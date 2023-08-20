@@ -1,0 +1,13 @@
+#!/bin/sh
+
+MSYS=C:/MinGW/msys/1.0
+FSTAB=$MSYS/etc/fstab
+
+if [[ "$1" == minc ]]; then
+	echo "D:/libminc-0.6.1/mingw/bin /usr/local/bin" >$FSTAB
+	echo "C:/MinC/usr/lib /mingw/bin" >>$FSTAB
+elif [[ "$1" == mingw ]]; then
+	echo "C:/MinGW /mingw" >$FSTAB
+else
+	/bin/cat $FSTAB
+fi

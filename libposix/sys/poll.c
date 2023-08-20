@@ -1,0 +1,92 @@
+/*
+ * Copyright (c) 2016 Daniel Boland <dboland@xs4all.nl>.
+ * All rights reserved.
+ *
+ * Redistribution and use in source and binary forms, with or without
+ * modification, are permitted provided that the following conditions
+ * are met:
+ * 1. Redistributions of source code must retain the above copyright
+ *    notice, this list of conditions and the following disclaimer.
+ * 2. Redistributions in binary form must reproduce the above copyright
+ *    notice, this list of conditions and the following disclaimer in the
+ *    documentation and/or other materials provided with the distribution.
+ * 3. Neither the name of the copyright holders nor the names of its 
+ *    contributors may be used to endorse or promote products derived 
+ *    from this software without specific prior written permission.
+ *
+ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" 
+ * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+ * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
+ * ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDERS OR CONTRIBUTORS 
+ * BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR 
+ * CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF 
+ * SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS 
+ * INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN 
+ * CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) 
+ * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF 
+ * THE POSSIBILITY OF SUCH DAMAGE.
+ *
+ */
+
+#include <poll.h>
+
+/****************************************************/
+
+BOOL 
+pollfd_win(WIN_TASK *Task, WIN_VNODE *Nodes[], WIN_POLLFD *Info[], struct pollfd fds[], nfds_t nfds)
+{
+	nfds_t i = 0;
+	int count = 0;
+	int fd;
+	WIN_VNODE *vnList = Task->Node;
+
+	if (nfds < 0 || nfds > WSA_MAXIMUM_WAIT_EVENTS){
+		return(FALSE);
+	}else while (i < nfds){
+		fd = fds->fd;
+		if (fd < 0){
+			fds->revents = 0;
+		}else if (fd >= OPEN_MAX){
+			fds->revents = POLLNVAL;
+		}else if (fds->events){
+			Nodes[count] = &vnList[fd];
+			Info[count] = (WIN_POLLFD *)fds;
+			if (Task->TracePoints & KTRFAC_STRUCT){
+				ktrace_STRUCT(Task, "pollfd", 6, fds, sizeof(struct pollfd));
+			}
+			count++;
+		}
+		i++;
+		fds++;
+	}
+	Nodes[count] = NULL;
+	Info[count] = NULL;
+	return(TRUE);
+}
+
+/****************************************************/
+
+int 
+sys_poll(call_t call, struct pollfd fds[], nfds_t nfds, int timeout)
+{
+	int result = -1;
+	WIN_POLLFD *fdVector[WSA_MAXIMUM_WAIT_EVENTS + 1];
+	WIN_VNODE *vnVector[WSA_MAXIMUM_WAIT_EVENTS + 1];
+	DWORD dwResult = 0;
+	DWORD dwTimeOut = timeout;
+	WIN_TASK *pwTask = call.Task;
+
+	if (timeout < 0){
+		dwTimeOut = INFINITE;
+	}
+	if (!pollfd_win(pwTask, vnVector, fdVector, fds, nfds)){
+		__errno_posix(pwTask, ERROR_BAD_ARGUMENTS);
+	}else if (!vfs_poll(pwTask, vnVector, fdVector, &dwTimeOut, &dwResult)){
+		__errno_posix(pwTask, GetLastError());
+	}else if (dwResult){
+		result = dwResult;
+	}else if (!dwTimeOut){
+		result = 0;
+	}
+	return(result);
+}

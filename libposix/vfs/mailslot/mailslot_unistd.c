@@ -1,0 +1,84 @@
+/*
+ * Copyright (c) 2016 Daniel Boland <dboland@xs4all.nl>.
+ * All rights reserved.
+ *
+ * Redistribution and use in source and binary forms, with or without
+ * modification, are permitted provided that the following conditions
+ * are met:
+ * 1. Redistributions of source code must retain the above copyright
+ *    notice, this list of conditions and the following disclaimer.
+ * 2. Redistributions in binary form must reproduce the above copyright
+ *    notice, this list of conditions and the following disclaimer in the
+ *    documentation and/or other materials provided with the distribution.
+ * 3. Neither the name of the copyright holders nor the names of its 
+ *    contributors may be used to endorse or promote products derived 
+ *    from this software without specific prior written permission.
+ *
+ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" 
+ * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+ * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
+ * ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDERS OR CONTRIBUTORS 
+ * BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR 
+ * CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF 
+ * SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS 
+ * INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN 
+ * CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) 
+ * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF 
+ * THE POSSIBILITY OF SUCH DAMAGE.
+ *
+ */
+
+#include <winbase.h>
+
+/****************************************************/
+
+BOOL 
+mail_write(HANDLE Handle, LPCSTR Buffer, DWORD Size, DWORD *Result)
+{
+	BOOL bResult = FALSE;
+	DWORD dwResult = 0;
+	LONG lSize = Size;
+	LONG lCount = 0;
+	OVERLAPPED ovl = {0, 0, 0, 0, __MailEvent};
+
+	while (lSize > 0){
+		if (lCount < WIN_MAX_INPUT){
+			lCount++;
+			lSize--;
+		}else if (WriteFile(Handle, Buffer, lCount, &lCount, &ovl)){
+			Buffer += lCount;
+			dwResult += lCount;
+			lCount = 0;
+		}else{
+			*Result = -1;
+//			break;
+			return(FALSE);
+		}
+	}
+	if (WriteFile(Handle, Buffer, lCount, &lCount, &ovl)){
+		dwResult += lCount;
+		bResult = TRUE;
+	}else{
+		WIN_ERR("mail_write(%d): %s\n", Handle, win_strerror(GetLastError()));
+		vfs_raise(WM_COMMAND, CTRL_ABORT_EVENT, 0);
+//		dwResult = -1;
+	}
+	*Result = dwResult;
+	return(bResult);
+}
+BOOL 
+mail_read(HANDLE Handle, LPSTR Buffer, DWORD Size, DWORD *Result)
+{
+	BOOL bResult = FALSE;
+
+	if (Size > WIN_MAX_INPUT){
+		Size = WIN_MAX_INPUT;
+	}
+	if (!ReadFile(Handle, Buffer, Size, Result, NULL)){
+//		WIN_ERR("mail_read(%d): %s\n", Handle, win_strerror(GetLastError()));
+		*Result = -1;
+	}else{
+		bResult = TRUE;
+	}
+	return(bResult);
+}

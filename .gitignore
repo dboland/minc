@@ -1,0 +1,11 @@
+Makefile.inc
+mount.sh
+*.exe
+*.dll
+*.so
+*.o
+*.a
+*.tar
+*.out
+*.tgz
+*.so.*
