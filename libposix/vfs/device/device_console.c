@@ -38,13 +38,13 @@ ConControlProc(DWORD CtrlType)
 	BOOL bResult = TRUE;
 	DWORD dwGroupId = __CTTY->GroupId;
 	DWORD dwMode = __CTTY->Mode[0];
-	WIN_TASK *pwTask = &__Tasks[__GroupId];
+	WIN_TASK *pwTask = &__Tasks[__TaskId];
 
 	/* To deliver signals, Windows (CSRSS.EXE) actually forks!
 	 * Copying the call stack to a new thread and executing
 	 * our code. Let's make sure it uses our Task struct too:
 	 */
-	TlsSetValue(__TlsIndex, (PVOID)__GroupId);
+	TlsSetValue(__TlsIndex, (PVOID)__TaskId);
 	if (dwMode & ENABLE_PROCESSED_INPUT){
 		if (pwTask->GroupId == dwGroupId){
 			if (!vfs_raise(WM_COMMAND, CtrlType, 0)){

@@ -146,6 +146,7 @@ sigproc_posix(WIN_TASK *Task, int signum, ucontext_t *ucontext)
 	int flags = sigaction->sa_flags;
 	action_t action = sigaction->sa_sigaction;
 	siginfo_t info = {0};
+//	sigset_t sigbit = sigmask(signum);
 
 	info.si_signo = signum;
 	info.si_errno = errno_posix(GetLastError());
@@ -156,8 +157,8 @@ sigproc_posix(WIN_TASK *Task, int signum, ucontext_t *ucontext)
 	if (Task->TracePoints & KTRFAC_PSIG){
 		ktrace_PSIG(Task, signum, handler, &info);
 	}
-//	if (sigbit & task->ts_procmask){
-//		task->ts_pending |= sigbit;
+//	if (sigbit & Task->ProcMask){
+//		Task->Pending |= sigbit;
 //	}else 
 	if (handler == SIG_DFL){		/* 0 */
 		result = sigproc_default(Task, signum);
@@ -179,7 +180,7 @@ sigproc_pending(WIN_TASK *Task, sigset_t newset)
 	ucontext_t ucontext = {0};
 	sigset_t pending = Task->Pending & ~newset;
 
-__PRINTF("sigproc_pending(0x%x): newset(0x%x)\n", Task->Pending, newset)
+//__PRINTF("sigproc_pending(0x%x): newset(0x%x)\n", Task->Pending, newset)
 	while (signum--){
 		if (sigmask(signum) & pending){
 			sigproc_posix(Task, signum, &ucontext);
@@ -357,7 +358,6 @@ sys_sigprocmask(call_t call, int how, const sigset_t *restrict set, sigset_t *re
 	if (oldset){
 		*oldset = curset;
 	}
-//msvc_printf("sys_sigprocmask: set(0x%x) old(0x%x)\n", *set, curset);
 	if (how & ~SIG_SETMASK){
 		__errno_posix(call.Task, ERROR_BAD_ARGUMENTS);
 	}else if (!set){
@@ -371,7 +371,6 @@ sys_sigprocmask(call_t call, int how, const sigset_t *restrict set, sigset_t *re
 		}else if (how == SIG_SETMASK){	// 3
 			curset = newset;
 		}
-
 //		if (how != SIG_BLOCK){
 //			sigproc_pending(pwTask, curset);
 //		}

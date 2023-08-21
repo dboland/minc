@@ -144,9 +144,7 @@ proc_init(WIN_SIGPROC SignalProc)
 		pwTask->FileMask = 0022;
 		ProcInitLimits(pwTask->Limit);
 	}
-//VfsDebugTask(pwTask, "proc_init");
-//	__TaskId = pwTask->TaskId;
-	__GroupId = pwTask->TaskId;
+	__TaskId = pwTask->TaskId;
 	__CTTY = &__Terminals[pwTask->TerminalId];
 	return(pwTask);
 }

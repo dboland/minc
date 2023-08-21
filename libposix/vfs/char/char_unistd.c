@@ -43,6 +43,7 @@ char_read(WIN_VNODE *Node, LPSTR Buffer, LONG Size, DWORD *Result)
 			bResult = input_read(Node->Handle, Buffer, Size, Result);
 			break;
 		case DEV_TYPE_INPUT:
+		case DEV_TYPE_NULL:
 			bResult = ReadFile(Node->Handle, Buffer, Size, Result, NULL);
 			break;
 		default:

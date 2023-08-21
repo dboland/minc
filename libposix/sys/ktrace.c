@@ -30,6 +30,8 @@
 
 #include <sys/ktrace.h>
 
+#define KTRARG(arg)	arg ? *(register_t *)arg : 0
+
 /****************************************************/
 
 struct timespec *
@@ -69,10 +71,11 @@ ktrace_SYSCALL(WIN_TASK *Task, register_t code, size_t argsize, register_t args[
 	}else if (code == SYS_sigprocmask){
 		iovData[2].Buffer = (PVOID)buf;
 		buf[0] = args[0];
-//		buf[1] = *(sigset_t *restrict)args[1];	/* ktrace GNU syslogd.exe */
+		buf[1] = KTRARG(args[1]);
+		buf[2] = KTRARG(args[2]);
 	}else if (code == SYS_sigsuspend){
 		iovData[2].Buffer = (PVOID)buf;
-		buf[0] = *(sigset_t *restrict)args[0];
+		buf[0] = KTRARG(args[0]);
 	}
 	header.ktr_type = KTR_SYSCALL;
 	header.ktr_pid = Task->TaskId;

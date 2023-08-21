@@ -65,7 +65,7 @@ WIN_SIGPROC	__SignalProc;
 HANDLE		__ProcEvent;
 HANDLE		__PipeEvent;
 HANDLE		__MailEvent;
-DWORD		__GroupId;
+DWORD		__TaskId;
 LPCSTR		__Clipboard;
 UINT		__RootUid = WIN_ROOT_UID;
 UINT		__RootGid = WIN_ROOT_GID;
