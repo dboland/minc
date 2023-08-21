@@ -11,11 +11,6 @@ Makefile.inc:
 mount.sh:
 	cp mount.sh.sample mount.sh
 
-install:
-	${MAKE} -C libposix install
-	${MAKE} -C mingw install
-	${MAKE} -C sbin install
-
 clean:
 	${MAKE} -C libposix clean
 	${MAKE} -C mingw clean

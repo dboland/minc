@@ -55,7 +55,7 @@ kfile_posix(struct kinfo_file *buf, DWORD ProcessId, WIN_TASK *Task, WIN_VNODE *
 	buf->v_type = vNode.FileType;			/* ENUM: vnode type */
 	buf->p_pid = Task->TaskId;			/* PID_T: process id */
 	buf->fd_fd = vNode.FileId;			/* INT: descriptor number */
-	buf->v_tag = VT_NTFS;				/* ENUM: type of underlying data */
+	buf->v_tag = WIN_VT_NTFS;			/* ENUM: type of underlying data */
 	buf->p_uid = rid_posix(&Task->UserSid);		/* UID_T: process credentials */
 	buf->p_gid = rid_posix(&Task->GroupSid);	/* GID_T: process credentials */
 	buf->p_tid = Task->ThreadId;			/* PID_T: thread id */
@@ -105,7 +105,6 @@ file_KERN_FILE(WIN_TASK *Task, const int *name, void *buf, size_t *size)
 	DWORD dwRemain;
 
 	*size = 0;
-//	vfs_nanosleep(Task, 1000, &dwRemain);
 	while (pid < CHILD_MAX){
 		if (pwTask->Flags && pwTask->State != WIN_SZOMB){
 			buf = file_KERN_FILE_BYPID(buf, size, Task->ProcessId, pwTask, pwTask->Node);

@@ -34,14 +34,11 @@
 #include <machine/param.h>
 #undef _KERNEL
 
-#include <uvm/uvm_object.h>	/* vnode.h */
-
 #include <sys/syslimits.h>
 #include <sys/syscall.h>
 #include <sys/sysctl.h>
 #include <sys/param.h>
 #include <sys/tty.h>
-#include <sys/vnode.h>
 
 /* sys/fcntl.h */
 

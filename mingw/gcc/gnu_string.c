@@ -16,7 +16,7 @@
    License along with the GNU C Library; if not, see
    <http://www.gnu.org/licenses/>.  */
 
-/* Needed for GNU gcc */
+/* Needed for GNU gcc.exe */
 
 #include <string.h>
 

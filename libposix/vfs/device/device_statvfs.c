@@ -168,7 +168,7 @@ BOOL
 dev_statvfs(WIN_CFDATA *Config, DWORD Flags, WIN_CFDRIVER *Driver)
 {
 	BOOL bResult = FALSE;
-	WIN_VNODE vNode;
+	WIN_VNODE vNode = {0};
 	DWORD dwSize;
 	WIN_FLAGS wFlags = {GENERIC_READ, 0, 0, REG_SZ, FALSE};
 	WIN_NAMEIDATA iNode;

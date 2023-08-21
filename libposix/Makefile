@@ -12,7 +12,7 @@ LDFLAGS=-s
 OBJECTS=crt1.o win_posix.o msvc_posix.o vfs_posix.o libposix.o
 WINDIR=/C/WINDOWS/system32
 GCCDIR=../mingw/gcc
-SRCDIR=D:/openbsd-master/sys
+#SRCDIR=D:/openbsd-master/sys
 INSTALL=../mingw/bin/ginstall
 
 all: ${LIBPOSIX}.dll
