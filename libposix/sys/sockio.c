@@ -37,10 +37,12 @@ sock_SIOCGIFFLAGS(WIN_TASK *Task, struct ifreq *req)
 {
 	int result = -1;
 	MIB_IFROW ifRow = {0};
+	DWORD dwResult;
 
 	ifRow.dwIndex = ws2_nametoindex(req->ifr_name);
-	if (ERROR_SUCCESS != GetIfEntry(&ifRow)){
-		__errno_posix(Task, GetLastError());
+	dwResult = GetIfEntry(&ifRow);
+	if (dwResult != ERROR_SUCCESS){
+		__errno_posix(Task, dwResult);
 	}else{
 		req->ifr_flags = ifflags_posix(&ifRow, 0xFFFFFFFF);
 		result = 0;
@@ -52,10 +54,12 @@ sock_SIOCGIFMTU(WIN_TASK *Task, struct ifreq *req)
 {
 	int result = -1;
 	MIB_IFROW ifRow = {0};
+	DWORD dwResult;
 
 	ifRow.dwIndex = ws2_nametoindex(req->ifr_name);
-	if (ERROR_SUCCESS != GetIfEntry(&ifRow)){
-		__errno_posix(Task, GetLastError());
+	dwResult = GetIfEntry(&ifRow);
+	if (dwResult != ERROR_SUCCESS){
+		__errno_posix(Task, dwResult);
 	}else{
 		req->ifr_mtu = ifRow.dwMtu;
 		result = 0;
@@ -82,10 +86,12 @@ sock_SIOCGIFDESCR(WIN_TASK *Task, struct ifreq *req)
 {
 	int result = -1;
 	MIB_IFROW ifRow = {0};
+	DWORD dwResult;
 
 	ifRow.dwIndex = ws2_nametoindex(req->ifr_name);
-	if (ERROR_SUCCESS != GetIfEntry(&ifRow)){
-		__errno_posix(Task, GetLastError());
+	dwResult = GetIfEntry(&ifRow);
+	if (dwResult != ERROR_SUCCESS){
+		__errno_posix(Task, dwResult);
 	}else{
 		win_strncpy(req->ifr_data, ifRow.bDescr, IFDESCRSIZE);
 		result = 0;
@@ -96,14 +102,16 @@ int
 sock_SIOCGIFADDR(WIN_TASK *Task, struct ifreq *req)
 {
 	int result = -1;
-	MIB_IPADDRROW ipaRow = {0};
+	MIB_IPADDRROW ifaRow = {0};
 	struct sockaddr_in *addr = (struct sockaddr_in *)&req->ifr_addr;
+	DWORD dwResult;
 
-	ipaRow.dwIndex = ws2_nametoindex(req->ifr_name);
-	if (!ws2_SIOGET_IPADDRROW(&ipaRow)){
-		__errno_posix(Task, GetLastError());
+	ifaRow.dwIndex = ws2_nametoindex(req->ifr_name);
+	dwResult = GetAddrEntry(&ifaRow);
+	if (dwResult != ERROR_SUCCESS){
+		__errno_posix(Task, dwResult);
 	}else{
-		inaddr_posix(addr, 0, (BYTE *)&ipaRow.dwAddr);
+		inaddr_posix(addr, 0, (BYTE *)&ifaRow.dwAddr);
 		result = 0;
 	}
 	return(result);
@@ -112,14 +120,16 @@ int
 sock_SIOCGIFNETMASK(WIN_TASK *Task, struct ifreq *req)
 {
 	int result = -1;
-	MIB_IPADDRROW ipaRow = {0};
+	MIB_IPADDRROW ifaRow = {0};
 	struct sockaddr_in *addr = (struct sockaddr_in *)&req->ifr_addr;
+	DWORD dwResult;
 
-	ipaRow.dwIndex = ws2_nametoindex(req->ifr_name);
-	if (!ws2_SIOGET_IPADDRROW(&ipaRow)){
-		__errno_posix(Task, GetLastError());
+	ifaRow.dwIndex = ws2_nametoindex(req->ifr_name);
+	dwResult = GetAddrEntry(&ifaRow);
+	if (dwResult != ERROR_SUCCESS){
+		__errno_posix(Task, dwResult);
 	}else{
-		inaddr_posix(addr, 0, (BYTE *)&ipaRow.dwMask);
+		inaddr_posix(addr, 0, (BYTE *)&ifaRow.dwMask);
 		result = 0;
 	}
 	return(result);
@@ -127,16 +137,18 @@ sock_SIOCGIFNETMASK(WIN_TASK *Task, struct ifreq *req)
 int 
 sock_SIOCGIFBRDADDR(WIN_TASK *Task, struct ifreq *req)
 {
-	MIB_IPADDRROW ipaRow = {0};
+	MIB_IPADDRROW ifaRow = {0};
 	int result = -1;
 	struct sockaddr_in *addr = (struct sockaddr_in *)&req->ifr_addr;
 	DWORD dwBroadcast;
+	DWORD dwResult;
 
-	ipaRow.dwIndex = ws2_nametoindex(req->ifr_name);
-	if (!ws2_SIOGET_IPADDRROW(&ipaRow)){
-		__errno_posix(Task, GetLastError());
+	ifaRow.dwIndex = ws2_nametoindex(req->ifr_name);
+	dwResult = GetAddrEntry(&ifaRow);
+	if (dwResult != ERROR_SUCCESS){
+		__errno_posix(Task, dwResult);
 	}else{
-		dwBroadcast = ipaRow.dwAddr | ~ipaRow.dwMask;
+		dwBroadcast = ifaRow.dwAddr | ~ifaRow.dwMask;
 		inaddr_posix(addr, 0, (BYTE *)&dwBroadcast);
 		result = 0;
 	}

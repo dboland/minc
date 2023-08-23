@@ -67,3 +67,14 @@ typedef struct _WIN_IFDATA {
 } WIN_IFDATA;
 
 #define WS2_SOCKET_SIZE		0x2000
+
+/*
+ * winsock_sockio.c
+ */
+
+typedef enum _WS2_ADDRTYPE {
+	WS2_UNICAST,
+	WS2_ANYCAST,
+	WS2_MULTICAST,
+	WS2_DNSSERVER,
+} WS2_ADDRTYPE;

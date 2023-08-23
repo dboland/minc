@@ -137,3 +137,32 @@ ws2_NET_RT_OACTIVE(PMIB_IPNETTABLE *Table, PMIB_IPNETROW *Row, DWORD *Count)
 	}
 	return(bResult);
 }
+BOOL 
+ws2_NET_INET6_IPV6_DAD_PENDING(DWORD *Count)
+{
+	BOOL bResult = TRUE;
+	ULONG ulStatus;
+	PIP_ADAPTER_ADDRESSES pifaTable, pifaRow;
+	LONG lSize = 0;
+	ULONG ulFlags = GAA_FLAG_INCLUDE_PREFIX;
+	DWORD dwCount = 0;
+
+	ulStatus = GetAdaptersAddresses(AF_INET6, ulFlags, NULL, NULL, &lSize);
+	if (lSize > 0){
+		pifaTable = win_malloc(lSize);
+		GetAdaptersAddresses(AF_INET6, ulFlags, NULL, pifaTable, &lSize);
+		pifaRow = pifaTable;
+		while (pifaRow){
+			if (pifaRow->FirstUnicastAddress && pifaRow->FirstUnicastAddress->DadState == IpDadStateDuplicate){
+				dwCount++;
+			}
+			pifaRow = pifaRow->Next;
+		}
+		*Count = dwCount;
+		win_free(pifaTable);
+	}else{
+		SetLastError(ulStatus);
+		bResult = FALSE;
+	}
+	return(bResult);
+}

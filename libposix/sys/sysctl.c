@@ -490,34 +490,18 @@ sysctl_VM(WIN_TASK *Task, const int *name, void *oldp, size_t *oldlenp, void *ne
 /****************************************************/
 
 int 
-sysctl_NET_RT_FLAGS(WIN_TASK *Task, const int *name, void *buf, size_t *size)
-{
-	int result = -1;
-
-	/* net/route.c
-	 */
-	switch (name[5]){
-		case IFF_OACTIVE:	/* arp.exe -a */
-			result = route_NET_RT_OACTIVE(Task, buf, size);
-			break;
-		default:
-			__errno_posix(Task, ERROR_INVALID_NAME);
-	}
-	return(result);
-}
-int 
 sysctl_NET_RT(WIN_TASK *Task, const int *name, void *buf, size_t *size)
 {
 	int result = -1;
 
-	/* net/route.c
-	 */
+	/* net/route.c */
+
 	switch (name[4]){
 		case NET_RT_DUMP:	/* 1 */
 			result = route_NET_RT_DUMP(Task, buf, size);
 			break;
 		case NET_RT_FLAGS:	/* 2 */
-			result = sysctl_NET_RT_FLAGS(Task, name, buf, size);
+			result = route_NET_RT_FLAGS(Task, name, buf, size);
 			break;
 		case NET_RT_IFLIST:	/* 3 */
 			result = route_NET_RT_IFLIST(Task, buf, size);
@@ -532,16 +516,33 @@ sysctl_NET_INET(WIN_TASK *Task, const int *name, void *buf, size_t *size)
 {
 	int result = -1;
 
-	/* netinet/ip.c
-	 */
+	/* netinet/ip.c */
+	/* netinet/tcp.c */
+
 	switch (name[2]){
 		case IPPROTO_IP:	/* 0 */
-			result = sysctl_NET_INET_IP(Task, name, buf, size);
+			result = ip_NET_INET_IP(Task, name, buf, size);
 			break;
 		case IPPROTO_TCP:	/* 6 */
-			result = sysctl_NET_INET_TCP(Task, name, buf, size);
+			result = tcp_NET_INET_TCP(Task, name, buf, size);
 			break;
 		case IPPROTO_UDP:
+		default:
+			__errno_posix(Task, ERROR_INVALID_NAME);
+	}
+	return(result);
+}
+int 
+sysctl_NET_INET6(WIN_TASK *Task, const int *name, void *buf, size_t *size)
+{
+	int result = -1;
+
+	/* netinet/in.c */
+
+	switch (name[2]){
+		case IPPROTO_IPV6:	/* 41 */
+			result = in_NET_INET6_IPV6(Task, name, buf, size);
+			break;
 		default:
 			__errno_posix(Task, ERROR_INVALID_NAME);
 	}
@@ -558,6 +559,9 @@ sysctl_NET(WIN_TASK *Task, const int *name, void *oldp, size_t *oldlenp, void *n
 			break;
 		case PF_INET:
 			result = sysctl_NET_INET(Task, name, oldp, oldlenp);
+			break;
+		case PF_INET6:
+			result = sysctl_NET_INET6(Task, name, oldp, oldlenp);
 			break;
 		case PF_KEY:
 			*oldlenp = 0;		/* no IPSEC (ifconfig.exe) */

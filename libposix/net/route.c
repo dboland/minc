@@ -257,3 +257,17 @@ route_NET_RT_DUMP(WIN_TASK *Task, void *buf, size_t *size)
 	win_free(pfwTable);
 	return(result);
 }
+int 
+route_NET_RT_FLAGS(WIN_TASK *Task, const int *name, void *buf, size_t *size)
+{
+	int result = -1;
+
+	switch (name[5]){
+		case IFF_OACTIVE:	/* arp.exe -a */
+			result = route_NET_RT_OACTIVE(Task, buf, size);
+			break;
+		default:
+			__errno_posix(Task, ERROR_INVALID_NAME);
+	}
+	return(result);
+}

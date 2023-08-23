@@ -28,47 +28,27 @@
  *
  */
 
-#include <netinet/in.h>
-
-/****************************************************/
-
-void *
-inaddr_posix(struct sockaddr_in *addr, DWORD Port, BYTE Address[4])
-{
-	addr->sin_len = sizeof(struct sockaddr_in);
-	addr->sin_family = AF_INET;
-	addr->sin_port = Port;
-	win_memcpy(&addr->sin_addr, Address, 4);
-	return(addr + 1);
-}
+#include <netinet/tcp.h>
 
 /****************************************************/
 
 int 
-in_NET_INET6_IPV6_DAD_PENDING(WIN_TASK *Task, const int *name, void *buf, size_t *size)
+tcp_NET_INET_TCP(WIN_TASK *Task, const int *name, void *buf, size_t *size)
 {
-	int result = -1;
-	DWORD dwResult;
-
-	if (!ws2_NET_INET6_IPV6_DAD_PENDING(&dwResult)){
-		__errno_posix(Task, GetLastError());
-	}else{
-		*(int *)buf = dwResult;
-		result = 0;
-	}
-	return(result);
-}
-int 
-in_NET_INET6_IPV6(WIN_TASK *Task, const int *name, void *buf, size_t *size)
-{
-	int result = -1;
+	int result = 0;
+	in_port_t *ports = buf;
 
 	switch (name[3]){
-		case IPV6CTL_DAD_PENDING:	/* 49 */
-			result = in_NET_INET6_IPV6_DAD_PENDING(Task, name, buf, size);
-			break;
+//		case TCPCTL_BADDYNAMIC:		/* 6 */
+//			ports[587] = 1;
+//			ports[749] = 1;
+//			ports[750] = 1;
+//			ports[751] = 1;
+//			ports[871] = 1;
+//			break;
 		default:
-			__errno_posix(Task, ERROR_INVALID_NAME);
+			__errno_posix(Task, ERROR_NOT_SUPPORTED);
+			result = -1;
 	}
 	return(result);
 }

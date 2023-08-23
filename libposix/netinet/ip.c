@@ -34,7 +34,7 @@
 /****************************************************/
 
 int 
-sysctl_NET_INET_IP(WIN_TASK *Task, const int *name, void *buf, size_t *size)
+ip_NET_INET_IP(WIN_TASK *Task, const int *name, void *buf, size_t *size)
 {
 	int result = 0;
 

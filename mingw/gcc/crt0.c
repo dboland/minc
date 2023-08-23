@@ -51,7 +51,7 @@ char __progname_storage[NAME_MAX+1];
 /************************************************************/
 
 void 
-_start(void)
+__start(void)
 {
 	char buf[PATH_MAX];	/* diff.exe (set_argstr()) */
 	int argc;

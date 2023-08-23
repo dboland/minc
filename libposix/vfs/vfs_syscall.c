@@ -138,12 +138,13 @@ vfs_pipe(WIN_VNODE Result[2])
 {
 	BOOL bResult = FALSE;
 	HANDLE hInput, hOutput;
+	HANDLE hEvent = CreateEvent(NULL, FALSE, FALSE, NULL);
 
 	if (!CreatePipe(&hInput, &hOutput, NULL, WIN_PIPE_BUF)){
 		WIN_ERR("CreatePipe(%d): %s\n", WIN_PIPE_BUF, win_strerror(GetLastError()));
 	}else{
 		Result[0].Handle = hInput;
-		Result[0].Event = __PipeEvent;
+		Result[0].Event = hEvent;
 		Result[0].FSType = FS_TYPE_PIPE;
 		Result[0].FileType = WIN_VFIFO;
 		Result[0].DeviceType = DEV_CLASS_CPU;
@@ -151,7 +152,7 @@ vfs_pipe(WIN_VNODE Result[2])
 		Result[0].Attribs = FILE_ATTRIBUTE_NORMAL;
 		Result[0].Size = WIN_PIPE_BUF;
 		Result[1].Handle = hOutput;
-		Result[1].Event = __PipeEvent;
+		Result[1].Event = hEvent;
 		Result[1].FSType = FS_TYPE_PIPE;
 		Result[1].FileType = WIN_VFIFO;
 		Result[1].DeviceType = DEV_CLASS_CPU;

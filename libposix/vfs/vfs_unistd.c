@@ -361,7 +361,7 @@ BOOL
 vfs_truncate(WIN_NAMEIDATA *Path, WIN_FLAGS *Flags, LONG Size)
 {
 	BOOL bResult = FALSE;
-	WIN_VNODE vNode;
+	WIN_VNODE vNode = {0};
 	WIN_MODE wMode = {0};
 
 	if (!vfs_open(Path, Flags, &wMode, &vNode)){

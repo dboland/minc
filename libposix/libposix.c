@@ -89,8 +89,9 @@ WIN_NAMEIDATA *path_win(WIN_NAMEIDATA *Path, const char *pathname, int flags);
 #include "net/if.c"
 #include "net/if_dl.c"
 #include "net/if_var.c"
-#include "netinet/in.c"
 #include "netinet/ip.c"
+#include "netinet/tcp.c"
+#include "netinet/in.c"
 #include "net/route.c"
 #include "sys/sockio.c"
 #include "sys/termio.c"
@@ -135,7 +136,7 @@ posix_THREAD_ATTACH(WIN_TASK *Task)
 BOOL 
 posix_PROCESS_DETACH(WIN_TASK *Task)
 {
-	if (Task->Flags & WIN_PS_EXITING){		/* ktrace.exe, su.exe */
+	if (Task->Flags & WIN_PS_EXITING){		/* ktrace.exe */
 		Task->Flags |= WIN_PS_ZOMBIE;
 		Task->State = WIN_SZOMB;
 		vfs_closefrom(Task->Node);

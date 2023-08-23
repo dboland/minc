@@ -32,42 +32,16 @@
 
 /************************************************************/
 
-/* VOID 
-ProcInheritChannels_OLD(DWORD ProcessId, WIN_VNODE Result[])
-{
-	HANDLE hResult = NULL;
-	LONG lIndex = 0;
-	HANDLE hProcess = NULL;
-
-	if (!(hProcess = OpenProcess(PROCESS_DUP_HANDLE, FALSE, ProcessId))){
-		WIN_ERR("OpenProcess(%d): %s\n", ProcessId, win_strerror(GetLastError()));
-	}else while (lIndex < WIN_OPEN_MAX){
-		if (Result->Access){
-//			if (!(Result->Flags & HANDLE_FLAG_INHERIT)){
-//				if (!vfs_F_INHERIT(Result, hProcess)){
-//__PRINTF("[%d:%d] ", ProcessId, GetCurrentProcessId())
-//VfsDebugNode(Result, "ProcInherit");
-//				}
-//			}
-			if (lIndex < 3){	// standard stream pseudo devices (sort.exe)
-				SetStdHandle(STD_INPUT_HANDLE - lIndex, Result->Handle);
-			}
-		}
-		lIndex++;
-		Result++;
-	}
-	CloseHandle(hProcess);
-} */
 VOID 
-ProcInitStdHandle(WIN_VNODE Result[])
+ProcInitStdHandle(WIN_VNODE Node[])
 {
 	LONG lIndex = 0;
 
 	/* standard stream pseudo devices (sort.exe)
 	 */
 	while (lIndex < 3){
-		SetStdHandle(STD_INPUT_HANDLE - lIndex, Result->Handle);
-		Result++;
+		SetStdHandle(STD_INPUT_HANDLE - lIndex, Node->Handle);
+		Node++;
 		lIndex++;
 	}
 }
