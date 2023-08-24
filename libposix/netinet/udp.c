@@ -28,20 +28,20 @@
  *
  */
 
-#include <netinet/tcp.h>
-#include <netinet/tcp_timer.h>
-#include <netinet/tcp_var.h>
+#include <netinet/udp.h>
+#include <netinet/ip_var.h>
+#include <netinet/udp_var.h>
 
 /****************************************************/
 
 int 
-tcp_NET_INET_TCP(WIN_TASK *Task, const int *name, void *buf, size_t *size)
+udp_NET_INET_UDP(WIN_TASK *Task, const int *name, void *buf, size_t *size)
 {
 	int result = 0;
 
 	switch (name[3]){
-		case TCPCTL_BADDYNAMIC:		/* 6 */
-			result = defports_posix(buf, *size, __DEFPORTS_TCP);
+		case UDPCTL_BADDYNAMIC:		/* 2 */
+			result = defports_posix(buf, *size, __DEFPORTS_UDP);
 			break;
 		default:
 			__errno_posix(Task, ERROR_NOT_SUPPORTED);

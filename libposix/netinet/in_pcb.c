@@ -28,24 +28,21 @@
  *
  */
 
-#include <netinet/tcp.h>
-#include <netinet/tcp_timer.h>
-#include <netinet/tcp_var.h>
+#include <netinet/in_pcb.h>
+
+const in_port_t __DEFPORTS_TCP[] = DEFBADDYNAMICPORTS_TCP;
+const in_port_t __DEFPORTS_UDP[] = DEFBADDYNAMICPORTS_UDP;
 
 /****************************************************/
 
 int 
-tcp_NET_INET_TCP(WIN_TASK *Task, const int *name, void *buf, size_t *size)
+defports_posix(u_int32_t *buf, size_t size, const in_port_t defports[])
 {
-	int result = 0;
+	in_port_t port;
 
-	switch (name[3]){
-		case TCPCTL_BADDYNAMIC:		/* 6 */
-			result = defports_posix(buf, *size, __DEFPORTS_TCP);
-			break;
-		default:
-			__errno_posix(Task, ERROR_NOT_SUPPORTED);
-			result = -1;
+	win_bzero(buf, size);
+	while (port = *defports++){
+		DP_SET(buf, port);
 	}
-	return(result);
+	return(0);
 }

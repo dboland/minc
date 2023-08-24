@@ -516,17 +516,16 @@ sysctl_NET_INET(WIN_TASK *Task, const int *name, void *buf, size_t *size)
 {
 	int result = -1;
 
-	/* netinet/ip.c */
-	/* netinet/tcp.c */
-
 	switch (name[2]){
-		case IPPROTO_IP:	/* 0 */
+		case IPPROTO_IP:	/* netinet/ip.c */
 			result = ip_NET_INET_IP(Task, name, buf, size);
 			break;
-		case IPPROTO_TCP:	/* 6 */
+		case IPPROTO_TCP:	/* netinet/tcp.c */
 			result = tcp_NET_INET_TCP(Task, name, buf, size);
 			break;
-		case IPPROTO_UDP:
+		case IPPROTO_UDP:	/* netinet/udp.c */
+			result = udp_NET_INET_UDP(Task, name, buf, size);
+			break;
 		default:
 			__errno_posix(Task, ERROR_INVALID_NAME);
 	}

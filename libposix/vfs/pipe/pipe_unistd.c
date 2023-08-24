@@ -43,6 +43,8 @@ pipe_close(WIN_VNODE *Node)
 		WIN_ERR("pipe_close(%d): %s\n", Node->Handle, win_strerror(GetLastError()));
 	}else if (!SetEvent(Node->Event)){
 		WIN_ERR("SetEvent(%d): %s\n", Node->Event, win_strerror(GetLastError()));
+//	}else if (!CloseHandle(Node->Event)){
+//		WIN_ERR("pipe_close(%d): %s\n", Node->Event, win_strerror(GetLastError()));
 	}else{
 		bResult = TRUE;
 	}

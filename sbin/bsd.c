@@ -69,7 +69,8 @@
 unsigned char		_verbose;
 unsigned char		_boot;
 
-//void ifinit(void);
+/* src/sys/netinet/ip_input.c */
+//void ip_init(void);
 
 /************************************************************/
 
