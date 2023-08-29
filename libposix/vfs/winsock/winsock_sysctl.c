@@ -121,26 +121,26 @@ ws2_NET_RT_OACTIVE(PMIB_IPNETTABLE *Table, PMIB_IPNETROW *Row, DWORD *Count)
 {
 	BOOL bResult = FALSE;
 	PMIB_IPNETTABLE pinTable;
-	ULONG ulSize = 0;
+	LONG lSize = 0;
 	DWORD dwStatus;
 
-	dwStatus = GetIpNetTable(NULL, &ulSize, FALSE);
-	if (!ulSize){
-		WIN_ERR("GetIpNetTable(): %s\n", win_strerror(dwStatus));
-	}else{
+	dwStatus = GetIpNetTable(NULL, &lSize, FALSE);
+	if (lSize > 0){
 		pinTable = win_malloc(ulSize);
-		GetIpNetTable(pinTable, &ulSize, FALSE);
+		GetIpNetTable(pinTable, &lSize, FALSE);
 		*Table = pinTable;
 		*Row = pinTable->table;
 		*Count = pinTable->dwNumEntries;
 		bResult = TRUE;
+	}else{
+		WIN_ERR("GetIpNetTable(): %s\n", win_strerror(dwStatus));
 	}
 	return(bResult);
 }
 BOOL 
 ws2_NET_INET6_IPV6_DAD_PENDING(DWORD *Count)
 {
-	BOOL bResult = TRUE;
+	BOOL bResult = FALSE;
 	ULONG ulStatus;
 	PIP_ADAPTER_ADDRESSES pifaTable, pifaRow;
 	LONG lSize = 0;
@@ -160,9 +160,9 @@ ws2_NET_INET6_IPV6_DAD_PENDING(DWORD *Count)
 		}
 		*Count = dwCount;
 		win_free(pifaTable);
+		bResult = TRUE;
 	}else{
 		SetLastError(ulStatus);
-		bResult = FALSE;
 	}
 	return(bResult);
 }

@@ -107,7 +107,7 @@ ktrace_SYSRET(WIN_TASK *Task, register_t code, register_t result)
 	data.ktr_code = code;
 //	data.ktr_eosys = errno_posix(GetLastError());
 	data.ktr_retval = result;
-	/* kdump.exe always prints -1 if ts_errno */
+	/* kdump.exe always prints -1 when Task->Error */
 	if (result < 0){
 		data.ktr_error = Task->Error;
 	}

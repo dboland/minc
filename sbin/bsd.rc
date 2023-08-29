@@ -27,4 +27,3 @@ FILETYPE 0x1
 	}
 }
 MAINICON ICON "console.ico"
-//ID_MANIFEST RT_MANIFEST "minc.exe.manifest"

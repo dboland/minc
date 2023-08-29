@@ -88,7 +88,7 @@ ws2_poll(WIN_VNODE *Node, WIN_POLLFD *Info)
 	DWORD dwResult = 0;
 	SHORT sResult = WIN_POLLERR;
 	SHORT sMask = Info->Events | WIN_POLLIGNORE;
-	WSANETWORKEVENTS nwEvents;
+	WSANETWORKEVENTS nwEvents = {0};
 	ULONG ulCount = 0;
 
 	if (!(Node->Attribs & FILE_FLAG_OVERLAPPED)){	/* wget.exe */
@@ -99,7 +99,7 @@ ws2_poll(WIN_VNODE *Node, WIN_POLLFD *Info)
 		sResult = WSAPollEvents(Node, nwEvents.lNetworkEvents);
 	}else if (!ws2_FIONREAD(Node->Socket, &ulCount)){	/* ssh.exe */
 		sResult = WIN_POLLERR;
-	}else if (ulCount){
+	}else if (ulCount){		/* ab.exe */
 		sResult = WIN_POLLIN;
 	}else{
 		sResult = Node->Pending;

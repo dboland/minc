@@ -33,40 +33,26 @@
 /****************************************************/
 
 SHORT 
-SockPollError(HANDLE Handle, DWORD Error)
+SockPollError(WIN_VNODE *Node, DWORD Error)
 {
-	SHORT sResult = 0;
-	OVERLAPPED ovl = {0, 0, 0, 0, __PipeEvent};
+	SHORT sResult = WIN_POLLERR;
+	OVERLAPPED ovl = {0, 0, 0, 0, Node->Event};
 
 	switch (Error){
 		case ERROR_BROKEN_PIPE:		/* 109: The pipe has been ended (write end closed) */
-			DisconnectNamedPipe(Handle);
+			DisconnectNamedPipe(Node->Handle);
 			/* Segfaults with OVERLAPPED struct,
-			 * and completion proc missing
+			 * and completion proc missing.
 			 */
-			ConnectNamedPipe(Handle, &ovl);
-		case ERROR_BAD_PIPE:		/* The pipe state is invalid */
+			ConnectNamedPipe(Node->Handle, &ovl);
+		case ERROR_BAD_PIPE:		/* 230: The pipe state is invalid */
+			/* This error indicates we need to ConnectNamedPipe().
+			 * In OVERLAPPED mode, it loses its meaning.
+			 */
+			sResult = 0;
 			break;
 		default:
-			sResult = WIN_POLLERR;
-			WIN_ERR("SockPollError(%d): %s\n", Handle, win_strerror(Error));
-	}
-	return(sResult);
-}
-SHORT 
-SockUnblock(WIN_VNODE *Node)
-{
-	SHORT sResult = WIN_POLLERR;
-	DWORD dwMode = PIPE_READMODE_MESSAGE + PIPE_NOWAIT;
-
-	/* PeekNamedPipe() hangs, despite having set lpOverlapped in ConnectNamedPipe().
-	 * This occurs when other threads are doing ReadFile() directly (syslogd.exe)
-	 */
-	if (!SetNamedPipeHandleState(Node->Handle, &dwMode, NULL, NULL)){
-		WIN_ERR("SetNamedPipeHandleState(%d): %s\n", Node->Handle, win_strerror(GetLastError()));
-	}else{
-		Node->Attribs |= FILE_FLAG_OVERLAPPED;
-		sResult = 0;
+			WIN_ERR("SockPollError(%d): %s\n", Node->Handle, win_strerror(Error));
 	}
 	return(sResult);
 }
@@ -82,13 +68,10 @@ sock_poll(WIN_VNODE *Node, WIN_POLLFD *Info)
 	DWORD dwMessage = 0;
 	DWORD dwResult = 0;
 
-//	if (!(Node->Attribs & FILE_FLAG_OVERLAPPED)){	/* syslogd.exe */
-//		sResult = SockUnblock(Node);
-//	}else 
 	if (!PeekNamedPipe(Node->Handle, NULL, 0, NULL, &dwAvail, &dwMessage)){
-		sResult = SockPollError(Node->Handle, GetLastError());
+		sResult = SockPollError(Node, GetLastError());
 	}else if (dwAvail || dwMessage){
-		sResult |= WIN_POLLIN;
+		sResult = WIN_POLLIN;
 	}
 	if (Info->Result = sResult & sMask){
 		dwResult++;

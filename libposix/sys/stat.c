@@ -280,7 +280,7 @@ sys_lstat(call_t call, const char *path, struct stat *buf)
 int 
 __fstatat(WIN_TASK *Task, int dirfd, const char *path, struct stat *buf, int flags)
 {
-	WIN_NAMEIDATA wPath;
+	WIN_NAMEIDATA wPath = {0};
 	WIN_VATTR wStat = {0};
 	int result = -1;
 

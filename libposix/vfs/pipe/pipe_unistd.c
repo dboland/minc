@@ -73,29 +73,28 @@ pipe_write(WIN_VNODE *Node, LPCSTR Buffer, DWORD Size, DWORD *Result)
 {
 	BOOL bResult = FALSE;
 	DWORD dwResult = 0;
-	LONG lCount = 0;
-	LONG lSize = Size;
 	OVERLAPPED ovl = {0, 0, 0, 0, Node->Event};
+	DWORD dwSize = Size;
 
-	/* rsync.exe (local file copy) expects atomic write
+	/* In Windows NT, non-blocking file IO can be achieved
+	 * by limiting the number of bytes to write to the size of
+	 * the pipe buffer, without having to put the pipe
+	 * in PIPE_NOWAIT mode (rsync.exe).
 	 */
-	while (lSize > 0){
-		if (lCount < WIN_PIPE_BUF){
-			lCount++;
-			lSize--;
-		}else if (!WriteFile(Node->Handle, Buffer, lCount, &lCount, &ovl)){
-			*Result = -1;
-			return(FALSE);
-		}else{
-			Buffer += lCount;
-			dwResult += lCount;
-			lCount = 0;
+	if (Node->Attribs & FILE_FLAG_OVERLAPPED){
+		if (dwSize > WIN_PIPE_BUF){
+			dwSize = WIN_PIPE_BUF;
 		}
 	}
-	if (!WriteFile(Node->Handle, Buffer, lCount, &lCount, &ovl)){
-		dwResult = -1;
+	/* When writing to a nonblocking, byte-mode pipe handle with
+	 * insufficient buffer space, WriteFile returns TRUE
+	 * with *lpNumberOfBytesWritten < nNumberOfBytesToWrite. 
+	 */
+	if (!WriteFile(Node->Handle, Buffer, dwSize, &dwResult, &ovl)){
+		return(FALSE);
+	}else if (dwResult < Size){
+		SetLastError(ERROR_MORE_DATA);
 	}else{
-		dwResult += lCount;
 		bResult = TRUE;
 	}
 	*Result = dwResult;

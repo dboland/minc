@@ -45,25 +45,21 @@ mail_write(HANDLE Handle, LPCSTR Buffer, DWORD Size, DWORD *Result)
 		if (lCount < WIN_MAX_INPUT){
 			lCount++;
 			lSize--;
-		}else if (WriteFile(Handle, Buffer, lCount, &lCount, &ovl)){
+		}else if (!WriteFile(Handle, Buffer, lCount, &lCount, &ovl)){
+			return(FALSE);
+		}else{
 			Buffer += lCount;
 			dwResult += lCount;
 			lCount = 0;
-		}else{
-			*Result = -1;
-//			break;
-			return(FALSE);
 		}
 	}
 	if (WriteFile(Handle, Buffer, lCount, &lCount, &ovl)){
-		dwResult += lCount;
+		*Result = dwResult + lCount;
 		bResult = TRUE;
 	}else{
 		WIN_ERR("mail_write(%d): %s\n", Handle, win_strerror(GetLastError()));
 		vfs_raise(WM_COMMAND, CTRL_ABORT_EVENT, 0);
-//		dwResult = -1;
 	}
-	*Result = dwResult;
 	return(bResult);
 }
 BOOL 

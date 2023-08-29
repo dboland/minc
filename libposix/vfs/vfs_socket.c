@@ -134,12 +134,12 @@ vfs_recvmsg(WIN_VNODE *Node, WSAMSG *Message, DWORD *Flags, DWORD *Result)
 	return(bResult);
 }
 BOOL 
-vfs_socketpair(INT Family, DWORD Mode, INT Protocol, WIN_VNODE Result[2])
+vfs_socketpair(INT Family, DWORD Attribs, INT Protocol, WIN_VNODE Result[2])
 {
 	BOOL bResult = FALSE;
 
 	if (Family == WIN_AF_LOCAL){
-		bResult = pipe_socketpair(Family, Mode, Protocol, Result);
+		bResult = pipe_socketpair(Family, Attribs, Protocol, Result);
 	}else{
 		WSASetLastError(WSAEPFNOSUPPORT);
 	}

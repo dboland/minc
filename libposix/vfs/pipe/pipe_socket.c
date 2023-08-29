@@ -143,11 +143,11 @@ pipe_bind(WIN_VNODE *Node, LPSOCKADDR Name, INT Length)
 {
 	BOOL bResult = FALSE;
 	WIN_MODE wMode = {WIN_VSOCK, WIN_S_IRW, WIN_S_IRW, WIN_S_IRW, 0};
-	SECURITY_ATTRIBUTES sa = {sizeof(sa), NULL, FALSE};
 	WCHAR szName[MAX_NAME] = {0};
 	OVERLAPPED ovl = {0, 0, 0, 0, __PipeEvent};
+	DWORD dwAttribs = FILE_FLAG_OVERLAPPED + PIPE_READMODE_MESSAGE;
 
-	if (!PipeCreateFile(PipeCreateName(szName), PIPE_READMODE_MESSAGE, __PipeEvent, Node)){
+	if (!PipeCreateFile(PipeCreateName(szName), dwAttribs, __PipeEvent, Node)){
 		SockError(GetLastError());
 	}else if (!pipe_mknod((LPWSTR)Name->sa_data, szName, &wMode)){
 		SockError(GetLastError());

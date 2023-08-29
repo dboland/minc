@@ -39,7 +39,7 @@ FifoPollError(HANDLE Handle, DWORD Error)
 
 	if (Error == ERROR_BROKEN_PIPE){
 		sResult = WIN_POLLHUP;
-	}else if (Error == ERROR_ACCESS_DENIED){		/* polling write end (git.exe) */
+	}else if (Error == ERROR_ACCESS_DENIED){	/* polling write end (git.exe) */
 		sResult = WIN_POLLOUT;
 	}else{
 		WIN_ERR("FifoPollError(%d): %s\n", Handle, win_strerror(Error));
@@ -61,7 +61,7 @@ fifo_poll(WIN_VNODE *Node, WIN_POLLFD *Info)
 	if (!PeekNamedPipe(Node->Handle, NULL, 0, NULL, &dwAvail, &dwMessage)){
 		sResult = FifoPollError(Node->Handle, GetLastError());
 	}else if (dwAvail || dwMessage){
-		sResult |= WIN_POLLIN;
+		sResult = WIN_POLLIN;
 	}
 	if (Info->Result = sResult & sMask){
 		dwResult++;

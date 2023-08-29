@@ -359,12 +359,12 @@ sys_socketpair(call_t call, int domain, int type, int protocol, int sv[2])
 	int result = -1;
 	WIN_VNODE vnResult[2] = {0};
 	WIN_TASK *pwTask = call.Task;
-	DWORD dwMode = PIPE_READMODE_BYTE;
+	DWORD dwAttribs = PIPE_READMODE_BYTE;
 
 	if (type == SOCK_DGRAM){
-		dwMode = PIPE_READMODE_MESSAGE;
+		dwAttribs = PIPE_READMODE_MESSAGE;
 	}
-	if (!vfs_socketpair(af_win(domain), dwMode, protocol, vnResult)){
+	if (!vfs_socketpair(af_win(domain), dwAttribs, protocol, vnResult)){
 		h_errno = h_errno_posix(pwTask, WSAGetLastError());
 	}else{
 		sv[0] = fd_posix(pwTask, &vnResult[0], 0);

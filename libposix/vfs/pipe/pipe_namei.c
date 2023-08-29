@@ -51,13 +51,12 @@ PipeCreateName(LPWSTR Result)
 	return(Result);
 }
 BOOL 
-PipeCreateFile(LPCWSTR Name, DWORD Mode, HANDLE Event, WIN_VNODE *Result)
+PipeCreateFile(LPCWSTR Name, DWORD Attribs, HANDLE Event, WIN_VNODE *Result)
 {
 	BOOL bResult = FALSE;
 	ACCESS_MASK aMask = GENERIC_READ + GENERIC_WRITE;
-	DWORD dwAttribs = FILE_FLAG_OVERLAPPED;
-	DWORD dwOpenMode = PIPE_ACCESS_DUPLEX + dwAttribs;
-	DWORD dwPipeMode = PIPE_TYPE_MESSAGE + PIPE_WAIT + Mode;
+	DWORD dwOpenMode = (Attribs & 0xFFFF0000) + PIPE_ACCESS_DUPLEX;
+	DWORD dwPipeMode = (Attribs & 0x0000FFFF) + PIPE_TYPE_MESSAGE + PIPE_WAIT;
 	WCHAR szPath[MAX_PATH] = L"\\\\.\\PIPE\\";
 	DWORD dwMax = PIPE_UNLIMITED_INSTANCES;
 	HANDLE hResult;
@@ -68,7 +67,7 @@ PipeCreateFile(LPCWSTR Name, DWORD Mode, HANDLE Event, WIN_VNODE *Result)
 		Result->Handle = hResult;
 		Result->Event = Event;
 		Result->FSType = FS_TYPE_PIPE;
-		Result->Attribs = dwAttribs;
+		Result->Attribs = Attribs & 0xFFFF0000;
 		Result->Access = win_F_GETFL(hResult);
 		Result->Flags = win_F_GETFD(hResult);
 		Result->Size = WIN_PIPE_BUF;

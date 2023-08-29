@@ -58,7 +58,6 @@ env_win(char *const envp[])
 		}
 	}
 	*p = 0;
-//msvc_printf("env_win(%d)\n", count);
 	return(pvResult);
 }
 LPSTR 
@@ -88,7 +87,6 @@ argv_win(WIN_TASK *Task, const char *command, char *const argv[])
 	if (Task->TracePoints & KTRFAC_NAMEI){
 		ktrace_NAMEI(Task, pszResult, size);
 	}
-//__PRINTF("argv_win(%d): %s\n", size, pszResult);
 	return(pszResult);
 }
 int
