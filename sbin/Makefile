@@ -55,5 +55,5 @@ install: ${DESTDIR}
 	ginstall -m 04555 bsd.exe ${DESTDIR}/
 
 clean:
-	rm -f *.exe *.o
+	/bin/rm -f *.exe *.o
 

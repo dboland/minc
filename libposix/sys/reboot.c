@@ -36,7 +36,7 @@ void
 sys_reboot(call_t call, int howto)
 {
 	switch (howto){
-		RB_HALT:
+		case RB_HALT:
 			vfs_reboot_HALT();
 			break;
 		default:

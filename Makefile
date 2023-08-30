@@ -2,9 +2,9 @@
 .SUFFIXES:
 
 all: Makefile.inc mount.sh
-	@${MAKE} -C openbsd includes
-	@${MAKE} -C mingw/gcc
-	@${MAKE} -C libposix
+	@${MAKE} -C mingw all install-local
+	@${MAKE} -C libposix all install-local
+	@${MAKE} -C openbsd all install-local
 
 Makefile.inc:
 	cp Makefile.inc.sample Makefile.inc
@@ -12,11 +12,8 @@ Makefile.inc:
 mount.sh:
 	cp mount.sh.sample mount.sh
 
-install:
-	@${MAKE} -C mingw/gcc install-local
-	@${MAKE} -C libposix install-local
-
 clean:
-	${MAKE} -C libposix clean
-	${MAKE} -C mingw clean
-	${MAKE} -C sbin clean
+	@${MAKE} -C libposix clean
+	@${MAKE} -C mingw clean
+	@${MAKE} -C sbin clean
+	@${MAKE} -C openbsd clean

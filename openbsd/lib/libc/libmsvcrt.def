@@ -1,0 +1,6 @@
+LIBRARY msvcrt.dll
+EXPORTS
+calloc
+free
+malloc
+realloc

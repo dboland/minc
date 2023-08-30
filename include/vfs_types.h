@@ -606,6 +606,16 @@ typedef struct _WIN_TASK {
 #define WIN_SYS_close	6
 #define WIN_SYS_kill	37
 
+typedef struct _WIN_SYSCALL {
+	SHORT tls;
+	SHORT data;
+	DWORD result;
+	WIN_TASK *Task;
+	DWORD reserved;
+	ULONG code;
+	ULONG base;	/* return address */
+} call_t;
+
 /*
  * vfs_poll.c
  */

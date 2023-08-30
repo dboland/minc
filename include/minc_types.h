@@ -49,13 +49,3 @@
 typedef void (*atexit_t)(void);
 typedef void (*action_t)(int, siginfo_t *, void *);
 
-typedef struct {
-	short tls;
-	short data;
-	register_t result;
-	WIN_TASK *Task;
-	register_t reserved;
-	u_long code;
-	u_long base;	/* return address */
-} call_t;
-

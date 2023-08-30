@@ -48,7 +48,7 @@ SID8 *rid_win(SID8 *Buf, int rid);
 
 char *path_posix(char *dest, LPCWSTR Source);
 char *pathp_posix(char *dest, LPCWSTR Source);
-WIN_NAMEIDATA *path_win(WIN_NAMEIDATA *Path, const char *pathname, int flags);
+//WIN_NAMEIDATA *path_win(WIN_NAMEIDATA *Path, const char *pathname, int flags);
 
 /* unistd.c */
 

@@ -1,0 +1,28 @@
+1 VERSIONINFO
+FILEVERSION 0,75,0,0
+PRODUCTVERSION 0,75,0,0
+FILEOS 0x4
+FILETYPE 0x1
+{
+	BLOCK "StringFileInfo"
+	{
+		BLOCK "041304E4"
+		{
+			VALUE "CompanyName", "BOLAND Automatisering\000"
+			VALUE "FileDescription", "Network Socket Library\000"
+			VALUE "FileVersion", RELEASE "." VERSION
+			VALUE "InternalName", "libsocket.so\000"
+			VALUE "LegalCopyright", "1991-2014 The Regents of the University of California, Berkeley\000"
+			VALUE "LegalTrademarks", "Unix®\000"
+			VALUE "OriginalFilename", "libsocket.so." RELEASE "\000"
+			VALUE "ProductName", "POSIX Layer for Windows\000"
+			VALUE "ProductVersion", RELEASE
+			VALUE "Comments", "\000"
+		}
+	}
+	BLOCK "VarFileInfo"
+	{
+		VALUE "Translation", 0x0413, 0x04E4
+	}
+}
+

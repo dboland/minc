@@ -3,6 +3,10 @@ BUILD=$(shell date +%s)
 DESTDIR=/C/MinC
 GCCVER=4.8.1
 MINGW=/C/MinGW
+SRCDIR=/D/openbsd-master
+
+.SUFFIXES:
+.DEFAULT:
 
 # PIC default: 0x10000000 (lib space)
 # PIE default: 0x00400000 (program space)
@@ -20,4 +24,5 @@ PREFIX=/usr
 BINDIR=/bin
 LIBDIR=${PREFIX}/lib
 INCDIR=${PREFIX}/include
-MANDIR=${PREFIX}/share/man
+SHDIR=${PREFIX}/share
+MANDIR=${SHDIR}/man

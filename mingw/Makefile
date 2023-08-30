@@ -6,9 +6,10 @@ LIBEXEC=${PREFIX}/libexec
 LIBS=libadvapi32.a libkernel32.a libshell32.a libuser32.a \
 	libmoldname.a libstdc++.a libgcc_s_dw2-1.a libgmon.a
 
+CP=/bin/cp
+
 all: ${LIBS}
 	@${MAKE} -C gcc
-	@${MAKE} -C bin
 
 #
 # below -k option makes ld remove "@" suffix
@@ -18,10 +19,10 @@ all: ${LIBS}
 	dlltool -d $< -l $@ -k
 
 %.exe: ${MINGW}/bin/%.exe
-	cp -vu $< ${UBINDIR}/
+	${CP} -vu $< ${UBINDIR}/
 
 %.dll: ${MINGW}/bin/%.dll
-	cp -vu $< ${BINDIR}/
+	${CP} -vu $< ${BINDIR}/
 
 bin.d:
 	@${MAKE} -C bin
@@ -55,14 +56,14 @@ install-ld: ${UBINDIR} ${BINUTILS}
 # create dummy ld.so for configure scripts to detect shared libs
 
 install-lib: ${LIBDIR}
-	cp ${LIBS} ${LIBDIR}/
+	${CP} ${LIBS} ${LIBDIR}/
 
 install-libexec: ${LIBEXEC}
-	cp -rvu ${MINGW}/libexec/gcc ${LIBEXEC}/
+	${CP} -rvu ${MINGW}/libexec/gcc ${LIBEXEC}/
 
 install-tools: ${MSGBIN}
 
-install-local: install-gcc install-ld install-lib install-libexec install-tools
+install-local: install-lib
 	@${MAKE} -C gcc install-local
 
 install:
@@ -70,6 +71,6 @@ install:
 	@${MAKE} -C bin install
 
 clean:
-	rm -f *.a
+	/bin/rm -f *.a
 	@${MAKE} -C gcc clean
 

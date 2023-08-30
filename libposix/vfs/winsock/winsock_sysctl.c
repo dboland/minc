@@ -100,19 +100,19 @@ ws2_NET_RT_UNKNOWN(PMIB_TCPTABLE *Table, PMIB_TCPROW *Row, DWORD *Count)
 {
 	BOOL bResult = FALSE;
 	PMIB_TCPTABLE ptcpTable;
-	ULONG ulSize = 0;
+	LONG lSize = 0;
 	DWORD dwStatus;
 
-	dwStatus = GetTcpTable(NULL, &ulSize, FALSE);
-	if (!ulSize){
-		WIN_ERR("GetTcpTable(): %s\n", win_strerror(dwStatus));
-	}else{
-		ptcpTable = win_malloc(ulSize);
-		GetTcpTable(ptcpTable, &ulSize, FALSE);
+	dwStatus = GetTcpTable(NULL, &lSize, FALSE);
+	if (lSize > 0){
+		ptcpTable = win_malloc(lSize);
+		GetTcpTable(ptcpTable, &lSize, FALSE);
 		*Table = ptcpTable;
 		*Row = ptcpTable->table;
 		*Count = ptcpTable->dwNumEntries;
 		bResult = TRUE;
+	}else{
+		WIN_ERR("GetTcpTable(): %s\n", win_strerror(dwStatus));
 	}
 	return(bResult);
 }
