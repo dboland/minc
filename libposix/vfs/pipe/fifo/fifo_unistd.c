@@ -36,9 +36,8 @@ BOOL
 fifo_read(WIN_VNODE *Node, LPSTR Buffer, DWORD Size, DWORD *Result)
 {
 	BOOL bResult = FALSE;
-//	OVERLAPPED ovl = {0, 0, 0, 0, Node->Event};
 
-	/* zero Result expected if broken (gzip.exe) */
+	/* Zero result expected if broken (gzip.exe) */
 	if (ReadFile(Node->Handle, Buffer, Size, Result, NULL)){
 		bResult = TRUE;
 	}else if (ERROR_BROKEN_PIPE == GetLastError()){

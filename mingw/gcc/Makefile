@@ -6,7 +6,7 @@ OBJECTS=${CRT0} crt1.o crtbegin.o crtend.o gcrt0.o
 LIBS=libgcc.a libgcc_eh.a libgcc_s.a
 GCCOBJ=_chkstk.o _chkstk_ms.o _mulsc3.o _muldc3.o _mulxc3.o _ctzdi2.o \
 	_ffsdi2.o _popcountdi2.o _popcountsi2.o _popcount_tab.o _udivdi3.o
-CP=cp
+CP=/bin/cp
 
 .DEFAULT:
 .SUFFIXES:
@@ -54,11 +54,11 @@ install-local: ${LIBDIR}/gcc/mingw32/${GCCVER}
 	${CP} gcrt0.o ${LIBDIR}/gcrt2.o
 
 install: ${DESTDIR}${LIBDIR}
-	${CP} ${LIBS} ${DESTDIR}${LIBDIR}/gcc/i686-pe-openbsd/${GCCVER}/
-	${CP} crtbegin.o crtend.o ${DESTDIR}${LIBDIR}/
-	${CP} ${CRT0} ${DESTDIR}${LIBDIR}/
-	${CP} crt1.o ${DESTDIR}${LIBDIR}/
-	${CP} gcrt0.o ${DESTDIR}${LIBDIR}/
+	cp ${LIBS} ${DESTDIR}${LIBDIR}/gcc/i686-pe-openbsd/${GCCVER}/
+	cp crtbegin.o crtend.o ${DESTDIR}${LIBDIR}/
+	cp ${CRT0} ${DESTDIR}${LIBDIR}/
+	cp crt1.o ${DESTDIR}${LIBDIR}/
+	cp gcrt0.o ${DESTDIR}${LIBDIR}/
 
 clean:
 	rm -f *.o *.a

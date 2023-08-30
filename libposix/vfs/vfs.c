@@ -120,7 +120,7 @@ BOOL dev_activate(WIN_DEVICE *Device, WIN_VNODE *Result);
 #include "vfs_shm.c"
 #include "vfs_time.c"
 #include "vfs_wait.c"
-//#include "vfs_reboot.c"
+#include "vfs_reboot.c"
 #include "vfs_ktrace.c"
 //#include "vfs_ldt.c"
 

@@ -32,8 +32,8 @@
 
 /****************************************************/
 
-BOOL 
-vfs_reboot(DWORD Method)
+VOID 
+vfs_reboot_HALT(VOID)
 {
-	return(FALSE);
+	vfs_kill_PID(__Tasks[0].ThreadId, WM_COMMAND, CTRL_LOGOFF_EVENT, Task->TaskId);
 }

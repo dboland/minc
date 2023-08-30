@@ -64,6 +64,9 @@ in_NET_INET6_IPV6(WIN_TASK *Task, const int *name, void *buf, size_t *size)
 	int result = -1;
 
 	switch (name[3]){
+		case IPV6CTL_FORWARDING:		/* 1 */
+			result = ip_NET_INET_IP_FORWARDING(Task, buf, size);
+			break;
 		case IPV6CTL_DAD_PENDING:	/* 49 */
 			result = in_NET_INET6_IPV6_DAD_PENDING(Task, name, buf, size);
 			break;

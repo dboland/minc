@@ -35,5 +35,11 @@
 void 
 sys_reboot(call_t call, int howto)
 {
-	__errno_posix(call.Task, ERROR_NOT_SUPPORTED);
+	switch (howto){
+		RB_HALT:
+			vfs_reboot_HALT();
+			break;
+		default:
+			__errno_posix(call.Task, ERROR_NOT_SUPPORTED);
+	}
 }

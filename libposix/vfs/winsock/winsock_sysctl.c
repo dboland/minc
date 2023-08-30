@@ -126,7 +126,7 @@ ws2_NET_RT_OACTIVE(PMIB_IPNETTABLE *Table, PMIB_IPNETROW *Row, DWORD *Count)
 
 	dwStatus = GetIpNetTable(NULL, &lSize, FALSE);
 	if (lSize > 0){
-		pinTable = win_malloc(ulSize);
+		pinTable = win_malloc(lSize);
 		GetIpNetTable(pinTable, &lSize, FALSE);
 		*Table = pinTable;
 		*Row = pinTable->table;

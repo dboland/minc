@@ -179,7 +179,7 @@ BOOL vfs_wait4(WIN_TASK *Task, WIN_TASK *Children[], BOOL NoHang, DWORD Status, 
 
 /* vfs_reboot.c */
 
-BOOL vfs_reboot(DWORD Method);
+VOID vfs_reboot_HALT(VOID);
 
 /****************************************************/
 

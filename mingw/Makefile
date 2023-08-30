@@ -18,10 +18,10 @@ all: ${LIBS}
 	dlltool -d $< -l $@ -k
 
 %.exe: ${MINGW}/bin/%.exe
-	cp $< ${UBINDIR}/
+	cp -vu $< ${UBINDIR}/
 
 %.dll: ${MINGW}/bin/%.dll
-	cp $< ${BINDIR}/
+	cp -vu $< ${BINDIR}/
 
 bin.d:
 	@${MAKE} -C bin

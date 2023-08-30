@@ -41,9 +41,8 @@ PollGetObjects(HANDLE Timer, WIN_VNODE *Nodes[], HANDLE Result[])
 	if (Timer){
 		Result[dwResult++] = Timer;
 	}
-	while (pNode = *Nodes){
+	while (pNode = *Nodes++){
 		Result[dwResult++] = pNode->Event;
-		Nodes++;
 	}
 	Result[dwResult++] = __ProcEvent;
 	return(dwResult);
