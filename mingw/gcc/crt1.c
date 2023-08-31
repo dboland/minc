@@ -31,15 +31,10 @@
 #include "win/windows.h"			/* minimal Win32 */
 #include "win_types.h"
 
-void _attach(int fstype);
-
 /****************************************************/
 
 BOOL WINAPI 
 DllMainCRTStartup(HINSTANCE hinstDLL, DWORD fdwReason, LPVOID lpvReserved)
 {
-	if (fdwReason == DLL_PROCESS_ATTACH){
-//		_attach(FS_TYPE_UNKNOWN);
-	}
 	return(TRUE);
 }
