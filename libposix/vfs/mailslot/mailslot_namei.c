@@ -36,11 +36,11 @@ HANDLE
 MailOpenFile(LPCSTR FileName, WIN_FLAGS *Flags)
 {
 	HANDLE hResult = NULL;
-//	DWORD dwAttr = FILE_ATTRIBUTE_NORMAL; // + FILE_FLAG_OVERLAPPED;
 	DWORD dwAccess = GENERIC_WRITE + READ_CONTROL;
 	SECURITY_ATTRIBUTES sa = {sizeof(sa), NULL, TRUE};
 
-	hResult = CreateFile(FileName, dwAccess, FILE_SHARE_READ, &sa, Flags->Creation, Flags->Attribs, NULL);
+	hResult = CreateFile(FileName, dwAccess, FILE_SHARE_READ, &sa, 
+		Flags->Creation, Flags->Attribs, NULL);
 	if (hResult == INVALID_HANDLE_VALUE){
 		WIN_ERR("CreateFile(%ls): %s\n", FileName, win_strerror(GetLastError()));
 	}
@@ -67,9 +67,9 @@ MailCreateInput(WIN_DEVICE *Device, WIN_FLAGS *Flags, WIN_VNODE *Result)
 		Result->FSType = FS_TYPE_DEVICE;
 		Result->FileType = WIN_VCHR;
 		Result->DeviceType = Device->DeviceType;
-		Result->Access = Flags->Access;
-		Result->Flags = HANDLE_FLAG_INHERIT;
 		Result->Attribs = Flags->Attribs;
+		Result->Access = win_F_GETFL(hResult);
+		Result->Flags = win_F_GETFD(hResult);
 		Result->Device = Device;
 		bResult = TRUE;
 	}
@@ -96,9 +96,9 @@ MailCreateOutput(WIN_DEVICE *Device, WIN_FLAGS *Flags, WIN_VNODE *Result)
 		Result->FSType = FS_TYPE_DEVICE;
 		Result->FileType = WIN_VCHR;
 		Result->DeviceType = Device->DeviceType;
-		Result->Access = Flags->Access;
-		Result->Flags = HANDLE_FLAG_INHERIT;
 		Result->Attribs = Flags->Attribs;
+		Result->Access = win_F_GETFL(hResult);
+		Result->Flags = win_F_GETFD(hResult);
 		Result->Device = Device;
 		bResult = TRUE;
 	}

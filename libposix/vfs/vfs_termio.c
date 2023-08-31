@@ -176,7 +176,7 @@ vfs_PTMGET(WIN_DEVICE *Device, WIN_PTMGET *Result)
 BOOL 
 vfs_TIOCSFLAGS(WIN_DEVICE *Device, DWORD Param)
 {
-	msvc_printf("WIN_TIOCSFLAGS(%ls): 0x%x\n", Device->Name, Param);
+	msvc_printf("WIN_TIOCSFLAGS(%s): 0x%x\n", Device->Name, Param);
 }
 BOOL 
 vfs_TIOCTL(WIN_VNODE *Node, DWORD Operation, PVOID Param)
