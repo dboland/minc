@@ -59,16 +59,6 @@
 #define LIBSOCK_IMPORT	__import
 #endif
 
-//#define __strong_alias(alias,sym)			\
-//	__asm__(".global " __STRING(alias) " ; "	\
-//	    __STRING(alias) " = " __STRING(sym))
-//#define __weak_alias(alias,sym)			\
-//	__asm__(".weak " __STRING(alias) " ; "		\
-//	    __STRING(alias) " = " __STRING(sym))
-//#define __warn_references(sym,msg)			\
-//	__asm__(".section .gnu.warning." __STRING(sym)	\
-//	    " ; .ascii \"" msg "\" ; .text")
-
 #define __strong_alias(name,symbol)	\
 	extern __typeof(symbol) name __attribute__((alias(__STRING(symbol))))
 //#define __weak_alias(name,symbol)		\

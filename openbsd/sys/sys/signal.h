@@ -42,7 +42,7 @@
 
 #include <machine/signal.h>	/* sigcontext; codes for SIGILL, SIGFPE */
 
-#define _NSIG		33		/* counting 0 (mask is 1-32) */
+#define _NSIG	33		/* counting 0 (mask is 1-32) */
 
 #if __BSD_VISIBLE
 #define NSIG _NSIG

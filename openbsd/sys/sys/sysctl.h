@@ -38,7 +38,7 @@
 #ifndef _SYS_SYSCTL_H_
 #define	_SYS_SYSCTL_H_
 
-//#include <uvm/uvm_extern.h>
+#include <uvm/uvm_extern.h>
 
 /*
  * Definitions for sysctl call.  The sysctl call uses a hierarchical name

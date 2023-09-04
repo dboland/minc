@@ -1,4 +1,4 @@
-/*	$OpenBSD: wait.h,v 1.14 2006/04/27 02:17:21 tedu Exp $	*/
+/*	$OpenBSD: src/sys/sys/wait.h,v 1.16 2014/02/12 05:47:36 guenther Exp $	*/
 /*	$NetBSD: wait.h,v 1.11 1996/04/09 20:55:51 cgd Exp $	*/
 
 /*
@@ -81,9 +81,6 @@
  */
 #define WNOHANG		1	/* don't hang in wait */
 #define WUNTRACED	2	/* tell about stopped, untraced children */
-#if __XPG_VISIBLE
-#define	WALTSIG		4	/* wait for child with alternate exit signal */
-#endif
 #define	WCONTINUED	8	/* report a job control continued process */
 
 #if __BSD_VISIBLE
@@ -158,8 +155,8 @@ pid_t	waitpid(pid_t, int *, int);
 #if __BSD_VISIBLE
 pid_t	wait3(int *, int, struct rusage *);
 pid_t	wait4(pid_t, int *, int, struct rusage *);
-#endif
+#endif /* __BSD_VISIBLE */
 __END_DECLS
-#endif
+#endif /* !_KERNEL */
 
 #endif /* !_SYS_WAIT_H_ */

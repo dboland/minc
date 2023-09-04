@@ -121,7 +121,6 @@ typedef unsigned long		__psize_t;
 typedef long double		__double_t;
 typedef long double		__float_t;
 typedef long			__ptrdiff_t;
-//typedef	unsigned long		__size_t;
 typedef	__SIZE_TYPE__		__size_t;
 typedef	long			__ssize_t;
 #if defined(__GNUC__) && __GNUC__ >= 3
@@ -132,10 +131,8 @@ typedef	char *			__va_list;
 
 /* Wide character support types */
 #ifndef __cplusplus
-//typedef	int			__wchar_t;
 typedef	__WCHAR_TYPE__	__wchar_t;		// match WinNT's
 #endif
-//typedef int			__wint_t;
 typedef	__WINT_TYPE__		__wint_t;		// match WinNT's
 typedef	int			__rune_t;
 typedef	void *			__wctrans_t;

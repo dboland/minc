@@ -40,7 +40,6 @@
 #define ELF_TARG_MACH		EM_386 /* XXX - EM_486 is currently unused
                                           by all OSs/compilers/linkers */
 
-//#define _NLIST_DO_ELF
 #define _KERN_DO_ELF
 
 #endif  /* _MACHINE_EXEC_H_ */

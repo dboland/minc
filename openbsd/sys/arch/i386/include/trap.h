@@ -1,4 +1,4 @@
-/*	$OpenBSD: trap.h,v 1.5 2005/10/26 20:32:59 marco Exp $	*/
+/*	$OpenBSD: src/sys/arch/i386/include/trap.h,v 1.5 2005/10/26 20:32:59 marco Exp $	*/
 /*	$NetBSD: trap.h,v 1.4 1994/10/27 04:16:30 cgd Exp $	*/
 
 /*-

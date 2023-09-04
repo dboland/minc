@@ -84,9 +84,6 @@
 #define STRONG_ALIAS(alias,sym) \
 	.global alias; \
 	alias = sym
-//#define WEAK_ALIAS(alias,sym) \
-//	.weak alias; \
-//	alias = sym
 #define WEAK_ALIAS(alias,sym) \
 	STRONG_ALIAS(alias,sym)
 
@@ -101,8 +98,6 @@
 # define _ALIGN_TEXT .align 2, 0x90
 #endif
 
-//#define _ENTRY(x) \
-//	.text; _ALIGN_TEXT; .globl x; .type x,@function; x:
 #define _ENTRY(x) \
 	.text; _ALIGN_TEXT; .global x; .def x; .scl 2; .type 32; .endef; x:
 

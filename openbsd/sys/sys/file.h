@@ -1,4 +1,4 @@
-/*	$OpenBSD: file.h,v 1.24 2006/03/26 17:47:10 mickey Exp $	*/
+/*	$OpenBSD: src/sys/sys/file.h,v 1.31 2013/06/05 01:26:00 guenther Exp $	*/
 /*	$NetBSD: file.h,v 1.11 1995/03/26 20:24:13 jtc Exp $	*/
 
 /*
@@ -78,7 +78,6 @@ struct file {
 	off_t	f_offset;
 	void 	*f_data;	/* private data */
 	int	f_iflags;	/* internal flags */
-	int	f_usecount;	/* number of users (temporary references). */
 	u_int64_t f_rxfer;	/* total number of read transfers */
 	u_int64_t f_wxfer;	/* total number of write transfers */
 	u_int64_t f_seek;	/* total independent seek operations */
@@ -86,33 +85,28 @@ struct file {
 	u_int64_t f_wbytes;	/* total bytes written */
 };
 
-#define FIF_WANTCLOSE		0x01	/* a close is waiting for usecount */
+#define FIF_HASLOCK		0x01	/* descriptor holds advisory lock */
 #define FIF_LARVAL		0x02	/* not fully constructed, don't use */
+#define FIF_MARK		0x04	/* mark during gc() */
+#define FIF_DEFER		0x08	/* defer for next gc() pass */
 
 #define FILE_IS_USABLE(fp) \
-	(((fp)->f_iflags & (FIF_WANTCLOSE|FIF_LARVAL)) == 0)
+	(((fp)->f_iflags & FIF_LARVAL) == 0)
 
-#define FREF(fp) do { (fp)->f_usecount++; } while (0)
-#define FRELE(fp) do {					\
-	--(fp)->f_usecount;					\
-	if (((fp)->f_iflags & FIF_WANTCLOSE) != 0)		\
-		wakeup(&(fp)->f_usecount);			\
-} while (0)
+#define FREF(fp)	do { (fp)->f_count++; } while (0)
+#define FRELE(fp,p)	(--(fp)->f_count == 0 ? fdrop(fp, p) : 0)
 
-#define FILE_SET_MATURE(fp) do {				\
+#define FILE_SET_MATURE(fp,p) do {				\
 	(fp)->f_iflags &= ~FIF_LARVAL;				\
-	FRELE(fp);						\
+	FRELE(fp, p);						\
 } while (0)
+
+int	fdrop(struct file *, struct proc *);
 
 LIST_HEAD(filelist, file);
 extern struct filelist filehead;	/* head of list of open files */
 extern int maxfiles;			/* kernel limit on number of open files */
 extern int nfiles;			/* actual number of open files */
 extern struct fileops vnops;		/* vnode operations for files */
-
-int     dofileread(struct proc *, int, struct file *, void *, size_t,
-            off_t *, register_t *);
-int     dofilewrite(struct proc *, int, struct file *, const void *,
-            size_t, off_t *, register_t *);
 
 #endif /* _KERNEL */
