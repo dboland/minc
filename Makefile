@@ -2,7 +2,8 @@
 .SUFFIXES:
 
 all: Makefile.inc mount.sh
-	@${MAKE} -C mingw all install-local
+	@${MAKE} -C openbsd includes-local
+	@${MAKE} -C mingw/gcc all install-local
 	@${MAKE} -C libposix all install-local
 	@${MAKE} -C openbsd all install-local
 

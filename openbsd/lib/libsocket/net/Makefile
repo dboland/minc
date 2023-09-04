@@ -8,14 +8,28 @@ OBJECTS=base64.o freeaddrinfo.o gai_strerror.o \
 	res_comp.o res_data.o rcmd.o rcmdsh.o rresvport.o \
 	res_debug_syms.o ruserok.o \
 	res_random.o ethers.o recv.o send.o vars6.o
-
 OBJECTS+=getservent.c.o linkaddr.c.o if_indextoname.c.o if_nametoindex.c.o
 
-all: ${OBJECTS}
+SHOBJECTS=base64.so freeaddrinfo.so gai_strerror.so \
+	getnetbyaddr.so getnetbyname.so getnetent.so \
+	getpeereid.so getproto.so getprotoent.so getprotoname.so \
+	getservbyname.so getservbyport.so getifaddrs.so \
+	herror.c.so if_nameindex.so inet_addr.so \
+	inet_lnaof.so inet_makeaddr.so inet_neta.so inet_netof.so inet_network.so \
+	inet_net_ntop.so inet_net_pton.so inet_ntoa.so inet_ntop.so inet_pton.so \
+	res_comp.so res_data.so rcmd.so rcmdsh.so rresvport.so \
+	res_debug_syms.so ruserok.so \
+	res_random.so ethers.so recv.so send.so vars6.so
+SHOBJECTS+=getservent.c.so linkaddr.c.so if_indextoname.c.so if_nametoindex.c.so
+
+all: ${OBJECTS} ${SHOBJECTS}
 
 %.o: ${SRCDIR}/libc/net/%.c
-	gcc -c ${CFLAGS} -o $@ $<
-
+	gcc -c ${CFLAGS} -DNOPIE -o $@ $<
 %.c.o: %.c
-	gcc -c ${CFLAGS} -o $@ $<
+	gcc -c ${CFLAGS} -DNOPIE -o $@ $<
 
+%.so: ${SRCDIR}/libc/net/%.c
+	gcc -c ${CFLAGS} -o $@ $<
+%.c.so: %.c
+	gcc -c ${CFLAGS} -o $@ $<

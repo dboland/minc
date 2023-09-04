@@ -36,7 +36,7 @@ libgcc_s.a: libgcc_s.def
 crt0_tls.o: crt0.o win_tls.o
 	ld -r -o $@ crt0.o win_tls.o
 
-install-include: ${INCDIR}/c++ ${INCDIR}/ssp
+includes: ${INCDIR}/c++ ${INCDIR}/ssp
 	${CP} -rvu ${MINGW}/lib/gcc/mingw32/${GCCVER}/include/c++ ${INCDIR}/c++/
 	${CP} -rvu ${MINGW}/lib/gcc/mingw32/${GCCVER}/include/ssp ${INCDIR}/ssp/
 

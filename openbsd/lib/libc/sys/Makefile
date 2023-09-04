@@ -1,6 +1,3 @@
-OBJECTS_OLD= nanosleep.o write.o wait4.o ktrace.o execve.o setitimer.o sigsuspend.o \
-	poll.o
-
 OBJECTS= __get_tcb.o __getcwd.o __semctl.o __set_tcb.o __syscall.o \
 	__sysctl.o __tfork.o __threxit.o __thrsigdivert.o __thrsleep.o __thrwakeup.o \
 	access.o acct.o adjfreq.o adjtime.o break.o chdir.o chflags.o \
@@ -40,7 +37,7 @@ SOCKET+= socket.o connect.o accept.o recvfrom.o sendto.o sendmsg.o recvmsg.o \
 .SUFFIXES:
 .DEFAULT:
 
-all: ${OBJECTS}
+all: source ${OBJECTS}
 
 %.o: %.S
 	gcc -c ${CFLAGS} -o $@ $<
@@ -48,6 +45,9 @@ all: ${OBJECTS}
 %.c.o: ${SRCDIR}/sys/%.c
 	gcc -c ${CFLAGS} -o $@ $<
 
+source:
+	@syscall.sh
+
 clean:
-	rm *.o
+	/bin/rm -f *.o
 

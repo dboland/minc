@@ -9,7 +9,6 @@ LIBS=libadvapi32.a libkernel32.a libshell32.a libuser32.a \
 CP=/bin/cp
 
 all: ${LIBS}
-	@${MAKE} -C gcc
 
 #
 # below -k option makes ld remove "@" suffix
@@ -64,7 +63,6 @@ install-libexec: ${LIBEXEC}
 install-tools: ${MSGBIN}
 
 install-local: install-lib
-	@${MAKE} -C gcc install-local
 
 install:
 	@${MAKE} -C gcc install

@@ -2,13 +2,15 @@
 
 MASTER=/usr/include/sys/syscall.h
 
+echo -n "creating system call stubs..."
+
 grep -ai '^#define' $MASTER | sed -e 's/SYS_//g' | \
 {
-	local count=0
 	while read define name index; do
-		echo "[$count] $name $index"
-		sed "s/NAME/$name/" syscall.template >$name.S
-		((count=count+1))
+		if ! [ -f "$name.S" ]; then
+			echo -n " $name.S"
+			sed "s/NAME/$name/" syscall.template >$name.S
+		fi
 	done
 }
-
+echo " done."

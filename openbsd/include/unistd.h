@@ -68,7 +68,6 @@
 #define _POSIX_CLOCK_SELECTION			(-1)
 #define _POSIX_CPUTIME				200809L
 #define _POSIX_FSYNC				200112L
-//#define _POSIX_IPV6				0
 #define _POSIX_IPV6				200809L
 #define _POSIX_JOB_CONTROL			1
 #define _POSIX_MAPPED_FILES			200112L

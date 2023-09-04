@@ -25,7 +25,7 @@ NLS=    C.msg Pig.msg da.ISO8859-1.msg da.UTF-8.msg de.ISO8859-1.msg \
         nl.ISO8859-1.msg nl.UTF-8.msg no.ISO8859-1.msg no.UTF-8.msg \
         ru.KOI8-R.msg ru.UTF-8.msg sv.ISO8859-1.msg sv.UTF-8.msg
 
-all: libmsvcrt.a ${LIBC} libc.a
+all: objects ${LIBC} libc.a libmsvcrt.a
 
 libc.a:
 	ar cru $@ ${SHOBJECTS} ${OBJECTS}
@@ -55,7 +55,7 @@ ${LIBC}: ${OBJECTS} version.o
 # --image-base=${IMGBASE_LIBC}
 # --enable-stdcall-fixup
 
-clean:
+clean: objects-clean
 	/bin/rm -f *.o *.a ${LIBC}
 
 objects-clean:
@@ -69,6 +69,7 @@ install: ${DESTDIR}
 	@#ln -s ${LIBC} ${DESTDIR}${LIBDIR}/libc.so
 	@#ginstall libc.a C:/minc-1.0${LIBDIR}/
 
+# Perl needs libc.so
 install-local:
 	/bin/cp ${IMPLIB} ${LIBDIR}/libc.so
 	/bin/cp ${IMPLIB} ${LIBDIR}/libmingwex.dll.a
