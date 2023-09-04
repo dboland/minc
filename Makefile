@@ -18,3 +18,7 @@ clean:
 	@${MAKE} -C mingw clean
 	@${MAKE} -C sbin clean
 	@${MAKE} -C openbsd clean
+
+install:
+	@${MAKE} -C libposix install
+	@${MAKE} -C openbsd install

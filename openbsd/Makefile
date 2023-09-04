@@ -4,8 +4,8 @@ include ../Makefile.inc
 .SUFFIXES:
 
 all:
-	${MAKE} -C lib
-	${MAKE} -C usr.bin
+	@${MAKE} -C lib
+	@${MAKE} -C usr.bin
 
 includes-local: ${INCDIR}/machine
 	@/bin/cp -rvu include/* ${INCDIR}/
@@ -21,13 +21,14 @@ includes-local: ${INCDIR}/machine
 	@/bin/cp -rvu sys/arch/i386/include/* ${INCDIR}/machine/
 
 install-local:
-	${MAKE} -C lib install-local
-	${MAKE} -C usr.bin install-local
+	@${MAKE} -C lib install-local
+	@${MAKE} -C usr.bin install-local
 
 install: ${DESTDIR}
 	@cp -rvu include/* ${DESTDIR}${INCDIR}/
-	@#cp -rvu sys/machine ${DESTDIR}${INCDIR}/
+	@cp -rvu sys/sys ${DESTDIR}${INCDIR}/
 	@cp -rvu share/mk ${DESTDIR}${SHDIR}/
+	@${MAKE} -C lib install
 
 clean:
-	${MAKE} -C lib clean
+	@${MAKE} -C lib clean
