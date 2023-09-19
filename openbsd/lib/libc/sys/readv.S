@@ -1,7 +1,3 @@
-#include <machine/asm.h>
-#include <sys/syscall.h>
+#include "SYS.h"
 
-ENTRY(readv)
-	push $SYS_readv
-	jmp _syscall
-	nop
+SYSENTRY(readv)

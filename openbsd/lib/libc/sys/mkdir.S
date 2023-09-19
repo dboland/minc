@@ -1,7 +1,3 @@
-#include <machine/asm.h>
-#include <sys/syscall.h>
+#include "SYS.h"
 
-ENTRY(mkdir)
-	push $SYS_mkdir
-	jmp _syscall
-	nop
+SYSENTRY(mkdir)

@@ -1,7 +1,3 @@
-#include <machine/asm.h>
-#include <sys/syscall.h>
+#include "SYS.h"
 
-ENTRY(mkdirat)
-	push $SYS_mkdirat
-	jmp _syscall
-	nop
+SYSENTRY(mkdirat)

@@ -1,7 +1,3 @@
-#include <machine/asm.h>
-#include <sys/syscall.h>
+#include "SYS.h"
 
-ENTRY(chflags)
-	push $SYS_chflags
-	jmp _syscall
-	nop
+SYSENTRY(chflags)

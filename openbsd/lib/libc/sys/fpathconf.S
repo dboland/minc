@@ -1,7 +1,3 @@
-#include <machine/asm.h>
-#include <sys/syscall.h>
+#include "SYS.h"
 
-ENTRY(fpathconf)
-	push $SYS_fpathconf
-	jmp _syscall
-	nop
+SYSENTRY(fpathconf)

@@ -1,7 +1,3 @@
-#include <machine/asm.h>
-#include <sys/syscall.h>
+#include "SYS.h"
 
-ENTRY(shmat)
-	push $SYS_shmat
-	jmp _syscall
-	nop
+SYSENTRY(shmat)

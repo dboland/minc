@@ -28,22 +28,26 @@
  *
  */
 
-#include <unistd.h>
-#include <signal.h>
+#include <winbase.h>
 
-pid_t getthrid(void);	/* not in unistd.h? */
+/****************************************************/
 
-/************************************************************/
-
-/* "weak" aliases (see: arch/i386/SYS.h) */
-
-int 
-_thread_sys_sigprocmask(int how, const sigset_t *set, sigset_t *oset)
+BOOL
+fifo_F_SETFL(WIN_VNODE *Node, WIN_FLAGS *Flags)
 {
-	return(sigprocmask(how, set, oset));
-}
-int 
-_thread_sys_getthrid(void)
-{
-	return(getthrid());
+	BOOL bResult = FALSE;
+	DWORD dwMode = PIPE_WAIT;
+
+	if (Flags->Attribs & FILE_FLAG_OVERLAPPED){     /* perl.exe (Configure) */
+		dwMode = PIPE_NOWAIT;
+	}
+	if (!SetNamedPipeHandleState(Node->Handle, &dwMode, NULL, NULL)){
+		WIN_ERR("SetNamedPipeHandleState(%d): %s\n", Node->Handle, win_strerror(GetLastError()));
+	}else{
+		Node->Access = Flags->Access;
+		Node->Attribs = Flags->Attribs;
+		Node->CloseExec = Flags->CloseExec;
+		bResult = TRUE;
+	}
+	return(bResult);
 }

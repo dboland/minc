@@ -1,7 +1,3 @@
-#include <machine/asm.h>
-#include <sys/syscall.h>
+#include "SYS.h"
 
-ENTRY(setpgid)
-	push $SYS_setpgid
-	jmp _syscall
-	nop
+SYSENTRY(setpgid)

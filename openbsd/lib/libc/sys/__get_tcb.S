@@ -1,7 +1,3 @@
-#include <machine/asm.h>
-#include <sys/syscall.h>
+#include "SYS.h"
 
-ENTRY(__get_tcb)
-	push $SYS___get_tcb
-	jmp _syscall
-	nop
+SYSENTRY(__get_tcb)

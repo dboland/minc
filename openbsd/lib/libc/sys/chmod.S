@@ -1,7 +1,3 @@
-#include <machine/asm.h>
-#include <sys/syscall.h>
+#include "SYS.h"
 
-ENTRY(chmod)
-	push $SYS_chmod
-	jmp _syscall
-	nop
+SYSENTRY(chmod)

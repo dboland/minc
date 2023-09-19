@@ -33,13 +33,13 @@
 
 #include "win/windows.h"
 #include "win_posix.h"
-#include "minc_posix.h"
+#include "arch_posix.h"
 
 #include <string.h>
 #include <errno.h>
 #include <pwd.h>
 
-#define PWDBUF_MAX	PATH_MAX
+#define PWDBUF_MAX	MAX_COMMENT
 
 char 			_PWDBUF[PWDBUF_MAX];
 struct passwd		_PASSWD;

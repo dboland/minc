@@ -1,7 +1,3 @@
-#include <machine/asm.h>
-#include <sys/syscall.h>
+#include "SYS.h"
 
-ENTRY(getsockopt)
-	push $SYS_getsockopt
-	jmp _syscall
-	nop
+SYSENTRY(getsockopt)

@@ -1,7 +1,3 @@
-#include <machine/asm.h>
-#include <sys/syscall.h>
+#include "SYS.h"
 
-ENTRY(sigsuspend)
-	push $SYS_sigsuspend
-	jmp _syscall
-	nop
+SYSENTRY(sigsuspend)

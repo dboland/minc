@@ -19,16 +19,20 @@ includes-local: ${INCDIR}/machine
 	@/bin/cp -rvu sys/netinet6 ${INCDIR}/
 	@/bin/cp -rvu sys/net80211 ${INCDIR}/
 	@/bin/cp -rvu sys/arch/i386/include/* ${INCDIR}/machine/
+	@${MAKE} -C lib includes-local
+
+includes: ${DESTDIR}
+	@cp -rvu include/* ${DESTDIR}${INCDIR}/
+	@cp -rvu sys/sys ${DESTDIR}${INCDIR}/
+	@cp -rvu sys/arch/i386/include/* ${DESTDIR}${INCDIR}/machine/
+
+install: ${DESTDIR}
+	@cp -rvu share/mk ${DESTDIR}${SHDIR}/
+	@${MAKE} -C lib install
 
 install-local:
 	@${MAKE} -C lib install-local
 	@${MAKE} -C usr.bin install-local
-
-install: ${DESTDIR}
-	@cp -rvu include/* ${DESTDIR}${INCDIR}/
-	@cp -rvu sys/sys ${DESTDIR}${INCDIR}/
-	@cp -rvu share/mk ${DESTDIR}${SHDIR}/
-	@${MAKE} -C lib install
 
 clean:
 	@${MAKE} -C lib clean

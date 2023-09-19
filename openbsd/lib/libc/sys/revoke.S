@@ -1,7 +1,3 @@
-#include <machine/asm.h>
-#include <sys/syscall.h>
+#include "SYS.h"
 
-ENTRY(revoke)
-	push $SYS_revoke
-	jmp _syscall
-	nop
+SYSENTRY(revoke)

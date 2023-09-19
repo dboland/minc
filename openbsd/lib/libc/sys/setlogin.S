@@ -1,7 +1,3 @@
-#include <machine/asm.h>
-#include <sys/syscall.h>
+#include "SYS.h"
 
-ENTRY(setlogin)
-	push $SYS_setlogin
-	jmp _syscall
-	nop
+SYSENTRY(setlogin)

@@ -1,7 +1,3 @@
-#include <machine/asm.h>
-#include <sys/syscall.h>
+#include "SYS.h"
 
-ENTRY(nfssvc)
-	push $SYS_nfssvc
-	jmp _syscall
-	nop
+SYSENTRY(nfssvc)

@@ -141,3 +141,16 @@ win_setgroups(SID8 Groups[], DWORD Count)
 	}
 	return(bResult);
 }
+BOOL 
+win___tfork_thread(WIN___TFORK *Params, SIZE_T Size, LPTHREAD_START_ROUTINE Start, PVOID Data, DWORD *Result)
+{
+	BOOL bResult = FALSE;
+	HANDLE hResult = NULL;
+
+	if (!(hResult = CreateThread(NULL, Size, Start, Data, 0, Result))){
+		WIN_ERR("CreateThread(%d): %s\n", Size, win_strerror(GetLastError()));
+	}else{
+		bResult = CloseHandle(hResult);
+	}
+	return(bResult);
+}

@@ -1,7 +1,3 @@
-#include <machine/asm.h>
-#include <sys/syscall.h>
+#include "SYS.h"
 
-ENTRY(kevent)
-	push $SYS_kevent
-	jmp _syscall
-	nop
+SYSENTRY(kevent)

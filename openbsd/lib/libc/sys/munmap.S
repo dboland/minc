@@ -1,7 +1,3 @@
-#include <machine/asm.h>
-#include <sys/syscall.h>
+#include "SYS.h"
 
-ENTRY(munmap)
-	push $SYS_munmap
-	jmp _syscall
-	nop
+SYSENTRY(munmap)

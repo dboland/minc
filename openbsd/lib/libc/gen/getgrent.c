@@ -33,13 +33,14 @@
 
 #include "win/windows.h"
 #include "win_posix.h"
-#include "minc_posix.h"
+#include "arch_posix.h"
 
+#include <limits.h>
 #include <string.h>
 #include <errno.h>
 #include <grp.h>
 
-#define GRPBUF_MAX	(PATH_MAX * 2)
+#define GRPBUF_MAX	MAX_TEXT
 
 char			*_MEMBUF[NGROUPS_MAX];
 

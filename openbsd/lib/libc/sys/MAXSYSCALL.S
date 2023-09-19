@@ -1,7 +1,3 @@
-#include <machine/asm.h>
-#include <sys/syscall.h>
+#include "SYS.h"
 
-ENTRY(MAXSYSCALL)
-	push $SYS_MAXSYSCALL
-	jmp _syscall
-	nop
+SYSENTRY(MAXSYSCALL)

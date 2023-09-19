@@ -1,7 +1,3 @@
-#include <machine/asm.h>
-#include <sys/syscall.h>
+#include "SYS.h"
 
-ENTRY(getgroups)
-	push $SYS_getgroups
-	jmp _syscall
-	nop
+SYSENTRY(getgroups)

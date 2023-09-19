@@ -1,7 +1,3 @@
-#include <machine/asm.h>
-#include <sys/syscall.h>
+#include "SYS.h"
 
-ENTRY(__thrwakeup)
-	push $SYS___thrwakeup
-	jmp _syscall
-	nop
+SYSENTRY(__thrwakeup)

@@ -1,7 +1,3 @@
-#include <machine/asm.h>
-#include <sys/syscall.h>
+#include "SYS.h"
 
-ENTRY(ioctl)
-	push $SYS_ioctl
-	jmp _syscall
-	nop
+SYSENTRY(ioctl)

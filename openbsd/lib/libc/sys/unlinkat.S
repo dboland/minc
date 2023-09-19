@@ -1,7 +1,3 @@
-#include <machine/asm.h>
-#include <sys/syscall.h>
+#include "SYS.h"
 
-ENTRY(unlinkat)
-	push $SYS_unlinkat
-	jmp _syscall
-	nop
+SYSENTRY(unlinkat)

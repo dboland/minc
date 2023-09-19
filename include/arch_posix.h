@@ -28,11 +28,10 @@
  *
  */
 
-/* sched.S */
+/* errno.c */
 
-int sys_fork(call_t call);
-int sys_vfork(call_t call);
-__dead void __threxit(pid_t *pid);
+UINT errno_win(VOID);
+int errno_posix(UINT Error);
 
 /* tls.S */
 
@@ -43,4 +42,20 @@ void ldt_set(int index);
 
 /* context.S */
 
-ucontext_t *ucontext_posix(ucontext_t *ucontext);
+//ucontext_t *ucontext_posix(ucontext_t *ucontext);
+
+/* stat.c */
+
+int rid_posix(SID8 *Sid);
+SID8 *rid_win(SID8 *Buf, int rid);
+
+/* proc.c */
+
+void task_init(char *cmdbuf, char *argv[], void *frame_address);
+
+/* namei.c */
+
+char *path_posix(char *dest, LPCWSTR Source);
+char *pathp_posix(char *dest, LPCWSTR Source);
+//WIN_NAMEIDATA *path_win(WIN_NAMEIDATA *Path, const char *pathname, int flags);
+

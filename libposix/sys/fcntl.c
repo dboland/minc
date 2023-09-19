@@ -54,9 +54,6 @@ flags_win(WIN_FLAGS *Result, int flags)
 //	if (flags & O_NONBLOCK){	/* GNU tar.exe */
 //		Result->Attribs |= FILE_FLAG_OVERLAPPED;
 //	}
-//	if (flags & O_DIRECTORY){	/* git.exe */
-//		Result->Attribs |= FILE_FLAG_BACKUP_SEMANTICS;
-//	}
 	if (flags & O_CREAT){
 		if (flags & O_EXCL){
 			Result->Creation = CREATE_NEW;
@@ -217,7 +214,7 @@ fcntl_F_SETOWN(WIN_TASK *Task, WIN_VNODE *Node, int owner)
 /****************************************************/
 
 int 
-__openat(WIN_TASK *Task, int dirfd, const char *pathname, int flags, va_list args)
+__openat_OLD(WIN_TASK *Task, int dirfd, const char *pathname, int flags, va_list args)
 {
 	int result = -1;
 	WIN_FLAGS wFlags;
@@ -243,24 +240,54 @@ __openat(WIN_TASK *Task, int dirfd, const char *pathname, int flags, va_list arg
 	return(result);
 }
 int 
+__openat(WIN_TASK *Task, WIN_NAMEIDATA *Path, int flags, va_list args)
+{
+	int result = -1;
+	mode_t mode = va_arg(args, mode_t);
+	WIN_FLAGS wFlags;
+	WIN_MODE wMode;
+	WIN_VNODE vNode = {0};
+	CHAR szMessage[MAX_MESSAGE];
+
+	mode &= ~Task->FileMask;
+	if ((Path->Flags & WIN_NOFOLLOW) && (Path->FileType == WIN_VLNK)){
+		__errno_posix(Task, ERROR_TOO_MANY_LINKS);
+	}else if (!vfs_open(Path, flags_win(&wFlags, flags), mode_win(&wMode, mode), &vNode)){
+		__errno_posix(Task, GetLastError());
+	}else{
+		result = fd_posix(Task, &vNode, 0);
+	}
+	return(result);
+}int 
 sys_open(call_t call, const char *pathname, int flags, ...)
 {
-	va_list args;
 	int result;
+	va_list args;
+	WIN_NAMEIDATA wPath;
 
 	va_start(args, flags);
-	result = __openat(call.Task, AT_FDCWD, pathname, flags, args);
+//	result = __openat(call.Task, AT_FDCWD, pathname, flags, args);
+	result = __openat(call.Task, path_win(&wPath, pathname, flags), flags, args);
 	va_end(args);
 	return(result);
 }
 int 
 sys_openat(call_t call, int dirfd, const char *pathname, int flags, ...)
 {
-	va_list args;
 	int result;
+	va_list args;
+	WIN_NAMEIDATA wPath;
+	int atflags = AT_SYMLINK_FOLLOW;
 
+	if (flags & O_NOFOLLOW){
+		atflags |= AT_SYMLINK_NOFOLLOW;
+	}
+	if (flags & O_DIRECTORY){
+		atflags |= AT_REMOVEDIR;
+	}
 	va_start(args, flags);
-	result = __openat(call.Task, dirfd, pathname, flags, args);
+//	result = __openat(call.Task, dirfd, pathname, flags, args);
+	result = __openat(call.Task, pathat_win(&wPath, dirfd, pathname, atflags), flags, args);
 	va_end(args);
 	return(result);
 }

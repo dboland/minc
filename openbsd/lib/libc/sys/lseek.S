@@ -1,7 +1,3 @@
-#include <machine/asm.h>
-#include <sys/syscall.h>
+#include "SYS.h"
 
-ENTRY(lseek)
-	push $SYS_lseek
-	jmp _syscall
-	nop
+SYSENTRY(lseek)

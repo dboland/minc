@@ -13,7 +13,9 @@ LDFLAGS= -shared -s
 LIBSOCKET= libsocket.so.${RELEASE}
 IMPLIB= libsocket.dll.a
 
-all: objects ${LIBSOCKET} libsocket.a
+all: objects lib
+
+lib: ${LIBSOCKET} libsocket.a
 
 crt1.o: crt1.c
 	gcc -c ${CFLAGS} -I../../include -I${LIBROOT}/include $<
@@ -33,15 +35,17 @@ ${LIBSOCKET}: crt1.o version.o
 	-L${POSIXLIB} -L${GCCLIB} -L../libc -lposix -lc -lmsvcrt -lgcc
 
 %.d: %
-	@${MAKE} -C $< SRCDIR="${SRCDIR}" CFLAGS="${CFLAGS} -I../../../../include -DLIBSOCK_IMPORT= -I../../libc/include"
+	@${MAKE} -C $< SRCDIR="${SRCDIR}" CFLAGS="${CFLAGS} -DLIBSOCK_IMPORT= -I../../../../include -I../../libc/include"
 
-objects: asr.d net.d gen.d rpc.d sys.d
+objects: asr.d net.d rpc.d
 
-clean: objects-clean
-	/bin/rm -f *.o *.a ${LIBSOCKET}
+clean: objects-clean lib-clean
+
+lib-clean:
+	rm -f *.o *.a ${LIBSOCKET}
 
 objects-clean:
-	/bin/rm -f */*.o */*.so
+	rm -f */*.o */*.so
 
 install: ${DESTDIR}
 	ginstall ${LIBSOCKET} ${DESTDIR}${LIBDIR}/

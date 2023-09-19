@@ -34,22 +34,6 @@ int h_errno = 0;
 
 /****************************************************/
 
-/* int 
-h_errno_posix(WIN_TASK *Task, INT Error)
-{
-	int result;
-
-//__PRINTF("h_errno_posix(%d): %s\n", result, win_strerror(Error));
-	if (Error < WSABASEERR){
-		result = Error;
-	}else if (Error == WSANOTINITIALISED){
-		result = ECANCELED;
-	}else{
-		result = Error - WSABASEERR;
-	}
-	Task->Error = result;
-	return(result);
-} */
 int 
 h_errno_posix(WIN_TASK *Task, DWORD Error)
 {

@@ -1,7 +1,3 @@
-#include <machine/asm.h>
-#include <sys/syscall.h>
+#include "SYS.h"
 
-ENTRY(fchmodat)
-	push $SYS_fchmodat
-	jmp _syscall
-	nop
+SYSENTRY(fchmodat)

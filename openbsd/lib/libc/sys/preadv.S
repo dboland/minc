@@ -1,7 +1,3 @@
-#include <machine/asm.h>
-#include <sys/syscall.h>
+#include "SYS.h"
 
-ENTRY(preadv)
-	push $SYS_preadv
-	jmp _syscall
-	nop
+SYSENTRY(preadv)

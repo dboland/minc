@@ -33,7 +33,7 @@
 #include "win/windows.h"
 #include "win_types.h"
 #include "vfs_posix.h"
-#include "minc_posix.h"
+#include "arch_posix.h"
 
 unsigned int
 if_nametoindex(const char *ifname)

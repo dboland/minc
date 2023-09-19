@@ -1,5 +1,5 @@
 OBJECTS = a64l.o atoi.o atof.o atol.o atoll.o bsearch.o \
-	cfree.o getenv.o getopt_long.o random.o \
+	cfree.o getenv.o random.o \
 	getsubopt.o heapsort.o imaxabs.o imaxdiv.o l64a.o llabs.o \
 	lldiv.o lsearch.o reallocarray.o merge.o posix_pty.o \
 	qsort.o radixsort.o setenv.o strtoimax.o \
@@ -9,7 +9,7 @@ OBJECTS = a64l.o atoi.o atof.o atol.o atoll.o bsearch.o \
 	qdiv.o _Exit.o exit.o abort.o rand.o realpath.o \
 	div.o hcreate.o
 
-OBJECTS+= atexit.c.o
+OBJECTS+= atexit.c.o getopt_long.c.o
 
 #OBJECTS+= ecvt.o gcvt.o malloc.o
 

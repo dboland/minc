@@ -1,7 +1,3 @@
-#include <machine/asm.h>
-#include <sys/syscall.h>
+#include "SYS.h"
 
-ENTRY(mknod)
-	push $SYS_mknod
-	jmp _syscall
-	nop
+SYSENTRY(mknod)

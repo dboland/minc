@@ -1,7 +1,3 @@
-#include <machine/asm.h>
-#include <sys/syscall.h>
+#include "SYS.h"
 
-ENTRY(kill)
-	push $SYS_kill
-	jmp _syscall
-	nop
+SYSENTRY(kill)

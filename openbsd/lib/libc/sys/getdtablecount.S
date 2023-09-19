@@ -1,7 +1,3 @@
-#include <machine/asm.h>
-#include <sys/syscall.h>
+#include "SYS.h"
 
-ENTRY(getdtablecount)
-	push $SYS_getdtablecount
-	jmp _syscall
-	nop
+SYSENTRY(getdtablecount)

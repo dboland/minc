@@ -1,7 +1,3 @@
-#include <machine/asm.h>
-#include <sys/syscall.h>
+#include "SYS.h"
 
-ENTRY(pwritev)
-	push $SYS_pwritev
-	jmp _syscall
-	nop
+SYSENTRY(pwritev)

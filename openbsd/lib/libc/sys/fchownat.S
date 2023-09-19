@@ -1,7 +1,3 @@
-#include <machine/asm.h>
-#include <sys/syscall.h>
+#include "SYS.h"
 
-ENTRY(fchownat)
-	push $SYS_fchownat
-	jmp _syscall
-	nop
+SYSENTRY(fchownat)

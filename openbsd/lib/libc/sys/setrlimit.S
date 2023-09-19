@@ -1,7 +1,3 @@
-#include <machine/asm.h>
-#include <sys/syscall.h>
+#include "SYS.h"
 
-ENTRY(setrlimit)
-	push $SYS_setrlimit
-	jmp _syscall
-	nop
+SYSENTRY(setrlimit)

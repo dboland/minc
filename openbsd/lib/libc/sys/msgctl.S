@@ -1,7 +1,3 @@
-#include <machine/asm.h>
-#include <sys/syscall.h>
+#include "SYS.h"
 
-ENTRY(msgctl)
-	push $SYS_msgctl
-	jmp _syscall
-	nop
+SYSENTRY(msgctl)

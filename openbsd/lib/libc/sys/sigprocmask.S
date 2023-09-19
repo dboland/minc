@@ -1,7 +1,3 @@
-#include <machine/asm.h>
-#include <sys/syscall.h>
+#include "SYS.h"
 
-ENTRY(sigprocmask)
-	push $SYS_sigprocmask
-	jmp _syscall
-	nop
+SYSENTRY(sigprocmask)

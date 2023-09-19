@@ -80,7 +80,7 @@ argv_win(WIN_TASK *Task, const char *command, char *const argv[])
 		size = p - pszResult;
 		/* maximum for CreateProcess(), rounded to nearest block */
 		if (size >= maxbuf){
-			msvc_printf("Warning: %s: Too many arguments\n", command);
+			msvc_printf("+ warning: %s: Too many arguments\n", command);
 			break;
 		}
 	}
@@ -107,7 +107,7 @@ argv_posix(char *buf, int size, char *argv[])
 		}else if (c != ' '){
 			buf++;
 		}else if (count >= MAXDEPTH){
-			msvc_printf("#!: too many arguments\n");
+			msvc_printf("+ warning: #!: Too many arguments\n");
 			break;
 		}else{
 			*buf++ = 0;

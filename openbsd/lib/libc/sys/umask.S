@@ -1,7 +1,3 @@
-#include <machine/asm.h>
-#include <sys/syscall.h>
+#include "SYS.h"
 
-ENTRY(umask)
-	push $SYS_umask
-	jmp _syscall
-	nop
+SYSENTRY(umask)

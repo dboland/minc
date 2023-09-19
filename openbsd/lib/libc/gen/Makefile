@@ -22,25 +22,19 @@ OBJECTS= assert.o \
 	nice.o alarm.o sysctl.o getcwd.o devname.o sysconf.o \
 	getpagesize.o getloadavg.o getdomainname.o setdomainname.o \
 	gethostname.o sethostname.o uname.o isatty.o initgroups.o disklabel.o \
-	getnetgrent.o ttyname.o ualarm.o raise.o nlist.o
+	getnetgrent.o ttyname.o ualarm.o raise.o nlist.o \
+	vwarn.o vwarnc.o vwarnx.o verr.o verrc.o verrx.o \
+	opendir.o readdir.o readdir_r.o rewinddir.o seekdir.o dirfd.o \
+	telldir.o closedir.o exec.o
 
-OBJECTS+= getpwent.c.o getgrent.c.o setproctitle.c.o
-
-#OBJECTS+= vwarn.c.o vwarnc.c.o vwarnx.c.o verr.c.o verrc.c.o verrx.c.o \
-#	setprogname.c.o getprogname.c.o exec.c.o
-
-OBJECTS+= vwarn.o vwarnc.o vwarnx.o verr.o verrc.o verrx.o \
-	setprogname.c.o getprogname.c.o exec.o
-
-OBJECTS+= opendir.o readdir.o readdir_r.o rewinddir.o seekdir.o dirfd.o telldir.o closedir.o 
+OBJECTS+= getpwent.c.o getgrent.c.o setproctitle.c.o setprogname.c.o getprogname.c.o
+OBJECTS+= _exit.S.o _getlogin.S.o _setlogin.S.o
 
 #OBJECTS+= elf_hash.o posix_spawn.o shm_open.o
 
-#LIBSOCKET= syslog_r.c.o syslog.o auth_subr.o login_cap.o authenticate.o
+OBJECTS= syslog_r.c.o syslog.o auth_subr.o login_cap.o authenticate.o
 
 #REPLACED+= getgrouplist.o errno.o getgrent.o getpwent.o
-
-#_NLIST_DO_ELF
 
 .SUFFIXES:
 .DEFAULT:
@@ -52,6 +46,9 @@ all: ${OBJECTS}
 
 %.c.o: %.c
 	gcc -c ${CFLAGS} -I../../../../include -o $@ $<
+
+%.S.o: %.S
+	gcc -c ${CFLAGS} -I../arch/${ARCH} -o $@ $<
 
 sysconf.o: ${SRCDIR}/gen/sysconf.c
 	gcc -c ${CFLAGS} -I${SRCDIR}/../../sys -I../../../sys -o $@ $<

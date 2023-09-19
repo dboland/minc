@@ -40,12 +40,22 @@
 #include <sys/param.h>
 #include <sys/tty.h>
 
-/* sys/fcntl.h */
+/* sys/fcntl.c */
 
-#define O_NOCROSS	0x1000
-
+#define O_NOCROSS		0x1000
 #define AT_MOUNT_NOCROSS	0x10
+
+/* sys/signal.c */
 
 typedef void (*atexit_t)(void);
 typedef void (*action_t)(int, siginfo_t *, void *);
 
+typedef struct {
+	SHORT tls;
+	SHORT data;
+	DWORD result;
+	WIN_TASK *Task;
+	DWORD reserved;
+	ULONG code;
+	ULONG base;	/* return address */
+} call_t;

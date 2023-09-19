@@ -1,7 +1,3 @@
-#include <machine/asm.h>
-#include <sys/syscall.h>
+#include "SYS.h"
 
-ENTRY(profil)
-	push $SYS_profil
-	jmp _syscall
-	nop
+SYSENTRY(profil)

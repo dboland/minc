@@ -12,8 +12,8 @@ SHOBJECTS=socket.so connect.so accept.so recvfrom.so sendto.so sendmsg.so recvms
 all: ${OBJECTS} ${SHOBJECTS}
 
 %.o: ../../libc/sys/%.S
-	gcc -c ${CFLAGS} -DNOPIE -o $@ $<
+	gcc -c ${CFLAGS} -I../../libc/arch/i386 -DNOPIE -o $@ $<
 
 %.so: ../../libc/sys/%.S
-	gcc -c ${CFLAGS} -o $@ $<
+	gcc -c ${CFLAGS} -I../../libc/arch/i386 -o $@ $<
 

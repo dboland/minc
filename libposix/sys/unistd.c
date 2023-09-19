@@ -259,10 +259,10 @@ sys_setgroups(call_t call, int size, const gid_t *list)
 int 
 sys_rmdir(call_t call, const char *pathname)
 {
-	WIN_NAMEIDATA wpePathName;
+	WIN_NAMEIDATA wPath;
 	int result = -1;
 
-	if (!vfs_rmdir(path_win(&wpePathName, pathname, O_NOFOLLOW))){
+	if (!vfs_rmdir(path_win(&wPath, pathname, O_NOFOLLOW))){
 		__errno_posix(call.Task, GetLastError());
 	}else{
 		result = 0;
@@ -270,13 +270,13 @@ sys_rmdir(call_t call, const char *pathname)
 	return(result);
 }
 int 
-sys_linkat(call_t call, int olddirfd, const char *oldpath, int newdirfd, const char *newpath, int flags)
+sys_linkat(call_t call, int fd1, const char *name1, int fd2, const char *name2, int flag)
 {
-	WIN_NAMEIDATA wpeOld;
-	WIN_NAMEIDATA wpeNew;
+	WIN_NAMEIDATA wpOld;
+	WIN_NAMEIDATA wpNew;
 	int result = -1;
 
-	if (!vfs_link(pathat_win(&wpeOld, olddirfd, oldpath, flags), pathat_win(&wpeNew, newdirfd, newpath, flags))){
+	if (!vfs_link(pathat_win(&wpOld, fd1, name1, flag), pathat_win(&wpNew, fd2, name2, flag))){
 		__errno_posix(call.Task, GetLastError());
 	}else{
 		result = 0;
@@ -718,7 +718,7 @@ sys_pwrite(call_t call, int fd, const void *buf, size_t nbyte, off_t offset)
 int 
 sys_getthrid(call_t call)
 {
-	return(call.Task->TaskId);
+	return(call.Task->TaskId);	/* git.exe */
 }
 pid_t 
 __getpgid(WIN_TASK *Task, pid_t pid)
@@ -815,4 +815,16 @@ sys_obreak(call_t call, char *nsize)
 {
 	msvc_printf("obreak(%d)\n", *nsize);
 	return(0);
+}
+pid_t 
+__tfork_thread(const struct __tfork *params, size_t psize, void (*startfunc)(void *), void *startarg)
+{
+	pid_t result = -1;
+	DWORD dwResult = 0;
+
+	if (!win___tfork_thread(NULL, psize, (PVOID)startfunc, startarg, &dwResult)){
+		__errno_posix(&__Tasks[CURRENT], GetLastError());
+	}else{
+		result = dwResult;
+	}	
 }

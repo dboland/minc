@@ -1,7 +1,3 @@
-#include <machine/asm.h>
-#include <sys/syscall.h>
+#include "SYS.h"
 
-ENTRY(futimes)
-	push $SYS_futimes
-	jmp _syscall
-	nop
+SYSENTRY(futimes)

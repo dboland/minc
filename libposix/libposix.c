@@ -41,8 +41,8 @@
 #include "vfs_debug.h"
 #include "ws2_posix.h"
 #include "msvc_posix.h"
-#include "minc_types.h"
-#include "arch_posix.h"
+#include "minc_posix.h"
+//#include "arch_posix.h"
 
 extern WIN_TASK 	*__Tasks;
 extern WIN_DEV_CLASS 	*__Devices;
@@ -120,6 +120,7 @@ WIN_NAMEIDATA *path_win(WIN_NAMEIDATA *Path, const char *pathname, int flags);
 #include "sys/sockio.c"
 #include "sys/ioctl.c"
 #include "sys/msgbuf.c"
+#include "sys/msg.c"
 
 #define _KERNEL
 #include "sys/file.c"

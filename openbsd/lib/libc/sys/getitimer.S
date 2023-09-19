@@ -1,7 +1,3 @@
-#include <machine/asm.h>
-#include <sys/syscall.h>
+#include "SYS.h"
 
-ENTRY(getitimer)
-	push $SYS_getitimer
-	jmp _syscall
-	nop
+SYSENTRY(getitimer)

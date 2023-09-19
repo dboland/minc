@@ -1,7 +1,3 @@
-#include <machine/asm.h>
-#include <sys/syscall.h>
+#include "SYS.h"
 
-ENTRY(mkfifo)
-	push $SYS_mkfifo
-	jmp _syscall
-	nop
+SYSENTRY(mkfifo)

@@ -49,7 +49,8 @@ typedef __SIZE_TYPE__ WIN_SIZE_T;
 #define MAX_COMMENT			160
 #define MAX_MESSAGE			256
 #define MAX_TEXT			416
-#define MAX_ARGBUF			0x7FFF		/* length of UNICODE_STRING struct */
+//#define MAX_ARGBUF			0x7FFF		/* length of UNICODE_STRING struct */
+#define MAX_ARGBUF			0x40000		/* GNU configure */
 #define MAX_FILESIZE			0xFFFFFFF0000	/* 16 TB minus 64 KB */
 
 /* winnt.h */
@@ -378,3 +379,9 @@ typedef struct _WIN_IOVEC {
 	WIN_SIZE_T Length;
 } WIN_IOVEC;
 
+/*
+ * win_unistd.c
+ */
+
+typedef struct _WIN___TFORK {
+} WIN___TFORK;

@@ -50,10 +50,12 @@ ConControlProc(DWORD CtrlType)
 			if (!vfs_raise(WM_COMMAND, CtrlType, 0)){
 				/* ping.exe */
 				pwTask->Flags |= WIN_PS_EXITING;
-				bResult = FALSE;	/* causes ExitProcess() */
+				/* causes ExitProcess() */
+				bResult = FALSE;
 			}else{
 				/* syslogd.exe -d */
-				vfs_kill_PID(pwTask->ThreadId, WM_COMMAND, CtrlType, 0);
+//				vfs_kill_PID(pwTask->ThreadId, WM_COMMAND, CtrlType, 0);
+				SetEvent(__ProcEvent);
 			}
 		}
 	}

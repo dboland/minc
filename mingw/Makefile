@@ -26,6 +26,9 @@ all: ${LIBS}
 bin.d:
 	@${MAKE} -C bin
 
+includes-local:
+	@/bin/cp -rvu include/* ${INCDIR}/
+
 ${BINDIR}:
 	mkdir -p ${BINDIR}
 

@@ -39,10 +39,10 @@ file_open(WIN_NAMEIDATA *Path, WIN_FLAGS *Flags, WIN_MODE *Mode, WIN_VNODE *Resu
 
 	if (Flags->Creation != OPEN_EXISTING){
 		bResult = DiskCreateFile(Path, Flags, Mode, Result);
-//	}else if (Path->Attribs == -1){		/* git.exe */
-//		return(FALSE);
-//	}else if (Flags->Attribs & FILE_FLAG_BACKUP_SEMANTICS){
-//		SetLastError(ERROR_DIRECTORY);
+	}else if (Path->Attribs == -1){		/* git.exe */
+		return(FALSE);
+	}else if (Path->Flags & WIN_REQUIREDIR){
+		SetLastError(ERROR_DIRECTORY);
 	}else{
 		bResult = DiskOpenFile(Path, Flags, Result);
 	}

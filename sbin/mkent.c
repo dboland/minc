@@ -32,7 +32,6 @@
 #include <string.h>
 #include <stdint.h>
 #include <stdlib.h>
-#include <wchar.h>
 #include <ctype.h>
 #include <errno.h>
 #include <wchar.h>

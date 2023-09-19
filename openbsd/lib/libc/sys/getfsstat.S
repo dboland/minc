@@ -1,7 +1,3 @@
-#include <machine/asm.h>
-#include <sys/syscall.h>
+#include "SYS.h"
 
-ENTRY(getfsstat)
-	push $SYS_getfsstat
-	jmp _syscall
-	nop
+SYSENTRY(getfsstat)

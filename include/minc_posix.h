@@ -30,33 +30,13 @@
 
 #include "minc_types.h"
 
-/* errno.c */
-
-DWORD errno_win(VOID);
-int errno_posix(DWORD Error);
-
-/* proc.c */
-
-void task_init(char *cmdbuf, char *argv[], void *frame_address);
-
-/* stat.c */
-
-int rid_posix(SID8 *Sid);
-SID8 *rid_win(SID8 *Buf, int rid);
-
-/* namei.c */
-
-char *path_posix(char *dest, LPCWSTR Source);
-char *pathp_posix(char *dest, LPCWSTR Source);
-//WIN_NAMEIDATA *path_win(WIN_NAMEIDATA *Path, const char *pathname, int flags);
-
 /* unistd.c */
 
 int group_member(gid_t gid);
 
 /* netdb.c */
 
-int h_errno_posix(VOID);
+int h_errno_posix(WIN_TASK *Task, DWORD Error);
 
 /* compat.c */
 
@@ -69,3 +49,10 @@ char *group_posix(char *buf, size_t buflen, WIN_GRENT *Group);
 /* pwd.c */
 
 char *passwd_posix(char *buf, size_t buflen, WIN_PWENT *WinPwd);
+
+/* fork.S */
+
+int sys_fork(call_t call);
+int sys_vfork(call_t call);
+__dead void __threxit(pid_t *pid);
+

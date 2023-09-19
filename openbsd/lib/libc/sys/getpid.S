@@ -1,7 +1,3 @@
-#include <machine/asm.h>
-#include <sys/syscall.h>
+#include "SYS.h"
 
-ENTRY(getpid)
-	push $SYS_getpid
-	jmp _syscall
-	nop
+SYSENTRY(getpid)

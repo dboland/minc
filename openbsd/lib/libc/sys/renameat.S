@@ -1,7 +1,3 @@
-#include <machine/asm.h>
-#include <sys/syscall.h>
+#include "SYS.h"
 
-ENTRY(renameat)
-	push $SYS_renameat
-	jmp _syscall
-	nop
+SYSENTRY(renameat)

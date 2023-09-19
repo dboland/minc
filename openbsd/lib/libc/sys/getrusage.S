@@ -1,7 +1,3 @@
-#include <machine/asm.h>
-#include <sys/syscall.h>
+#include "SYS.h"
 
-ENTRY(getrusage)
-	push $SYS_getrusage
-	jmp _syscall
-	nop
+SYSENTRY(getrusage)

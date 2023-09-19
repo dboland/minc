@@ -64,7 +64,7 @@ file_FIONBIO(WIN_TASK *Task, WIN_VNODE *Node, int *mode)
 int 
 file_ioctl(WIN_TASK *Task, int fd, unsigned long request, va_list args)
 {
-	int result = -1;
+	int result = 0;
 	WIN_VNODE *pNode = &Task->Node[fd];
 
 	switch (request){
@@ -74,8 +74,15 @@ file_ioctl(WIN_TASK *Task, int fd, unsigned long request, va_list args)
 		case FIONREAD:
 			result = file_FIONREAD(Task, pNode, va_arg(args, int *));
 			break;
+		case FIOCLEX:	/* python.exe */
+			pNode->CloseExec = TRUE;
+			break;
+		case FIONCLEX:
+			pNode->CloseExec = FALSE;
+			break;
 		default:
 			__errno_posix(Task, ERROR_NOT_SUPPORTED);
+			result = -1;
 	}
 	return(result);
 }

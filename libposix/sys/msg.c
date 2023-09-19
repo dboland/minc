@@ -33,10 +33,16 @@
 /************************************************************/
 
 int 
-msgget(key_t key, int flags)
+sys_msgget(call_t call, key_t key, int flags)
 {
+__PRINTF("sys_msgget(%d)\n", key)
+	__errno_posix(call.Task, ERROR_NOT_SUPPORTED);
+	return(-1);
 }
 int 
-msgsnd(int msqid, const void *msgp, size_t msgsz, int flags)
+sys_msgsnd(call_t call, int msqid, const void *msgp, size_t msgsz, int flags)
 {
+__PRINTF("sys_msgsnd(%d)\n", msqid)
+	__errno_posix(call.Task, ERROR_NOT_SUPPORTED);
+	return(-1);
 }

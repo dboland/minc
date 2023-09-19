@@ -1,7 +1,3 @@
-#include <machine/asm.h>
-#include <sys/syscall.h>
+#include "SYS.h"
 
-ENTRY(adjfreq)
-	push $SYS_adjfreq
-	jmp _syscall
-	nop
+SYSENTRY(adjfreq)

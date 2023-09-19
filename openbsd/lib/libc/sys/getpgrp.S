@@ -1,7 +1,3 @@
-#include <machine/asm.h>
-#include <sys/syscall.h>
+#include "SYS.h"
 
-ENTRY(getpgrp)
-	push $SYS_getpgrp
-	jmp _syscall
-	nop
+SYSENTRY(getpgrp)

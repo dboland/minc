@@ -1,7 +1,3 @@
-#include <machine/asm.h>
-#include <sys/syscall.h>
+#include "SYS.h"
 
-ENTRY(getpriority)
-	push $SYS_getpriority
-	jmp _syscall
-	nop
+SYSENTRY(getpriority)

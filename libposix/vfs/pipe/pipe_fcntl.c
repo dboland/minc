@@ -51,3 +51,19 @@ pipe_F_DUPFD(WIN_VNODE *Node, HANDLE Process, DWORD Options, WIN_VNODE *Result)
 	}
 	return(bResult);
 }
+BOOL 
+pipe_F_SETFL(WIN_VNODE *Node, WIN_FLAGS *Flags)
+{
+	BOOL bResult = FALSE;
+
+	switch (Node->FileType){
+		case WIN_VFIFO:
+			bResult = fifo_F_SETFL(Node, Flags);
+			break;
+		default:
+			Node->Access = Flags->Access;
+			Node->Attribs = Flags->Attribs;
+			Node->CloseExec = Flags->CloseExec;
+			bResult = TRUE;
+	}
+}

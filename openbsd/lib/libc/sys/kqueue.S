@@ -1,7 +1,3 @@
-#include <machine/asm.h>
-#include <sys/syscall.h>
+#include "SYS.h"
 
-ENTRY(kqueue)
-	push $SYS_kqueue
-	jmp _syscall
-	nop
+SYSENTRY(kqueue)

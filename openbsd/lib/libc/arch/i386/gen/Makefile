@@ -15,12 +15,3 @@ all: ${OBJECTS}
 
 %.o: ${SRCDIR}/arch/i386/gen/%.S
 	gcc -c ${CFLAGS} -o $@ $<
-
-MAN=fabs.3 ldexp.3 \
-	modf.3 setjmp.3
-MAN+=fpgetmask.3
-
-%.3:
-	@cp -vu ${SRCDIR}/gen/$@ ${DESTDIR}/usr/share/man/man3/$@
-
-install: ${MAN}

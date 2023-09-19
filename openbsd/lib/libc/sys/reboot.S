@@ -1,7 +1,3 @@
-#include <machine/asm.h>
-#include <sys/syscall.h>
+#include "SYS.h"
 
-ENTRY(reboot)
-	push $SYS_reboot
-	jmp _syscall
-	nop
+SYSENTRY(reboot)

@@ -1,7 +1,3 @@
-#include <machine/asm.h>
-#include <sys/syscall.h>
+#include "SYS.h"
 
-ENTRY(vfork)
-	push $SYS_vfork
-	jmp _syscall
-	nop
+SYSENTRY(vfork)

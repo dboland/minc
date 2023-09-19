@@ -1,7 +1,3 @@
-#include <machine/asm.h>
-#include <sys/syscall.h>
+#include "SYS.h"
 
-ENTRY(recvmsg)
-	push $SYS_recvmsg
-	jmp _syscall
-	nop
+SYSENTRY(recvmsg)

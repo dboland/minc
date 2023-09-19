@@ -1,7 +1,3 @@
-#include <machine/asm.h>
-#include <sys/syscall.h>
+#include "SYS.h"
 
-ENTRY(seteuid)
-	push $SYS_seteuid
-	jmp _syscall
-	nop
+SYSENTRY(seteuid)

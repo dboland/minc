@@ -1,7 +1,3 @@
-#include <machine/asm.h>
-#include <sys/syscall.h>
+#include "SYS.h"
 
-ENTRY(minherit)
-	push $SYS_minherit
-	jmp _syscall
-	nop
+SYSENTRY(minherit)

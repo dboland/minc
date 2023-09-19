@@ -1,7 +1,3 @@
-#include <machine/asm.h>
-#include <sys/syscall.h>
+#include "SYS.h"
 
-ENTRY(gettimeofday)
-	push $SYS_gettimeofday
-	jmp _syscall
-	nop
+SYSENTRY(gettimeofday)

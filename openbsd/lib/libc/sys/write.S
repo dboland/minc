@@ -1,7 +1,3 @@
-#include <machine/asm.h>
-#include <sys/syscall.h>
+#include "SYS.h"
 
-ENTRY(write)
-	push $SYS_write
-	jmp _syscall
-	nop
+SYSENTRY(write)

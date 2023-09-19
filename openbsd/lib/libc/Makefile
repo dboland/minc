@@ -2,21 +2,20 @@ include ../../../Makefile.inc
 
 RELEASE=75.0
 
+ARCH=i386
 CFLAGS+= -g -Wimplicit-function-declaration -fno-omit-frame-pointer -DNOPIE
-#CFLAGS+= -DNLS
 CFLAGS+= -ffreestanding
 #CFLAGS+= -fno-builtin
 LDFLAGS= -shared -s
 IMPLIB= libc.dll.a
 SRCDIR= /D/openbsd-master/lib/libc
-OBJECTS= libc.o thread.o gnu_string.o
-SHOBJECTS= $(shell /bin/ls arch/*/*.o */*.o db/*/*.o)
+OBJECTS= libc.o gnu_string.o
+SHOBJECTS= $(shell /bin/ls arch/${ARCH}/*/*.o */*.o db/*/*.o)
 LIBROOT=../../..
 GCCLIB=${LIBROOT}/mingw/gcc
 TOOLDIR=${LIBROOT}/mingw/bin
 POSIXLIB=${LIBROOT}/libposix
 WINLIB=/C/WINDOWS/system32
-ARCH=i386
 LIBC=libc.so.${RELEASE}
 
 NLS=    C.msg Pig.msg da.ISO8859-1.msg da.UTF-8.msg de.ISO8859-1.msg \
@@ -25,7 +24,9 @@ NLS=    C.msg Pig.msg da.ISO8859-1.msg da.UTF-8.msg de.ISO8859-1.msg \
         nl.ISO8859-1.msg nl.UTF-8.msg no.ISO8859-1.msg no.UTF-8.msg \
         ru.KOI8-R.msg ru.UTF-8.msg sv.ISO8859-1.msg sv.UTF-8.msg
 
-all: objects ${LIBC} libc.a libmsvcrt.a
+all: objects lib
+
+lib: ${LIBC} libc.a libmsvcrt.a
 
 libc.a:
 	ar cru $@ ${SHOBJECTS} ${OBJECTS}
@@ -38,7 +39,7 @@ libmsvcrt.a: libmsvcrt.def
 
 objects: arch.d quad.d stdlib.d citrus.d compat-43.d crypt.d db.d gdtoa.d gen.d \
 	hash.d locale.d regex.d stdio.d string.d termios.d time.d thread.d \
-	sys.d nls.d dlfcn.d gmon.d
+	sys.d nls.d dlfcn.d gmon.d net.d
 
 %.o: %.c
 	gcc -c ${CFLAGS} -I${LIBROOT}/include -o $@ $<
@@ -55,11 +56,13 @@ ${LIBC}: ${OBJECTS} version.o
 # --image-base=${IMGBASE_LIBC}
 # --enable-stdcall-fixup
 
-clean: objects-clean
-	/bin/rm -f *.o *.a ${LIBC}
+clean: objects-clean lib-clean
+
+lib-clean:
+	rm -f *.o *.a ${LIBC}
 
 objects-clean:
-	/bin/rm -f */*.o arch/*/*.o db/*/*.o
+	rm -f */*.o arch/${ARCH}/*/*.o db/*/*.o
 
 install: ${DESTDIR}
 	ginstall ${LIBC} ${DESTDIR}${LIBDIR}/

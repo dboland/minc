@@ -1,7 +1,3 @@
-#include <machine/asm.h>
-#include <sys/syscall.h>
+#include "SYS.h"
 
-ENTRY(chroot)
-	push $SYS_chroot
-	jmp _syscall
-	nop
+SYSENTRY(chroot)

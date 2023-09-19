@@ -1,7 +1,3 @@
-#include <machine/asm.h>
-#include <sys/syscall.h>
+#include "SYS.h"
 
-ENTRY(clock_getres)
-	push $SYS_clock_getres
-	jmp _syscall
-	nop
+SYSENTRY(clock_getres)

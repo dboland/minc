@@ -35,6 +35,8 @@
 .global _sys_fork, _sys_vfork
 .text
 
+# aliases
+
 return = 0
 origin = 4
 size   = 8

@@ -1,7 +1,3 @@
-#include <machine/asm.h>
-#include <sys/syscall.h>
+#include "SYS.h"
 
-ENTRY(fstatat)
-	push $SYS_fstatat
-	jmp _syscall
-	nop
+SYSENTRY(fstatat)

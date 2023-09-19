@@ -1,7 +1,3 @@
-#include <machine/asm.h>
-#include <sys/syscall.h>
+#include "SYS.h"
 
-ENTRY(mkfifoat)
-	push $SYS_mkfifoat
-	jmp _syscall
-	nop
+SYSENTRY(mkfifoat)

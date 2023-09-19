@@ -1,7 +1,3 @@
-#include <machine/asm.h>
-#include <sys/syscall.h>
+#include "SYS.h"
 
-ENTRY(sigpending)
-	push $SYS_sigpending
-	jmp _syscall
-	nop
+SYSENTRY(sigpending)

@@ -1,7 +1,3 @@
-#include <machine/asm.h>
-#include <sys/syscall.h>
+#include "SYS.h"
 
-ENTRY(__thrsigdivert)
-	push $SYS___thrsigdivert
-	jmp _syscall
-	nop
+SYSENTRY(__thrsigdivert)

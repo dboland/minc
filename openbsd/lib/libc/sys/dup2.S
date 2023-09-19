@@ -1,7 +1,3 @@
-#include <machine/asm.h>
-#include <sys/syscall.h>
+#include "SYS.h"
 
-ENTRY(dup2)
-	push $SYS_dup2
-	jmp _syscall
-	nop
+SYSENTRY(dup2)

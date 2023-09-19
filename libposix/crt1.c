@@ -34,6 +34,7 @@
 
 extern WIN_TASK 	*__Tasks;
 extern DWORD		__TlsIndex;
+extern DWORD		__TaskId;
 
 BOOL posix_PROCESS_DETACH(WIN_TASK *Task);
 BOOL posix_THREAD_ATTACH(WIN_TASK *Task);
@@ -52,7 +53,7 @@ DllMainCRTStartup(HINSTANCE hinstDLL, DWORD fdwReason, LPVOID lpvReserved)
 			bResult = posix_PROCESS_DETACH(&__Tasks[CURRENT]);
 			break;
 		case DLL_THREAD_ATTACH:
-			bResult = posix_THREAD_ATTACH(&__Tasks[CURRENT]);
+			bResult = posix_THREAD_ATTACH(&__Tasks[__TaskId]);
 			break;
 		case DLL_THREAD_DETACH:
 			bResult = posix_THREAD_DETACH(&__Tasks[CURRENT]);

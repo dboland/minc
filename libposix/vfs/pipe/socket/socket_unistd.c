@@ -33,6 +33,25 @@
 /****************************************************/
 
 BOOL 
+sock_close(WIN_VNODE *Node)
+{
+	BOOL bResult = FALSE;
+
+	if (Node->Handle == INVALID_HANDLE_VALUE){	/* socket not bound (init.exe) */
+		bResult = TRUE;
+	}else if (!CloseHandle(Node->Handle)){
+		WIN_ERR("sock_close(%d): %s\n", Node->Handle, win_strerror(GetLastError()));
+	}else if (!SetEvent(Node->Event)){
+		WIN_ERR("SetEvent(%d): %s\n", Node->Event, win_strerror(GetLastError()));
+//	}else if (!CloseHandle(Node->Event)){
+//		WIN_ERR("sock_close(%d): %s\n", Node->Event, win_strerror(GetLastError()));
+	}else{
+		bResult = TRUE;
+	}
+	ZeroMemory(Node, sizeof(WIN_VNODE));
+	return(bResult);
+}
+BOOL 
 sock_read(WIN_VNODE *Node, LPSTR Buffer, DWORD Size, DWORD *Result)
 {
 	BOOL bResult = FALSE;

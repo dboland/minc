@@ -1,7 +1,3 @@
-#include <machine/asm.h>
-#include <sys/syscall.h>
+#include "SYS.h"
 
-ENTRY(__thrsleep)
-	push $SYS___thrsleep
-	jmp _syscall
-	nop
+SYSENTRY(__thrsleep)

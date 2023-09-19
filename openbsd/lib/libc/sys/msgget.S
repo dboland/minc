@@ -1,7 +1,3 @@
-#include <machine/asm.h>
-#include <sys/syscall.h>
+#include "SYS.h"
 
-ENTRY(msgget)
-	push $SYS_msgget
-	jmp _syscall
-	nop
+SYSENTRY(msgget)

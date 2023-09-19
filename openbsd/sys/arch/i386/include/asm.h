@@ -38,8 +38,6 @@
 #ifndef _MACHINE_ASM_H_
 #define _MACHINE_ASM_H_
 
-#define errno		__errno	// for sbrk.S
-
 #ifdef __PIC__
 #define PIC_PROLOGUE	\
 	pushl	%ebx;	\
@@ -60,11 +58,7 @@
 #define PIC_GOTOFF(x)	x
 #endif
 
-#ifdef _NOUNDERSCORE
-#define _C_LABEL(name)	name
-#else
 #define _C_LABEL(name)	__CONCAT(_,name)
-#endif
 #define	_ASM_LABEL(x)	x
 
 #define CVAROFF(x, y)	_C_LABEL(x) + y
@@ -85,7 +79,8 @@
 	.global alias; \
 	alias = sym
 #define WEAK_ALIAS(alias,sym) \
-	STRONG_ALIAS(alias,sym)
+	.weak alias; \
+	alias = sym
 
 /*
  * WARN_REFERENCES: create a warning if the specified symbol is referenced

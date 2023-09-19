@@ -1,7 +1,3 @@
-#include <machine/asm.h>
-#include <sys/syscall.h>
+#include "SYS.h"
 
-ENTRY(mlockall)
-	push $SYS_mlockall
-	jmp _syscall
-	nop
+SYSENTRY(mlockall)

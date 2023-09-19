@@ -1,7 +1,3 @@
-#include <machine/asm.h>
-#include <sys/syscall.h>
+#include "SYS.h"
 
-ENTRY(shutdown)
-	push $SYS_shutdown
-	jmp _syscall
-	nop
+SYSENTRY(shutdown)

@@ -1,7 +1,3 @@
-#include <machine/asm.h>
-#include <sys/syscall.h>
+#include "SYS.h"
 
-ENTRY(madvise)
-	push $SYS_madvise
-	jmp _syscall
-	nop
+SYSENTRY(madvise)

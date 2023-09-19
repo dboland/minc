@@ -23,14 +23,15 @@ OBJECTS= __get_tcb.o __getcwd.o __semctl.o __set_tcb.o __syscall.o \
 	settimeofday.o setuid.o shmat.o shmctl.o shmdt.o shmget.o \
 	sigaction.o sigaltstack.o sigpending.o sigprocmask.o sigreturn.o \
 	sigsuspend.o stat.o statfs.o swapctl.o symlink.o \
-	symlinkat.o sync.o sysarch.o syscall.sh syscall.template truncate.o \
+	symlinkat.o sync.o sysarch.o truncate.o \
 	umask.o unlink.o unlinkat.o unmount.o utimensat.o utimes.o \
-	utrace.o vfork.o wait4.o write.o writev.o _exit.o _getlogin.o _setlogin.o
+	utrace.o vfork.o wait4.o write.o writev.o
 
 OBJECTS+= semctl.c.o
 
-#OBJECTS+= exit.o getlogin.o setlogin.o syscall.o
-SOCKET+= socket.o connect.o accept.o recvfrom.o sendto.o sendmsg.o recvmsg.o \
+LIBGEN+= exit.o getlogin.o setlogin.o
+
+OBJECTS+= socket.o connect.o accept.o recvfrom.o sendto.o sendmsg.o recvmsg.o \
 	socketpair.o shutdown.o getsockopt.o setsockopt.o bind.o listen.o \
 	getpeername.o getsockname.o
 
@@ -40,10 +41,10 @@ SOCKET+= socket.o connect.o accept.o recvfrom.o sendto.o sendmsg.o recvmsg.o \
 all: source ${OBJECTS}
 
 %.o: %.S
-	gcc -c ${CFLAGS} -o $@ $<
+	gcc -c ${CFLAGS} -I../arch/${ARCH} -o $@ $<
 
 %.c.o: ${SRCDIR}/sys/%.c
-	gcc -c ${CFLAGS} -o $@ $<
+	gcc -c ${CFLAGS} -I../arch/${ARCH} -o $@ $<
 
 source:
 	@syscall.sh

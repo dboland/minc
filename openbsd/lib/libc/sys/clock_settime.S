@@ -1,7 +1,3 @@
-#include <machine/asm.h>
-#include <sys/syscall.h>
+#include "SYS.h"
 
-ENTRY(clock_settime)
-	push $SYS_clock_settime
-	jmp _syscall
-	nop
+SYSENTRY(clock_settime)

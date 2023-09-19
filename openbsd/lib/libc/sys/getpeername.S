@@ -1,7 +1,3 @@
-#include <machine/asm.h>
-#include <sys/syscall.h>
+#include "SYS.h"
 
-ENTRY(getpeername)
-	push $SYS_getpeername
-	jmp _syscall
-	nop
+SYSENTRY(getpeername)

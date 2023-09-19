@@ -34,7 +34,7 @@
 #include "win/windows.h"
 #include "win_types.h"
 #include "msvc_posix.h"
-#include "minc_posix.h"
+#include "arch_posix.h"
 
 #include <libgen.h>
 #include <nlist.h>

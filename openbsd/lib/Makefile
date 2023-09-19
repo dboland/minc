@@ -7,6 +7,9 @@ all:
 	@${MAKE} -C libc
 	@${MAKE} -C libsocket
 
+includes-local:
+	@/bin/cp -rvu include/* ${INCDIR}/
+
 install-local:
 	@${MAKE} -C libc install-local
 	@${MAKE} -C libsocket install-local
