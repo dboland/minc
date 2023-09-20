@@ -109,3 +109,4 @@ WIN_TLSENTRY			__Offsets[WIN_GOT_MAX];	/* global offset table */
 #include "win_signal.c"
 #include "win_time.c"
 #include "win_sysctl.c"
+#include "win_dlfcn.c"

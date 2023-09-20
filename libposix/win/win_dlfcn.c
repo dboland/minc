@@ -33,29 +33,29 @@
 /**************************************************************/
 
 HMODULE 
-vfs_dlopen(WIN_NAMEIDATA *Path)
+win_dlopen(LPCWSTR FileName)
 {
 	HINSTANCE hResult = NULL;
 
-	if (!Path){
+	if (!FileName){
 		hResult = GetModuleHandle(NULL);
-	}else if (!(hResult = LoadLibraryW(Path->Resolved))){
-		WIN_ERR("LoadLibrary(%ls): %s\n", Path->Resolved, win_strerror(GetLastError()));
+	}else if (!(hResult = LoadLibraryW(FileName))){
+		WIN_ERR("LoadLibrary(%ls): %s\n", FileName, win_strerror(GetLastError()));
 	}
 	return(hResult);
 }
 FARPROC 
-vfs_dlsym(HMODULE Module, LPCSTR ProcName)
+win_dlsym(HMODULE Module, LPCSTR ProcName)
 {
 	return(GetProcAddress(Module, ProcName));
 }
 BOOL 
-vfs_dlclose(HMODULE Module)
+win_dlclose(HMODULE Module)
 {
 	return(FreeLibrary(Module));
 }
 BOOL 
-vfs_dladdr(LPCVOID Address, MEMORY_BASIC_INFORMATION *Info, LPWSTR FileName)
+win_dladdr(LPCVOID Address, MEMORY_BASIC_INFORMATION *Info, LPWSTR FileName)
 {
 	BOOL bResult = FALSE;
 

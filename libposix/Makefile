@@ -5,7 +5,7 @@ BINDIR=/bin
 
 LIBPOSIX=libposix-${RELEASE}.dll
 IMPLIB=libposix.dll.a
-CFLAGS+=-g -Wimplicit-function-declaration -I../include -ffreestanding
+CFLAGS+=-g -Wimplicit-function-declaration -Werror -I../include -ffreestanding
 CFLAGS+=-DRELEASE=\"${RELEASE}\" -DVERSION=\"${VERSION}\" -DBUILD=${BUILD}
 #CFLAGS+=-Wunused
 LDFLAGS=-s

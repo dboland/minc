@@ -56,3 +56,10 @@ int sys_fork(call_t call);
 int sys_vfork(call_t call);
 __dead void __threxit(pid_t *pid);
 
+/* namei.c */
+
+WIN_NAMEIDATA *path_win(WIN_NAMEIDATA *Path, const char *pathname, int flags);
+
+/* errno */
+
+void __errno_posix(WIN_TASK *Task, DWORD Error);

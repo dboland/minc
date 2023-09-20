@@ -99,9 +99,9 @@ vfs_F_SETFL(WIN_VNODE *Node, WIN_FLAGS *Flags)
 	BOOL bResult = FALSE;
 
 	switch (Node->FSType){
-//		case FS_TYPE_PIPE:	/* perl.exe */
-//			bResult = pipe_F_SETFL(Node, Flags);
-//			break;
+		case FS_TYPE_PIPE:	/* building perl.exe */
+			bResult = pipe_F_SETFL(Node, Flags);
+			break;
 		case FS_TYPE_WINSOCK:	/* git.exe (pull) */
 			bResult = ws2_F_SETFL(Node, Flags);
 			break;

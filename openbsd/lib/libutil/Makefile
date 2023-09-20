@@ -2,12 +2,9 @@ include ../../../Makefile.inc
 
 RELEASE=12.1
 
-BINDIR=${PREFIX}/bin
-
 CFLAGS=-fno-omit-frame-pointer -Wimplicit-function-declaration
 LIBUTIL=libutil.so.${RELEASE}
 IMPLIB=libutil.dll.a
-SRCDIR=D:/openbsd-master/lib
 
 LIBROOT=../../..
 GCCLIB=${LIBROOT}/mingw/gcc
@@ -33,7 +30,7 @@ HEADERS=util.h imsg.h
 
 all: libutil.a
 
-%.o: ${SRCDIR}/libutil/%.c
+%.o: ${SRCDIR}/lib/libutil/%.c
 	gcc -c ${CFLAGS} -I../../include -o $@ $<
 
 pidfile.o: pidfile.c
@@ -43,14 +40,14 @@ libutil.a: ${OBJECTS}
 	ar cru $@ ${OBJECTS}
 
 ${LIBUTIL}: ${OBJECTS}
-	${LD} -shared -o $@ --out-implib=${IMPLIB} --disable-auto-import \
-	/lib/dllcrt2.o ${OBJECTS} \
+	${LD} -shared -o $@ -e _DllMainCRTStartup@12 --out-implib=${IMPLIB} --disable-auto-import \
+	${GCCLIB}/crt1.o ${OBJECTS} \
 	-L/lib -L${GCCLIB} -lmsvcrt -lmingw32 -lmingwex -lsocket -lgcc
 
 clean:
 	/bin/rm -f *.o *.a ${LIBUTIL}
 
-%.h: ${SRCDIR}/libutil/%.h
+%.h: ${SRCDIR}/lib/libutil/%.h
 	@cp -vu $< ${DESTDIR}${INCDIR}/$@
 
 install: ${DESTDIR} ${HEADERS}

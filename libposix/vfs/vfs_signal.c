@@ -63,7 +63,7 @@ SigExceptionProc(PEXCEPTION_POINTERS ExceptionInfo)
 		default:
 			msvc_printf("ExceptionProc(0x%x) %s: Not implemented.\n", dwExceptionCode, nt_strerror(GetLastError()));
 	}
-	if (vfs_dladdr(peRecord->ExceptionAddress, &mbInfo, szModule)){
+	if (win_dladdr(peRecord->ExceptionAddress, &mbInfo, szModule)){
 		WIN_ERR("Exception(0x%X) in %ls at 0x%x\n", dwExceptionCode, szModule, pContext->Eip);
 	}
 	if (__SignalProc(dwCtrlType, pContext)){

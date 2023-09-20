@@ -261,7 +261,7 @@ sys_fstat(call_t call, int fd, struct stat *buf)
 	}
 	return(result);
 }
-int 
+/* int 
 sys_lstat(call_t call, const char *path, struct stat *buf)
 {
 	WIN_VATTR wStat = {0};
@@ -276,7 +276,7 @@ sys_lstat(call_t call, const char *path, struct stat *buf)
 		result = 0;
 	}
 	return(result);
-}
+} */
 int 
 __fstatat(WIN_TASK *Task, int dirfd, const char *path, struct stat *buf, int flags)
 {
@@ -284,13 +284,22 @@ __fstatat(WIN_TASK *Task, int dirfd, const char *path, struct stat *buf, int fla
 	WIN_VATTR wStat = {0};
 	int result = -1;
 
-	if (!vfs_stat(pathat_win(&wPath, dirfd, path, flags), &wStat)){
+	if (!path){
+		__errno_posix(Task, ERROR_INVALID_ADDRESS);
+	}else if (!*path){
+		__errno_posix(Task, ERROR_INVALID_NAME);
+	}else if (!vfs_stat(pathat_win(&wPath, dirfd, path, flags), &wStat)){
 		__errno_posix(Task, GetLastError());
 	}else{
 		stat_posix(Task, buf, &wStat);
 		result = 0;
 	}
 	return(result);
+}
+int 
+sys_lstat(call_t call, const char *path, struct stat *buf)
+{
+	return(__fstatat(call.Task, AT_FDCWD, path, buf, AT_SYMLINK_NOFOLLOW));
 }
 int 
 sys_fstatat(call_t call, int dirfd, const char *path, struct stat *buf, int flags)
@@ -306,13 +315,17 @@ sys_stat(call_t call, const char *path, struct stat *buf)
 /****************************************************/
 
 int 
-__fchmodat(WIN_TASK *Task, int dirfd, const char *pathname, mode_t mode, int flags)
+__fchmodat(WIN_TASK *Task, int fd, const char *path, mode_t mode, int flag)
 {
 	WIN_MODE wMode;
 	int result = -1;
 	WIN_NAMEIDATA wPath;
 
-	if (!vfs_chmod(pathat_win(&wPath, dirfd, pathname, flags), mode_win(&wMode, mode))){
+	if (!path){
+		__errno_posix(Task, ERROR_INVALID_ADDRESS);
+	}else if (!*path){
+		__errno_posix(Task, ERROR_INVALID_NAME);
+	}else if (!vfs_chmod(pathat_win(&wPath, fd, path, flag), mode_win(&wMode, mode))){
 		__errno_posix(Task, GetLastError());
 	}else{
 		result = 0;
@@ -320,14 +333,14 @@ __fchmodat(WIN_TASK *Task, int dirfd, const char *pathname, mode_t mode, int fla
 	return(result);
 }
 int 
-sys_fchmodat(call_t call, int dirfd, const char *pathname, mode_t mode, int flags)
+sys_fchmodat(call_t call, int fd, const char *path, mode_t mode, int flag)
 {
-	return(__fchmodat(call.Task, dirfd, pathname, mode, flags));
+	return(__fchmodat(call.Task, fd, path, mode, flag));
 }
 int 
-sys_chmod(call_t call, const char *pathname, mode_t mode)
+sys_chmod(call_t call, const char *path, mode_t mode)
 {
-	return(__fchmodat(call.Task, AT_FDCWD, pathname, mode, 0));
+	return(__fchmodat(call.Task, AT_FDCWD, path, mode, 0));
 }
 int 
 sys_fchmod(call_t call, int fd, mode_t mode)
@@ -385,13 +398,13 @@ sys_umask(call_t call, mode_t mask)
 /****************************************************/
 
 int 
-__mknodat(WIN_TASK *Task, int dirfd, const char *pathname, mode_t mode, dev_t dev)
+__mknodat(WIN_TASK *Task, int fd, const char *path, mode_t mode, dev_t dev)
 {
 	int result = -1;
 	WIN_NAMEIDATA wPath;
 	WIN_MODE wMode;
 
-	if (!vfs_mknod(pathat_win(&wPath, dirfd, pathname, AT_SYMLINK_NOFOLLOW), mode_win(&wMode, mode), dev)){
+	if (!vfs_mknod(pathat_win(&wPath, fd, path, AT_SYMLINK_NOFOLLOW), mode_win(&wMode, mode), dev)){
 		__errno_posix(Task, GetLastError());
 	}else{
 		result = 0;
@@ -399,14 +412,14 @@ __mknodat(WIN_TASK *Task, int dirfd, const char *pathname, mode_t mode, dev_t de
 	return(result);
 }
 int 
-sys_mknodat(call_t call, int dirfd, const char *pathname, mode_t mode, dev_t dev)
+sys_mknodat(call_t call, int fd, const char *path, mode_t mode, dev_t dev)
 {
-	return(__mknodat(call.Task, dirfd, pathname, mode, dev));
+	return(__mknodat(call.Task, fd, path, mode, dev));
 }
 int 
-sys_mknod(call_t call, const char *pathname, mode_t mode, dev_t dev)
+sys_mknod(call_t call, const char *path, mode_t mode, dev_t dev)
 {
-	return(__mknodat(call.Task, AT_FDCWD, pathname, mode, dev));
+	return(__mknodat(call.Task, AT_FDCWD, path, mode, dev));
 }
 int 
 __mkdirat(WIN_TASK *Task, int dirfd, const char *pathname, mode_t mode)

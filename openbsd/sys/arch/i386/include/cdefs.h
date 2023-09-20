@@ -22,19 +22,15 @@
 #undef WIN32		// cc.exe
 #undef WINNT
 #undef _WIN32		// cc.exe
-//#undef _MSC_VER		// GNU libintl.h
 
 #define __thread	__thread __attribute__((section(".tls")))
 #define __import	__attribute__((dllimport))
 
 #define __MinC__
 #define __OpenBSD__
-//#define __THROW						// GLIBC mntent.h
-//#define uint_t		u_int				// GLIBC mnttab.h
 #define restrict	__restrict
 #define environ		__environ
 #define alloca		__builtin_alloca
-//#define sys_siglist	_sys_siglist
 
 /* pthread_win32 */
 #define PTW32_CDECL
@@ -49,6 +45,7 @@
 #define LIBC_IMPORT		
 #define GETOPT_IMPORT	
 #define LIBSOCK_IMPORT	
+#define DLL_IMPORT	
 #endif
 
 #ifndef LIBPOSIX_IMPORT
@@ -63,8 +60,11 @@
 #ifndef LIBSOCK_IMPORT
 #define LIBSOCK_IMPORT	__import
 #endif
+#ifndef DLL_IMPORT
+#define DLL_IMPORT	__import
+#endif
 
-/* weak aliases are kind of broken in MinGW32 ld:
+/* weak aliases are kind of broken in MinGW32 ld.exe:
  * http://mingw.5.n7.nabble.com/weak-functions-td6379.html
  * https://sourceware.org/bugzilla/show_bug.cgi?id=9687
  * https://sourceware.org/bugzilla/show_bug.cgi?id=2729

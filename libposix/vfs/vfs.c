@@ -88,7 +88,6 @@ BOOL dev_activate(WIN_DEVICE *Device, WIN_VNODE *Result);
 
 #include "vfs_acl.c"
 #include "vfs_debug.c"
-#include "vfs_dlfcn.c"
 #include "vfs_signal.c"
 #include "vfs_statvfs.c"
 #include "vfs_libgen.c"

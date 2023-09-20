@@ -7,9 +7,9 @@ OBJECTS=base64.o freeaddrinfo.o gai_strerror.o \
 	inet_net_ntop.o inet_net_pton.o inet_ntoa.o inet_ntop.o inet_pton.o \
 	res_comp.o res_data.o rcmd.o rcmdsh.o rresvport.o \
 	res_debug_syms.o ruserok.o \
-	res_random.o ethers.o recv.o vars6.o
+	res_random.o ethers.o vars6.o
 OBJECTS+=getservent.c.o linkaddr.c.o if_indextoname.c.o if_nametoindex.c.o
-LIBC= send.o
+LIBC= send.o recv.o
 
 SHOBJECTS=base64.so freeaddrinfo.so gai_strerror.so \
 	getnetbyaddr.so getnetbyname.so getnetent.so \
@@ -20,9 +20,9 @@ SHOBJECTS=base64.so freeaddrinfo.so gai_strerror.so \
 	inet_net_ntop.so inet_net_pton.so inet_ntoa.so inet_ntop.so inet_pton.so \
 	res_comp.so res_data.so rcmd.so rcmdsh.so rresvport.so \
 	res_debug_syms.so ruserok.so \
-	res_random.so ethers.so recv.so vars6.so
+	res_random.so ethers.so vars6.so
 SHOBJECTS+=getservent.c.so linkaddr.c.so if_indextoname.c.so if_nametoindex.c.so
-LIBC= send.so
+LIBC= send.so recv.so
 
 all: ${OBJECTS} ${SHOBJECTS}
 

@@ -158,6 +158,13 @@ BOOL win_cap_set_mode(SID8 *User, ACCESS_MASK Access, ACL *Result);
 BOOL win_cap_setuid(WIN_PWENT *Passwd, HANDLE *Result);
 BOOL win_cap_setgroups(SID8 *Primary, SID8 Groups[], DWORD Count, HANDLE *Result);
 
+/* win_dlfcn.c */
+
+HMODULE win_dlopen(LPCWSTR FileName);
+BOOL win_dlclose(HMODULE Module);
+FARPROC win_dlsym(HMODULE Module, LPCSTR ProcName);
+BOOL win_dladdr(LPCVOID Address, MEMORY_BASIC_INFORMATION *Info, LPWSTR FileName);
+
 /* win_resource.c */
 
 BOOL win_getrlimit_DATA(WIN_RLIMIT *Limit);

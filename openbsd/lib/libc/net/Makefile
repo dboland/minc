@@ -1,5 +1,4 @@
-OBJECTS= send.o
-#OBJECTS+= recv.o	# presently in libsocket
+OBJECTS= send.o recv.o
 
 .SUFFIXES:
 .DEFAULT:

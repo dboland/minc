@@ -104,13 +104,6 @@ BOOL vfs_F_SETLK(WIN_VNODE *Node, DWORD Flags);
 BOOL vfs_F_GETPATH(WIN_VNODE *Node, WIN_NAMEIDATA *Path);
 BOOL vfs_F_DUPFD(WIN_VNODE *Node, BOOL CloseExec, WIN_VNODE *Result);
 
-/* vfs_dlfcn.c */
-
-HMODULE vfs_dlopen(WIN_NAMEIDATA *Path);
-BOOL vfs_dlclose(HMODULE Module);
-FARPROC vfs_dlsym(HMODULE Module, LPCSTR ProcName);
-BOOL vfs_dladdr(LPCVOID Address, MEMORY_BASIC_INFORMATION *Info, LPWSTR FileName);
-
 /* vfs_time.c */
 
 BOOL vfs_setitimer(WIN_TASK *Task, LONG *Interval, DWORDLONG *TimeOut);

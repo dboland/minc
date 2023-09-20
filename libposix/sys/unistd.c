@@ -289,16 +289,20 @@ sys_link(call_t call, const char *oldpath, const char *newpath)
 	return(sys_linkat(call, AT_FDCWD, oldpath, AT_FDCWD, newpath, AT_SYMLINK_NOFOLLOW));
 }
 int 
-__unlinkat(WIN_TASK *Task, int dirfd, const char *pathname, int flags)
+__unlinkat(WIN_TASK *Task, int fd, const char *path, int flag)
 {
 	WIN_NAMEIDATA wPath;
 	int result = -1;
-	BOOL bResult;
+	BOOL bResult = FALSE;
 
-	if (flags & AT_REMOVEDIR){
-		bResult = vfs_rmdir(pathat_win(&wPath, dirfd, pathname, AT_SYMLINK_NOFOLLOW));
+	if (!path){
+		SetLastError(ERROR_INVALID_ADDRESS);
+	}else if (!*path){
+		SetLastError(ERROR_INVALID_NAME);
+	}else if (flag & AT_REMOVEDIR){
+		bResult = vfs_rmdir(pathat_win(&wPath, fd, path, AT_SYMLINK_NOFOLLOW));
 	}else{
-		bResult = vfs_unlink(pathat_win(&wPath, dirfd, pathname, AT_SYMLINK_NOFOLLOW));
+		bResult = vfs_unlink(pathat_win(&wPath, fd, path, AT_SYMLINK_NOFOLLOW));
 	}
 	if (!bResult){
 		__errno_posix(Task, GetLastError());
@@ -308,14 +312,14 @@ __unlinkat(WIN_TASK *Task, int dirfd, const char *pathname, int flags)
 	return(result);
 }
 int 
-sys_unlinkat(call_t call, int dirfd, const char *pathname, int flags)
+sys_unlinkat(call_t call, int fd, const char *path, int flag)
 {
-	return(__unlinkat(call.Task, dirfd, pathname, flags));
+	return(__unlinkat(call.Task, fd, path, flag));
 }
 int 
-sys_unlink(call_t call, const char *pathname)
+sys_unlink(call_t call, const char *path)
 {
-	return(__unlinkat(call.Task, AT_FDCWD, pathname, AT_SYMLINK_NOFOLLOW));
+	return(__unlinkat(call.Task, AT_FDCWD, path, 0));
 }
 void 
 sys_sync(call_t call)

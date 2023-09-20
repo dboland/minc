@@ -131,12 +131,6 @@ pathat_win(WIN_NAMEIDATA *Result, int dirfd, const char *path, int atflags)
 		vfs_F_GETPATH(&pwTask->Node[dirfd], Result);
 		*Result->R++ = '\\';		/* GNU rm.exe */
 
-	/* GNU rm.exe tries to delete nameless files
-	 * during package building.
-	 */
-//	}else if (!path || !path[0]){		/* GNU conftest.exe */
-//		Result->FSType = FS_TYPE_UNKNOWN;
-
 	}else if (*path == '/'){
 		win_memcpy(Result, __Mounts, sizeof(WIN_INODE));
 		path = root_win(Result, path + 1, __Mounts->Path);

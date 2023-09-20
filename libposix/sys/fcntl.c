@@ -214,32 +214,6 @@ fcntl_F_SETOWN(WIN_TASK *Task, WIN_VNODE *Node, int owner)
 /****************************************************/
 
 int 
-__openat_OLD(WIN_TASK *Task, int dirfd, const char *pathname, int flags, va_list args)
-{
-	int result = -1;
-	WIN_FLAGS wFlags;
-	WIN_MODE wMode;
-	WIN_NAMEIDATA wPath;
-	mode_t mode = va_arg(args, mode_t);
-	WIN_VNODE vNode = {0};
-	CHAR szMessage[MAX_MESSAGE];
-
-	if (flags & O_NOFOLLOW){	/* GNU conftest.exe (checking for working fcntl.h) */
-		pathat_win(&wPath, dirfd, pathname, AT_SYMLINK_NOFOLLOW);
-	}else{
-		pathat_win(&wPath, dirfd, pathname, AT_SYMLINK_FOLLOW);
-	}
-	mode &= ~Task->FileMask;
-	if ((flags & O_NOFOLLOW) && (wPath.FileType == WIN_VLNK)){
-		__errno_posix(Task, ERROR_TOO_MANY_LINKS);
-	}else if (!vfs_open(&wPath, flags_win(&wFlags, flags), mode_win(&wMode, mode), &vNode)){
-		__errno_posix(Task, GetLastError());
-	}else{
-		result = fd_posix(Task, &vNode, 0);
-	}
-	return(result);
-}
-int 
 __openat(WIN_TASK *Task, WIN_NAMEIDATA *Path, int flags, va_list args)
 {
 	int result = -1;
@@ -259,20 +233,19 @@ __openat(WIN_TASK *Task, WIN_NAMEIDATA *Path, int flags, va_list args)
 	}
 	return(result);
 }int 
-sys_open(call_t call, const char *pathname, int flags, ...)
+sys_open(call_t call, const char *path, int flags, ...)
 {
 	int result;
 	va_list args;
 	WIN_NAMEIDATA wPath;
 
 	va_start(args, flags);
-//	result = __openat(call.Task, AT_FDCWD, pathname, flags, args);
-	result = __openat(call.Task, path_win(&wPath, pathname, flags), flags, args);
+	result = __openat(call.Task, path_win(&wPath, path, flags), flags, args);
 	va_end(args);
 	return(result);
 }
 int 
-sys_openat(call_t call, int dirfd, const char *pathname, int flags, ...)
+sys_openat(call_t call, int dirfd, const char *path, int flags, ...)
 {
 	int result;
 	va_list args;
@@ -286,8 +259,7 @@ sys_openat(call_t call, int dirfd, const char *pathname, int flags, ...)
 		atflags |= AT_REMOVEDIR;
 	}
 	va_start(args, flags);
-//	result = __openat(call.Task, dirfd, pathname, flags, args);
-	result = __openat(call.Task, pathat_win(&wPath, dirfd, pathname, atflags), flags, args);
+	result = __openat(call.Task, pathat_win(&wPath, dirfd, path, atflags), flags, args);
 	va_end(args);
 	return(result);
 }
