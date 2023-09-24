@@ -94,6 +94,7 @@ VfsFileAttribs(DWORD Attribs, LPCWSTR Label)
 		win_flagname(FILE_ATTRIBUTE_READONLY, "READONLY", Attribs, &Attribs);
 		win_flagname(FILE_ATTRIBUTE_HIDDEN, "HIDDEN", Attribs, &Attribs);
 		win_flagname(FILE_ATTRIBUTE_SYSTEM, "SYSTEM", Attribs, &Attribs);
+		win_flagname(FILE_ATTRIBUTE_SYMLINK, "SYMLINK", Attribs, &Attribs);
 		win_flagname(FILE_ATTRIBUTE_DIRECTORY, "DIRECTORY", Attribs, &Attribs);
 		win_flagname(FILE_ATTRIBUTE_ARCHIVE, "ARCHIVE", Attribs, &Attribs);
 		win_flagname(FILE_ATTRIBUTE_DEVICE, "DEVICE", Attribs, &Attribs);
@@ -432,4 +433,10 @@ VfsDebugTime(SYSTEMTIME *Time, LPCSTR Label)
 {
 	msvc_printf("%s: wYear(%d) wMonth(%d) wDayOfWeek(%d) wDay(%d) wHour(%d) wMinute(%d) wSecond(%d) wMilliseconds(%d)\n",
 		Label, Time->wYear, Time->wMonth, Time->wDayOfWeek, Time->wDay, Time->wHour, Time->wMinute, Time->wSecond, Time->wMilliseconds);
+}
+VOID 
+VfsDebugConfig(WIN_CFDATA *Config, LPCSTR Label)
+{
+	msvc_printf("%s(%ls): Bus(%ls) FSType(%s), DosPath(%ls) Depth(%d) Class(%ls) NtPath(%ls)\n", 
+		Label, Config->NtName, Config->BusName, FSType(Config->FSType), Config->DosPath, Config->Depth, Config->ClassName, Config->NtPath);
 }

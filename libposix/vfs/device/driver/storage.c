@@ -39,7 +39,7 @@ storage_found(WIN_DEVICE *Device)
 		case DEV_TYPE_VOLUME:
 			bResult = config_found("vol", FS_TYPE_DRIVE, WIN_VBLK, Device);
 			break;
-		case DEV_TYPE_HARDDISK:
+		case DEV_TYPE_USBMASS:
 			bResult = config_found("umass", FS_TYPE_DEVICE, WIN_VBLK, Device);
 			break;
 		case DEV_TYPE_CDROM:

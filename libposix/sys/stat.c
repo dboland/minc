@@ -261,22 +261,6 @@ sys_fstat(call_t call, int fd, struct stat *buf)
 	}
 	return(result);
 }
-/* int 
-sys_lstat(call_t call, const char *path, struct stat *buf)
-{
-	WIN_VATTR wStat = {0};
-	WIN_NAMEIDATA wPath;
-	int result = -1;
-	WIN_TASK *pwTask = call.Task;
-
-	if (!vfs_stat(path_win(&wPath, path, O_NOFOLLOW), &wStat)){
-		__errno_posix(pwTask, GetLastError());
-	}else{
-		stat_posix(pwTask, buf, &wStat);
-		result = 0;
-	}
-	return(result);
-} */
 int 
 __fstatat(WIN_TASK *Task, int dirfd, const char *path, struct stat *buf, int flags)
 {
@@ -302,9 +286,9 @@ sys_lstat(call_t call, const char *path, struct stat *buf)
 	return(__fstatat(call.Task, AT_FDCWD, path, buf, AT_SYMLINK_NOFOLLOW));
 }
 int 
-sys_fstatat(call_t call, int dirfd, const char *path, struct stat *buf, int flags)
+sys_fstatat(call_t call, int dirfd, const char *path, struct stat *buf, int flag)
 {
-	return(__fstatat(call.Task, dirfd, path, buf, flags));
+	return(__fstatat(call.Task, dirfd, path, buf, flag));
 }
 int 
 sys_stat(call_t call, const char *path, struct stat *buf)

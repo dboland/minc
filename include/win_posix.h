@@ -192,3 +192,8 @@ BOOL win_writev(HANDLE Handle, const WIN_IOVEC Data[], DWORD Count, ULONG *Resul
 /* win_time.c */
 
 BOOL win_settimeofday(DWORDLONG Time, WORD MilliSeconds);
+
+/* win_mount.c */
+
+BOOL win_mount(LPCWSTR Directory, LPCWSTR Volume);
+BOOL win_unmount(LPCWSTR Directory);

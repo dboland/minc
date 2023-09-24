@@ -48,6 +48,9 @@ system_found(WIN_DEVICE *Device)
 		case DEV_TYPE_ACPI:
 			bResult = config_found("acpi", FS_TYPE_DEVICE, WIN_VCHR, Device);
 			break;
+		case DEV_TYPE_ROOT:
+			bResult = config_found("root", FS_TYPE_DEVICE, WIN_VBLK, Device);
+			break;
 		default:
 			bResult = FALSE;
 	}

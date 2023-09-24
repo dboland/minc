@@ -86,6 +86,7 @@ drive_statvfs(WIN_CFDATA *Config, DWORD Flags, WIN_MOUNT *Result)
 {
 	BOOL bResult = TRUE;
 
+//VfsDebugConfig(Config, "drive_statvfs");
 	ZeroMemory(Result, sizeof(WIN_MOUNT));
 	win_wcscpy(Result->NtName, Config->NtName);
 	win_wcscpy(Result->Drive, Config->DosPath);

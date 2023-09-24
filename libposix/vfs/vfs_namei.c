@@ -112,7 +112,7 @@ PathGlob(WIN_NAMEIDATA *Path, DWORD Flags)
 	}else if (Flags & WIN_FOLLOW){
 		bResult = PathGlobLink(Path, 0);
 	}else{
-		Path->Attribs |= FILE_ATTRIBUTE_REPARSE_POINT;
+		Path->Attribs |= FILE_ATTRIBUTE_SYMLINK;
 	}
 //VfsDebugPath(Path, "PathGlob");
 	return(bResult);
@@ -130,10 +130,10 @@ PathClose(WIN_NAMEIDATA *Path, DWORD Flags)
 	DWORD dwFileType = WIN_VREG;
 
 	if (PathGlob(Path, Flags)){
-		if (Path->Attribs & FILE_ATTRIBUTE_REPARSE_POINT){
-			dwFileType = WIN_VLNK;
-		}else if (Path->Attribs & FILE_ATTRIBUTE_DIRECTORY){
+		if (Path->Attribs & FILE_ATTRIBUTE_DIRECTORY){
 			dwFileType = WIN_VDIR;
+		}else if (Path->Attribs & FILE_ATTRIBUTE_SYMLINK){
+			dwFileType = WIN_VLNK;
 		}
 //		if (Path->Attribs == FILE_ATTRIBUTE_VFS){		/* perl.exe */
 //VfsDebugPath(Path, "PathClose");

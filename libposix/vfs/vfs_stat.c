@@ -66,13 +66,13 @@ vfs_stat(WIN_NAMEIDATA *Path, WIN_VATTR *Result)
 {
 	BOOL bResult = FALSE;
 
+//VfsDebugPath(Path, "vfs_stat");
 	switch (Path->FSType){
 		case FS_TYPE_DISK:
 			bResult = disk_stat(Path, Result);
 			break;
 		case FS_TYPE_DEVICE:
 			bResult = dev_stat(Path, Result);
-//VfsDebugPath(Path, "vfs_stat");
 			break;
 		default:
 			SetLastError(ERROR_BAD_FILE_TYPE);

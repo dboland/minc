@@ -91,6 +91,7 @@ vfs_ktrace_ATTRIBS(LPSTR Buffer, DWORD Attribs)
 		psz = flagname_win(psz, FILE_ATTRIBUTE_READONLY, "READONLY", Attribs);
 		psz = flagname_win(psz, FILE_ATTRIBUTE_HIDDEN, "HIDDEN", Attribs);
 		psz = flagname_win(psz, FILE_ATTRIBUTE_SYSTEM, "SYSTEM", Attribs);
+		psz = flagname_win(psz, FILE_ATTRIBUTE_SYMLINK, "SYMLINK", Attribs);
 		psz = flagname_win(psz, FILE_ATTRIBUTE_DIRECTORY, "DIRECTORY", Attribs);
 		psz = flagname_win(psz, FILE_ATTRIBUTE_ARCHIVE, "ARCHIVE", Attribs);
 		psz = flagname_win(psz, FILE_ATTRIBUTE_DEVICE, "DEVICE", Attribs);

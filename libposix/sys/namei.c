@@ -101,12 +101,14 @@ pathp_posix(char *dest, LPCWSTR Source)
 /****************************************************/
 
 const char *
-root_win(WIN_NAMEIDATA *Result, const char *path, LPCWSTR Root)
+root_win(WIN_NAMEIDATA *Result, const char *path)
 {
-	if (!win_strncmp(path, "proc/", 5)){
-		path = root_win(Result, path + 5, WIN_PROCESS_ROOT);
+	if (!win_strncmp(path, "/proc/", 6)){
+		Result->R = win_wcpcpy(Result->Resolved, WIN_PROCESS_ROOT);
+		path += 6;
 	}else{
-		Result->R = win_wcpcpy(Result->Resolved, Root);
+		Result->R = win_wcpcpy(Result->Resolved, __Mounts->Path);
+		path++;
 	}
 	return(path);
 }
@@ -133,7 +135,7 @@ pathat_win(WIN_NAMEIDATA *Result, int dirfd, const char *path, int atflags)
 
 	}else if (*path == '/'){
 		win_memcpy(Result, __Mounts, sizeof(WIN_INODE));
-		path = root_win(Result, path + 1, __Mounts->Path);
+		path = root_win(Result, path);
 
 	}else if (path[1] == ':'){		/* MSYS sh.exe */
 		*Result->R++ = *path++;

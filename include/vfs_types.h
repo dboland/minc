@@ -120,8 +120,9 @@ typedef enum _WIN_VTAGTYPE {
 #define DEV_BUS_FDC		DEV_BUS_ISA		/* Floppy Disk controller bus */
 #define DEV_BUS_UART		32			/* Universal Asynchronous Receiver-Transmitter bus */
 #define DEV_BUS_USB		DEV_BUS_UART		/* Universal Serial Bus */
-#define DEV_BUS_SCSI		24			/* Small Computer System Interface bus  */
-#define DEV_BUS_IDE		16			/* Integrated Disk Electronics bus */
+#define DEV_BUS_IDE		24			/* Integrated Disk Electronics bus */
+#define DEV_BUS_HDC		DEV_BUS_IDE		/* Hard Disk Controller bus */
+#define DEV_BUS_SCSI		16			/* Small Computer System Interface bus  */
 
 /* System device types */
 
@@ -131,6 +132,7 @@ typedef enum _WIN_VTAGTYPE {
 #define DEV_TYPE_OHCI		(DEV_CLASS_DULL + DEV_BUS_PCI)	/* USB Open Host Controller Interface */
 #define DEV_TYPE_EHCI		(DEV_CLASS_DULL + DEV_BUS_USB)	/* USB Enhanced Host Controller Interface (USB 2.0) */
 #define DEV_TYPE_IDE		(DEV_CLASS_DULL + DEV_BUS_IDE)	/* Integrated Disk Electronics device */
+//#define DEV_TYPE_ROOT		(DEV_CLASS_DULL + DEV_BUS_HDC)
 
 #define DEV_TYPE_MEM		(DEV_CLASS_CPU + 1)		/* physical memory device */
 #define DEV_TYPE_KMEM		(DEV_CLASS_CPU + 2)		/* kernel memory device (libposix.dll) */
@@ -190,11 +192,11 @@ typedef enum _WIN_VTAGTYPE {
 #define DEV_TYPE_WSMOUSE	(DEV_CLASS_MOUSE + DEV_BUS_PCI)
 
 #define DEV_TYPE_VOLUME		(DEV_CLASS_STORAGE)
-#define DEV_TYPE_ROOT		(DEV_CLASS_STORAGE + DEV_BUS_MAIN)	/* Root mount point */
+#define DEV_TYPE_REMOTE		(DEV_CLASS_STORAGE + DEV_BUS_MAIN)	/* Server Message Block storage */
 #define DEV_TYPE_FLOPPY		(DEV_CLASS_STORAGE + DEV_BUS_FDC)	/* Floppy Disk storage */
-#define DEV_TYPE_HARDDISK	(DEV_CLASS_STORAGE + DEV_BUS_USB)	/* Serial disk storage */
+#define DEV_TYPE_USBMASS	(DEV_CLASS_STORAGE + DEV_BUS_USB)	/* Serial disk storage */
 #define DEV_TYPE_CDROM		(DEV_CLASS_STORAGE + DEV_BUS_SCSI)	/* CDROM storage */
-#define DEV_TYPE_REMOTE		(DEV_CLASS_STORAGE + DEV_BUS_IDE)	/* Server Message Block storage */
+#define DEV_TYPE_ROOT		(DEV_CLASS_STORAGE + DEV_BUS_HDC)	/* Root mount point */
 
 #define DEV_TYPE_HID		(DEV_CLASS_USB)
 #define DEV_TYPE_USBHUB		(DEV_CLASS_USB + DEV_BUS_USB)
@@ -265,6 +267,7 @@ typedef enum _WIN_VTAGTYPE {
 #define TypeNameExe			0x6578652E	/* ".exe" */
 #define TypeNameVirtual			0x7366762E	/* ".vfs" */
 
+#define FILE_ATTRIBUTE_SYMLINK		0x00000008
 #define FILE_ATTRIBUTE_TRAVERSE		(FILE_ATTRIBUTE_HIDDEN | FILE_ATTRIBUTE_SYSTEM)
 #define FILE_ATTRIBUTE_MOUNT		(FILE_ATTRIBUTE_DIRECTORY | FILE_ATTRIBUTE_SYSTEM)
 #define FILE_ATTRIBUTE_VFS		(FILE_ATTRIBUTE_HIDDEN | FILE_ATTRIBUTE_SYSTEM | FILE_ATTRIBUTE_DIRECTORY)

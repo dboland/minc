@@ -67,7 +67,7 @@ drive_match(LPCWSTR NtName, DWORD DeviceType)
 			pwDevice->DeviceType = DeviceType;
 			pwDevice->DeviceId = sClass + sUnit;
 			if (!dev_found(pwDevice)){
-				msvc_printf("Warning: storage device %ls not configured\n", NtName);
+				msvc_printf("Warning: storage device %ls (type 0x%x) not configured\n", NtName, DeviceType);
 			}
 //VfsDebugDevice(pwDevice, "drive_match");
 			break;

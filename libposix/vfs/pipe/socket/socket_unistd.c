@@ -63,7 +63,7 @@ sock_read(WIN_VNODE *Node, LPSTR Buffer, DWORD Size, DWORD *Result)
 			break;
 		}else if (ulResult){
 			bResult = fifo_read(Node, Buffer, Size, Result);
-//			break;
+			break;
 		}else if (!sock_select(Node, INFINITE)){
 			break;
 		}else if (proc_poll()){
