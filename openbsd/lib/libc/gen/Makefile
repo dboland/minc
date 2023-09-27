@@ -32,7 +32,7 @@ OBJECTS+= _exit.S.o _getlogin.S.o _setlogin.S.o
 
 #OBJECTS+= elf_hash.o posix_spawn.o shm_open.o
 
-OBJECTS= syslog_r.c.o syslog.o auth_subr.o login_cap.o authenticate.o
+OBJECTS= syslog_r.o syslog.o auth_subr.o login_cap.o authenticate.o
 
 #REPLACED+= getgrouplist.o errno.o getgrent.o getpwent.o
 
@@ -58,7 +58,4 @@ getloadavg.o: getloadavg.c
 
 disklabel.o: ${SRCDIR}/gen/disklabel.c
 	gcc -c ${CFLAGS} -I${SRCDIR}/../../sys -o $@ $<
-
-clean:
-	rm -f *.o *.dll *.a
 

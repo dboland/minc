@@ -46,6 +46,8 @@ GCCLIB=libgmp-10.dll libmpc-3.dll libmpfr-4.dll zlib1.dll libgcc_s_dw2-1.dll
 GCCBIN+=g++.exe c++.exe gdb.exe
 GCCLIB+=libintl-8.dll libiconv-2.dll libstdc++-6.dll
 
+#cp /c/MinGW/mingw32/lib/gcc/mingw32/4.8.1/libstdc++.dll.a /lib/gcc/mingw32/4.8.1/libstdc++.a
+
 BINUTILS=ld.exe ar.exe as.exe nm.exe objdump.exe ranlib.exe size.exe strip.exe \
 	dlltool.exe gprof.exe addr2line.exe dllwrap.exe elfedit.exe objcopy.exe \
 	strings.exe windmc.exe windres.exe c++filt.exe

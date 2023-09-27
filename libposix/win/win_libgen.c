@@ -137,25 +137,6 @@ win_flagname(DWORD Flag, LPCSTR Name, DWORD Mask, DWORD *Remain)
 	}
 	return(bResult);
 }
-/* LPWSTR 
-win_docname_r(LPCWSTR FileName, LPWSTR Buffer, LONG Size)
-{
-	LPWSTR pszResult = Buffer;
-	LPWSTR pszBase = win_basename(FileName);
-	WCHAR C;
-
-	while (C = *pszBase++){
-		Size--;
-		if (Size < 1){
-			break;
-		}else if (C == '.'){
-			break;
-		}
-		*Buffer++ = C;
-	}
-	*Buffer = 0;
-	return(pszResult);
-} */
 BOOL 
 win_sidname(SID8 *Sid, LPSTR Buffer, DWORD Size)
 {

@@ -7,9 +7,9 @@ OBJECTS = a64l.o atoi.o atof.o atol.o atoll.o bsearch.o \
 	system.o tfind.o tsearch.o _rand48.o drand48.o erand48.o jrand48.o \
 	lcong48.o lrand48.o mrand48.o nrand48.o seed48.o srand48.o qabs.o \
 	qdiv.o _Exit.o exit.o abort.o rand.o realpath.o \
-	div.o hcreate.o
+	div.o hcreate.o getopt_long.o
 
-OBJECTS+= atexit.c.o getopt_long.c.o
+OBJECTS+= atexit.c.o
 
 #OBJECTS+= ecvt.o gcvt.o malloc.o
 

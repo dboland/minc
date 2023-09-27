@@ -3,7 +3,7 @@ include ../../../Makefile.inc
 RELEASE=75.0
 
 ARCH=i386
-CFLAGS+= -g -Wimplicit-function-declaration -fno-omit-frame-pointer -DNOPIE
+CFLAGS+= -g -Wimplicit-function-declaration -fno-omit-frame-pointer -DPIC
 CFLAGS+= -ffreestanding
 #CFLAGS+= -fno-builtin
 LDFLAGS= -shared -s

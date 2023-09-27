@@ -68,7 +68,7 @@ int
 sys_madvise(call_t call, void *addr, size_t length, int advice)
 {
 	/* install.exe (MADV_SEQUENTIAL) */
-//	msvc_printf("sys_madvise: %d\n", advice);
+//	msvc_printf("sys_madvise: length(%d) advice(%d)\n", length, advice);
 	return(0);
 }
 int 

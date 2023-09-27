@@ -119,7 +119,7 @@ win_munmap(PVOID Address, DWORD Offset)
 {
 	BOOL bResult = FALSE;
 
-	if (!VirtualFree(Address, Offset, MEM_DECOMMIT)){
+	if (!VirtualFree(Address, 0, MEM_RELEASE)){
 		WIN_ERR("VirtualFree(0x%x): %s\n", Address, win_strerror(GetLastError()));
 	}else{
 		bResult = TRUE;

@@ -6,7 +6,7 @@ OBJECTS=${CRT0} crt1.o crtbegin.o crtend.o gcrt0.o
 LIBS=libgcc.a libgcc_eh.a libgcc_s.a
 GCCOBJ=_chkstk.o _chkstk_ms.o _mulsc3.o _muldc3.o _mulxc3.o _ctzdi2.o \
 	_ffsdi2.o _popcountdi2.o _popcountsi2.o _popcount_tab.o _udivdi3.o
-CP=/bin/cp
+GCCINC=/lib/gcc/mingw32/${GCCVER}/include
 
 .DEFAULT:
 .SUFFIXES:
@@ -36,16 +36,16 @@ libgcc_s.a: libgcc_s.def
 crt0_tls.o: crt0.o win_tls.o
 	ld -r -o $@ crt0.o win_tls.o
 
-includes: ${INCDIR}/c++ ${INCDIR}/ssp
-	${CP} -rvu ${MINGW}/lib/gcc/mingw32/${GCCVER}/include/c++ ${INCDIR}/c++/
-	${CP} -rvu ${MINGW}/lib/gcc/mingw32/${GCCVER}/include/ssp ${INCDIR}/ssp/
+includes-local: ${CPPINC}
+	/bin/cp -rvu ${MINGW}${CPPINC}/c++ ${GCCINC}/
+	/bin/cp -rvu ${MINGW}${CPPINC}/ssp ${GCCINC}/
 
 install-local: ${LIBDIR}/gcc/mingw32/${GCCVER}
-	${CP} ${LIBS} ${LIBDIR}/gcc/mingw32/${GCCVER}/
-	${CP} crtbegin.o crtend.o ${LIBDIR}/gcc/mingw32/${GCCVER}/
-	${CP} ${CRT0} ${LIBDIR}/crt2.o
-	${CP} crt1.o ${LIBDIR}/dllcrt2.o
-	${CP} gcrt0.o ${LIBDIR}/gcrt2.o
+	/bin/cp ${LIBS} ${LIBDIR}/gcc/mingw32/${GCCVER}/
+	/bin/cp crtbegin.o crtend.o ${LIBDIR}/gcc/mingw32/${GCCVER}/
+	/bin/cp ${CRT0} ${LIBDIR}/crt2.o
+	/bin/cp crt1.o ${LIBDIR}/dllcrt2.o
+	/bin/cp gcrt0.o ${LIBDIR}/gcrt2.o
 
 install: ${DESTDIR}${LIBDIR}
 	cp ${LIBS} ${DESTDIR}${LIBDIR}/gcc/i686-pe-openbsd/${GCCVER}/
