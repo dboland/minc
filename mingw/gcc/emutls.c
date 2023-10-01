@@ -36,8 +36,6 @@ extern unsigned char __tls_start__;
 
 extern uint32_t __tls_index__;
 
-/* ./libgcc/emutls.c */
-
 typedef unsigned int word __attribute__((mode(word)));
 typedef unsigned int pointer __attribute__((mode(pointer)));
 
@@ -53,8 +51,6 @@ struct __emutls_object
 };
 
 unsigned char **tls_get(void);
-
-//__tls_get_addr
 
 /****************************************************/
 

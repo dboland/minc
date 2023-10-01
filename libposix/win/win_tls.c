@@ -47,12 +47,3 @@ win_tls_attach(const IMAGE_TLS_DIRECTORY *Image)
 	__Offsets[dwIndex].Size = dwSize;
 	__Offsets[dwIndex].Address = (LPBYTE)Image->StartAddressOfRawData;
 }
-/* must be removed, but still used by gcc.exe */
-LPBYTE 
-win_tls_get(LPBYTE Data[], const IMAGE_TLS_DIRECTORY *Image, const LPBYTE Address)
-{
-	DWORD dwIndex = *(TLSINT *)Image->AddressOfIndex;
-	DWORD dwOffset = Address - (LPBYTE)Image->StartAddressOfRawData;
-
-	return(Data[dwIndex] + dwOffset);
-}

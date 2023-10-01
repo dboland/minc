@@ -32,6 +32,17 @@
 
 /************************************************************/
 
+VOID 
+WinDebugThread(WIN_THREAD_STRUCT *Thread, LPCSTR Label)
+{
+	msvc_printf("%s(%d): ppid(%d) origin(%d) size(%d) source(%d) offset(%d) dest(%d)\n",
+		Label, Thread->Result, Thread->TaskId, Thread->origin, Thread->size, Thread->source, Thread->offset, Thread->dest);
+	msvc_printf("+ ebx(%d) ecx(%d) edx(%d)\n", 
+		Thread->bx, Thread->cx, Thread->dx);
+}
+
+/************************************************************/
+
 WIN_THREAD_STRUCT *
 win_fork_enter(PVOID Data[], DWORD Flags)
 {
@@ -79,5 +90,6 @@ win_fork_leave(WIN_THREAD_STRUCT *Thread)
 	if (!(Thread->Flags & WIN_PS_PPWAIT)){
 		PostThreadMessage(Thread->ThreadId, WM_USER, Thread->Result, 0);
 	}
+//WinDebugThread(Thread, "win_fork_leave");
 	LocalFree(Thread);
 }

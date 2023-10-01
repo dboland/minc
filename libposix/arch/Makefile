@@ -1,4 +1,4 @@
-OBJECTS=fork.o syscall.o tls.o
+OBJECTS=fork.o syscall.o
 
 all: ${OBJECTS}
 
