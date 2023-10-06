@@ -50,20 +50,29 @@ struct __emutls_object
   void *templ;
 };
 
-unsigned char **tls_get(void);
+//unsigned char **tls_get(void);
+unsigned char *__tls_get(int index);
 
 /****************************************************/
 
 void *
 __emutls_get_address(struct __emutls_object *obj)
 {
-	unsigned char **data = tls_get();
+//	unsigned char **data = tls_get();
 	int offset = obj->templ - (void *)&__tls_start__;
+	unsigned char *data = __tls_get(__tls_index__);
 
-	return(data[__tls_index__] + offset);
+//	return(data[__tls_index__] + offset);
+	return(data + offset);
 }
-__asm(".text\n"			\
+//__asm(".text\n"			\
 "_tls_get:\n"			\
 	"mov %fs:0x2c,%eax\n"	\
 	"ret\n"			\
+);
+__asm("___tls_get:\n"			\
+	"mov 4(%esp),%ecx\n"		\
+	"mov %fs:0x2c,%eax\n"		\
+	"mov (%eax,%ecx,4),%eax\n"	\
+	"ret\n"				\
 );

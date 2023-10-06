@@ -16,9 +16,9 @@
    License along with the GNU C Library; if not, see
    <http://www.gnu.org/licenses/>.  */
 
-/* Needed for GNU gcc.exe. Now in libgcc_eh.a, remove at next build. */
-
 #include <string.h>
+
+/* Needed for GNU gcc and binutils. Now in libgcc_eh.a, remove at next build. */
 
 /************************************************************/
 

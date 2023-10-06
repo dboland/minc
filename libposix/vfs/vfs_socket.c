@@ -50,7 +50,7 @@ vfs_socket(INT Family, INT Type, INT Protocol, WIN_VNODE *Result)
 	return(bResult);
 }
 BOOL 
-vfs_connect(WIN_TASK *Task, WIN_VNODE *Node, CONST LPSOCKADDR Address, INT Size)
+vfs_connect(WIN_VNODE *Node, CONST LPSOCKADDR Address, INT Size)
 {
 	BOOL bResult = FALSE;
 
@@ -59,7 +59,7 @@ vfs_connect(WIN_TASK *Task, WIN_VNODE *Node, CONST LPSOCKADDR Address, INT Size)
 			bResult = pipe_connect(Node, Address, Size);
 			break;
 		case FS_TYPE_WINSOCK:
-			bResult = ws2_connect(Task, Node, Address, Size);
+			bResult = ws2_connect(Node, Address, Size);
 			break;
 		default:
 			WSASetLastError(WSAEPFNOSUPPORT);
@@ -84,19 +84,17 @@ vfs_bind(WIN_VNODE *Node, LPSOCKADDR Address, INT Length)
 	return(bResult);
 }
 BOOL 
-vfs_accept(WIN_TASK *Task, WIN_VNODE *Node, LPSOCKADDR Address, LPINT Length, WIN_VNODE *Result)
+vfs_accept(WIN_VNODE *Node, LPSOCKADDR Address, LPINT Length, WIN_VNODE *Result)
 {
 	BOOL bResult = FALSE;
 
-	Task->State = WIN_SSLEEP;
 	switch (Node->FSType){
 		case FS_TYPE_WINSOCK:
-			bResult = ws2_accept(Task, Node, Address, Length, Result);
+			bResult = ws2_accept(Node, Address, Length, Result);
 			break;
 		default:
 			WSASetLastError(WSAEPFNOSUPPORT);
 	}
-	Task->State = WIN_SRUN;
 	return(bResult);
 }
 BOOL 

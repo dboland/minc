@@ -47,24 +47,11 @@ WIN_THREAD_STRUCT *
 win_fork_enter(PVOID Data[], DWORD Flags)
 {
 	WIN_THREAD_STRUCT *ptsResult;
-	DWORD dwIndex = 0;
-	WIN_TLSENTRY *tlsEntry = __Offsets;
 
-	/* When TLS is enabled, WinNT automatically copies the .data (.tls)
-	 * sections for each new thread! Let's put the GOT data there first
-	 * to make Windows copy parent data when forking.
-	 */
 	ptsResult = LocalAlloc(LMEM_FIXED + LMEM_ZEROINIT, sizeof(WIN_THREAD_STRUCT));
 	ptsResult->TaskId = CURRENT;
 	ptsResult->ThreadId = GetCurrentThreadId();
 	ptsResult->Flags = Flags;
-	while (dwIndex < WIN_GOT_MAX){
-		if (tlsEntry->Size){
-			win_memcpy(tlsEntry->Address, Data[dwIndex], tlsEntry->Size);
-		}
-		dwIndex++;
-		tlsEntry++;
-	}
 	OpenThreadToken(GetCurrentThread(), TOKEN_ALL_ACCESS, TRUE, &ptsResult->Token);
 	return(ptsResult);
 }

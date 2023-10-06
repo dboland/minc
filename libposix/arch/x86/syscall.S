@@ -36,9 +36,9 @@
 .def _syscall; .scl 2; .type 32; .endef
 
 _syscall:
-	mov (%esp),%ecx	# code
+	mov (%esp),%edx		# code
 	mov $-1,%eax
-	cmp $SYS_MAXSYSCALL,%ecx
+	cmp $SYS_MAXSYSCALL,%edx
 	jg 1f
 	# setup call_t struct
 	push $-1		# task_struct (defunct)

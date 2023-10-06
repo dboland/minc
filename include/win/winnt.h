@@ -286,13 +286,13 @@ typedef struct _GUID {
 typedef VOID (NTAPI *PIMAGE_TLS_CALLBACK)(PVOID,DWORD,PVOID);
 
 typedef struct _IMAGE_TLS_DIRECTORY {
-        PVOID StartAddressOfRawData;
-        PVOID EndAddressOfRawData;
-        PVOID AddressOfIndex;
-        PVOID AddressOfCallBacks;
-        DWORD SizeOfZeroFill;
-        DWORD Characteristics;
-} IMAGE_TLS_DIRECTORY,*PIMAGE_TLS_DIRECTORY;
+	PVOID StartAddressOfRawData;
+	PVOID EndAddressOfRawData;
+	PVOID AddressOfIndex;
+	PVOID AddressOfCallBacks;
+	DWORD SizeOfZeroFill;
+	DWORD Characteristics;
+} IMAGE_TLS_DIRECTORY, *PIMAGE_TLS_DIRECTORY;
 
 typedef struct _MEMORY_BASIC_INFORMATION {
         PVOID BaseAddress;
@@ -365,26 +365,6 @@ typedef LONG NTSTATUS, *PNTSTATUS;
 #define FILE_SUPPORTS_EXTENDED_ATTRIBUTES 0x00800000
 #define FILE_SUPPORTS_OPEN_BY_FILE_ID   0x01000000
 #define FILE_SUPPORTS_USN_JOURNAL       0x02000000
-
-/* 
- * ddk/winddk.h
- */
-
-/* #define REG_NONE                           0
-#define REG_SZ                             1
-#define REG_EXPAND_SZ                      2
-#define REG_BINARY                         3
-#define REG_DWORD                          4
-#define REG_DWORD_LITTLE_ENDIAN            4
-#define REG_DWORD_BIG_ENDIAN               5
-#define REG_LINK                           6
-#define REG_MULTI_SZ                       7
-#define REG_RESOURCE_LIST                  8
-#define REG_FULL_RESOURCE_DESCRIPTOR       9
-#define REG_RESOURCE_REQUIREMENTS_LIST    10
-#define REG_QWORD                         11
-#define REG_QWORD_LITTLE_ENDIAN           11
-*/
 
 /* 
  * ddk/ntapi.h

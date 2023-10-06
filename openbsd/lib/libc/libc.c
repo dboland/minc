@@ -38,12 +38,20 @@
 
 #include <libgen.h>
 #include <nlist.h>
+#include <string.h>
 
-//char *__progname = NULL;		// gas: NULL solves "can't be equated to common symbol"
+extern __import char 	*__PROGNAME;
+
+#define GOT_MAX		32
+
+typedef struct {
+	void *address;
+	size_t size;
+} tlsentry;
+
 char *__progname;
 char **__environ;
-
-extern __import char *__PROGNAME;
+tlsentry __offsets[GOT_MAX];
 
 void 
 _init(char *cmdbuf, int *_argc, char ***_argv, char ***_env, void *frame_address)
@@ -60,9 +68,36 @@ __fdnlist(int fd, struct nlist *list)
 
 	while (*list->n_name){
 printf("__fdnlist(%d): name(%s) type(0x%x) other(%d) desc(%d) value(%d)\n", 
-		fd, list->n_name, list->n_type, list->n_other, list->n_desc, list->n_value);
+	fd, list->n_name, list->n_type, list->n_other, list->n_desc, list->n_value);
 		result++;
 		list++;
 	}
 	return(result);
+}
+void 
+__tls_attach(const IMAGE_TLS_DIRECTORY *Image)
+{
+	size_t size = Image->EndAddressOfRawData - Image->StartAddressOfRawData;
+	int index = *(int *)(Image->AddressOfIndex);
+
+	__offsets[index].size = size;
+	__offsets[index].address = Image->StartAddressOfRawData;
+}
+void 
+__tls_copy(void *data[])
+{
+	tlsentry *entry = __offsets;
+	int index = 0;
+
+	/* When TLS is enabled, WinNT automatically copies the .data (.tls)
+	 * sections for each new thread! Let's put the GOT data there first
+	 * to make Windows copy parent data when forking.
+	 */
+	while (index < GOT_MAX){
+		if (entry->size){
+			memcpy(entry->address, data[index], entry->size);
+		}
+		entry++;
+		index++;
+	}
 }

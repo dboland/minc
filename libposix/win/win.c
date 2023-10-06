@@ -87,8 +87,6 @@ SID8 SidIntegrityMedium		= {1, 1, {0, 0, 0, 0, 0, 16}, 0x2000};
 SID8 SidIntegrityHigh		= {1, 1, {0, 0, 0, 0, 0, 16}, 0x3000};
 SID8 SidIntegritySystem		= {1, 1, {0, 0, 0, 0, 0, 16}, 0x4000};
 
-WIN_TLSENTRY			__Offsets[WIN_GOT_MAX];	/* global offset table */
-
 #include "win_string.c"
 #include "win_wchar.c"
 #include "win_libgen.c"
@@ -105,7 +103,6 @@ WIN_TLSENTRY			__Offsets[WIN_GOT_MAX];	/* global offset table */
 #include "win_mman.c"
 #include "win_resource.c"
 #include "win_uio.c"
-#include "win_tls.c"
 #include "win_signal.c"
 #include "win_time.c"
 #include "win_sysctl.c"

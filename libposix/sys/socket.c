@@ -239,7 +239,7 @@ sys_connect(call_t call, int sockfd, const struct sockaddr *address, socklen_t a
 	
 	if (sockfd < 0 || sockfd >= OPEN_MAX){	/* ab.exe */
 		h_errno = h_errno_posix(pwTask, WSAEBADF);
-	}else if (!vfs_connect(pwTask, &pwTask->Node[sockfd], addr_win(&sAddress, pwTask, address), addrlen)){
+	}else if (!vfs_connect(&pwTask->Node[sockfd], addr_win(&sAddress, pwTask, address), addrlen)){
 		h_errno = h_errno_posix(pwTask, WSAGetLastError());
 	}else{
 		result = 0;
@@ -254,14 +254,16 @@ sys_accept(call_t call, int sockfd, struct sockaddr *addr, socklen_t *addrlen)
 	WIN_VNODE vnResult = {0};
 	WIN_TASK *pwTask = call.Task;
 
+	pwTask->State = SSLEEP;
 	if (sockfd < 0 || sockfd >= OPEN_MAX){	/* ab.exe */
 		h_errno = h_errno_posix(pwTask, WSAEBADF);
-	}else if (!vfs_accept(pwTask, &pwTask->Node[sockfd], &sAddress, addrlen, &vnResult)){
+	}else if (!vfs_accept(&pwTask->Node[sockfd], &sAddress, addrlen, &vnResult)){
 		h_errno = h_errno_posix(pwTask, WSAGetLastError());
 	}else{
 		addr_posix(addr, pwTask, &sAddress, addrlen);
 		result = fd_posix(pwTask, &vnResult, 0);
 	}
+	pwTask->State = SRUN;
 	return(result);
 }
 ssize_t 

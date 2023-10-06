@@ -3,13 +3,13 @@ include ../../../Makefile.inc
 RELEASE=75.0
 
 ARCH=i386
-CFLAGS+= -g -Wimplicit-function-declaration -fno-omit-frame-pointer -DPIC
+CFLAGS+= -g -Wimplicit-function-declaration -fno-omit-frame-pointer -DNOPIE
 CFLAGS+= -ffreestanding
 #CFLAGS+= -fno-builtin
 LDFLAGS= -shared -s
 IMPLIB= libc.dll.a
 SRCDIR= /D/openbsd-master/lib/libc
-OBJECTS= libc.o gnu_string.o
+OBJECTS= libc.o
 SHOBJECTS= $(shell /bin/ls arch/${ARCH}/*/*.o */*.o db/*/*.o)
 LIBROOT=../../..
 GCCLIB=${LIBROOT}/mingw/gcc
@@ -29,7 +29,7 @@ all: objects lib
 lib: ${LIBC} libc.a libmsvcrt.a
 
 libc.a:
-	ar cru $@ ${SHOBJECTS} ${OBJECTS}
+	ar cru $@ ${OBJECTS} ${SHOBJECTS}
 
 libmsvcrt.a: libmsvcrt.def
 	dlltool -d $< -l $@ -k
@@ -51,10 +51,6 @@ ${LIBC}: ${OBJECTS} version.o
 	${LD} ${LDFLAGS} -e _DllMainCRTStartup@12 --out-implib=${IMPLIB} --disable-auto-import \
 	-o $@ --image-base=${IMGBASE_LIBC} ${GCCLIB}/crt1.o ${OBJECTS} ${SHOBJECTS} version.o \
 	-L${GCCLIB} -L${POSIXLIB} -L${WINLIB} -lgcc_eh -lgcc -lposix -lmsvcrt
-
-# --undefined=___progname
-# --image-base=${IMGBASE_LIBC}
-# --enable-stdcall-fixup
 
 clean: objects-clean lib-clean
 

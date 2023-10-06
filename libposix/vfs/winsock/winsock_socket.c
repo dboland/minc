@@ -97,7 +97,7 @@ ws2_socket(UINT Family, UINT Type, INT Protocol, WIN_VNODE *Result)
 	return(bResult);
 }
 BOOL 
-ws2_connect(WIN_TASK *Task, WIN_VNODE *Node, CONST LPSOCKADDR Address, INT Length)
+ws2_connect(WIN_VNODE *Node, CONST LPSOCKADDR Address, INT Length)
 {
 	BOOL bResult = FALSE;
 
@@ -140,7 +140,7 @@ ws2_listen(WIN_VNODE *Node, INT Backlog)
 	return(bResult);
 }
 BOOL 
-ws2_accept(WIN_TASK *Task, WIN_VNODE *Node, LPSOCKADDR Address, LPINT Length, WIN_VNODE *Result)
+ws2_accept(WIN_VNODE *Node, LPSOCKADDR Address, LPINT Length, WIN_VNODE *Result)
 {
 	BOOL bResult = FALSE;
 	WIN_POLLFD fdInfo = {Node->FileId, WIN_POLLRDBAND | WIN_POLLIN, 0};

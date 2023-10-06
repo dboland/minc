@@ -37,10 +37,10 @@ ws2_FIONREAD(SOCKET Socket, ULONG *Result)
 {
 	BOOL bResult = FALSE;
 
-	if (SOCKET_ERROR == ioctlsocket(Socket, FIONREAD, Result)){
-		WIN_ERR("ioctlsocket(FIONREAD): %s\n", win_strerror(WSAGetLastError()));
-	}else{
+	if (SOCKET_ERROR != ioctlsocket(Socket, FIONREAD, Result)){
 		bResult = TRUE;
+	}else{
+		WIN_ERR("ioctlsocket(FIONREAD): %s\n", win_strerror(WSAGetLastError()));
 	}
 	return(bResult);
 }

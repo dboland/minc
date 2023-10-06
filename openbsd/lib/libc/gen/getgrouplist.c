@@ -28,22 +28,50 @@
  *
  */
 
-#include <winbase.h>
+#include "win/windows.h"
+#include "win_posix.h"
+#include "arch_posix.h"
 
-#if __i386__
-typedef DWORD TLSINT;
-#else
-typedef ULONGLONG TLSINT;
-#endif
+#include <errno.h>
 
-/************************************************************/
-
-VOID 
-win_tls_attach(const IMAGE_TLS_DIRECTORY *Image)
+int 
+getgrouplist(const char *user, gid_t group, gid_t *groups, int *ngroups)
 {
-	DWORD dwSize = Image->EndAddressOfRawData - Image->StartAddressOfRawData;
-	DWORD dwIndex = *(TLSINT *)Image->AddressOfIndex;
+	int result = -1;
+	WIN_PWENT pwEntry;
+	WCHAR szAccount[MAX_NAME];
+	SID8 *sidList = NULL;
+	SID8 sid;
+	int i = 0;
+	gid_t next;
+	int count = 0;
 
-	__Offsets[dwIndex].Size = dwSize;
-	__Offsets[dwIndex].Address = (LPBYTE)Image->StartAddressOfRawData;
+	if (!group){
+		group = WIN_ROOT_GID;
+	}
+	if (!user){
+		errno = EINVAL;
+	}else if (!groups || !ngroups){
+		errno = EFAULT;
+	}else if (!win_mbstowcs(szAccount, user, MAX_NAME)){
+		errno = EINVAL;
+	}else if (!win_getpwnam(szAccount, &pwEntry)){
+		errno = errno_posix(errno_win());
+	}else if (!win_getgrouplist(&pwEntry, rid_win(&sid, group), &sidList, &count)){
+		errno = errno_posix(errno_win());
+	}else if (*ngroups >= count){
+		while (i < count){
+			next = rid_posix(&sidList[i]);
+			if (next == WIN_ROOT_GID){
+				groups[i] = 0;
+			}else{
+				groups[i] = next;
+			}
+			i++;
+		}
+		result = count;
+	}
+	win_free(sidList);
+	*ngroups = count;
+	return(result);
 }

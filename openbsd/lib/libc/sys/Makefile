@@ -4,7 +4,7 @@ OBJECTS= __get_tcb.o __getcwd.o __semctl.o __set_tcb.o __syscall.o \
 	chmod.o chown.o chroot.o clock_getres.o clock_gettime.o clock_settime.o close.o \
 	closefrom.o dup.o dup2.o execve.o faccessat.o fchdir.o \
 	fchflags.o fchmod.o fchmodat.o fchown.o fchownat.o fcntl.o fhopen.o fhstat.o \
-	fhstatfs.o flock.o fork.o fpathconf.o fstat.o fstatat.o fstatfs.o fsync.o \
+	fhstatfs.o flock.o fpathconf.o fstat.o fstatat.o fstatfs.o fsync.o \
 	ftruncate.o futimens.o futimes.o getdents.o getdtablecount.o getegid.o \
 	geteuid.o getfh.o getfsstat.o getgid.o getgroups.o getitimer.o \
 	getpgid.o getpgrp.o getpid.o getppid.o getpriority.o getresgid.o \
@@ -25,15 +25,14 @@ OBJECTS= __get_tcb.o __getcwd.o __semctl.o __set_tcb.o __syscall.o \
 	sigsuspend.o stat.o statfs.o swapctl.o symlink.o \
 	symlinkat.o sync.o sysarch.o truncate.o \
 	umask.o unlink.o unlinkat.o unmount.o utimensat.o utimes.o \
-	utrace.o vfork.o wait4.o write.o writev.o
+	utrace.o wait4.o write.o writev.o
 
 OBJECTS+= semctl.c.o
-
-LIBGEN+= exit.o getlogin.o setlogin.o
-
 OBJECTS+= socket.o connect.o accept.o recvfrom.o sendto.o sendmsg.o recvmsg.o \
 	socketpair.o shutdown.o getsockopt.o setsockopt.o bind.o listen.o \
 	getpeername.o getsockname.o
+
+LIBGEN+= exit.o getlogin.o setlogin.o fork.o vfork.o
 
 .SUFFIXES:
 .DEFAULT:

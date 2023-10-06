@@ -29,7 +29,7 @@
  */
 
 #include "win/windows.h"
-#include "win_posix.h"
+#include "win_types.h"
 
 extern unsigned char __tls_start__;
 extern unsigned char __tls_end__;
@@ -46,12 +46,14 @@ const IMAGE_TLS_DIRECTORY _tls_used = {
 	0			/* characteristics */
 };
 
+void __tls_attach(const IMAGE_TLS_DIRECTORY *Image);
+
 /************************************************************/
 
 VOID NTAPI 
 TlsMainCRTStartup(LPVOID lpvDLL, DWORD fdwReason, LPVOID lpvReserved)
 {
 	if (fdwReason == DLL_PROCESS_ATTACH){
-		win_tls_attach(&_tls_used);
+		__tls_attach(&_tls_used);
 	}
 }

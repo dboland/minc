@@ -8,7 +8,7 @@ IMPLIB=libposix.dll.a
 CFLAGS+=-g -Wimplicit-function-declaration -Werror -I../include -ffreestanding
 CFLAGS+=-DRELEASE=\"${RELEASE}\" -DVERSION=\"${VERSION}\" -DBUILD=${BUILD}
 #CFLAGS+=-Wunused
-LDFLAGS=-s
+LDFLAGS=
 OBJECTS=crt1.o win_posix.o msvc_posix.o vfs_posix.o libposix.o
 WINDIR=/C/WINDOWS/system32
 GCCDIR=../mingw/gcc

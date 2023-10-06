@@ -4,6 +4,8 @@
  * Written by J.T. Conklin <jtc@wimsey.com> 01/17/95.
  * Public domain.
  */
+/* Adapted for MinC by D. Boland <dboland@xs4all.nl> 2016
+ */
 
 #ifndef	_MACHINE_CDEFS_H_
 #define	_MACHINE_CDEFS_H_
@@ -17,11 +19,12 @@
 
 #undef __MINGW32__
 #undef __WIN32__	// <GL/gl.h>
+#undef __MSVCRT__
 #undef __WINNT__
 #undef __WINNT
+#undef _WIN32		// cc.exe
 #undef WIN32		// cc.exe
 #undef WINNT
-#undef _WIN32		// cc.exe
 
 #define __thread	__thread __attribute__((section(".tls")))
 #define __import	__attribute__((dllimport))
@@ -31,6 +34,8 @@
 #define restrict	__restrict
 #define environ		__environ
 #define alloca		__builtin_alloca
+
+#define sys_siglist	_sys_siglist	/* legacy */
 
 /* pthread_win32 */
 #define PTW32_CDECL
