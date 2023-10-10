@@ -39,12 +39,13 @@ PathRead(WIN_NAMEIDATA *Path)
 	WCHAR *R = Path->R;
 	WCHAR C;
 
-	while (C = *S++){
+	while (C = *S){
 		if (C == ':'){		/* perl.exe */
 			*R++ = '_';
 		}else{
 			*R++ = C;
 		}
+		S++;
 		if (*S == '/'){
 			*S = '\\';
 			break;

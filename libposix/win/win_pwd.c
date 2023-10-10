@@ -81,12 +81,12 @@ PwdLookup(WIN_PWENT *Entity)
 		case SECURITY_BUILTIN_DOMAIN_RID:	/* 32 (Builtin) */
 			bResult = PwdLookupNTAuth(Entity);
 			break;
-		case SECURITY_LOCAL_SYSTEM_RID:	/* 18 (SYSTEM) */
+		case SECURITY_LOCAL_SYSTEM_RID:		/* 18 (SYSTEM) */
 			Entity->GroupSid = SidAdmins;
 			Entity->Privileges = USER_PRIV_ADMIN;
 			Entity->Integrity = SECURITY_MANDATORY_SYSTEM_RID;
 			break;
-		default:					/* 6 (SERVICE) */
+		default:				/* 6 (SERVICE) */
 			Entity->GroupSid = SidBatch;
 			Entity->Privileges = USER_PRIV_GUEST;
 			Entity->Integrity = SECURITY_MANDATORY_LOW_RID;

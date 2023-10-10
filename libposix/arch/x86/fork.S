@@ -71,11 +71,11 @@ _fork_enter:
 	mov %fs,fs(%eax)
 	mov %gs,gs(%eax)
 	mov %ss,ss(%eax)
-	pop %edx			# save return addr, thereby aligning stack
-	mov %edx,return(%eax)
-	mov %fs:0x4,%edx		# NT_TIB.StackBase
-	mov %edx,origin(%eax)
-	mov %edx,size(%eax)
+	pop %ecx			# save return addr, thereby aligning stack
+	mov %ecx,return(%eax)
+	mov %fs:0x4,%ecx		# NT_TIB.StackBase
+	mov %ecx,origin(%eax)
+	mov %ecx,size(%eax)
 	sub %esp,size(%eax)
 	mov %ebp,source(%eax)
 	mov %ebp,offset(%eax)
@@ -92,21 +92,21 @@ _fork_enter:
 	ret
 
 _fork_leave:
-	mov 4(%esp),%edx		# WIN_THREAD_STRUCT
+	mov 4(%esp),%ecx		# WIN_THREAD_STRUCT
 	enter $0,$0
 	# allocate stack space
-	sub size(%edx),%esp
-	mov %ebp,dest(%edx)
-	push %edx
+	sub size(%ecx),%esp
+	mov %ebp,dest(%ecx)
+	push %ecx
 	call _task_copy
-	pop %edx
+	pop %ecx
 	# restore pointers
-	mov dest(%edx),%esp
+	mov dest(%ecx),%esp
 	mov %esp,%ebp
-	add offset(%edx),%ebp
-	push return(%edx)
+	add offset(%ecx),%ebp
+	push return(%ecx)
 	# restore registers
-	mov %edx,%eax
+	mov %ecx,%eax
 	mov bx(%eax),%ebx
 	mov cx(%eax),%ecx
 	mov dx(%eax),%edx

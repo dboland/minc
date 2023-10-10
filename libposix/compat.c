@@ -39,7 +39,7 @@ runcmd(char *argv[])
 
 	win_wcstombs(szPath, pwTask->Path.Name, PATH_MAX);
 	if (!win_execve(argv_win(pwTask, *argv, argv), szPath)){
-		__errno_posix(pwTask, GetLastError());
+		pwTask->Error = errno_posix(GetLastError());
 	}else{
 		result = 0;
 	}
@@ -56,7 +56,7 @@ group_member(gid_t gid)
 		gid = WIN_ROOT_GID;
 	}
 	if (!win_group_member(rid_win(&sid, gid))){
-		__errno_posix(pwTask, GetLastError());
+		pwTask->Error = errno_posix(GetLastError());
 	}else{
 		result = 0;
 	}
@@ -71,7 +71,7 @@ futimesat(int dirfd, const char *pathname, const struct timeval times[2])
 	WIN_TASK *pwTask = &__Tasks[CURRENT];
 
 	if (!vfs_utimes(pathat_win(&wPath, dirfd, pathname, AT_SYMLINK_FOLLOW), utimeval_win(fTime, times))){
-		__errno_posix(pwTask, GetLastError());
+		pwTask->Error = errno_posix(GetLastError());
 	}else{
 		result = 0;
 	}

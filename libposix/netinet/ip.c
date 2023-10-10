@@ -42,8 +42,7 @@ ip_NET_INET_IP_FORWARDING(WIN_TASK *Task, void *buf, size_t *size)
 
 	ulStatus = GetIpStatistics(&ipStats);
 	if (ulStatus != ERROR_SUCCESS){
-		__errno_posix(Task, ulStatus);
-		result = -1;
+		result -= errno_posix(ulStatus);
 	}else if (ipStats.dwForwarding == MIB_IP_FORWARDING){
 		*(int *)buf = 1;
 	}else{
@@ -54,13 +53,13 @@ ip_NET_INET_IP_FORWARDING(WIN_TASK *Task, void *buf, size_t *size)
 int 
 ip_NET_INET_IP_DEFTTL(WIN_TASK *Task, void *buf, size_t *size)
 {
-	int result = -1;
+	int result = 0;
 	ULONG ulStatus;
 	MIB_IPSTATS ipStats;
 
 	ulStatus = GetIpStatistics(&ipStats);
 	if (ulStatus != ERROR_SUCCESS){
-		__errno_posix(Task, ulStatus);
+		result -= errno_posix(ulStatus);
 	}else{
 		*(int *)buf = ipStats.dwDefaultTTL;
 		result = 0;
@@ -80,8 +79,7 @@ ip_NET_INET_IP(WIN_TASK *Task, const int *name, void *buf, size_t *size)
 			result = ip_NET_INET_IP_DEFTTL(Task, buf, size);
 			break;
 		default:
-			__errno_posix(Task, ERROR_NOT_SUPPORTED);
-			result = -1;
+			result = -EOPNOTSUPP;
 	}
 	return(result);
 }

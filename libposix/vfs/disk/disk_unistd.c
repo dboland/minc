@@ -156,7 +156,7 @@ disk_pread(WIN_VNODE *Node, LPVOID Buffer, DWORD Size, DWORDLONG Offset, DWORD *
 {
 	BOOL bResult = FALSE;
 	OVERLAPPED ovl = {0, 0, Offset & 0xFFFFFFFF, Offset >> 32, NULL};
-	LARGE_INTEGER liCurrent = {0, 0};
+	LARGE_INTEGER liCurrent = {0};
 
 	if (!SetFilePointerEx(Node->Handle, liCurrent, &liCurrent, FILE_CURRENT)){
 		WIN_ERR("SetFilePointerEx(%d): %s\n", Node->Handle, win_strerror(GetLastError()));

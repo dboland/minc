@@ -39,11 +39,7 @@ fd_win(WIN_TASK *Task, int fd)
 {
 	HANDLE hResult = INVALID_HANDLE_VALUE;
 
-	if (fd == AT_FDCWD){
-		return(INVALID_HANDLE_VALUE);
-	}else if (fd < 0 || fd >= OPEN_MAX){
-		SetLastError(ERROR_INVALID_HANDLE);
-	}else{
+	if (fd > -1 && fd < OPEN_MAX){
 		hResult = Task->Node[fd].Handle;
 	}
 	return(hResult);
@@ -63,6 +59,5 @@ fd_posix(WIN_TASK *Task, WIN_VNODE *Node, int offset)
 		pNode++;
 		fd++;
 	}
-	__errno_posix(Task, ERROR_TOO_MANY_OPEN_FILES);
-	return(-1);
+	return(-EMFILE);
 }

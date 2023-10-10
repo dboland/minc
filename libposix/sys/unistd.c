@@ -149,7 +149,7 @@ sys_getresgid(call_t call, gid_t *rgid, gid_t *egid, gid_t *sgid)
 long 
 sys_pathconf(call_t call, const char *path, int name)
 {
-	long result = -1;
+	long result = 0;
 
 	switch (name){
 		case _PC_MAX_CANON:
@@ -159,7 +159,6 @@ sys_pathconf(call_t call, const char *path, int name)
 			result = MAX_INPUT;
 			break;
 //		case _PC_VDISABLE:
-//			result = 0;
 //			break;
 		case _PC_NAME_MAX:
 			result = NAME_MAX;
@@ -171,8 +170,8 @@ sys_pathconf(call_t call, const char *path, int name)
 			result = PIPE_BUF;
 			break;
 		default:
-			__PRINTF("pathconf(%s) name(%d)\n", path, name)
-			__errno_posix(call.Task, ERROR_NOT_SUPPORTED);
+			__PRINTF("sys_pathconf(%s) name(%d)\n", path, name)
+			result = -EOPNOTSUPP;
 	}
 	return(result);
 }
@@ -203,37 +202,39 @@ sys_getdtablecount(call_t call)
 int 
 sys_getgroups(call_t call, int size, gid_t list[])
 {
+	int result = 0;
+	int index = 0;
 	SID8 *grList = NULL;
-	DWORD dwIndex = 0;
-	DWORD dwCount = -1;
+//	DWORD dwIndex = 0;
+//	DWORD dwCount = -1;
 
 	if (size < 0){	/* GNU conftest.exe */
-		__errno_posix(call.Task, ERROR_BAD_ARGUMENTS);
-	}else if (!win_getgroups(&grList, &dwCount)){
-		__errno_posix(call.Task, GetLastError());
-	}else if (size >= dwCount){
-		while (dwIndex < dwCount){
-			list[dwIndex] = rid_posix(&grList[dwIndex]);
-			if (list[dwIndex] == WIN_ROOT_GID){
-				list[dwIndex] = 0;
+		result = -EINVAL;
+	}else if (!win_getgroups(&grList, &result)){
+		result -= errno_posix(GetLastError());
+	}else if (size >= result){
+		while (index < result){
+			list[index] = rid_posix(&grList[index]);
+			if (list[index] == WIN_ROOT_GID){
+				list[index] = 0;
 			}
-			dwIndex++;
+			index++;
 		}
 	}
 	win_free(grList);
-	return(dwCount);
+	return(result);
 }
 int 
 sys_setgroups(call_t call, int size, const gid_t *list)
 {
-	int result = -1;
+	int result = 0;
 	SID8 sid;
 	SID8 *grList;
 	DWORD dwIndex = 0;
 	DWORD dwCount = size;
 
 	if (size < 0 || size >= NGROUPS_MAX){
-		__errno_posix(call.Task, ERROR_BAD_ARGUMENTS);
+		result = -EINVAL;
 	}else{
 		grList = groups_win(&dwCount);
 		while (size--){
@@ -245,9 +246,7 @@ sys_setgroups(call_t call, int size, const gid_t *list)
 			dwIndex++;
 		}
 		if (!win_setgroups(grList, dwCount)){
-			__errno_posix(call.Task, GetLastError());
-		}else{
-			result = 0;
+			result -= errno_posix(GetLastError());
 		}
 		win_free(grList);
 	}
@@ -259,27 +258,23 @@ sys_setgroups(call_t call, int size, const gid_t *list)
 int 
 sys_rmdir(call_t call, const char *pathname)
 {
+	int result = 0;
 	WIN_NAMEIDATA wPath;
-	int result = -1;
 
 	if (!vfs_rmdir(path_win(&wPath, pathname, O_NOFOLLOW))){
-		__errno_posix(call.Task, GetLastError());
-	}else{
-		result = 0;
+		result -= errno_posix(GetLastError());
 	}
 	return(result);
 }
 int 
 sys_linkat(call_t call, int fd1, const char *name1, int fd2, const char *name2, int flag)
 {
+	int result = 0;
 	WIN_NAMEIDATA wpOld;
 	WIN_NAMEIDATA wpNew;
-	int result = -1;
 
 	if (!vfs_link(pathat_win(&wpOld, fd1, name1, flag), pathat_win(&wpNew, fd2, name2, flag))){
-		__errno_posix(call.Task, GetLastError());
-	}else{
-		result = 0;
+		result -= errno_posix(GetLastError());
 	}
 	return(result);
 }
@@ -291,23 +286,21 @@ sys_link(call_t call, const char *oldpath, const char *newpath)
 int 
 __unlinkat(WIN_TASK *Task, int fd, const char *path, int flag)
 {
+	int result = 0;
 	WIN_NAMEIDATA wPath;
-	int result = -1;
 	BOOL bResult = FALSE;
 
 	if (!path){
-		SetLastError(ERROR_INVALID_ADDRESS);
+		result = -EFAULT;
 	}else if (!*path){
-		SetLastError(ERROR_INVALID_NAME);
+		result = -ENOENT;
 	}else if (flag & AT_REMOVEDIR){
 		bResult = vfs_rmdir(pathat_win(&wPath, fd, path, AT_SYMLINK_NOFOLLOW));
 	}else{
 		bResult = vfs_unlink(pathat_win(&wPath, fd, path, AT_SYMLINK_NOFOLLOW));
 	}
 	if (!bResult){
-		__errno_posix(Task, GetLastError());
-	}else{
-		result = 0;
+		result -= errno_posix(GetLastError());
 	}
 	return(result);
 }
@@ -324,20 +317,18 @@ sys_unlink(call_t call, const char *path)
 void 
 sys_sync(call_t call)
 {
-	if (!vfs_sync()){
-		__errno_posix(call.Task, GetLastError());
-	}
+	vfs_sync();
 }
 int 
 sys_fsync(call_t call, int fd)
 {
-	int result = -1;
+	int result = 0;
 	WIN_TASK *pwTask = call.Task;
 
 	if (fd < 0 || fd >= OPEN_MAX){
-		__errno_posix(pwTask, ERROR_INVALID_HANDLE);
+		result = -EBADF;
 	}else if (!vfs_fsync(&pwTask->Node[fd])){
-		__errno_posix(call.Task, GetLastError());
+		result -= errno_posix(GetLastError());
 	}else{
 		result = 0;
 	}
@@ -363,52 +354,46 @@ sys___getcwd(call_t call, char *buf, size_t size)
 int 
 sys_fchdir(call_t call, int fildes)
 {
+	int result = 0;
 	WIN_NAMEIDATA wPath;
-	int result = -1;
 	WIN_TASK *pwTask = call.Task;
 
 	if (!vfs_chdir(pwTask, fdpath_win(&wPath, fildes, 0))){
-		__errno_posix(pwTask, GetLastError());
-	}else{
-		result = 0;
+		result -= errno_posix(GetLastError());
 	}
 	return(result);
 }
 int 
 sys_chdir(call_t call, const char *path)
 {
+	int result = 0;
 	WIN_NAMEIDATA wPath;
-	int result = -1;
 	WIN_TASK *pwTask = call.Task;
 
 	if (!vfs_chdir(pwTask, path_win(&wPath, path, 0))){
-		__errno_posix(pwTask, GetLastError());
-	}else{
-		result = 0;
+		result -= errno_posix(GetLastError());
 	}
 	return(result);
 }
 int 
 sys_chroot(call_t call, const char *path)
 {
-	int result = -1;
+	int result = 0;
 	WIN_NAMEIDATA wPath;
 
 	if (!vfs_chroot(path_win(&wPath, path, 0))){
-		__errno_posix(call.Task, GetLastError());
-	}else{
-		result = 0;
+		result -= errno_posix(GetLastError());
 	}
 	return(result);
 }
 ssize_t 
 __readlinkat(WIN_TASK *Task, int dirfd, const char *pathname, char *buf, size_t bufsiz)
 {
+	ssize_t result = 0;
 	WIN_NAMEIDATA wpePath;
-	ssize_t result = -1;
 
 	if (!vfs_readlink(pathat_win(&wpePath, dirfd, pathname, AT_SYMLINK_NOFOLLOW), FALSE)){
-		__errno_posix(Task, GetLastError());
+		result -= errno_posix(GetLastError());
 	}else{
 		result = pathnp_posix(buf, wpePath.Resolved, bufsiz, TRUE) - buf;
 	}
@@ -427,21 +412,18 @@ sys_readlink(call_t call, const char *path, char *buf, size_t bufsiz)
 int 
 __symlinkat(WIN_TASK *Task, const char *oldpath, int newdirfd, const char *newpath)
 {
+	int result = 0;
 	WIN_NAMEIDATA wpOld;
 	WIN_NAMEIDATA wpNew;
 	WIN_VATTR wStat = {0};
 	WIN_MODE wMode;
-	int result = -1;
 
 	pathat_win(&wpOld, 0, oldpath, AT_SYMLINK_FOLLOW);
-//	path_win(&wpOld, oldpath, 0);
 	if (wpOld.Attribs != -1){
 		vfs_stat(&wpOld, &wStat);
 	}
 	if (!vfs_symlink(&wpOld, &wStat, mode_win(&wMode, 0755), pathat_win(&wpNew, newdirfd, newpath, AT_SYMLINK_NOFOLLOW))){
-		__errno_posix(Task, GetLastError());
-	}else{
-		result = 0;
+		result -= errno_posix(GetLastError());
 	}
 	return(result);
 }
@@ -458,9 +440,9 @@ sys_symlink(call_t call, const char *oldpath, const char *newpath)
 int 
 __faccessat(WIN_TASK *Task, int dirfd, const char *pathname, int mode, int flags)
 {
+	int result = 0;
 	WIN_NAMEIDATA wPath;
 	ACCESS_MASK amDesired = 0;
-	int result = -1;
 
 	if (mode & R_OK){
 		amDesired |= WIN_S_IREAD;
@@ -472,9 +454,7 @@ __faccessat(WIN_TASK *Task, int dirfd, const char *pathname, int mode, int flags
 		amDesired |= WIN_S_IEXEC;
 	}
 	if (!vfs_access(pathat_win(&wPath, dirfd, pathname, flags), amDesired)){
-		__errno_posix(Task, GetLastError());
-	}else{
-		result = 0;
+		result -= errno_posix(GetLastError());
 	}
 	return(result);
 }
@@ -491,16 +471,14 @@ sys_access(call_t call, const char *pathname, int mode)
 int 
 __renameat(WIN_TASK *Task, int dirfd, const char *path, int newdirfd, const char *newpath)
 {
+	int result = 0;
 	WIN_NAMEIDATA wpOld;
 	WIN_NAMEIDATA wpNew;
-	int result = -1;
 
 	if (pathat_win(&wpOld, dirfd, path, AT_SYMLINK_NOFOLLOW)->Attribs == -1){
-		__errno_posix(Task, GetLastError());
+		result -= errno_posix(GetLastError());
 	}else if (!vfs_rename(&wpOld, pathat_win(&wpNew, newdirfd, newpath, AT_SYMLINK_NOFOLLOW))){
-		__errno_posix(Task, GetLastError());
-	}else{
-		result = 0;
+		result -= errno_posix(GetLastError());
 	}
 	return(result);
 }
@@ -517,29 +495,25 @@ sys_rename(call_t call, const char *path, const char *newpath)
 int 
 sys_ftruncate(call_t call, int fd, off_t length)
 {
-	int result = -1;
+	int result = 0;
 	WIN_TASK *pwTask = call.Task;
 
 	if (fd < 0 || fd >= OPEN_MAX){
-		__errno_posix(pwTask, ERROR_INVALID_HANDLE);
+		result = -EBADF;
 	}else if (!vfs_ftruncate(&pwTask->Node[fd], length)){
-		__errno_posix(pwTask, GetLastError());
-	}else{
-		result = 0;
+		result -= errno_posix(GetLastError());
 	}
 	return(result);
 }
 int 
 sys_truncate(call_t call, const char *path, off_t length)
 {
-	int result = -1;
+	int result = 0;
 	WIN_NAMEIDATA wPath;
 	WIN_FLAGS wFlags;
 
 	if (!vfs_truncate(path_win(&wPath, path, 0), flags_win(&wFlags, O_WRONLY), length)){
-		__errno_posix(call.Task, GetLastError());
-	}else{
-		result = 0;
+		result -= errno_posix(GetLastError());
 	}
 	return(result);
 }
@@ -549,14 +523,14 @@ sys_truncate(call_t call, const char *path, off_t length)
 int 
 sys_dup(call_t call, int oldfd)
 {
-	int result = -1;
+	int result = 0;
 	WIN_VNODE vnResult = {0};
 	WIN_TASK *pwTask = call.Task;
 
 	if (oldfd < 0 || oldfd >= OPEN_MAX){
-		__errno_posix(pwTask, ERROR_INVALID_HANDLE);
+		result = -EBADF;
 	}else if (!vfs_dup(&pwTask->Node[oldfd], &vnResult)){
-		__errno_posix(pwTask, GetLastError());
+		result -= errno_posix(GetLastError());
 	}else{
 		result = fd_posix(pwTask, &vnResult, 0);
 	}
@@ -565,15 +539,15 @@ sys_dup(call_t call, int oldfd)
 int 
 sys_dup2(call_t call, int oldfd, int newfd)
 {
-	int result = -1;
+	int result = 0;
 	WIN_TASK *pwTask = call.Task;
 
 	if (oldfd < 0 || oldfd >= OPEN_MAX){
-		__errno_posix(pwTask, ERROR_INVALID_HANDLE);
+		result = -EBADF;
 	}else if (newfd < 0 || newfd >= OPEN_MAX){
-		__errno_posix(pwTask, ERROR_BAD_ARGUMENTS);
+		result = -EINVAL;
 	}else if (!vfs_dup2(&pwTask->Node[oldfd], &pwTask->Node[newfd])){
-		__errno_posix(pwTask, GetLastError());
+		result -= errno_posix(GetLastError());
 	}else{
 		result = newfd;
 	}
@@ -582,7 +556,7 @@ sys_dup2(call_t call, int oldfd, int newfd)
 off_t 
 sys_lseek(call_t call, int fd, off_t offset, int whence)
 {
-	off_t result = -1;
+	off_t result = 0;
 	DWORD dwMethod = FILE_BEGIN;
 	LONGLONG llResult;
 	LONGLONG llOffset = offset;		/* __int64_t */
@@ -594,9 +568,9 @@ sys_lseek(call_t call, int fd, off_t offset, int whence)
 		dwMethod = FILE_END;
 	}
 	if (fd < 0 || fd >= OPEN_MAX){
-		__errno_posix(pwTask, ERROR_INVALID_HANDLE);
+		result = -EBADF;
 	}else if (!vfs_lseek(&pwTask->Node[fd], llOffset, dwMethod, &llResult)){
-		__errno_posix(pwTask, GetLastError());
+		result -= errno_posix(GetLastError());
 	}else{
 		result = llResult;
 	}
@@ -605,15 +579,13 @@ sys_lseek(call_t call, int fd, off_t offset, int whence)
 int 
 sys_close(call_t call, int fd)
 {
-	int result = -1;
+	int result = 0;
 	WIN_TASK *pwTask = call.Task;
 
 	if (fd < 0 || fd >= OPEN_MAX){
-		__errno_posix(pwTask, ERROR_INVALID_HANDLE);
+		result = -EBADF;
 	}else if (!vfs_close(&pwTask->Node[fd])){
-		__errno_posix(pwTask, GetLastError());
-	}else{
-		result = 0;
+		result -= errno_posix(GetLastError());
 	}
 	return(result);
 }
@@ -634,10 +606,10 @@ __closefrom(WIN_VNODE List[], int offset)
 int 
 sys_closefrom(call_t call, int fd)
 {
-	int result = -1;
+	int result = 0;
 
 	if (fd < 0 || fd >= OPEN_MAX){
-		__errno_posix(call.Task, ERROR_INVALID_HANDLE);
+		result = -EBADF;
 	}else{
 		result = __closefrom(call.Task->Node, fd);
 	}
@@ -646,6 +618,7 @@ sys_closefrom(call_t call, int fd)
 ssize_t 
 sys_read(call_t call, int fd, void *buf, size_t count)
 {
+	ssize_t result = 0;
 	DWORD dwResult = -1;
 	DWORD dwCount = count;
 	WIN_TASK *pwTask = call.Task;
@@ -655,17 +628,21 @@ sys_read(call_t call, int fd, void *buf, size_t count)
 		ktrace_USER(pwTask, "VNODE", szMessage, vfs_ktrace(&pwTask->Node[fd], szMessage));
 	}
 	if (fd < 0 || fd >= OPEN_MAX){
-		__errno_posix(pwTask, ERROR_INVALID_HANDLE);
+		result = -EBADF;
 	}else if (!vfs_read(&pwTask->Node[fd], buf, dwCount, &dwResult)){
-		__errno_posix(pwTask, GetLastError());
-	}else if (pwTask->TracePoints & KTRFAC_GENIO){
-		ktrace_GENIO(pwTask, fd, UIO_READ, buf, dwResult);
+		result -= errno_posix(GetLastError());
+	}else{
+		result = dwResult;
+		if (pwTask->TracePoints & KTRFAC_GENIO){
+			ktrace_GENIO(pwTask, fd, UIO_READ, buf, dwResult);
+		}
 	}
-	return((ssize_t)dwResult);
+	return(result);
 }
 ssize_t 
 sys_write(call_t call, int fd, const void *buf, size_t nbyte)
 {
+	ssize_t result = 0;
 	DWORD dwResult = -1;
 	DWORD dwCount = nbyte;
 	WIN_TASK *pwTask = call.Task;
@@ -678,43 +655,51 @@ sys_write(call_t call, int fd, const void *buf, size_t nbyte)
 		ktrace_USER(pwTask, "VNODE", szMessage, vfs_ktrace(&pwTask->Node[fd], szMessage));
 	}
 	if (fd < 0 || fd >= OPEN_MAX){
-		__errno_posix(pwTask, ERROR_INVALID_HANDLE);
+		result = -EBADF;
 	}else if (!vfs_write(&pwTask->Node[fd], buf, dwCount, &dwResult)){
-		__errno_posix(pwTask, GetLastError());
+		result -= errno_posix(GetLastError());
+	}else{
+		result = dwResult;
 	}
-	return((ssize_t)dwResult);
+	return(result);
 }
 ssize_t 
 sys_pread(call_t call, int fd, void *buf, size_t nbyte, off_t offset)
 {
+	ssize_t result = 0;
 	DWORD dwResult = -1;
 	DWORD dwCount = nbyte;
 	WIN_TASK *pwTask = call.Task;
 
 	if (offset < 0){
-		__errno_posix(pwTask, ERROR_BAD_ARGUMENTS);
+		result = -EINVAL;
 	}else if (fd < 0 || fd >= OPEN_MAX){
-		__errno_posix(pwTask, ERROR_INVALID_HANDLE);
+		result = -EBADF;
 	}else if (!vfs_pread(&pwTask->Node[fd], buf, dwCount, offset, &dwResult)){
-		__errno_posix(call.Task, GetLastError());
+		result -= errno_posix(GetLastError());
+	}else{
+		result = dwResult;
 	}
-	return((ssize_t)dwResult);
+	return(result);
 }
 ssize_t 
 sys_pwrite(call_t call, int fd, const void *buf, size_t nbyte, off_t offset)
 {
+	ssize_t result = 0;
 	DWORD dwResult = -1;
 	DWORD dwCount = nbyte;
 	WIN_TASK *pwTask = call.Task;
 
 	if (offset < 0){
-		__errno_posix(pwTask, ERROR_BAD_ARGUMENTS);
+		result = -EINVAL;
 	}else if (fd < 0 || fd >= OPEN_MAX){
-		__errno_posix(pwTask, ERROR_INVALID_HANDLE);
+		result = -EBADF;
 	}else if (!vfs_pwrite(&pwTask->Node[fd], buf, dwCount, offset, &dwResult)){
-		__errno_posix(pwTask, GetLastError());
+		result -= errno_posix(GetLastError());
+	}else{
+		result = dwResult;
 	}
-	return((ssize_t)dwResult);
+	return(result);
 }
 
 /****************************************************/
@@ -727,12 +712,10 @@ sys_getthrid(call_t call)
 pid_t 
 __getpgid(WIN_TASK *Task, pid_t pid)
 {
-	pid_t result = -1;
+	pid_t result = 0;
 
-	if (pid < 0){
-		__errno_posix(Task, ERROR_BAD_ARGUMENTS);
-	}else if (pid >= CHILD_MAX){
-		__errno_posix(Task, ERROR_MAX_THRDS_REACHED);
+	if (pid < 0 || pid >= CHILD_MAX){
+		result = -EINVAL;
 	}else if (!pid){
 		result = Task->GroupId;
 	}else{
@@ -753,14 +736,11 @@ sys_getpgrp(call_t call)
 int 
 sys_setpgid(call_t call, pid_t pid, pid_t pgid)
 {
-	int result = -1;
+	int result = 0;
 
-	if (pid < 0){
-		__errno_posix(call.Task, ERROR_BAD_ARGUMENTS);
-	}else if (pid >= CHILD_MAX){
-		__errno_posix(call.Task, ERROR_MAX_THRDS_REACHED);
+	if (pid < 0 || pid >= CHILD_MAX){
+		result = -EINVAL;
 	}else{
-		result = 0;
 		if (!pid){
 			pid = call.Task->TaskId;
 		}
@@ -779,7 +759,7 @@ sys_issetugid(call_t call)
 int 
 sys_revoke(call_t call, const char *path)
 {
-	int result = -1;
+	int result = 0;
 	WIN_NAMEIDATA wPath;
 	WIN_FLAGS wFlags = {GENERIC_READ + GENERIC_WRITE, 
 		FILE_SHARE_READ, OPEN_EXISTING, 
@@ -788,11 +768,11 @@ sys_revoke(call_t call, const char *path)
 	WIN_VNODE vNode = {0};
 
 	if (!vfs_open(path_win(&wPath, path, 0), &wFlags, mode_win(&wMode, 0700), &vNode)){
-		__errno_posix(call.Task, GetLastError());
+		result -= errno_posix(GetLastError());
 	}else if (!vfs_revoke(&vNode)){
-		__errno_posix(call.Task, GetLastError());
-	}else if (vfs_close(&vNode)){
-		result = 0;
+		result -= errno_posix(GetLastError());
+	}else if (!vfs_close(&vNode)){
+		result -= errno_posix(GetLastError());
 	}
 	return(result);
 }
@@ -805,12 +785,10 @@ sys_acct(call_t call, const char *filename)
 int 
 sys_profil(call_t call, char *samples, size_t size, u_long offset, u_int scale)
 {
-	int result = -1;
+	int result = 0;
 
 	if (scale && !samples){
-		__errno_posix(call.Task, ERROR_INVALID_ADDRESS);
-	}else{
-		result = 0;
+		result = -EFAULT;
 	}
 	return(result);
 }
@@ -823,12 +801,13 @@ sys_obreak(call_t call, char *nsize)
 pid_t 
 __tfork_thread(const struct __tfork *params, size_t psize, void (*startfunc)(void *), void *startarg)
 {
-	pid_t result = -1;
+	pid_t result = 0;
 	DWORD dwResult = 0;
 
 	if (!win___tfork_thread(NULL, psize, (PVOID)startfunc, startarg, &dwResult)){
-		__errno_posix(&__Tasks[CURRENT], GetLastError());
+		result -= errno_posix(GetLastError());
 	}else{
 		result = dwResult;
-	}	
+	}
+	return(result);	
 }

@@ -50,27 +50,26 @@ sysctl_debug(const int *name, u_int namelen, void *oldp, size_t *oldlenp, void *
 int 
 sysctl_KERN_CLOCKRATE(WIN_TASK *Task, struct clockinfo *info)
 {
-	int result = -1;
+	int result = 0;
 	DWORDLONG dwlHertz, dwlTick;
 
 	if (!win_KERN_CLOCKRATE(&dwlHertz)){
-		__errno_posix(Task, GetLastError());
+		result -= errno_posix(GetLastError());
 	}else if (!win_KERN_TIMECOUNTER_TICK(&dwlTick)){
-		__errno_posix(Task, GetLastError());
+		result -= errno_posix(GetLastError());
 	}else{
 		info->hz = dwlHertz;
 		info->tick = dwlTick;
 		info->tickadj = 0;
 		info->stathz = dwlHertz;
 		info->profhz = dwlHertz;
-		result = 0;
 	}
 	return(result);
 }
 int 
 sysctl_KERN_HOSTNAME(WIN_TASK *Task, char *curname, size_t *csize, const char *newname, size_t nsize)
 {
-	int result = -1;
+	int result = 0;
 	size_t size = 0;
 
 	if (csize){
@@ -78,16 +77,14 @@ sysctl_KERN_HOSTNAME(WIN_TASK *Task, char *curname, size_t *csize, const char *n
 	}
 	/* size not needed for new name */
 	if (!win_KERN_HOSTNAME(curname, newname, size)){
-		__errno_posix(Task, GetLastError());
-	}else{
-		result = 0;
+		result -= errno_posix(GetLastError());
 	}
 	return(result);
 }
 int 
 sysctl_KERN_DOMAINNAME(WIN_TASK *Task, char *curname, size_t *csize, const char *newname, size_t nsize)
 {
-	int result = -1;
+	int result = 0;
 	size_t size = 0;
 
 	if (csize){
@@ -95,9 +92,7 @@ sysctl_KERN_DOMAINNAME(WIN_TASK *Task, char *curname, size_t *csize, const char 
 	}
 	/* size not needed for new name */
 	if (!win_KERN_DOMAINNAME(curname, newname, size)){
-		__errno_posix(Task, GetLastError());
-	}else{
-		result = 0;
+		result -= errno_posix(GetLastError());
 	}
 	return(result);
 }
@@ -207,36 +202,34 @@ sysctl_KERN_SECURELVL(WIN_TASK *Task, int *oldvalue, int *newvalue)
 	}else if (newvalue){
 		__Globals[WIN_KERN_SECURELVL].LowPart = *newvalue;
 	}else{
-		__errno_posix(Task, ERROR_BAD_ARGUMENTS);
-		result = -1;
+		result = -EINVAL;
 	}
 	return(result);
 }
 int 
 sysctl_KERN_TIMECOUNTER_TICK(WIN_TASK *Task, int *value)
 {
-	int result = -1;
+	int result = 0;
 	DWORDLONG dwlValue;
 
 	if (!win_KERN_TIMECOUNTER_TICK(&dwlValue)){
-		__errno_posix(Task, ERROR_INVALID_NAME);
+		result = -ENOENT;
 	}else{
 		*value = (int)dwlValue;
-		result = 0;
 	}
 	return(result);
 }
 int 
 sysctl_KERN_TIMECOUNTER(WIN_TASK *Task, const int *name, void *oldvalue, void *newvalue)
 {
-	int result = -1;
+	int result = 0;
 
 	switch (name[2]){
 		case KERN_TIMECOUNTER_TICK:
 			result = sysctl_KERN_TIMECOUNTER_TICK(Task, (int *)oldvalue);
 			break;
 		default:
-			__errno_posix(Task, ERROR_INVALID_NAME);
+			result = -ENOENT;
 	}
 	return(result);
 }
@@ -326,8 +319,7 @@ sysctl_KERN(WIN_TASK *Task, const int *name, void *oldp, size_t *oldlenp, void *
 			break;
 		case KERN_HOSTID:	/* alpine.exe */
 		default:
-			__errno_posix(Task, ERROR_INVALID_NAME);
-			result = -1;
+			result = -ENOENT;
 	}
 	return(result);
 }
@@ -373,16 +365,14 @@ sysctl_HW_NCPU(int *value)
 int 
 sysctl_HW(WIN_TASK *Task, const int *name, void *oldp, size_t *oldlenp, void *newp, size_t newlen)
 {
-	int result = -1;
+	int result = 0;
 
 	switch (name[1]){
 		case HW_MACHINE:
 			win_strncpy(oldp, MACHINE, *oldlenp);
-			result = 0;
 			break;
 		case HW_PAGESIZE:
 			*(int *)oldp = __Globals[WIN_HW_PAGESIZE].LowPart;
-			result = 0;
 			break;
 		case HW_PHYSMEM:	/* gcc.exe/collect2.exe */
 			result = sysctl_HW_PHYSMEM((int *)oldp);
@@ -398,10 +388,9 @@ sysctl_HW(WIN_TASK *Task, const int *name, void *oldp, size_t *oldlenp, void *ne
 			break;
 		case HW_DISKNAMES:
 			win_strncpy(oldp, "wd0:,cd0:,sd0:", *oldlenp);
-			result = 0;
 			break;
 		default:
-			__errno_posix(Task, ERROR_INVALID_NAME);
+			result = -ENOENT;
 	}
 	return(result);
 }
@@ -411,20 +400,18 @@ sysctl_HW(WIN_TASK *Task, const int *name, void *oldp, size_t *oldlenp, void *ne
 int 
 sysctl_VM_LOADAVG(WIN_TASK *Task, struct loadavg *load, size_t size)
 {
-	int result = -1;
+	int result = 0;
 	DWORD dwCount = size / sizeof(struct loadavg);
 
 	if (!proc_VM_LOADAVG(__Tasks, (WIN_LOADAVG *)load)){
-		__errno_posix(Task, GetLastError());
-	}else{
-		result = 0;
+		result -= errno_posix(GetLastError());
 	}
 	return(result);
 }
 int 
 sysctl_VM_UVMEXP(WIN_TASK *Task, struct uvmexp *uvm, size_t size)
 {
-	int result = -1;
+//	int result = -1;
 	MEMORYSTATUSEX msInfo = {sizeof(MEMORYSTATUSEX), 0};
 	SYSTEM_INFO sInfo;
 	DWORD dwPageSize;
@@ -481,8 +468,7 @@ sysctl_VM(WIN_TASK *Task, const int *name, void *oldp, size_t *oldlenp, void *ne
 			result = sysctl_VM_UVMEXP(Task, (struct uvmexp *)oldp, *oldlenp);
 			break;
 		default:
-			__errno_posix(Task, ERROR_INVALID_NAME);
-			result = -1;
+			result = -ENOENT;
 	}
 	return(result);
 }
@@ -492,7 +478,7 @@ sysctl_VM(WIN_TASK *Task, const int *name, void *oldp, size_t *oldlenp, void *ne
 int 
 sysctl_NET_RT(WIN_TASK *Task, const int *name, void *buf, size_t *size)
 {
-	int result = -1;
+	int result = 0;
 
 	/* net/route.c */
 
@@ -507,14 +493,14 @@ sysctl_NET_RT(WIN_TASK *Task, const int *name, void *buf, size_t *size)
 			result = route_NET_RT_IFLIST(Task, buf, size);
 			break;
 		default:
-			__errno_posix(Task, ERROR_INVALID_NAME);
+			result = -ENOENT;
 	}
 	return(result);
 }
 int 
 sysctl_NET_INET(WIN_TASK *Task, const int *name, void *buf, size_t *size)
 {
-	int result = -1;
+	int result = 0;
 
 	switch (name[2]){
 		case IPPROTO_IP:	/* netinet/ip.c */
@@ -527,14 +513,14 @@ sysctl_NET_INET(WIN_TASK *Task, const int *name, void *buf, size_t *size)
 			result = udp_NET_INET_UDP(Task, name, buf, size);
 			break;
 		default:
-			__errno_posix(Task, ERROR_INVALID_NAME);
+			result = -ENOENT;
 	}
 	return(result);
 }
 int 
 sysctl_NET_INET6(WIN_TASK *Task, const int *name, void *buf, size_t *size)
 {
-	int result = -1;
+	int result = 0;
 
 	/* netinet/in.c */
 
@@ -543,14 +529,14 @@ sysctl_NET_INET6(WIN_TASK *Task, const int *name, void *buf, size_t *size)
 			result = in_NET_INET6_IPV6(Task, name, buf, size);
 			break;
 		default:
-			__errno_posix(Task, ERROR_INVALID_NAME);
+			result = -ENOENT;
 	}
 	return(result);
 }
 int 
 sysctl_NET(WIN_TASK *Task, const int *name, void *oldp, size_t *oldlenp, void *newp, size_t newlen)
 {
-	int result = -1;
+	int result = 0;
 
 	switch (name[1]){
 		case PF_ROUTE:
@@ -564,10 +550,9 @@ sysctl_NET(WIN_TASK *Task, const int *name, void *oldp, size_t *oldlenp, void *n
 			break;
 		case PF_KEY:
 			*oldlenp = 0;		/* no IPSEC (ifconfig.exe) */
-			result = 0;
 			break;
 		default:
-			__errno_posix(Task, ERROR_INVALID_NAME);
+			result = -ENOENT;
 	}
 	return(result);
 }
@@ -590,22 +575,21 @@ sysctl_VFS_GENERIC(WIN_TASK *Task, const int *name, void *buf, size_t *size)
 			result = sysctl_VFS_BCACHESTAT((struct bcachestats *)buf, *size);
 			break;
 		default:
-			__errno_posix(Task, ERROR_INVALID_NAME);
-			result = -1;
+			result = -ENOENT;
 	}
 	return(result);
 }
 int 
 sysctl_VFS(WIN_TASK *Task, const int *name, void *oldp, size_t *oldlenp, void *newp, size_t newlen)
 {
-	int result = -1;
+	int result = 0;
 
 	switch (name[1]){
 		case VFS_GENERIC:
 			result = sysctl_VFS_GENERIC(Task, name, oldp, oldlenp);
 			break;
 		default:
-			__errno_posix(Task, ERROR_INVALID_NAME);
+			result = -ENOENT;
 	}
 	return(result);
 }
@@ -615,20 +599,19 @@ sysctl_VFS(WIN_TASK *Task, const int *name, void *oldp, size_t *oldlenp, void *n
 int 
 sysctl_MACHDEP_CPU_BIOS(WIN_TASK *Task, const int *name, char **buf, size_t *size)
 {
-	int result = -1;
+	int result = 0;
 
 	switch (name[2]){
 		case BIOS_DEV:
 			*(dev_t *)buf = DEV_TYPE_PORT;
-			result = 0;
 			break;
 		case BIOS_DISKINFO:
-			__errno_posix(Task, ERROR_DEVICE_NOT_PARTITIONED);
+			result = -ENXIO;
 			break;
 		case BIOS_CKSUMLEN:
 		case BIOS_MAXID:
 		default:
-			__errno_posix(Task, ERROR_INVALID_NAME);
+			result = -ENOENT;
 	}
 	return(result);
 }
@@ -645,8 +628,7 @@ sysctl_MACHDEP(WIN_TASK *Task, const int *name, void *oldp, size_t *oldlenp, voi
 			result = sysctl_MACHDEP_CPU_BIOS(Task, name, (char **)oldp, oldlenp);
 			break;
 		default:
-			__errno_posix(Task, ERROR_INVALID_NAME);
-			result = -1;
+			result = -ENOENT;
 	}
 	return(result);
 }
@@ -656,11 +638,11 @@ sysctl_MACHDEP(WIN_TASK *Task, const int *name, void *oldp, size_t *oldlenp, voi
 int 
 sys___sysctl(call_t call, const int *name, u_int namelen, void *oldp, size_t *oldlenp, void *newp, size_t newlen)
 {
-	int result = -1;
+	int result = 0;
 	WIN_TASK *pwTask = call.Task;
 
 	if (namelen < 2 || namelen >= CTL_MAXNAME){
-		__errno_posix(pwTask, ERROR_BAD_ARGUMENTS);
+		result = -EINVAL;
 	}else switch(name[0]){
 		case CTL_KERN:
 			result = sysctl_KERN(pwTask, name, oldp, oldlenp, newp, newlen);
@@ -682,7 +664,7 @@ sys___sysctl(call_t call, const int *name, u_int namelen, void *oldp, size_t *ol
 			result = sysctl_MACHDEP(pwTask, name, oldp, oldlenp, newp, newlen);
 			break;
 		default:
-			__errno_posix(pwTask, ERROR_INVALID_NAME);
+			result = -ENOENT;
 	}
 	return(result);
 }

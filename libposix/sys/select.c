@@ -70,7 +70,7 @@ timev_posix(struct timeval *tp, DWORD Millisecs)
 
 	if (llTime > 0){
 		tp->tv_usec = (Millisecs % 1000) * 1000;	/* microseconds */
-		tp->tv_sec = (time_t)(llTime * 0.001);	/* __int64_t (%I64d) */
+		tp->tv_sec = (time_t)(llTime * 0.001);		/* __int64_t (%I64d) */
 	}else{
 		tp->tv_usec = 0;
 		tp->tv_sec = 0;
@@ -84,7 +84,7 @@ int
 __select(WIN_TASK *Task, int nfds, fd_set *restrict readfds, fd_set *restrict writefds, 
 	fd_set *restrict errorfds, struct timeval *restrict timeout)
 {
-	int result = -1;
+	int result = 0;
 	WIN_POLLFD *fdVector[WSA_MAXIMUM_WAIT_EVENTS + 1];
 	WIN_VNODE *vnVector[WSA_MAXIMUM_WAIT_EVENTS + 1];
 	struct pollfd pollfds[WSA_MAXIMUM_WAIT_EVENTS] = {0};
@@ -111,11 +111,9 @@ __select(WIN_TASK *Task, int nfds, fd_set *restrict readfds, fd_set *restrict wr
 		nfds = WSA_MAXIMUM_WAIT_EVENTS;
 	}
 	if (!pollfd_win(Task, vnVector, fdVector, pollfds, nfds)){
-		__errno_posix(Task, ERROR_BAD_ARGUMENTS);
+		result = -EINVAL;
 	}else if (!vfs_poll(Task, vnVector, fdVector, &dwTimeOut, &dwResult)){
-		__errno_posix(Task, GetLastError());
-	}else{
-		result = 0;
+		result -= errno_posix(GetLastError());
 	}
 	if (errorfds){
 		result += fdset_select(errorfds, pollfds, (POLLERR | POLLNVAL));

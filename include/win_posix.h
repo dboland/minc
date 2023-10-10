@@ -147,9 +147,10 @@ BOOL win_KERN_TIMECOUNTER_TICK(DWORDLONG *Result);
 
 /* win_mman.c */
 
-BOOL win_mmap(HANDLE Handle, LONG Offset, DWORD Size, PVOID Address, DWORD Protect, PVOID *Result);
-BOOL win_munmap(PVOID Address, DWORD Offset);
-BOOL win_mprotect(PVOID Address, DWORD Size, DWORD Protect);
+BOOL win_mmap(HANDLE Handle, PVOID Address, SIZE_T Size, LARGE_INTEGER *Offset, DWORD Protect, PVOID *Result);
+BOOL win_munmap(PVOID Address, SIZE_T Size);
+BOOL win_mprotect(PVOID Address, SIZE_T Size, DWORD Protect);
+BOOL win_madvise(PVOID Address, SIZE_T Size, DWORD Type);
 
 /* win_capability.c */
 

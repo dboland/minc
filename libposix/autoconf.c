@@ -103,7 +103,7 @@ cpu_configure(void)
 	WIN_CFDRIVER cfDriver;
 	DWORD dwFlags = WIN_MNT_NOWAIT;
 	CHAR szMessage[MAX_MESSAGE];
-	WIN_STATFS fsInfo;
+//	WIN_STATFS fsInfo;
 
 	if (!vfs_setvfs(&cfData, dwFlags)){
 		return;

@@ -35,12 +35,12 @@
 int 
 sys_ioctl(call_t call, int fd, unsigned long request, ...)
 {
-	int result = -1;
+	int result = 0;
 	va_list args;
 
 	va_start(args, request);
 	if (fd < 0 || fd >= OPEN_MAX){
-		__errno_posix(call.Task, ERROR_INVALID_HANDLE);
+		result = -EBADF;
 	}else switch (IOCGROUP(request)){
 		case 'd':
 			result = disk_ioctl(call.Task, fd, request, args);
@@ -64,7 +64,7 @@ sys_ioctl(call_t call, int fd, unsigned long request, ...)
 		case 'm':		/* sys/mtio.h */
 		default:
 			__PRINTF("sys_ioctl(%c)\n", IOCGROUP(request))
-			__errno_posix(call.Task, ERROR_NOT_SUPPORTED);
+			result = -EOPNOTSUPP;
 	}
 	va_end(args);
 	return(result);

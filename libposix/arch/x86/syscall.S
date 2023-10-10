@@ -31,14 +31,14 @@
 #include <sys/syscall.h>
 
 .file "syscall.S"
-.global _syscall, __threxit
+.global _syscall
 
 .def _syscall; .scl 2; .type 32; .endef
 
 _syscall:
-	mov (%esp),%edx		# code
+	mov (%esp),%ecx		# code
 	mov $-1,%eax
-	cmp $SYS_MAXSYSCALL,%edx
+	cmp $SYS_MAXSYSCALL,%ecx
 	jg 1f
 	# setup call_t struct
 	push $-1		# task_struct (defunct)

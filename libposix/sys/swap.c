@@ -61,7 +61,7 @@ swapctl_STATS(struct swapent *swap, int count)
 int
 sys_swapctl(call_t call, int cmd, const void *arg, int misc)
 {
-	int result = -1;
+	int result = 0;
 
 	switch (cmd){
 		case SWAP_NSWAP:
@@ -71,7 +71,7 @@ sys_swapctl(call_t call, int cmd, const void *arg, int misc)
 			result = swapctl_STATS((struct swapent *)arg, misc);
 			break;
 		default:
-			__errno_posix(call.Task, ERROR_NOT_SUPPORTED);
+			result = -EOPNOTSUPP;
 	}
 	return(result);
 }

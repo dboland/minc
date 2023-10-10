@@ -35,16 +35,16 @@
 ssize_t 
 sys_writev(call_t call, int fd, const struct iovec *iov, int iovcnt)
 {
-	ssize_t result = -1;
+	ssize_t result = 0;
 	ULONG ulResult;
 	WIN_TASK *pwTask = call.Task;
 
 	if (iovcnt < 0 || iovcnt >= IOV_MAX){
-		__errno_posix(pwTask, ERROR_BAD_ARGUMENTS);
+		result = -EINVAL;
 	}else if (fd < 0 || fd >= OPEN_MAX){
-		__errno_posix(pwTask, ERROR_INVALID_HANDLE);
+		result = -EBADF;
 	}else if (!vfs_writev(&pwTask->Node[fd], (WIN_IOVEC *)iov, iovcnt, &ulResult)){
-		__errno_posix(pwTask, GetLastError());
+		result -= errno_posix(GetLastError());
 	}else{
 		result = ulResult;
 	}
@@ -53,16 +53,16 @@ sys_writev(call_t call, int fd, const struct iovec *iov, int iovcnt)
 ssize_t 
 sys_readv(call_t call, int fd, const struct iovec *iov, int iovcnt)
 {
-	ssize_t result = -1;
+	ssize_t result = 0;
 	ULONG ulResult;
 	WIN_TASK *pwTask = call.Task;
 
 	if (iovcnt < 0 || iovcnt >= IOV_MAX){
-		__errno_posix(pwTask, ERROR_BAD_ARGUMENTS);
+		result = -EINVAL;
 	}else if (fd < 0 || fd >= OPEN_MAX){
-		__errno_posix(pwTask, ERROR_INVALID_HANDLE);
+		result = -EBADF;
 	}else if (!vfs_readv(&pwTask->Node[fd], (WIN_IOVEC *)iov, iovcnt, &ulResult)){
-		__errno_posix(pwTask, GetLastError());
+		result -= errno_posix(GetLastError());
 	}else{
 		result = ulResult;
 	}

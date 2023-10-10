@@ -33,12 +33,12 @@
 /************************************************************/
 
 BOOL 
-MManAlloc(PVOID Address, DWORD Size, DWORD Protect, PVOID *Result)
+MManAlloc(PVOID Address, DWORD Size, DWORD Type, DWORD Protect, PVOID *Result)
 {
 	BOOL bResult = FALSE;
 	PVOID pvResult = NULL;
 
-	if (pvResult = VirtualAlloc(Address, Size, MEM_COMMIT, Protect)){
+	if (pvResult = VirtualAlloc(Address, Size, Type, Protect)){
 		*Result = pvResult;
 		bResult = TRUE;
 	}else{
@@ -47,34 +47,22 @@ MManAlloc(PVOID Address, DWORD Size, DWORD Protect, PVOID *Result)
 	return(bResult);
 }
 BOOL 
-MManLoadFile(HANDLE Handle, PVOID Address, LONG Offset, DWORD Size, PVOID *Result)
+MManLoadFile(HANDLE Handle, PVOID Address, DWORD Size, LARGE_INTEGER *Offset, PVOID *Result)
 {
 	BOOL bResult = FALSE;
-	LONG lBytesRead;
+	DWORD dwResult;
+	LARGE_INTEGER liCurrent = {0};
 
-	if (INVALID_SET_FILE_POINTER == SetFilePointer(Handle, Offset, NULL, FILE_BEGIN)){
-		WIN_ERR("SetFilePointer(%d): %s\n", Handle, win_strerror(GetLastError()));
-	}else if (!ReadFile(Handle, Address, Size, &lBytesRead, NULL)){
-		WIN_ERR("ReadFile(%d): %s\n", Address, win_strerror(GetLastError()));
-	}else if (INVALID_SET_FILE_POINTER == SetFilePointer(Handle, Offset, NULL, FILE_BEGIN)){
-		WIN_ERR("SetFilePointer(%d): %s\n", Handle, win_strerror(GetLastError()));
+	if (!SetFilePointerEx(Handle, liCurrent, &liCurrent, FILE_CURRENT)){
+		WIN_ERR("SetFilePointerEx(%d): %s\n", Handle, win_strerror(GetLastError()));
+	}else if (!SetFilePointerEx(Handle, *Offset, Offset, FILE_BEGIN)){
+		WIN_ERR("SetFilePointerEx(%d): %s\n", Handle, win_strerror(GetLastError()));
+	}else if (!ReadFile(Handle, Address, Size, &dwResult, NULL)){
+		WIN_ERR("ReadFile(0x%x): %s\n", Address, win_strerror(GetLastError()));
+	}else if (!SetFilePointerEx(Handle, liCurrent, &liCurrent, FILE_BEGIN)){
+		WIN_ERR("SetFilePointerEx(%d): %s\n", Handle, win_strerror(GetLastError()));
 	}else{
 		*Result = Address;
-		bResult = TRUE;
-	}
-	return(bResult);
-}
-BOOL 
-MManCreateFile(HANDLE Handle, PVOID Address, LONG Offset, DWORD Size, PVOID *Result)
-{
-	BOOL bResult = FALSE;
-	HANDLE hResult = NULL;
-	LPVOID lpvResult = NULL;
-
-	if (!(hResult = CreateFileMapping(Handle, NULL, PAGE_READWRITE, 0, 0, NULL))){
-		WIN_ERR("CreateFileMapping(%d): %s\n", Handle, win_strerror(GetLastError()));
-	}else if (lpvResult = MapViewOfFile(hResult, FILE_MAP_WRITE, 0, 0, 0)){
-		*Result = lpvResult;
 		bResult = TRUE;
 	}
 	return(bResult);
@@ -83,7 +71,7 @@ MManCreateFile(HANDLE Handle, PVOID Address, LONG Offset, DWORD Size, PVOID *Res
 /************************************************************/
 
 BOOL 
-win_mprotect(PVOID Address, DWORD Size, DWORD Protect)
+win_mprotect(PVOID Address, SIZE_T Size, DWORD Protect)
 {
 	BOOL bResult = FALSE;
 	DWORD dwProtect;
@@ -96,33 +84,70 @@ win_mprotect(PVOID Address, DWORD Size, DWORD Protect)
 	return(bResult);
 }
 BOOL 
-win_mmap(HANDLE Handle, LONG Offset, DWORD Size, PVOID Address, DWORD Protect, PVOID *Result)
+win_mmap(HANDLE Handle, PVOID Address, SIZE_T Size, LARGE_INTEGER *Offset, DWORD Protect, PVOID *Result)
 {
 	BOOL bResult = FALSE;
 	PVOID pvResult = NULL;
 
 	if (Handle == INVALID_HANDLE_VALUE){
-		bResult = MManAlloc(Address, Size, Protect, Result);
+		bResult = MManAlloc(Address, Size, MEM_COMMIT, Protect, Result);
 	}else if (Address){
-		bResult = MManLoadFile(Handle, Address, Offset, Size, Result);
-	}else if (!MManAlloc(NULL, Size, PAGE_READWRITE, &pvResult)){
+		bResult = MManLoadFile(Handle, Address, Size, Offset, Result);
+	}else if (!MManAlloc(NULL, Size, MEM_RESERVE | MEM_COMMIT, PAGE_READWRITE, &pvResult)){
 		return(FALSE);
-	}else if (!MManLoadFile(Handle, pvResult, Offset, Size, Result)){
-		VirtualFree(pvResult, 0, MEM_DECOMMIT);
+	}else if (!MManLoadFile(Handle, pvResult, Size, Offset, Result)){
+		VirtualFree(pvResult, 0, MEM_RELEASE);
 	}else{
 		bResult = win_mprotect(pvResult, Size, Protect);
 	}
 	return(bResult);
 }
 BOOL 
-win_munmap(PVOID Address, DWORD Offset)
+win_madvise(PVOID Address, SIZE_T Size, DWORD Type)
 {
 	BOOL bResult = FALSE;
+	MEMORY_BASIC_INFORMATION mbInfo = {0};
 
-	if (!VirtualFree(Address, 0, MEM_RELEASE)){
-		WIN_ERR("VirtualFree(0x%x): %s\n", Address, win_strerror(GetLastError()));
+	if (!Type){
+		return(TRUE);
+	}else if (!VirtualQuery(Address, &mbInfo, sizeof(MEMORY_BASIC_INFORMATION))){
+		WIN_ERR("VirtualQuery(0x%x): %s\n", Address, win_strerror(GetLastError()));
+	}else if (!VirtualAlloc(Address, Size, Type, mbInfo.AllocationProtect)){
+		WIN_ERR("VirtualAlloc(%d): %s\n", Type, win_strerror(GetLastError()));
 	}else{
 		bResult = TRUE;
 	}
+	return(bResult);
+}
+BOOL 
+win_munmap_OLD(PVOID Address, DWORD Size)
+{
+	BOOL bResult = FALSE;
+	PVOID pvResult = NULL;
+
+	if (!VirtualFree(Address, 0, MEM_RELEASE)){
+		WIN_ERR("VirtualAlloc(0x%x): %s\n", Address, win_strerror(GetLastError()));
+	}else{
+		bResult = TRUE;
+	}
+	return(bResult);
+}
+BOOL 
+win_munmap(PVOID Address, SIZE_T Size)
+{
+	BOOL bResult = FALSE;
+	MEMORY_BASIC_INFORMATION mbInfo = {0};
+
+	if (!VirtualQuery(Address, &mbInfo, sizeof(MEMORY_BASIC_INFORMATION))){
+		WIN_ERR("VirtualQuery(0x%x): %s\n", Address, win_strerror(GetLastError()));
+	}else if (Size < mbInfo.RegionSize){
+		bResult = VirtualFree(Address, 0, MEM_RELEASE);
+	}else if (!VirtualAlloc(Address, Size, MEM_RESET, mbInfo.AllocationProtect)){
+		WIN_ERR("VirtualAlloc(0x%x): %s\n", Address, win_strerror(GetLastError()));
+	}else{
+		bResult = TRUE;
+	}
+//__PRINTF("Size(%d) Address(0x%x) State(0x%x) RegionSize(%d), Type(0x%x) BaseAddress(0x%x) AllocationBase(0x%x)\n", 
+//		Size, Address, mbInfo.State, mbInfo.RegionSize, mbInfo.Type, mbInfo.BaseAddress, mbInfo.AllocationBase)
 	return(bResult);
 }

@@ -136,13 +136,13 @@ fdflags_posix(WIN_VNODE *Node)
 int 
 fcntl_F_DUP(WIN_TASK *Task, WIN_VNODE *Node, DWORD Command, int offset)
 {
+	int result = 0;
 	WIN_VNODE vnResult = {0};
-	int result = -1;
 
 	if (offset < 0 || offset >= OPEN_MAX){
-		__errno_posix(Task, ERROR_INVALID_HANDLE);
+		result = -EBADF;
 	}else if (!vfs_F_CNTL(Node, Command, &vnResult)){
-		__errno_posix(Task, GetLastError());
+		result -= errno_posix(GetLastError());
 	}else{
 		result = fd_posix(Task, &vnResult, offset);
 	}
@@ -151,13 +151,11 @@ fcntl_F_DUP(WIN_TASK *Task, WIN_VNODE *Node, DWORD Command, int offset)
 int 
 fcntl_F_SETFL(WIN_TASK *Task, WIN_VNODE *Node, int flags)
 {
-	int result = -1;
+	int result = 0;
 	WIN_FLAGS wFlags = {0};
 
 	if (!vfs_F_SETFL(Node, flflags_win(&wFlags, flags))){
-		__errno_posix(Task, GetLastError());
-	}else{
-		result = 0;
+		result -= errno_posix(GetLastError());
 	}
 	return(result);
 }
@@ -174,7 +172,7 @@ fcntl_F_SETFD(WIN_VNODE *Node, int flags)
 int 
 fcntl_F_SETLK(WIN_TASK *Task, WIN_VNODE *Node, struct flock *lock)
 {
-	int result = -1;
+	int result = 0;
 	DWORD dwFlags = 0;
 
 	switch (lock->l_type){
@@ -191,22 +189,19 @@ fcntl_F_SETLK(WIN_TASK *Task, WIN_VNODE *Node, struct flock *lock)
 			dwFlags = -1;
 	}
 	if (!vfs_F_SETLK(Node, dwFlags)){
-		__errno_posix(Task, GetLastError());
-	}else{
-		result = 0;
+		result -= errno_posix(GetLastError());
 	}
 	return(result);
 }
 int 
 fcntl_F_SETOWN(WIN_TASK *Task, WIN_VNODE *Node, int owner)
 {
-	int result = -1;
+	int result = 0;
 
 	if (owner >= CHILD_MAX){
-		__errno_posix(Task, ERROR_INVALID_HANDLE);
+		result = -EBADF;
 	}else{
 		Node->Owner = owner;
-		result = 0;
 	}
 	return(result);
 }
@@ -216,7 +211,7 @@ fcntl_F_SETOWN(WIN_TASK *Task, WIN_VNODE *Node, int owner)
 int 
 __openat(WIN_TASK *Task, WIN_NAMEIDATA *Path, int flags, va_list args)
 {
-	int result = -1;
+	int result = 0;
 	mode_t mode = va_arg(args, mode_t);
 	WIN_FLAGS wFlags;
 	WIN_MODE wMode;
@@ -225,9 +220,9 @@ __openat(WIN_TASK *Task, WIN_NAMEIDATA *Path, int flags, va_list args)
 
 	mode &= ~Task->FileMask;
 	if ((Path->Flags & WIN_NOFOLLOW) && (Path->FileType == WIN_VLNK)){
-		__errno_posix(Task, ERROR_TOO_MANY_LINKS);
+		result = -ELOOP;
 	}else if (!vfs_open(Path, flags_win(&wFlags, flags), mode_win(&wMode, mode), &vNode)){
-		__errno_posix(Task, GetLastError());
+		result -= errno_posix(GetLastError());
 	}else{
 		result = fd_posix(Task, &vNode, 0);
 	}
@@ -266,7 +261,7 @@ sys_openat(call_t call, int dirfd, const char *path, int flags, ...)
 int 
 sys_flock(call_t call, int fd, int operation)
 {
-	int result = -1;
+	int result = 0;
 	WIN_TASK *pwTask = call.Task;
 	DWORD dwFlags = 0;
 
@@ -280,25 +275,23 @@ sys_flock(call_t call, int fd, int operation)
 		dwFlags |= LOCKFILE_UNLOCK;
 	}
 	if (fd < 0 || fd >= OPEN_MAX){
-		__errno_posix(pwTask, ERROR_INVALID_HANDLE);
+		result = -EBADF;
 	}else if (!vfs_F_SETLK(&pwTask->Node[fd], dwFlags)){
-		__errno_posix(pwTask, GetLastError());
-	}else{
-		result = 0;
+		result -= errno_posix(GetLastError());
 	}
 	return(result);
 }
 int 
 sys_fcntl(call_t call, int fd, int cmd, ...)
 {
-	int result = -1;
+	int result = 0;
 	va_list args;
 	WIN_TASK *pwTask = call.Task;
 	WIN_VNODE *vNodes = pwTask->Node;
 
 	va_start(args, cmd);
 	if (fd < 0 || fd >= OPEN_MAX){
-		__errno_posix(pwTask, ERROR_INVALID_HANDLE);
+		result = -EBADF;
 	}else switch (cmd){
 		case F_DUPFD:
 		case F_DUPFD_CLOEXEC:
@@ -323,7 +316,7 @@ sys_fcntl(call_t call, int fd, int cmd, ...)
 			result = fcntl_F_SETOWN(pwTask, &vNodes[fd], va_arg(args, int));
 			break;
 		default:
-			__errno_posix(pwTask, ERROR_NOT_SUPPORTED);
+			result = -EOPNOTSUPP;
 	}
 	va_end(args);
 	return(result);

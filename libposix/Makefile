@@ -5,7 +5,7 @@ BINDIR=/bin
 
 LIBPOSIX=libposix-${RELEASE}.dll
 IMPLIB=libposix.dll.a
-CFLAGS+=-g -Wimplicit-function-declaration -Werror -I../include -ffreestanding
+CFLAGS+=-g -I../include -ffreestanding
 CFLAGS+=-DRELEASE=\"${RELEASE}\" -DVERSION=\"${VERSION}\" -DBUILD=${BUILD}
 #CFLAGS+=-Wunused
 LDFLAGS=
@@ -48,10 +48,10 @@ clean:
 	/bin/rm -f arch/*.o *.o *.a *.dll
 
 ${LIBDIR}:
-	mkdir -p ${DESTDIR}${LIBDIR}
+	mkdir -p ${LIBDIR}
 
 ${BINDIR}:
-	mkdir -p ${DESTDIR}${BINDIR}
+	mkdir -p ${BINDIR}
 
 install: ${DESTDIR}
 	${INSTALL} -m 06555 ${LIBPOSIX} ${DESTDIR}${BINDIR}/

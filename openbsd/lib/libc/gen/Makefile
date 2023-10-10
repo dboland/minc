@@ -33,7 +33,7 @@ OBJECTS+= _exit.S.o _getlogin.S.o _setlogin.S.o _fork.S.o _vfork.S.o
 OBJECTS+= syslog_r.o syslog.o auth_subr.o login_cap.o authenticate.o
 
 #OBJECTS+= elf_hash.o posix_spawn.o shm_open.o
-#REPLACED+= errno.o
+#OBJECTS+= errno.S.o
 
 .SUFFIXES:
 .DEFAULT:

@@ -223,14 +223,14 @@ ktrace_USER(WIN_TASK *Task, const char *label, void *addr, size_t len)
 int 
 ktrace_SET(WIN_TASK *Task , const char *tracefile, int trpoints)
 {
-	int result = -1;
+	int result = 0;
 	WIN_MODE wMode;
 	struct ktr_header header = {0x0052544b, 0};	/* "KTR" */
 	WIN_NAMEIDATA wPath;
 	LONG lSize = sizeof(struct ktr_header);
 
 	if (!vfs_ktrace_SET(Task, path_win(&wPath, tracefile, 0), &header, lSize)){
-		__errno_posix(Task, GetLastError());
+		result -= errno_posix(GetLastError());
 	}else{
 		Task->TracePoints = trpoints;
 		result = 0;
@@ -240,10 +240,10 @@ ktrace_SET(WIN_TASK *Task , const char *tracefile, int trpoints)
 int 
 ktrace_CLEAR(WIN_TASK *Task)
 {
-	int result = -1;
+	int result = 0;
 
 	if (!vfs_ktrace_CLEAR(Task)){
-		__errno_posix(Task, GetLastError());
+		result -= errno_posix(GetLastError());
 	}else{
 		Task->TracePoints = 0;
 		result = 0;
@@ -256,29 +256,29 @@ ktrace_CLEAR(WIN_TASK *Task)
 int 
 sys_ktrace(call_t call, const char *tracefile, int ops, int trpoints, pid_t pid)
 {
-	int result = -1;
+	int result = 0;
 
 	if (ops == KTROP_SET){
 		result = ktrace_SET(call.Task, tracefile, trpoints);
 	}else if (ops == KTROP_CLEAR){
 		result = ktrace_CLEAR(call.Task);
 	}else{
-		__errno_posix(call.Task, ERROR_BAD_ARGUMENTS);
+		result -= errno_posix(GetLastError());
 	}
 	return(result);
 }
 int 
 sys_utrace(call_t call, const char *label, void *addr, size_t len)
 {
-	int result = -1;
+	int result = 0;
 	WIN_TASK *pwTask = call.Task;
 
 	if (!(pwTask->TracePoints & KTRFAC_USER)){
 		return(0);
 	}else if (strlen(label) >= KTR_USER_MAXIDLEN){
-		__errno_posix(pwTask, ERROR_FILENAME_EXCED_RANGE);
+		result = -ENAMETOOLONG;
 	}else if (len > KTR_USER_MAXLEN){
-		__errno_posix(pwTask, ERROR_BAD_ARGUMENTS);
+		result = -EINVAL;
 	}else{
 		ktrace_USER(pwTask, label, addr, len);
 		result = 0;

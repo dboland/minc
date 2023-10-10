@@ -163,7 +163,7 @@ int
 __seteuid(WIN_TASK *Task, uid_t uid)
 {
 	SID8 sidUser;
-	int result = -1;
+	int result = 0;
 
 	if (!uid){
 		uid = __RootUid;
@@ -171,19 +171,16 @@ __seteuid(WIN_TASK *Task, uid_t uid)
 	if (uid == rid_posix(&Task->UserSid)){
 		return(0);
 	}else if (__getuid(Task) && __geteuid(Task)){
-		__errno_posix(Task, ERROR_PRIVILEGE_NOT_HELD);
+		result = -EPERM;
 	}else if (!vfs_seteuid(Task, rid_win(&sidUser, uid))){
-		__errno_posix(Task, GetLastError());
-	}else{
-//		Task->EffUid = uid;
-		result = 0;
+		result -= errno_posix(GetLastError());
 	}
 	return(result);
 }
 int 
 __setuid(WIN_TASK *Task, uid_t uid)
 {
-	int result = -1;
+	int result = 0;
 
 	if (!uid){
 		uid = __RootUid;
@@ -192,7 +189,6 @@ __setuid(WIN_TASK *Task, uid_t uid)
 		return(0);
 	}else if (!__seteuid(Task, uid)){
 		Task->RealUid = rid_posix(&Task->UserSid);
-		result = 0;
 	}
 	return(result);
 }
@@ -209,7 +205,7 @@ sys_setuid(call_t call, uid_t uid)
 int 
 sys_setreuid(call_t call, uid_t ruid, uid_t euid)
 {
-	int result = -1;
+	int result = 0;
 
 	if (ruid == __getuid(call.Task)){
 		result = __seteuid(call.Task, euid);
@@ -238,7 +234,7 @@ int
 __setegid(WIN_TASK *Task, gid_t gid)
 {
 	SID8 sidGroup;
-	int result = -1;
+	int result = 0;
 
 	if (!gid){
 		gid = WIN_ROOT_GID;
@@ -246,26 +242,23 @@ __setegid(WIN_TASK *Task, gid_t gid)
 	if (gid == rid_posix(&Task->GroupSid)){
 		return(0);
 	}else if (__getuid(Task) && __geteuid(Task)){
-		__errno_posix(Task, ERROR_PRIVILEGE_NOT_HELD);
+		result = -EPERM;
 	}else if (!vfs_setegid(Task, rid_win(&sidGroup, gid))){
-		__errno_posix(Task, GetLastError());
-	}else{
-		result = 0;
+		result -= errno_posix(GetLastError());
 	}
 	return(result);
 }
 int 
 __setgid(WIN_TASK *Task, gid_t gid)
 {
-	int result = -1;
+	int result = 0;
 
 	if (gid == Task->RealGid){
 		result = 0;
 	}else if (__setegid(Task, gid)){
-		__errno_posix(Task, GetLastError());
+		result -= errno_posix(GetLastError());
 	}else{
 		Task->RealGid = rid_posix(&Task->GroupSid);
-		result = 0;
 	}
 	return(result);
 }
@@ -282,7 +275,7 @@ sys_setgid(call_t call, gid_t gid)
 int 
 sys_setregid(call_t call, gid_t rgid, gid_t egid)
 {
-	int result = -1;
+	int result = 0;
 	WIN_TASK *pwTask = call.Task;
 
 	if (rgid == pwTask->RealGid){
@@ -311,25 +304,21 @@ sys_setresgid(call_t call, gid_t rgid, gid_t egid, gid_t sgid)
 int 
 sys_getlogin(call_t call, char *name, size_t namelen)
 {
-	int result = -1;
+	int result = 0;
 	SID8 sid;
 
 	if (!vfs_getlogin(call.Task, name, namelen)){
-		__errno_posix(call.Task, GetLastError());
-	}else{
-		result = 0;
+		result -= errno_posix(GetLastError());
 	}
 	return(result);
 }
 int 
 sys_setlogin(call_t call, const char *name)
 {
-	int result = -1;
+	int result = 0;
 
 	if (!vfs_setlogin(call.Task, name)){
-		__errno_posix(call.Task, GetLastError());
-	}else{
-		result = 0;
+		result -= errno_posix(GetLastError());
 	}
 	return(result);
 }
@@ -355,11 +344,11 @@ sys_getppid(call_t call)
 pid_t 
 sys_getsid(call_t call, pid_t pid)
 {
-	pid_t result = -1;
+	pid_t result = 0;
 	WIN_TASK *pwTask = call.Task;
 
 	if (pid < 0 || pid >= CHILD_MAX){
-		__errno_posix(pwTask, ERROR_BAD_ARGUMENTS);
+		result = -EINVAL;
 	}else if (!pid){
 		result = pwTask->SessionId;
 	}else{
@@ -370,11 +359,11 @@ sys_getsid(call_t call, pid_t pid)
 pid_t 
 sys_setsid(call_t call)
 {
-	pid_t result = -1;
+	pid_t result = 0;
 	WIN_TASK *pwTask = call.Task;
 
 	if (!vfs_setsid(pwTask)){
-		__errno_posix(pwTask, GetLastError());
+		result -= errno_posix(GetLastError());
 	}else{
 		result = pwTask->SessionId;
 	}
@@ -383,7 +372,7 @@ sys_setsid(call_t call)
 int 
 sys_chown(call_t call, const char *path, uid_t owner, gid_t group)
 {
-	int result = -1;
+	int result = 0;
 	SID8 sidUser;
 	SID8 sidGroup;
 	WIN_NAMEIDATA wpePath;
@@ -395,16 +384,14 @@ sys_chown(call_t call, const char *path, uid_t owner, gid_t group)
 		group = WIN_ROOT_GID;
 	}
 	if (!vfs_chown(path_win(&wpePath, path, 0), rid_win(&sidUser, owner), rid_win(&sidGroup, group))){
-		__errno_posix(call.Task, GetLastError());
-	}else{
-		result = 0;
+		result -= errno_posix(GetLastError());
 	}
 	return(result);
 }
 int 
 sys_fchown(call_t call, int fd, uid_t owner, gid_t group)
 {
-	int result = -1;
+	int result = 0;
 	SID8 sidUser;
 	SID8 sidGroup;
 	WIN_TASK *pwTask = call.Task;
@@ -416,18 +403,16 @@ sys_fchown(call_t call, int fd, uid_t owner, gid_t group)
 		group = WIN_ROOT_GID;
 	}
 	if (fd < 0 || fd >= OPEN_MAX){
-		__errno_posix(pwTask, ERROR_INVALID_HANDLE);
+		result = -EBADF;
 	}else if (!vfs_fchown(&pwTask->Node[fd], rid_win(&sidUser, owner), rid_win(&sidGroup, group))){
-		__errno_posix(call.Task, GetLastError());
-	}else{
-		result = 0;
+		result -= errno_posix(GetLastError());
 	}
 	return(result);
 }
 int 
 sys_lchown(call_t call, const char *path, uid_t owner, gid_t group)
 {
-	int result = -1;
+	int result = 0;
 	SID8 sidUser;
 	SID8 sidGroup;
 	WIN_NAMEIDATA wpePath;
@@ -439,7 +424,7 @@ sys_lchown(call_t call, const char *path, uid_t owner, gid_t group)
 		group = WIN_ROOT_GID;
 	}
 	if (!vfs_chown(path_win(&wpePath, path, O_NOFOLLOW), rid_win(&sidUser, owner), rid_win(&sidGroup, group))){
-		__errno_posix(call.Task, GetLastError());
+		result -= errno_posix(GetLastError());
 	}else{
 		result = 0;
 	}
@@ -448,10 +433,10 @@ sys_lchown(call_t call, const char *path, uid_t owner, gid_t group)
 int 
 sys_fchownat(call_t call, int dirfd, const char *pathname, uid_t owner, gid_t group, int flags)
 {
+	int result = 0;
 	SID8 sidUser;
 	SID8 sidGroup;
 	WIN_NAMEIDATA wpePath;
-	int result = -1;
 
 	if (!owner){
 		owner = WIN_ROOT_UID;
@@ -460,39 +445,36 @@ sys_fchownat(call_t call, int dirfd, const char *pathname, uid_t owner, gid_t gr
 		group = WIN_ROOT_GID;
 	}
 	if (!pathname || !pathname[0]){
-		__errno_posix(call.Task, ERROR_BAD_ARGUMENTS);
+		result = -EINVAL;
 	}else if (!vfs_chown(pathat_win(&wpePath, dirfd, pathname, flags), rid_win(&sidUser, owner), rid_win(&sidGroup, group))){
-		__errno_posix(call.Task, GetLastError());
-	}else{
-		result = 0;
+		result -= errno_posix(GetLastError());
 	}
 	return(result);
 }
 int 
 sys_pipe(call_t call, int pipefd[2])
 {
-	int result = -1;
+	int result = 0;
 	WIN_VNODE vnResult[2] = {0};
 	WIN_TASK *pwTask = call.Task;
 
 	if (!pipefd){
-		__errno_posix(call.Task, ERROR_INVALID_ADDRESS);
+		result = -EFAULT;
 	}else if (!vfs_pipe(vnResult)){
-		__errno_posix(pwTask, GetLastError());
+		result -= errno_posix(GetLastError());
 	}else{
 		pipefd[0] = fd_posix(pwTask, &vnResult[0], 0);
 		pipefd[1] = fd_posix(pwTask, &vnResult[1], 0);
 		if (pwTask->TracePoints & KTRFAC_STRUCT){
 			ktrace_STRUCT(pwTask, "fdvec", 5, pipefd, (sizeof(int) * 2));
 		}
-		result = 0;
 	}
 	return(result);
 }
 int 
 sys_execve(call_t call, const char *filename, char *const argv[], char *const envp[])
 {
-	int result = -1;
+	int result = 0;
 	WIN_NAMEIDATA wPath;
 	WIN_TASK *pwTask = call.Task;
 	WIN_MODE wMode;
@@ -503,13 +485,13 @@ sys_execve(call_t call, const char *filename, char *const argv[], char *const en
 	CHAR szCommand[PATH_MAX] = "";
 
 	if (!filename || !envp){
-		__errno_posix(pwTask, ERROR_BAD_ARGUMENTS);
+		result = -EINVAL;
 	}else if (!disk_open(path_win(&wPath, filename, 0), &wFlags, mode_win(&wMode, 0666), &vNode)){
-		__errno_posix(pwTask, GetLastError());
+		result -= errno_posix(GetLastError());
 	}else if (!shebang_win(&vNode, &wPath, filename, szCommand)){
-		__errno_posix(pwTask, GetLastError());
+		result -= errno_posix(GetLastError());
 	}else if (!vfs_execve(pwTask, argv_win(pwTask, szCommand, argv), env_win(envp))){
-		__errno_posix(pwTask, GetLastError());
+		result -= errno_posix(GetLastError());
 	}else{
 		win_exit(0);
 	}
@@ -543,8 +525,7 @@ sys___get_tcb(call_t call)
 int 
 sys_interrupt(call_t call)
 {
-	__errno_posix(call.Task, ERROR_SIGNAL_PENDING);
-	return(-1);
+	return(-EINTR);
 }
 
 /****************************************************/
@@ -586,6 +567,10 @@ syscall_leave(call_t call)
 //			result = -1;
 //		}
 //	}
+	if (result < 0){
+		pwTask->Error = -result;
+		result = -1;
+	}
 	if (pwTask->TracePoints & KTRFAC_SYSRET){
 		ktrace_SYSRET(pwTask, call.code, result);
 	}

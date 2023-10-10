@@ -1,6 +1,6 @@
 include ../../Makefile.inc
 
-CFLAGS=-g -Wimplicit-function-declaration
+CFLAGS=-Wimplicit-function-declaration
 CRT0=crt0.o
 OBJECTS=${CRT0} crt1.o crtbegin.o crtend.o gcrt0.o
 LIBS=libgcc.a libgcc_eh.a libgcc_s.a

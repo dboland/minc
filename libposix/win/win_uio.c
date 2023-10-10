@@ -36,19 +36,19 @@ BOOL
 win_writev(HANDLE Handle, const WIN_IOVEC Data[], DWORD Count, ULONG *Result)
 {
 	BOOL bResult = FALSE;
-	DWORD dwIndex = 0;
+//	DWORD dwIndex = 0;
 	DWORD dwSize = 0;
 	ULONG ulSize = 0;
 	PVOID pvBuffer = win_malloc(1);
 	PVOID P;
 
-	while (dwIndex < Count){
+	while (Count--){
 		dwSize = Data->Length;
 		pvBuffer = win_realloc(pvBuffer, ulSize + dwSize);
 		P = pvBuffer + ulSize;
 		win_memcpy(P, Data->Buffer, dwSize);
 		ulSize += dwSize;
-		dwIndex++;
+//		dwIndex++;
 		Data++;
 	}
 	if (!WriteFile(Handle, pvBuffer, ulSize, &dwSize, NULL)){

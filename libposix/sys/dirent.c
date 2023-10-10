@@ -76,11 +76,9 @@ sys_getdents(call_t call, int fd, void *buf, size_t nbytes)
 	WIN_TASK *pwTask = call.Task;
 
 	if (fd < 0 || fd >= OPEN_MAX){
-		__errno_posix(pwTask, ERROR_BAD_ARGUMENTS);
-		result = -1;
+		result = -EINVAL;
 	}else if (!vfs_getdents(&pwTask->Node[fd], pEntity, dwCount, &dwCount)){
-		__errno_posix(pwTask, GetLastError());
-		result = -1;
+		result -= errno_posix(GetLastError());
 	}else while (dwCount--){
 		buf = dirent_posix(buf, pEntity);
 		result += sizeof(struct dirent);

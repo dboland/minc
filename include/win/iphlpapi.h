@@ -55,4 +55,4 @@ typedef struct {
 
 DWORD WINAPI GetNetworkParams(PFIXED_INFO,PULONG);
 DWORD WINAPI GetIfEntry(PMIB_IFROW);
-ULONG GetIpStatistics(PMIB_IPSTATS Statistics);
+DWORD WINAPI GetIpStatistics(PMIB_IPSTATS);

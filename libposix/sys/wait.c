@@ -100,7 +100,7 @@ taskv_win(WIN_TASK *Parent, pid_t pid, WIN_TASK *Result[])
 pid_t 
 sys_wait4(call_t call, pid_t pid, int *status, int options, struct rusage *rusage)
 {
-	pid_t result = -1;
+	pid_t result = 0;
 	WIN_USAGE wuResult = {0};
 	WIN_TASK *ptVector[CHILD_MAX + 1];
 	BOOL bNoHang = FALSE;
@@ -114,11 +114,11 @@ sys_wait4(call_t call, pid_t pid, int *status, int options, struct rusage *rusag
 		dwStatus = 0xFFFF;
 	}
 	if (pid >= CHILD_MAX){
-		__errno_posix(pwTask, ERROR_BAD_ARGUMENTS);
+		result = -EINVAL;
 	}else if (!taskv_win(pwTask, pid, ptVector)){
-		__errno_posix(pwTask, ERROR_WAIT_NO_CHILDREN);
+		result = -ECHILD;
 	}else if (!vfs_wait4(pwTask, ptVector, bNoHang, dwStatus, &wuResult)){
-		__errno_posix(pwTask, GetLastError());
+		result -= errno_posix(GetLastError());
 	}else{
 		result = wuResult.TaskId;
 	}

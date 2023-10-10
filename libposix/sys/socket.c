@@ -219,12 +219,12 @@ sys_getrtable(call_t call)
 int 
 sys_socket(call_t call, int family, int type, int protocol)
 {
-	int result = -1;
+	int result = 0;
 	WIN_VNODE vNode = {0};
 	WIN_TASK *pwTask = call.Task;
 
 	if (!vfs_socket(af_win(family), type, protocol, &vNode)){
-		h_errno = h_errno_posix(pwTask, WSAGetLastError());
+		result -= errno_posix(WSAGetLastError());
 	}else{
 		result = fd_posix(pwTask, &vNode, 0);
 	}
@@ -233,32 +233,30 @@ sys_socket(call_t call, int family, int type, int protocol)
 int 
 sys_connect(call_t call, int sockfd, const struct sockaddr *address, socklen_t addrlen)
 {
-	int result = -1;
+	int result = 0;
 	SOCKADDR sAddress = {0};
 	WIN_TASK *pwTask = call.Task;
 	
 	if (sockfd < 0 || sockfd >= OPEN_MAX){	/* ab.exe */
-		h_errno = h_errno_posix(pwTask, WSAEBADF);
+		result = -EBADF;
 	}else if (!vfs_connect(&pwTask->Node[sockfd], addr_win(&sAddress, pwTask, address), addrlen)){
-		h_errno = h_errno_posix(pwTask, WSAGetLastError());
-	}else{
-		result = 0;
+		result -= errno_posix(WSAGetLastError());
 	}
 	return(result);
 }
 int 
 sys_accept(call_t call, int sockfd, struct sockaddr *addr, socklen_t *addrlen)
 {
-	int result = -1;
+	int result = 0;
 	SOCKADDR sAddress = {0};
 	WIN_VNODE vnResult = {0};
 	WIN_TASK *pwTask = call.Task;
 
 	pwTask->State = SSLEEP;
 	if (sockfd < 0 || sockfd >= OPEN_MAX){	/* ab.exe */
-		h_errno = h_errno_posix(pwTask, WSAEBADF);
+		result = -EBADF;
 	}else if (!vfs_accept(&pwTask->Node[sockfd], &sAddress, addrlen, &vnResult)){
-		h_errno = h_errno_posix(pwTask, WSAGetLastError());
+		result -= errno_posix(WSAGetLastError());
 	}else{
 		addr_posix(addr, pwTask, &sAddress, addrlen);
 		result = fd_posix(pwTask, &vnResult, 0);
@@ -270,28 +268,31 @@ ssize_t
 sys_recvfrom(call_t call, int sockfd, void *buf, size_t size, int flags, 
 	struct sockaddr *src_addr, socklen_t *addrlen)
 {
-	DWORD dwResult = -1;
+	ssize_t result = 0;
+	DWORD dwResult = 0;
 	SOCKADDR sAddress = {0};
 	WIN_TASK *pwTask = call.Task;
 
 //sflags_debug(flags, "sys_recvfrom");
 	if (sockfd < 0 || sockfd >= OPEN_MAX){
-		h_errno = h_errno_posix(pwTask, WSAEBADF);
+		result = -EBADF;
 	}else if (!vfs_recvfrom(&pwTask->Node[sockfd], buf, size, flags, addr_win(&sAddress, pwTask, src_addr), addrlen, &dwResult)){
-		h_errno = h_errno_posix(pwTask, WSAGetLastError());
+		result -= errno_posix(WSAGetLastError());
 	}else{
 		addr_posix(src_addr, pwTask, &sAddress, addrlen);
 		if (pwTask->TracePoints & KTRFAC_GENIO){
 			ktrace_GENIO(pwTask, sockfd, UIO_READ, buf, dwResult);
 		}
+		result = dwResult;
 	}
-	return((ssize_t)dwResult);
+	return(result);
 }
 ssize_t 
 sys_sendto(call_t call, int sockfd, const void *buf, size_t size, int flags, 
 	const struct sockaddr *dest_addr, socklen_t addrlen)
 {
-	DWORD dwResult = -1;
+	ssize_t result = 0;
+	DWORD dwResult = 0;
 	SOCKADDR sAddress = {0};
 	WIN_TASK *pwTask = call.Task;
 
@@ -300,16 +301,18 @@ sys_sendto(call_t call, int sockfd, const void *buf, size_t size, int flags,
 	}
 //sflags_debug(flags, "sys_sendto");
 	if (sockfd < 0 || sockfd >= OPEN_MAX){	/* sshd.exe */
-		h_errno = h_errno_posix(pwTask, WSAEBADF);
+		result = -EBADF;
 	}else if (!vfs_sendto(&pwTask->Node[sockfd], buf, size, flags, addr_win(&sAddress, pwTask, dest_addr), addrlen, &dwResult)){
-		h_errno = h_errno_posix(pwTask, WSAGetLastError());
+		result -= errno_posix(WSAGetLastError());
+	}else{
+		result = dwResult;
 	}
-	return((ssize_t)dwResult);
+	return(result);
 }
 ssize_t 
 sys_sendmsg(call_t call, int sockfd, const struct msghdr *msg, int flags)
 {
-	ssize_t result = -1;
+	ssize_t result = 0;
 	WSAMSG wMessage = {0};
 	SOCKADDR sAddress = {0};
 	DWORD dwResult;
@@ -320,9 +323,9 @@ sys_sendmsg(call_t call, int sockfd, const struct msghdr *msg, int flags)
 	wMessage.namelen = msg->msg_namelen;
 	cmsghdr_win(pwTask, msg);
 	if (sockfd < 0 || sockfd >= OPEN_MAX){
-		h_errno = h_errno_posix(pwTask, WSAEBADF);
+		result = -EBADF;
 	}else if (!vfs_sendmsg(&pwTask->Node[sockfd], msghdr_win(&wMessage, msg), dwFlags, &dwResult)){
-		h_errno = h_errno_posix(pwTask, WSAGetLastError());
+		result -= errno_posix(WSAGetLastError());
 	}else{
 		/* swap back iovec pointers */
 		iovec_win(msg->msg_iov, msg->msg_iovlen);
@@ -333,7 +336,7 @@ sys_sendmsg(call_t call, int sockfd, const struct msghdr *msg, int flags)
 ssize_t 
 sys_recvmsg(call_t call, int sockfd, struct msghdr *msg, int flags)
 {
-	ssize_t result = -1;
+	ssize_t result = 0;
 	SOCKADDR sAddress = {0};
 	WSAMSG wMessage = {0};
 	DWORD dwResult;
@@ -343,9 +346,9 @@ sys_recvmsg(call_t call, int sockfd, struct msghdr *msg, int flags)
 	wMessage.name = &sAddress;
 	wMessage.namelen = msg->msg_namelen;	/* used for in/out (dig.exe) */
 	if (sockfd < 0 || sockfd >= OPEN_MAX){
-		h_errno = h_errno_posix(pwTask, WSAEBADF);
+		result = -EBADF;
 	}else if (!vfs_recvmsg(&pwTask->Node[sockfd], msghdr_win(&wMessage, msg), &dwFlags, &dwResult)){
-		h_errno = h_errno_posix(pwTask, WSAGetLastError());
+		result -= errno_posix(WSAGetLastError());
 	}else{
 		/* swap back iovec pointers */
 		iovec_win(msg->msg_iov, msg->msg_iovlen);
@@ -358,7 +361,7 @@ sys_recvmsg(call_t call, int sockfd, struct msghdr *msg, int flags)
 int 
 sys_socketpair(call_t call, int domain, int type, int protocol, int sv[2])
 {
-	int result = -1;
+	int result = 0;
 	WIN_VNODE vnResult[2] = {0};
 	WIN_TASK *pwTask = call.Task;
 	DWORD dwAttribs = PIPE_READMODE_BYTE;
@@ -367,29 +370,26 @@ sys_socketpair(call_t call, int domain, int type, int protocol, int sv[2])
 		dwAttribs = PIPE_READMODE_MESSAGE;
 	}
 	if (!vfs_socketpair(af_win(domain), dwAttribs, protocol, vnResult)){
-		h_errno = h_errno_posix(pwTask, WSAGetLastError());
+		result -= errno_posix(WSAGetLastError());
 	}else{
 		sv[0] = fd_posix(pwTask, &vnResult[0], 0);
 		sv[1] = fd_posix(pwTask, &vnResult[1], 0);
 		if (pwTask->TracePoints & KTRFAC_STRUCT){
 			ktrace_STRUCT(pwTask, "fdvec", 5, sv, (sizeof(int) * 2));
 		}
-		result = 0;
 	}
 	return(result);
 }
 int 
 sys_shutdown(call_t call, int sockfd, int how)
 {
-	int result = -1;
+	int result = 0;
 	WIN_TASK *pwTask = call.Task;
 
 	if (sockfd < 0 || sockfd >= OPEN_MAX){
-		h_errno = h_errno_posix(pwTask, WSAEBADF);
+		result = -EBADF;
 	}else if (!vfs_shutdown(&pwTask->Node[sockfd], how)){
-		h_errno = h_errno_posix(pwTask, WSAGetLastError());
-	}else{
-		result = 0;
+		result -= errno_posix(WSAGetLastError());
 	}
 	return(result);
 }
@@ -400,11 +400,9 @@ sys_getsockopt(call_t call, int sockfd, int level, int optname, void *optval, so
 	WIN_TASK *pwTask = call.Task;
 
 	if (sockfd < 0 || sockfd >= OPEN_MAX){
-		h_errno = h_errno_posix(pwTask, WSAEBADF);
-		result = -1;
+		result = -EBADF;
 	}else if (!vfs_getsockopt(&pwTask->Node[sockfd], level, optname, optval, optlen)){
-		h_errno = h_errno_posix(pwTask, WSAGetLastError());
-		result = -1;
+		result -= errno_posix(WSAGetLastError());
 	}else if (level == SOL_SOCKET && optname == SO_ERROR){	// perl.exe
 		*(int *)optval = errno_posix(*(DWORD *)optval);
 	}
@@ -413,80 +411,72 @@ sys_getsockopt(call_t call, int sockfd, int level, int optname, void *optval, so
 int 
 sys_setsockopt(call_t call, int sockfd, int level, int optname, const void *optval, socklen_t optlen)
 {
-	int result = -1;
+	int result = 0;
 	WIN_TASK *pwTask = call.Task;
 
 	if (sockfd < 0 || sockfd >= OPEN_MAX){
-		h_errno = h_errno_posix(pwTask, WSAEBADF);
+		result = -EBADF;
 	}else if (!vfs_setsockopt(&pwTask->Node[sockfd], level, optname, optval, optlen)){
-		h_errno = h_errno_posix(pwTask, WSAGetLastError());
-	}else{
-		result = 0;
+		result -= errno_posix(WSAGetLastError());
 	}
 	return(result);
 }
 int 
 sys_bind(call_t call, int sockfd, const struct sockaddr *addr, socklen_t addrlen)
 {
-	int result = -1;
+	int result = 0;
 	SOCKADDR sAddress = {0};
 	WIN_TASK *pwTask = call.Task;
 
 	if (sockfd < 0 || sockfd >= OPEN_MAX){	/* sshd.exe */
-		h_errno = h_errno_posix(pwTask, WSAEBADF);
+		result = -EBADF;
 	}else if (!vfs_bind(&pwTask->Node[sockfd], addr_win(&sAddress, pwTask, addr), addrlen)){
-		h_errno = h_errno_posix(pwTask, WSAGetLastError());
-	}else{
-		result = 0;
+		result -= errno_posix(WSAGetLastError());
 	}
 	return(result);
 }
 int 
 sys_listen(call_t call, int sockfd, int backlog)
 {
-	int result = -1;
+	int result = 0;
 	WIN_TASK *pwTask = call.Task;
 
 	if (sockfd < 0 || sockfd >= OPEN_MAX){
-		__errno_posix(pwTask, ERROR_INVALID_HANDLE);
+		result = -EBADF;
 	}else if (!vfs_listen(&pwTask->Node[sockfd], backlog)){
-		h_errno = h_errno_posix(pwTask, WSAGetLastError());
-	}else{
-		result = 0;
+		result -= errno_posix(WSAGetLastError());
 	}
 	return(result);
 }
 int 
 sys_getpeername(call_t call, int sockfd, struct sockaddr *address, socklen_t *address_len)
 {
-	int result = -1;
+	int result = 0;
 	SOCKADDR sAddress = {0};
 	WIN_TASK *pwTask = call.Task;
 
 	if (sockfd < 0 || sockfd >= OPEN_MAX){
-		__errno_posix(pwTask, ERROR_INVALID_HANDLE);
+		result = -EBADF;
 	}else if (!vfs_getpeername(&pwTask->Node[sockfd], &sAddress, address_len)){
-		h_errno = h_errno_posix(pwTask, WSAGetLastError());
+		result -= errno_posix(WSAGetLastError());
 	}else{
 		addr_posix(address, pwTask, &sAddress, address_len);
-		result = 0;
 	}
 	return(result);
 }
 int 
 sys_getsockname(call_t call, int sockfd, struct sockaddr *address, socklen_t *address_len)
 {
-	int result = -1;
+	int result = 0;
 	SOCKADDR sAddress = {0};
 	WIN_TASK *pwTask = call.Task;
 
 	if (sockfd < 0 || sockfd >= OPEN_MAX){
-		__errno_posix(pwTask, ERROR_INVALID_HANDLE);
+		result = -EBADF;
 	}else if (!vfs_getsockname(&pwTask->Node[sockfd], &sAddress, address_len)){
-		h_errno = h_errno_posix(pwTask, WSAGetLastError());
+		result -= errno_posix(WSAGetLastError());
 	}else{
 		addr_posix(address, pwTask, &sAddress, address_len);
-		result = 0;
 	}
 	return(result);
 }

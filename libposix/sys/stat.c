@@ -247,36 +247,34 @@ stat_posix(WIN_TASK *Task, struct stat *buf, WIN_VATTR *Stat)
 int 
 sys_fstat(call_t call, int fd, struct stat *buf)
 {
+	int result = 0;
 	WIN_VATTR wStat = {0};
-	int result = -1;
 	WIN_TASK *pwTask = call.Task;
 
 	if (fd < 0 || fd >= OPEN_MAX){
-		__errno_posix(pwTask, ERROR_INVALID_HANDLE);
+		result = -EBADF;
 	}else if (!vfs_fstat(&pwTask->Node[fd], &wStat)){
-		__errno_posix(pwTask, GetLastError());
+		result -= errno_posix(GetLastError());
 	}else{
 		stat_posix(pwTask, buf, &wStat);
-		result = 0;
 	}
 	return(result);
 }
 int 
 __fstatat(WIN_TASK *Task, int dirfd, const char *path, struct stat *buf, int flags)
 {
+	int result = 0;
 	WIN_NAMEIDATA wPath = {0};
 	WIN_VATTR wStat = {0};
-	int result = -1;
 
 	if (!path){
-		__errno_posix(Task, ERROR_INVALID_ADDRESS);
+		result = -EFAULT;
 	}else if (!*path){
-		__errno_posix(Task, ERROR_INVALID_NAME);
+		result = -ENOENT;
 	}else if (!vfs_stat(pathat_win(&wPath, dirfd, path, flags), &wStat)){
-		__errno_posix(Task, GetLastError());
+		result -= errno_posix(GetLastError());
 	}else{
 		stat_posix(Task, buf, &wStat);
-		result = 0;
 	}
 	return(result);
 }
@@ -301,18 +299,16 @@ sys_stat(call_t call, const char *path, struct stat *buf)
 int 
 __fchmodat(WIN_TASK *Task, int fd, const char *path, mode_t mode, int flag)
 {
+	int result = 0;
 	WIN_MODE wMode;
-	int result = -1;
 	WIN_NAMEIDATA wPath;
 
 	if (!path){
-		__errno_posix(Task, ERROR_INVALID_ADDRESS);
+		result = -EFAULT;
 	}else if (!*path){
-		__errno_posix(Task, ERROR_INVALID_NAME);
+		result = -ENOENT;
 	}else if (!vfs_chmod(pathat_win(&wPath, fd, path, flag), mode_win(&wMode, mode))){
-		__errno_posix(Task, GetLastError());
-	}else{
-		result = 0;
+		result -= errno_posix(GetLastError());
 	}
 	return(result);
 }
@@ -329,16 +325,14 @@ sys_chmod(call_t call, const char *path, mode_t mode)
 int 
 sys_fchmod(call_t call, int fd, mode_t mode)
 {
-	int result = -1;
+	int result = 0;
 	WIN_TASK *pwTask = call.Task;
 	WIN_MODE wMode;
 
 	if (fd < 0 || fd >= OPEN_MAX){
-		__errno_posix(pwTask, ERROR_INVALID_HANDLE);
+		result = -EBADF;
 	}else if (!vfs_fchmod(&pwTask->Node[fd], mode_win(&wMode, mode))){
-		__errno_posix(pwTask, GetLastError());
-	}else{
-		result = 0;
+		result -= errno_posix(GetLastError());
 	}
 	return(result);
 }
@@ -348,13 +342,11 @@ sys_fchmod(call_t call, int fd, mode_t mode)
 int 
 sys_chflagsat(call_t call, int fd, const char *path, unsigned int flags, int atflag)
 {
-	int result = -1;
+	int result = 0;
 	WIN_NAMEIDATA wPath;
 
 	if (!disk_chflags(pathat_win(&wPath, fd, path, atflag), attr_win(flags))){
-		__errno_posix(call.Task, GetLastError());
-	}else{
-		result = 0;
+		result -= errno_posix(GetLastError());
 	}
 	return(result);
 }
@@ -384,14 +376,12 @@ sys_umask(call_t call, mode_t mask)
 int 
 __mknodat(WIN_TASK *Task, int fd, const char *path, mode_t mode, dev_t dev)
 {
-	int result = -1;
+	int result = 0;
 	WIN_NAMEIDATA wPath;
 	WIN_MODE wMode;
 
 	if (!vfs_mknod(pathat_win(&wPath, fd, path, AT_SYMLINK_NOFOLLOW), mode_win(&wMode, mode), dev)){
-		__errno_posix(Task, GetLastError());
-	}else{
-		result = 0;
+		result -= errno_posix(GetLastError());
 	}
 	return(result);
 }
@@ -408,15 +398,13 @@ sys_mknod(call_t call, const char *path, mode_t mode, dev_t dev)
 int 
 __mkdirat(WIN_TASK *Task, int dirfd, const char *pathname, mode_t mode)
 {
+	int result = 0;
 	WIN_MODE wMode;
 	WIN_NAMEIDATA wPath;
-	int result = -1;
 
 	mode &= (~Task->FileMask & 0777);
 	if (!vfs_mkdir(pathat_win(&wPath, dirfd, pathname, AT_SYMLINK_NOFOLLOW), mode_win(&wMode, mode))){
-		__errno_posix(Task, GetLastError());
-	}else{
-		result = 0;
+		result -= errno_posix(GetLastError());
 	}
 	return(result);
 }
@@ -433,13 +421,13 @@ sys_mkdir(call_t call, const char *pathname, mode_t mode)
 int 
 sys_mkfifoat(call_t call, int dirfd, const char *pathname, mode_t mode)
 {
+	int result = 0;
 	WIN_MODE wMode;
 	WIN_NAMEIDATA wPath;
 	WIN_VNODE vNode = {0};
-	int result = -1;
 
 	if (!vfs_mkfifo(pathat_win(&wPath, dirfd, pathname, AT_SYMLINK_NOFOLLOW), mode_win(&wMode, mode), &vNode)){
-		__errno_posix(call.Task, GetLastError());
+		result -= errno_posix(GetLastError());
 	}else{
 		result = fd_posix(call.Task, &vNode, 0);
 	}

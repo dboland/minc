@@ -44,8 +44,7 @@ udp_NET_INET_UDP(WIN_TASK *Task, const int *name, void *buf, size_t *size)
 			result = defports_posix(buf, *size, __DEFPORTS_UDP);
 			break;
 		default:
-			__errno_posix(Task, ERROR_NOT_SUPPORTED);
-			result = -1;
+			result = -EOPNOTSUPP;
 	}
 	return(result);
 }

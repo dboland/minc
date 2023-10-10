@@ -103,51 +103,45 @@ statfs_posix(struct statfs *buf, WIN_STATFS *Stat)
 int
 mount_NTFS(WIN_TASK *Task, const char *dir, struct ntfs_args *args)
 {
-	int result = -1;
+	int result = 0;
 	WIN_NAMEIDATA wPath;
 	WIN_MODE wMode;
 	WIN_VATTR wAttr;
 
 	if (!vfs_stat(path_win(&wPath, args->fspec, O_NOFOLLOW), &wAttr)){
-		__errno_posix(Task, GetLastError());
+		result -= errno_posix(GetLastError());
 	}else if (!drive_mount(path_win(&wPath, dir, O_NOCROSS), &wAttr, mode_win(&wMode, args->mode))){
-		__errno_posix(Task, GetLastError());
-	}else{
-		result = 0;
+		result -= errno_posix(GetLastError());
 	}
 	return(result);
 }
 int
 mount_MSDOS(WIN_TASK *Task, const char *dir, struct msdosfs_args *args)
 {
-	int result = -1;
+	int result = 0;
 	WIN_NAMEIDATA wPath;
 	WIN_MODE wMode;
 	WIN_VATTR wAttr;
 
 	if (!vfs_stat(path_win(&wPath, args->fspec, O_NOFOLLOW), &wAttr)){
-		__errno_posix(Task, GetLastError());
+		result -= errno_posix(GetLastError());
 	}else if (!drive_mount(path_win(&wPath, dir, O_NOCROSS), &wAttr, mode_win(&wMode, args->mask))){
-		__errno_posix(Task, GetLastError());
-	}else{
-		result = 0;
+		result -= errno_posix(GetLastError());
 	}
 	return(result);
 }
 int
 mount_CD9660(WIN_TASK *Task, const char *dir, struct iso_args *args)
 {
-	int result = -1;
+	int result = 0;
 	WIN_NAMEIDATA wPath;
 	WIN_MODE wMode;
 	WIN_VATTR wAttr;
 
 	if (!vfs_stat(path_win(&wPath, args->fspec, O_NOFOLLOW), &wAttr)){
-		__errno_posix(Task, GetLastError());
+		result -= errno_posix(GetLastError());
 	}else if (!drive_mount(path_win(&wPath, dir, O_NOCROSS), &wAttr, mode_win(&wMode, 0666))){
-		__errno_posix(Task, GetLastError());
-	}else{
-		result = 0;
+		result -= errno_posix(GetLastError());
 	}
 	return(result);
 }
@@ -157,7 +151,7 @@ mount_CD9660(WIN_TASK *Task, const char *dir, struct iso_args *args)
 int 
 sys_mount(call_t call, const char *type, const char *dir, int flags, void *data)
 {
-	int result = -1;
+	int result = 0;
 	WIN_TASK *pwTask = call.Task;
 
 	if (!win_strcmp(type, MOUNT_NTFS)){
@@ -170,7 +164,7 @@ sys_mount(call_t call, const char *type, const char *dir, int flags, void *data)
 		result = mount_CD9660(pwTask, dir, (struct iso_args *)data);
 
 	}else{
-		__errno_posix(pwTask, ERROR_NOT_SUPPORTED);
+		result = -EOPNOTSUPP;
 
 	}
 	return(result);
@@ -178,44 +172,40 @@ sys_mount(call_t call, const char *type, const char *dir, int flags, void *data)
 int
 sys_unmount(call_t call, const char *dir, int flags)
 {
-	int result = -1;
+	int result = 0;
 	WIN_NAMEIDATA wPath;
 
 	if (!drive_unmount(path_win(&wPath, dir, O_NOCROSS))){
-		__errno_posix(call.Task, GetLastError());
-	}else{
-		result = 0;
+		result -= errno_posix(GetLastError());
 	}
 	return(result);
 }
 int 
 sys_statfs(call_t call, const char *path, struct statfs *buf)
 {
-	int result = -1;
+	int result = 0;
 	WIN_STATFS fsInfo = {0};
 	WIN_NAMEIDATA wPath;
 
 	if (!drive_statfs(path_win(&wPath, path, 0), &fsInfo)){
-		__errno_posix(call.Task, GetLastError());
+		result -= errno_posix(GetLastError());
 	}else{
 		statfs_posix(buf, &fsInfo);
-		result = 0;
 	}
 	return(result);
 }
 int 
 sys_fstatfs(call_t call, int fd, struct statfs *buf)
 {
-	int result = -1;
+	int result = 0;
 	WIN_STATFS fsInfo = {0};
 	WIN_NAMEIDATA wPath;
 	WIN_TASK *pwTask = call.Task;
 
 	if (!drive_statfs(fdpath_win(&wPath, fd, 0), &fsInfo)){
-		__errno_posix(pwTask, GetLastError());
+		result -= errno_posix(GetLastError());
 	}else{
 		statfs_posix(buf, &fsInfo);
-		result = 0;
 	}
 	return(result);
 }

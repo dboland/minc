@@ -33,11 +33,12 @@
 /****************************************************/
 
 void *
-sys_mmap(call_t call, void *addr, size_t length, int prot, int flags, int fd, off_t offset)
+sys_mmap(call_t call, void *addr, size_t len, int prot, int flags, int fd, off_t offset)
 {
+	void *result = NULL;
 	DWORD dwProtect = PAGE_READONLY;
-	void *result = (void *)-1;
 	WIN_TASK *pwTask = call.Task;
+	LARGE_INTEGER liOffset = {offset & 0xFFFFFFFF, offset >> 32};
 
 	if (prot & PROT_WRITE){
 		dwProtect = PAGE_READWRITE;
@@ -45,47 +46,63 @@ sys_mmap(call_t call, void *addr, size_t length, int prot, int flags, int fd, of
 	if (flags & MAP_ANON){
 		fd = -1;
 	}
-	if (!length){
-		__errno_posix(pwTask, ERROR_BAD_ARGUMENTS);
-	}else if (!win_mmap(fd_win(pwTask, fd), offset, length, addr, dwProtect, &result)){
-		__errno_posix(pwTask, GetLastError());
+	if (!len){
+		result = (void *)-EINVAL;
+	}else if (!win_mmap(fd_win(pwTask, fd), addr, len, &liOffset, dwProtect, &result)){
+		result -= errno_posix(GetLastError());
 	}
 	return(result);
 }
 int 
 sys_munmap(call_t call, void *addr, size_t length)
 {
-	int result = -1;
+	int result = 0;
 
 	if (!win_munmap(addr, length)){
-		__errno_posix(call.Task, GetLastError());
-	}else{
-		result = 0;
+		result -= errno_posix(GetLastError());
 	}
 	return(result);
 }
 int 
-sys_madvise(call_t call, void *addr, size_t length, int advice)
+sys_madvise(call_t call, void *addr, size_t len, int advice)
 {
-	/* install.exe (MADV_SEQUENTIAL) */
-//	msvc_printf("sys_madvise: length(%d) advice(%d)\n", length, advice);
-	return(0);
+	int result = 0;
+	DWORD dwType;
+
+	switch (advice){
+		case MADV_WILLNEED:
+			dwType = MEM_COMMIT;	/* GNU conftest (mutt.exe) */
+			break;
+		case MADV_SEQUENTIAL:		/* install.exe, grep.exe */
+			dwType = 0;
+			break;
+		case MADV_DONTNEED:
+			dwType = MEM_DECOMMIT;
+			break;
+		case MADV_FREE:
+			dwType = MEM_RESET;
+			break;
+		default:
+			dwType = 0;
+	}
+	if (!win_madvise(addr, len, dwType)){
+		result -= errno_posix(GetLastError());
+	}
+	return(result);
 }
 int 
 sys_mprotect(call_t call, void *addr, size_t len, int prot)
 {
+	int result = 0;
 	DWORD dwProtect = PAGE_READONLY;
-	int result = -1;
 
 	if (prot & PROT_WRITE){
 		dwProtect = PAGE_READWRITE;
 	}
 	if (!len){
-		__errno_posix(call.Task, ERROR_BAD_ARGUMENTS);
+		result = -EINVAL;
 	}else if (!win_mprotect(addr, len, dwProtect)){
-		__errno_posix(call.Task, GetLastError());
-	}else{
-		result = 0;
+		result -= errno_posix(GetLastError());
 	}
 	return(result);
 }

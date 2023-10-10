@@ -35,26 +35,23 @@
 int 
 file_FIONREAD(WIN_TASK *Task, WIN_VNODE *Node, int *nbytes)
 {
-	int result = -1;
+	int result = 0;
 	ULONG ulResult;
 
 	if (!vfs_FIONREAD(Node, &ulResult)){
-		__errno_posix(Task, GetLastError());
+		result -= errno_posix(GetLastError());
 	}else{
 		*nbytes = ulResult;
-		result = 0;
 	}
 	return(result);
 }
 int 
 file_FIONBIO(WIN_TASK *Task, WIN_VNODE *Node, int *mode)
 {
-	int result = -1;
+	int result = 0;
 
 	if (!vfs_FIONBIO(Node, *mode)){
-		__errno_posix(Task, GetLastError());
-	}else{
-		result = 0;
+		result -= errno_posix(GetLastError());
 	}
 	return(result);
 }
@@ -81,8 +78,7 @@ file_ioctl(WIN_TASK *Task, int fd, unsigned long request, va_list args)
 			pNode->CloseExec = FALSE;
 			break;
 		default:
-			__errno_posix(Task, ERROR_NOT_SUPPORTED);
-			result = -1;
+			result = -EOPNOTSUPP;
 	}
 	return(result);
 }

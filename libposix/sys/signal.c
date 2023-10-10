@@ -110,12 +110,13 @@ context_posix(ucontext_t *ucontext, CONTEXT *Context)
 int 
 __sigsuspend(WIN_TASK *Task, const sigset_t *mask)
 {
+	int result = 0;
 	MSG Msg = {0};
 
 	if (vfs_sigsuspend(Task, mask, 0, &Msg)){
-		__errno_posix(Task, GetLastError());
+		result -= errno_posix(GetLastError());
 	}
-	return(-1);
+	return(result);
 }
 int 
 sigproc_default(WIN_TASK *Task, int signum)
@@ -292,24 +293,20 @@ sigproc_win(DWORD CtrlType, CONTEXT *Context)
 int
 kill_GRP(WIN_TASK *Task, DWORD GroupId, int sig)
 {
-	int result = -1;
+	int result = 0;
 
 	if (!vfs_kill_GRP(GroupId, WM_COMMAND, __SIG_WIN[sig], Task->TaskId)){
-		__errno_posix(Task, GetLastError());
-	}else{
-		result = 0;
+		result -= errno_posix(GetLastError());
 	}
 	return(result);
 }
 int
 kill_ANY(WIN_TASK *Task, int sig)
 {
-	int result = -1;
+	int result = 0;
 
 	if (!vfs_kill_ANY(Task->TaskId, WM_COMMAND, __SIG_WIN[sig], Task->TaskId)){
-		__errno_posix(Task, GetLastError());
-	}else{
-		result = 0;
+		result -= errno_posix(GetLastError());
 	}
 	return(result);
 }
@@ -319,7 +316,7 @@ kill_ANY(WIN_TASK *Task, int sig)
 int 
 sys_sigaction(call_t call, int signum, const struct sigaction *act, struct sigaction *oldact)
 {
-	int result = -1;
+	int result = 0;
 	WIN_SIGACTION *Actions = call.Task->Action;
 	struct sigaction *sigaction = (PVOID)&Actions[signum];
 	struct sigaction tmp = {0};
@@ -333,11 +330,11 @@ sys_sigaction(call_t call, int signum, const struct sigaction *act, struct sigac
 		tmp.sa_handler = (sig_t)act;
 	}
 	if (signum < 0 || signum >= NSIG){
-		__errno_posix(call.Task, ERROR_BAD_ARGUMENTS);
+		result = -EINVAL;
 	}else switch (signum){
 		case SIGKILL:
 		case SIGSTOP:
-			__errno_posix(call.Task, ERROR_BAD_ARGUMENTS);
+			result = -EINVAL;
 			break;
 //		case SIGINT:
 //			con_sigaction((BOOL)act);	/* ping.exe */
@@ -350,18 +347,18 @@ sys_sigaction(call_t call, int signum, const struct sigaction *act, struct sigac
 int 
 sys_sigprocmask(call_t call, int how, const sigset_t *restrict set, sigset_t *restrict oldset)
 {
+	int result = 0;
 	WIN_TASK *pwTask = call.Task;
 	sigset_t curset = pwTask->ProcMask;
-	int result = -1;
 	sigset_t newset;
 
 	if (oldset){
 		*oldset = curset;
 	}
 	if (how & ~SIG_SETMASK){
-		__errno_posix(call.Task, ERROR_BAD_ARGUMENTS);
+		result = -EINVAL;
 	}else if (!set){
-		__errno_posix(call.Task, ERROR_INVALID_ADDRESS);
+		result = -EFAULT;
 	}else{
 		newset = *set & ~(BIT_SIGKILL | BIT_SIGSTOP);
 		if (how == SIG_BLOCK){		// 1
@@ -375,7 +372,6 @@ sys_sigprocmask(call_t call, int how, const sigset_t *restrict set, sigset_t *re
 //			sigproc_pending(pwTask, curset);
 //		}
 		pwTask->ProcMask = curset;
-		result = 0;
 	}
 	return(result);
 }
@@ -387,25 +383,24 @@ sys_sigsuspend(call_t call, const sigset_t *mask)
 int 
 sys_sigpending(call_t call, sigset_t *set)
 {
-	int result = -1;
+	int result = 0;
 
 	if (!set){
-		__errno_posix(call.Task, ERROR_INVALID_ADDRESS);
+		result = -EFAULT;
 	}else{
 		*set = call.Task->Pending;
-		result = 0;
 	}
 	return(result);
 }
 int 
 sys_kill(call_t call, pid_t pid, int sig)
 {
-	int result = -1;
+	int result = 0;
 	ucontext_t ucontext = {0};
 	WIN_TASK *pwTask = call.Task;
 
 	if (sig >= NSIG){
-		__errno_posix(pwTask, ERROR_BAD_ARGUMENTS);
+		result = -EINVAL;
 
 	}else if (pid == -1){
 		result = kill_ANY(pwTask, sig);
@@ -415,9 +410,7 @@ sys_kill(call_t call, pid_t pid, int sig)
 
 	}else if (!sig){
 		if (pid_win(pid) == 0){
-			__errno_posix(pwTask, ERROR_INVALID_THREAD_ID);
-		}else{
-			result = 0;
+			result = -ESRCH;
 		}
 	}else if (!pid){
 		result = kill_GRP(pwTask, pwTask->GroupId, sig);
@@ -426,13 +419,10 @@ sys_kill(call_t call, pid_t pid, int sig)
 		result = sigproc_posix(pwTask, sig, &ucontext);
 
 	}else if (pid >= CHILD_MAX){
-		__errno_posix(pwTask, ERROR_BAD_ARGUMENTS);
+		result = -EINVAL;
 
 	}else if (!vfs_kill_PID(pid_win(pid), WM_COMMAND, __SIG_WIN[sig], pwTask->TaskId)){
-		__errno_posix(pwTask, GetLastError());
-
-	}else{
-		result = 0;
+		result -= errno_posix(GetLastError());
 
 	}
 	return(result);

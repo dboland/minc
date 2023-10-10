@@ -21,6 +21,7 @@
 
 #include <sys/cdefs.h>	// features.h
 #define __need_FILE
+#define __THROW	
 #include <stdio.h>
 #include <paths.h>
 

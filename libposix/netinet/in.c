@@ -47,21 +47,20 @@ inaddr_posix(struct sockaddr_in *addr, DWORD Port, BYTE Address[4])
 int 
 in_NET_INET6_IPV6_DAD_PENDING(WIN_TASK *Task, const int *name, void *buf, size_t *size)
 {
-	int result = -1;
+	int result = 0;
 	DWORD dwResult;
 
 	if (!ws2_NET_INET6_IPV6_DAD_PENDING(&dwResult)){
-		__errno_posix(Task, GetLastError());
+		result -= errno_posix(GetLastError());
 	}else{
 		*(int *)buf = dwResult;
-		result = 0;
 	}
 	return(result);
 }
 int 
 in_NET_INET6_IPV6(WIN_TASK *Task, const int *name, void *buf, size_t *size)
 {
-	int result = -1;
+	int result = 0;
 
 	switch (name[3]){
 		case IPV6CTL_FORWARDING:		/* 1 */
@@ -71,7 +70,7 @@ in_NET_INET6_IPV6(WIN_TASK *Task, const int *name, void *buf, size_t *size)
 			result = in_NET_INET6_IPV6_DAD_PENDING(Task, name, buf, size);
 			break;
 		default:
-			__errno_posix(Task, ERROR_INVALID_NAME);
+			result = -ENOENT;
 	}
 	return(result);
 }

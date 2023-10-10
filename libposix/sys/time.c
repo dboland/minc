@@ -116,12 +116,10 @@ clock_gettime_MONOTONIC(struct timespec *tp, DWORDLONG Time)
 int 
 setitimer_REAL(WIN_TASK *Task, LONG *Interval, DWORDLONG *TimeOut)
 {
-	int result = -1;
+	int result = 0;
 
 	if (!vfs_setitimer(Task, Interval, TimeOut)){
-		__errno_posix(Task, GetLastError());
-	}else{
-		result = 0;
+		result -= errno_posix(GetLastError());
 	}
 	return(result);
 }
@@ -131,20 +129,18 @@ setitimer_REAL(WIN_TASK *Task, LONG *Interval, DWORDLONG *TimeOut)
 int 
 sys_nanosleep(call_t call, const struct timespec *req, struct timespec *rem)
 {
+	int result = 0;
 	DWORD dwRemain;
 	DWORD dwMillisecs;
-	int result = -1;
 	WIN_TASK *pwTask = call.Task;
 
 	/* __int64_t (%I64d) */
 	dwMillisecs = (req->tv_sec & 0xBFFFFFFF) * 1000;	/* limit to DWORD bits */
 	dwMillisecs += req->tv_nsec * 0.000001;			/* nanoseconds */
 	if (req->tv_nsec > 999999999){
-		__errno_posix(pwTask, ERROR_BAD_ARGUMENTS);
+		result = -EINVAL;
 	}else if (!vfs_nanosleep(pwTask, dwMillisecs, &dwRemain)){
-		__errno_posix(pwTask, GetLastError());
-	}else{
-		result = 0;
+		result -= errno_posix(GetLastError());
 	}
 	if (rem){
 		rem->tv_sec = dwRemain * 0.001;
@@ -155,11 +151,11 @@ sys_nanosleep(call_t call, const struct timespec *req, struct timespec *rem)
 int 
 sys_gettimeofday(call_t call, struct timeval *tv, struct timezone *tz)
 {
-	int result = -1;
+	int result = 0;
 	DWORDLONG dwlTime;
 
 	if (!tv){
-		__errno_posix(call.Task, ERROR_BAD_ARGUMENTS);
+		result = -EINVAL;
 	}else{
 		GetSystemTimeAsFileTime((FILETIME *)&dwlTime);
 		dwlTime -= 116444736000000000LL;		/* epoch */
@@ -173,23 +169,21 @@ sys_gettimeofday(call_t call, struct timeval *tv, struct timezone *tz)
 int 
 sys_settimeofday(call_t call, const struct timeval *tp, const struct timezone *tzp)
 {
-	int result = -1;
+	int result = 0;
 
 	if (!win_settimeofday(tp->tv_sec, tp->tv_usec * 0.001)){
-		__errno_posix(call.Task, GetLastError());
-	}else{
-		result = 0;
+		result -= errno_posix(GetLastError());
 	}
 	return(result);
 }
 int 
 sys_clock_gettime(call_t call, clockid_t clk_id, struct timespec *tp)
 {
+	int result = 0;
 	DWORDLONG dwlTime = 0;
-	int result = -1;
 
 	if (!vfs_clock_gettime(clk_id, &dwlTime)){
-		__errno_posix(call.Task, GetLastError());
+		result -= errno_posix(GetLastError());
 	}else if (clk_id == CLOCK_REALTIME){			/* git.exe */
 		result = clock_gettime_REALTIME(tp, dwlTime);
 	}else if (clk_id == CLOCK_MONOTONIC){			/* git.exe */
@@ -202,7 +196,7 @@ sys_clock_gettime(call_t call, clockid_t clk_id, struct timespec *tp)
 int 
 sys_setitimer(call_t call, int which, const struct itimerval *restrict value, struct itimerval *restrict ovalue)
 {
-	int result = -1;
+	int result = 0;
 	LONG lInterval = 0;
 	DWORDLONG dwlTimeOut = 0;
 	DWORD dwResult;
@@ -219,7 +213,7 @@ sys_setitimer(call_t call, int which, const struct itimerval *restrict value, st
 	if (which == ITIMER_REAL){
 		result = setitimer_REAL(pwTask, &lInterval, &dwlTimeOut);
 	}else{
-		__errno_posix(pwTask, ERROR_NOT_SUPPORTED);
+		result = -EOPNOTSUPP;
 	}
 	if (ovalue){
 		dwResult = dwlTimeOut & 0xFFFFFFFF;
@@ -234,29 +228,25 @@ sys_setitimer(call_t call, int which, const struct itimerval *restrict value, st
 int 
 sys_futimens(call_t call, int fd, const struct timespec times[2])
 {
-	int result = -1;
+	int result = 0;
 	FILETIME fTime[2];
 	WIN_TASK *pwTask = call.Task;
 
 	if (fd < 0 || fd >= OPEN_MAX){
-		__errno_posix(pwTask, ERROR_INVALID_HANDLE);
+		result = -EBADF;
 	}else if (!disk_futimes(&pwTask->Node[fd], utimespec_win(fTime, times))){
-		__errno_posix(pwTask, GetLastError());
-	}else{
-		result = 0;
+		result -= errno_posix(GetLastError());
 	}
 	return(result);
 }
 int 
 __utimensat(WIN_TASK *Task, int dirfd, const char *pathname, FILETIME Time[2], int flags)
 {
-	int result = -1;
+	int result = 0;
 	WIN_NAMEI wPath;
 
 	if (!vfs_utimes(pathat_win(&wPath, dirfd, pathname, flags), Time)){
-		__errno_posix(Task, GetLastError());
-	}else{
-		result = 0;
+		result -= errno_posix(GetLastError());
 	}
 	return(result);
 }

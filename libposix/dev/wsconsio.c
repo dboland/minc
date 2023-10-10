@@ -35,14 +35,13 @@
 int 
 wscons_WSKBDIO_GTYPE(WIN_TASK *Task, WIN_VNODE *Node, int *kbtype)
 {
-	int result = -1;
+	int result = 0;
 	UINT uiType, uiSubType, uiFKeys;
 
 	if (!dev_WSKBDIO_GTYPE(&uiType, &uiSubType, &uiFKeys)){
-		__errno_posix(Task, GetLastError());
+		result -= errno_posix(GetLastError());
 	}else{
 		*kbtype = WSKBD_TYPE_PC_AT;
-		result = 0;
 	}
 	return(result);
 }
@@ -52,7 +51,7 @@ wscons_WSKBDIO_GTYPE(WIN_TASK *Task, WIN_VNODE *Node, int *kbtype)
 int 
 wscons_ioctl(WIN_TASK *Task, int fd, unsigned long request, va_list args)
 {
-	int result = -1;
+	int result = 0;
 	WIN_VNODE *pvNode = &Task->Node[fd];
 
 	switch (request){
@@ -60,7 +59,7 @@ wscons_ioctl(WIN_TASK *Task, int fd, unsigned long request, va_list args)
 			result = wscons_WSKBDIO_GTYPE(Task, pvNode, va_arg(args, int *));
 			break;
 		default:
-			__errno_posix(Task, ERROR_NOT_SUPPORTED);
+			result = -EOPNOTSUPP;
 	}
 	return(result);
 }

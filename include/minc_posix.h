@@ -62,4 +62,4 @@ WIN_NAMEIDATA *path_win(WIN_NAMEIDATA *Path, const char *pathname, int flags);
 
 /* errno */
 
-void __errno_posix(WIN_TASK *Task, DWORD Error);
+//void __errno_posix(WIN_TASK *Task, DWORD Error);

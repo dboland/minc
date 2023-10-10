@@ -36,8 +36,7 @@ int
 pci_PCIOCREAD(WIN_TASK *Task, struct pci_io *pci)
 {
 	pci->pi_data = 0;
-	__errno_posix(Task, ERROR_FILE_NOT_FOUND);
-	return(-1);
+	return(-ENOENT);
 }
 
 /****************************************************/
@@ -45,18 +44,18 @@ pci_PCIOCREAD(WIN_TASK *Task, struct pci_io *pci)
 int 
 pci_ioctl(WIN_TASK *Task, int fd, unsigned long request, va_list args)
 {
-	int result = -1;
+	int result = 0;
 	DWORD wOperation = request & 0xFF;
 	WIN_VNODE *pvNode = &Task->Node[fd];
 
 	if (!pvNode->Access){
-		__errno_posix(Task, ERROR_INVALID_HANDLE);
+		result = -EBADF;
 	}else switch (request){
 		case PCIOCREAD:
 			result = pci_PCIOCREAD(Task, va_arg(args, struct pci_io *));
 			break;
 		default:
-			__errno_posix(Task, ERROR_NOT_SUPPORTED);
+			result = -EOPNOTSUPP;
 	}
 	return(result);
 }

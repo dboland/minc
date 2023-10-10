@@ -158,54 +158,50 @@ termio_win(DWORD Mode[2], struct termios *term)
 int 
 tty_TIOCGETA(WIN_TASK *Task, WIN_VNODE *Node, WORD Operation, struct termios *term)
 {
-	int result = -1;
+	int result = 0;
 	DWORD dwMode[2] = {0};
 
 	if (!vfs_TIOCGETA(Node, dwMode)){
-		__errno_posix(Task, GetLastError());
+		result -= errno_posix(GetLastError());
 	}else{
 		dwMode[0] |= (__CTTY->Mode[0] & 0xFFFF0000);
 		dwMode[1] |= (__CTTY->Mode[1] & 0xFFFF0000);
 		termio_posix(term, dwMode);
-		result = 0;
 	}
 	return(result);
 }
 int 
 tty_TIOCSETA(WIN_TASK *Task, WIN_VNODE *Node, WORD Operation, struct termios *term)
 {
-	int result = -1;
+	int result = 0;
 	DWORD dwMode[2] = {0};
 
 	if (!vfs_TIOCTL(Node, Operation, termio_win(dwMode, term))){
-		__errno_posix(Task, GetLastError());
+		result -= errno_posix(GetLastError());
 	}else{
 		__CTTY->Mode[0] = dwMode[0];
 		__CTTY->Mode[1] = dwMode[1];
-		result = 0;
 	}
 	return(result);
 }
 int 
 tty_TIOCSCTTY(WIN_TASK *Task, WIN_VNODE *Node)
 {
-	int result = -1;
+	int result = 0;
 
 	if (!vfs_TIOCSCTTY(Node->Device, Task)){
-		__errno_posix(Task, GetLastError());
-	}else{
-		result = 0;
+		result -= errno_posix(GetLastError());
 	}
 	return(result);
 }
 int 
 tty_PTMGET(WIN_TASK *Task, WIN_VNODE *Node, struct ptmget *ptm)
 {
+	int result = 0;
 	WIN_PTMGET ptmGet = {0};
-	int result = -1;
 
 	if (!vfs_PTMGET(Node->Device, &ptmGet)){
-		__errno_posix(Task, GetLastError());
+		result -= errno_posix(GetLastError());
 	}else{
 		/* controlling terminal (master) */
 		ptm->cfd = fd_posix(Task, &ptmGet.Master, 0);
@@ -213,19 +209,16 @@ tty_PTMGET(WIN_TASK *Task, WIN_VNODE *Node, struct ptmget *ptm)
 		/* slave */
 		ptm->sfd = fd_posix(Task, &ptmGet.Slave, 0);
 		win_strncpy(ptm->sn, ptmGet.Slave.Device->Name, 16);
-		result = 0;
 	}
 	return(result);
 }
 int 
 tty_TIOCTL(WIN_TASK *Task, WIN_VNODE *Node, WORD Operation, PVOID Param)
 {
-	int result = -1;
+	int result = 0;
 
 	if (!vfs_TIOCTL(Node, Operation, Param)){
-		__errno_posix(Task, GetLastError());
-	}else{
-		result = 0;
+		result -= errno_posix(GetLastError());
 	}
 	return(result);
 }
@@ -235,12 +228,12 @@ tty_TIOCTL(WIN_TASK *Task, WIN_VNODE *Node, WORD Operation, PVOID Param)
 int 
 tty_ioctl(WIN_TASK *Task, int fd, unsigned long request, va_list args)
 {
-	int result = -1;
+	int result = 0;
 	DWORD wOperation = request & 0xFF;
 	WIN_VNODE *pvNode = &Task->Node[fd];
 
 	if (!pvNode->Access){
-		__errno_posix(Task, ERROR_INVALID_HANDLE);
+		result = -EBADF;
 	}else switch (request){
 		case PTMGET:
 			result = tty_PTMGET(Task, pvNode, va_arg(args, struct ptmget *));

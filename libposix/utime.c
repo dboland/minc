@@ -64,30 +64,26 @@ utimbuf_win(FILETIME FileTime[2], const struct utimbuf *times)
 int 
 sys_utime(call_t call, const char *path, const struct utimbuf *times)
 {
-	int result = -1;
+	int result = 0;
 	WIN_NAMEIDATA wPath;
 	FILETIME fTime[2];
 
 	if (!vfs_utimes(path_win(&wPath, path, 0), utimbuf_win(fTime, times))){
-		__errno_posix(call.Task, GetLastError());
-	}else{
-		result = 0;
+		result -= errno_posix(GetLastError());
 	}
 	return(result);
 }
 int 
 sys_futimes(call_t call, int fd, const struct timeval tv[2])
 {
-	int result = -1;
+	int result = 0;
 	FILETIME fTime[2];
 	WIN_TASK *pwTask = call.Task;
 
 	if (fd < 0 || fd >= OPEN_MAX){
-		__errno_posix(pwTask, ERROR_INVALID_HANDLE);
+		result = -EBADF;
 	}else if (!disk_futimes(&pwTask->Node[fd], utimeval_win(fTime, tv))){
-		__errno_posix(pwTask, GetLastError());
-	}else{
-		result = 0;
+		result -= errno_posix(GetLastError());
 	}
 	return(result);
 }

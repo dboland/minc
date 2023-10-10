@@ -187,11 +187,9 @@ route_NET_RT_IFLIST(WIN_TASK *Task, void *buf, size_t *size)
 	DWORD ifCount, ifaCount;
 
 	if (!ws2_setvfs(&ifData, FALSE, &pifRow, &ifCount)){
-		__errno_posix(Task, GetLastError());
-		result = -1;
+		result -= errno_posix(GetLastError());
 	}else if (!ws2_NET_RT_IFALIST(&pifaTable, &pifaRow, &ifaCount)){
-		__errno_posix(Task, GetLastError());
-		result = -1;
+		result -= errno_posix(GetLastError());
 	}else if (!buf){
 		*size = IFMSGLEN * ifCount;
 		*size += IFAMSGLEN * ifaCount;
@@ -218,8 +216,7 @@ route_NET_RT_OACTIVE(WIN_TASK *Task, void *buf, size_t *size)
 	DWORD dwCount;
 
 	if (!ws2_NET_RT_OACTIVE(&pinTable, &pinRow, &dwCount)){
-		__errno_posix(Task, GetLastError());
-		result = -1;
+		result -= errno_posix(GetLastError());
 	}else if (!buf){
 		*size = INMSGLEN * dwCount;
 	}else while (dwCount--){
@@ -232,15 +229,14 @@ route_NET_RT_OACTIVE(WIN_TASK *Task, void *buf, size_t *size)
 int 
 route_NET_RT_DUMP(WIN_TASK *Task, void *buf, size_t *size)
 {
+	int result = 0;
 	PMIB_IPFORWARDTABLE pfwTable;
 	PMIB_IPFORWARDROW pfwRow;
 	DWORD dwCount = 0;
 	MIB_IFROW ifRow;
-	int result = 0;
 
 	if (!ws2_NET_RT_DUMP(&pfwTable, &pfwRow, &dwCount)){
-		__errno_posix(Task, GetLastError());
-		return(-1);
+		result -= errno_posix(GetLastError());
 	}else if (!buf){
 		*size = RTMSGLEN * dwCount;
 	}else while (dwCount--){
@@ -248,8 +244,7 @@ route_NET_RT_DUMP(WIN_TASK *Task, void *buf, size_t *size)
 		if (ERROR_SUCCESS == GetIfEntry(&ifRow)){
 			buf = rtmsg_posix(buf, &ifRow, pfwRow);
 		}else{
-			__errno_posix(Task, GetLastError());
-			result = -1;
+			result -= errno_posix(GetLastError());
 			break;
 		}
 		pfwRow++;
@@ -260,14 +255,14 @@ route_NET_RT_DUMP(WIN_TASK *Task, void *buf, size_t *size)
 int 
 route_NET_RT_FLAGS(WIN_TASK *Task, const int *name, void *buf, size_t *size)
 {
-	int result = -1;
+	int result = 0;
 
 	switch (name[5]){
 		case IFF_OACTIVE:	/* arp.exe -a */
 			result = route_NET_RT_OACTIVE(Task, buf, size);
 			break;
 		default:
-			__errno_posix(Task, ERROR_INVALID_NAME);
+			result = -ENOENT;
 	}
 	return(result);
 }

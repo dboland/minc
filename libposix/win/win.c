@@ -98,7 +98,6 @@ SID8 SidIntegritySystem		= {1, 1, {0, 0, 0, 0, 0, 16}, 0x4000};
 #include "win_fcntl.c"
 #include "win_syscall.c"
 #include "win_grp.c"
-#include "win_ldt.c"
 #include "win_sched.c"
 #include "win_mman.c"
 #include "win_resource.c"

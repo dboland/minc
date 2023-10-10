@@ -69,19 +69,19 @@ pollfd_win(WIN_TASK *Task, WIN_VNODE *Nodes[], WIN_POLLFD *Info[], struct pollfd
 int 
 __poll(WIN_TASK *Task, struct pollfd fds[], nfds_t nfds, DWORD *TimeOut)
 {
-	int result = -1;
+	int result = 0;
 	WIN_POLLFD *fdVector[WSA_MAXIMUM_WAIT_EVENTS + 1];
 	WIN_VNODE *vnVector[WSA_MAXIMUM_WAIT_EVENTS + 1];
 	DWORD dwResult = 0;
 
 	if (!pollfd_win(Task, vnVector, fdVector, fds, nfds)){
-		__errno_posix(Task, ERROR_BAD_ARGUMENTS);
+		result = -EINVAL;
 	}else if (!vfs_poll(Task, vnVector, fdVector, TimeOut, &dwResult)){
-		__errno_posix(Task, GetLastError());
+		result -= errno_posix(GetLastError());
 	}else if (dwResult){
 		result = dwResult;
-	}else if (!*TimeOut){
-		result = 0;
+	}else if (*TimeOut){
+		result = -1;
 	}
 	return(result);
 }
@@ -102,6 +102,5 @@ sys_ppoll(call_t call, struct pollfd *fds, nfds_t nfds, const struct timespec *t
 	DWORD dwTimeOut = INFINITE;
 
 __PRINTF("sys_ppoll(%d)\n", nfds)
-	__errno_posix(call.Task, ERROR_NOT_SUPPORTED);
-	return(-1);
+	return(-EOPNOTSUPP);
 }

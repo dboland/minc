@@ -36,12 +36,10 @@
 int 
 disk_DIOCGDINFO(WIN_TASK *Task, WIN_DEVICE *Device, struct disklabel *label)
 {
-	int result = -1;
+	int result = 0;
 
 	if (!dev_DIOCGDINFO(Device)){
-		__errno_posix(Task, ERROR_NOT_SUPPORTED);
-	}else{
-		result = 0;
+		result = -EOPNOTSUPP;
 	}
 	return(result);
 }
@@ -51,7 +49,7 @@ disk_DIOCGDINFO(WIN_TASK *Task, WIN_DEVICE *Device, struct disklabel *label)
 int 
 disk_ioctl(WIN_TASK *Task, int fd, unsigned long request, va_list args)
 {
-	int result = -1;
+	int result = 0;
 	WIN_VNODE *pvNode = &Task->Node[fd];
 
 	switch (request){
@@ -59,7 +57,7 @@ disk_ioctl(WIN_TASK *Task, int fd, unsigned long request, va_list args)
 			result = disk_DIOCGDINFO(Task, pvNode->Device, va_arg(args, struct disklabel *));
 			break;
 		default:
-			__errno_posix(Task, ERROR_NOT_SUPPORTED);
+			result = -EOPNOTSUPP;
 	}
 	return(result);
 }

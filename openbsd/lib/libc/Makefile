@@ -3,8 +3,7 @@ include ../../../Makefile.inc
 RELEASE=75.0
 
 ARCH=i386
-CFLAGS+= -g -Wimplicit-function-declaration -fno-omit-frame-pointer -DNOPIE
-CFLAGS+= -ffreestanding
+CFLAGS+= -g -ffreestanding -DNOPIE
 #CFLAGS+= -fno-builtin
 LDFLAGS= -shared -s
 IMPLIB= libc.dll.a
@@ -66,7 +65,6 @@ install: ${DESTDIR}
 	ginstall libc.a ${DESTDIR}${LIBDIR}/
 	ginstall libmsvcrt.a ${DESTDIR}${LIBDIR}/
 	@#ln -s ${LIBC} ${DESTDIR}${LIBDIR}/libc.so
-	@#ginstall libc.a C:/minc-1.0${LIBDIR}/
 
 # Perl needs libc.so
 install-local:

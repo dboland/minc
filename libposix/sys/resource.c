@@ -73,28 +73,27 @@ rlimit_posix(WIN_TASK *Task, int resource, struct rlimit *rlp)
 int 
 sys_getrusage(call_t call, int who, struct rusage *usage)
 {
-	int result = -1;
+	int result = 0;
 
 	if (who == RUSAGE_SELF){
 		win_memset(usage, 0, sizeof(struct rusage));
 		usage->ru_utime.tv_sec = 100;
 		usage->ru_stime.tv_sec = 100;
-		result = 0;
 	}else{
-		__errno_posix(call.Task, ERROR_NOT_SUPPORTED);
+		result = -EOPNOTSUPP;
 	}
 	return(result);
 }
 int 
 sys_getrlimit(call_t call, int resource, struct rlimit *rlp)
 {
-	int result = -1;
+	int result = 0;
 	WIN_TASK *pwTask = call.Task;
 
 	if (!rlp){
-		__errno_posix(pwTask, ERROR_INVALID_ADDRESS);
+		result = -EFAULT;
 	}else if (resource < 0 || resource >= RLIM_NLIMITS){
-		__errno_posix(pwTask, ERROR_BAD_ARGUMENTS);
+		result = -EINVAL;
 	}else{
 		result = rlimit_posix(pwTask, resource, rlp);
 	}
@@ -103,34 +102,33 @@ sys_getrlimit(call_t call, int resource, struct rlimit *rlp)
 int 
 sys_setrlimit(call_t call, int resource, const struct rlimit *rlp)
 {
-	int result = -1;
+	int result = 0;
 	WIN_TASK *pwTask = call.Task;
 
 	if (!rlp){
-		__errno_posix(pwTask, ERROR_INVALID_ADDRESS);
+		result = -EFAULT;
 	}else if (resource < 0 || resource >= RLIM_NLIMITS){
-		__errno_posix(pwTask, ERROR_BAD_ARGUMENTS);
+		result = -EINVAL;
 	}else if (rlp->rlim_cur > rlp->rlim_max){
 //__PRINTF("  sys_setrlimit(%d): cur(%I64d) max(%I64d)\n", resource, rlp->rlim_cur, rlp->rlim_max)
-		__errno_posix(pwTask, ERROR_BAD_ARGUMENTS);
+		result = -EINVAL;
 	}else{
 		pwTask->Limit[resource] = rlp->rlim_cur;
-		result = 0;
 	}
 	return(result);
 }
 int 
 sys_getpriority(call_t call, int which, id_t who)
 {
-	int result = -1;
+	int result = 0;
 
 	if (who < 0 || who >= CHILD_MAX){
-		__errno_posix(call.Task, ERROR_BAD_ARGUMENTS);
+		result = -EINVAL;
 	}else if (which == PRIO_PROCESS){
 		result = __Tasks[who].Nice;
 	}else{
 __PRINTF("getpriority(%d): who(%d)\n", which, who)
-		__errno_posix(call.Task, ERROR_NOT_SUPPORTED);
+		result = -EOPNOTSUPP;
 	}
 	return(result);
 }
@@ -140,13 +138,12 @@ sys_setpriority(call_t call, int which, id_t who, int value)
 	int result = 0;
 
 	if (who < 0 || who >= CHILD_MAX){
-		__errno_posix(call.Task, ERROR_BAD_ARGUMENTS);
+		result = -EINVAL;
 	}else if (which == PRIO_PROCESS){
 		__Tasks[who].Nice = value;
 	}else{
 __PRINTF("setpriority(%d): who(%d) value(%d)\n", which, who, value)
-		__errno_posix(call.Task, ERROR_NOT_SUPPORTED);
-		result = -1;
+		result = -EOPNOTSUPP;
 	}
 	return(result);
 }
