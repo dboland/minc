@@ -630,7 +630,7 @@ sys_read(call_t call, int fd, void *buf, size_t count)
 	if (fd < 0 || fd >= OPEN_MAX){
 		result = -EBADF;
 	}else if (!vfs_read(&pwTask->Node[fd], buf, dwCount, &dwResult)){
-		result -= errno_posix(GetLastError());
+		pwTask->Error = errno_posix(GetLastError());
 	}else{
 		result = dwResult;
 		if (pwTask->TracePoints & KTRFAC_GENIO){
@@ -640,23 +640,22 @@ sys_read(call_t call, int fd, void *buf, size_t count)
 	return(result);
 }
 ssize_t 
-sys_write(call_t call, int fd, const void *buf, size_t nbyte)
+sys_write(call_t call, int fd, const void *buf, size_t nbytes)
 {
 	ssize_t result = 0;
 	DWORD dwResult = -1;
-	DWORD dwCount = nbyte;
 	WIN_TASK *pwTask = call.Task;
 	CHAR szMessage[MAX_MESSAGE];
 
 	if (pwTask->TracePoints & KTRFAC_GENIO){
-		ktrace_GENIO(pwTask, fd, UIO_WRITE, buf, nbyte);
+		ktrace_GENIO(pwTask, fd, UIO_WRITE, buf, nbytes);
 	}
 	if (pwTask->TracePoints & KTRFAC_USER){
 		ktrace_USER(pwTask, "VNODE", szMessage, vfs_ktrace(&pwTask->Node[fd], szMessage));
 	}
 	if (fd < 0 || fd >= OPEN_MAX){
 		result = -EBADF;
-	}else if (!vfs_write(&pwTask->Node[fd], buf, dwCount, &dwResult)){
+	}else if (!vfs_write(&pwTask->Node[fd], buf, nbytes, &dwResult)){
 		result -= errno_posix(GetLastError());
 	}else{
 		result = dwResult;
@@ -664,37 +663,35 @@ sys_write(call_t call, int fd, const void *buf, size_t nbyte)
 	return(result);
 }
 ssize_t 
-sys_pread(call_t call, int fd, void *buf, size_t nbyte, off_t offset)
+sys_pread(call_t call, int fd, void *buf, size_t nbytes, off_t offset)
 {
 	ssize_t result = 0;
 	DWORD dwResult = -1;
-	DWORD dwCount = nbyte;
 	WIN_TASK *pwTask = call.Task;
 
 	if (offset < 0){
 		result = -EINVAL;
 	}else if (fd < 0 || fd >= OPEN_MAX){
 		result = -EBADF;
-	}else if (!vfs_pread(&pwTask->Node[fd], buf, dwCount, offset, &dwResult)){
-		result -= errno_posix(GetLastError());
+	}else if (!vfs_pread(&pwTask->Node[fd], buf, nbytes, offset, &dwResult)){
+		pwTask->Error = errno_posix(GetLastError());
 	}else{
 		result = dwResult;
 	}
 	return(result);
 }
 ssize_t 
-sys_pwrite(call_t call, int fd, const void *buf, size_t nbyte, off_t offset)
+sys_pwrite(call_t call, int fd, const void *buf, size_t nbytes, off_t offset)
 {
 	ssize_t result = 0;
 	DWORD dwResult = -1;
-	DWORD dwCount = nbyte;
 	WIN_TASK *pwTask = call.Task;
 
 	if (offset < 0){
 		result = -EINVAL;
 	}else if (fd < 0 || fd >= OPEN_MAX){
 		result = -EBADF;
-	}else if (!vfs_pwrite(&pwTask->Node[fd], buf, dwCount, offset, &dwResult)){
+	}else if (!vfs_pwrite(&pwTask->Node[fd], buf, nbytes, offset, &dwResult)){
 		result -= errno_posix(GetLastError());
 	}else{
 		result = dwResult;

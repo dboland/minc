@@ -59,7 +59,6 @@ sock_read(WIN_VNODE *Node, LPSTR Buffer, DWORD Size, DWORD *Result)
 
 	while (!bResult){
 		if (!pipe_FIONREAD(Node, &ulResult)){
-			*Result = 0;
 			break;
 		}else if (ulResult){
 			bResult = fifo_read(Node, Buffer, Size, Result);
@@ -70,5 +69,36 @@ sock_read(WIN_VNODE *Node, LPSTR Buffer, DWORD Size, DWORD *Result)
 			break;
 		}
 	}
+	return(bResult);
+}
+BOOL 
+sock_write(WIN_VNODE *Node, LPCSTR Buffer, DWORD Size, DWORD *Result)
+{
+	BOOL bResult = FALSE;
+	DWORD dwResult = 0;
+	OVERLAPPED ovl = {0, 0, 0, 0, Node->Event};
+	DWORD dwSize = Size;
+
+	/* Non-blocking file IO can be achieved by limiting the number
+	 * of bytes to write to the size of the pipe buffer, without
+	 * having to put the pipe in PIPE_NOWAIT mode (rsync.exe).
+	 */
+	if (Node->Attribs & FILE_FLAG_OVERLAPPED){
+		if (dwSize > WIN_PIPE_BUF){
+			dwSize = WIN_PIPE_BUF;
+		}
+	}
+	/* When writing to a nonblocking, byte-mode pipe handle with
+	 * insufficient buffer space, WriteFile returns TRUE
+	 * with *lpNumberOfBytesWritten < nNumberOfBytesToWrite. 
+	 */
+	if (!WriteFile(Node->Handle, Buffer, dwSize, &dwResult, &ovl)){
+		return(FALSE);
+	}else if (dwResult < Size){
+		SetLastError(ERROR_MORE_DATA);
+	}else{
+		bResult = TRUE;
+	}
+	*Result = dwResult;
 	return(bResult);
 }

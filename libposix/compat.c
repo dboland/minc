@@ -45,7 +45,7 @@ runcmd(char *argv[])
 	}
 	return(result);
 }
-int 
+/* int 
 group_member(gid_t gid)
 {
 	int result = -1;
@@ -61,8 +61,8 @@ group_member(gid_t gid)
 		result = 0;
 	}
 	return(result);
-}
-int 
+} */
+/* int 
 futimesat(int dirfd, const char *pathname, const struct timeval times[2])
 {
 	int result = -1;
@@ -76,4 +76,4 @@ futimesat(int dirfd, const char *pathname, const struct timeval times[2])
 		result = 0;
 	}
 	return(result);
-}
+} */

@@ -139,6 +139,7 @@ void	 strmode(int, char *);
 char	*strsep(char **, const char *);
 int	 timingsafe_bcmp(const void *, const void *, size_t);
 #endif 
+void *mempcpy(void *, const void *, size_t);
 __END_DECLS
 
 #endif /* _STRING_H_ */

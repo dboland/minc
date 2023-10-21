@@ -213,7 +213,7 @@ sys_setitimer(call_t call, int which, const struct itimerval *restrict value, st
 	if (which == ITIMER_REAL){
 		result = setitimer_REAL(pwTask, &lInterval, &dwlTimeOut);
 	}else{
-		result = -EOPNOTSUPP;
+		return(-EOPNOTSUPP);
 	}
 	if (ovalue){
 		dwResult = dwlTimeOut & 0xFFFFFFFF;

@@ -1,6 +1,5 @@
 include ../../Makefile.inc
 
-CFLAGS=-Wimplicit-function-declaration
 CRT0=crt0.o
 OBJECTS=${CRT0} crt1.o crtbegin.o crtend.o gcrt0.o
 LIBS=libgcc.a libgcc_eh.a libgcc_s.a
@@ -21,11 +20,11 @@ all: ${OBJECTS} ${LIBS}
 # btw: there is a chkstk() in ntdll.dll
 #
 
-libgcc.a:
+libgcc.a: ${MINGW}
 	ar xv ${MINGW}/lib/gcc/mingw32/${GCCVER}/libgcc.a ${GCCOBJ}
 	ar cru $@ ${GCCOBJ}
 
-libgcc_eh.a: emutls.o wintls.o gnu_string.o gnu_mntent.o
+libgcc_eh.a: emutls.o wintls.o mempcpy.o gnu_mntent.o futimesat.o
 	ar cru $@ $^
 
 libgcc_s.a: libgcc_s.def

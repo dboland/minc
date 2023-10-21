@@ -57,7 +57,7 @@ group_posix(char *buf, size_t buflen, WIN_GRENT *Group)
 	char *result = buf;
 
 	bzero(buf, buflen);
-	buf = win_wcstombp(buf, Group->Account, MAX_NAME);
+	buf += sprintf(buf, "%ls", Group->Account);
 	buf = stpcpy(buf, ":*:");
 //	buf = stpcpy(buf, Group->Comment);
 //	buf = stpcpy(buf, ":");
@@ -153,7 +153,7 @@ getgrnam_r(const char *name, struct group *grp, char *buf, size_t buflen, struct
 		errno = EINVAL;
 	}else if (!buf || !result){
 		errno = EFAULT;
-	}else if (!win_mbstowcs(szAccount, name, MAX_NAME)){
+	}else if (!mbstowcs(szAccount, name, MAX_NAME)){
 		errno = EINVAL;
 	}else if (!win_getgrnam(szAccount, &wgResult)){
 		errno = errno_posix(errno_win());

@@ -8,7 +8,7 @@ IMPLIB=libposix.dll.a
 CFLAGS+=-g -I../include -ffreestanding
 CFLAGS+=-DRELEASE=\"${RELEASE}\" -DVERSION=\"${VERSION}\" -DBUILD=${BUILD}
 #CFLAGS+=-Wunused
-LDFLAGS=
+LDFLAGS=-shared -s
 OBJECTS=crt1.o win_posix.o msvc_posix.o vfs_posix.o libposix.o
 WINDIR=/C/WINDOWS/system32
 GCCDIR=../mingw/gcc
@@ -39,7 +39,7 @@ arch.d:
 	@${MAKE} -C arch CFLAGS="-I../../openbsd/include -I../../include"
 
 ${LIBPOSIX}: arch.d ${OBJECTS} version.o
-	${LD} -shared ${LDFLAGS} -e _DllMainCRTStartup@12 --out-implib=${IMPLIB} --disable-auto-import --enable-stdcall-fixup \
+	${LD} ${LDFLAGS} -e _DllMainCRTStartup@12 --out-implib=${IMPLIB} --disable-auto-import --enable-stdcall-fixup \
 	-o $@ --image-base=${IMGBASE_LIBPOSIX} ${OBJECTS} $(shell /bin/ls arch/*.o) version.o \
 	-L${WINDIR} -L${GCCDIR} -lmsvcrt -ladvapi32 -lshell32 -luser32 -lntdll -lkernel32 \
 	-lnetapi32 -lws2_32 -limagehlp -liphlpapi -lrpcrt4 -lgcc
@@ -55,8 +55,8 @@ ${BINDIR}:
 
 install: ${DESTDIR}
 	${INSTALL} -m 06555 ${LIBPOSIX} ${DESTDIR}${BINDIR}/
+	@#strip --remove-section=.reloc ${DESTDIR}${BINDIR}/${LIBPOSIX}
 
 install-local: ${LIBDIR} ${BINDIR}
 	/bin/cp ${LIBPOSIX} ${BINDIR}/
 	/bin/cp ${IMPLIB} ${LIBDIR}/libmingw32.a
-

@@ -70,31 +70,16 @@ BOOL
 pipe_write(WIN_VNODE *Node, LPCSTR Buffer, DWORD Size, DWORD *Result)
 {
 	BOOL bResult = FALSE;
-	DWORD dwResult = 0;
-	OVERLAPPED ovl = {0, 0, 0, 0, Node->Event};
-	DWORD dwSize = Size;
 
-	/* In Windows NT, non-blocking file IO can be achieved
-	 * by limiting the number of bytes to write to the size of
-	 * the pipe buffer, without having to put the pipe
-	 * in PIPE_NOWAIT mode (rsync.exe).
-	 */
-	if (Node->Attribs & FILE_FLAG_OVERLAPPED){
-		if (dwSize > WIN_PIPE_BUF){
-			dwSize = WIN_PIPE_BUF;
-		}
+	switch (Node->FileType){
+		case WIN_VSOCK:
+			bResult = sock_write(Node, Buffer, Size, Result);
+			break;
+		case WIN_VFIFO:
+			bResult = fifo_write(Node, Buffer, Size, Result);
+			break;
+		default:
+			SetLastError(ERROR_BAD_FILE_TYPE);
 	}
-	/* When writing to a nonblocking, byte-mode pipe handle with
-	 * insufficient buffer space, WriteFile returns TRUE
-	 * with *lpNumberOfBytesWritten < nNumberOfBytesToWrite. 
-	 */
-	if (!WriteFile(Node->Handle, Buffer, dwSize, &dwResult, &ovl)){
-		return(FALSE);
-	}else if (dwResult < Size){
-		SetLastError(ERROR_MORE_DATA);
-	}else{
-		bResult = TRUE;
-	}
-	*Result = dwResult;
 	return(bResult);
 }

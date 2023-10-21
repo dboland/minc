@@ -79,7 +79,7 @@ argv_win(WIN_TASK *Task, const char *command, char *const argv[])
 		p = stpquot(p, arg);
 		size = p - pszResult;
 		/* maximum for CreateProcess(), rounded to nearest block */
-		if (size >= maxbuf){
+		if (size >= maxbuf){		/* xargs.exe */
 			msvc_printf("+ warning: %s: Too many arguments\n", command);
 			break;
 		}

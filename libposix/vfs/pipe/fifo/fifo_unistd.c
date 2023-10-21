@@ -54,17 +54,27 @@ fifo_read(WIN_VNODE *Node, LPSTR Buffer, DWORD Size, DWORD *Result)
 {
 	BOOL bResult = FALSE;
 
-	/* Zero result expected if broken (gzip.exe).
-	 * When in non-blocking mode and no data present,
+	/* When in non-blocking mode and no data present,
 	 * result should be -1 and errno EAGAIN (perl.exe).
 	 */
 	if (ReadFile(Node->Handle, Buffer, Size, Result, NULL)){
 		bResult = TRUE;
-	}else if (ERROR_BROKEN_PIPE == GetLastError()){
-		*Result = 0;
 	}else if (ERROR_NO_DATA == GetLastError()){
-		*Result = -1;
 		SetLastError(ERROR_MORE_DATA);
+	}
+	return(bResult);
+}
+BOOL 
+fifo_write(WIN_VNODE *Node, LPCSTR Buffer, DWORD Size, DWORD *Result)
+{
+	BOOL bResult = FALSE;
+	OVERLAPPED ovl = {0, 0, 0, 0, Node->Event};
+
+	/* Anonymous pipes don't block when Size is larger
+	 * than WIN_PIPE_BUF.
+	 */
+	if (WriteFile(Node->Handle, Buffer, Size, Result, &ovl)){
+		bResult = TRUE;
 	}
 	return(bResult);
 }

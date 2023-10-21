@@ -54,7 +54,7 @@ passwd_posix(char *buf, size_t buflen, WIN_PWENT *WinPwd)
 	char *result = buf;
 	char *shell = "/bin/ksh";
 
-	buf = win_wcstombp(buf, WinPwd->Account, MAX_NAME);
+	buf += sprintf(buf, "%ls", WinPwd->Account);
 	buf = stpcpy(buf, ":");
 	buf = stpcpy(buf, WinPwd->Password);
 	buf = stpcpy(buf, ":");
@@ -82,7 +82,7 @@ passwd_posix(char *buf, size_t buflen, WIN_PWENT *WinPwd)
 		buf = stpcpy(buf, "/var/empty");
 		shell = "/bin/sh";
 	}else{
-		buf = win_wcstombp(stpcpy(buf, "/home/"), WinPwd->Account, MAX_NAME);
+		buf += sprintf(buf, "/home/%ls", WinPwd->Account);
 	}
 	buf = stpcpy(buf, ":");
 	buf = stpcpy(buf, shell);
@@ -184,7 +184,7 @@ getpwnam_r(const char *name, struct passwd *pwd, char *buf, size_t buflen, struc
 		errno = EINVAL;
 	}else if (!buf || !result){
 		errno = EFAULT;
-	}else if (!win_mbstowcs(szAccount, name, MAX_NAME)){
+	}else if (!mbstowcs(szAccount, name, MAX_NAME)){
 		errno = EINVAL;
 	}else if (!win_getpwnam(szAccount, &pwResult)){
 		errno = errno_posix(errno_win());

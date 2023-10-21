@@ -35,7 +35,7 @@
 int 
 errno_posix(DWORD Error)
 {
-	int result;
+	int result = -1;				// ERESTART
 
 	switch (Error){
 		case ERROR_SUCCESS:
@@ -243,7 +243,6 @@ errno_posix(DWORD Error)
 //		case ERROR_TIMEOUT:		// Ctrl+C when vim.exe is opening perl file
 //		case ERROR_NOACCESS:		// LoadLibrary(): Invalid access to memory location
 		default:
-			result = ERESTART;
 			__PRINTF("errno_posix(%d): %s\n", Error, win_strerror(Error))
 	}
 	return(result);

@@ -28,6 +28,5 @@
  *
  */
 
-#include "fifo_fcntl.c"
 #include "fifo_unistd.c"
 #include "fifo_poll.c"
