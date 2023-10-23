@@ -28,27 +28,17 @@
  *
  */
 
-/* errno.c */
+#include <sys/time.h>
+#include <sys/stat.h>
 
-UINT errno_win(VOID);
-int errno_posix(UINT Error);
+int 
+futimesat(int dirfd, const char *path, const struct timeval times[2])
+{
+	struct timespec spec[2];
 
-/* context.S */
-
-//ucontext_t *ucontext_posix(ucontext_t *ucontext);
-
-/* stat.c */
-
-int rid_posix(SID8 *Sid);
-SID8 *rid_win(SID8 *Buf, int rid);
-
-/* proc.c */
-
-void task_init(char *cmdbuf, char *argv[], void *frame_address);
-
-/* namei.c */
-
-char *path_posix(char *dest, LPCWSTR Source);
-char *pathp_posix(char *dest, LPCWSTR Source);
-//WIN_NAMEIDATA *path_win(WIN_NAMEIDATA *Path, const char *pathname, int flags);
-
+	spec[0].tv_sec = times[0].tv_sec;
+	spec[0].tv_nsec = times[0].tv_usec * 1000;
+	spec[1].tv_sec = times[1].tv_sec;
+	spec[1].tv_nsec = times[1].tv_usec * 1000;
+	return(utimensat(dirfd, path, spec, 0));
+}

@@ -59,7 +59,7 @@ dirent_posix(struct dirent *ent, WIN_DIRENT *Entity)
 //	ent->d_off = ent->d_reclen + ent->d_namlen;
 	ent->d_namlen = win_wcstombs(ent->d_name, Entity->FileName, MAXNAMLEN);
 	ent->d_reclen = sizeof(struct dirent);
-	ent->d_off = (off_t)ent->d_reclen;	/* 64 bits! */
+	ent->d_off = (off_t)ent->d_reclen;	/* 64 bit! */
 	ent->d_fileno = (ino_t)Entity->Index;
 	return(ent + 1);
 }

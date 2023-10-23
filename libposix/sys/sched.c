@@ -40,7 +40,7 @@ copy_thread(WIN_THREAD_STRUCT *Thread)
 	pwTask = proc_dup(&__Tasks[Thread->TaskId], Thread);
 	srand(time_posix(&pwTask->Started));
 	Thread->Result = pwTask->TaskId;
-//__PRINTF("copy_task(%lu): task(%lu) pid(%d) ppid(%d)\n", 
+//__PRINTF("copy_thread(%lu): task(%lu) pid(%d) ppid(%d)\n", 
 //		Parent->Tls, result, result->pid, result->ppid)
 	TlsSetValue(__TlsIndex, (PVOID)pwTask->TaskId);
 }

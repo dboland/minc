@@ -65,21 +65,6 @@ sock_SIOCGIFMTU(WIN_TASK *Task, struct ifreq *req)
 	return(result);
 }
 int 
-sock_SIOCGIFGROUP(WIN_TASK *Task, struct ifgroupreq *req)
-{
-	char *ifname = req->ifgr_name;
-	char *result = req->ifgr_group;
-	char c;
-
-	while (c = *ifname++){
-		if (c < '0' || c > '9'){
-			*result++ = c;
-		}
-	}
-	*result = 0;
-	return(0);
-}
-int 
 sock_SIOCGIFDESCR(WIN_TASK *Task, struct ifreq *req)
 {
 	int result = 0;
@@ -94,6 +79,21 @@ sock_SIOCGIFDESCR(WIN_TASK *Task, struct ifreq *req)
 		win_strncpy(req->ifr_data, ifRow.bDescr, IFDESCRSIZE);
 	}
 	return(result);
+}
+int 
+sock_SIOCGIFGROUP(WIN_TASK *Task, struct ifgroupreq *req)
+{
+	char *ifname = req->ifgr_name;
+	char *result = req->ifgr_group;
+	char c;
+
+	while (c = *ifname++){
+		if (c < '0' || c > '9'){
+			*result++ = c;
+		}
+	}
+	*result = 0;
+	return(0);
 }
 int 
 sock_SIOCGIFADDR(WIN_TASK *Task, struct ifreq *req)

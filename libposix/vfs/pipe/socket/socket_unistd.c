@@ -74,7 +74,7 @@ sock_read(WIN_VNODE *Node, LPSTR Buffer, DWORD Size, DWORD *Result)
 BOOL 
 sock_write(WIN_VNODE *Node, LPCSTR Buffer, DWORD Size, DWORD *Result)
 {
-	BOOL bResult = FALSE;
+	BOOL bResult = TRUE;
 	DWORD dwResult = 0;
 	OVERLAPPED ovl = {0, 0, 0, 0, Node->Event};
 	DWORD dwSize = Size;
@@ -96,8 +96,6 @@ sock_write(WIN_VNODE *Node, LPCSTR Buffer, DWORD Size, DWORD *Result)
 		return(FALSE);
 	}else if (dwResult < Size){
 		SetLastError(ERROR_MORE_DATA);
-	}else{
-		bResult = TRUE;
 	}
 	*Result = dwResult;
 	return(bResult);
