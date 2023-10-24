@@ -41,20 +41,37 @@ _syscall:
 	cmp $SYS_MAXSYSCALL,%ecx
 	jg 1f
 	# setup call_t struct
-	push $-1		# task_struct (defunct)
 	push $-1		# WIN_TASK
-	push $-1		# result low
-	pushw %ds		# data
-	pushw %gs		# tls
+	push %edx
+	push %ecx
+	push %ebx
+	push %ebp
+	push %esi
+	push %edi
+	push %gs
+	push %fs
+	push %es
+	push %ds
+	push $-1		# result
 	call _syscall_enter
 	call *%eax
-	mov %eax,4(%esp)
+	mov %eax,(%esp)
 	call _syscall_leave
-	popw %gs
-	popw %ds
-	add $12,%esp
-1:
+	add $4,%esp		# result
+	pop %ds
+	pop %es
+	pop %fs
+	pop %gs
+	pop %edi
+	pop %esi
+#	pop %ebp
 	add $4,%esp
+	pop %ebx
+	pop %ecx
+	pop %edx
+	add $4,%esp		# WIN_TASK
+1:
+	add $4,%esp		# code
 	ret
 
 .def ___threxit; .scl 2; .type 32; .endef

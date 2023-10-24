@@ -269,17 +269,6 @@ typedef struct _WIN_THREAD_STRUCT {
 	ULONG source;
 	ULONG offset;
 	ULONG dest;
-	ULONG bx;
-	ULONG cx;
-	ULONG dx;
-	ULONG di;
-	ULONG si;
-	ULONG cs;
-	ULONG ds;
-	ULONG es;
-	ULONG fs;
-	ULONG gs;
-	ULONG ss;
 	/* these are dynamic */
 	ULONG TaskId;
 	HANDLE Token;

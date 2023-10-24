@@ -51,7 +51,7 @@ copy_stack(u_long origin, u_long src, u_long *dest)
 	int size;
 	u_long next;
 
-//__PRINTF("origin(%lu) src(%lu) dest(%lu) _THREAD_FRAME(%lu)\n", 
+//__PRINTF("origin(0x%lx) src(0x%lx) dest(0x%lx) _THREAD_FRAME(0x%lx)\n", 
 //			origin, src, dest, _THREAD_FRAME)
 	if (!src){				/* at process frame (_start()) */
 		depth = 0;
@@ -65,8 +65,8 @@ copy_stack(u_long origin, u_long src, u_long *dest)
 		}else{
 			size = next - src;
 		}
-//__PRINTF("copy_stack(%d): source(0x%lx) dest(0x%lx) ret(0x%lx) size(%d)\n", 
-//			depth, src, dest[0], *(long *)(src + LSIZE), size)
+//__PRINTF("+ copy_stack(%d): source(0x%lx) dest(0x%lx) ret(0x%lx) size(%d)\n", 
+//			depth, src, dest[0], *(long *)(src + 4), size)
 		dest[0] -= size;
 		memcpy((void *)dest[0], (void *)src, size);
 		if (!depth){

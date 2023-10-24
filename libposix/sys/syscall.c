@@ -328,8 +328,7 @@ sys_setlogin(call_t call, const char *name)
 int 
 sys_nosys(call_t call)
 {
-	call.Task->Error = ENOSYS;
-	return(-1);
+	return(-ENOSYS);
 }
 pid_t 
 sys_getpid(call_t call)
@@ -472,7 +471,7 @@ sys_pipe(call_t call, int pipefd[2])
 	return(result);
 }
 int 
-sys_execve(call_t call, const char *filename, char *const argv[], char *const envp[])
+sys_execve(call_t call, const char *path, char *const argv[], char *const envp[])
 {
 	int result = 0;
 	WIN_NAMEIDATA wPath;
@@ -484,11 +483,11 @@ sys_execve(call_t call, const char *filename, char *const argv[], char *const en
 	WIN_VNODE vNode = {0};
 	CHAR szCommand[PATH_MAX] = "";
 
-	if (!filename || !envp){
+	if (!path || !envp){
 		result = -EINVAL;
-	}else if (!disk_open(path_win(&wPath, filename, 0), &wFlags, mode_win(&wMode, 0666), &vNode)){
+	}else if (!disk_open(path_win(&wPath, path, 0), &wFlags, mode_win(&wMode, 0666), &vNode)){
 		result -= errno_posix(GetLastError());
-	}else if (!shebang_win(&vNode, &wPath, filename, szCommand)){
+	}else if (!shebang_win(&vNode, &wPath, path, szCommand)){
 		result -= errno_posix(GetLastError());
 	}else if (!vfs_execve(pwTask, argv_win(pwTask, szCommand, argv), env_win(envp))){
 		result -= errno_posix(GetLastError());
@@ -533,16 +532,16 @@ sys_interrupt(call_t call)
 const void *
 syscall_enter(call_t call)
 {
-	struct sysent *ent = &sysent[call.code];
+	int code = call.Code;
+	struct sysent *ent = &sysent[code];
 	void *result = ent->sy_call;
 	WIN_TASK *pwTask = &__Tasks[CURRENT];
-	int code = call.code;
 
 //msvc_printf("syscall_enter(%d): base(0x%x) Task(0x%x) data(0x%x) tls(0x%x)\n", 
 //		call.code, &call.base, call.Task, call.data, call.tls);
 	pwTask->Code = code;
 	if (pwTask->TracePoints & KTRFAC_SYSCALL){
-		ktrace_SYSCALL(pwTask, code, ent->sy_argsize, &call.base + 1);
+		ktrace_SYSCALL(pwTask, code, ent->sy_argsize, &call.Base + 1);
 	}
 	if (proc_poll()){
 		result = sys_interrupt;
@@ -553,7 +552,7 @@ syscall_enter(call_t call)
 register_t 
 syscall_leave(call_t call)
 {
-	register_t result = call.result;
+	int result = call.c_result;
 	WIN_TASK *pwTask = call.Task;
 
 	/* PeekMessage() interferes with lseek().
@@ -572,7 +571,7 @@ syscall_leave(call_t call)
 		result = -1;
 	}
 	if (pwTask->TracePoints & KTRFAC_SYSRET){
-		ktrace_SYSRET(pwTask, call.code, result);
+		ktrace_SYSRET(pwTask, call.Code, result);
 	}
 	return(result);
 }

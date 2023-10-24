@@ -51,26 +51,18 @@ typedef void (*atexit_t)(void);
 typedef void (*action_t)(int, siginfo_t *, void *);
 
 typedef struct {
-	SHORT tls;
-	SHORT data;
-	DWORD result;
-	WIN_TASK *Task;
-	DWORD reserved;
-	ULONG code;
-	ULONG base;	/* return address */
-} call_t;
-
-typedef struct {
-	int c_gs;
-	int c_fs;
-	int c_es;
+	int c_result;
 	int c_ds;
+	int c_es;
+	int c_fs;
+	int c_gs;
 	int c_edi;
 	int c_esi;
 	int c_ebp;
-//	int c_eax;
 	int c_ebx;
 	int c_ecx;
 	int c_edx;
-	int c_code;
-} context_t;
+	WIN_TASK *Task;
+	ULONG Code;
+	ULONG Base;	/* return address */
+} call_t;

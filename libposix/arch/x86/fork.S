@@ -43,34 +43,12 @@ size   = 8
 source = 12
 offset = 16
 dest   = 20
-bx     = 24
-cx     = 28
-dx     = 32
-di     = 36
-si     = 40
-cs     = 44
-ds     = 48
-es     = 52
-fs     = 56
-gs     = 60
-ss     = 64
 
 _fork_enter:
 	push %fs:0x2c			# NT_TIB.ThreadLocalStoragePointer
 	call _win_fork_enter		# create WIN_THREAD_STRUCT
 	add $8,%esp
 	# set up WIN_THREAD_STRUCT with parent data
-	movl %ebx,bx(%eax)
-	movl %ecx,cx(%eax)
-	movl %edx,dx(%eax)
-	movl %edi,di(%eax)
-	movl %esi,si(%eax)
-	mov %cs,cs(%eax)
-	mov %ds,ds(%eax)
-	mov %es,es(%eax)
-	mov %fs,fs(%eax)
-	mov %gs,gs(%eax)
-	mov %ss,ss(%eax)
 	pop %ecx			# save return addr, thereby aligning stack
 	mov %ecx,return(%eax)
 	mov %fs:0x4,%ecx		# NT_TIB.StackBase
@@ -105,14 +83,7 @@ _fork_leave:
 	mov %esp,%ebp
 	add offset(%ecx),%ebp
 	push return(%ecx)
-	# restore registers
-	mov %ecx,%eax
-	mov bx(%eax),%ebx
-	mov cx(%eax),%ecx
-	mov dx(%eax),%edx
-	mov di(%eax),%edi
-	mov si(%eax),%esi
-	push %eax
+	push %ecx
 	call _win_fork_leave		# destroy WIN_THREAD_STRUCT
 	add $4,%esp
 	mov $0,%eax
