@@ -51,6 +51,8 @@ typedef struct {
 
 char *__progname;
 char **__environ;
+int h_errno;
+
 tlsentry __offsets[GOT_MAX];
 
 void 

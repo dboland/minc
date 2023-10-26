@@ -40,6 +40,8 @@
 #include <sys/param.h>
 #include <sys/tty.h>
 
+#include <netdb.h>
+
 /* sys/fcntl.c */
 
 #define O_NOCROSS		0x1000
@@ -52,13 +54,8 @@ typedef void (*action_t)(int, siginfo_t *, void *);
 
 typedef struct {
 	int c_result;
-	int c_ds;
-	int c_es;
-	int c_fs;
-	int c_gs;
 	int c_edi;
 	int c_esi;
-	int c_ebp;
 	int c_ebx;
 	int c_ecx;
 	int c_edx;

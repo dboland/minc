@@ -52,7 +52,7 @@ copy_stack(u_long origin, u_long src, u_long *dest)
 	u_long next;
 
 //__PRINTF("origin(0x%lx) src(0x%lx) dest(0x%lx) _THREAD_FRAME(0x%lx)\n", 
-//			origin, src, dest, _THREAD_FRAME)
+//			origin, src, dest[0], _THREAD_FRAME)
 	if (!src){				/* at process frame (_start()) */
 		depth = 0;
 	}else if (src == _THREAD_FRAME){	/* at thread frame (main()) */

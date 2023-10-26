@@ -32,6 +32,7 @@
 
 .file "syscall.S"
 .global _syscall
+.text
 
 .def _syscall; .scl 2; .type 32; .endef
 
@@ -45,27 +46,16 @@ _syscall:
 	push %edx
 	push %ecx
 	push %ebx
-	push %ebp
 	push %esi
 	push %edi
-	push %gs
-	push %fs
-	push %es
-	push %ds
 	push $-1		# result
 	call _syscall_enter
 	call *%eax
 	mov %eax,(%esp)
 	call _syscall_leave
 	add $4,%esp		# result
-	pop %ds
-	pop %es
-	pop %fs
-	pop %gs
 	pop %edi
 	pop %esi
-#	pop %ebp
-	add $4,%esp
 	pop %ebx
 	pop %ecx
 	pop %edx

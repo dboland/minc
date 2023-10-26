@@ -73,17 +73,3 @@ sys_utime(call_t call, const char *path, const struct utimbuf *times)
 	}
 	return(result);
 }
-int 
-sys_futimes(call_t call, int fd, const struct timeval tv[2])
-{
-	int result = 0;
-	FILETIME fTime[2];
-	WIN_TASK *pwTask = call.Task;
-
-	if (fd < 0 || fd >= OPEN_MAX){
-		result = -EBADF;
-	}else if (!disk_futimes(&pwTask->Node[fd], utimeval_win(fTime, tv))){
-		result -= errno_posix(GetLastError());
-	}
-	return(result);
-}

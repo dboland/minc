@@ -53,9 +53,6 @@
 #define DLL_IMPORT	
 #endif
 
-//#ifndef LIBPOSIX_IMPORT
-//#define LIBPOSIX_IMPORT	__import
-//#endif
 #ifndef LIBC_IMPORT
 #define LIBC_IMPORT	__import
 #endif

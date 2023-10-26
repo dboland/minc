@@ -144,7 +144,7 @@ struct	protoent {
 };
 
 #if __BSD_VISIBLE || __POSIX_VISIBLE < 200809
-extern LIBPOSIX_IMPORT int h_errno;
+extern LIBC_IMPORT int h_errno;
 
 /*
  * Error return codes from gethostbyname() and gethostbyaddr()

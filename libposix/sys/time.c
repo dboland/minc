@@ -240,22 +240,22 @@ sys_futimens(call_t call, int fd, const struct timespec times[2])
 	return(result);
 }
 int 
-__utimensat(WIN_TASK *Task, int dirfd, const char *pathname, FILETIME Time[2], int flags)
+__utimensat(WIN_TASK *Task, int dirfd, const char *file, FILETIME Time[2], int flags)
 {
 	int result = 0;
 	WIN_NAMEI wPath;
 
-	if (!vfs_utimes(pathat_win(&wPath, dirfd, pathname, flags), Time)){
+	if (!vfs_utimes(pathat_win(&wPath, dirfd, file, flags), Time)){
 		result -= errno_posix(GetLastError());
 	}
 	return(result);
 }
 int 
-sys_utimensat(call_t call, int dirfd, const char *path, const struct timespec times[2], int flags)
+sys_utimensat(call_t call, int dirfd, const char *file, const struct timespec times[2], int flags)
 {
 	FILETIME fTime[2];
 
-	return(__utimensat(call.Task, dirfd, path, utimespec_win(fTime, times), flags));
+	return(__utimensat(call.Task, dirfd, file, utimespec_win(fTime, times), flags));
 }
 int 
 sys_utimes(call_t call, const char *path, const struct timeval times[2])
@@ -263,4 +263,18 @@ sys_utimes(call_t call, const char *path, const struct timeval times[2])
 	FILETIME fTime[2];
 
 	return(__utimensat(call.Task, AT_FDCWD, path, utimeval_win(fTime, times), 0));
+}
+int 
+sys_futimes(call_t call, int fd, const struct timeval tv[2])
+{
+	int result = 0;
+	FILETIME fTime[2];
+	WIN_TASK *pwTask = call.Task;
+
+	if (fd < 0 || fd >= OPEN_MAX){
+		result = -EBADF;
+	}else if (!disk_futimes(&pwTask->Node[fd], utimeval_win(fTime, tv))){
+		result -= errno_posix(GetLastError());
+	}
+	return(result);
 }

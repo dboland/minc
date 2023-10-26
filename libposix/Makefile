@@ -5,7 +5,7 @@ BINDIR=/bin
 
 LIBPOSIX=libposix-${RELEASE}.dll
 IMPLIB=libposix.dll.a
-CFLAGS+=-g -I../include -ffreestanding
+CFLAGS+=-I../include -ffreestanding -g
 CFLAGS+=-DRELEASE=\"${RELEASE}\" -DVERSION=\"${VERSION}\" -DBUILD=${BUILD}
 #CFLAGS+=-Wunused
 LDFLAGS=-shared -s

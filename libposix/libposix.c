@@ -42,7 +42,6 @@
 #include "ws2_posix.h"
 #include "msvc_posix.h"
 #include "minc_posix.h"
-//#include "arch_posix.h"
 
 extern WIN_TASK 	*__Tasks;
 extern WIN_DEV_CLASS 	*__Devices;
@@ -84,7 +83,6 @@ WIN_NAMEIDATA *path_win(WIN_NAMEIDATA *Path, const char *pathname, int flags);
 #include "sys/stat.c"
 #include "sys/fcntl.c"
 #include "sys/proc.c"
-#include "netdb.c"
 #include "sys/socket.c"
 #include "sys/termio.c"
 #include "sys/filio.c"
