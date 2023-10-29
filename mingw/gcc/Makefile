@@ -2,7 +2,7 @@ include ../../Makefile.inc
 
 CRT0=crt0.o
 OBJECTS=${CRT0} crt1.o crtbegin.o crtend.o gcrt0.o
-LIBS=libgcc.a libgcc_eh.a libgcc_s.a
+LIBS=libgcc.a libgcc_s.a libgcc_eh.a
 GCCOBJ=_chkstk.o _chkstk_ms.o _mulsc3.o _muldc3.o _mulxc3.o _ctzdi2.o \
 	_ffsdi2.o _popcountdi2.o _popcountsi2.o _popcount_tab.o _udivdi3.o
 GCCINC=/lib/gcc/mingw32/${GCCVER}/include
@@ -20,15 +20,18 @@ all: ${OBJECTS} ${LIBS}
 # btw: there is a chkstk() in ntdll.dll
 #
 
-libgcc.a: ${MINGW}
+libgcc.a: emutls.o wintls.o mempcpy.o gnu_mntent.o futimesat.o
 	ar xv ${MINGW}/lib/gcc/mingw32/${GCCVER}/libgcc.a ${GCCOBJ}
-	ar cru $@ ${GCCOBJ}
-
-libgcc_eh.a: emutls.o wintls.o mempcpy.o gnu_mntent.o futimesat.o
-	ar cru $@ $^
+	ar cru $@ ${GCCOBJ} $^
 
 libgcc_s.a: libgcc_s.def
 	dlltool -d $< -l $@ -k
+
+libgcc_eh.a: libgcc_eh.def
+	dlltool -d $< -l $@ -k
+
+#libgcc_eh.a: emutls.o wintls.o mempcpy.o gnu_mntent.o futimesat.o
+#	ar cru $@ $^
 
 # combine objects:
 
@@ -40,6 +43,7 @@ includes-local: ${CPPINC}
 	/bin/cp -rvu ${MINGW}${CPPINC}/ssp ${GCCINC}/
 
 install-local: ${LIBDIR}/gcc/mingw32/${GCCVER}
+	/bin/cp ${MINGW}/lib/gcc/mingw32/${GCCVER}/libstdc++.dll.a ${LIBDIR}/gcc/mingw32/${GCCVER}/libstdc++.a
 	/bin/cp ${LIBS} ${LIBDIR}/gcc/mingw32/${GCCVER}/
 	/bin/cp crtbegin.o crtend.o ${LIBDIR}/gcc/mingw32/${GCCVER}/
 	/bin/cp ${CRT0} ${LIBDIR}/crt2.o
@@ -47,7 +51,7 @@ install-local: ${LIBDIR}/gcc/mingw32/${GCCVER}
 	/bin/cp gcrt0.o ${LIBDIR}/gcrt2.o
 
 install: ${DESTDIR}${LIBDIR}
-	cp ${LIBS} ${DESTDIR}${LIBDIR}/gcc/i686-pe-openbsd/${GCCVER}/
+	cp libgcc.a ${DESTDIR}${LIBDIR}/gcc/i686-pe-openbsd/${GCCVER}/
 	cp crtbegin.o crtend.o ${DESTDIR}${LIBDIR}/
 	cp ${CRT0} ${DESTDIR}${LIBDIR}/
 	cp crt1.o ${DESTDIR}${LIBDIR}/

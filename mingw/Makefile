@@ -4,10 +4,11 @@ UBINDIR=${PREFIX}/bin
 LIBEXEC=${PREFIX}/libexec
 
 LIBS=libadvapi32.a libkernel32.a libshell32.a libuser32.a \
-	libmoldname.a libstdc++.a libgcc_s_dw2-1.a libgmon.a
+	libmoldname.a libgmon.a
 
 all: ${LIBS}
 	@${MAKE} -C bin
+	@${MAKE} -C gcc
 
 #
 # below -k option makes ld remove "@" suffix
@@ -67,6 +68,7 @@ install-libexec: ${LIBEXEC}
 install-tools: ${MSGBIN}
 
 install-local: install-lib
+	@${MAKE} -C gcc install-local
 
 install:
 	@${MAKE} -C gcc install

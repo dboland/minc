@@ -123,7 +123,7 @@ WIN_NAMEIDATA *path_win(WIN_NAMEIDATA *Path, const char *pathname, int flags);
 #define _KERNEL
 #include "sys/file.c"
 #include "sys/sysctl.c"
-#include "../openbsd/lib/libd/dlfcn.c"
+//#include "../openbsd/lib/libd/dlfcn.c"
 #include "compat.c"
 #include "kern/init_sysent.c"
 

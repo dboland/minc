@@ -28,17 +28,62 @@
  *
  */
 
-#include <netdb.h>
+#include <dlfcn.h>
 
-int h_errno = 0;
+char _DL_PATH_BUF[PATH_MAX];
 
-/****************************************************/
+/**************************************************************/
 
-int 
-h_errno_posix(WIN_TASK *Task, DWORD Error)
+void *
+dlopen(const char *filename, int flag)
 {
-	int result = errno_posix(Error);
+	void *result = NULL;
+	WIN_NAMEIDATA wPath;
+	WIN_TASK *pwTask = &__Tasks[CURRENT];
 
-	Task->Error = result;
+	if (!filename){
+		result = win_dlopen(NULL);
+	}else if (!(result = win_dlopen(path_win(&wPath, filename, 0)->Resolved))){
+		pwTask->Error = errno_posix(GetLastError());
+	}
 	return(result);
+}
+void *
+dlsym(void *handle, const char *symbol)
+{
+	void *result = NULL;
+	WIN_TASK *pwTask = &__Tasks[CURRENT];
+
+	if (!(result = win_dlsym(handle, symbol))){
+		pwTask->Error = errno_posix(GetLastError());
+	}
+	return(result);
+}
+char *
+dlerror(void)
+{
+	return(win_strerror(errno_win()));
+}
+int 
+dlclose(void *handle)
+{
+	return(win_dlclose(handle));
+}
+int 
+dladdr(const void *addr, Dl_info *info)
+{
+	int result = 0;
+	MEMORY_BASIC_INFORMATION mbInfo;
+	WCHAR szPath[MAX_PATH];
+	WIN_TASK *pwTask = &__Tasks[CURRENT];
+
+	if (!win_dladdr(addr, &mbInfo, szPath)){
+		pwTask->Error = errno_posix(GetLastError());
+	}else{
+		info->dli_fname = path_posix(_DL_PATH_BUF, szPath);
+		info->dli_fbase = mbInfo.AllocationBase;
+		info->dli_sname = NULL;
+		info->dli_saddr = NULL;
+		result = 1;
+	}
 }
