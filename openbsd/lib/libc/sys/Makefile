@@ -1,4 +1,4 @@
-OBJECTS= __get_tcb.o __getcwd.o __semctl.o __set_tcb.o __syscall.o \
+OBJECTS= __get_tcb.o __getcwd.o __semctl.o __set_tcb.o \
 	__sysctl.o __tfork.o __threxit.o __thrsigdivert.o __thrsleep.o __thrwakeup.o \
 	access.o acct.o adjfreq.o adjtime.o break.o chdir.o chflags.o \
 	chmod.o chown.o chroot.o clock_getres.o clock_gettime.o clock_settime.o close.o \
@@ -25,7 +25,7 @@ OBJECTS= __get_tcb.o __getcwd.o __semctl.o __set_tcb.o __syscall.o \
 	sigsuspend.o stat.o statfs.o swapctl.o symlink.o \
 	symlinkat.o sync.o sysarch.o truncate.o \
 	umask.o unlink.o unlinkat.o unmount.o utimensat.o utimes.o \
-	utrace.o wait4.o write.o writev.o
+	utrace.o wait4.o write.o writev.o syscall.o
 
 OBJECTS+= semctl.c.o
 OBJECTS+= socket.o connect.o accept.o recvfrom.o sendto.o sendmsg.o recvmsg.o \
@@ -33,6 +33,7 @@ OBJECTS+= socket.o connect.o accept.o recvfrom.o sendto.o sendmsg.o recvmsg.o \
 	getpeername.o getsockname.o
 
 LIBGEN+= exit.o getlogin.o setlogin.o fork.o vfork.o
+LIBPOSIX+=  __syscall.o
 
 .SUFFIXES:
 .DEFAULT:

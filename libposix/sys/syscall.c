@@ -325,11 +325,6 @@ sys_setlogin(call_t call, const char *name)
 
 /****************************************************/
 
-int 
-sys_nosys(call_t call)
-{
-	return(-ENOSYS);
-}
 pid_t 
 sys_getpid(call_t call)
 {
@@ -526,6 +521,11 @@ sys_interrupt(call_t call)
 {
 	return(-EINTR);
 }
+int 
+sys_nosys(call_t call)
+{
+	return(-ENOSYS);
+}
 
 /****************************************************/
 
@@ -537,8 +537,6 @@ syscall_enter(call_t call)
 	void *result = ent->sy_call;
 	WIN_TASK *pwTask = &__Tasks[CURRENT];
 
-//msvc_printf("syscall_enter(%d): base(0x%x) Task(0x%x) data(0x%x) tls(0x%x)\n", 
-//		call.code, &call.base, call.Task, call.data, call.tls);
 	pwTask->Code = code;
 	if (pwTask->TracePoints & KTRFAC_SYSCALL){
 		ktrace_SYSCALL(pwTask, code, ent->sy_argsize, &call.Base + 1);

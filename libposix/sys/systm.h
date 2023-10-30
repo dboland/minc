@@ -58,9 +58,7 @@ extern struct sysent {		/* system call table */
 #define sys___get_tcb		sys_nosys
 
 #define sys_sched_yield		sys_nosys
-//#define sys_ppoll		sys_nosys
 #define sys_quotactl		sys_nosys
-//#define sys_obreak		sys_nosys
 #define sys_getitimer		sys_nosys
 #define sys_kevent		sys_nosys
 #define sys_mincore		sys_nosys

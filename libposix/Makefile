@@ -12,7 +12,6 @@ LDFLAGS=-shared -s
 OBJECTS=crt1.o win_posix.o msvc_posix.o vfs_posix.o libposix.o
 WINDIR=/C/WINDOWS/system32
 GCCDIR=../mingw/gcc
-INSTALL=../mingw/bin/ginstall
 
 all: ${LIBPOSIX}
 
@@ -48,15 +47,16 @@ clean:
 	/bin/rm -f arch/*.o *.o *.a *.dll
 
 ${LIBDIR}:
-	mkdir -p ${LIBDIR}
+	/bin/mkdir -p ${LIBDIR}
 
 ${BINDIR}:
-	mkdir -p ${BINDIR}
-
-install: ${DESTDIR}
-	${INSTALL} -m 06555 ${LIBPOSIX} ${DESTDIR}${BINDIR}/
-	@#strip --remove-section=.reloc ${DESTDIR}${BINDIR}/${LIBPOSIX}
+	/bin/mkdir -p ${BINDIR}
 
 install-local: ${LIBDIR} ${BINDIR}
 	/bin/cp ${LIBPOSIX} ${BINDIR}/
 	/bin/cp ${IMPLIB} ${LIBDIR}/libmingw32.a
+
+install: ${DESTDIR}
+	ginstall -m 06555 ${LIBPOSIX} ${DESTDIR}${BINDIR}/
+	@#strip --remove-section=.reloc ${DESTDIR}${BINDIR}/${LIBPOSIX}
+

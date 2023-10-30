@@ -47,8 +47,11 @@
 
 #define	SYSENTRY(x)					\
 	ENTRY(x);					\
-	push $(SYS_ ## x);				\
-	jmp _syscall;					\
+	pop %ecx;					\
+	mov $(SYS_ ## x),%eax;				\
+	call ___syscall;				\
+	push %ecx;					\
+	ret;						\
 	.global _C_LABEL(_thread_sys_ ## x);		\
 	_C_LABEL(_thread_sys_ ## x) = _C_LABEL(x)
 

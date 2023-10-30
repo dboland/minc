@@ -1,5 +1,8 @@
 #include "SYS.h"
 
 ENTRY(_setlogin)
-	push $SYS_setlogin
-	jmp _syscall
+	pop %ecx
+	mov $SYS_setlogin,%eax
+	call ___syscall
+	push %ecx
+	ret

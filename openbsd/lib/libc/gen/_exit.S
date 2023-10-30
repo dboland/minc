@@ -1,5 +1,8 @@
 #include "SYS.h"
 
 ENTRY(_exit)
-	push $SYS_exit
-	jmp _syscall
+	pop %ecx
+	mov $SYS_exit,%eax
+	call ___syscall
+	push %ecx
+	ret

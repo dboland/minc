@@ -264,7 +264,7 @@ main(int argc, char *argv[], char *envp[])
 	setenv("PATH", _PATH_DEFPATH, 1);
 	switch (pid = fork()){
 		case -1:
-			die("vfork(): %s\n", strerror(errno));
+			die("fork(): %s\n", strerror(errno));
 		case 0:
 			if (_boot)
 				boot();

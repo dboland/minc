@@ -4,7 +4,7 @@ RELEASE=6.1.0
 
 LIBEXEC=${PREFIX}/libexec
 
-CFLAGS+=-g -Wimplicit-function-declaration -Werror -ffreestanding
+CFLAGS+=-g -ffreestanding
 OBJECTS=libd.o
 IMPLIB=libdl.dll.a
 LDFLAGS=-shared -s
@@ -32,7 +32,10 @@ clean:
 install: ${DESTDIR}
 	ginstall ld.so ${DESTDIR}${LIBEXEC}/
 
-install-local:
+${LIBEXEC}:
+	mkdir ${LIBEXEC}
+
+install-local: ${LIBEXEC}
 	/bin/cp ${IMPLIB} ${LIBDIR}/
 	/bin/cp ld.so ${LIBEXEC}/
 

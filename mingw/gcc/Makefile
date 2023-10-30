@@ -7,9 +7,6 @@ GCCOBJ=_chkstk.o _chkstk_ms.o _mulsc3.o _muldc3.o _mulxc3.o _ctzdi2.o \
 	_ffsdi2.o _popcountdi2.o _popcountsi2.o _popcount_tab.o _udivdi3.o
 GCCINC=/lib/gcc/mingw32/${GCCVER}/include
 
-.DEFAULT:
-.SUFFIXES:
-
 all: ${OBJECTS} ${LIBS}
 
 %.o: %.c

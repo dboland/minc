@@ -49,22 +49,15 @@ version.o: version.rc
 ${LIBC}: ${OBJECTS} version.o
 	${LD} ${LDFLAGS} -e _DllMainCRTStartup@12 --out-implib=${IMPLIB} --disable-auto-import \
 	-o $@ --image-base=${IMGBASE_LIBC} ${GCCLIB}/crt1.o ${OBJECTS} ${SHOBJECTS} version.o \
-	-L${GCCLIB} -L${POSIXLIB} -L${WINLIB} -lgcc_eh -lgcc -lposix -lmsvcrt
+	-L${GCCLIB} -L${POSIXLIB} -L${WINLIB} -lgcc -lposix -lmsvcrt
 
 clean: objects-clean lib-clean
 
 lib-clean:
-	rm -f *.o *.a ${LIBC}
+	/bin/rm -f *.o *.a ${LIBC}
 
 objects-clean:
-	rm -f */*.o arch/${ARCH}/*/*.o db/*/*.o
-
-install: ${DESTDIR}
-	ginstall ${LIBC} ${DESTDIR}${LIBDIR}/
-	@#strip ${DESTDIR}${LIBDIR}/${LIBC}
-	ginstall libc.a ${DESTDIR}${LIBDIR}/
-	ginstall libmsvcrt.a ${DESTDIR}${LIBDIR}/
-	@#ln -s ${LIBC} ${DESTDIR}${LIBDIR}/libc.so
+	/bin/rm -f */*.o arch/${ARCH}/*/*.o db/*/*.o
 
 # Perl needs libc.so
 install-local:
@@ -74,4 +67,10 @@ install-local:
 	/bin/cp libc.a ${LIBDIR}/libmingwex.a
 	/bin/cp libc.a ${LIBDIR}/
 	/bin/cp libmsvcrt.a ${LIBDIR}/
+
+install: ${DESTDIR}
+	ginstall ${LIBC} ${DESTDIR}${LIBDIR}/
+	ginstall libc.a ${DESTDIR}${LIBDIR}/
+	ginstall libmsvcrt.a ${DESTDIR}${LIBDIR}/
+	@#ln -s ${LIBC} ${DESTDIR}${LIBDIR}/libc.so
 
