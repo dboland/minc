@@ -44,7 +44,7 @@ dlopen(const char *filename, int flag)
 	if (!filename){
 		result = win_dlopen(NULL);
 	}else if (!(result = win_dlopen(path_win(&wPath, filename, 0)->Resolved))){
-		pwTask->Error = errno_posix(GetLastError());
+		pwTask->Error = errno_posix(errno_win());
 	}
 	return(result);
 }
@@ -55,7 +55,7 @@ dlsym(void *handle, const char *symbol)
 	WIN_TASK *pwTask = &__Tasks[CURRENT];
 
 	if (!(result = win_dlsym(handle, symbol))){
-		pwTask->Error = errno_posix(GetLastError());
+		pwTask->Error = errno_posix(errno_win());
 	}
 	return(result);
 }
@@ -78,7 +78,7 @@ dladdr(const void *addr, Dl_info *info)
 	WIN_TASK *pwTask = &__Tasks[CURRENT];
 
 	if (!win_dladdr(addr, &mbInfo, szPath)){
-		pwTask->Error = errno_posix(GetLastError());
+		pwTask->Error = errno_posix(errno_win());
 	}else{
 		info->dli_fname = path_posix(_DL_PATH_BUF, szPath);
 		info->dli_fbase = mbInfo.AllocationBase;

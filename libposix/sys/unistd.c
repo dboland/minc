@@ -556,11 +556,11 @@ sys_dup2(call_t call, int oldfd, int newfd)
 off_t 
 sys_lseek(call_t call, int fd, off_t offset, int whence)
 {
-	off_t result = 0;
+	off_t result = 0L;
 	DWORD dwMethod = FILE_BEGIN;
-	LONGLONG llResult;
-	LONGLONG llOffset = offset;		/* __int64_t */
+	LARGE_INTEGER liResult;
 	WIN_TASK *pwTask = call.Task;
+	LARGE_INTEGER liOffset = {offset & 0xFFFFFFFF, offset >> 32};
 
 	if (whence == SEEK_CUR){
 		dwMethod = FILE_CURRENT;
@@ -569,10 +569,10 @@ sys_lseek(call_t call, int fd, off_t offset, int whence)
 	}
 	if (fd < 0 || fd >= OPEN_MAX){
 		result = -EBADF;
-	}else if (!vfs_lseek(&pwTask->Node[fd], llOffset, dwMethod, &llResult)){
-		result -= errno_posix(GetLastError());
+	}else if (!vfs_lseek(&pwTask->Node[fd], &liOffset, dwMethod, &liResult)){
+		result -= (off_t)errno_posix(GetLastError());
 	}else{
-		result = llResult;
+		result = liResult.QuadPart;
 	}
 	return(result);
 }
@@ -630,7 +630,7 @@ sys_read(call_t call, int fd, void *buf, size_t count)
 	if (fd < 0 || fd >= OPEN_MAX){
 		result = -EBADF;
 	}else if (!vfs_read(&pwTask->Node[fd], buf, dwCount, &dwResult)){
-		pwTask->Error = errno_posix(GetLastError());
+		result -= errno_posix(GetLastError());
 	}else{
 		result = dwResult;
 		if (pwTask->TracePoints & KTRFAC_GENIO){
@@ -674,7 +674,7 @@ sys_pread(call_t call, int fd, void *buf, size_t nbytes, off_t offset)
 	}else if (fd < 0 || fd >= OPEN_MAX){
 		result = -EBADF;
 	}else if (!vfs_pread(&pwTask->Node[fd], buf, nbytes, offset, &dwResult)){
-		pwTask->Error = errno_posix(GetLastError());
+		result -= errno_posix(GetLastError());
 	}else{
 		result = dwResult;
 	}

@@ -29,11 +29,10 @@ OBJECTS= assert.o \
 
 OBJECTS+= getpwent.c.o getgrent.c.o setproctitle.c.o setprogname.c.o \
 	getprogname.c.o getgrouplist.c.o
-OBJECTS+= _exit.S.o _getlogin.S.o _setlogin.S.o _fork.S.o _vfork.S.o
+OBJECTS+= _exit.S.o _getlogin.S.o _setlogin.S.o
 OBJECTS+= syslog_r.o syslog.o auth_subr.o login_cap.o authenticate.o
 
-#OBJECTS+= elf_hash.o posix_spawn.o shm_open.o
-#OBJECTS+= errno.S.o
+#OBJECTS+= elf_hash.o posix_spawn.o shm_open.o errno.o
 
 .SUFFIXES:
 .DEFAULT:

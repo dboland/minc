@@ -44,10 +44,10 @@ ws2_fstat(WIN_VNODE *Node, WIN_VATTR *Result)
 	Result->LastWriteTime = ftNow;
 	Result->NumberOfLinks = 1;
 	Result->DeviceId = Node->DeviceId;
-	Result->FileSizeLow = Node->Size;
 	Result->Mode.User = Node->Access;
 	Result->Mode.Group = WIN_S_IREAD;
 	Result->Mode.Other = WIN_S_IREAD;
 	Result->Mode.FileType = Node->FileType;
+	Result->BlockSize = WIN_PIPE_BUF;
 	return(TRUE);
 }

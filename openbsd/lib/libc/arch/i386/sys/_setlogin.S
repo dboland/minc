@@ -3,6 +3,6 @@
 ENTRY(_setlogin)
 	pop %ecx
 	mov $SYS_setlogin,%eax
-	call ___syscall
+	call ___kernel
 	push %ecx
 	ret

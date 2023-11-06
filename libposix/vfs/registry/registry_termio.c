@@ -42,7 +42,7 @@ reg_TIOCGETA(WIN_DEVICE *Device, DWORD Mode[2])
 	LPCWSTR pszPath = L"Console\\MinC";
 
 	if (!RegOpenFile(HKEY_CURRENT_USER, pszPath, KEY_QUERY_VALUE, &vNode)){
-		WIN_ERR("RegCreateFile(%ls): %s\n", pszPath, win_strerror(GetLastError()));
+		WIN_ERR("RegOpenFile(%ls): %s\n", pszPath, win_strerror(GetLastError()));
 	}else{
 		RegReadFile(vNode.Key, L"VirtualTerminalLevel", REG_DWORD, &dwValue, &dwSize);
 		if (dwValue > 0){

@@ -31,6 +31,7 @@ clean:
 
 install: ${DESTDIR}
 	ginstall ld.so ${DESTDIR}${LIBEXEC}/
+	ginstall ${IMPLIB} ${DESTDIR}${LIBDIR}/libdl.a
 
 ${LIBEXEC}:
 	mkdir ${LIBEXEC}

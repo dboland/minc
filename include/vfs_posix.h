@@ -47,7 +47,7 @@ BOOL vfs_dup2(WIN_VNODE *Node, WIN_VNODE *Result);
 BOOL vfs_ftruncate(WIN_VNODE *Node, LONG Size);
 BOOL vfs_truncate(WIN_NAMEIDATA *Path, WIN_FLAGS *Flags, LONG Size);
 BOOL vfs_unlink(WIN_NAMEIDATA *Path);
-BOOL vfs_lseek(WIN_VNODE *Node, LONGLONG Offset, DWORD Method, LONGLONG *Result);
+BOOL vfs_lseek(WIN_VNODE *Node, LARGE_INTEGER *Offset, DWORD Method, LARGE_INTEGER *Result);
 BOOL vfs_rmdir(WIN_NAMEIDATA *Path);
 BOOL vfs_link(WIN_NAMEIDATA *Path, WIN_NAMEIDATA *Result);
 BOOL vfs_fsync(WIN_VNODE *Node);

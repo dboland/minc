@@ -15,4 +15,4 @@ scacls.exe: scacls.c
 	gcc ${CFLAGS} -I../../include -o $@ $<
 
 install:
-	./ginstall ginstall.exe ${DESTDIR}/usr/bin/ginstall
+	ginstall ginstall.exe ${DESTDIR}/usr/bin/ginstall

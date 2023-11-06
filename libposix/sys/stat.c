@@ -219,8 +219,8 @@ stat_posix(WIN_TASK *Task, struct stat *buf, WIN_VATTR *Stat)
 	buf->st_uid = rid_posix(&Stat->UserSid);
 	buf->st_gid = rid_posix(&Stat->GroupSid);
 	buf->st_size = (Stat->FileSizeHigh * 0x100000000) + Stat->FileSizeLow;
-	buf->st_blksize = S_BLKSIZE;
 	buf->st_blocks = (buf->st_size + S_BLKSIZE - 1) / S_BLKSIZE;
+	buf->st_blksize = Stat->BlockSize;
 	/* raw device: device this inode represents (if special file) */
 	buf->st_rdev = Stat->SpecialId;
 	/* stat(2) man page: access (read, execve) */

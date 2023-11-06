@@ -25,15 +25,15 @@ OBJECTS= __get_tcb.o __getcwd.o __semctl.o __set_tcb.o \
 	sigsuspend.o stat.o statfs.o swapctl.o symlink.o \
 	symlinkat.o sync.o sysarch.o truncate.o \
 	umask.o unlink.o unlinkat.o unmount.o utimensat.o utimes.o \
-	utrace.o wait4.o write.o writev.o syscall.o
+	utrace.o wait4.o write.o writev.o
 
 OBJECTS+= semctl.c.o
 OBJECTS+= socket.o connect.o accept.o recvfrom.o sendto.o sendmsg.o recvmsg.o \
 	socketpair.o shutdown.o getsockopt.o setsockopt.o bind.o listen.o \
 	getpeername.o getsockname.o
 
-LIBGEN+= exit.o getlogin.o setlogin.o fork.o vfork.o
-LIBPOSIX+=  __syscall.o
+#OBJECTS+= exit.o getlogin.o setlogin.o
+#OBJECTS+=  __syscall.o
 
 .SUFFIXES:
 .DEFAULT:

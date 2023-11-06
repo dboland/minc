@@ -98,7 +98,7 @@ proc_close(WIN_TASK *Task)
 		SetLastError(ERROR_INVALID_THREAD_ID);
 	}else if (CloseHandle(Task->Handle)){
 		bResult = TRUE;
-	}else{
+	}else{				/* tar.exe */
 		WIN_ERR("proc_close(%d): %s\n", Task->Handle, win_strerror(GetLastError()));
 	}
 	Task->Flags |= WIN_PS_NOZOMBIE;	/* ready to be reclaimed */

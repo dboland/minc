@@ -138,16 +138,14 @@ disk_rename(WIN_NAMEI *Path, WIN_NAMEI *Result)
 	return(bResult);
 }
 BOOL 
-disk_lseek(WIN_VNODE *Node, LONGLONG Offset, DWORD Method, LONGLONG *Result)
+disk_lseek(WIN_VNODE *Node, LARGE_INTEGER *Offset, DWORD Method, LARGE_INTEGER *Result)
 {
-	LARGE_INTEGER liOffset;
-	LARGE_INTEGER liResult = {0};
 	BOOL bResult = FALSE;
 
-	liOffset.QuadPart = Offset;
-	if (SetFilePointerEx(Node->Handle, liOffset, &liResult, Method)){
-		*Result = liResult.QuadPart;
+	if (SetFilePointerEx(Node->Handle, *Offset, Result, Method)){
 		bResult = TRUE;
+//	}else{
+//		WIN_ERR("SetFilePointerEx(%d): %s\n", Node->Handle, win_strerror(GetLastError()));
 	}
 	return(bResult);
 }

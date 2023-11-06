@@ -150,7 +150,6 @@ vfs_pipe(WIN_VNODE Result[2])
 		Result[0].DeviceType = DEV_CLASS_CPU;
 		Result[0].Access = win_F_GETFL(hInput);
 		Result[0].Attribs = FILE_ATTRIBUTE_NORMAL;
-		Result[0].Size = WIN_PIPE_BUF;
 		Result[1].Handle = hOutput;
 		Result[1].Event = __PipeEvent;
 		Result[1].FSType = FS_TYPE_PIPE;
@@ -158,7 +157,6 @@ vfs_pipe(WIN_VNODE Result[2])
 		Result[1].DeviceType = DEV_CLASS_CPU;
 		Result[1].Access = win_F_GETFL(hOutput);
 		Result[1].Attribs = FILE_ATTRIBUTE_NORMAL;
-		Result[1].Size = WIN_PIPE_BUF;
 		bResult = TRUE;
 	}
 	return(bResult);

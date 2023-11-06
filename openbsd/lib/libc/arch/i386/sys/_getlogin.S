@@ -3,6 +3,6 @@
 ENTRY(_getlogin)
 	pop %ecx
 	mov $SYS_getlogin,%eax
-	call ___syscall
+	call ___kernel
 	push %ecx
 	ret

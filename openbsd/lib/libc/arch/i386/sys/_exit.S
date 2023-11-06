@@ -3,6 +3,6 @@
 ENTRY(_exit)
 	pop %ecx
 	mov $SYS_exit,%eax
-	call ___syscall
+	call ___kernel
 	push %ecx
 	ret

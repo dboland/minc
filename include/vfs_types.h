@@ -413,7 +413,6 @@ typedef struct _WIN_VNODE {
 	HANDLE Event;
 	ULONG Pending;		/* pending events */
 	DWORD Flags;		/* handle information */
-	DWORD Size;		/* buffer size */
 	union {
 		HANDLE Handle;
 		UINT Socket;
@@ -525,6 +524,7 @@ typedef struct _WIN_VATTR {
 	WIN_MODE Mode;
 	SID8 UserSid;
 	SID8 GroupSid;
+	DWORD BlockSize;
 } WIN_VATTR;
 
 /*

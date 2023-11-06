@@ -49,7 +49,7 @@
 	ENTRY(x);					\
 	pop %ecx;					\
 	mov $(SYS_ ## x),%eax;				\
-	call ___syscall;				\
+	call ___kernel;					\
 	push %ecx;					\
 	ret;						\
 	.global _C_LABEL(_thread_sys_ ## x);		\

@@ -58,7 +58,6 @@ typedef struct {
 	int c_esi;
 	int c_ebx;
 	int c_ecx;
-	int c_edx;
 	WIN_TASK *Task;
 	ULONG Code;
 	ULONG Base;	/* return address */

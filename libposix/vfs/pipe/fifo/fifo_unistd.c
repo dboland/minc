@@ -58,8 +58,12 @@ fifo_read(WIN_VNODE *Node, LPSTR Buffer, DWORD Size, DWORD *Result)
 	 * result should be -1 and errno EAGAIN (perl.exe).
 	 */
 	if (ReadFile(Node->Handle, Buffer, Size, Result, NULL)){
+		return(TRUE);
+	}else if (ERROR_BROKEN_PIPE == GetLastError()){
+		*Result = 0;
 		bResult = TRUE;
 	}else if (ERROR_NO_DATA == GetLastError()){
+		*Result = -1;
 		SetLastError(ERROR_MORE_DATA);
 	}
 	return(bResult);

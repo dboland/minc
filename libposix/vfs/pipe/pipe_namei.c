@@ -70,7 +70,6 @@ PipeCreateFile(LPCWSTR Name, DWORD Attribs, HANDLE Event, WIN_VNODE *Result)
 		Result->Attribs = Attribs & 0xFFFF0000;
 		Result->Access = win_F_GETFL(hResult);
 		Result->Flags = win_F_GETFD(hResult);
-		Result->Size = WIN_PIPE_BUF;
 		bResult = TRUE;
 	}else{
 		WIN_ERR("CreateNamedPipe(%ls): %s\n", szPath, win_strerror(GetLastError()));
@@ -96,7 +95,6 @@ PipeOpenFile(LPCWSTR Name, HANDLE Event, WIN_VNODE *Result)
 		Result->Attribs = dwAttribs;
 		Result->Access = win_F_GETFL(hResult);
 		Result->Flags = win_F_GETFD(hResult);
-		Result->Size = WIN_PIPE_BUF;
 		bResult = TRUE;
 //	}else{
 //		WIN_ERR("PipeOpenFile(%ls): %s\n", szPath, win_strerror(GetLastError()));
@@ -116,7 +114,7 @@ pipe_namei(HANDLE Handle, WIN_VNODE *Result)
 	Result->FSType = FS_TYPE_PIPE;
 	Result->Event = __PipeEvent;
 	Result->DeviceType = DEV_CLASS_CPU;
-	if (GetNamedPipeInfo(Handle, &dwFlags, &Result->Size, NULL, NULL)){
+	if (GetNamedPipeInfo(Handle, &dwFlags, NULL, NULL, NULL)){
 		if (dwFlags & PIPE_TYPE_MESSAGE){		/* git.exe */
 			Result->FileType = WIN_VSOCK;
 		}else{

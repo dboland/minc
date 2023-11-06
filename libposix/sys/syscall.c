@@ -514,7 +514,7 @@ sys___threxit(call_t call, pid_t *pid)
 /* void *
 sys___get_tcb(call_t call)
 {
-	return(call.task);
+	return(call.Task);
 } */
 int 
 sys_interrupt(call_t call)
@@ -547,27 +547,17 @@ syscall_enter(call_t call)
 	call.Task = pwTask;
 	return(result);
 }
-register_t 
+int 
 syscall_leave(call_t call)
 {
 	int result = call.c_result;
 	WIN_TASK *pwTask = call.Task;
 
-	/* PeekMessage() interferes with lseek().
-	 * lseek returns an off_t (__int64_t), which uses two 
-	 * registers: %eax and %edx, so the call into NT space
-	 * clobbers the value in %edx (nm.exe, vim.exe)
-	 */
-//	if (call.code != SYS_lseek){
-//		if (!vfs_proc_poll()){
-//			__errno_posix(call.Task, GetLastError());
-//			result = -1;
-//		}
-//	}
 	if (result < 0){
 		pwTask->Error = -result;
-		result = -1;
 	}
+	/* Does WriteFile() touch the %edx register?
+	 */
 	if (pwTask->TracePoints & KTRFAC_SYSRET){
 		ktrace_SYSRET(pwTask, call.Code, result);
 	}

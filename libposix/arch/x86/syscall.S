@@ -31,35 +31,37 @@
 #include <sys/syscall.h>
 
 .file "syscall.S"
-.global ___syscall, _sys_syscall
+.global ___kernel, _sys_syscall
 .text
 
-.def ___syscall; .scl 2; .type 32; .endef
+.def ___kernel; .scl 2; .type 32; .endef
 
-___syscall:
+___kernel:
 	# setup call_t struct
 	cmp $SYS_MAXSYSCALL,%eax
 	jg 1f
 	push %eax		# code
 	push $-1		# WIN_TASK
-	push %edx
 	push %ecx
 	push %ebx
 	push %esi
 	push %edi
-	push $-1		# result
+	push $0			# result low
 	call _syscall_enter
 	call *%eax
 	mov %eax,(%esp)
 	call _syscall_leave
-	add $4,%esp		# result
+	add $4,%esp		# result low
 	pop %edi
 	pop %esi
 	pop %ebx
 	pop %ecx
-	pop %edx
 	add $4,%esp		# WIN_TASK
 	add $4,%esp		# code
+	cmp $0,%eax
+	jge 1f
+	mov $-1,%edx
+	mov $-1,%eax
 1:
 	ret
 
@@ -68,7 +70,7 @@ ___syscall:
 _sys_syscall:
 	pop %ecx
 	pop %eax
-	call ___syscall
+	call ___kernel
 	push %ecx
 	ret
 
@@ -77,6 +79,6 @@ _sys_syscall:
 ___threxit:
 	pop %ecx
 	mov $SYS___threxit,%eax
-	call ___syscall
+	call ___kernel
 	push %ecx
 	ret

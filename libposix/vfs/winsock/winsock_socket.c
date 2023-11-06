@@ -88,7 +88,6 @@ ws2_socket(UINT Family, UINT Type, INT Protocol, WIN_VNODE *Result)
 		Result->FileType = WIN_VSOCK;
 		Result->Event = WSACreateEvent();
 		Result->Pending = 0;
-		Result->Size = WS2_SOCKET_SIZE;
 		Result->DeviceType = DEV_TYPE_ETH;
 		Result->Access = win_F_GETFL((HANDLE)sResult);
 		Result->Flags = win_F_GETFD((HANDLE)sResult);

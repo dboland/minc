@@ -48,7 +48,6 @@ WSAcceptFile(WIN_VNODE *Node, LPSOCKADDR Address, LPINT Length, WIN_VNODE *Resul
 		Result->DeviceType = Node->DeviceType;
 		Result->FileType = Node->FileType;
 		Result->Event = WSACreateEvent();
-		Result->Size = WS2_SOCKET_SIZE;
 		Result->Access = win_F_GETFL((HANDLE)sResult);;
 		Result->Flags = win_F_GETFD((HANDLE)sResult);
 		Result->CloseExec = FALSE;

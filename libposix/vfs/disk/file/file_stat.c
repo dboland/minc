@@ -45,6 +45,7 @@ file_fstat(WIN_VNODE *Node, WIN_VATTR *Result)
 	}else if (vfs_acl_stat(psd, Result)){
 		Result->DeviceId = Node->DeviceId;
 		Result->Mode.FileType = Node->FileType;
+		Result->BlockSize = WIN_S_BLKSIZE;
 		bResult = TRUE;
 	}
 	LocalFree(psd);

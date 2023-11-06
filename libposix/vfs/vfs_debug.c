@@ -371,8 +371,8 @@ VfsDebugPath(WIN_NAMEIDATA *Path, LPCSTR Label)
 VOID 
 VfsDebugNode(WIN_VNODE *Node, LPCSTR Label)
 {
-	msvc_printf("%s(%d): Type(%s:%s) Handle(%d) Event(%d) Size(%d) Access(0x%x) CloEx(%d) DevType(0x%x) DevId(0x%x)\n", 
-		Label, Node->FileId, FSType(Node->FSType), FType(Node->FileType), Node->Handle, Node->Event, Node->Size, Node->Access, Node->CloseExec, Node->DeviceType, Node->DeviceId);
+	msvc_printf("%s(%d): Type(%s:%s) Handle(%d) Event(%d) Access(0x%x) CloEx(%d) DevType(0x%x) DevId(0x%x)\n", 
+		Label, Node->FileId, FSType(Node->FSType), FType(Node->FileType), Node->Handle, Node->Event, Node->Access, Node->CloseExec, Node->DeviceType, Node->DeviceId);
 	VfsFileFlags(Node->Flags, L"+ flags");
 	VfsFileAttribs(Node->Attribs, L"+ attribs");
 	VfsAccessFlags(Node->Access);
@@ -418,8 +418,8 @@ VfsDebugTTY(WIN_TERMIO *Terminal, LPCSTR Label)
 VOID 
 VfsDebugDrive(WIN_STATFS *Info, LPCSTR Label)
 {
-	msvc_printf("%s(%ls): Type(%ls) DevId(0x%x) Label(%ls) MaxPath(%d)\n", 
-		Label, Info->Drive, Info->TypeName, Info->DeviceId, Info->Label, Info->MaxPath);
+	msvc_printf("%s(%ls): Type(%ls) DevId(0x%x) Label(%ls) MaxPath(%d) BytesPerSector(%d)\n", 
+		Label, Info->Drive, Info->TypeName, Info->DeviceId, Info->Label, Info->MaxPath, Info->BytesPerSector);
 //	VfsVolumeFlags(Info->Flags, "  flags");
 }
 VOID 
