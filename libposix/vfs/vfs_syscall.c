@@ -138,7 +138,6 @@ vfs_pipe(WIN_VNODE Result[2])
 {
 	BOOL bResult = FALSE;
 	HANDLE hInput, hOutput;
-//	HANDLE hEvent = CreateEvent(NULL, FALSE, FALSE, NULL);
 
 	if (!CreatePipe(&hInput, &hOutput, NULL, WIN_PIPE_BUF)){
 		WIN_ERR("CreatePipe(%d): %s\n", WIN_PIPE_BUF, win_strerror(GetLastError()));

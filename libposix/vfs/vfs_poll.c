@@ -63,8 +63,8 @@ PollNoWait(WIN_VNODE *Nodes[], WIN_POLLFD *Info[])
 			case FS_TYPE_PIPE:
 				dwResult += pipe_poll(pNode, pInfo);
 				break;
-			case FS_TYPE_DEVICE:
-				dwResult += dev_poll(pNode->Device, pInfo);
+			case FS_TYPE_PDO:
+				dwResult += pdo_poll(pNode->Device, pInfo);
 				break;
 			case FS_TYPE_MAILSLOT:
 				dwResult += mail_poll(pNode->Handle, pInfo);

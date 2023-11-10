@@ -116,7 +116,7 @@ addr_win(SOCKADDR *Result, WIN_TASK *Task, const struct sockaddr *addr)
 	return(Result);
 }
 struct sockaddr *
-addr_posix(struct sockaddr *result, WIN_TASK *Task, SOCKADDR *Address, DWORD *Length)
+addr_posix(struct sockaddr *result, WIN_TASK *Task, SOCKADDR *Address, LPINT Length)
 {
 	int i = 0;
 	int size = 14;		/* struct sockaddr default */

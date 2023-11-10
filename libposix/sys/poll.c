@@ -81,7 +81,7 @@ __poll(WIN_TASK *Task, struct pollfd fds[], nfds_t nfds, DWORD *TimeOut)
 	}else if (dwResult){
 		result = dwResult;
 	}else if (*TimeOut){
-		result = -1;
+		result = -EINTR;
 	}
 	return(result);
 }

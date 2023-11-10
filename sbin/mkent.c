@@ -56,7 +56,7 @@ extern __import SID8 SidService;
 extern __import SID8 SidAdmins;
 extern __import SID8 SidPackageRestrict;
 
-#define WIN_ERR			msvc_printf
+#define WIN_ERR			printf
 #define MAX_PWDBUF		WIN_PATH_MAX
 
 char 	_PWDBUF[MAX_PWDBUF];

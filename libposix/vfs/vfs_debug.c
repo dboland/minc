@@ -37,7 +37,7 @@ static const CHAR *_FSType[] = {
 	"CHAR", 
 	"PIPE", 
 	"MAILSLOT", 
-	"DEVICE", 
+	"PDO", 
 	"DRIVE", 
 	"PROCESS", 
 	"WINSOCK", 

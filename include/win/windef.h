@@ -44,7 +44,7 @@
 #define _ANONYMOUS_STRUCT	
 #define MAX_PATH 260
 
-typedef uint32_t DWORD,*PDWORD,*LPDWORD;
+typedef unsigned long DWORD,*PDWORD,*LPDWORD;
 typedef unsigned char BYTE;
 typedef unsigned short WORD;
 typedef int INT, *LPINT;

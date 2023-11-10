@@ -207,12 +207,12 @@ BOOL reg_open(WIN_NAMEIDATA *Path, WIN_FLAGS *Flags, WIN_VNODE *Result);
 BOOL reg_read(WIN_VNODE *Node, LPCWSTR Name, LPVOID Buffer, DWORD Size, DWORD *Result);
 BOOL reg_close(WIN_VNODE *Node);
 
-/* device.c */
+/* pdo.c */
 
-DWORD dev_statvfs(WIN_CFDATA *Config, DWORD Flags, WIN_CFDRIVER *Result);
-BOOL dev_match(LPCWSTR NtName, DWORD DeviceType, WIN_CFDRIVER *Driver);
-BOOL dev_WSKBDIO_GTYPE(UINT *Type, UINT *SubType, UINT *Keys);
-BOOL dev_DIOCGDINFO(WIN_DEVICE *Device);
+DWORD pdo_statvfs(WIN_CFDATA *Config, DWORD Flags, WIN_CFDRIVER *Result);
+BOOL pdo_match(LPCWSTR NtName, DWORD DeviceType, WIN_CFDRIVER *Driver);
+BOOL pdo_DIOCGDINFO(WIN_DEVICE *Device);
+BOOL pdo_WSKBDIO_GTYPE(UINT *Type, UINT *SubType, UINT *FKeys);
 BOOL tty_close(WIN_TERMIO *Terminal);
 
 /* volume.c */
@@ -220,7 +220,7 @@ BOOL tty_close(WIN_TERMIO *Terminal);
 BOOL vol_fstat(HANDLE Handle, LPSTR Result);
 BOOL vol_stat(LPCWSTR Path, LPSTR Result);
 
-/* winsock_if.c */
+/* winsock.c */
 
 UINT ws2_nametoindex(LPCSTR Name);
 UINT ws2_indextoname(DWORD Index, LPSTR Result);

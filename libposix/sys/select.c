@@ -73,7 +73,7 @@ timev_posix(struct timeval *tp, DWORD Millisecs)
 		tp->tv_sec = (time_t)(llTime * 0.001);		/* __int64_t (%I64d) */
 	}else{
 		tp->tv_usec = 0;
-		tp->tv_sec = 0;
+		tp->tv_sec = 0L;
 	}
 	return(tp);
 }

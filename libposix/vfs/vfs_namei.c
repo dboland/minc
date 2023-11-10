@@ -142,7 +142,7 @@ PathClose(WIN_NAMEIDATA *Path, DWORD Flags)
 	}else if (PathGlobType(Path, L".exe")){
 		Path->DeviceType = DEV_CLASS_DISK;
 	}else if (PathGlobType(Path, L".vfs")){
-		Path->FSType = FS_TYPE_DEVICE;
+		Path->FSType = FS_TYPE_PDO;
 //	}else{
 //		WIN_ERR("PathClose(%ls): %s\n", Path->Resolved, win_strerror(GetLastError()));
 	}

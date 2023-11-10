@@ -64,7 +64,7 @@ MailCreateInput(WIN_DEVICE *Device, WIN_FLAGS *Flags, WIN_VNODE *Result)
 		Device->FSType = FS_TYPE_MAILSLOT;
 		Device->FileType = WIN_VCHR;
 		Result->Event = __MailEvent;
-		Result->FSType = FS_TYPE_DEVICE;
+		Result->FSType = FS_TYPE_PDO;
 		Result->FileType = WIN_VCHR;
 		Result->DeviceType = Device->DeviceType;
 		Result->Attribs = Flags->Attribs;
@@ -93,7 +93,7 @@ MailCreateOutput(WIN_DEVICE *Device, WIN_FLAGS *Flags, WIN_VNODE *Result)
 		Device->FSType = FS_TYPE_MAILSLOT;
 		Device->FileType = WIN_VCHR;
 		Result->Event = __MailEvent;
-		Result->FSType = FS_TYPE_DEVICE;
+		Result->FSType = FS_TYPE_PDO;
 		Result->FileType = WIN_VCHR;
 		Result->DeviceType = Device->DeviceType;
 		Result->Attribs = Flags->Attribs;

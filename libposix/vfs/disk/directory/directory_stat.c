@@ -38,7 +38,7 @@ dir_fstat(WIN_VNODE *Node, WIN_VATTR *Result)
 	BOOL bResult = FALSE;
 
 	if (file_fstat(Node, Result)){
-		Result->FileSizeLow += (WIN_S_BLKSIZE * 2);	/* WinNT */
+		Result->FileSizeLow += WIN_S_BLKSIZE;	/* WinNT */
 		bResult = TRUE;
 	}
 	return(bResult);

@@ -162,8 +162,8 @@ vfs_read(WIN_VNODE *Node, LPVOID Buffer, DWORD Size, DWORD *Result)
 		case FS_TYPE_CHAR:
 			bResult = char_read(Node, Buffer, Size, Result);
 			break;
-		case FS_TYPE_DEVICE:
-			bResult = dev_read(Node->Device, Buffer, Size, Result);
+		case FS_TYPE_PDO:
+			bResult = pdo_read(Node->Device, Buffer, Size, Result);
 			break;
 		default:
 			SetLastError(ERROR_BAD_FILE_TYPE);
@@ -191,8 +191,8 @@ vfs_write(WIN_VNODE *Node, LPCVOID Buffer, DWORD Size, DWORD *Result)
 		case FS_TYPE_CHAR:
 			bResult = char_write(Node, Buffer, Size, Result);
 			break;
-		case FS_TYPE_DEVICE:
-			bResult = dev_write(Node->Device, Buffer, Size, Result);
+		case FS_TYPE_PDO:
+			bResult = pdo_write(Node->Device, Buffer, Size, Result);
 			break;
 		default:
 			SetLastError(ERROR_BAD_FILE_TYPE);
@@ -212,8 +212,8 @@ vfs_pwrite(WIN_VNODE *Node, LPCVOID Buffer, DWORD Size, DWORDLONG Offset, DWORD 
 		case FS_TYPE_WINSOCK:
 			SetLastError(ERROR_PIPE_CONNECTED);
 			break;
-		case FS_TYPE_DEVICE:
-			bResult = dev_write(Node->Device, Buffer, Size, Result);
+		case FS_TYPE_PDO:
+			bResult = pdo_write(Node->Device, Buffer, Size, Result);
 			break;
 		default:
 			SetLastError(ERROR_BAD_FILE_TYPE);
@@ -233,8 +233,8 @@ vfs_pread(WIN_VNODE *Node, LPVOID Buffer, DWORD Size, DWORDLONG Offset, DWORD *R
 		case FS_TYPE_WINSOCK:
 			SetLastError(ERROR_PIPE_CONNECTED);
 			break;
-		case FS_TYPE_DEVICE:
-			bResult = dev_read(Node->Device, Buffer, Size, Result);
+		case FS_TYPE_PDO:
+			bResult = pdo_read(Node->Device, Buffer, Size, Result);
 			break;
 		default:
 			SetLastError(ERROR_BAD_FILE_TYPE);
@@ -246,7 +246,7 @@ vfs_dup(WIN_VNODE *Node, WIN_VNODE *Result)
 {
 	BOOL bResult = FALSE;
 
-	Result->FileId = Node->FileId;	/* dev_F_DUPFD() */
+	Result->FileId = Node->FileId;	/* pdo_F_DUPFD() */
 	if (vfs_F_DUPFD(Node, FALSE, Result)){
 		bResult = TRUE;
 	}
@@ -391,7 +391,7 @@ vfs_unlink(WIN_NAMEIDATA *Path)
 
 //VfsDebugPath(Path, "vfs_unlink");
 	switch (Path->FSType){
-		case FS_TYPE_DEVICE:
+		case FS_TYPE_PDO:
 		case FS_TYPE_DISK:
 			bResult = disk_unlink(Path);
 			break;
@@ -447,8 +447,8 @@ vfs_fsync(WIN_VNODE *Node)
 		case FS_TYPE_DISK:
 			bResult = FlushFileBuffers(Node->Handle);
 			break;
-		case FS_TYPE_DEVICE:
-			bResult = dev_fsync(Node->Device);
+		case FS_TYPE_PDO:
+			bResult = pdo_fsync(Node->Device);
 			break;
 		default:
 			SetLastError(ERROR_BAD_FILE_TYPE);
@@ -476,8 +476,8 @@ vfs_revoke(WIN_VNODE *Node)
 	BOOL bResult = FALSE;
 
 	switch (Node->FSType){
-		case FS_TYPE_DEVICE:
-			bResult = dev_revoke(Node->Device);
+		case FS_TYPE_PDO:
+			bResult = pdo_revoke(Node->Device);
 			break;
 		default:
 			SetLastError(ERROR_BAD_FILE_TYPE);

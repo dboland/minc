@@ -32,20 +32,30 @@
 
 /****************************************************/
 
-void 
-ifinit(void)
+int 
+ifflags_posix(MIB_IFROW *Interface, DWORD Mask)
 {
-	WIN_IFDATA ifData;
-	PMIB_IFROW pifRow;
-	DWORD dwCount = 0;
+	short result = 0;
 
-	if (!ws2_setvfs(&ifData, FALSE, &pifRow, &dwCount)){
-		return;
-	}else while (dwCount--){
-		if (ws2_statvfs(&ifData, pifRow)){
-			ws2_attach(ifData.NtName, ifData.DeviceType, pifRow);
-		}
-		pifRow--;
+	if (Interface->dwAdminStatus == MIB_IF_ADMIN_STATUS_UP){
+		result |= IFF_UP;
 	}
-	ws2_endvfs(&ifData);
+	if (Interface->dwOperStatus == IF_OPER_STATUS_OPERATIONAL){
+		result |= IFF_RUNNING;
+	}
+	if (Mask){
+		result |= IFF_BROADCAST;
+	}
+//	if (Interface->FirstMulticastAddress){
+//		result |= IFF_MULTICAST;
+//	}
+	switch (Interface->dwType){
+		case IF_TYPE_PPP:
+			result |= IFF_POINTOPOINT;
+			break;
+		case IF_TYPE_SOFTWARE_LOOPBACK:
+			result |= IFF_LOOPBACK;
+			break;
+	}
+	return(result);
 }

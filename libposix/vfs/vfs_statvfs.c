@@ -82,7 +82,7 @@ VfsBusName(LPCWSTR DosPath, LPWSTR Result)
 	ZeroMemory(Result, sizeof(WCHAR) * MAX_NAME);
 	while (C = *P++){
 		if (C == '#'){
-			dwType = FS_TYPE_DEVICE;
+			dwType = FS_TYPE_PDO;
 			break;
 		}else if (C == ':'){
 			dwType = FS_TYPE_DRIVE;

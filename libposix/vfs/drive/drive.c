@@ -29,10 +29,9 @@
  */
 
 #include "drive_namei.c"
+#include "drive_device.c"
 #include "drive_mount.c"
 #include "drive_statvfs.c"
-
-#define DEVINTERFACE_VOLUME		L"{53f5630d-b6bf-11d0-94f2-00a0c91efb8b}"
 
 /****************************************************/
 
@@ -50,30 +49,4 @@ drive_init(WIN_MOUNT *Mount, HINSTANCE Instance)
 	Mount->FSType = FS_TYPE_DISK;
 //VfsDebugMount(Mount, "drive_init");
 //	DefineDosDeviceW(DDD_RAW_TARGET_PATH, L"MINC:", L"\\Device\\HarddiskVolume1\\MinC");
-}
-WIN_DEVICE *
-drive_match(LPCWSTR NtName, DWORD DeviceType)
-{
-	WIN_DEVICE *pwDevice = DEVICE(DeviceType);
-	USHORT sClass = DeviceType & 0xFF00;
-	USHORT sUnit = DeviceType & 0x00FF;
-
-	while (sUnit < WIN_UNIT_MAX){
-		if (!win_wcscmp(pwDevice->NtName, NtName)){
-			break;
-		}else if (!pwDevice->Flags){
-			win_wcscpy(pwDevice->NtName, NtName);
-			win_wcscpy(pwDevice->ClassId, DEVINTERFACE_VOLUME);
-			pwDevice->DeviceType = DeviceType;
-			pwDevice->DeviceId = sClass + sUnit;
-			if (!dev_found(pwDevice)){
-				msvc_printf("Warning: storage device %ls (type 0x%x) not configured\n", NtName, DeviceType);
-			}
-//VfsDebugDevice(pwDevice, "drive_match");
-			break;
-		}
-		pwDevice++;
-		sUnit++;
-	}
-	return(pwDevice);
 }

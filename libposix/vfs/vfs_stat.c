@@ -53,8 +53,8 @@ vfs_fstat(WIN_VNODE *Node, WIN_VATTR *Result)
 		case FS_TYPE_WINSOCK:
 			bResult = ws2_fstat(Node, Result);
 			break;
-		case FS_TYPE_DEVICE:
-			bResult = dev_fstat(Node, Result);
+		case FS_TYPE_PDO:
+			bResult = pdo_fstat(Node, Result);
 			break;
 		default:
 			SetLastError(ERROR_BAD_FILE_TYPE);
@@ -71,8 +71,8 @@ vfs_stat(WIN_NAMEIDATA *Path, WIN_VATTR *Result)
 		case FS_TYPE_DISK:
 			bResult = disk_stat(Path, Result);
 			break;
-		case FS_TYPE_DEVICE:
-			bResult = dev_stat(Path, Result);
+		case FS_TYPE_PDO:
+			bResult = pdo_stat(Path, Result);
 			break;
 		default:
 			SetLastError(ERROR_BAD_FILE_TYPE);
@@ -86,7 +86,7 @@ vfs_chmod(WIN_NAMEIDATA *Path, WIN_MODE *Mode)
 
 	switch (Path->FSType){
 		case FS_TYPE_DISK:
-		case FS_TYPE_DEVICE:
+		case FS_TYPE_PDO:
 			bResult = disk_chmod(Path, Mode);
 			break;
 		default:
@@ -115,7 +115,7 @@ vfs_mknod(WIN_NAMEIDATA *Path, WIN_MODE *Mode, DWORD DeviceId)
 		CREATE_ALWAYS, FILE_ATTRIBUTE_NORMAL, 0};
 	WIN_VNODE vNode = {0};
 	WIN_INODE iNode = {TypeNameVirtual, Mode->FileType, 0, 
-		DeviceId, FS_TYPE_DEVICE, 0};
+		DeviceId, FS_TYPE_PDO, 0};
 	DWORD dwSize = sizeof(WIN_INODE);
 	SHORT sClass = DeviceId >> 8;
 	SHORT sUnit = DeviceId & 0xFF;

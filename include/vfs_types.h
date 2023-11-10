@@ -40,7 +40,7 @@ typedef enum _WIN_FS_TYPE {
 	FS_TYPE_CHAR,
 	FS_TYPE_PIPE,
 	FS_TYPE_MAILSLOT,
-	FS_TYPE_DEVICE,
+	FS_TYPE_PDO,
 	FS_TYPE_DRIVE,
 	FS_TYPE_PROCESS,
 	FS_TYPE_WINSOCK,
@@ -319,7 +319,7 @@ typedef struct _WIN_NAMEIDATA {
 #define WIN_PDIRUNLOCK		0x200000	/* vfs_lookup() unlocked parent dir */
 
 /*
- * vfs_device.c
+ * autoconf.c
  */
 
 typedef struct _WIN_DEVICE {
@@ -373,7 +373,7 @@ typedef struct _WIN_CFDATA {
 	DWORD Depth;
 	WCHAR BusName[MAX_NAME];
 	WCHAR ClassName[MAX_NAME];
-	WCHAR NtPath[WIN_PATH_MAX];
+	WCHAR NtPath[MAX_PATH];
 } WIN_CFDATA;
 
 typedef WIN_DEVICE WIN_DEV_CLASS[WIN_UNIT_MAX];
@@ -684,8 +684,6 @@ typedef struct _WIN_SESSION {
 /*
  * registry.c
  */
-
-/* Registry file types */
 
 #define REG_DRIVER	1
 #define REG_CLASS	2

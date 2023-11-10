@@ -203,23 +203,23 @@ int
 sys_getgroups(call_t call, int size, gid_t list[])
 {
 	int result = 0;
-	int index = 0;
 	SID8 *grList = NULL;
-//	DWORD dwIndex = 0;
-//	DWORD dwCount = -1;
+	DWORD dwCount = 0;
+	int index = 0;
 
 	if (size < 0){	/* GNU conftest.exe */
 		result = -EINVAL;
-	}else if (!win_getgroups(&grList, &result)){
+	}else if (!win_getgroups(&grList, &dwCount)){
 		result -= errno_posix(GetLastError());
-	}else if (size >= result){
-		while (index < result){
+	}else if (size >= dwCount){
+		while (index < dwCount){
 			list[index] = rid_posix(&grList[index]);
 			if (list[index] == WIN_ROOT_GID){
 				list[index] = 0;
 			}
 			index++;
 		}
+		result = dwCount;
 	}
 	win_free(grList);
 	return(result);

@@ -37,10 +37,11 @@
 #include "win/winsock2.h"		/* minimal Windows Sockets v.2 */
 #include "win/iphlpapi.h"		/* minimal Network API */
 #include "win_posix.h"
+#include "msvc_posix.h"
 #include "vfs_posix.h"
 #include "vfs_debug.h"
 #include "ws2_posix.h"
-#include "msvc_posix.h"
+#include "dev_posix.h"
 #include "minc_posix.h"
 
 extern WIN_TASK 	*__Tasks;
@@ -86,8 +87,10 @@ WIN_NAMEIDATA *path_win(WIN_NAMEIDATA *Path, const char *pathname, int flags);
 #include "sys/socket.c"
 #include "sys/termio.c"
 #include "sys/filio.c"
+#include "sys/disk.c"		/* disk_init() */
 #include "sys/dkio.c"
-#include "dev/wsconsio.c"
+#include "sys/systm.c"		/* cpu_configure() */
+//#include "dev/wsconsio.c"
 #include "sys/pciio.c"
 #include "sys/resource.c"
 #include "sys/unistd.c"
@@ -105,8 +108,7 @@ WIN_NAMEIDATA *path_win(WIN_NAMEIDATA *Path, const char *pathname, int flags);
 #include "sys/reboot.c"
 #include "sys/syscall.c"
 #include "sys/dirent.c"
-#include "autoconf.c"
-#include "net/if.c"
+#include "net/if.c"		/* ifinit() */
 #include "net/if_dl.c"
 #include "net/if_var.c"
 #include "netinet/ip.c"

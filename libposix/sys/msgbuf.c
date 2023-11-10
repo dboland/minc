@@ -45,9 +45,9 @@ msgbuf_KERN_MSGBUFSIZE(int *data, size_t *len)
 	if (!vfs_setvfs(&cfData, dwFlags)){
 		return(-1);
 	}else while (vfs_getvfs(&cfData, dwFlags)){
-		if (cfData.FSType == FS_TYPE_DEVICE){
-			dev_statvfs(&cfData, dwFlags, &cfDriver);
-			if (dev_match(cfData.NtName, cfDriver.DeviceType, &cfDriver)){
+		if (cfData.FSType == FS_TYPE_PDO){
+			pdo_statvfs(&cfData, dwFlags, &cfDriver);
+			if (pdo_match(cfData.NtName, cfDriver.DeviceType, &cfDriver)){
 				bufsize += cfmessage(&cfData, &cfDriver, buf);
 				msgbuf = win_realloc(msgbuf, bufsize + MSGBUFSIZE);
 				buf = msgbuf + bufsize;

@@ -29,6 +29,7 @@
  */
 
 #include "winsock_namei.c"
+#include "winsock_device.c"
 #include "winsock_sockio.c"
 #include "winsock_filio.c"
 #include "winsock_fcntl.c"
@@ -39,8 +40,6 @@
 #include "winsock_statvfs.c"
 #include "winsock_stat.c"
 #include "winsock_if.c"
-
-#define NDIS_LAN_CLASS		L"{ad498944-762f-11d0-8dcb-00c04fc3358c}"
 
 /************************************************************/
 
@@ -68,33 +67,6 @@ ws2_finish(VOID)
 		WIN_ERR("WSACleanup(): %s\n", win_strerror(WSAGetLastError()));
 	}else{
 		bResult = TRUE;
-	}
-	return(bResult);
-}
-BOOL 
-ws2_attach(LPCWSTR NtName, DWORD DeviceType, MIB_IFROW *Interface)
-{
-	BOOL bResult = FALSE;
-	WIN_DEVICE *pwDevice = DEVICE(DeviceType);
-	USHORT sClass = DeviceType & 0xFF00;
-	USHORT sUnit = DeviceType & 0x00FF;
-
-	while (sUnit < WIN_UNIT_MAX){
-		if (!pwDevice->Flags){
-			pwDevice->DeviceType = DeviceType;
-			pwDevice->DeviceId = sClass + sUnit;
-			pwDevice->Index = Interface->dwIndex;
-			pwDevice->Flags |= WIN_DVF_DRIVER_READY;
-			win_wcscpy(pwDevice->NtName, NtName);
-//			win_wcscpy(pwDevice->ClassId, NDIS_LAN_CLASS);
-			bResult = dev_found(pwDevice);
-//VfsDebugDevice(pwDevice, "ws2_attach");
-			break;
-		}else if (!win_wcscmp(pwDevice->NtName, NtName)){
-			break;
-		}
-		pwDevice++;
-		sUnit++;
 	}
 	return(bResult);
 }

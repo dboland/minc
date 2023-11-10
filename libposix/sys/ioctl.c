@@ -61,7 +61,7 @@ sys_ioctl(call_t call, int fd, unsigned long request, ...)
 		case 'W':
 			result = wscons_ioctl(call.Task, fd, request, args);
 			break;
-		case 'm':		/* sys/mtio.h */
+		case 'm':		/* sys/mtio.h (tar.exe) */
 		default:
 			__PRINTF("sys_ioctl(%c)\n", IOCGROUP(request))
 			result = -EOPNOTSUPP;

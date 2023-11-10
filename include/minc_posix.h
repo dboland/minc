@@ -60,6 +60,3 @@ __dead void __threxit(pid_t *pid);
 
 WIN_NAMEIDATA *path_win(WIN_NAMEIDATA *Path, const char *pathname, int flags);
 
-/* errno */
-
-//void __errno_posix(WIN_TASK *Task, DWORD Error);

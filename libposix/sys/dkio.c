@@ -38,7 +38,7 @@ disk_DIOCGDINFO(WIN_TASK *Task, WIN_DEVICE *Device, struct disklabel *label)
 {
 	int result = 0;
 
-	if (!dev_DIOCGDINFO(Device)){
+	if (!pdo_DIOCGDINFO(Device)){
 		result = -EOPNOTSUPP;
 	}
 	return(result);

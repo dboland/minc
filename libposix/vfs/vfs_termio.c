@@ -38,8 +38,8 @@ vfs_TIOCGWINSZ(WIN_VNODE *Node, WIN_WINSIZE *WinSize)
 	BOOL bResult = FALSE;
 
 	switch (Node->FSType){
-		case FS_TYPE_DEVICE:
-			bResult = dev_TIOCGWINSZ(Node->Device, WinSize);
+		case FS_TYPE_PDO:
+			bResult = pdo_TIOCGWINSZ(Node->Device, WinSize);
 			break;
 		case FS_TYPE_CHAR:			/* stty.exe */
 			bResult = char_TIOCGWINSZ(Node, WinSize);
@@ -60,8 +60,8 @@ vfs_TIOCGETA(WIN_VNODE *Node, DWORD Mode[2])
 
 //VfsDebugNode(Node, "vfs_TIOCGETA");
 	switch (Node->FSType){
-		case FS_TYPE_DEVICE:
-			bResult = dev_TIOCGETA(Node->Device, Mode);
+		case FS_TYPE_PDO:
+			bResult = pdo_TIOCGETA(Node->Device, Mode);
 			break;
 		case FS_TYPE_CHAR:			/* nano.exe */
 			bResult = char_TIOCGETA(Node, Mode);
@@ -83,8 +83,8 @@ vfs_TIOCFLUSH(WIN_VNODE *Node)
 	BOOL bResult = FALSE;
 
 	switch (Node->FSType){
-		case FS_TYPE_DEVICE:
-			bResult = dev_TIOCFLUSH(Node->Device);
+		case FS_TYPE_PDO:
+			bResult = pdo_TIOCFLUSH(Node->Device);
 			break;
 		case FS_TYPE_CHAR:
 			bResult = char_TIOCFLUSH(Node);
@@ -100,8 +100,8 @@ vfs_TIOCDRAIN(WIN_VNODE *Node)
 	BOOL bResult = FALSE;
 
 	switch (Node->FSType){
-		case FS_TYPE_DEVICE:
-			bResult = dev_TIOCDRAIN(Node->Device);
+		case FS_TYPE_PDO:
+			bResult = pdo_TIOCDRAIN(Node->Device);
 			break;
 		case FS_TYPE_CHAR:
 			bResult = char_TIOCDRAIN(Node);
@@ -121,8 +121,8 @@ vfs_TIOCSETAF(WIN_VNODE *Node, DWORD Mode[2], BOOL Flush, BOOL Drain)
 	}
 //VfsDebugIoctl(Mode, "vfs_TIOCSETAF");
 	switch (Node->FSType){
-		case FS_TYPE_DEVICE:
-			bResult = dev_TIOCSETA(Node->Device, Mode);
+		case FS_TYPE_PDO:
+			bResult = pdo_TIOCSETA(Node->Device, Mode);
 			break;
 		case FS_TYPE_CHAR:			/* nano.exe */
 			bResult = char_TIOCSETA(Node, Mode);
@@ -168,7 +168,7 @@ vfs_PTMGET(WIN_DEVICE *Device, WIN_PTMGET *Result)
 
 	if (!MailCreateOutput(Device, &wFlags, &Result->Master)){
 		return(FALSE);
-	}else if (MailCreateInput(dev_attach(DEV_TYPE_TTY), &wFlags, &Result->Slave)){
+	}else if (MailCreateInput(pdo_attach(DEV_TYPE_TTY), &wFlags, &Result->Slave)){
 		bResult = mail_PTMGET(Device, Result->Slave.Device);
 	}
 	return(bResult);

@@ -9,7 +9,7 @@ CFLAGS+=-I../include -ffreestanding -g
 CFLAGS+=-DRELEASE=\"${RELEASE}\" -DVERSION=\"${VERSION}\" -DBUILD=${BUILD}
 #CFLAGS+=-Wunused
 LDFLAGS=-shared -s
-OBJECTS=crt1.o win_posix.o msvc_posix.o vfs_posix.o libposix.o
+OBJECTS=crt1.o win_posix.o msvc_posix.o dev_posix.o vfs_posix.o libposix.o
 WINDIR=/C/WINDOWS/system32
 GCCDIR=../mingw/gcc
 
@@ -25,7 +25,10 @@ msvc_posix.o: msvc/msvc.c
 	gcc -c ${CFLAGS} -I${MINGW}/include -o $@ $<
 
 vfs_posix.o: vfs/vfs.c
-	gcc -c ${CFLAGS} -I${MINGW}/include -o $@ $<
+	gcc -c ${CFLAGS} -I${MINGW}/include -I. -o $@ $<
+
+dev_posix.o: dev/dev.c
+	gcc -c ${CFLAGS} -I../openbsd/include -o $@ $<
 
 libposix.o: libposix.c
 	gcc -c ${CFLAGS} -DTTYDEFCHARS -I../openbsd/include -I../openbsd/sys \
