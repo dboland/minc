@@ -45,6 +45,7 @@
 #include "win/iphlpapi.h"
 #include "win/aclapi.h"
 #include "win_posix.h"
+#include "dev_types.h"
 #include "vfs_posix.h"
 #include "ws2_posix.h"
 #include "msvc_posix.h"
@@ -167,6 +168,8 @@ mk_passwd(FILE *stream)
 	win_getpwuid(&SidSystem, &pwEntry);
 	fprintf(stream, "%s\n", passwd_posix(_PWDBUF, MAX_PWDBUF, &pwEntry));
 	win_getpwuid(&SidService, &pwEntry);
+	fprintf(stream, "%s\n", passwd_posix(_PWDBUF, MAX_PWDBUF, &pwEntry));
+	win_getpwuid(&SidAdmins, &pwEntry);
 	fprintf(stream, "%s\n", passwd_posix(_PWDBUF, MAX_PWDBUF, &pwEntry));
 	if (win_getpwnam(L"NT SERVICE\\TrustedInstaller", &pwEntry)){	/* Vista */
 		fprintf(stream, "%s\n", passwd_posix(_PWDBUF, MAX_PWDBUF, &pwEntry));

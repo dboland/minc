@@ -64,7 +64,7 @@ rid_posix(SID8 *Sid)
 		}
 	}else if (Sid->SubAuthorityCount == 1){
 		ulSubAuth = 0;
-	}else if (ulSubAuth == SECURITY_NT_SERVICE_RID){	/* TrustedInstaller */
+	}else if (ulSubAuth == SECURITY_NT_SERVICE_RID){	/* NTService */
 		bAuth = 0;
 		ulSubAuth = 0;
 	}
@@ -80,7 +80,9 @@ rid_win(SID8 *Result, int rid)
 	BYTE bAuth = rid / 100000000;
 	ULONG ulSubAuth = (rid / 1000000) % 100;
 
-	if (rid < 0 || !bAuth){		/* tar.exe */
+	if (rid == DOMAIN_NT_SERVICE_RID_INSTALLER){		/* TrustedInstaller */
+		*Result = SidTrustedInstaller;
+	}else if (rid < 0 || !bAuth){		/* tar.exe */
 		*Result = SidNone;
 	}else if (!ulSubAuth){					/* 0 (Local) */
 		*Result = SidNull;

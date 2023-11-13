@@ -67,6 +67,7 @@ extern SID8 SidAuthenticated;
 extern SID8 SidRestricted;
 extern SID8 SidSystem;
 extern SID8 SidUsers;
+extern SID8 SidTrustedInstaller;
 
 u_long __THREAD_FRAME;
 

@@ -78,7 +78,6 @@ PwdLookup(WIN_PWENT *Entity)
 		return(FALSE);
 	}else switch (ulSubAuth){
 		case SECURITY_NT_NON_UNIQUE_RID:	/* 21 (Machine) */
-		case SECURITY_BUILTIN_DOMAIN_RID:	/* 32 (Builtin) */
 			bResult = PwdLookupNTAuth(Entity);
 			break;
 		case SECURITY_LOCAL_SYSTEM_RID:		/* 18 (SYSTEM) */
@@ -86,6 +85,7 @@ PwdLookup(WIN_PWENT *Entity)
 			Entity->Privileges = USER_PRIV_ADMIN;
 			Entity->Integrity = SECURITY_MANDATORY_SYSTEM_RID;
 			break;
+		case SECURITY_BUILTIN_DOMAIN_RID:	/* 32 (Builtin) */
 		default:				/* 6 (SERVICE) */
 			Entity->GroupSid = SidBatch;
 			Entity->Privileges = USER_PRIV_GUEST;
