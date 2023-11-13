@@ -30,7 +30,7 @@
 
 #include <dlfcn.h>
 
-char _DL_PATH_BUF[PATH_MAX];
+char __DL_PATH_BUF[PATH_MAX];
 
 /**************************************************************/
 
@@ -80,10 +80,11 @@ dladdr(const void *addr, Dl_info *info)
 	if (!win_dladdr(addr, &mbInfo, szPath)){
 		pwTask->Error = errno_posix(errno_win());
 	}else{
-		info->dli_fname = path_posix(_DL_PATH_BUF, szPath);
+		info->dli_fname = path_posix(__DL_PATH_BUF, szPath);
 		info->dli_fbase = mbInfo.AllocationBase;
 		info->dli_sname = NULL;
 		info->dli_saddr = NULL;
 		result = 1;
 	}
+	return(result);
 }

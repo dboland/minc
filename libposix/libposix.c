@@ -38,7 +38,6 @@
 #include "win/iphlpapi.h"		/* minimal Network API */
 #include "win_posix.h"
 #include "msvc_posix.h"
-#include "dev_types.h"
 #include "vfs_posix.h"
 #include "vfs_debug.h"
 #include "ws2_posix.h"

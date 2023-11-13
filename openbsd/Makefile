@@ -1,8 +1,5 @@
 include ../Makefile.inc
 
-.DEFAULT:
-.SUFFIXES:
-
 all:
 	@${MAKE} -C lib
 	@${MAKE} -C usr.bin
@@ -36,3 +33,4 @@ install-local:
 
 clean:
 	@${MAKE} -C lib clean
+	@${MAKE} -C usr.bin clean

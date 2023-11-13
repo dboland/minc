@@ -2,7 +2,6 @@ include ../../../Makefile.inc
 
 RELEASE=12.1
 
-CFLAGS=-fno-omit-frame-pointer -Wimplicit-function-declaration
 LIBUTIL=libutil.so.${RELEASE}
 IMPLIB=libutil.dll.a
 
@@ -15,14 +14,11 @@ OBJECTS=bcrypt_pbkdf.o duid.o \
 	uucplock.o fparseln.o opendisk.o pidfile.o \
 	fmt_scaled.o pkcs5_pbkdf2.o \
 	getrawpartition.o readlabel.o opendev.o
-
 OBJECTS+=ohash_create_entry.o ohash_delete.o ohash_do.o ohash_entries.o \
 	ohash_enum.o ohash_init.o ohash_interval.o \
 	ohash_lookup_interval.o ohash_lookup_memory.o \
 	ohash_qlookup.o ohash_qlookupi.o
-
 OBJECTS+= getmaxpartitions.o
-
 # BSD Auth
 OBJECTS+=passwd.o check_expire.o login_fbtab.o imsg.o imsg-buffer.o login.o
 
@@ -40,8 +36,8 @@ libutil.a: ${OBJECTS}
 	ar cru $@ ${OBJECTS}
 
 ${LIBUTIL}: ${OBJECTS}
-	${LD} -shared -o $@ -e _DllMainCRTStartup@12 --out-implib=${IMPLIB} --disable-auto-import \
-	${GCCLIB}/crt1.o ${OBJECTS} \
+	${LD} -shared -s -o $@ -e _DllMainCRTStartup@12 --disable-auto-import \
+	--out-implib=${IMPLIB} ${GCCLIB}/crt1.o ${OBJECTS} \
 	-L/lib -L${GCCLIB} -lmsvcrt -lmingw32 -lmingwex -lsocket -lgcc
 
 clean:
@@ -50,9 +46,5 @@ clean:
 %.h: ${SRCDIR}/lib/libutil/%.h
 	@cp -vu $< ${DESTDIR}${INCDIR}/$@
 
-install: ${DESTDIR} ${HEADERS}
-	cp libutil.a ${DESTDIR}${LIBDIR}/
-
 install-local: ${HEADERS}
 	/bin/cp libutil.a ${LIBDIR}/
-

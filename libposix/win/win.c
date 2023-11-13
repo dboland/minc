@@ -68,8 +68,6 @@ SID8 SidAdmins			= {1, 2, {0, 0, 0, 0, 0, 5}, 32, 544};
 SID8 SidUsers			= {1, 2, {0, 0, 0, 0, 0, 5}, 32, 545};
 SID8 SidGuests			= {1, 2, {0, 0, 0, 0, 0, 5}, 32, 546};
 SID8 SidPowerUsers		= {1, 2, {0, 0, 0, 0, 0, 5}, 32, 547};
-SID8 SidOther			= {1, 2, {0, 0, 0, 0, 0, 6}, 0, 0};
-SID8 SidNone			= {0};
 
 /* Vista */
 
@@ -78,6 +76,7 @@ SID8 SidNTLMAuth		= {1, 2, {0, 0, 0, 0, 0, 5}, 64, 10};
 SID8 SidNTService		= {1, 2, {0, 0, 0, 0, 0, 5}, 80, 0};
 SID8 SidTrustedInstaller	= {1, 6, {0, 0, 0, 0, 0, 5}, 80, 0x38FB89B5, 0xCBC28419, 0x6D236C5C, 0x6E770057, 0x876402C0};
 SID8 SidOtherOrganization	= {1, 1, {0, 0, 0, 0, 0, 5}, 1000};
+SID8 SidOtherDomain		= {1, 2, {0, 0, 0, 0, 0, 6}, 0, 0};
 SID8 SidPackage			= {1, 2, {0, 0, 0, 0, 0, 15}, 2, 0};
 SID8 SidPackageAll		= {1, 2, {0, 0, 0, 0, 0, 15}, 2, 1};
 SID8 SidPackageRestrict		= {1, 2, {0, 0, 0, 0, 0, 15}, 2, 2};
@@ -87,6 +86,7 @@ SID8 SidIntegrityLow		= {1, 1, {0, 0, 0, 0, 0, 16}, 0x1000};
 SID8 SidIntegrityMedium		= {1, 1, {0, 0, 0, 0, 0, 16}, 0x2000};
 SID8 SidIntegrityHigh		= {1, 1, {0, 0, 0, 0, 0, 16}, 0x3000};
 SID8 SidIntegritySystem		= {1, 1, {0, 0, 0, 0, 0, 16}, 0x4000};
+SID8 SidNone			= {0};
 
 #include "win_string.c"
 #include "win_wchar.c"

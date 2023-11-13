@@ -28,6 +28,7 @@
  *
  */
 
+#include "dev_types.h"
 #include "vfs_types.h"
 
 BOOL vfs_PROCESS_ATTACH(HINSTANCE Instance, LPVOID Reserved);

@@ -5,7 +5,7 @@ RELEASE=6.1.0
 LIBEXEC=${PREFIX}/libexec
 
 CFLAGS+=-g -ffreestanding
-OBJECTS=libd.o
+OBJECTS=libdl.o
 IMPLIB=libdl.dll.a
 LDFLAGS=-shared -s
 WINDIR=/C/WINDOWS/system32
@@ -29,14 +29,14 @@ ld.so: ${OBJECTS} version.o
 clean:
 	/bin/rm -f *.o *.a ld.so
 
+${LIBEXEC}:
+	/bin/mkdir ${LIBEXEC}
+
+install-local: ${LIBEXEC}
+	/bin/cp ld.so ${LIBEXEC}/
+	/bin/cp ${IMPLIB} ${LIBDIR}/
+
 install: ${DESTDIR}
 	ginstall ld.so ${DESTDIR}${LIBEXEC}/
 	ginstall ${IMPLIB} ${DESTDIR}${LIBDIR}/libdl.a
-
-${LIBEXEC}:
-	mkdir ${LIBEXEC}
-
-install-local: ${LIBEXEC}
-	/bin/cp ${IMPLIB} ${LIBDIR}/
-	/bin/cp ld.so ${LIBEXEC}/
 

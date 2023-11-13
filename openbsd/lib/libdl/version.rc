@@ -1,5 +1,5 @@
 /*
- * Google Chrome checks FILEVERSION/PRODUCTVERSION after downloading.
+ * Google Chrome seems to check FILEVERSION/PRODUCTVERSION after downloading.
  */
 1 VERSIONINFO
 FILEVERSION 0,6,1,0
