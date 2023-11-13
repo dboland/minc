@@ -62,7 +62,7 @@ PipeCreateFile(LPCWSTR Name, DWORD Attribs, HANDLE Event, WIN_VNODE *Result)
 	HANDLE hResult;
 
 	hResult = CreateNamedPipeW(win_wcscat(szPath, Name), dwOpenMode, dwPipeMode, 
-		dwMax, WIN_PIPE_BUF, WIN_PIPE_BUF, NMPWAIT_USE_DEFAULT_WAIT, NULL);
+		dwMax, WIN_S_BLKSIZE, WIN_S_BLKSIZE, NMPWAIT_USE_DEFAULT_WAIT, NULL);
 	if (hResult != INVALID_HANDLE_VALUE){
 		Result->Handle = hResult;
 		Result->Event = Event;

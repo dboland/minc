@@ -40,8 +40,8 @@ DriveLookupBus(LPCWSTR ClassName, DWORD Class)
 	if (!win_wcsncmp(ClassName, L"Floppy", 6)){
 		dwResult |= DEV_BUS_FDC;
 
-	}else if (!win_wcsncmp(ClassName, L"Harddisk", 8)){
-		dwResult |= DEV_BUS_USB;
+//	}else if (!win_wcsncmp(ClassName, L"Harddisk", 8)){
+//		dwResult |= DEV_BUS_USB;
 
 	}else if (!win_wcscmp(ClassName, L"Ide")){
 		dwResult |= DEV_BUS_IDE;

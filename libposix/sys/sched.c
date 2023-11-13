@@ -51,11 +51,11 @@ copy_stack(u_long origin, u_long src, u_long *dest)
 	int size;
 	u_long next;
 
-//__PRINTF("origin(0x%lx) src(0x%lx) dest(0x%lx) _THREAD_FRAME(0x%lx)\n", 
-//			origin, src, dest[0], _THREAD_FRAME)
+//__PRINTF("origin(0x%lx) src(0x%lx) dest(0x%lx) __THREAD_FRAME(0x%lx)\n", 
+//			origin, src, dest[0], __THREAD_FRAME)
 	if (!src){				/* at process frame (_start()) */
 		depth = 0;
-	}else if (src == _THREAD_FRAME){	/* at thread frame (main()) */
+	}else if (src == __THREAD_FRAME){	/* at thread frame (main()) */
 		depth = 0;
 	}else{
 		next = *(u_long *)src;
@@ -88,7 +88,7 @@ task_init(char *cmdbuf, char *argv[], void *frame_address)
 	WIN_TASK *pwTask;
 	LPWSTR pszCommand;
 
-	_THREAD_FRAME = (u_long)frame_address;
+	__THREAD_FRAME = (u_long)frame_address;
 	pwTask = proc_init(sigproc_win);
 	srand(time_posix(&pwTask->Started));
 

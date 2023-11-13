@@ -44,8 +44,8 @@
 #include "msvc_posix.h"
 #include "ws2_types.h"
 #include "ole_types.h"
+#include "dev_types.h"
 #include "vfs_types.h"
-#include "dev_posix.h"
 
 #define WIN_ERR			msvc_printf
 #define OBJECT_NAME(name)	"Local\\MinC_" VERSION "_" name
@@ -61,6 +61,14 @@ extern SID8 SidMachine;
 extern SID8 SidUsers;
 extern SID8 SidGuests;
 extern SID8 SidBuiltin;
+
+typedef struct _SEQUENCE {
+	CHAR *Args;
+	LONG Arg1;
+	CHAR Char1;
+	CHAR CSI;
+	CHAR Buf[64];
+} SEQUENCE;
 
 HANDLE 		__Shared;
 WIN_SIGPROC	__SignalProc;
@@ -95,6 +103,7 @@ BOOL vfs_F_DUPFD(WIN_VNODE *Node, BOOL CloseExec, WIN_VNODE *Result);
 #include "vfs_signal.c"
 #include "vfs_statvfs.c"
 #include "vfs_libgen.c"
+#include "vfs_device.c"
 #include "registry/registry.c"
 #include "process/process.c"
 #include "pipe/pipe.c"
@@ -122,7 +131,6 @@ BOOL vfs_F_DUPFD(WIN_VNODE *Node, BOOL CloseExec, WIN_VNODE *Result);
 #include "vfs_shm.c"
 #include "vfs_time.c"
 #include "vfs_wait.c"
-#include "vfs_reboot.c"
 #include "vfs_ktrace.c"
 //#include "vfs_ldt.c"
 
@@ -142,7 +150,7 @@ vfs_PROCESS_ATTACH(HINSTANCE Instance, LPVOID Reserved)
 	__PipeEvent = event_attach(OBJECT_NAME("PipeEvent"), FALSE);
 	__MailEvent = event_attach(OBJECT_NAME("MailEvent"), FALSE);
 	__ProcEvent = event_attach(OBJECT_NAME("ProcEvent"), FALSE);
-	win_acl_attach();
+	win_acl_PROCESS_ATTACH();
 //	win_ldt_attach(WIN_CHILD_MAX + 1);
 	return(TRUE);
 }
@@ -157,7 +165,7 @@ vfs_PROCESS_DETACH(WIN_TASK *Task)
 /****************************************************/
 
 BOOL 
-vfs_attach(WIN_FS_TYPE FileSystem)
+vfs_init(WIN_FS_TYPE FileSystem)
 {
 	BOOL bResult = FALSE;
 
@@ -174,7 +182,7 @@ vfs_attach(WIN_FS_TYPE FileSystem)
 	return(bResult);
 }
 BOOL 
-vfs_detach(WIN_FS_TYPE FileSystem)
+vfs_finish(WIN_FS_TYPE FileSystem)
 {
 	BOOL bResult = FALSE;
 

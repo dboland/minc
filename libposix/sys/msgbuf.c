@@ -37,15 +37,19 @@ msgbuf_KERN_MSGBUFSIZE(int *data, size_t *len)
 {
 	WIN_CFDATA cfData;
 	WIN_CFDRIVER cfDriver;
-	DWORD dwFlags = WIN_MNT_NOWAIT;
+	WIN_MOUNT wMount;
+	DWORD dwFlags = WIN_MNT_NOWAIT | WIN_MNT_REVERSED;
 	char *msgbuf = win_malloc(MSGBUFSIZE);
 	size_t bufsize = 0;
 	char *buf = msgbuf;
 
 	if (!vfs_setvfs(&cfData, dwFlags)){
-		return(-1);
+		return(-ECANCELED);
 	}else while (vfs_getvfs(&cfData, dwFlags)){
-		if (cfData.FSType == FS_TYPE_PDO){
+		if (cfData.FSType == FS_TYPE_DRIVE){
+			drive_statvfs(&cfData, dwFlags, &wMount);
+			drive_match(wMount.NtName, wMount.DeviceType);
+		}else if (cfData.FSType == FS_TYPE_PDO){
 			pdo_statvfs(&cfData, dwFlags, &cfDriver);
 			if (pdo_match(cfData.NtName, cfDriver.DeviceType, &cfDriver)){
 				bufsize += cfmessage(&cfData, &cfDriver, buf);

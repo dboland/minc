@@ -112,24 +112,6 @@ VfsClassName(LPCWSTR NtPath, LPWSTR Result)
 	*Result = 0;
 	return(dwDepth);
 }
-/* BOOL 
-VfsBootTime(FILETIME *Result)
-{
-	BOOL bResult = FALSE;
-	SYSTEM_TIMEOFDAY_INFORMATION todInfo;
-	ULONG ulSize = sizeof(SYSTEM_TIMEOFDAY_INFORMATION);
-	NTSTATUS ntStatus;
-
-	ntStatus = NtQuerySystemInformation(SystemTimeOfDayInformation, &todInfo, ulSize, &ulSize);
-	if (!NT_SUCCESS(ntStatus)){
-		WIN_ERR("NtQuerySystemInformation(SystemTimeOfDayInformation): %s\n", nt_strerror(ntStatus));
-	}else{
-		Result->dwLowDateTime = todInfo.BootTime.LowPart;
-		Result->dwHighDateTime = todInfo.BootTime.HighPart;
-		bResult = TRUE;
-	}
-	return(bResult);
-} */
 LPCWSTR 
 VfsPrevious(LPCWSTR Origin, LPCWSTR String)
 {
@@ -166,7 +148,6 @@ vfs_setvfs(WIN_CFDATA *Config, DWORD Flags)
 			return(FALSE);
 		}
 	}
-//	VfsBootTime(&Config->BootTime);
 	if (Flags & WIN_MNT_REVERSED){
 		Config->Next = VfsPrevious(pszBuffer, pszBuffer + dwSize - 1);
 	}else{
@@ -188,7 +169,7 @@ vfs_getvfs(WIN_CFDATA *Config, DWORD Flags)
 
 	if (!pszNext || !*pszNext){
 		SetLastError(ERROR_NO_MORE_ITEMS);
-	}else if (!QueryDosDeviceW(pszNext, Config->NtPath, WIN_PATH_MAX)){
+	}else if (!QueryDosDeviceW(pszNext, Config->NtPath, MAX_TEXT)){
 		WIN_ERR("QueryDosDevice(%ls): %s\n", pszNext, win_strerror(GetLastError()));
 	}else{
 		Config->FSType = VfsBusName(pszNext, Config->BusName);

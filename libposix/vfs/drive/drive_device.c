@@ -28,9 +28,9 @@
  *
  */
 
-#include <winbase.h>
+#include <ddk/mountmgr.h>
 
-#define DEVINTERFACE_VOLUME		L"{53f5630d-b6bf-11d0-94f2-00a0c91efb8b}"
+#define MOUNTED_DEVICE_GUID		L"{53f5630d-b6bf-11d0-94f2-00a0c91efb8b}"
 
 /****************************************************/
 
@@ -46,10 +46,10 @@ drive_match(LPCWSTR NtName, DWORD DeviceType)
 			break;
 		}else if (!pwDevice->Flags){
 			win_wcscpy(pwDevice->NtName, NtName);
-			win_wcscpy(pwDevice->ClassId, DEVINTERFACE_VOLUME);
+			win_wcscpy(pwDevice->ClassId, MOUNTED_DEVICE_GUID);
 			pwDevice->DeviceType = DeviceType;
 			pwDevice->DeviceId = sClass + sUnit;
-			if (!dev_attach(pwDevice)){
+			if (!config_attach(pwDevice)){
 				msvc_printf("Warning: storage device %ls (type 0x%x) not configured\n", NtName, DeviceType);
 			}
 //VfsDebugDevice(pwDevice, "drive_match");

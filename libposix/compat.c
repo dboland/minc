@@ -45,35 +45,3 @@ runcmd(char *argv[])
 	}
 	return(result);
 }
-/* int 
-group_member(gid_t gid)
-{
-	int result = -1;
-	SID8 sid;
-	WIN_TASK *pwTask = &__Tasks[CURRENT];
-
-	if (!gid){
-		gid = WIN_ROOT_GID;
-	}
-	if (!win_group_member(rid_win(&sid, gid))){
-		pwTask->Error = errno_posix(GetLastError());
-	}else{
-		result = 0;
-	}
-	return(result);
-} */
-/* int 
-futimesat(int dirfd, const char *pathname, const struct timeval times[2])
-{
-	int result = -1;
-	FILETIME fTime[2];
-	WIN_NAMEI wPath;
-	WIN_TASK *pwTask = &__Tasks[CURRENT];
-
-	if (!vfs_utimes(pathat_win(&wPath, dirfd, pathname, AT_SYMLINK_FOLLOW), utimeval_win(fTime, times))){
-		pwTask->Error = errno_posix(GetLastError());
-	}else{
-		result = 0;
-	}
-	return(result);
-} */

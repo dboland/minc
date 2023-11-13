@@ -49,24 +49,24 @@ pdo_init(WIN_DEV_CLASS Devices[])
 {
 	__Devices = Devices;
 
-	conf_init("mem", FS_TYPE_PDO, WIN_VCHR, DEV_TYPE_MEM);	/* netstat.exe */
-	conf_init("kmem", FS_TYPE_PDO, WIN_VCHR, DEV_TYPE_KMEM);
-	conf_init("null", FS_TYPE_PDO, WIN_VCHR, DEV_TYPE_NULL);
-	conf_init("random", FS_TYPE_PDO, WIN_VCHR, DEV_TYPE_RANDOM);
-	conf_init("urandom", FS_TYPE_PDO, WIN_VCHR, DEV_TYPE_URANDOM);
-	conf_init("route", FS_TYPE_PDO, WIN_VCHR, DEV_TYPE_ROUTE);
-	conf_init("stdin", FS_TYPE_PDO, WIN_VCHR, DEV_TYPE_STDIN);
-	conf_init("stdout", FS_TYPE_PDO, WIN_VCHR, DEV_TYPE_STDOUT);
-	conf_init("stderr", FS_TYPE_PDO, WIN_VCHR, DEV_TYPE_STDERR);
-	conf_init("swap", FS_TYPE_PDO, WIN_VBLK, DEV_TYPE_SWAP);
+	config_init("mem", FS_TYPE_PDO, WIN_VCHR, DEV_TYPE_MEM);	/* netstat.exe */
+	config_init("kmem", FS_TYPE_PDO, WIN_VCHR, DEV_TYPE_KMEM);
+	config_init("null", FS_TYPE_PDO, WIN_VCHR, DEV_TYPE_NULL);
+	config_init("random", FS_TYPE_PDO, WIN_VCHR, DEV_TYPE_RANDOM);
+	config_init("urandom", FS_TYPE_PDO, WIN_VCHR, DEV_TYPE_URANDOM);
+	config_init("route", FS_TYPE_PDO, WIN_VCHR, DEV_TYPE_ROUTE);
+	config_init("stdin", FS_TYPE_PDO, WIN_VCHR, DEV_TYPE_STDIN);
+	config_init("stdout", FS_TYPE_PDO, WIN_VCHR, DEV_TYPE_STDOUT);
+	config_init("stderr", FS_TYPE_PDO, WIN_VCHR, DEV_TYPE_STDERR);
+	config_init("swap", FS_TYPE_PDO, WIN_VBLK, DEV_TYPE_SWAP);
 
-	conf_init("console", FS_TYPE_CHAR, WIN_VCHR, DEV_TYPE_CONSOLE);
-	conf_init("tty", FS_TYPE_CHAR, WIN_VCHR, DEV_CLASS_TTY);
-	conf_init("ptm", FS_TYPE_CHAR, WIN_VCHR, DEV_TYPE_PTM);
-	conf_init("input", FS_TYPE_CHAR, WIN_VCHR, DEV_TYPE_INPUT);
-	conf_init("screen", FS_TYPE_CHAR, WIN_VCHR, DEV_TYPE_SCREEN);
+	config_init("console", FS_TYPE_CHAR, WIN_VCHR, DEV_TYPE_CONSOLE);
+	config_init("tty", FS_TYPE_CHAR, WIN_VCHR, DEV_CLASS_TTY);
+	config_init("ptm", FS_TYPE_CHAR, WIN_VCHR, DEV_TYPE_PTM);
+	config_init("input", FS_TYPE_CHAR, WIN_VCHR, DEV_TYPE_INPUT);
+	config_init("screen", FS_TYPE_CHAR, WIN_VCHR, DEV_TYPE_SCREEN);
 
-	conf_init("root", FS_TYPE_DISK, WIN_VDIR, DEV_TYPE_ROOT);
+	config_init("root", FS_TYPE_DISK, WIN_VDIR, DEV_TYPE_ROOT);
 
 	con_init(DEVICE(DEV_TYPE_CONSOLE));
 }

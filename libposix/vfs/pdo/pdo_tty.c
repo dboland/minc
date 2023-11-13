@@ -71,7 +71,7 @@ tty_open(WIN_DEVICE *Device, WIN_FLAGS *Flags, WIN_VNODE *Result)
 {
 	Result->Event = Device->Input;
 	Result->Device = Device;
-	return(dev_activate(Device, Result));
+	return(config_activate(Device, Result));
 }
 BOOL 
 tty_close(WIN_TERMIO *Terminal)

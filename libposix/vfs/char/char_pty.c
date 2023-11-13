@@ -30,8 +30,6 @@
 
 #include <wincon.h>
 
-//BOOL dev_activate(WIN_DEVICE *Device, WIN_VNODE *Result);
-
 /****************************************************/
 
 BOOL 
@@ -43,7 +41,7 @@ pty_open(WIN_DEVICE *Device, WIN_FLAGS *Flags, WIN_VNODE *Result)
 	Device->Output = raw_open("CONOUT$", Flags, &sa);
 	Result->Event = Device->Input;
 	Result->Device = Device;
-	return(dev_activate(Device, Result));
+	return(config_activate(Device, Result));
 }
 BOOL 
 pty_revoke(WIN_DEVICE *Device)

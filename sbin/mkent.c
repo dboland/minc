@@ -210,6 +210,7 @@ mk_fstab(FILE *stream)
 	WIN_CFDATA cfData;
 	DWORD dwFlags = WIN_MNT_NOWAIT | WIN_MNT_REVERSED;
 	WIN_STATFS wsInfo;
+	WIN_CFDRIVER cfDriver;
 
 	if (!vfs_setvfs(&cfData, dwFlags)){
 		fprintf(stderr, "vol_setfsstat(): %s\n", win_strerror(errno_win()));
@@ -219,7 +220,12 @@ mk_fstab(FILE *stream)
 				drive_match(wMount.NtName, wMount.DeviceType);
 			}else if (drive_getfsstat(&wMount, dwFlags, &wsInfo)){
 				print_fsent(&wMount, &wsInfo, wsInfo.TypeName, wsInfo.Flags);
+			}else{
+				drive_match(wMount.NtName, wMount.DeviceType);
 			}
+		}else if (cfData.FSType == FS_TYPE_PDO){
+			pdo_statvfs(&cfData, dwFlags, &cfDriver);
+			pdo_match(cfData.NtName, cfDriver.DeviceType, &cfDriver);
 		}
 	}
 	vfs_endvfs(&cfData);
@@ -315,7 +321,7 @@ main(int argc, char *argv[])
 	}else if (!strcmp(cmd, "resolv")){
 		mk_resolv(stdout);
 	}else if (!strcmp(cmd, "pdo")){
-		mk_fsent(FS_TYPE_DEVICE);
+		mk_fsent(FS_TYPE_PDO);
 	}else if (!strcmp(cmd, "vol")){
 		mk_vol(stdout);
 	}else if (!strcmp(cmd, "fdo")){

@@ -59,7 +59,6 @@
 
 #define _KERNEL
 
-#include <sys/disk.h>
 #include <net/if.h>
 #include <net/if_var.h>
 
@@ -192,7 +191,6 @@ boot(void)
 {
 	char *args[] = {"/sbin/init", NULL};
 
-	disk_init();
 	ifinit();
 	cpu_configure();
 	unmount_vfs();		// fsck.exe operation?
@@ -206,7 +204,6 @@ single(void)
 	int mib[2] = {CTL_KERN, KERN_SECURELVL};
 	int level = 1;
 
-	disk_init();
 	ifinit();
 	cpu_configure();
 	unmount_vfs();

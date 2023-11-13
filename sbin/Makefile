@@ -4,7 +4,6 @@ RELEASE=6.1.0
 SBINDIR=/sbin
 
 LDFLAGS= -s -Wl,--disable-auto-import -L../libposix
-#MINGWLIB=/C/MinGW/lib
 GCCLIB=/lib/gcc/mingw32/4.8.1
 WINLIB=/C/WINDOWS/system32
 PROGS=wrc mkent
@@ -19,7 +18,7 @@ all: ${PROGS} bsd.exe
 	gcc -c ${CFLAGS} -I../openbsd/include -I../include -I../openbsd/sys -o $@ $<
 
 %.exe: %.o
-	gcc -s ${LDFLAGS} -o $@ $< ${LIBS}
+	gcc ${LDFLAGS} -o $@ $< ${LIBS}
 
 #
 # -Wl,-o inhibits the default --force-exe-suffix.
@@ -32,7 +31,7 @@ mkent: mkent.o
 	gcc ${LDFLAGS} -o $@ $< ${MINGW}/lib/libiphlpapi.a ${LIBS}
 
 bsd.exe: bsd.o version.o
-	gcc -o $@ $^ ${LDFLAGS} ${LIBS}
+	gcc ${LDFLAGS} -o $@ $^ ${LIBS}
 
 wrc: wrc.exe
 

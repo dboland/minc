@@ -570,7 +570,7 @@ sys_lseek(call_t call, int fd, off_t offset, int whence)
 	if (fd < 0 || fd >= OPEN_MAX){
 		result = -EBADF;
 	}else if (!vfs_lseek(&pwTask->Node[fd], &liOffset, dwMethod, &liResult)){
-		result -= (off_t)errno_posix(GetLastError());
+		result -= errno_posix(GetLastError());
 	}else{
 		result = liResult.QuadPart;
 	}
@@ -590,9 +590,9 @@ sys_close(call_t call, int fd)
 	return(result);
 }
 int 
-__closefrom(WIN_VNODE List[], int offset)
+__closefrom(WIN_VNODE Nodes[], int offset)
 {
-	WIN_VNODE *pvNode = &List[offset];
+	WIN_VNODE *pvNode = &Nodes[offset];
 
 	while (offset < OPEN_MAX){
 		if (pvNode->Access){

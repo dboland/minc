@@ -33,8 +33,8 @@
 BOOL vfs_PROCESS_ATTACH(HINSTANCE Instance, LPVOID Reserved);
 BOOL vfs_PROCESS_DETACH(WIN_TASK *Task);
 BOOL vfs_THREAD_DETACH(WIN_TASK *Task);
-BOOL vfs_attach(DWORD FileSystem);
-BOOL vfs_detach(DWORD FileSystem);
+BOOL vfs_init(DWORD FileSystem);
+BOOL vfs_finish(DWORD FileSystem);
 
 /* vfs_unistd.c */
 
@@ -93,7 +93,7 @@ BOOL vfs_sigaction(BOOL Enable);
 BOOL vfs_kill_PID(DWORD ThreadId, UINT Message, WPARAM WParam, LPARAM LParam);
 BOOL vfs_kill_GRP(DWORD GroupId, UINT Message, WPARAM WParam, LPARAM LParam);
 BOOL vfs_kill_ANY(DWORD CallerId, UINT Message, WPARAM WParam, LPARAM LParam);
-BOOL vfs_sigaction(BOOL Enable);
+//BOOL vfs_sigaction(BOOL Enable);
 
 /* vfs_fcntl.c */
 
@@ -129,6 +129,12 @@ BOOL vfs_TIOCGETA(WIN_VNODE *Node, DWORD Mode[2]);
 BOOL vfs_TIOCSCTTY(WIN_DEVICE *Device, WIN_TASK *Task);
 BOOL vfs_PTMGET(WIN_DEVICE *Device, WIN_PTMGET *Result);
 
+/* vfs_ktrace.c */
+
+BOOL vfs_ktrace_SET(WIN_TASK *Task, WIN_NAMEIDATA *Path, PVOID Buffer, LONG Size);
+BOOL vfs_ktrace_CLEAR(WIN_TASK *Task);
+DWORD vfs_ktrace(WIN_VNODE *Node, LPSTR Message);
+
 /* vfs_filio.c */
 
 BOOL vfs_FIONREAD(WIN_VNODE *Node, ULONG *Result);
@@ -143,12 +149,6 @@ BOOL vfs_namei(HANDLE Handle, DWORD Index, WIN_VNODE *Result);
 
 BOOL vfs_writev(WIN_VNODE *Node, const WIN_IOVEC Data[], LONG Count, ULONG *Result);
 BOOL vfs_readv(WIN_VNODE *Node, const WIN_IOVEC Data[], LONG Count, ULONG *Result);
-
-/* vfs_ktrace.c */
-
-BOOL vfs_ktrace_SET(WIN_TASK *Task, WIN_NAMEIDATA *Path, PVOID Buffer, LONG Size);
-BOOL vfs_ktrace_CLEAR(WIN_TASK *Task);
-DWORD vfs_ktrace(WIN_VNODE *Node, LPSTR Message);
 
 /* vfs_dirent.c */
 
@@ -170,10 +170,6 @@ BOOL vfs_utimes(WIN_NAMEIDATA *Path, FILETIME FileTime[2]);
 
 BOOL vfs_wait4(WIN_TASK *Task, WIN_TASK *Children[], BOOL NoHang, DWORD Status, WIN_USAGE *Result);
 
-/* vfs_reboot.c */
-
-VOID vfs_reboot_HALT(VOID);
-
 /****************************************************/
 
 /* process.c */
@@ -192,6 +188,7 @@ BOOL drive_statfs(WIN_NAMEIDATA *Path, WIN_STATFS *Result);
 BOOL drive_mount(WIN_NAMEIDATA *Path, WIN_VATTR *Stat, WIN_MODE *Mode);
 BOOL drive_unmount(WIN_NAMEIDATA *Path);
 WIN_DEVICE *drive_match(LPCWSTR NtName, DWORD DeviceType);
+//VOID drive_configure(VOID);
 
 /* disk.c */
 

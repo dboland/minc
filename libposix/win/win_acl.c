@@ -46,7 +46,7 @@ AclLookupW(LPCWSTR Name, SID8 *Result)
 /************************************************************/
 
 VOID 
-win_acl_attach(VOID)
+win_acl_PROCESS_ATTACH(VOID)
 {
 	WCHAR wszDomain[MAX_NAME];
 	DWORD bufLen = MAX_NAME;

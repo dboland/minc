@@ -50,7 +50,6 @@ pipe_fstat(WIN_VNODE *Node, WIN_VATTR *Result)
 		Result->DeviceId = __Mounts->DeviceId;
 		Result->SpecialId = Node->DeviceId;
 		Result->Mode.FileType = Node->FileType;
-		Result->BlockSize = WIN_PIPE_BUF;
 		bResult = TRUE;
 	}
 	LocalFree(psd);

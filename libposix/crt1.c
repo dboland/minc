@@ -30,6 +30,7 @@
 
 #include "win/windows.h"
 #include "win_types.h"
+#include "dev_types.h"
 #include "vfs_posix.h"
 
 extern WIN_TASK 	*__Tasks;

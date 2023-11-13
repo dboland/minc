@@ -120,19 +120,6 @@ win_madvise(PVOID Address, SIZE_T Size, DWORD Type)
 	return(bResult);
 }
 BOOL 
-win_munmap_OLD(PVOID Address, DWORD Size)
-{
-	BOOL bResult = FALSE;
-	PVOID pvResult = NULL;
-
-	if (!VirtualFree(Address, 0, MEM_RELEASE)){
-		WIN_ERR("VirtualAlloc(0x%x): %s\n", Address, win_strerror(GetLastError()));
-	}else{
-		bResult = TRUE;
-	}
-	return(bResult);
-}
-BOOL 
 win_munmap(PVOID Address, SIZE_T Size)
 {
 	BOOL bResult = FALSE;

@@ -28,7 +28,7 @@
  *
  */
 
-#include <mswsock.h>
+#include <ddk/ndisguid.h>
 
 #define NDIS_LAN_CLASS		L"{ad498944-762f-11d0-8dcb-00c04fc3358c}"
 
@@ -50,7 +50,7 @@ ws2_attach(LPCWSTR NtName, DWORD DeviceType, MIB_IFROW *Interface)
 			pwDevice->Flags |= WIN_DVF_DRIVER_READY;
 			win_wcscpy(pwDevice->NtName, NtName);
 //			win_wcscpy(pwDevice->ClassId, NDIS_LAN_CLASS);
-			bResult = dev_attach(pwDevice);
+			bResult = config_attach(pwDevice);
 //VfsDebugDevice(pwDevice, "ws2_attach");
 			break;
 		}else if (!win_wcscmp(pwDevice->NtName, NtName)){

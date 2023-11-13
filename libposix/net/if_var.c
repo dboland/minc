@@ -35,7 +35,7 @@
 int 
 ifflags_posix(MIB_IFROW *Interface, DWORD Mask)
 {
-	short result = 0;
+	int result = 0;
 
 	if (Interface->dwAdminStatus == MIB_IF_ADMIN_STATUS_UP){
 		result |= IFF_UP;

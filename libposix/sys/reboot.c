@@ -32,12 +32,20 @@
 
 /****************************************************/
 
+VOID 
+reboot_HALT(VOID)
+{
+	vfs_kill_PID(__Tasks[0].ThreadId, WM_COMMAND, CTRL_LOGOFF_EVENT, 0);
+}
+
+/****************************************************/
+
 void 
 sys_reboot(call_t call, int howto)
 {
 	switch (howto){
 		case RB_HALT:
-			vfs_reboot_HALT();
+			reboot_HALT();
 			break;
 	}
 }

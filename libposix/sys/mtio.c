@@ -28,49 +28,35 @@
  *
  */
 
-/*
- * re*		Realtek, Alloy, Buffalo, Compaq, D-Link, Gigabyte, Linksys, US Robotics
- * em*		Axiomtek, HP, Intel, Soekris, Sun, Supermicro
- * athn*	Atheros IEEE 802.11a/b/g/n wireless network device
- * fxp*		Intel EtherExpress PRO/100 10/100 Ethernet device
- * ppp*		Point-to-Point Protocol network interface
- * lo*		software loopback network interface
- * gif*		generic tunnel interface
- * wlan*	IEEE80211 generic wireless network device
- * eth*		generic Ethernet network device
- */
+#include <sys/mtio.h>
 
 /****************************************************/
 
-BOOL 
-ifnet_found(WIN_DEVICE *Device)
+int 
+mtape_MTIOCGET(WIN_VNODE *Node, struct mtget *status)
 {
-	BOOL bResult = TRUE;
+	int result = 0;
 
-	switch (Device->DeviceType){
-		case DEV_TYPE_NDIS:
-			bResult = conf_found("ndis", FS_TYPE_PDO, WIN_VSOCK, Device);
-			break;
-		case DEV_TYPE_TUNNEL:
-			bResult = conf_found("gif", FS_TYPE_PDO, WIN_VSOCK, Device);
-			break;
-		case DEV_TYPE_NIC:
-			bResult = conf_found("nic", FS_TYPE_PDO, WIN_VSOCK, Device);
-			break;
-		case DEV_TYPE_LOOPBACK:
-			bResult = conf_found("lo", FS_TYPE_PDO, WIN_VSOCK, Device);
-			break;
-		case DEV_TYPE_ETH:
-			bResult = conf_found("eth", FS_TYPE_PDO, WIN_VSOCK, Device);
-			break;
-		case DEV_TYPE_WLAN:
-			bResult = conf_found("wlan", FS_TYPE_PDO, WIN_VSOCK, Device);
-			break;
-		case DEV_TYPE_PPP:
-			bResult = conf_found("ppp", FS_TYPE_PDO, WIN_VSOCK, Device);
+	if (Node->DeviceType != DEV_TYPE_MAGTAPE){
+		result = -ENODEV;
+	}
+	return(result);
+}
+
+/****************************************************/
+
+int 
+mtape_ioctl(WIN_TASK *Task, int fd, unsigned long request, va_list args)
+{
+	int result = 0;
+	WIN_VNODE *pvNode = &Task->Node[fd];
+
+	switch (request){
+		case MTIOCGET:
+			result = mtape_MTIOCGET(pvNode, va_arg(args, struct mtget *));
 			break;
 		default:
-			bResult = FALSE;
+			result = -EOPNOTSUPP;
 	}
-	return(bResult);
+	return(result);
 }

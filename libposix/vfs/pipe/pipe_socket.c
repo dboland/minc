@@ -275,7 +275,7 @@ pipe_getsockopt(WIN_VNODE *Node, INT Level, INT Name, CHAR *Value, INT *Length)
 	switch (Name){
 		case SO_RCVBUF:
 		case SO_SNDBUF:
-			*(UINT *)Value = WIN_PIPE_BUF;
+			*(UINT *)Value = WIN_S_BLKSIZE;
 			*Length = sizeof(UINT);
 			break;
 		default:
@@ -292,7 +292,7 @@ pipe_setsockopt(WIN_VNODE *Node, INT Level, INT Name, CONST CHAR *Value, INT Len
 	switch (Name){
 		case SO_RCVBUF:
 		case SO_SNDBUF:
-//			bResult = (*(UINT *)Value == WIN_PIPE_BUF);
+//			bResult = (*(UINT *)Value == WIN_S_BLKSIZE);
 			break;
 		default:
 			WSASetLastError(WSAENOPROTOOPT);

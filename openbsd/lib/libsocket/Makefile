@@ -8,7 +8,6 @@ POSIXLIB=${LIBROOT}/libposix
 GCCLIB=${LIBROOT}/mingw/gcc
 TOOLDIR=${LIBROOT}/mingw/bin
 
-CFLAGS= -g -Wimplicit-function-declaration
 LDFLAGS= -shared -s
 LIBSOCKET= libsocket.so.${RELEASE}
 IMPLIB= libsocket.dll.a
@@ -18,7 +17,7 @@ all: objects lib
 lib: ${LIBSOCKET} libsocket.a
 
 crt1.o: crt1.c
-	gcc -c ${CFLAGS} -I../../include -I${LIBROOT}/include $<
+	gcc -c -g ${CFLAGS} -I../../include -I${LIBROOT}/include $<
 
 libsocket.a:
 	ar cru $@ $(shell ls */*.o)

@@ -73,7 +73,7 @@ pdo_open(WIN_NAMEIDATA *Path, WIN_FLAGS *Flags, WIN_MODE *Mode, WIN_VNODE *Resul
 		SetLastError(ERROR_DEVICE_NOT_AVAILABLE);
 	}else switch (Result->DeviceType){
 		case DEV_TYPE_CONSOLE:
-			bResult = dev_activate(Result->Device, Result);
+			bResult = config_activate(Result->Device, Result);
 			break;
 		case DEV_CLASS_TTY:
 			bResult = tty_open(DEVICE(__CTTY->DeviceId), Flags, Result);

@@ -33,7 +33,7 @@
 /****************************************************/
 
 int 
-file_FIONREAD(WIN_TASK *Task, WIN_VNODE *Node, int *nbytes)
+file_FIONREAD(WIN_VNODE *Node, int *nbytes)
 {
 	int result = 0;
 	ULONG ulResult;
@@ -46,7 +46,7 @@ file_FIONREAD(WIN_TASK *Task, WIN_VNODE *Node, int *nbytes)
 	return(result);
 }
 int 
-file_FIONBIO(WIN_TASK *Task, WIN_VNODE *Node, int *mode)
+file_FIONBIO(WIN_VNODE *Node, int *mode)
 {
 	int result = 0;
 
@@ -62,20 +62,20 @@ int
 file_ioctl(WIN_TASK *Task, int fd, unsigned long request, va_list args)
 {
 	int result = 0;
-	WIN_VNODE *pNode = &Task->Node[fd];
+	WIN_VNODE *pvNode = &Task->Node[fd];
 
 	switch (request){
 		case FIONBIO:
-			result = file_FIONBIO(Task, pNode, va_arg(args, int *));
+			result = file_FIONBIO(pvNode, va_arg(args, int *));
 			break;
 		case FIONREAD:
-			result = file_FIONREAD(Task, pNode, va_arg(args, int *));
+			result = file_FIONREAD(pvNode, va_arg(args, int *));
 			break;
 		case FIOCLEX:	/* python.exe */
-			pNode->CloseExec = TRUE;
+			pvNode->CloseExec = TRUE;
 			break;
 		case FIONCLEX:
-			pNode->CloseExec = FALSE;
+			pvNode->CloseExec = FALSE;
 			break;
 		default:
 			result = -EOPNOTSUPP;

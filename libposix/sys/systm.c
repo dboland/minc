@@ -30,16 +30,6 @@
 
 #include <sys/systm.h>
 
-/* Devices are loaded using OpenBSD's autoconf framework. After executing the 
- * biosboot program, devices are known, but need to be matched with their drivers.
- * The matching process is started by calling cpu_configure() which
- * calls config_rootfound() once, which searches the tree by
- * calling config_search(), which calls the xxx_match() function of all the
- * drivers in its parent class.
- * After that, config_search() calls the xxx_attach() function of the found driver,
- * which calls config_found(), completing driver initialization.
- */
-
 /****************************************************/
 
 wchar_t *
@@ -84,13 +74,17 @@ cpu_configure(void)
 {
 	WIN_CFDATA cfData;
 	WIN_CFDRIVER cfDriver;
-	DWORD dwFlags = WIN_MNT_NOWAIT;
+	DWORD dwFlags = WIN_MNT_NOWAIT | WIN_MNT_REVERSED;
 	CHAR szMessage[MAX_MESSAGE];
+	WIN_MOUNT wMount;
 
 	if (!vfs_setvfs(&cfData, dwFlags)){
 		return;
 	}else while (vfs_getvfs(&cfData, dwFlags)){
-		if (cfData.FSType == FS_TYPE_PDO){
+		if (cfData.FSType == FS_TYPE_DRIVE){
+			drive_statvfs(&cfData, dwFlags, &wMount);
+			drive_match(wMount.NtName, wMount.DeviceType);
+		}else if (cfData.FSType == FS_TYPE_PDO){
 			pdo_statvfs(&cfData, dwFlags, &cfDriver);
 			if (pdo_match(cfData.NtName, cfDriver.DeviceType, &cfDriver)){
 				cfmessage(&cfData, &cfDriver, szMessage);

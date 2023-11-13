@@ -60,8 +60,8 @@ vfs_shm_attach(LPCSTR Name, HINSTANCE Instance)
  
 	if (!(__Shared = OpenFileMapping(FILE_MAP_WRITE, FALSE, Name))){
 		wsResult = SHMCreate(Name, sizeof(WIN_SESSION));
+		disk_init(wsResult->Mounts, Instance);
 		pdo_init(wsResult->Devices);
-		drive_init(wsResult->Mounts, Instance);
 		glob_init(wsResult->Globals);
 	}else if (!(wsResult = MapViewOfFile(__Shared, FILE_MAP_WRITE, 0, 0, 0))){
 		WIN_ERR("MapViewOfFile(%d): %s\n", __Shared, win_strerror(GetLastError()));

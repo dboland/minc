@@ -32,21 +32,3 @@
 #include "drive_device.c"
 #include "drive_mount.c"
 #include "drive_statvfs.c"
-
-/****************************************************/
-
-VOID 
-drive_init(WIN_MOUNT *Mount, HINSTANCE Instance)
-{
-	/* mount first partition on boot disk
-	 */
-	GetModuleFileNameW(Instance, Mount->Path, MAX_PATH);
-	win_dirname(win_dirname(Mount->Path));
-	win_wcscpy(Mount->Drive, L"MINC:");
-	Mount->FileType = WIN_VDIR;
-	Mount->DeviceType = DEV_TYPE_ROOT;
-	Mount->DeviceId = DEV_TYPE_ROOT;
-	Mount->FSType = FS_TYPE_DISK;
-//VfsDebugMount(Mount, "drive_init");
-//	DefineDosDeviceW(DDD_RAW_TARGET_PATH, L"MINC:", L"\\Device\\HarddiskVolume1\\MinC");
-}

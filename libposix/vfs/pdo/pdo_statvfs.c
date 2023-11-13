@@ -114,7 +114,7 @@ DevLookup(LPCWSTR Bus, LPCWSTR Class, LPCWSTR Service)
 		dwResult = DevLookupClass(Service, DEV_BUS_ISA);
 
 	}else if (!win_wcscmp(Service, L"usbprint")){	/* no "Printer" class for USB */
-		dwResult = DEV_TYPE_USBLPT;
+		dwResult = DEV_TYPE_USBPRINT;
 
 	}else if (!win_wcscmp(Class, L"USB")){
 		dwResult = DevLookupBus(Bus, DEV_CLASS_USB);

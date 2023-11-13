@@ -48,6 +48,5 @@ ws2_fstat(WIN_VNODE *Node, WIN_VATTR *Result)
 	Result->Mode.Group = WIN_S_IREAD;
 	Result->Mode.Other = WIN_S_IREAD;
 	Result->Mode.FileType = Node->FileType;
-	Result->BlockSize = WIN_PIPE_BUF;
 	return(TRUE);
 }

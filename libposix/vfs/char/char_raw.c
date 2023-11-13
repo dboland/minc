@@ -58,7 +58,6 @@ raw_fstat(WIN_DEVICE *Device, WIN_VATTR *Result)
 		Result->DeviceId = __Mounts->DeviceId;
 		Result->Mode.FileType = Device->FileType;
 		Result->SpecialId = Device->DeviceId;
-		Result->BlockSize = 1;
 		bResult = TRUE;
 	}
 	LocalFree(psd);

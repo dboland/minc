@@ -87,7 +87,7 @@ DWORD win_getenv(LPCSTR Name, LPCSTR Buffer, DWORD Size);
 
 /* win_acl.c */
 
-VOID win_acl_attach(VOID);
+VOID win_acl_PROCESS_ATTACH(VOID);
 BOOL win_acl_get_file(LPCWSTR FileName, PSECURITY_DESCRIPTOR *Result);
 BOOL win_acl_get_fd(HANDLE Handle, PSECURITY_DESCRIPTOR *Result);
 BOOL win_acl_init(WIN_MODE *Mode, WIN_ACL_CONTROL *Result);
