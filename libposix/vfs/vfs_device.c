@@ -80,7 +80,7 @@ config_activate(WIN_DEVICE *Device, WIN_VNODE *Result)
 /****************************************************/
 
 BOOL 
-system_found(WIN_DEVICE *Device)
+system_attach(WIN_DEVICE *Device)
 {
 	BOOL bResult = TRUE;
 
@@ -106,7 +106,7 @@ system_found(WIN_DEVICE *Device)
 	return(bResult);
 }
 BOOL 
-cpu_found(WIN_DEVICE *Device)
+cpu_attach(WIN_DEVICE *Device)
 {
 	BOOL bResult = TRUE;
 
@@ -123,7 +123,7 @@ cpu_found(WIN_DEVICE *Device)
 	return(bResult);
 }
 BOOL 
-disk_found(WIN_DEVICE *Device)
+disk_attach(WIN_DEVICE *Device)
 {
 	BOOL bResult = TRUE;
 
@@ -149,7 +149,7 @@ disk_found(WIN_DEVICE *Device)
 	return(bResult);
 }
 BOOL 
-ifnet_found(WIN_DEVICE *Device)
+ifnet_attach(WIN_DEVICE *Device)
 {
 	BOOL bResult = TRUE;
 
@@ -181,7 +181,7 @@ ifnet_found(WIN_DEVICE *Device)
 	return(bResult);
 }
 BOOL 
-media_found(WIN_DEVICE *Device)
+media_attach(WIN_DEVICE *Device)
 {
 	BOOL bResult = TRUE;
 
@@ -201,7 +201,7 @@ media_found(WIN_DEVICE *Device)
 	return(bResult);
 }
 BOOL 
-serial_found(WIN_DEVICE *Device)
+serial_attach(WIN_DEVICE *Device)
 {
 	BOOL bResult = TRUE;
 
@@ -221,7 +221,7 @@ serial_found(WIN_DEVICE *Device)
 	return(bResult);
 }
 BOOL 
-printer_found(WIN_DEVICE *Device)
+printer_attach(WIN_DEVICE *Device)
 {
 	BOOL bResult = TRUE;
 
@@ -241,7 +241,7 @@ printer_found(WIN_DEVICE *Device)
 	return(bResult);
 }
 BOOL 
-display_found(WIN_DEVICE *Device)
+display_attach(WIN_DEVICE *Device)
 {
 	BOOL bResult = TRUE;
 
@@ -258,7 +258,7 @@ display_found(WIN_DEVICE *Device)
 	return(bResult);
 }
 BOOL 
-keyboard_found(WIN_DEVICE *Device)
+keyboard_attach(WIN_DEVICE *Device)
 {
 	BOOL bResult = TRUE;
 
@@ -278,7 +278,7 @@ keyboard_found(WIN_DEVICE *Device)
 	return(bResult);
 }
 BOOL 
-mouse_found(WIN_DEVICE *Device)
+mouse_attach(WIN_DEVICE *Device)
 {
 	BOOL bResult = TRUE;
 
@@ -298,7 +298,7 @@ mouse_found(WIN_DEVICE *Device)
 	return(bResult);
 }
 BOOL 
-storage_found(WIN_DEVICE *Device)
+storage_attach(WIN_DEVICE *Device)
 {
 	BOOL bResult = TRUE;
 
@@ -322,7 +322,7 @@ storage_found(WIN_DEVICE *Device)
 	return(bResult);
 }
 BOOL 
-usb_found(WIN_DEVICE *Device)
+usb_attach(WIN_DEVICE *Device)
 {
 	BOOL bResult = TRUE;
 
@@ -349,40 +349,40 @@ config_attach(WIN_DEVICE *Device)
 
 	switch (sClass){
 		case DEV_CLASS_SYSTEM:
-			bResult = system_found(Device);
+			bResult = system_attach(Device);
 			break;
 		case DEV_CLASS_CPU:
-			bResult = cpu_found(Device);
+			bResult = cpu_attach(Device);
 			break;
 		case DEV_CLASS_DISK:
-			bResult = disk_found(Device);
+			bResult = disk_attach(Device);
 			break;
 		case DEV_CLASS_IFNET:
-			bResult = ifnet_found(Device);
+			bResult = ifnet_attach(Device);
 			break;
 		case DEV_CLASS_MEDIA:
-			bResult = media_found(Device);
+			bResult = media_attach(Device);
 			break;
 		case DEV_CLASS_SERIAL:
-			bResult = serial_found(Device);
+			bResult = serial_attach(Device);
 			break;
 		case DEV_CLASS_PRINTER:
-			bResult = printer_found(Device);
+			bResult = printer_attach(Device);
 			break;
 		case DEV_CLASS_DISPLAY:
-			bResult = display_found(Device);
+			bResult = display_attach(Device);
 			break;
 		case DEV_CLASS_KEYBOARD:
-			bResult = keyboard_found(Device);
+			bResult = keyboard_attach(Device);
 			break;
 		case DEV_CLASS_MOUSE:
-			bResult = mouse_found(Device);
+			bResult = mouse_attach(Device);
 			break;
 		case DEV_CLASS_STORAGE:
-			bResult = storage_found(Device);
+			bResult = storage_attach(Device);
 			break;
 		case DEV_CLASS_USB:
-			bResult = usb_found(Device);
+			bResult = usb_attach(Device);
 			break;
 		default:
 			bResult = FALSE;

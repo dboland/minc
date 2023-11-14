@@ -34,11 +34,11 @@
 /****************************************************/
 
 int 
-disk_DIOCGDINFO(WIN_TASK *Task, WIN_DEVICE *Device, struct disklabel *label)
+disk_DIOCGDINFO(WIN_VNODE *Node, struct disklabel *label)
 {
 	int result = 0;
 
-	if (!pdo_DIOCGDINFO(Device)){
+	if (!pdo_DIOCGDINFO(Node->Device)){
 		result = -EOPNOTSUPP;
 	}
 	return(result);
@@ -54,7 +54,7 @@ disk_ioctl(WIN_TASK *Task, int fd, unsigned long request, va_list args)
 
 	switch (request){
 		case DIOCGDINFO:
-			result = disk_DIOCGDINFO(Task, pvNode->Device, va_arg(args, struct disklabel *));
+			result = disk_DIOCGDINFO(pvNode, va_arg(args, struct disklabel *));
 			break;
 		default:
 			result = -EOPNOTSUPP;

@@ -51,7 +51,7 @@ rtime_posix(DWORDLONG *Started)
 	DWORDLONG dwlRealTime;
 
 	GetSystemTimeAsFileTime((LPFILETIME)&dwlCurrent);
-	dwlRealTime = dwlCurrent - *Started;	/* 100-nanosecond intervals */
+	dwlRealTime = dwlCurrent - *Started;		/* 100-nanosecond intervals */
 	dwlRealTime *= 0.0000001;			/* seconds */
 	return((u_int32_t)dwlRealTime);
 }

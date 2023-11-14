@@ -34,5 +34,6 @@ VOID VfsFileFlags(DWORD Flags, LPCWSTR Label);
 VOID VfsVolumeFlags(DWORD Flags, LPCSTR Label);
 VOID VfsTermFlags(DWORD Mode[2], LPCSTR Label);
 VOID VfsNetFlags(LONG NetworkEvents, LPCSTR Label);
+VOID VfsAccessFlags(ACCESS_MASK Access, DWORD Type);
 
 VOID VfsDebugNode(WIN_VNODE *Node, LPCSTR Label);

@@ -273,10 +273,8 @@ VfsSpecificFlags(ACCESS_MASK Perms, DWORD Type, LPCSTR Label)
 				mask[2] = 'x';
 			msvc_printf("file(%s) ", mask);
 		}else{
-			if (TestAccess(Perms, PROCESS_TERMINATE, &dwRemain))
-				msvc_printf(" [terminate]");	// 0x0001
-			if (TestAccess(Perms, PROCESS_CREATE_THREAD, &dwRemain))
-				msvc_printf(" [create_thread]");	// 0x0002
+			win_flagname(PROCESS_TERMINATE, "TERMINATE", dwRemain, &dwRemain);
+			win_flagname(PROCESS_CREATE_THREAD, "CREATE_THREAD", dwRemain, &dwRemain);
 		}
 		if (Type == OB_TYPE_FILE){
 			strcpy(mask, "---");
@@ -310,7 +308,7 @@ VfsSpecificFlags(ACCESS_MASK Perms, DWORD Type, LPCSTR Label)
 			// 0x0020
 			if (TestAccess(Perms, PROCESS_VM_WRITE, &dwRemain))
 				mask[1] = 'w';
-			msvc_printf("vm(%s) ", mask);
+			msvc_printf(" vm(%s)", mask);
 		}
 		if (Type != OB_TYPE_FILE){
 			strcpy(mask, "---");
@@ -323,7 +321,7 @@ VfsSpecificFlags(ACCESS_MASK Perms, DWORD Type, LPCSTR Label)
 			// 0x0800
 			if (TestAccess(Perms, PROCESS_SUSPEND_RESUME, &dwRemain))
 				mask[2] = 'x';
-			msvc_printf("process(%s) ", mask);
+			msvc_printf(" process(%s) ", mask);
 		}
 		if (Type == OB_TYPE_FILE){
 			/* 0x0004 */
@@ -341,12 +339,12 @@ VfsSpecificFlags(ACCESS_MASK Perms, DWORD Type, LPCSTR Label)
 	}
 }
 VOID 
-VfsAccessFlags(ACCESS_MASK Access)
+VfsAccessFlags(ACCESS_MASK Access, DWORD Type)
 {
-	VfsGenericFlags(Access, OB_TYPE_FILE, "+ generic");
-	VfsReservedFlags(Access, OB_TYPE_FILE, "+ reserved");
-	VfsStandardFlags(Access, OB_TYPE_FILE, "+ standard");
-	VfsSpecificFlags(Access, OB_TYPE_FILE, "+ specific");
+	VfsGenericFlags(Access, Type, "+ generic");
+	VfsReservedFlags(Access, Type, "+ reserved");
+	VfsStandardFlags(Access, Type, "+ standard");
+	VfsSpecificFlags(Access, Type, "+ specific");
 }
 VOID 
 VfsNameIFlags(DWORD Flags, LPCSTR Label)
@@ -375,7 +373,7 @@ VfsDebugNode(WIN_VNODE *Node, LPCSTR Label)
 		Label, Node->FileId, FSType(Node->FSType), FType(Node->FileType), Node->Handle, Node->Event, Node->Access, Node->CloseExec, Node->DeviceType, Node->DeviceId);
 	VfsFileFlags(Node->Flags, L"+ flags");
 	VfsFileAttribs(Node->Attribs, L"+ attribs");
-	VfsAccessFlags(Node->Access);
+	VfsAccessFlags(Node->Access, OB_TYPE_FILE);
 }
 VOID 
 VfsDebugDevice(WIN_DEVICE *Device, LPCSTR Label)

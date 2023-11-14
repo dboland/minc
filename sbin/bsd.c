@@ -60,7 +60,7 @@
 #define _KERNEL
 
 #include <net/if.h>
-#include <net/if_var.h>
+//#include <net/if_var.h>
 
 #define KTR_DEFAULT (KTRFAC_SYSCALL | KTRFAC_SYSRET | KTRFAC_NAMEI | \
 	KTRFAC_PSIG | KTRFAC_EMUL | KTRFAC_STRUCT)

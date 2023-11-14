@@ -68,6 +68,6 @@ BOOL ws2_setvfs(WIN_IFDATA *Config, BOOL Ascending, PMIB_IFROW *Interface, DWORD
 VOID ws2_endvfs(WIN_IFDATA *Config);
 BOOL ws2_statvfs(WIN_IFDATA *Config, PMIB_IFROW Interface);
 
-/* winsock.c */
+/* winsock_device.c */
 
 BOOL ws2_attach(LPCWSTR NtName, DWORD DeviceType, MIB_IFROW *Interface);

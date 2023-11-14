@@ -35,7 +35,7 @@
 VOID 
 reboot_HALT(VOID)
 {
-	vfs_kill_PID(__Tasks[0].ThreadId, WM_COMMAND, CTRL_LOGOFF_EVENT, 0);
+	vfs_kill_PID(pid_win(0), WM_COMMAND, CTRL_LOGOFF_EVENT, 0);
 }
 
 /****************************************************/

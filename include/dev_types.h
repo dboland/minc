@@ -52,9 +52,9 @@
 #define DEV_BUS_MAIN		56
 #define DEV_BUS_BIOS		DEV_BUS_MAIN
 #define DEV_BUS_CPU		DEV_BUS_MAIN
-#define DEV_BUS_UEFI		DEV_BUS_BIOS		/* Unified Extensible Firmware Interface */
-#define DEV_BUS_APM		DEV_BUS_BIOS		/* Advanced Power Management interface */
-#define DEV_BUS_ACPI		DEV_BUS_BIOS		/* Advanced Configuration and Power Interface */
+#define DEV_BUS_UEFI		DEV_BUS_BIOS		/* Unified Extensible Firmware Interface bus */
+#define DEV_BUS_APM		DEV_BUS_BIOS		/* Advanced Power Management interface bus */
+#define DEV_BUS_ACPI		DEV_BUS_BIOS		/* Advanced Configuration and Power Interface bus */
 #define DEV_BUS_PCI		48			/* Peripheral Component Interconnect bus */
 #define DEV_BUS_SATA		DEV_BUS_PCI		/* Serial Advanced Technology Attachment bus */
 #define DEV_BUS_ISA		40			/* Industry Standard Architecture bus */
@@ -69,11 +69,9 @@
 
 #define DEV_TYPE_SWD		(DEV_CLASS_DULL)
 #define DEV_TYPE_ACPI		(DEV_CLASS_DULL + DEV_BUS_ACPI)
-//#define DEV_TYPE_PCI		(DEV_CLASS_DULL + DEV_BUS_PCI)  /* Peripheral Component Interconnect */
 #define DEV_TYPE_OHCI		(DEV_CLASS_DULL + DEV_BUS_PCI)	/* USB Open Host Controller Interface */
 #define DEV_TYPE_EHCI		(DEV_CLASS_DULL + DEV_BUS_USB)	/* USB Enhanced Host Controller Interface (USB 2.0) */
 #define DEV_TYPE_IDE		(DEV_CLASS_DULL + DEV_BUS_IDE)	/* Integrated Disk Electronics device */
-//#define DEV_TYPE_ROOT		(DEV_CLASS_DULL + DEV_BUS_HDC)
 
 #define DEV_TYPE_MEM		(DEV_CLASS_CPU + 1)		/* physical memory device */
 #define DEV_TYPE_KMEM		(DEV_CLASS_CPU + 2)		/* kernel memory device (libposix.dll) */
@@ -136,7 +134,6 @@
 #define DEV_TYPE_VOLUME		(DEV_CLASS_STORAGE)
 #define DEV_TYPE_REMOTE		(DEV_CLASS_STORAGE + DEV_BUS_MAIN)	/* Server Message Block storage */
 #define DEV_TYPE_FLOPPY		(DEV_CLASS_STORAGE + DEV_BUS_FDC)	/* Floppy Disk storage */
-//#define DEV_TYPE_USBSTOR	(DEV_CLASS_STORAGE + DEV_BUS_USB)	/* Serial disk storage */
 #define DEV_TYPE_CDROM		(DEV_CLASS_STORAGE + DEV_BUS_SCSI)	/* CDROM storage */
 #define DEV_TYPE_ROOT		(DEV_CLASS_STORAGE + DEV_BUS_HDC)	/* Root mount point */
 
