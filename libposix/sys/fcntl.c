@@ -227,7 +227,8 @@ __openat(WIN_TASK *Task, WIN_NAMEIDATA *Path, int flags, va_list args)
 		result = fd_posix(Task, &vNode, 0);
 	}
 	return(result);
-}int 
+}
+int 
 sys_open(call_t call, const char *path, int flags, ...)
 {
 	int result;

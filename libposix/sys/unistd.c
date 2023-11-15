@@ -267,7 +267,7 @@ sys_rmdir(call_t call, const char *pathname)
 	return(result);
 }
 int 
-sys_linkat(call_t call, int fd1, const char *name1, int fd2, const char *name2, int flag)
+__linkat(int fd1, const char *name1, int fd2, const char *name2, int flag)
 {
 	int result = 0;
 	WIN_NAMEIDATA wpOld;
@@ -279,9 +279,14 @@ sys_linkat(call_t call, int fd1, const char *name1, int fd2, const char *name2, 
 	return(result);
 }
 int 
-sys_link(call_t call, const char *oldpath, const char *newpath)
+sys_link(call_t call, const char *name1, const char *name2)
 {
-	return(sys_linkat(call, AT_FDCWD, oldpath, AT_FDCWD, newpath, AT_SYMLINK_NOFOLLOW));
+	return(__linkat(AT_FDCWD, name1, AT_FDCWD, name2, AT_SYMLINK_NOFOLLOW));
+}
+int 
+sys_linkat(call_t call, int fd1, const char *name1, int fd2, const char *name2, int flag)
+{
+	return(__linkat(fd1, name1, fd2, name2, flag));
 }
 int 
 __unlinkat(WIN_TASK *Task, int fd, const char *path, int flag)

@@ -47,7 +47,7 @@ disk_futimes(WIN_VNODE *Node, FILETIME FileTime[2])
 	return(SetFileTime(Node->Handle, NULL, ftAccess, ftWrite));
 }
 BOOL 
-disk_utimes(WIN_NAMEI *Path, FILETIME FileTime[2])
+disk_utimes(WIN_NAMEIDATA *Path, FILETIME FileTime[2])
 {
 	WIN_VNODE vNode;
 	BOOL bResult = FALSE;

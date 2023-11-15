@@ -48,7 +48,7 @@ disk_fstat(WIN_VNODE *Node, WIN_VATTR *Result)
 	return(bResult);
 }
 BOOL 
-disk_stat(WIN_NAMEI *Path, WIN_VATTR *Result)
+disk_stat(WIN_NAMEIDATA *Path, WIN_VATTR *Result)
 {
 	BOOL bResult = FALSE;
 
@@ -82,7 +82,7 @@ disk_fchmod(WIN_VNODE *Node, WIN_MODE *Mode)
 	return(bResult);
 }
 BOOL 
-disk_chmod(WIN_NAMEI *Path, WIN_MODE *Mode)
+disk_chmod(WIN_NAMEIDATA *Path, WIN_MODE *Mode)
 {
 	BOOL bResult = FALSE;
 	WIN_FLAGS wFlags = {READ_CONTROL + WRITE_DAC + WRITE_OWNER, 
@@ -114,7 +114,7 @@ disk_fchflags(WIN_VNODE *Node, ULONG Attributes)
 	return(bResult);
 } */
 BOOL 
-disk_chflags(WIN_NAMEI *Path, DWORD Attributes)
+disk_chflags(WIN_NAMEIDATA *Path, DWORD Attributes)
 {
 	return(SetFileAttributesW(Path->Resolved, Attributes));
 }

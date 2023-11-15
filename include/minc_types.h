@@ -53,7 +53,8 @@ typedef void (*atexit_t)(void);
 typedef void (*action_t)(int, siginfo_t *, void *);
 
 typedef struct {
-	int c_result;
+	int c_edx;
+	int c_eax;
 	int c_edi;
 	int c_esi;
 	int c_ebx;

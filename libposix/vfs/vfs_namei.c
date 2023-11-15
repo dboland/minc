@@ -67,7 +67,6 @@ BOOL
 PathGlobType(WIN_NAMEIDATA *Path, LPCWSTR TypeName)
 {
 	BOOL bResult = FALSE;
-	CHAR *R;
 	DWORD dwAttribs;
 
 	win_wcscpy(Path->R, TypeName);
@@ -136,9 +135,6 @@ PathClose(WIN_NAMEIDATA *Path, DWORD Flags)
 		}else if (Path->Attribs & FILE_ATTRIBUTE_SYMLINK){
 			dwFileType = WIN_VLNK;
 		}
-//		if (Path->Attribs == FILE_ATTRIBUTE_VFS){		/* perl.exe */
-//VfsDebugPath(Path, "PathClose");
-//		}
 	}else if (PathGlobType(Path, L".exe")){
 		Path->DeviceType = DEV_CLASS_DISK;
 	}else if (PathGlobType(Path, L".vfs")){

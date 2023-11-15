@@ -126,7 +126,7 @@ argv_posix(char *buf, int size, char *argv[])
 	return(count);
 }
 BOOL 
-shebang_win(WIN_VNODE *Node, WIN_NAMEI *Path, const char *filename, LPSTR Result)
+shebang_win(WIN_VNODE *Node, WIN_NAMEIDATA *Path, const char *filename, LPSTR Result)
 {
 	BOOL bResult = FALSE;
 	DWORD dwRead;
@@ -547,20 +547,19 @@ syscall_enter(call_t call)
 	call.Task = pwTask;
 	return(result);
 }
-int 
+void 
 syscall_leave(call_t call)
 {
-	int result = call.c_result;
+	int result = call.c_eax;
 	WIN_TASK *pwTask = call.Task;
 
 	if (result < 0){
 		pwTask->Error = -result;
 	}
-	/* Does WriteFile() touch the %edx register?
+	/* WriteFile() will touch the %edx register.
 	 */
 	if (pwTask->TracePoints & KTRFAC_SYSRET){
 		ktrace_SYSRET(pwTask, call.Code, result);
 	}
-	return(result);
 }
 

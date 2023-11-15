@@ -243,7 +243,7 @@ int
 __utimensat(WIN_TASK *Task, int dirfd, const char *file, FILETIME Time[2], int flags)
 {
 	int result = 0;
-	WIN_NAMEI wPath;
+	WIN_NAMEIDATA wPath;
 
 	if (!vfs_utimes(pathat_win(&wPath, dirfd, file, flags), Time)){
 		result -= errno_posix(GetLastError());

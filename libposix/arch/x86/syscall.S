@@ -47,11 +47,14 @@ ___kernel:
 	push %esi
 	push %edi
 	push $0			# result low
+	push $0			# result high
 	call _syscall_enter
 	call *%eax
-	mov %eax,(%esp)
+	mov %edx,(%esp)
+	mov %eax,4(%esp)
 	call _syscall_leave
-	add $4,%esp		# result low
+	pop %edx		# result high
+	pop %eax		# result low
 	pop %edi
 	pop %esi
 	pop %ebx

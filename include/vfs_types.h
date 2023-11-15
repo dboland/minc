@@ -97,6 +97,8 @@ typedef enum _WIN_VTAGTYPE {
 #define FILE_ATTRIBUTE_MOUNT		(FILE_ATTRIBUTE_DIRECTORY | FILE_ATTRIBUTE_SYSTEM)
 #define FILE_ATTRIBUTE_VFS		(FILE_ATTRIBUTE_HIDDEN | FILE_ATTRIBUTE_SYSTEM | FILE_ATTRIBUTE_DIRECTORY)
 
+#define WIN_SYMLOOP_MAX			8
+
 typedef struct _WIN_INODE {
 	DWORD Magic;			/* file signature/mount identifier */
 	WIN_VTYPE FileType;		/* in userland, everything is a file */
@@ -119,9 +121,6 @@ typedef struct _WIN_NAMEIDATA {
 	WCHAR *R;			/* current WCHAR in resolved path buffer */
 	WCHAR *S;			/* current WCHAR in source path buffer */
 } WIN_NAMEIDATA;
-
-#define WIN_NAMEI	WIN_NAMEIDATA
-#define WIN_SYMLOOP_MAX		32
 
 #define WIN_LOCKLEAF		0x000004	/* lock inode on return */
 #define WIN_LOCKPARENT		0x000008	/* want parent vnode returned locked */

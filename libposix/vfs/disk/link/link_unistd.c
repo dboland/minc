@@ -32,7 +32,7 @@
 
 /**************************************************************/
 
-link_rename(WIN_NAMEI *Path, WIN_NAMEI *Result)
+link_rename(WIN_NAMEIDATA *Path, WIN_NAMEIDATA *Result)
 {
 	BOOL bResult = FALSE;
 

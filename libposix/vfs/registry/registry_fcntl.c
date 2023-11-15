@@ -33,7 +33,7 @@
 /****************************************************/
 
 BOOL 
-reg_open(WIN_NAMEI *Path, WIN_FLAGS *Flags, WIN_VNODE *Result)
+reg_open(WIN_NAMEIDATA *Path, WIN_FLAGS *Flags, WIN_VNODE *Result)
 {
 	BOOL bResult = FALSE;
 	REGSAM rsAccess = KEY_QUERY_VALUE;

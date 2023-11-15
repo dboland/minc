@@ -48,13 +48,14 @@ BOOL
 dir_rename(WIN_NAMEIDATA *Path, WIN_NAMEIDATA *Result)
 {
 	BOOL bResult = FALSE;
+	DWORD dwFlags = MOVEFILE_COPY_ALLOWED;
 
 	if (Result->Attribs == -1){
-		bResult = MoveFileExW(Path->Resolved, Result->Resolved, MOVEFILE_COPY_ALLOWED);
+		bResult = MoveFileExW(Path->Resolved, Result->Resolved, dwFlags);
 	}else if (Result->FileType != WIN_VDIR){
 		SetLastError(ERROR_DIRECTORY);
 	}else if (RemoveDirectoryW(Result->Resolved)){
-		bResult = MoveFileExW(Path->Resolved, Result->Resolved, MOVEFILE_COPY_ALLOWED);
+		bResult = MoveFileExW(Path->Resolved, Result->Resolved, dwFlags);
 	}
 	return(bResult);
 }

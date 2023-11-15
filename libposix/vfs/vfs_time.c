@@ -170,7 +170,7 @@ vfs_nanosleep(WIN_TASK *Task, DWORD Millisecs, DWORD *Remain)
 	return(bResult);
 }
 BOOL 
-vfs_utimes(WIN_NAMEI *Path, FILETIME FileTime[2])
+vfs_utimes(WIN_NAMEIDATA *Path, FILETIME FileTime[2])
 {
 	BOOL bResult = FALSE;
 

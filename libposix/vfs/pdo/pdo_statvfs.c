@@ -154,7 +154,7 @@ DevClass(LPWSTR Result, LPCWSTR ClassID)
 	WIN_VNODE vNode;
 	DWORD dwResult;
 	WIN_FLAGS wFlags = {GENERIC_READ, 0, 0, REG_SZ, FALSE};
-	WIN_NAMEI iNode;
+	WIN_NAMEIDATA iNode;
 
 	if (reg_open(reg_lookup(&iNode, REG_CLASS, ClassID), &wFlags, &vNode)){
 		reg_read(&vNode, L"Class", Result, MAX_NAME, &dwResult);

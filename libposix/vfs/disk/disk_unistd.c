@@ -74,7 +74,7 @@ disk_fchown(WIN_VNODE *Node, PSID NewUser, PSID NewGroup)
 	return(bResult);
 }
 BOOL 
-disk_chown(WIN_NAMEI *Path, PSID NewUser, PSID NewGroup)
+disk_chown(WIN_NAMEIDATA *Path, PSID NewUser, PSID NewGroup)
 {
 	BOOL bResult = FALSE;
 	WIN_FLAGS wFlags = {WRITE_DAC + FILE_WRITE_ATTRIBUTES, 
@@ -90,7 +90,7 @@ disk_chown(WIN_NAMEI *Path, PSID NewUser, PSID NewGroup)
 	return(bResult);
 }
 BOOL 
-disk_rmdir(WIN_NAMEI *Path)
+disk_rmdir(WIN_NAMEIDATA *Path)
 {
 	BOOL bResult = FALSE;
 
@@ -104,7 +104,7 @@ disk_rmdir(WIN_NAMEI *Path)
 	return(bResult);
 }
 BOOL 
-disk_unlink(WIN_NAMEI *Path)
+disk_unlink(WIN_NAMEIDATA *Path)
 {
 	BOOL bResult = FALSE;
 
@@ -118,7 +118,7 @@ disk_unlink(WIN_NAMEI *Path)
 	return(bResult);
 }
 BOOL 
-disk_rename(WIN_NAMEI *Path, WIN_NAMEI *Result)
+disk_rename(WIN_NAMEIDATA *Path, WIN_NAMEIDATA *Result)
 {
 	BOOL bResult = FALSE;
 

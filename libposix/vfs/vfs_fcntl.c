@@ -210,7 +210,7 @@ vfs_F_CNTL(WIN_VNODE *Node, DWORD Command, PVOID Param)
 /****************************************************/
 
 BOOL 
-vfs_open(WIN_NAMEI *Path, WIN_FLAGS *Flags, WIN_MODE *Mode, WIN_VNODE *Result)
+vfs_open(WIN_NAMEIDATA *Path, WIN_FLAGS *Flags, WIN_MODE *Mode, WIN_VNODE *Result)
 {
 	BOOL bResult = FALSE;
 

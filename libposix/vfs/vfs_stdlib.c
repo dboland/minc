@@ -47,7 +47,7 @@ vfs__cxa_finalize(PVOID Param)
 	}
 }
 BOOL 
-vfs_realpath(WIN_NAMEI *Path, DWORD Size)
+vfs_realpath(WIN_NAMEIDATA *Path, DWORD Size)
 {
 	BOOL bResult = FALSE;
 	LPWSTR pszDoc = NULL;

@@ -81,7 +81,7 @@ RegOpenFile(HKEY Key, LPCWSTR Path, REGSAM Access, WIN_VNODE *Result)
 
 /****************************************************/
 
-WIN_NAMEI *
+WIN_NAMEIDATA *
 reg_lookup(WIN_NAMEIDATA *Result, DWORD FileType, LPCWSTR Source)
 {
 	Result->FSType = FS_TYPE_REGISTRY;

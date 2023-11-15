@@ -51,7 +51,7 @@ disk_F_DUPFD(WIN_VNODE *Node, HANDLE Process, DWORD Options, WIN_VNODE *Result)
 /****************************************************/
 
 BOOL 
-disk_open(WIN_NAMEI *Path, WIN_FLAGS *Flags, WIN_MODE *Mode, WIN_VNODE *Result)
+disk_open(WIN_NAMEIDATA *Path, WIN_FLAGS *Flags, WIN_MODE *Mode, WIN_VNODE *Result)
 {
 	BOOL bResult = FALSE;
 
