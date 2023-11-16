@@ -378,8 +378,12 @@ vfs_link(WIN_NAMEIDATA *Path, WIN_NAMEIDATA *Result)
 {
 	BOOL bResult = FALSE;
 
-	/* "Access is denied" if exists, a directory, or opened with write access */
-	if (CreateHardLinkW(Result->Resolved, Path->Resolved, NULL)){
+	/* CreateHardLink() yields "Access is denied" if target exists,
+	 * source is a directory, or opened with write access
+	 */
+	if (Result->Attribs != -1){
+		SetLastError(ERROR_FILE_EXISTS);
+	}else if (CreateHardLinkW(Result->Resolved, Path->Resolved, NULL)){
 		bResult = TRUE;
 //	}else{
 //		WIN_ERR("CreateHardLink(%ls): %s\n", Result->Resolved, win_strerror(GetLastError()));

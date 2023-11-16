@@ -45,6 +45,21 @@
 
 /****************************************************/
 
+HANDLE 
+CharOpenFile(LPCSTR Name, WIN_FLAGS *Flags, PSECURITY_ATTRIBUTES sa)
+{
+	HANDLE hResult = NULL;
+
+	hResult = CreateFile(Name, Flags->Access, Flags->Share, sa, 
+		Flags->Creation, Flags->Attribs, NULL);
+	if (hResult == INVALID_HANDLE_VALUE){
+		WIN_ERR("CreateFile(%s): %s\n", Name, win_strerror(GetLastError()));
+	}
+	return(hResult);
+}
+
+/****************************************************/
+
 BOOL 
 char_namei(HANDLE Handle, DWORD Index, WIN_VNODE *Result)
 {

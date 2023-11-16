@@ -76,8 +76,8 @@ con_init(WIN_DEVICE *Device)
 		OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, 0};
 	SECURITY_ATTRIBUTES sa = {sizeof(sa), NULL, TRUE};
 
-	Device->Input = raw_open("CONIN$", &wFlags, &sa);
-	Device->Output = raw_open("CONOUT$", &wFlags, &sa);
+	Device->Input = CharOpenFile("CONIN$", &wFlags, &sa);
+	Device->Output = CharOpenFile("CONOUT$", &wFlags, &sa);
 }
 DWORD 
 con_poll(WIN_DEVICE *Device, WIN_POLLFD *Info)

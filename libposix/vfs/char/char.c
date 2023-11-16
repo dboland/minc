@@ -28,6 +28,7 @@
  *
  */
 
+#include "char_namei.c"
 #include "ansi/vt100.c"
 #include "ansi/interix.c"
 #include "ansi/ansi.c"
@@ -38,7 +39,6 @@
 #include "char_console.c"
 #include "char_pty.c"
 #include "char_fcntl.c"
-#include "char_namei.c"
 #include "char_unistd.c"
 #include "char_stat.c"
 #include "char_poll.c"

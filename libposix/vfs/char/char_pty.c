@@ -37,8 +37,8 @@ pty_open(WIN_DEVICE *Device, WIN_FLAGS *Flags, WIN_VNODE *Result)
 {
 	SECURITY_ATTRIBUTES sa = {sizeof(sa), NULL, TRUE};
 
-	Device->Input = raw_open("CONIN$", Flags, &sa);
-	Device->Output = raw_open("CONOUT$", Flags, &sa);
+	Device->Input = CharOpenFile("CONIN$", Flags, &sa);
+	Device->Output = CharOpenFile("CONOUT$", Flags, &sa);
 	Result->Event = Device->Input;
 	Result->Device = Device;
 	return(config_activate(Device, Result));

@@ -282,7 +282,7 @@ sys_link(call_t call, const char *name1, const char *name2)
 {
 	WIN_NAMEIDATA wpOld;
 
-	return(__linkat(pathat_win(&wpOld, AT_FDCWD, name1, AT_SYMLINK_NOFOLLOW), AT_FDCWD, name2, AT_SYMLINK_NOFOLLOW));
+	return(__linkat(path_win(&wpOld, name1, 0), AT_FDCWD, name2, AT_SYMLINK_FOLLOW));
 }
 int 
 sys_linkat(call_t call, int fd1, const char *name1, int fd2, const char *name2, int flag)

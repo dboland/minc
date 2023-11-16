@@ -39,7 +39,7 @@ null_open(WIN_DEVICE *Device, WIN_FLAGS *Flags, WIN_VNODE *Result)
 	HANDLE hResult = NULL;
 	SECURITY_ATTRIBUTES sa = {sizeof(sa), NULL, FALSE};
 
-	if (hResult = raw_open("NUL", Flags, &sa)){
+	if (hResult = CharOpenFile("NUL", Flags, &sa)){
 		Result->Handle = hResult;
 		Result->Event = hResult;
 		Result->FSType = FS_TYPE_CHAR;
