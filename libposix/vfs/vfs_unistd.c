@@ -344,12 +344,12 @@ vfs_rename(WIN_NAMEIDATA *Path, WIN_NAMEIDATA *Result)
 	return(bResult);
 }
 BOOL 
-vfs_ftruncate(WIN_VNODE *Node, LONG Size)
+vfs_ftruncate(WIN_VNODE *Node, LARGE_INTEGER *Size)
 {
 	BOOL bResult = FALSE;
 
-	if (-1 == SetFilePointer(Node->Handle, Size, NULL, FILE_BEGIN)){
-		WIN_ERR("SetFilePointer(%d): %s\n", Node->Handle, win_strerror(GetLastError()));
+	if (-1 == SetFilePointerEx(Node->Handle, *Size, Size, FILE_BEGIN)){
+		WIN_ERR("SetFilePointerEx(%d): %s\n", Node->Handle, win_strerror(GetLastError()));
 	}else if (!SetEndOfFile(Node->Handle)){
 		WIN_ERR("SetEndOfFile(%d): %s\n", Node->Handle, win_strerror(GetLastError()));
 	}else{
@@ -358,13 +358,15 @@ vfs_ftruncate(WIN_VNODE *Node, LONG Size)
 	return(bResult);
 }
 BOOL 
-vfs_truncate(WIN_NAMEIDATA *Path, WIN_FLAGS *Flags, LONG Size)
+vfs_truncate(WIN_NAMEIDATA *Path, LARGE_INTEGER *Size)
 {
 	BOOL bResult = FALSE;
 	WIN_VNODE vNode = {0};
+	WIN_FLAGS wFlags = {GENERIC_WRITE, FILE_SHARE_READ, 
+		OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, FALSE};
 	WIN_MODE wMode = {0};
 
-	if (!vfs_open(Path, Flags, &wMode, &vNode)){
+	if (!vfs_open(Path, &wFlags, &wMode, &vNode)){
 		return(FALSE);
 	}else if (vfs_ftruncate(&vNode, Size)){
 		bResult = CloseHandle(vNode.Handle);

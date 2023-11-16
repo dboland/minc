@@ -45,8 +45,8 @@ BOOL vfs_renameat(WIN_VNODE *Node, WIN_NAMEIDATA *Result);
 BOOL vfs_close(WIN_VNODE *Node);
 BOOL vfs_dup(WIN_VNODE *Node, WIN_VNODE *Result);
 BOOL vfs_dup2(WIN_VNODE *Node, WIN_VNODE *Result);
-BOOL vfs_ftruncate(WIN_VNODE *Node, LONG Size);
-BOOL vfs_truncate(WIN_NAMEIDATA *Path, WIN_FLAGS *Flags, LONG Size);
+BOOL vfs_ftruncate(WIN_VNODE *Node, LARGE_INTEGER *Size);
+BOOL vfs_truncate(WIN_NAMEIDATA *Path, LARGE_INTEGER *Size);
 BOOL vfs_unlink(WIN_NAMEIDATA *Path);
 BOOL vfs_lseek(WIN_VNODE *Node, LARGE_INTEGER *Offset, DWORD Method, LARGE_INTEGER *Result);
 BOOL vfs_rmdir(WIN_NAMEIDATA *Path);
@@ -189,7 +189,6 @@ BOOL drive_statfs(WIN_NAMEIDATA *Path, WIN_STATFS *Result);
 BOOL drive_mount(WIN_NAMEIDATA *Path, WIN_VATTR *Stat, WIN_MODE *Mode);
 BOOL drive_unmount(WIN_NAMEIDATA *Path);
 WIN_DEVICE *drive_match(LPCWSTR NtName, DWORD DeviceType);
-//VOID drive_configure(VOID);
 
 /* disk.c */
 
