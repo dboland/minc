@@ -84,6 +84,15 @@ typedef enum _WIN_VTAGTYPE {
 	WIN_VT_TMPFS
 } WIN_VTAGTYPE;
 
+#define WIN_UNIT_MAX		64
+#define WIN_TTY_MAX		WIN_UNIT_MAX
+
+/* sys/syslimits.h */
+
+#define WIN_MAX_INPUT		128
+#define WIN_NAME_MAX		16
+#define WIN_PIPE_BUF		1024
+
 /* 
  * vfs_namei.c
  */
@@ -180,17 +189,9 @@ typedef struct _WIN_NAMEIDATA {
 #define WIN_OXTABS		0x00040000
 #define WIN_OCRNL		0x00100000
 
-/* sys/syslimits.h */
-
-#define WIN_MAX_INPUT	128
-#define WIN_TTY_MAX	WIN_UNIT_MAX
-#define WIN_NAME_MAX	16
-
 /*
  * vfs_statvfs.c
  */
-
-#define WIN_UNIT_MAX		64
 
 typedef struct _WIN_DEVICE {
 	DWORD Magic;
@@ -422,13 +423,14 @@ typedef enum _WIN_GLOBAL {
 	WIN_GLOBAL_MAX
 } WIN_GLOBAL;
 
-typedef struct _WIN_IFENUM {
+/* typedef struct _WIN_IFENUM {
 	DWORD Ethernet;
 	DWORD PPP;
 	DWORD Loopback;
 	DWORD WLan;
 	DWORD Other;
 } WIN_IFENUM;
+*/
 
 /*
  * vfs_sched.c
@@ -470,14 +472,6 @@ typedef struct _WIN_TASK {
 	WIN_SIGACTION Action[WIN_NSIG];
 	WIN_VNODE Node[WIN_OPEN_MAX];
 } WIN_TASK;
-
-/*
- * vfs_syscall.c
- */
-
-//#define WIN_SYS_exit	1
-//#define WIN_SYS_close	6
-//#define WIN_SYS_kill	37
 
 /*
  * vfs_poll.c
@@ -531,6 +525,13 @@ typedef struct _WIN_PTMGET {
 	WIN_VNODE Master;
 	WIN_VNODE Slave;
 } WIN_PTMGET;
+
+/*
+ * vfs_ktrace.c
+ */
+
+#define WIN_KTRFAC_ROOT		0x80000000	/* root set this trace */
+#define WIN_KTRFAC_INHERIT	0x40000000	/* pass trace flags to children */
 
 /*
  * vfs.c

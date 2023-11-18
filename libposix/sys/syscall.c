@@ -551,12 +551,13 @@ void
 syscall_leave(call_t call)
 {
 	int result = call.c_eax;
+	int code = call.Code;
 	WIN_TASK *pwTask = call.Task;
 
 	if (result < 0){
 		pwTask->Error = -result;
 	}
-	/* WriteFile() will touch the %edx register.
+	/* Note: WriteFile() will touch the %edx register.
 	 */
 	if (pwTask->TracePoints & KTRFAC_SYSRET){
 		ktrace_SYSRET(pwTask, call.Code, result);

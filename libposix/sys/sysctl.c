@@ -165,7 +165,7 @@ sysctl_KERN_PROC_ARGS(WIN_TASK *Task, const int *name, void *buf, size_t *size)
 		case KERN_PROC_ENV:
 		case KERN_PROC_NENV:
 		default:
-			result = -1;
+			result = -ENOENT;
 	}
 	return(result);
 }

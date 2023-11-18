@@ -68,9 +68,9 @@ extern SID8 SidSystem;
 extern SID8 SidUsers;
 extern SID8 SidTrustedInstaller;
 
-u_long __THREAD_FRAME;
+u_long	__THREAD_FRAME;
 
-char *__PROGNAME;		/* ktrace.c */
+char 	*__PROGNAME;		/* ktrace.c */
 
 WIN_NAMEIDATA *path_win(WIN_NAMEIDATA *Path, const char *pathname, int flags);
 

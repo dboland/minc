@@ -56,13 +56,14 @@ proc_dup(WIN_TASK *Parent, WIN_THREAD_STRUCT *Thread)
 {
 	WIN_TASK *ptResult = ProcCreateTask(Parent->GroupId);
 
-	if (Parent->Flags & WIN_PS_TRACED){
-		ptResult->Flags |= WIN_PS_TRACED;
-	}
 	ptResult->State = WIN_SIDL;
 	ptResult->Flags |= Thread->Flags;
+	if (Parent->TracePoints & WIN_KTRFAC_INHERIT){
+		ptResult->TraceHandle = Parent->TraceHandle;
+		ptResult->TracePoints = Parent->TracePoints;
+		ptResult->Flags |= WIN_PS_TRACED;
+	}
 	ptResult->Handle = Thread->Handle;
-	win_memcpy(&__Strings[ptResult->TaskId], &__Strings[Parent->TaskId], sizeof(WIN_PSTRING));
 	ptResult->ParentId = Parent->TaskId;
 	ptResult->Depth = Parent->Depth + 1;
 	ptResult->GroupId = Parent->GroupId;
@@ -70,8 +71,6 @@ proc_dup(WIN_TASK *Parent, WIN_THREAD_STRUCT *Thread)
 	ptResult->TerminalId = Parent->TerminalId;
 	ptResult->UserSid = Parent->UserSid;
 	ptResult->GroupSid = Parent->GroupSid;
-	ptResult->TraceHandle = Parent->TraceHandle;
-	ptResult->TracePoints = Parent->TracePoints;
 	ptResult->FileMask = Parent->FileMask;
 	ptResult->IsSetUGid = Parent->IsSetUGid;
 	ptResult->RealUid = Parent->RealUid;
@@ -83,6 +82,7 @@ proc_dup(WIN_TASK *Parent, WIN_THREAD_STRUCT *Thread)
 	win_memcpy(ptResult->AtExit, Parent->AtExit, WIN_ATEXIT_MAX * sizeof(WIN_ATEXITPROC));
 	win_memcpy(ptResult->Action, Parent->Action, WIN_NSIG * sizeof(WIN_SIGACTION));
 	ProcDupChannels(Parent->Node, ptResult->Node);
+	win_memcpy(&__Strings[ptResult->TaskId], &__Strings[Parent->TaskId], sizeof(WIN_PSTRING));
 	return(ptResult);
 }
 BOOL 

@@ -60,10 +60,9 @@
 #define _KERNEL
 
 #include <net/if.h>
-//#include <net/if_var.h>
 
 #define KTR_DEFAULT (KTRFAC_SYSCALL | KTRFAC_SYSRET | KTRFAC_NAMEI | \
-	KTRFAC_PSIG | KTRFAC_EMUL | KTRFAC_STRUCT)
+	KTRFAC_PSIG | KTRFAC_EMUL | KTRFAC_STRUCT | KTRFAC_INHERIT)
 
 unsigned char		_verbose;
 unsigned char		_boot;

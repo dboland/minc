@@ -40,10 +40,8 @@ pipe_FIONREAD(WIN_VNODE *Node, ULONG *Result)
 
 	if (PeekNamedPipe(Node->Handle, NULL, 0, NULL, Result, &dwMessage)){
 		bResult = TRUE;
-	}else if (ERROR_BROKEN_PIPE == GetLastError()){
-		*Result = 0;
-	}else{
-		WIN_ERR("PeekNamedPipe(%d): %s\n", Node->Handle, win_strerror(GetLastError()));
+//	}else{
+//		WIN_ERR("PeekNamedPipe(%d): %s\n", Node->Handle, win_strerror(GetLastError()));
 	}
 	return(bResult);
 }

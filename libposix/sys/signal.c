@@ -166,7 +166,7 @@ sigproc_posix(WIN_TASK *Task, int signum, ucontext_t *ucontext)
 	}else if (handler == SIG_IGN){		/* 1 */
 		result = -1;
 	}else if (handler == SIG_ERR){		/* -1 */
-		Task->Status = (info.si_errno * 0x100) + signum;
+		Task->Status = (Task->Error * 0x100) + signum;
 	}else if (flags & SA_SIGINFO){
 		action(signum, &info, ucontext);
 	}else{

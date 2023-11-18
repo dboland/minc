@@ -156,18 +156,18 @@ sys_pathconf(call_t call, const char *path, int name)
 			result = MAX_CANON;
 			break;
 		case _PC_MAX_INPUT:
-			result = MAX_INPUT;
+			result = WIN_MAX_INPUT;
 			break;
 //		case _PC_VDISABLE:
 //			break;
 		case _PC_NAME_MAX:
-			result = NAME_MAX;
+			result = WIN_NAME_MAX;
 			break;
 		case _PC_PATH_MAX:
-			result = PATH_MAX;
+			result = WIN_PATH_MAX;
 			break;
 		case _PC_PIPE_BUF:
-			result = PIPE_BUF;
+			result = WIN_PIPE_BUF;
 			break;
 		default:
 			__PRINTF("sys_pathconf(%s) name(%d)\n", path, name)
@@ -418,7 +418,7 @@ sys_readlink(call_t call, const char *path, char *buf, size_t bufsiz)
 	return(__readlinkat(call.Task, AT_FDCWD, path, buf, bufsiz));
 }
 int 
-__symlinkat(WIN_TASK *Task, WIN_NAMEIDATA *Path, int newdirfd, const char *newpath)
+__symlinkat(WIN_NAMEIDATA *Path, int newdirfd, const char *newpath)
 {
 	int result = 0;
 	WIN_NAMEIDATA wpNew;
@@ -438,17 +438,17 @@ sys_symlinkat(call_t call, const char *oldpath, int newdirfd, const char *newpat
 {
 	WIN_NAMEIDATA wpOld;
 
-	return(__symlinkat(call.Task, path_win(&wpOld, oldpath, 0), newdirfd, newpath));
+	return(__symlinkat(path_win(&wpOld, oldpath, 0), newdirfd, newpath));
 }
 int 
 sys_symlink(call_t call, const char *oldpath, const char *newpath)
 {
 	WIN_NAMEIDATA wpOld;
 
-	return(__symlinkat(call.Task, path_win(&wpOld, oldpath, 0), AT_FDCWD, newpath));
+	return(__symlinkat(path_win(&wpOld, oldpath, 0), AT_FDCWD, newpath));
 }
 int 
-__faccessat(WIN_TASK *Task, int dirfd, const char *pathname, int mode, int flags)
+__faccessat(int dirfd, const char *pathname, int mode, int flags)
 {
 	int result = 0;
 	WIN_NAMEIDATA wPath;
@@ -471,15 +471,15 @@ __faccessat(WIN_TASK *Task, int dirfd, const char *pathname, int mode, int flags
 int 
 sys_faccessat(call_t call, int dirfd, const char *pathname, int mode, int flags)
 {
-	return(__faccessat(call.Task, dirfd, pathname, mode, flags));
+	return(__faccessat(dirfd, pathname, mode, flags));
 }
 int 
 sys_access(call_t call, const char *pathname, int mode)
 {
-	return(__faccessat(call.Task, AT_FDCWD, pathname, mode, AT_SYMLINK_FOLLOW));
+	return(__faccessat(AT_FDCWD, pathname, mode, AT_SYMLINK_FOLLOW));
 }
 int 
-__renameat(WIN_TASK *Task, WIN_NAMEIDATA *Path, int newdirfd, const char *newpath)
+__renameat(WIN_NAMEIDATA *Path, int newdirfd, const char *newpath)
 {
 	int result = 0;
 	WIN_NAMEIDATA wpNew;
@@ -496,14 +496,14 @@ sys_renameat(call_t call, int dirfd, const char *path, int newdirfd, const char 
 {
 	WIN_NAMEIDATA wpOld;
 
-	return(__renameat(call.Task, pathat_win(&wpOld, dirfd, path, AT_SYMLINK_NOFOLLOW), newdirfd, newpath));
+	return(__renameat(pathat_win(&wpOld, dirfd, path, AT_SYMLINK_NOFOLLOW), newdirfd, newpath));
 }
 int 
 sys_rename(call_t call, const char *path, const char *newpath)
 {
 	WIN_NAMEIDATA wpOld;
 
-	return(__renameat(call.Task, path_win(&wpOld, path, O_NOFOLLOW), AT_FDCWD, newpath));
+	return(__renameat(path_win(&wpOld, path, O_NOFOLLOW), AT_FDCWD, newpath));
 }
 int 
 sys_ftruncate(call_t call, int fd, off_t length)
@@ -645,6 +645,8 @@ sys_read(call_t call, int fd, void *buf, size_t count)
 		result = -EBADF;
 	}else if (!vfs_read(&pwTask->Node[fd], buf, dwCount, &dwResult)){
 		result -= errno_posix(GetLastError());
+	}else if (dwResult == -1){
+		pwTask->Error = errno_posix(GetLastError());
 	}else{
 		result = dwResult;
 		if (pwTask->TracePoints & KTRFAC_GENIO){
@@ -671,6 +673,8 @@ sys_write(call_t call, int fd, const void *buf, size_t nbytes)
 		result = -EBADF;
 	}else if (!vfs_write(&pwTask->Node[fd], buf, nbytes, &dwResult)){
 		result -= errno_posix(GetLastError());
+	}else if (dwResult == -1){
+		pwTask->Error = errno_posix(GetLastError());
 	}else{
 		result = dwResult;
 	}

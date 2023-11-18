@@ -84,8 +84,8 @@ sock_write(WIN_VNODE *Node, LPCSTR Buffer, DWORD Size, DWORD *Result)
 	 * having to put the pipe in PIPE_NOWAIT mode (rsync.exe).
 	 */
 	if (Node->Attribs & FILE_FLAG_OVERLAPPED){
-		if (dwSize > WIN_S_BLKSIZE){
-			dwSize = WIN_S_BLKSIZE;
+		if (dwSize > WIN_PIPE_BUF){
+			dwSize = WIN_PIPE_BUF;
 		}
 	}
 	/* When writing to a nonblocking, byte-mode pipe handle with

@@ -205,7 +205,7 @@ CapGetRealToken(DWORD Access, TOKEN_TYPE Type, HANDLE *Result)
 	BOOL bResult = FALSE;
 
 	if (!OpenProcessToken(GetCurrentProcess(), Access, &hProcToken)){
-		WIN_ERR("OpenProcessToken(%d): %s\n", GetCurrentProcess(), win_strerror(GetLastError()));
+		WIN_ERR("CapGetRealToken(%d): %s\n", GetCurrentProcess(), win_strerror(GetLastError()));
 	}else if (Type != TokenImpersonation){
 		*Result = hProcToken;
 		bResult = TRUE;
@@ -262,11 +262,12 @@ win_cap_init(WIN_CAP_CONTROL *Result)
 	NTSTATUS ntStatus;
 
 	if (!OpenProcessToken(GetCurrentProcess(), MAXIMUM_ALLOWED, &hToken)){
-		WIN_ERR("OpenProcessToken(): %s\n", win_strerror(GetLastError()));
-	}else if (!GetTokenInformation(hToken, TokenStatistics, &tStats, sizeof(TOKEN_STATISTICS), &dwSize)){
-		WIN_ERR("GetTokenInformation(TokenStatistics): %s\n", win_strerror(GetLastError()));
+//		WIN_ERR("OpenProcessToken(): %s\n", win_strerror(GetLastError()));
+		SetLastError(ERROR_PRIVILEGE_NOT_HELD);
 	}else if (!GetTokenInformation(hToken, TokenSource, &tSource, sizeof(TOKEN_SOURCE), &dwSize)){
 		WIN_ERR("GetTokenInformation(TokenSource): %s\n", win_strerror(GetLastError()));
+	}else if (!GetTokenInformation(hToken, TokenStatistics, &tStats, sizeof(TOKEN_STATISTICS), &dwSize)){
+		WIN_ERR("GetTokenInformation(TokenStatistics): %s\n", win_strerror(GetLastError()));
 	}else if (!GetTokenInformation(hToken, TokenSessionId, &dwSessionId, sizeof(DWORD), &dwSize)){
 		WIN_ERR("GetTokenInformation(TokenSessionId): %s\n", win_strerror(GetLastError()));
 	}else{
@@ -311,7 +312,7 @@ BOOL
 win_cap_setuid(WIN_PWENT *Passwd, HANDLE *Result)
 {
 	BOOL bResult = FALSE;
-	HANDLE hToken;
+	HANDLE hToken = NULL;
 	WIN_CAP_CONTROL wControl;
 
 	if (!win_cap_get_proc(MAXIMUM_ALLOWED, 0, &hToken)){
@@ -341,8 +342,9 @@ win_cap_setuid(WIN_PWENT *Passwd, HANDLE *Result)
 
 		bResult = CapCreateToken(&wControl, Result);
 
+		win_cap_free(&wControl);
+
 	}
-	win_cap_free(&wControl);
 	CloseHandle(hToken);
 	return(bResult);
 }
@@ -351,7 +353,7 @@ win_cap_setgroups(SID8 *Primary, SID8 Groups[], DWORD Count, HANDLE *Result)
 {
 	BOOL bResult = FALSE;
 	WIN_CAP_CONTROL wControl;
-	HANDLE hToken;
+	HANDLE hToken = NULL;
 
 	if (!win_cap_get_proc(MAXIMUM_ALLOWED, 0, &hToken)){
 		return(FALSE);
@@ -371,8 +373,9 @@ win_cap_setgroups(SID8 *Primary, SID8 Groups[], DWORD Count, HANDLE *Result)
 
 		bResult = CapCreateToken(&wControl, Result);
 
+		win_cap_free(&wControl);
+
 	}
-	win_cap_free(&wControl);
 	CloseHandle(hToken);
 	return(bResult);
 }

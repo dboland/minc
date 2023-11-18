@@ -258,12 +258,19 @@ sys_ktrace(call_t call, const char *tracefile, int ops, int trpoints, pid_t pid)
 {
 	int result = 0;
 
-	if (ops == KTROP_SET){
-		result = ktrace_SET(call.Task, tracefile, trpoints);
-	}else if (ops == KTROP_CLEAR){
-		result = ktrace_CLEAR(call.Task);
-	}else{
-		result -= errno_posix(GetLastError());
+	if (ops & KTRFLAG_DESCEND){
+		ops &= ~KTRFLAG_DESCEND;
+		trpoints |= KTRFAC_INHERIT;
+	}
+	switch (ops){
+		case KTROP_SET:
+			result = ktrace_SET(call.Task, tracefile, trpoints);
+			break;
+		case KTROP_CLEAR:
+			result = ktrace_CLEAR(call.Task);
+			break;
+		default:
+			result = -EOPNOTSUPP;
 	}
 	return(result);
 }
