@@ -90,8 +90,8 @@ ProcControlHandler(DWORD CtrlType)
 				bResult = FALSE;
 			}else{
 				/* syslogd.exe -d */
-				vfs_kill_PID(pwTask->ThreadId, WM_COMMAND, CtrlType, 0);
-//				SetEvent(__ProcEvent);
+				vfs_kill_ANY(pwTask->TaskId, WM_COMMAND, CtrlType, 0);
+				SetEvent(__ProcEvent);
 			}
 		}
 	}

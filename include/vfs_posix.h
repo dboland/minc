@@ -93,8 +93,8 @@ BOOL vfs_raise(UINT Message, WPARAM WParam, LPARAM LParam);
 BOOL vfs_sigaction(BOOL Enable);
 BOOL vfs_kill_PID(DWORD ThreadId, UINT Message, WPARAM WParam, LPARAM LParam);
 BOOL vfs_kill_GRP(DWORD GroupId, UINT Message, WPARAM WParam, LPARAM LParam);
-BOOL vfs_kill_ANY(DWORD TaskId, UINT Message, WPARAM WParam, LPARAM LParam);
-BOOL vfs_kill_SYS(DWORD TaskId, UINT Message, WPARAM WParam, LPARAM LParam);
+BOOL vfs_kill_ANY(DWORD ParentId, UINT Message, WPARAM WParam, LPARAM LParam);
+BOOL vfs_kill_SYS(DWORD CallerId, UINT Message, WPARAM WParam, LPARAM LParam);
 
 /* vfs_fcntl.c */
 
