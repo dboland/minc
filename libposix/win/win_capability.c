@@ -337,7 +337,7 @@ win_cap_setuid(WIN_PWENT *Passwd, HANDLE *Result)
 		win_cap_set_mode(&wControl.User, GENERIC_ALL, &wControl.DefaultAcl);
 
 		CapTogglePrivilege(hToken, "SeCreateTokenPrivilege", SE_PRIVILEGE_ENABLED);
-		/* Win8 */
+		/* Vista */
 		CapTogglePrivilege(hToken, "SeDelegateSessionUserImpersonatePrivilege", SE_PRIVILEGE_ENABLED);
 
 		bResult = CapCreateToken(&wControl, Result);

@@ -42,7 +42,7 @@ ws2_close(WIN_VNODE *Node)
 	 * This occurs when other threads are doing ReadFile()
 	 */
 	if (SOCKET_ERROR == closesocket(Node->Socket)){
-		WIN_ERR("closesocket(%d): %s\n", Node->Socket, win_strerror(WSAGetLastError()));
+		return(FALSE);
 	}else if (!WSACloseEvent(Node->Event)){
 		WIN_ERR("WSACloseEvent(%d): %s\n", Node->Event, win_strerror(WSAGetLastError()));
 	}else{
@@ -54,17 +54,7 @@ ws2_close(WIN_VNODE *Node)
 BOOL 
 ws2_write(WIN_VNODE *Node, LPCSTR Buffer, DWORD Size, DWORD *Result)
 {
-	BOOL bResult = FALSE;
-//	OVERLAPPED ovl = {0, 0, 0, 0, Node->Event};
-
-	/* -1 Result expected on error (perl.exe)
-	 */
-	if (!WriteFile(Node->Handle, Buffer, Size, Result, NULL)){
-		*Result = -1;
-	}else{
-		bResult = TRUE;
-	}
-	return(bResult);
+	return(fifo_write(Node, Buffer, Size, Result));
 }
 BOOL 
 ws2_read(WIN_VNODE *Node, LPSTR Buffer, DWORD Size, DWORD *Result)

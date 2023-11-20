@@ -88,7 +88,7 @@ ktrace_SYSCALL(WIN_TASK *Task, register_t code, size_t argsize, register_t args[
 	win_writev(Task->TraceHandle, iovData, dwCount, &ulResult);
 }
 void 
-ktrace_SYSRET(WIN_TASK *Task, register_t code, register_t result)
+ktrace_SYSRET(WIN_TASK *Task, register_t code, int result)
 {
 	struct ktr_header header = {0};
 	struct ktr_sysret data = {0};

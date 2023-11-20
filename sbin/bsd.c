@@ -190,6 +190,8 @@ boot(void)
 {
 	char *args[] = {"/sbin/init", NULL};
 
+	setuid(0);
+	setgid(0);
 	ifinit();
 	cpu_configure();
 	unmount_fs();		// fsck.exe operation?

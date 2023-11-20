@@ -154,7 +154,7 @@ proc_KERN_PROC_UID(WIN_TASK *Task, uid_t uid, struct kinfo_proc *buf, size_t *si
 	uid_t rid = rid_posix(&Task->UserSid);
 
 	if (!uid){
-		uid = __RootUid;
+		uid = WIN_ROOT_UID;
 	}
 	if (rid == uid){
 		if (!buf){

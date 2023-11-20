@@ -54,7 +54,7 @@ SHMCreate(LPCSTR Name, DWORD SizeLow)
 /************************************************************/
 
 WIN_SESSION *
-vfs_shm_attach(LPCSTR Name, HINSTANCE Instance)
+vfs_shm_init(LPCSTR Name, HINSTANCE Instance)
 {
 	WIN_SESSION *wsResult = NULL;
  
@@ -69,7 +69,7 @@ vfs_shm_attach(LPCSTR Name, HINSTANCE Instance)
 	return(wsResult);
 }
 VOID 
-vfs_shm_detach(WIN_SESSION *Session)
+vfs_shm_finish(WIN_SESSION *Session)
 {
 	if (!UnmapViewOfFile(Session)){
 		WIN_ERR("UnmapViewOfFile(%d): %s\n", Session, win_strerror(GetLastError()));

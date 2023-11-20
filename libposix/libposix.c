@@ -53,8 +53,6 @@ extern WIN_TERMIO 	*__CTTY;
 
 extern DWORD	 	__TlsIndex;
 extern HANDLE		__ProcEvent;
-extern UINT		__RootUid;
-extern UINT		__RootGid;
 
 extern SID8 SidNull;
 extern SID8 SidNone;

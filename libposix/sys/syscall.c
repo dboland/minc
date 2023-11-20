@@ -166,9 +166,9 @@ __seteuid(WIN_TASK *Task, uid_t uid)
 	int result = 0;
 
 	if (!uid){
-		uid = __RootUid;
+		uid = WIN_ROOT_UID;
 	}
-	if (uid == rid_posix(&Task->UserSid)){
+	if (uid == rid_posix(&Task->UserSid)){	/* PRIV_START check (ssh.exe) */
 		return(0);
 	}else if (__getuid(Task) && __geteuid(Task)){
 		result = -EPERM;
@@ -183,9 +183,9 @@ __setuid(WIN_TASK *Task, uid_t uid)
 	int result = 0;
 
 	if (!uid){
-		uid = __RootUid;
+		uid = WIN_ROOT_UID;
 	}
-	if (Task->RealUid == uid){
+	if (uid == Task->RealUid){
 		return(0);
 	}else if (!__seteuid(Task, uid)){
 		Task->RealUid = rid_posix(&Task->UserSid);
@@ -218,7 +218,7 @@ int
 sys_setresuid(call_t call, uid_t ruid, uid_t euid, uid_t suid)
 {
 	if (!suid){
-		suid = __RootUid;
+		suid = WIN_ROOT_UID;
 	}
 	if (!sys_setreuid(call, ruid, euid)){
 		call.Task->SavedUid = suid;
@@ -239,7 +239,7 @@ __setegid(WIN_TASK *Task, gid_t gid)
 	if (!gid){
 		gid = WIN_ROOT_GID;
 	}
-	if (gid == rid_posix(&Task->GroupSid)){
+	if (gid == rid_posix(&Task->GroupSid)){	/* PRIV_START check (ssh.exe) */
 		return(0);
 	}else if (__getuid(Task) && __geteuid(Task)){
 		result = -EPERM;
@@ -253,6 +253,9 @@ __setgid(WIN_TASK *Task, gid_t gid)
 {
 	int result = 0;
 
+	if (!gid){
+		gid = WIN_ROOT_GID;
+	}
 	if (gid == Task->RealGid){
 		result = 0;
 	}else if (__setegid(Task, gid)){

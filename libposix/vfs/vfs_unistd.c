@@ -134,8 +134,8 @@ vfs_closefrom(WIN_VNODE Nodes[])
 	 * named pipes are not closed on program exit.
 	 */
 	while (dwIndex < WIN_OPEN_MAX){
-		if (Nodes->FSType == FS_TYPE_PIPE && Nodes->FileType == WIN_VSOCK){
-			pipe_close(Nodes);
+		if (Nodes->FileType == WIN_VSOCK){
+			vfs_close(Nodes);
 		}
 		dwIndex++;
 		Nodes++;
@@ -379,7 +379,7 @@ vfs_link(WIN_NAMEIDATA *Path, WIN_NAMEIDATA *Result)
 	BOOL bResult = FALSE;
 
 	/* CreateHardLink() yields "Access is denied" if target exists,
-	 * source is a directory, or opened with write access
+	 * source is a directory, or opened with write access (Vista).
 	 */
 	if (Result->Attribs != -1){
 		SetLastError(ERROR_FILE_EXISTS);

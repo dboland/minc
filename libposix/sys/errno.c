@@ -127,8 +127,8 @@ errno_posix(DWORD Error)
 			result = ESRCH;
 			break;
 		case ERROR_NO_DATA:			// 232: The pipe is being closed (read end closed)
-			vfs_raise(WM_COMMAND, CTRL_PIPE_EVENT, 0);
 		case ERROR_PIPE_NOT_CONNECTED:		// 233: No process is on the other end of the pipe.
+			vfs_raise(WM_COMMAND, CTRL_PIPE_EVENT, 0);
 		case WSAEPIPE:
 		case ERROR_BROKEN_PIPE:			// 109: The pipe has been ended (write end closed)
 			result = EPIPE;

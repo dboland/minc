@@ -95,17 +95,12 @@ task_init(char *cmdbuf, char *argv[], void *frame_address)
 	pszCommand = __Strings[pwTask->TaskId].Command;
 	win_mbstowcs(pszCommand, argv[0], WIN_MAX_PROCTITLE);
 	argv[0] = path_posix(cmdbuf, pszCommand);
-//__PRINTF("title: %s\n", _PATH_BUF)
 
 	/* in WinNT the groups are significant */
 //	if (wStat.Mode.Special & WIN_S_ISGID){
 //		task->ts_issetugid = 1;
 //		win_setegid(pwTask, &wStat.GroupSid);
 //	}
-	if (win_group_member(&SidAdmins)){
-		__RootUid = rid_posix(win_geteuid(&sid));
-		__RootGid = rid_posix(win_getegid(&sid));
-	}
 	TlsSetValue(__TlsIndex, (PVOID)pwTask->TaskId);
 }
 void 

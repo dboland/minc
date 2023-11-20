@@ -61,7 +61,7 @@ __getuid(WIN_TASK *Task)
 		uid = rid_posix(win_getuid(&sidUser));
 		Task->RealUid = uid;
 	}
-	if (uid == __RootUid){
+	if (uid == WIN_ROOT_UID){
 		uid = 0;
 	}
 	return(uid);
@@ -72,7 +72,7 @@ __geteuid(WIN_TASK *Task)
 	SID8 sidUser;
 	uid_t uid = rid_posix(&Task->UserSid);
 
-	if (uid == __RootUid){
+	if (uid == WIN_ROOT_UID){
 		uid = 0;
 	}
 	return(uid);
@@ -107,7 +107,7 @@ __getgid(WIN_TASK *Task)
 		gid = rid_posix(win_getgid(&sidGroup));
 		Task->RealGid = gid;
 	}
-	if (gid == __RootGid){
+	if (gid == WIN_ROOT_GID){
 		gid = 0;
 	}
 	return(gid);
@@ -118,7 +118,7 @@ __getegid(WIN_TASK *Task)
 	SID8 sidGroup;
 	gid_t gid = rid_posix(&Task->GroupSid);
 
-	if (gid == __RootGid){
+	if (gid == WIN_ROOT_GID){
 		gid = 0;
 	}
 	return(gid);
@@ -633,7 +633,7 @@ ssize_t
 sys_read(call_t call, int fd, void *buf, size_t count)
 {
 	ssize_t result = 0;
-	DWORD dwResult = -1;
+	DWORD dwResult = -1;		/* WinNT EOF on ReadFile() */
 	DWORD dwCount = count;
 	WIN_TASK *pwTask = call.Task;
 	CHAR szMessage[MAX_MESSAGE];
@@ -659,7 +659,7 @@ ssize_t
 sys_write(call_t call, int fd, const void *buf, size_t nbytes)
 {
 	ssize_t result = 0;
-	DWORD dwResult = -1;
+	DWORD dwResult = 0;		/* WinNT EOF on WriteFile() */
 	WIN_TASK *pwTask = call.Task;
 	CHAR szMessage[MAX_MESSAGE];
 
@@ -673,7 +673,7 @@ sys_write(call_t call, int fd, const void *buf, size_t nbytes)
 		result = -EBADF;
 	}else if (!vfs_write(&pwTask->Node[fd], buf, nbytes, &dwResult)){
 		result -= errno_posix(GetLastError());
-	}else if (dwResult == -1){
+	}else if (!dwResult){
 		pwTask->Error = errno_posix(GetLastError());
 	}else{
 		result = dwResult;

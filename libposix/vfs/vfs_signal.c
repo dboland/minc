@@ -93,23 +93,39 @@ BOOL
 vfs_kill_GRP(DWORD GroupId, UINT Message, WPARAM WParam, LPARAM LParam)
 {
 	BOOL bResult = TRUE;
-	DWORD dwIndex = WIN_PID_INIT;
+	DWORD dwIndex = WIN_CHILD_MAX - 1;
 	WIN_TASK *pwTask = &__Tasks[dwIndex];
 
 	if (!GroupId){
 		SetLastError(ERROR_INVALID_THREAD_ID);
 		bResult = FALSE;
-	}else while (dwIndex < WIN_CHILD_MAX){
+	}else while (dwIndex > WIN_PID_INIT){
 		if (pwTask->GroupId == GroupId){
 			vfs_kill_PID(pwTask->ThreadId, Message, WParam, LParam);
 		}
-		dwIndex++;
-		pwTask++;
+		dwIndex--;
+		pwTask--;
 	}
 	return(bResult);
 }
 BOOL 
-vfs_kill_ANY(DWORD CallerId, UINT Message, WPARAM WParam, LPARAM LParam)
+vfs_kill_ANY(DWORD TaskId, UINT Message, WPARAM WParam, LPARAM LParam)
+{
+	BOOL bResult = TRUE;
+	DWORD dwIndex = WIN_CHILD_MAX - 1;
+	WIN_TASK *pwTask = &__Tasks[dwIndex];
+
+	while (dwIndex > WIN_PID_INIT){
+		if (pwTask->ParentId == TaskId){
+			vfs_kill_PID(pwTask->ThreadId, Message, WParam, LParam);
+		}
+		dwIndex--;
+		pwTask--;
+	}
+	return(bResult);
+}
+BOOL 
+vfs_kill_SYS(DWORD TaskId, UINT Message, WPARAM WParam, LPARAM LParam)
 {
 	BOOL bResult = TRUE;
 	DWORD dwIndex = WIN_PID_INIT;
@@ -119,7 +135,7 @@ vfs_kill_ANY(DWORD CallerId, UINT Message, WPARAM WParam, LPARAM LParam)
 		SetLastError(ERROR_PRIVILEGE_NOT_HELD);
 		bResult = FALSE;
 	}else while (dwIndex < WIN_CHILD_MAX){
-		if (pwTask->Flags && pwTask->TaskId != CallerId){
+		if (pwTask->Flags && pwTask->TaskId != TaskId){
 			vfs_kill_PID(pwTask->ThreadId, Message, WParam, LParam);
 		}
 		dwIndex++;

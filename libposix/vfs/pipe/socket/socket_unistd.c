@@ -59,7 +59,7 @@ sock_read(WIN_VNODE *Node, LPSTR Buffer, DWORD Size, DWORD *Result)
 
 	while (!bResult){
 		if (!pipe_FIONREAD(Node, &ulResult)){
-			break;
+			bResult = TRUE;		/* POSIX result for read() */
 		}else if (ulResult){
 			bResult = fifo_read(Node, Buffer, Size, Result);
 			break;

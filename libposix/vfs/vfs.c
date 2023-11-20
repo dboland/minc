@@ -76,8 +76,6 @@ HANDLE		__ProcEvent;
 HANDLE		__PipeEvent;
 HANDLE		__MailEvent;
 DWORD		__TaskId;
-UINT		__RootUid = WIN_ROOT_UID;
-UINT		__RootGid = WIN_ROOT_GID;
 SEQUENCE 	__ANSI_BUF;
 CHAR		__INPUT_BUF[WIN_MAX_INPUT + 2];
 UCHAR 		__Char;
@@ -140,7 +138,7 @@ BOOL
 vfs_PROCESS_ATTACH(HINSTANCE Instance, LPVOID Reserved)
 {
 	__TlsIndex = TlsAlloc();
-	__Session = vfs_shm_attach(OBJECT_NAME("Session"), Instance);
+	__Session = vfs_shm_init(OBJECT_NAME("Session"), Instance);
 	__Tasks = __Session->Tasks;
 	__Devices = __Session->Devices;
 	__Terminals = __Session->Terminals;
@@ -157,7 +155,7 @@ vfs_PROCESS_ATTACH(HINSTANCE Instance, LPVOID Reserved)
 BOOL 
 vfs_PROCESS_DETACH(WIN_TASK *Task)
 {
-	vfs_shm_detach(__Session);
+	vfs_shm_finish(__Session);
 	TlsFree(__TlsIndex);
 	return(TRUE);
 }

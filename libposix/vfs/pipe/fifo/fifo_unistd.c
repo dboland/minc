@@ -59,7 +59,7 @@ fifo_read(WIN_VNODE *Node, LPSTR Buffer, DWORD Size, DWORD *Result)
 	 */
 	if (ReadFile(Node->Handle, Buffer, Size, Result, NULL)){
 		return(TRUE);
-	}else if (ERROR_BROKEN_PIPE == GetLastError()){
+	}else if (ERROR_BROKEN_PIPE == GetLastError()){	/* write end closed */
 		bResult = TRUE;
 	}else if (ERROR_NO_DATA == GetLastError()){
 		SetLastError(ERROR_MORE_DATA);
@@ -77,6 +77,8 @@ fifo_write(WIN_VNODE *Node, LPCSTR Buffer, DWORD Size, DWORD *Result)
 	 */
 	if (WriteFile(Node->Handle, Buffer, Size, Result, &ovl)){
 		bResult = TRUE;
+	}else if (ERROR_BROKEN_PIPE == GetLastError()){	/* read end closed */
+		SetLastError(ERROR_PIPE_NOT_CONNECTED);
 	}
 	return(bResult);
 }

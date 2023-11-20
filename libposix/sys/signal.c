@@ -150,7 +150,7 @@ sigproc_posix(WIN_TASK *Task, int signum, ucontext_t *ucontext)
 //	sigset_t sigbit = sigmask(signum);
 
 	info.si_signo = signum;
-	info.si_errno = errno_posix(GetLastError());
+	info.si_errno = Task->Error;
 	info.si_pid = Task->TaskId;
 	info.si_uid = rid_posix(&Task->UserSid);
 	info.si_status = Task->Status;
@@ -301,11 +301,11 @@ kill_GRP(WIN_TASK *Task, DWORD GroupId, int sig)
 	return(result);
 }
 int
-kill_ANY(WIN_TASK *Task, int sig)
+kill_SYS(WIN_TASK *Task, int sig)
 {
 	int result = 0;
 
-	if (!vfs_kill_ANY(Task->TaskId, WM_COMMAND, __sig_win[sig], Task->TaskId)){
+	if (!vfs_kill_SYS(Task->TaskId, WM_COMMAND, __sig_win[sig], Task->TaskId)){
 		result -= errno_posix(GetLastError());
 	}
 	return(result);
@@ -403,7 +403,7 @@ sys_kill(call_t call, pid_t pid, int sig)
 		result = -EINVAL;
 
 	}else if (pid == -1){
-		result = kill_ANY(pwTask, sig);
+		result = kill_SYS(pwTask, sig);
 
 	}else if (pid < 0){
 		result = kill_GRP(pwTask, -pid, sig);
