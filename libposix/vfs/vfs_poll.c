@@ -38,7 +38,7 @@ PollGetObjects(HANDLE Timer, WIN_VNODE *Nodes[], HANDLE Result[])
 	DWORD dwResult = 0;
 	WIN_VNODE *pNode;
 
-	Result[dwResult++] = __ProcEvent;	/* must be WSA_WAIT_EVENT_0 */
+	Result[dwResult++] = __Interrupt;
 	if (Timer){
 		Result[dwResult++] = Timer;
 	}
@@ -100,8 +100,8 @@ PollWait(WIN_TASK *Task, WIN_VNODE *Nodes[], DWORD *TimeOut)
 	if (dwStatus == WSA_WAIT_FAILED){
 		WIN_ERR("WSAWaitForMultipleEvents(%s): %s\n", win_strobj(hObjects, dwCount), win_strerror(WSAGetLastError()));
 		vfs_raise(WM_COMMAND, CTRL_ABORT_EVENT, 0);
-	}else if (!dwStatus){
-		SetLastError(ERROR_SIGNAL_PENDING);
+//	}else if (!dwStatus){
+//		SetLastError(ERROR_SIGNAL_PENDING);
 	}else{
 		bResult = TRUE;
 	}

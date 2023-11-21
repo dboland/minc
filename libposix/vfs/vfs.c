@@ -72,7 +72,7 @@ typedef struct _SEQUENCE {
 
 HANDLE 		__Shared;
 WIN_SIGPROC	__SignalProc;
-HANDLE		__ProcEvent;
+HANDLE		__Interrupt;
 HANDLE		__PipeEvent;
 HANDLE		__MailEvent;
 DWORD		__TaskId;
@@ -147,7 +147,7 @@ vfs_PROCESS_ATTACH(HINSTANCE Instance, LPVOID Reserved)
 	__Globals = __Session->Globals;
 	__PipeEvent = event_attach(OBJECT_NAME("PipeEvent"), FALSE);
 	__MailEvent = event_attach(OBJECT_NAME("MailEvent"), FALSE);
-	__ProcEvent = event_attach(OBJECT_NAME("ProcEvent"), FALSE);
+	__Interrupt = event_attach(OBJECT_NAME("Interrupt"), FALSE);
 	win_acl_PROCESS_ATTACH();
 //	win_ldt_attach(WIN_CHILD_MAX + 1);
 	return(TRUE);

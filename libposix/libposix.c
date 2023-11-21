@@ -52,7 +52,7 @@ extern LARGE_INTEGER	*__Globals;
 extern WIN_TERMIO 	*__CTTY;
 
 extern DWORD	 	__TlsIndex;
-extern HANDLE		__ProcEvent;
+extern HANDLE		__Interrupt;
 
 extern SID8 SidNull;
 extern SID8 SidNone;

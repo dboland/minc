@@ -38,7 +38,7 @@ WaitGetObjects(WIN_TASK *Children[], HANDLE Result[])
 	DWORD dwResult = 0;
 	WIN_TASK *pwTask = NULL;
 
-	Result[dwResult++] = __ProcEvent;	/* must be WAIT_OBJECT_0 */
+	Result[dwResult++] = __Interrupt;
 	while (pwTask = *Children++){
 		Result[dwResult++] = pwTask->Handle;
 	}
@@ -50,7 +50,6 @@ WaitNoHang(WIN_TASK *Children[], DWORD Status, WIN_USAGE *Result)
 	WIN_TASK *pwTask = NULL;
 
 	while (pwTask = *Children++){
-//VfsDebugTask(pwTask, "WaitNoHang");
 		if (pwTask->Flags & WIN_PS_NOZOMBIE){	/* recursive wait (ksh.exe) */
 			ZeroMemory(pwTask, sizeof(WIN_TASK));
 		}else if (pwTask->Flags & WIN_PS_ZOMBIE){
@@ -79,8 +78,6 @@ WaitTimeOut(WIN_TASK *Children[], DWORD TimeOut)
 	if (dwResult == WAIT_FAILED){
 		WIN_ERR("WaitForMultipleObjects(%s): %s\n", win_strobj(hObjects, dwCount), win_strerror(GetLastError()));
 		vfs_raise(WM_COMMAND, CTRL_ABORT_EVENT, 0);
-	}else if (!dwResult){
-		SetLastError(ERROR_SIGNAL_PENDING);
 	}else{
 		bResult = TRUE;
 	}

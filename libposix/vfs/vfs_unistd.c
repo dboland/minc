@@ -41,8 +41,8 @@ vfs_readlink(WIN_NAMEIDATA *Path, BOOL MakeReal)
 	CHAR szBuffer[MAX_PATH] = "";
 	HANDLE hFile;
 
-	hFile = CreateFileW(Path->Resolved, FILE_READ_DATA, FILE_SHARE_READ, NULL, 
-		OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, NULL);
+	hFile = CreateFileW(Path->Resolved, FILE_READ_DATA, FILE_SHARE_READ, 
+		NULL, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, NULL);
 	if (hFile == INVALID_HANDLE_VALUE){
 		return(FALSE);
 	}else if (!ReadFile(hFile, &slHead, dwSize, &dwSize, NULL)){

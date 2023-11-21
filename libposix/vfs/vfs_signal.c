@@ -82,8 +82,8 @@ vfs_kill_PID(DWORD ThreadId, UINT Message, WPARAM WParam, LPARAM LParam)
 	if (!PostThreadMessage(ThreadId, Message, WParam, LParam)){
 //		WIN_ERR("PostThreadMessage(%d): %s\n", ThreadId, win_strerror(GetLastError()));
 		return(FALSE);	/* child orphaned */
-	}else if (!SetEvent(__ProcEvent)){
-		WIN_ERR("SetEvent(%d): %s\n", __ProcEvent, win_strerror(GetLastError()));
+	}else if (!SetEvent(__Interrupt)){
+		WIN_ERR("SetEvent(%d): %s\n", __Interrupt, win_strerror(GetLastError()));
 	}else{
 		bResult = TRUE;
 	}

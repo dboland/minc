@@ -82,7 +82,7 @@ taskv_win(WIN_TASK *Parent, pid_t pid, WIN_TASK *Result[])
 
 	if (pid == Parent->TaskId){	/* wait on self (perl.exe) */
 		return(0);
-	}else if (pid == WAIT_MYPGRP){	/* 0 */
+	}else if (pid == WAIT_MYPGRP){		/* 0 */
 		count = taskv_GRP(Parent->GroupId, Result);
 	}else if (pid == WAIT_ANY){		/* -1 */
 		count = taskv_ANY(Parent->TaskId, Result);

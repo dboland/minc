@@ -35,6 +35,8 @@
 #define	_MCOUNT_DECL static __inline void _mcount
 
 #define	MCOUNT \
+extern void mcount(void) __asm("__mcount");				\
+__weak_alias(mcount,__mcount);						\
 void									\
 mcount(void)								\
 {									\

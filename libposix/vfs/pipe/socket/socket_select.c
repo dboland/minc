@@ -36,8 +36,8 @@ BOOL
 sock_select(WIN_VNODE *Node, DWORD TimeOut)
 {
 	BOOL bResult = FALSE;
-	DWORD dwStatus;
-	HANDLE hObjects[2] = {__ProcEvent, Node->Event};
+	DWORD dwStatus = 0;
+	HANDLE hObjects[2] = {__Interrupt, Node->Event};
 
 	/* Non-blocking sockets *do* timeout, but we have to
 	 * SetLastError() from dwStatus.
@@ -47,6 +47,8 @@ sock_select(WIN_VNODE *Node, DWORD TimeOut)
 		WIN_ERR("sock_select(%s): %s\n", win_strobj(hObjects, 2), win_strerror(WSAGetLastError()));
 	}else if (dwStatus == WSA_WAIT_TIMEOUT){
 		WSASetLastError(WSAETIMEDOUT);
+//	}else if (!dwStatus){
+//		SetLastError(ERROR_SIGNAL_PENDING);
 	}else{
 		bResult = TRUE;
 	}

@@ -203,16 +203,21 @@ sys_setuid(call_t call, uid_t uid)
 	return(__setuid(call.Task, uid));
 }
 int 
-sys_setreuid(call_t call, uid_t ruid, uid_t euid)
+__setreuid(WIN_TASK *Task, uid_t ruid, uid_t euid)
 {
 	int result = 0;
 
-	if (ruid == __getuid(call.Task)){
-		result = __seteuid(call.Task, euid);
+	if (ruid == __getuid(Task)){
+		result = __seteuid(Task, euid);
 	}else{
-		result = __setuid(call.Task, ruid);
+		result = __setuid(Task, ruid);
 	}
 	return(result);
+}
+int 
+sys_setreuid(call_t call, uid_t ruid, uid_t euid)
+{
+	return(__setreuid(call.Task, ruid, euid));
 }
 int 
 sys_setresuid(call_t call, uid_t ruid, uid_t euid, uid_t suid)
@@ -220,10 +225,10 @@ sys_setresuid(call_t call, uid_t ruid, uid_t euid, uid_t suid)
 	if (!suid){
 		suid = WIN_ROOT_UID;
 	}
-	if (!sys_setreuid(call, ruid, euid)){
+	if (!__setreuid(call.Task, ruid, euid)){
 		call.Task->SavedUid = suid;
 	}else{
-		return(-1);
+		return(-EPERM);
 	}
 	return(0);
 }
@@ -276,17 +281,21 @@ sys_setgid(call_t call, gid_t gid)
 	return(__setgid(call.Task, gid));
 }
 int 
-sys_setregid(call_t call, gid_t rgid, gid_t egid)
+__setregid(WIN_TASK *Task, gid_t rgid, gid_t egid)
 {
 	int result = 0;
-	WIN_TASK *pwTask = call.Task;
 
-	if (rgid == pwTask->RealGid){
-		result = __setegid(pwTask, egid);
+	if (rgid == Task->RealGid){
+		result = __setegid(Task, egid);
 	}else{
-		result = __setgid(pwTask, rgid);
+		result = __setgid(Task, rgid);
 	}
 	return(result);
+}
+int 
+sys_setregid(call_t call, gid_t rgid, gid_t egid)
+{
+	return(__setregid(call.Task, rgid, egid));
 }
 int 
 sys_setresgid(call_t call, gid_t rgid, gid_t egid, gid_t sgid)
@@ -294,10 +303,10 @@ sys_setresgid(call_t call, gid_t rgid, gid_t egid, gid_t sgid)
 	if (!sgid){
 		sgid = WIN_ROOT_GID;
 	}
-	if (!sys_setregid(call, rgid, egid)){
+	if (!__setregid(call.Task, rgid, egid)){
 		call.Task->SavedGid = sgid;
 	}else{
-		return(-1);
+		return(-EPERM);
 	}
 	return(0);
 }

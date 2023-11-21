@@ -418,34 +418,34 @@ sys_readlink(call_t call, const char *path, char *buf, size_t bufsiz)
 	return(__readlinkat(call.Task, AT_FDCWD, path, buf, bufsiz));
 }
 int 
-__symlinkat(WIN_NAMEIDATA *Path, int newdirfd, const char *newpath)
+__symlinkat(WIN_NAMEIDATA *Target, int fd, const char *path)
 {
 	int result = 0;
-	WIN_NAMEIDATA wpNew;
+	WIN_NAMEIDATA wnPath;
 	WIN_VATTR wStat = {0};
 	WIN_MODE wMode;
 
-	if (Path->Attribs != -1){
-		vfs_stat(Path, &wStat);
+	if (Target->Attribs != -1){
+		vfs_stat(Target, &wStat);
 	}
-	if (!vfs_symlink(Path, &wStat, mode_win(&wMode, 00755), pathat_win(&wpNew, newdirfd, newpath, AT_SYMLINK_NOFOLLOW))){
+	if (!vfs_symlink(Target, &wStat, mode_win(&wMode, 00755), pathat_win(&wnPath, fd, path, AT_SYMLINK_NOFOLLOW))){
 		result -= errno_posix(GetLastError());
 	}
 	return(result);
 }
 int 
-sys_symlinkat(call_t call, const char *oldpath, int newdirfd, const char *newpath)
+sys_symlinkat(call_t call, const char *name1, int fd, const char *name2)
 {
-	WIN_NAMEIDATA wpOld;
+	WIN_NAMEIDATA wnTarget;
 
-	return(__symlinkat(path_win(&wpOld, oldpath, 0), newdirfd, newpath));
+	return(__symlinkat(pathat_win(&wnTarget, 0, name1, 0), fd, name2));
 }
 int 
-sys_symlink(call_t call, const char *oldpath, const char *newpath)
+sys_symlink(call_t call, const char *name1, const char *name2)
 {
-	WIN_NAMEIDATA wpOld;
+	WIN_NAMEIDATA wnTarget;
 
-	return(__symlinkat(path_win(&wpOld, oldpath, 0), AT_FDCWD, newpath));
+	return(__symlinkat(pathat_win(&wnTarget, 0, name1, 0), AT_FDCWD, name2));
 }
 int 
 __faccessat(int dirfd, const char *pathname, int mode, int flags)

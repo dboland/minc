@@ -91,7 +91,7 @@ ProcControlHandler(DWORD CtrlType)
 			}else{
 				/* syslogd.exe -d */
 				vfs_kill_ANY(pwTask->TaskId, WM_COMMAND, CtrlType, 0);
-				SetEvent(__ProcEvent);
+				SetEvent(__Interrupt);
 			}
 		}
 	}

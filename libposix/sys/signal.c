@@ -127,7 +127,7 @@ sigproc_default(WIN_TASK *Task, int signum)
 
 	if (sigbit & BIT_SIGSTOP){
 		Task->Status = _WSTOPPED;
-		SetEvent(__ProcEvent);
+		SetEvent(__Interrupt);
 		__sigsuspend(Task, &mask);
 	}else if (sigbit & SIGMASK_TTY){
 		result = 0;		/* mark as handled (interrupt syscalls) */
