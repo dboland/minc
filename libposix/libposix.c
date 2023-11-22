@@ -60,6 +60,7 @@ extern SID8 SidBuiltin;
 extern SID8 SidMachine;
 extern SID8 SidAdmins;
 extern SID8 SidEveryone;
+//extern SID8 SidInteractive;
 extern SID8 SidAuthenticated;
 extern SID8 SidRestricted;
 extern SID8 SidSystem;

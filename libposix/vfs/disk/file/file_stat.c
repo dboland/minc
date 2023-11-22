@@ -54,14 +54,11 @@ BOOL
 file_stat(WIN_NAMEIDATA *Path, WIN_VATTR *Result)
 {
 	BOOL bResult = FALSE;
-	WIN_VNODE vNode = {0};
-	WIN_FLAGS wFlags = {READ_CONTROL, FILE_SHARE_READ, 
-		OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, 0};
 
-	if (!DiskOpenFile(Path, &wFlags, &vNode)){
-		return(FALSE);
-	}else if (file_fstat(&vNode, Result)){
-		bResult = CloseHandle(vNode.Handle);
+	if (DiskStatFile(Path->Resolved, FILE_ATTRIBUTE_NORMAL, Result)){
+		Result->DeviceId = Path->DeviceId;
+		Result->Mode.FileType = Path->FileType;
+		bResult = TRUE;
 	}
 	return(bResult);
 }

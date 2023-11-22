@@ -33,7 +33,7 @@
 /************************************************************/
 
 VOID 
-ProcInitStdHandle(WIN_VNODE Node[])
+ProcInitStreams(WIN_VNODE Node[])
 {
 	LONG lIndex = 0;
 
@@ -50,7 +50,7 @@ ProcInitLimits(DWORDLONG Limits[])
 {
 	Limits[WIN_RLIMIT_CPU] = WIN_RLIM_INFINITY;
 	Limits[WIN_RLIMIT_FSIZE] = WIN_FSIZE_MAX;
-	Limits[WIN_RLIMIT_DATA] = 0x00100000L;		/* SizeOfHeapReserve */
+	Limits[WIN_RLIMIT_DATA] = 0x00100000L;		/* SizeOfHeapReserve? */
 	Limits[WIN_RLIMIT_STACK] = WIN_STACKSIZE;
 	Limits[WIN_RLIMIT_CORE] = WIN_RLIM_INFINITY;
 	Limits[WIN_RLIMIT_RSS] = 0x7FFFFFFFL;		/* ksh.exe ("memory") */
@@ -84,7 +84,6 @@ ProcControlHandler(DWORD CtrlType)
 	if (dwMode & ENABLE_PROCESSED_INPUT){
 		if (pwTask->GroupId == dwGroupId){
 			if (!vfs_raise(WM_COMMAND, CtrlType, 0)){
-				/* ping.exe */
 				pwTask->Flags |= WIN_PS_EXITING;
 				/* causes ExitProcess() */
 				bResult = FALSE;
@@ -132,12 +131,11 @@ proc_init(WIN_SIGPROC SignalProc)
 	GetStartupInfo(&si);
 	if (si.dwFlags & STARTF_PS_EXEC){
 		pwTask = &__Tasks[si.dwX];
-		ProcInitStdHandle(pwTask->Node);
+		ProcInitStreams(pwTask->Node);
 		pwTask->Flags |= WIN_PS_INEXEC;
 	}else{
 		pwTask = ProcCreateTask(0);
 		pwTask->Flags |= WIN_PS_SYSTEM;
-		ProcInitChannels(pwTask->Node);
 		vfs_namei(GetStdHandle(STD_INPUT_HANDLE), 0, &pwTask->Node[0]);
 		vfs_namei(GetStdHandle(STD_OUTPUT_HANDLE), 1, &pwTask->Node[1]);
 		vfs_namei(GetStdHandle(STD_ERROR_HANDLE), 2, &pwTask->Node[2]);
@@ -145,8 +143,12 @@ proc_init(WIN_SIGPROC SignalProc)
 		win_geteuid(&pwTask->UserSid);
 		win_getegid(&pwTask->GroupSid);
 		pwTask->FileMask = 0022;
+		ProcInitChannels(pwTask->Node);
 		ProcInitLimits(pwTask->Limit);
 	}
+//	if (vfs_setugid(pwTask)){
+//		pwTask->IsSetUGid = 1;
+//	}
 	__TaskId = pwTask->TaskId;
 	__CTTY = &__Terminals[pwTask->TerminalId];
 	return(pwTask);

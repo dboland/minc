@@ -37,7 +37,6 @@ SockError(HRESULT Error)
 {
 	INT wsaError = 0;
 
-	/* /c/MinGW/include/winsock2.h */
 	switch (Error){
 		case ERROR_FILE_NOT_FOUND:
 			wsaError = WSAENOENT;
@@ -52,7 +51,7 @@ SockError(HRESULT Error)
 			break;
 		case ERROR_PIPE_BUSY:			/* All pipe instances are busy */
 			wsaError = WSAEISCONN;		/* ./lib/libc/gen/syslog_r.c */
-			SetEvent(__PipeEvent);		/* logger.exe */
+//			SetEvent(__PipeEvent);		/* logger.exe */
 			break;
 		case ERROR_PIPE_NOT_CONNECTED:	/* No process is on the other end of the pipe */
 			wsaError = WSAENOTCONN;
@@ -148,10 +147,8 @@ pipe_bind(WIN_VNODE *Node, LPSOCKADDR Name, INT Length)
 	DWORD dwAttribs = FILE_FLAG_OVERLAPPED + PIPE_READMODE_MESSAGE;
 
 	if (!PipeCreateFile(PipeCreateName(szName), dwAttribs, __PipeEvent, Node)){
-		SockError(GetLastError());
-	}else if (!pipe_mknod((LPWSTR)Name->sa_data, szName, &wMode)){
-		SockError(GetLastError());
-	}else{
+		return(FALSE);
+	}else if (pipe_mknod((LPWSTR)Name->sa_data, szName, &wMode)){
 		ConnectNamedPipe(Node->Handle, &ovl);
 		bResult = TRUE;
 	}
@@ -165,18 +162,15 @@ pipe_connect(WIN_VNODE *Node, CONST LPSOCKADDR Name, INT Length)
 	WIN_INODE iNode;
 	DWORD dwSize = sizeof(WIN_INODE);
 
-//__PRINTF("  pipe_connect(%ls)\n", Name->sa_data)
 	hResult = CreateFileW((LPWSTR)Name->sa_data, GENERIC_READ, FILE_SHARE_READ, 
 		NULL, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, NULL);
 	if (hResult == INVALID_HANDLE_VALUE){
-		SockError(GetLastError());
+		return(FALSE);
 	}else if (!ReadFile(hResult, &iNode, dwSize, &dwSize, NULL)){
 		WIN_ERR("ReadFile(%s): %s\n", Name->sa_data, win_strerror(GetLastError()));
 	}else if (!CloseHandle(hResult)){
 		WIN_ERR("CloseHandle(%d): %s\n", hResult, win_strerror(GetLastError()));
-	}else if (!PipeOpenFile(iNode.Name, __PipeEvent, Node)){
-		SockError(GetLastError());
-	}else{
+	}else if (PipeOpenFile(iNode.Name, __PipeEvent, Node)){
 		bResult = TRUE;
 	}
 	return(bResult);
@@ -191,10 +185,8 @@ pipe_socketpair(INT Domain, INT Mode, INT Protocol, WIN_VNODE Result[2])
 	HANDLE hEvent = CreateEvent(NULL, FALSE, FALSE, NULL);
 
 	if (!PipeCreateFile(PipeCreateName(szName), Mode, hEvent, &Result[0])){
-		SockError(GetLastError());
-	}else if (!PipeOpenFile(szName, hEvent, &Result[1])){
-		SockError(GetLastError());
-	}else{
+		return(FALSE);
+	}else if (PipeOpenFile(szName, hEvent, &Result[1])){
 		Result[0].FileType = WIN_VSOCK;
 		Result[0].DeviceType = DEV_CLASS_CPU;
 		Result[1].FileType = WIN_VSOCK;
@@ -206,27 +198,12 @@ pipe_socketpair(INT Domain, INT Mode, INT Protocol, WIN_VNODE Result[2])
 BOOL 
 pipe_sendto(WIN_VNODE *Node, LPCSTR Buffer, UINT Size, DWORD Flags, DWORD *Result)
 {
-	BOOL bResult = FALSE;
-	OVERLAPPED ovl = {0, 0, 0, 0, Node->Event};
-
-	if (!WriteFile(Node->Handle, Buffer, Size, Result, &ovl)){
-		SockError(GetLastError());
-	}else{
-		bResult = TRUE;
-	}
-	return(bResult);
+	return(fifo_write(Node, Buffer, Size, Result));
 }
 BOOL 
 pipe_recvfrom(WIN_VNODE *Node, LPSTR Buffer, UINT Size, DWORD Flags, DWORD *Result)
 {
-	BOOL bResult = FALSE;
-
-	if (!sock_read(Node, Buffer, Size, Result)){
-		SockError(GetLastError());
-	}else{
-		bResult = TRUE;
-	}
-	return(bResult);
+	return(fifo_read(Node, Buffer, Size, Result));
 }
 BOOL 
 pipe_sendmsg(WIN_VNODE *Node, WSAMSG *Message, DWORD Flags, DWORD *Result)
@@ -234,12 +211,12 @@ pipe_sendmsg(WIN_VNODE *Node, WSAMSG *Message, DWORD Flags, DWORD *Result)
 	BOOL bResult = FALSE;
 	DWORD dwSize, dwResult;
 	PVOID pvData, P;
-	OVERLAPPED ovl = {0, 0, 0, 0, Node->Event};
+//	OVERLAPPED ovl = {0, 0, 0, 0, Node->Event};
 
 	pvData = SockAllocData(Message, &dwSize, &dwResult);
 	P = SockPushData(pvData, Message->lpBuffers, Message->dwBufferCount);
 	P = SockPushData(P, &Message->Control, 1);
-	if (!WriteFile(Node->Handle, pvData, dwSize, &dwSize, &ovl)){
+	if (!fifo_write(Node, pvData, dwSize, &dwSize)){
 		WIN_ERR("pipe_sendmsg(%d): %s\n", Node->Handle, win_strerror(GetLastError()));
 	}else{
 		*Result = dwResult;
@@ -256,7 +233,7 @@ pipe_recvmsg(WIN_VNODE *Node, WSAMSG *Message, DWORD *Flags, DWORD *Result)
 	PVOID pvData;
 
 	pvData = SockAllocData(Message, &dwSize, &dwResult);
-	if (!sock_read(Node, pvData, dwSize, &dwSize)){
+	if (!fifo_read(Node, pvData, dwSize, &dwSize)){
 		WIN_ERR("pipe_recvmsg(%d): %s\n", Node->Handle, win_strerror(GetLastError()));
 	}else{
 		pvData = SockPopData(Message->lpBuffers, pvData, Message->dwBufferCount);

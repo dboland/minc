@@ -47,14 +47,12 @@ BOOL
 dir_stat(WIN_NAMEIDATA *Path, WIN_VATTR *Result)
 {
 	BOOL bResult = FALSE;
-	WIN_VNODE vNode = {0};
-	WIN_FLAGS wFlags = {READ_CONTROL, FILE_SHARE_READ, OPEN_EXISTING, 
-		FILE_FLAG_BACKUP_SEMANTICS, 0};
 
-	if (!DiskOpenFile(Path, &wFlags, &vNode)){
-		return(FALSE);
-	}else if (dir_fstat(&vNode, Result)){
-		bResult = CloseHandle(vNode.Handle);
+	if (DiskStatFile(Path->Resolved, FILE_FLAG_BACKUP_SEMANTICS, Result)){
+		Result->DeviceId = Path->DeviceId;
+		Result->Mode.FileType = Path->FileType;
+		Result->FileSizeLow += WIN_S_BLKSIZE;
+		bResult = TRUE;
 	}
 	return(bResult);
 }

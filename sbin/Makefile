@@ -40,9 +40,8 @@ install-local:
 	./mkent group >/etc/group
 
 install: ${DESTDIR}
-	@#cp -vu ${PROGS} ${DESTDIR}${SBINDIR}/
 	@for file in ${PROGS}; do echo $$file; ginstall $$file "${DESTDIR}${SBINDIR}/$$file"; done
-	ginstall -m 04555 bsd.exe ${DESTDIR}/
+	ginstall -m 06555 -g 0 bsd.exe ${DESTDIR}/
 
 clean:
 	/bin/rm -f *.exe *.o

@@ -42,6 +42,7 @@ ws2_close(WIN_VNODE *Node)
 	 * This occurs when other threads are doing ReadFile()
 	 */
 	if (SOCKET_ERROR == closesocket(Node->Socket)){
+//		WIN_ERR("closesocket(%d): %s\n", Node->Socket, win_strerror(WSAGetLastError()));
 		return(FALSE);
 	}else if (!WSACloseEvent(Node->Event)){
 		WIN_ERR("WSACloseEvent(%d): %s\n", Node->Event, win_strerror(WSAGetLastError()));

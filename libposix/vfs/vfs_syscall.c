@@ -78,7 +78,7 @@ vfs_seteuid(WIN_TASK *Task, SID8 *Sid)
 	}else if (!SetThreadToken(NULL, hToken)){
 		WIN_ERR("SetThreadToken(%ls): %s\n", pwEntry.Account, win_strerror(GetLastError()));
 	}else{
-		Task->UserSid = pwEntry.UserSid;
+		Task->UserSid = *Sid;
 		bResult = CloseHandle(hToken);
 	}
 	return(bResult);
@@ -112,7 +112,8 @@ vfs_getlogin(WIN_TASK *Task, LPSTR Name, DWORD Size)
 	SID_NAME_USE snType = 0;
 	DWORD dwSize = MAX_NAME;
 
-	/* This always returns logged on user, not impersonated one. */
+	/* This always returns logged on user, not impersonated one.
+	 */
 	if (!LookupAccountSid(NULL, &Task->UserSid, Name, &Size, szBuf, &dwSize, &snType)){
 		WIN_ERR("LookupAccountSid(%s): %s\n", win_strsid(&Task->UserSid), win_strerror(GetLastError()));
 	}else{
@@ -157,6 +158,44 @@ vfs_pipe(WIN_VNODE Result[2])
 		Result[1].Access = win_F_GETFL(hOutput);
 		Result[1].Attribs = FILE_ATTRIBUTE_NORMAL;
 		bResult = TRUE;
+	}
+	return(bResult);
+}
+BOOL 
+vfs_setsid(WIN_TASK *Task)
+{
+	BOOL bResult = FALSE;
+
+	if (Task->TaskId == Task->GroupId){
+		SetLastError(ERROR_INVALID_OPERATION);
+	}else{
+		Task->GroupId = Task->TaskId;
+		Task->SessionId = Task->TaskId;
+//		if (Task->TerminalId){
+//			FreeConsole();
+//		}
+//		Task->TerminalId = 0;
+		bResult = TRUE;
+	}
+	return(bResult);
+}
+BOOL 
+vfs_setugid(WIN_TASK *Task)
+{
+	BOOL bResult = FALSE;
+	WCHAR szPath[MAX_PATH];
+	WIN_VATTR wStat = {0};
+
+	if (!GetModuleFileNameW(NULL, szPath, MAX_PATH)){
+		return(FALSE);
+	}else if (!DiskStatFile(szPath, FILE_ATTRIBUTE_NORMAL, &wStat)){
+		return(FALSE);
+	}
+	if (wStat.Mode.Special & WIN_S_ISUID){
+		bResult = vfs_seteuid(Task, &wStat.UserSid);
+	}
+	if (wStat.Mode.Special & WIN_S_ISGID){
+		bResult = vfs_setegid(Task, &wStat.GroupSid);
 	}
 	return(bResult);
 }
@@ -206,23 +245,5 @@ vfs_execve(WIN_TASK *Task, LPSTR Command, PVOID Environ)
 	CloseHandle(hToken);
 	win_free(Command);
 	win_free(Environ);
-	return(bResult);
-}
-BOOL 
-vfs_setsid(WIN_TASK *Task)
-{
-	BOOL bResult = FALSE;
-
-	if (Task->TaskId == Task->GroupId){
-		SetLastError(ERROR_INVALID_OPERATION);
-	}else{
-		Task->GroupId = Task->TaskId;
-		Task->SessionId = Task->TaskId;
-//		if (Task->TerminalId){
-//			FreeConsole();
-//		}
-//		Task->TerminalId = 0;
-		bResult = TRUE;
-	}
 	return(bResult);
 }

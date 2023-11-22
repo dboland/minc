@@ -96,11 +96,6 @@ task_init(char *cmdbuf, char *argv[], void *frame_address)
 	win_mbstowcs(pszCommand, argv[0], WIN_MAX_PROCTITLE);
 	argv[0] = path_posix(cmdbuf, pszCommand);
 
-	/* in WinNT the groups are significant */
-//	if (wStat.Mode.Special & WIN_S_ISGID){
-//		task->ts_issetugid = 1;
-//		win_setegid(pwTask, &wStat.GroupSid);
-//	}
 	TlsSetValue(__TlsIndex, (PVOID)pwTask->TaskId);
 }
 void 
@@ -114,6 +109,6 @@ task_copy(WIN_THREAD_STRUCT *Thread)
 	Thread->source -= Thread->offset;
 	Thread->dest -= Thread->offset;
 	memcpy((void *)Thread->dest, (void *)Thread->source, Thread->offset);
-	/* copy thread local storage */
+	/* copy thread control block */
 	copy_thread(Thread);
 }

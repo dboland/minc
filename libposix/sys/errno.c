@@ -252,11 +252,6 @@ errno_win(VOID)
 {
 	return(GetLastError());
 }
-/* void 
-__errno_posix(WIN_TASK *Task, DWORD Error)
-{
-	Task->Error = errno_posix(Error);
-} */
 
 /****************************************************/
 

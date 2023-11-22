@@ -105,11 +105,6 @@ BOOL win_getgroups(SID8 **Groups, DWORD *Count);
 BOOL win_setgroups(SID8 Groups[], DWORD Count);
 BOOL win___tfork_thread(WIN___TFORK *Params, SIZE_T Size, LPTHREAD_START_ROUTINE *Start, PVOID Data, DWORD *Result);
 
-/* win_syscall.c */
-
-DECLSPEC_NORETURN VOID win_exit(DWORD ExitCode);
-BOOL win_execve(LPSTR Command, LPCSTR Path);
-
 /* win_pwd.c */
 
 BOOL win_getpwnam(LPCWSTR Account, WIN_PWENT *Entity);
@@ -165,6 +160,11 @@ HMODULE win_dlopen(LPCWSTR FileName);
 BOOL win_dlclose(HMODULE Module);
 FARPROC win_dlsym(HMODULE Module, LPCSTR ProcName);
 BOOL win_dladdr(LPCVOID Address, MEMORY_BASIC_INFORMATION *Info, LPWSTR FileName);
+
+/* win_syscall.c */
+
+DECLSPEC_NORETURN VOID win_exit(DWORD ExitCode);
+BOOL win_execve(LPSTR Command, LPCSTR Path);
 
 /* win_resource.c */
 

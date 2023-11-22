@@ -663,11 +663,11 @@ sys_write(call_t call, int fd, const void *buf, size_t nbytes)
 	WIN_TASK *pwTask = call.Task;
 	CHAR szMessage[MAX_MESSAGE];
 
-	if (pwTask->TracePoints & KTRFAC_GENIO){
-		ktrace_GENIO(pwTask, fd, UIO_WRITE, buf, nbytes);
-	}
 	if (pwTask->TracePoints & KTRFAC_USER){
 		ktrace_USER(pwTask, "VNODE", szMessage, vfs_ktrace(&pwTask->Node[fd], szMessage));
+	}
+	if (pwTask->TracePoints & KTRFAC_GENIO){
+		ktrace_GENIO(pwTask, fd, UIO_WRITE, buf, nbytes);
 	}
 	if (fd < 0 || fd >= OPEN_MAX){
 		result = -EBADF;

@@ -75,6 +75,7 @@ BOOL vfs_pipe(WIN_VNODE Result[2]);
 BOOL vfs_fchown(WIN_VNODE *Node, PSID NewUser, PSID NewGroup);
 BOOL vfs_execve(WIN_TASK *Task, LPSTR Command, PVOID Environ);
 BOOL vfs_setsid(WIN_TASK *Task);
+BOOL vfs_setugid(WIN_TASK *Task);
 
 /* vfs_stat.c */
 

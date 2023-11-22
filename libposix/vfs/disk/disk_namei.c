@@ -90,6 +90,27 @@ DiskOpenFile(WIN_NAMEIDATA *Path, WIN_FLAGS *Flags, WIN_VNODE *Result)
 	}
 	return(bResult);
 }
+BOOL 
+DiskStatFile(LPCWSTR FileName, DWORD Attribs, WIN_VATTR *Result)
+{
+	BOOL bResult = FALSE;
+	PSECURITY_DESCRIPTOR psd;
+	HANDLE hFile;
+
+	hFile = CreateFileW(FileName, READ_CONTROL, FILE_SHARE_READ, 
+		NULL, OPEN_EXISTING, Attribs, NULL);
+	if (hFile == INVALID_HANDLE_VALUE){
+		return(FALSE);
+	}else if (!win_acl_get_fd(hFile, &psd)){
+		return(FALSE);
+	}else if (!GetFileInformationByHandle(hFile, (BY_HANDLE_FILE_INFORMATION *)Result)){
+		WIN_ERR("GetFileInformationByHandle(%d): %s\n", hFile, win_strerror(GetLastError()));
+	}else if (vfs_acl_stat(psd, Result)){
+		bResult = CloseHandle(hFile);
+	}
+	LocalFree(psd);
+	return(bResult);
+}
 
 /****************************************************/
 

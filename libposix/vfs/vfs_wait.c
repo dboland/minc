@@ -78,6 +78,8 @@ WaitTimeOut(WIN_TASK *Children[], DWORD TimeOut)
 	if (dwResult == WAIT_FAILED){
 		WIN_ERR("WaitForMultipleObjects(%s): %s\n", win_strobj(hObjects, dwCount), win_strerror(GetLastError()));
 		vfs_raise(WM_COMMAND, CTRL_ABORT_EVENT, 0);
+//	}else if (!dwResult){
+//		SetLastError(ERROR_SIGNAL_PENDING);
 	}else{
 		bResult = TRUE;
 	}

@@ -45,6 +45,19 @@ typedef struct _WIN_CAP_CONTROL {
 /************************************************************/
 
 BOOL 
+CapTogglePrivilege(HANDLE Token, LPCSTR Name, DWORD Value)
+{
+	TOKEN_PRIVILEGES tPriv = {1, {0, 0, Value}};
+	BOOL bResult = FALSE;
+
+	if (!LookupPrivilegeValue(NULL, Name, &tPriv.Privileges[0].Luid)){
+		return(FALSE);
+	}else if (!AdjustTokenPrivileges(Token, FALSE, &tPriv, sizeof(tPriv), NULL, NULL)){
+		WIN_ERR("AdjustTokenPrivileges(%s): %s\n", Name, win_strerror(GetLastError()));
+	}
+	return(bResult);
+}
+BOOL 
 CapCreateToken(WIN_CAP_CONTROL *Control, HANDLE *Result)
 {
 	BOOL bResult = FALSE;
@@ -109,19 +122,6 @@ CapAddPrivilege(PTOKEN_PRIVILEGES Privs, LPCSTR Name)
 		ptResult->PrivilegeCount++;
 	}
 	return(ptResult);
-}
-BOOL 
-CapTogglePrivilege(HANDLE Token, LPCSTR Name, DWORD Value)
-{
-	TOKEN_PRIVILEGES tPriv = {1, {0, 0, Value}};
-	BOOL bResult = FALSE;
-
-	if (!LookupPrivilegeValue(NULL, Name, &tPriv.Privileges[0].Luid)){
-		return(FALSE);
-	}else if (!AdjustTokenPrivileges(Token, FALSE, &tPriv, sizeof(tPriv), NULL, NULL)){
-		WIN_ERR("AdjustTokenPrivileges(%s): %s\n", Name, win_strerror(GetLastError()));
-	}
-	return(bResult);
 }
 BOOL 
 CapGetUser(HANDLE Token, SID8 *Sid)
@@ -327,18 +327,16 @@ win_cap_setuid(WIN_PWENT *Passwd, HANDLE *Result)
 
 		wControl.User = Passwd->UserSid;
 
+		CapTogglePrivilege(hToken, "SeDelegateSessionUserImpersonatePrivilege", SE_PRIVILEGE_ENABLED);
+
 		if (Passwd->Integrity == SECURITY_MANDATORY_SYSTEM_RID){
 			wControl.Privs = CapAddPrivilege(wControl.Privs, "SeTcbPrivilege");
-		/* Vista */
-//		}else if (!SetTokenInformation(hToken, TokenSessionId, &wControl.SessionId, sizeof(DWORD))){
-//			WIN_ERR("SetTokenInformation(TokenSessionId(%d)): %s\n", wControl.SessionId, win_strerror(GetLastError()));
+		}else if (!SetTokenInformation(hToken, TokenSessionId, &wControl.SessionId, sizeof(DWORD))){
+			WIN_ERR("SetTokenInformation(TokenSessionId(%d)): %s\n", wControl.SessionId, win_strerror(GetLastError()));
 		}
-
 		win_cap_set_mode(&wControl.User, GENERIC_ALL, &wControl.DefaultAcl);
 
 		CapTogglePrivilege(hToken, "SeCreateTokenPrivilege", SE_PRIVILEGE_ENABLED);
-		/* Vista */
-		CapTogglePrivilege(hToken, "SeDelegateSessionUserImpersonatePrivilege", SE_PRIVILEGE_ENABLED);
 
 		bResult = CapCreateToken(&wControl, Result);
 
@@ -369,7 +367,7 @@ win_cap_setgroups(SID8 *Primary, SID8 Groups[], DWORD Count, HANDLE *Result)
 		win_cap_set_mode(&wControl.User, GENERIC_ALL, &wControl.DefaultAcl);
 
 		CapTogglePrivilege(hToken, "SeCreateTokenPrivilege", SE_PRIVILEGE_ENABLED);
-		CapTogglePrivilege(hToken, "SeDelegateSessionUserImpersonatePrivilege", SE_PRIVILEGE_ENABLED);
+//		CapTogglePrivilege(hToken, "SeDelegateSessionUserImpersonatePrivilege", SE_PRIVILEGE_ENABLED);
 
 		bResult = CapCreateToken(&wControl, Result);
 

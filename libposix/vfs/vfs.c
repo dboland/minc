@@ -94,7 +94,8 @@ CHAR 		*__Escape;
 CHAR		*__Input = __INPUT_BUF;
 
 BOOL vfs_namei(HANDLE Handle, DWORD Index, WIN_VNODE *Result);
-BOOL vfs_F_DUPFD(WIN_VNODE *Node, BOOL CloseExec, WIN_VNODE *Result);
+BOOL proc_poll(VOID);
+//BOOL vfs_F_DUPFD(WIN_VNODE *Node, BOOL CloseExec, WIN_VNODE *Result);
 
 #include "vfs_acl.c"
 #include "vfs_debug.c"
@@ -103,7 +104,6 @@ BOOL vfs_F_DUPFD(WIN_VNODE *Node, BOOL CloseExec, WIN_VNODE *Result);
 #include "vfs_libgen.c"
 #include "vfs_device.c"
 #include "registry/registry.c"
-#include "process/process.c"
 #include "pipe/pipe.c"
 #include "char/char.c"
 #include "pdo/pdo.c"
@@ -119,6 +119,7 @@ BOOL vfs_F_DUPFD(WIN_VNODE *Node, BOOL CloseExec, WIN_VNODE *Result);
 #include "vfs_unistd.c"
 #include "vfs_namei.c"
 #include "vfs_syscall.c"
+#include "process/process.c"
 #include "vfs_uio.c"
 #include "vfs_filio.c"
 #include "vfs_stat.c"

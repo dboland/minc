@@ -33,77 +33,6 @@
 /****************************************************/
 
 BOOL 
-vfs_readlink(WIN_NAMEIDATA *Path, BOOL MakeReal)
-{
-	BOOL bResult = FALSE;
-	SHELL_LINK_HEADER slHead;
-	DWORD dwSize = sizeof(SHELL_LINK_HEADER);
-	CHAR szBuffer[MAX_PATH] = "";
-	HANDLE hFile;
-
-	hFile = CreateFileW(Path->Resolved, FILE_READ_DATA, FILE_SHARE_READ, 
-		NULL, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, NULL);
-	if (hFile == INVALID_HANDLE_VALUE){
-		return(FALSE);
-	}else if (!ReadFile(hFile, &slHead, dwSize, &dwSize, NULL)){
-		WIN_ERR("ReadFile(%s): %s\n", Path->Resolved, win_strerror(GetLastError()));
-	}else if (!IsEqualGUID(&slHead.LinkCLSID, &CLSID_ShellLink)){
-		SetLastError(ERROR_BAD_ARGUMENTS);
-	}else{
-		if (slHead.LinkFlags & HasLinkTargetIDList){
-			LinkReadTarget(hFile);
-		}
-		if (slHead.LinkFlags & HasLinkInfo){
-			LinkReadInfo(hFile, szBuffer);
-		}
-		Path->R = Path->Resolved;
-		if (szBuffer[1] == ':'){	/* nano.exe */
-			drive_lookup(MOUNTID(szBuffer[0]), WIN_NOCROSSMOUNT, Path);
-		}else if (MakeReal){
-			Path->R = win_basename(Path->Resolved);
-		}
-		Path->R = win_mbstowcp(Path->R, szBuffer, MAX_PATH);
-		Path->Last = Path->R - 1;
-		Path->Attribs = GetFileAttributesW(Path->Resolved);
-		bResult = TRUE;
-	}
-	CloseHandle(hFile);
-	return(bResult);
-}
-BOOL 
-vfs_symlink(WIN_NAMEIDATA *Path, WIN_VATTR *Stat, WIN_MODE *Mode, WIN_NAMEIDATA *Result)
-{
-	BOOL bResult = FALSE;
-	SHELL_LINK_HEADER slHead = {0};
-	DWORD dwTerminalBlock = 0;
-	DWORD dwSize;
-	CHAR szBuffer[MAX_PATH] = "";
-	HANDLE hFile;
-
-	if (*Path->Last == '\\'){	/* GNU conftest.exe */
-		*Path->Last = 0;
-	}
-	Result->R = win_wcpcpy(Result->R, L".lnk");
-	hFile = CreateFileW(Result->Resolved, GENERIC_WRITE, FILE_SHARE_READ, NULL, 
-		CREATE_NEW, FILE_ATTRIBUTE_NORMAL, NULL);
-	if (hFile != INVALID_HANDLE_VALUE){
-		slHead.HeaderSize = sizeof(SHELL_LINK_HEADER);
-		slHead.LinkCLSID = CLSID_ShellLink;
-		slHead.LinkFlags = HasLinkInfo;
-		slHead.FileAttributes = Stat->Attributes;
-		slHead.CreationTime = Stat->CreationTime;
-		slHead.AccessTime = Stat->LastAccessTime;
-		slHead.WriteTime = Stat->LastWriteTime;
-		slHead.FileSize = Stat->FileSizeLow;
-		WriteFile(hFile, &slHead, sizeof(slHead), &dwSize, NULL);
-		win_wcstombs(szBuffer, Path->Resolved, MAX_PATH);
-		LinkCreateInfo(hFile, szBuffer, Stat);
-		WriteFile(hFile, &dwTerminalBlock, sizeof(DWORD), &dwSize, NULL);
-		bResult = CloseHandle(hFile);
-	}
-	return(bResult);
-}
-BOOL 
 vfs_close(WIN_VNODE *Node)
 {
 	BOOL bResult = FALSE;
@@ -395,7 +324,6 @@ vfs_unlink(WIN_NAMEIDATA *Path)
 {
 	BOOL bResult = FALSE;
 
-//VfsDebugPath(Path, "vfs_unlink");
 	switch (Path->FSType){
 		case FS_TYPE_PDO:
 		case FS_TYPE_DISK:
@@ -429,7 +357,7 @@ vfs_lseek(WIN_VNODE *Node, LARGE_INTEGER *Offset, DWORD Method, LARGE_INTEGER *R
 		case FS_TYPE_CHAR:
 			SetLastError(ERROR_INVALID_HANDLE);
 			break;
-		case FS_TYPE_PIPE:	/* does work, but has weird results (perl.exe) */
+		case FS_TYPE_PIPE:
 		case FS_TYPE_WINSOCK:
 			SetLastError(ERROR_PIPE_CONNECTED);
 			break;
@@ -487,6 +415,77 @@ vfs_revoke(WIN_VNODE *Node)
 			break;
 		default:
 			SetLastError(ERROR_BAD_FILE_TYPE);
+	}
+	return(bResult);
+}
+BOOL 
+vfs_readlink(WIN_NAMEIDATA *Path, BOOL MakeReal)
+{
+	BOOL bResult = FALSE;
+	SHELL_LINK_HEADER slHead;
+	DWORD dwSize = sizeof(SHELL_LINK_HEADER);
+	CHAR szBuffer[MAX_PATH] = "";
+	HANDLE hFile;
+
+	hFile = CreateFileW(Path->Resolved, FILE_READ_DATA, FILE_SHARE_READ, 
+		NULL, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, NULL);
+	if (hFile == INVALID_HANDLE_VALUE){
+		return(FALSE);
+	}else if (!ReadFile(hFile, &slHead, dwSize, &dwSize, NULL)){
+		WIN_ERR("ReadFile(%s): %s\n", Path->Resolved, win_strerror(GetLastError()));
+	}else if (!IsEqualGUID(&slHead.LinkCLSID, &CLSID_ShellLink)){
+		SetLastError(ERROR_BAD_ARGUMENTS);
+	}else{
+		if (slHead.LinkFlags & HasLinkTargetIDList){
+			LinkReadTarget(hFile);
+		}
+		if (slHead.LinkFlags & HasLinkInfo){
+			LinkReadInfo(hFile, szBuffer);
+		}
+		Path->R = Path->Resolved;
+		if (szBuffer[1] == ':'){	/* nano.exe */
+			drive_lookup(MOUNTID(szBuffer[0]), WIN_NOCROSSMOUNT, Path);
+		}else if (MakeReal){
+			Path->R = win_basename(Path->Resolved);
+		}
+		Path->R = win_mbstowcp(Path->R, szBuffer, MAX_PATH);
+		Path->Last = Path->R - 1;
+		Path->Attribs = GetFileAttributesW(Path->Resolved);
+		bResult = TRUE;
+	}
+	CloseHandle(hFile);
+	return(bResult);
+}
+BOOL 
+vfs_symlink(WIN_NAMEIDATA *Path, WIN_VATTR *Stat, WIN_MODE *Mode, WIN_NAMEIDATA *Result)
+{
+	BOOL bResult = FALSE;
+	SHELL_LINK_HEADER slHead = {0};
+	DWORD dwTerminalBlock = 0;
+	DWORD dwSize;
+	CHAR szBuffer[MAX_PATH] = "";
+	HANDLE hFile;
+
+	if (*Path->Last == '\\'){	/* GNU conftest.exe */
+		*Path->Last = 0;
+	}
+	Result->R = win_wcpcpy(Result->R, L".lnk");
+	hFile = CreateFileW(Result->Resolved, GENERIC_WRITE, FILE_SHARE_READ, NULL, 
+		CREATE_NEW, FILE_ATTRIBUTE_NORMAL, NULL);
+	if (hFile != INVALID_HANDLE_VALUE){
+		slHead.HeaderSize = sizeof(SHELL_LINK_HEADER);
+		slHead.LinkCLSID = CLSID_ShellLink;
+		slHead.LinkFlags = HasLinkInfo;
+		slHead.FileAttributes = Stat->Attributes;
+		slHead.CreationTime = Stat->CreationTime;
+		slHead.AccessTime = Stat->LastAccessTime;
+		slHead.WriteTime = Stat->LastWriteTime;
+		slHead.FileSize = Stat->FileSizeLow;
+		WriteFile(hFile, &slHead, sizeof(slHead), &dwSize, NULL);
+		win_wcstombs(szBuffer, Path->Resolved, MAX_PATH);
+		LinkCreateInfo(hFile, szBuffer, Stat);
+		WriteFile(hFile, &dwTerminalBlock, sizeof(DWORD), &dwSize, NULL);
+		bResult = CloseHandle(hFile);
 	}
 	return(bResult);
 }

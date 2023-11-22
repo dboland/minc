@@ -1,10 +1,13 @@
 include ../../Makefile.inc
 
-OBJECTS=cat.exe chmod.exe chgrp.exe cp.exe ln.exe ls.exe \
+OBJECTS=chmod.exe chgrp.exe cp.exe ln.exe ls.exe \
 	mkdir.exe mv.exe rm.exe rmdir.exe touch.exe uname.exe chown.exe \
 	ginstall.exe mknod.exe test.exe scacls.exe
+#OBJECTS+=cat.exe
 COREDIR=/D/src/coreutils-8.13/src
 CFLAGS+=-s
+
+# cat.exe: standard output: Bad file descriptor
 
 all: ${OBJECTS}
 
