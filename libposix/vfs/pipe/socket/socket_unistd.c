@@ -79,7 +79,7 @@ sock_write(WIN_VNODE *Node, LPCSTR Buffer, DWORD Size, DWORD *Result)
 	OVERLAPPED ovl = {0, 0, 0, 0, Node->Event};
 	DWORD dwSize = Size;
 
-	/* Non-blocking file IO can be achieved by limiting the number
+	/* Non-blocking file I/O can be achieved by limiting the number
 	 * of bytes to write to the size of the pipe buffer, without
 	 * having to put the pipe in PIPE_NOWAIT mode (rsync.exe).
 	 */

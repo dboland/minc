@@ -42,9 +42,9 @@ getgrouplist(const char *user, gid_t group, gid_t *groups, int *ngroups)
 	WCHAR szAccount[MAX_NAME];
 	SID8 *sidList = NULL;
 	SID8 sid;
+	DWORD dwCount = 0;
 	int i = 0;
 	gid_t next;
-	int count = 0;
 
 	if (!group){
 		group = WIN_ROOT_GID;
@@ -57,10 +57,10 @@ getgrouplist(const char *user, gid_t group, gid_t *groups, int *ngroups)
 		errno = EINVAL;
 	}else if (!win_getpwnam(szAccount, &pwEntry)){
 		errno = errno_posix(errno_win());
-	}else if (!win_getgrouplist(&pwEntry, rid_win(&sid, group), &sidList, &count)){
+	}else if (!win_getgrouplist(&pwEntry, rid_win(&sid, group), &sidList, &dwCount)){
 		errno = errno_posix(errno_win());
-	}else if (*ngroups >= count){
-		while (i < count){
+	}else if (*ngroups >= dwCount){
+		while (i < dwCount){
 			next = rid_posix(&sidList[i]);
 			if (next == WIN_ROOT_GID){
 				groups[i] = 0;
@@ -69,9 +69,9 @@ getgrouplist(const char *user, gid_t group, gid_t *groups, int *ngroups)
 			}
 			i++;
 		}
-		result = count;
+		result = dwCount;
 	}
 	win_free(sidList);
-	*ngroups = count;
+	*ngroups = dwCount;
 	return(result);
 }

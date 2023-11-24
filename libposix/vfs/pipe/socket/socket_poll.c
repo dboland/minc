@@ -38,18 +38,17 @@ SockPollError(WIN_VNODE *Node, DWORD Error)
 	SHORT sResult = WIN_POLLERR;
 	OVERLAPPED ovl = {0, 0, 0, 0, Node->Event};
 
+	/* ConnectNamedPipe() segfaults with OVERLAPPED struct,
+	 * and completion proc missing.
+	 */
 	switch (Error){
 		case ERROR_BROKEN_PIPE:		/* 109: The pipe has been ended (write end closed) */
 			DisconnectNamedPipe(Node->Handle);
-			/* Segfaults with OVERLAPPED struct,
-			 * and completion proc missing.
-			 */
-			ConnectNamedPipe(Node->Handle, &ovl);
+			sResult = WIN_POLLHUP;
+			break;
 		case ERROR_BAD_PIPE:		/* 230: The pipe state is invalid */
-			/* This error indicates we need to ConnectNamedPipe().
-			 * In OVERLAPPED mode, it loses its meaning.
-			 */
-			sResult = 0;
+			ConnectNamedPipe(Node->Handle, &ovl);
+			sResult = WIN_POLLRDBAND;
 			break;
 		default:
 			WIN_ERR("SockPollError(%d): %s\n", Node->Handle, win_strerror(Error));
@@ -65,12 +64,12 @@ sock_poll(WIN_VNODE *Node, WIN_POLLFD *Info)
 	SHORT sResult = WIN_POLLOUT;
 	SHORT sMask = Info->Events | WIN_POLLIGNORE;
 	DWORD dwAvail = 0;
-	DWORD dwMessage = 0;
+	DWORD dwRemain = 0;
 	DWORD dwResult = 0;
 
-	if (!PeekNamedPipe(Node->Handle, NULL, 0, NULL, &dwAvail, &dwMessage)){
+	if (!PeekNamedPipe(Node->Handle, NULL, 0, NULL, &dwAvail, &dwRemain)){
 		sResult = SockPollError(Node, GetLastError());
-	}else if (dwAvail || dwMessage){
+	}else if (dwAvail || dwRemain){
 		sResult = WIN_POLLIN;
 	}
 	if (Info->Result = sResult & sMask){

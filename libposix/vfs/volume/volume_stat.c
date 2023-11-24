@@ -32,26 +32,6 @@
 
 /****************************************************/
 
-/* BOOL 
-vol_stat(WIN_DRIVER *Entity)
-{
-	BOOL bResult;
-	HANDLE hResult;
-	WCHAR szVolume[MAX_PATH];
-	WCHAR szPath[MAX_PATH];
-
-	win_wcscpy(win_wcpcpy(win_wcpcpy(szVolume, L"\\\\?\\"), Entity->DosPath), L"\\");
-	hResult = FindFirstVolumeMountPointW(szVolume, szPath, MAX_PATH);
-	if (hResult == INVALID_HANDLE_VALUE){
-		WIN_ERR("FindFirstVolumeMountPoint(%ls): %s\n", szVolume, win_strerror(GetLastError()));
-	}else{
-__PRINTF("vol_stat(%ls): %ls\n", szVolume, szPath)
-		bResult = FindVolumeMountPointClose(hResult);
-	}
-} */
-
-/****************************************************/
-
 BOOL 
 vol_fstat(HANDLE Handle, LPSTR Result)
 {
@@ -72,7 +52,7 @@ vol_stat(LPCWSTR Path, LPSTR Result)
 	BOOL bResult = FALSE;
 	WIN_VNODE vNode = {0};
 	HANDLE hResult;
-	WCHAR szPath[MAX_PATH] = WIN_VOLUME_ROOT;
+	WCHAR szPath[MAX_PATH] = L"\\\\.\\";
 
 	hResult = CreateFileW(win_wcscat(szPath, Path), READ_CONTROL, FILE_SHARE_READ, NULL, 
 		OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, NULL);

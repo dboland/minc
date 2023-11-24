@@ -50,13 +50,15 @@ char *group_posix(char *buf, size_t buflen, WIN_GRENT *Group);
 
 char *passwd_posix(char *buf, size_t buflen, WIN_PWENT *WinPwd);
 
-/* fork.S */
+/* syscall.S */
 
-int sys_fork(call_t call);
-int sys_vfork(call_t call);
 __dead void __threxit(pid_t *pid);
 
 /* namei.c */
 
 WIN_NAMEIDATA *path_win(WIN_NAMEIDATA *Path, const char *pathname, int flags);
 
+/* syscall.S */
+
+int sys_fork(call_t call);
+int sys_vfork(call_t call);

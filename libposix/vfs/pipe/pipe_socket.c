@@ -32,52 +32,6 @@
 
 /****************************************************/
 
-VOID 
-SockError(HRESULT Error)
-{
-	INT wsaError = 0;
-
-	switch (Error){
-		case ERROR_FILE_NOT_FOUND:
-			wsaError = WSAENOENT;
-			break;
-		case ERROR_INVALID_PARAMETER:
-		case ERROR_INVALID_NAME:
-			wsaError = WSAEINVAL;
-			break;
-		case ERROR_INVALID_HANDLE:
-		case ERROR_PATH_NOT_FOUND:
-			wsaError = WSAENOTSOCK;
-			break;
-		case ERROR_PIPE_BUSY:			/* All pipe instances are busy */
-			wsaError = WSAEISCONN;		/* ./lib/libc/gen/syslog_r.c */
-//			SetEvent(__PipeEvent);		/* logger.exe */
-			break;
-		case ERROR_PIPE_NOT_CONNECTED:	/* No process is on the other end of the pipe */
-			wsaError = WSAENOTCONN;
-			break;
-		case ERROR_NO_DATA:			// 232: The pipe is being closed (read end closed)
-			wsaError = ERROR_NO_DATA;
-			break;
-		case ERROR_BROKEN_PIPE:
-			wsaError = WSAEPIPE;
-			break;
-		case ERROR_SIGNAL_PENDING:
-			wsaError = WSAEINTR;
-			break;
-		case ERROR_NOACCESS:
-			wsaError = WSAEFAULT;
-			break;
-		case ERROR_ACCESS_DENIED:
-			wsaError = WSAEACCES;
-			break;
-//		case ERROR_PIPE_CONNECTED:		/* There is a process on other end of the pipe */
-//		case ERROR_PIPE_LISTENING:		/* ReadFile() after ConnectNamedPipe() */
-		default:
-			WIN_ERR("SockError(%d): %s\n", Error, win_strerror(Error));
-	}
-	WSASetLastError(wsaError);
-}
 PVOID 
 SockAllocData(WSAMSG *Message, DWORD *Size, DWORD *Result)
 {
@@ -143,13 +97,11 @@ pipe_bind(WIN_VNODE *Node, LPSOCKADDR Name, INT Length)
 	BOOL bResult = FALSE;
 	WIN_MODE wMode = {WIN_VSOCK, WIN_S_IRW, WIN_S_IRW, WIN_S_IRW, 0};
 	WCHAR szName[MAX_NAME] = {0};
-	OVERLAPPED ovl = {0, 0, 0, 0, __PipeEvent};
 	DWORD dwAttribs = FILE_FLAG_OVERLAPPED + PIPE_READMODE_MESSAGE;
 
 	if (!PipeCreateFile(PipeCreateName(szName), dwAttribs, __PipeEvent, Node)){
 		return(FALSE);
 	}else if (pipe_mknod((LPWSTR)Name->sa_data, szName, &wMode)){
-		ConnectNamedPipe(Node->Handle, &ovl);
 		bResult = TRUE;
 	}
 	return(bResult);
@@ -180,8 +132,6 @@ pipe_socketpair(INT Domain, INT Mode, INT Protocol, WIN_VNODE Result[2])
 {
 	BOOL bResult = FALSE;
 	WCHAR szName[MAX_GUID];
-//	SECURITY_ATTRIBUTES sa = {sizeof(sa), NULL, FALSE};	/* ftpd.exe */
-//	SECURITY_ATTRIBUTES sa = {sizeof(sa), NULL, TRUE};	/* sshd.exe -d */
 	HANDLE hEvent = CreateEvent(NULL, FALSE, FALSE, NULL);
 
 	if (!PipeCreateFile(PipeCreateName(szName), Mode, hEvent, &Result[0])){
@@ -211,7 +161,6 @@ pipe_sendmsg(WIN_VNODE *Node, WSAMSG *Message, DWORD Flags, DWORD *Result)
 	BOOL bResult = FALSE;
 	DWORD dwSize, dwResult;
 	PVOID pvData, P;
-//	OVERLAPPED ovl = {0, 0, 0, 0, Node->Event};
 
 	pvData = SockAllocData(Message, &dwSize, &dwResult);
 	P = SockPushData(pvData, Message->lpBuffers, Message->dwBufferCount);
@@ -269,7 +218,6 @@ pipe_setsockopt(WIN_VNODE *Node, INT Level, INT Name, CONST CHAR *Value, INT Len
 	switch (Name){
 		case SO_RCVBUF:
 		case SO_SNDBUF:
-//			bResult = (*(UINT *)Value == WIN_PIPE_BUF);
 			break;
 		default:
 			WSASetLastError(WSAENOPROTOOPT);

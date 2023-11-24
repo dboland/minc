@@ -69,7 +69,7 @@ PollNoWait(WIN_VNODE *Nodes[], WIN_POLLFD *Info[])
 			case FS_TYPE_MAILSLOT:
 				dwResult += mail_poll(pNode->Handle, pInfo);
 				break;
-			case FS_TYPE_DISK:	/* git.exe (format-patch) */
+			case FS_TYPE_DISK:
 				dwResult += disk_poll(pNode->Handle, pInfo);
 				break;
 			case FS_TYPE_WINSOCK:

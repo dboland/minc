@@ -245,6 +245,20 @@ sys_connect(call_t call, int sockfd, const struct sockaddr *address, socklen_t a
 	return(result);
 }
 int 
+sys_bind(call_t call, int sockfd, const struct sockaddr *addr, socklen_t addrlen)
+{
+	int result = 0;
+	SOCKADDR sAddress = {0};
+	WIN_TASK *pwTask = call.Task;
+
+	if (sockfd < 0 || sockfd >= OPEN_MAX){	/* sshd.exe */
+		result = -EBADF;
+	}else if (!vfs_bind(&pwTask->Node[sockfd], addr_win(&sAddress, pwTask, addr), addrlen)){
+		result -= errno_posix(WSAGetLastError());
+	}
+	return(result);
+}
+int 
 sys_accept(call_t call, int sockfd, struct sockaddr *addr, socklen_t *addrlen)
 {
 	int result = 0;
@@ -417,20 +431,6 @@ sys_setsockopt(call_t call, int sockfd, int level, int optname, const void *optv
 	if (sockfd < 0 || sockfd >= OPEN_MAX){
 		result = -EBADF;
 	}else if (!vfs_setsockopt(&pwTask->Node[sockfd], level, optname, optval, optlen)){
-		result -= errno_posix(WSAGetLastError());
-	}
-	return(result);
-}
-int 
-sys_bind(call_t call, int sockfd, const struct sockaddr *addr, socklen_t addrlen)
-{
-	int result = 0;
-	SOCKADDR sAddress = {0};
-	WIN_TASK *pwTask = call.Task;
-
-	if (sockfd < 0 || sockfd >= OPEN_MAX){	/* sshd.exe */
-		result = -EBADF;
-	}else if (!vfs_bind(&pwTask->Node[sockfd], addr_win(&sAddress, pwTask, addr), addrlen)){
 		result -= errno_posix(WSAGetLastError());
 	}
 	return(result);

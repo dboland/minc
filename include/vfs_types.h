@@ -31,7 +31,7 @@
 //#define WIN_MAILSLOT_ROOT	L"\\\\.\\MAILSLOT\\"
 //#define WIN_PIPE_ROOT		L"\\\\.\\PIPE\\"
 #define WIN_PROCESS_ROOT	L"\\\\.\\GLOBALROOT\\"
-#define WIN_VOLUME_ROOT		L"\\\\.\\"
+//#define WIN_VOLUME_ROOT		L"\\\\.\\"
 #define WIN_DEVICE_ROOT		L"\\??\\"
 
 typedef enum _WIN_FS_TYPE {
@@ -190,7 +190,7 @@ typedef struct _WIN_NAMEIDATA {
 #define WIN_OCRNL		0x00100000
 
 /*
- * vfs_statvfs.c
+ * vfs_device.c
  */
 
 typedef struct _WIN_DEVICE {
@@ -422,15 +422,6 @@ typedef enum _WIN_GLOBAL {
 	WIN_KERN_MSGBUF,
 	WIN_GLOBAL_MAX
 } WIN_GLOBAL;
-
-/* typedef struct _WIN_IFENUM {
-	DWORD Ethernet;
-	DWORD PPP;
-	DWORD Loopback;
-	DWORD WLan;
-	DWORD Other;
-} WIN_IFENUM;
-*/
 
 /*
  * vfs_sched.c

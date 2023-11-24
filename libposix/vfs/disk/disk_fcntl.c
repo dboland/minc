@@ -58,8 +58,8 @@ disk_open(WIN_NAMEIDATA *Path, WIN_FLAGS *Flags, WIN_MODE *Mode, WIN_VNODE *Resu
 	if (Flags->Access == GENERIC_WRITE){	/* git.exe (git-remote-https) */
 		Flags->Access |= FILE_READ_ATTRIBUTES | FILE_READ_EA;
 	}
+	Flags->Access |= READ_CONTROL;
 	Flags->Share |= FILE_SHARE_DELETE;
-	Flags->Access |= READ_CONTROL;		/* disk_fstat() */
 	if (Path->FileType == WIN_VDIR){
 		bResult = dir_open(Path, Flags, Mode, Result);
 	}else{

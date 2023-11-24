@@ -42,10 +42,6 @@
 
 /* winsock2.h */
 
-#define WSAEPERM	(WSABASEERR+1)
-#define WSAENOENT	(WSABASEERR+2)
-#define WSAEPIPE	(WSABASEERR+32)
-
 #define WIN_AF_LOCAL	AF_UNIX
 #define WIN_AF_INET	AF_INET
 #define WIN_AF_INET6	23

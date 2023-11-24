@@ -172,6 +172,8 @@ errno_posix(DWORD Error)
 		case ERROR_INVALID_USER_BUFFER:
 			result = EIO;
 			break;
+		case ERROR_PIPE_BUSY:			/* 231: All pipe instances are busy */
+			SetEvent(__PipeEvent);		/* logger.exe */
 		case ERROR_LOCK_VIOLATION:
 		case ERROR_MORE_DATA:
 		case ERROR_IO_PENDING:
@@ -239,9 +241,6 @@ errno_posix(DWORD Error)
 		case WSAEADDRINUSE:
 			result = EADDRINUSE;
 			break;
-//		case ERROR_DISK_FULL:		// login.exe after typing username
-//		case ERROR_TIMEOUT:		// Ctrl+C when vim.exe is opening perl file
-//		case ERROR_NOACCESS:		// LoadLibrary(): Invalid access to memory location
 		default:
 			__PRINTF("errno_posix(%d): %s\n", Error, win_strerror(Error))
 	}

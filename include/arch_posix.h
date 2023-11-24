@@ -33,10 +33,6 @@
 UINT errno_win(VOID);
 int errno_posix(UINT Error);
 
-/* context.S */
-
-//ucontext_t *ucontext_posix(ucontext_t *ucontext);
-
 /* stat.c */
 
 int rid_posix(SID8 *Sid);
@@ -50,5 +46,4 @@ void task_init(char *cmdbuf, char *argv[], void *frame_address);
 
 char *path_posix(char *dest, LPCWSTR Source);
 char *pathp_posix(char *dest, LPCWSTR Source);
-//WIN_NAMEIDATA *path_win(WIN_NAMEIDATA *Path, const char *pathname, int flags);
 

@@ -66,8 +66,12 @@ vfs_stat(WIN_NAMEIDATA *Path, WIN_VATTR *Result)
 {
 	BOOL bResult = FALSE;
 
-//VfsDebugPath(Path, "vfs_stat");
-	switch (Path->FSType){
+	/* CreateFile() yields "Access is denied" on open files
+	 * which meanwhile have been deleted (git.exe).
+	 */
+	if (Path->Attribs == -1){
+		return(FALSE);
+	}else switch (Path->FSType){
 		case FS_TYPE_DISK:
 			bResult = disk_stat(Path, Result);
 			break;
