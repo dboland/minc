@@ -53,7 +53,7 @@ getgrouplist(const char *user, gid_t group, gid_t *groups, int *ngroups)
 		errno = EINVAL;
 	}else if (!groups || !ngroups){
 		errno = EFAULT;
-	}else if (!win_mbstowcs(szAccount, user, MAX_NAME)){
+	}else if (!mbstowcs(szAccount, user, MAX_NAME)){
 		errno = EINVAL;
 	}else if (!win_getpwnam(szAccount, &pwEntry)){
 		errno = errno_posix(errno_win());

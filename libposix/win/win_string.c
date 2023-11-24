@@ -194,7 +194,7 @@ win_index(LPCSTR String, CHAR Chr)
 	return(pszResult);
 }
 VOID 
-win_memcpy(LPVOID Destination, LPVOID Source, DWORD Size)
+win_memcpy(LPVOID Destination, LPCVOID Source, DWORD Size)
 {
 	CopyMemory(Destination, Source, Size);
 }

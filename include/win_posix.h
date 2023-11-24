@@ -38,7 +38,7 @@ LPSTR win_strcpy(LPSTR Destination, LPCSTR Source);
 LPSTR win_stpcpy(LPSTR Destination, LPCSTR Source);
 LPSTR win_strncpy(LPSTR Destination, LPCSTR Source, DWORD Length);
 INT win_strlen(LPCSTR String);
-VOID win_memcpy(LPVOID Destination, LPVOID Source, DWORD Size);
+VOID win_memcpy(LPVOID Destination, LPCVOID Source, DWORD Size);
 INT win_strcmp(LPCSTR String1, LPCSTR String2);
 INT win_strncmp(LPCSTR String1, LPCSTR String2, LONG Length);
 LPCSTR win_index(LPCSTR String, CHAR Chr);

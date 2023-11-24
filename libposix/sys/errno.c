@@ -48,7 +48,6 @@ errno_posix(DWORD Error)
 		case ERROR_BAD_ARGUMENTS:		// 160
 			result = EINVAL;
 			break;
-		case WSAENOENT:
 		case NERR_GroupNotFound:
 		case NERR_UserNotFound:
 		case ERROR_NONE_MAPPED:			// 1332: No mapping between account names and security IDs was done.
@@ -129,7 +128,6 @@ errno_posix(DWORD Error)
 		case ERROR_NO_DATA:			// 232: The pipe is being closed (read end closed)
 		case ERROR_PIPE_NOT_CONNECTED:		// 233: No process is on the other end of the pipe.
 			vfs_raise(WM_COMMAND, CTRL_PIPE_EVENT, 0);
-		case WSAEPIPE:
 		case ERROR_BROKEN_PIPE:			// 109: The pipe has been ended (write end closed)
 			result = EPIPE;
 			break;
