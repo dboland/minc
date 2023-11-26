@@ -722,7 +722,7 @@ sys_pwrite(call_t call, int fd, const void *buf, size_t nbytes, off_t offset)
 int 
 sys_getthrid(call_t call)
 {
-	return(call.Task->TaskId);	/* git.exe */
+	return(call.Task->TaskId);	/* libc.so raise() (git.exe) */
 }
 pid_t 
 __getpgid(WIN_TASK *Task, pid_t pid)

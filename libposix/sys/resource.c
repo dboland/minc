@@ -43,12 +43,12 @@ rlimit_posix(WIN_TASK *Task, int resource, struct rlimit *rlp)
 			rlp->rlim_max = RLIM_INFINITY;
 			break;
 		case RLIMIT_DATA:
-			rlp->rlim_max = 0x00100000L * 8;	/* SizeOfHeapReserve */
+			rlp->rlim_max = 0x00100000L * 8;	/* SizeOfHeapReserve? */
 			break;
 		case RLIMIT_STACK:
 			rlp->rlim_max = WIN_STACKSIZE * 8;
 			break;
-		case RLIMIT_RSS:		/* ksh.exe ("memory") */
+		case RLIMIT_RSS:	/* ksh.exe ("memory") */
 		case RLIMIT_MEMLOCK:
 			rlp->rlim_max = 0x7FFFFFFFL;
 			break;
@@ -63,7 +63,7 @@ rlimit_posix(WIN_TASK *Task, int resource, struct rlimit *rlp)
 			rlp->rlim_max = RLIM_INFINITY;
 			break;
 		default:
-			result = -1;
+			result = -EINVAL;
 	}
 	return(result);
 }

@@ -84,7 +84,7 @@
 #define DEV_TYPE_STDIN		(DEV_CLASS_CPU + 16)		/* standard stream pseudo device */
 #define DEV_TYPE_STDOUT		(DEV_CLASS_CPU + 17)		/* standard stream pseudo device */
 #define DEV_TYPE_STDERR		(DEV_CLASS_CPU + 18)		/* standard stream pseudo device */
-#define DEV_TYPE_SWAP		(DEV_CLASS_CPU + 24)		/* sisk swap pseudo device */
+#define DEV_TYPE_SWAP		(DEV_CLASS_CPU + 24)		/* disk swap pseudo device */
 #define DEV_TYPE_RAMDISK	(DEV_CLASS_CPU + 32)		/* Random Access Memory disk device (rd*) */
 #define DEV_TYPE_PROCESSOR	(DEV_CLASS_CPU + DEV_BUS_CPU)	/* Central Processing Unit */
 
@@ -92,7 +92,7 @@
 #define DEV_TYPE_FDC		(DEV_CLASS_DISK + DEV_BUS_FDC)	/* Floppy Disk Controller */
 #define DEV_TYPE_USBSTOR	(DEV_CLASS_DISK + DEV_BUS_USB)	/* USB Mass Storage controller */
 #define DEV_TYPE_SD		(DEV_CLASS_DISK + DEV_BUS_SCSI)	/* SCSI Disk controller */
-#define DEV_TYPE_WD		(DEV_CLASS_DISK + DEV_BUS_IDE)
+#define DEV_TYPE_WD		(DEV_CLASS_DISK + DEV_BUS_IDE)	/* WD100x compatible hard disk controller */
 
 #define DEV_TYPE_NDIS		(DEV_CLASS_IFNET)
 #define DEV_TYPE_TUNNEL		(DEV_CLASS_IFNET + 16)		/* Tunnel type encapsulation */

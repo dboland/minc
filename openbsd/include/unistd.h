@@ -541,7 +541,6 @@ int	 syscall(int, ...);
 pid_t	 __tfork_thread(const struct __tfork *, size_t, void (*)(void *),
 	    void *);
 #endif /* __BSD_VISIBLE */
-pid_t	getthrid(void);
 __END_DECLS
 
 #endif /* !_UNISTD_H_ */

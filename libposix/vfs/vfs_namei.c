@@ -100,7 +100,7 @@ BOOL
 PathGlob(WIN_NAMEIDATA *Path, DWORD Flags)
 {
 	BOOL bResult = TRUE;
-	WIN32_FILE_ATTRIBUTE_DATA faData;
+//	WIN32_FILE_ATTRIBUTE_DATA faData;
 	Path->Attribs = GetFileAttributesW(Path->Resolved);
 
 	if (Path->Attribs == FILE_ATTRIBUTE_MOUNT){

@@ -28,7 +28,7 @@
  *
  */
 
-#include "sys/systm.h"
+#include "sys/syscall.h"
 
 #define MAXLINE		80
 #define MAXDEPTH	16
@@ -254,6 +254,11 @@ __setegid(WIN_TASK *Task, gid_t gid)
 	return(result);
 }
 int 
+sys_setegid(call_t call, gid_t gid)
+{
+	return(__setegid(call.Task, gid));
+}
+int 
 __setgid(WIN_TASK *Task, gid_t gid)
 {
 	int result = 0;
@@ -269,11 +274,6 @@ __setgid(WIN_TASK *Task, gid_t gid)
 		Task->RealGid = rid_posix(&Task->GroupSid);
 	}
 	return(result);
-}
-int 
-sys_setegid(call_t call, gid_t gid)
-{
-	return(__setegid(call.Task, gid));
 }
 int 
 sys_setgid(call_t call, gid_t gid)

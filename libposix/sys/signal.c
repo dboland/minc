@@ -317,30 +317,33 @@ int
 sys_sigaction(call_t call, int signum, const struct sigaction *act, struct sigaction *oldact)
 {
 	int result = 0;
-	WIN_SIGACTION *Actions = call.Task->Action;
-	struct sigaction *sigaction = (PVOID)&Actions[signum];
+	struct sigaction *action;
 	struct sigaction tmp = {0};
+	WIN_TASK *pwTask = call.Task;
 
+	if (signum < 0 || signum >= NSIG){
+		return(-EINVAL);
+	}else{
+		action = (PVOID)&pwTask->Action[signum];
+	}
 	if (oldact){
-		*oldact = *sigaction;
+		*oldact = *action;
 	}
 	if ((sig_t)act > SIG_IGN){
 		tmp = *act;
 	}else{
 		tmp.sa_handler = (sig_t)act;
 	}
-	if (signum < 0 || signum >= NSIG){
-		result = -EINVAL;
-	}else switch (signum){
+	if (pwTask->TracePoints & KTRFAC_STRUCT){
+		ktrace_STRUCT(pwTask, "sigaction", 9, &tmp, sizeof(struct sigaction));
+	}
+	switch (signum){
 		case SIGKILL:
 		case SIGSTOP:
 			result = -EINVAL;
 			break;
-//		case SIGINT:
-//			con_sigaction((BOOL)act);	/* ping.exe */
 		default:
-			*sigaction = tmp;
-			result = 0;
+			*action = tmp;
 	}
 	return(result);
 }

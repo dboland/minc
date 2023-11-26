@@ -195,6 +195,9 @@ media_attach(WIN_DEVICE *Device)
 		case DEV_TYPE_AUDIO:
 			bResult = config_found("audio", FS_TYPE_PDO, WIN_VCHR, Device);
 			break;
+		case DEV_TYPE_MAGTAPE:
+			bResult = config_found("mt", FS_TYPE_PDO, WIN_VCHR, Device);
+			break;
 		default:
 			bResult = FALSE;
 	}

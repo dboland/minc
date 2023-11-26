@@ -182,14 +182,13 @@ BOOL
 ws2_sendto(WIN_VNODE *Node, LPCSTR Buffer, UINT Size, DWORD Flags, CONST LPSOCKADDR To, UINT ToLen, DWORD *Result)
 {
 	BOOL bResult = TRUE;
-	UINT uiResult;
+	UINT uiResult = 0;
+	UINT uiFlags = Flags & ~WIN_MSG_NOSIGNAL;
 
 	/* On WinXP SP2 we get "A blocking operation was interrupted by
 	 * a call to WSACancelBlockingCall" (traceroute.exe).
 	 */
-	/* Not supported by Windows Sockets (git.exe pull) */
-	Flags &= ~(WIN_MSG_NOSIGNAL);
-	uiResult = sendto(Node->Socket, Buffer, Size, Flags, To, ToLen);
+	uiResult = sendto(Node->Socket, Buffer, Size, uiFlags, To, ToLen);
 	if (uiResult != SOCKET_ERROR){
 		*Result = uiResult;
 	}else{

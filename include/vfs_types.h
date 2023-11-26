@@ -32,7 +32,7 @@
 //#define WIN_PIPE_ROOT		L"\\\\.\\PIPE\\"
 #define WIN_PROCESS_ROOT	L"\\\\.\\GLOBALROOT\\"
 //#define WIN_VOLUME_ROOT		L"\\\\.\\"
-#define WIN_DEVICE_ROOT		L"\\??\\"
+//#define WIN_DEVICE_ROOT		L"\\??\\"
 
 typedef enum _WIN_FS_TYPE {
 	FS_TYPE_UNKNOWN,
