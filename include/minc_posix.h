@@ -34,10 +34,6 @@
 
 int group_member(gid_t gid);
 
-/* netdb.c */
-
-int h_errno_posix(WIN_TASK *Task, DWORD Error);
-
 /* compat.c */
 
 int runcmd(char *argv[]);

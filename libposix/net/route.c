@@ -234,6 +234,7 @@ route_NET_RT_DUMP(WIN_TASK *Task, void *buf, size_t *size)
 	PMIB_IPFORWARDROW pfwRow;
 	DWORD dwCount = 0;
 	MIB_IFROW ifRow;
+	DWORD dwResult;
 
 	if (!ws2_NET_RT_DUMP(&pfwTable, &pfwRow, &dwCount)){
 		result -= errno_posix(GetLastError());
@@ -241,10 +242,11 @@ route_NET_RT_DUMP(WIN_TASK *Task, void *buf, size_t *size)
 		*size = RTMSGLEN * dwCount;
 	}else while (dwCount--){
 		ifRow.dwIndex = pfwRow->dwForwardIfIndex;
-		if (ERROR_SUCCESS == GetIfEntry(&ifRow)){
+		dwResult = GetIfEntry(&ifRow);
+		if (dwResult == ERROR_SUCCESS){
 			buf = rtmsg_posix(buf, &ifRow, pfwRow);
 		}else{
-			result -= errno_posix(GetLastError());
+			result -= errno_posix(dwResult);
 			break;
 		}
 		pfwRow++;

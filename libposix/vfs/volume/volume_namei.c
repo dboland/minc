@@ -32,22 +32,23 @@
 
 /****************************************************/
 
-BOOL 
-raw_fstat(WIN_DEVICE *Device, WIN_VATTR *Result)
+BOOL
+vol_lookup(WIN_NAMEIDATA *Path, LONG MountId, DWORD Flags)
 {
-	BOOL bResult = FALSE;
-	PSECURITY_DESCRIPTOR psd;
+	BOOL bResult = TRUE;
+	WIN_MOUNT *pwMount = &__Mounts[MountId];
 
-	if (!win_acl_get_fd(Device->Handle, &psd)){
-		return(FALSE);
-	}else if (!GetFileInformationByHandle(Device->Handle, (BY_HANDLE_FILE_INFORMATION *)Result)){
-		WIN_ERR("GetFileInformationByHandle(%d): %s\n", Device->Handle, win_strerror(GetLastError()));
-	}else if (vfs_acl_stat(psd, Result)){
-		Result->DeviceId = __Mounts->DeviceId;
-		Result->Mode.FileType = Device->FileType;
-		Result->SpecialId = Device->DeviceId;
-		bResult = TRUE;
+	if (MountId < 0 || MountId >= WIN_MOUNT_MAX){
+		SetLastError(ERROR_BAD_ARGUMENTS);
+		bResult = FALSE;
+	}else if (pwMount->DeviceId){
+		Path->MountId = pwMount->MountId;
+		Path->DeviceType = pwMount->DeviceType;
+		Path->DeviceId = pwMount->DeviceId;
+		Path->FSType = pwMount->FSType;
+	}else{
+		Path->MountId = MountId;
 	}
-	LocalFree(psd);
+//VfsDebugPath(Path, "drive_lookup");
 	return(bResult);
 }

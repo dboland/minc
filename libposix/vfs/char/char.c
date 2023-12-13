@@ -32,7 +32,6 @@
 #include "ansi/vt100.c"
 #include "ansi/interix.c"
 #include "ansi/ansi.c"
-#include "char_raw.c"
 #include "char_null.c"
 #include "char_input.c"
 #include "char_screen.c"

@@ -30,33 +30,37 @@
 
 #include <ddk/mountmgr.h>
 
-#define MOUNTED_DEVICE_GUID		L"{53f5630d-b6bf-11d0-94f2-00a0c91efb8b}"
+#define MOUNTDEV_MOUNTED_DEVICE		L"{53f5630d-b6bf-11d0-94f2-00a0c91efb8b}"
 
 /****************************************************/
 
-WIN_DEVICE *
-drive_match(LPCWSTR NtName, DWORD DeviceType)
+BOOL 
+drive_match(LPCWSTR NtName, DWORD DeviceType, WIN_MOUNT *Mount)
 {
+	BOOL bResult = FALSE;
 	WIN_DEVICE *pwDevice = DEVICE(DeviceType);
 	USHORT sClass = DeviceType & 0xFF00;
 	USHORT sUnit = DeviceType & 0x00FF;
 
 	while (sUnit < WIN_UNIT_MAX){
 		if (!win_wcscmp(pwDevice->NtName, NtName)){
+			win_wcscpy(pwDevice->NtPath, Mount->Path);
+			bResult = TRUE;
 			break;
 		}else if (!pwDevice->Flags){
 			win_wcscpy(pwDevice->NtName, NtName);
-			win_wcscpy(pwDevice->ClassId, MOUNTED_DEVICE_GUID);
+			win_wcscpy(pwDevice->ClassId, MOUNTDEV_MOUNTED_DEVICE);
+			win_wcscpy(pwDevice->NtPath, Mount->Path);
 			pwDevice->DeviceType = DeviceType;
 			pwDevice->DeviceId = sClass + sUnit;
-			if (!config_attach(pwDevice)){
-				msvc_printf("Warning: storage device %ls (type 0x%x) not configured\n", NtName, DeviceType);
-			}
-//VfsDebugDevice(pwDevice, "drive_match");
+			bResult = config_attach(pwDevice);
 			break;
 		}
 		pwDevice++;
 		sUnit++;
 	}
-	return(pwDevice);
+	win_strcpy(Mount->Name, pwDevice->Name);
+	Mount->DeviceType = DeviceType;
+	Mount->Flags = pwDevice->Flags;
+	return(bResult);
 }

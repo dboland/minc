@@ -32,13 +32,66 @@
 
 /****************************************************/
 
+wchar_t *
+cfexpand(wchar_t *string)
+{
+	wchar_t *result = string;
+	wchar_t c;
+
+	/* Expand Vista formatted strings by skipping them.
+	 */
+	while (c = *string++){
+		if (c == ';' || c == '\\'){
+			result = string;
+		}
+	}
+	return(result);
+}
+int 
+msg_pdo(WIN_CFDATA *Config, WIN_CFDRIVER *Driver, LPSTR Result)
+{
+	LPSTR psz = Result;
+
+	if (Driver->Flags){
+		psz += msvc_sprintf(psz, "%s on ", Driver->Name);
+	}else{
+		psz += msvc_sprintf(psz, "+ not configured: ");
+	}
+	psz += msvc_sprintf(psz, "%ls at %ls", Config->NtName, Config->BusName);
+	psz += msvc_sprintf(psz, " %ls", cfexpand(Driver->Location));
+	psz += msvc_sprintf(psz, ", type 0x%x", Config->DeviceType);
+	psz += msvc_sprintf(psz, ", driver %ls:%ls", Driver->NtClass, Driver->Service);
+	psz += msvc_sprintf(psz, ", \"%ls\"", cfexpand(Driver->Comment));
+	*psz++ = '\n';
+	*psz = 0;
+	return(psz - Result);
+}
+int 
+msg_drive(WIN_CFDATA *Config, WIN_MOUNT *Mount, LPSTR Result)
+{
+	LPSTR psz = Result;
+
+	if (Mount->Flags){
+		psz += msvc_sprintf(psz, "%ls on ", Config->BusName);
+	}else{
+		psz += msvc_sprintf(psz, "+ not configured: ");
+	}
+	psz += msvc_sprintf(psz, "%ls at %s", Config->NtName, Mount->Name);
+	psz += msvc_sprintf(psz, ", type 0x%x", Config->DeviceType);
+	*psz++ = '\n';
+	*psz = 0;
+	return(psz - Result);
+}
+
+/****************************************************/
+
 int 
 msgbuf_KERN_MSGBUFSIZE(int *data, size_t *len)
 {
 	WIN_CFDATA cfData;
 	WIN_CFDRIVER cfDriver;
 	WIN_MOUNT wMount;
-	DWORD dwFlags = WIN_MNT_NOWAIT | WIN_MNT_REVERSED;
+	DWORD dwFlags = WIN_MNT_VFSFLAGS;
 	char *msgbuf = win_malloc(MSGBUFSIZE);
 	size_t bufsize = 0;
 	char *buf = msgbuf;
@@ -48,11 +101,11 @@ msgbuf_KERN_MSGBUFSIZE(int *data, size_t *len)
 	}else while (vfs_getvfs(&cfData, dwFlags)){
 		if (cfData.FSType == FS_TYPE_DRIVE){
 			drive_statvfs(&cfData, dwFlags, &wMount);
-			drive_match(wMount.NtName, wMount.DeviceType);
+			drive_match(cfData.NtName, cfData.DeviceType, &wMount);
 		}else if (cfData.FSType == FS_TYPE_PDO){
 			pdo_statvfs(&cfData, dwFlags, &cfDriver);
-			if (pdo_match(cfData.NtName, cfDriver.DeviceType, &cfDriver)){
-				bufsize += cfmessage(&cfData, &cfDriver, buf);
+			if (pdo_match(cfData.NtName, cfData.DeviceType, &cfDriver)){
+				bufsize += msg_pdo(&cfData, &cfDriver, buf);
 				msgbuf = win_realloc(msgbuf, bufsize + MSGBUFSIZE);
 				buf = msgbuf + bufsize;
 			}

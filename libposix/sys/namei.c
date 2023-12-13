@@ -30,10 +30,12 @@
 
 #include <sys/namei.h>
 
+#define PROCESS_ROOT	L"\\\\.\\GLOBALROOT\\"
+
 /****************************************************/
 
 char *
-pathnp_posix(char *dest, LPCWSTR Source, DWORD Size, BOOL EndPtr)
+pathnp_posix(char *dest, LPCWSTR Source, LONG Size, BOOL EndPtr)
 {
 	char *result = dest;
 	LPWSTR Root = __Mounts->Path;
@@ -43,12 +45,12 @@ pathnp_posix(char *dest, LPCWSTR Source, DWORD Size, BOOL EndPtr)
 	DWORD dwType = 0;
 	char buf[PATH_MAX], *src = buf;
 
-	if (!win_wcsncmp(Source, WIN_PROCESS_ROOT, 14)){
+	if (!win_wcsncmp(Source, PROCESS_ROOT, 14)){
 		Source += 14;
 	}
 	win_wcstombs(src, Source, Size);
 	if (!win_wcsncmp(Source, Root, len)){
-		*dest++ = '/';
+//		*dest++ = '/';
 		src += len;
 		Size--;
 	}else if (*src && src[1] == ':'){		/* MinGW ld.exe */
@@ -74,8 +76,6 @@ pathnp_posix(char *dest, LPCWSTR Source, DWORD Size, BOOL EndPtr)
 	dwType = type ? *(DWORD *)type : 0;
 	if (dwType == TypeNameLink){
 		*type = 0;		/* chop ".lnk" extension */
-	}else if (dwType == TypeNameVirtual){
-		*type = 0;		/* chop ".vfs" extension */
 	}
 	if (EndPtr){
 		result = dest;
@@ -103,8 +103,8 @@ pathp_posix(char *dest, LPCWSTR Source)
 const char *
 root_win(WIN_NAMEIDATA *Result, const char *path)
 {
-	if (!win_strncmp(path, "/proc/", 6)){
-		Result->R = win_wcpcpy(Result->Resolved, WIN_PROCESS_ROOT);
+	if (!win_strncmp(path, "/proc/", 6)){		/* vim.exe */
+		Result->R = win_wcpcpy(Result->Resolved, PROCESS_ROOT);
 		path += 6;
 	}else{
 		Result->R = win_wcpcpy(Result->Resolved, __Mounts->Path);
@@ -118,7 +118,7 @@ pathat_win(WIN_NAMEIDATA *Result, int dirfd, const char *path, int atflags)
 	WCHAR szPath[PATH_MAX] = L"";
 	size_t size;
 	WIN_TASK *pwTask = &__Tasks[CURRENT];
-	DWORD dwFlags = WIN_FOLLOW;
+	DWORD dwFlags = WIN_NOFOLLOW;
 
 	if (pwTask->TracePoints & KTRFAC_NAMEI){
 		ktrace_NAMEI(pwTask, path, win_strlen(path));
@@ -131,7 +131,7 @@ pathat_win(WIN_NAMEIDATA *Result, int dirfd, const char *path, int atflags)
 
 	if (dirfd > 0 && dirfd < OPEN_MAX){
 		vfs_F_GETPATH(&pwTask->Node[dirfd], Result);
-		*Result->R++ = '\\';		/* GNU rm.exe */
+//		*Result->R++ = '\\';		/* GNU rm.exe */
 
 	}else if (*path == '/'){
 		win_memcpy(Result, __Mounts, sizeof(WIN_INODE));
@@ -140,24 +140,31 @@ pathat_win(WIN_NAMEIDATA *Result, int dirfd, const char *path, int atflags)
 	}else if (path[1] == ':'){		/* MSYS sh.exe */
 		*Result->R++ = *path++;
 		*Result->R++ = *path++;
+		path++;
 
 	}else if (dirfd == AT_FDCWD){
 		win_memcpy(Result, &pwTask->Path, sizeof(WIN_INODE));
 		Result->R += win_wcslen(pwTask->Path.Name);
+
+	}else{
+		dwFlags |= WIN_PATHCOPY;
 
 	}
 
 	size = WIN_PATH_MAX - (Result->R - Result->Resolved);
 	win_mbstowcs(szPath, path, size);
 
-	if (atflags & AT_SYMLINK_NOFOLLOW){
-		dwFlags = WIN_NOFOLLOW;
+	if (!(atflags & AT_SYMLINK_NOFOLLOW)){
+		dwFlags |= WIN_FOLLOW;
 	}
-	if (atflags & AT_MOUNT_NOCROSS){
+	if (atflags & AT_NOCROSS){
 		dwFlags |= WIN_NOCROSSMOUNT;
 	}
 	if (atflags & AT_REMOVEDIR){
 		dwFlags |= WIN_REQUIREDIR;
+	}
+	if (atflags & AT_REQUIREDRIVE){
+		dwFlags |= WIN_REQUIREDRIVE;
 	}
 
 	return(vfs_lookup(Result, szPath, dwFlags));
@@ -172,26 +179,13 @@ path_win(WIN_NAMEIDATA *Result, const char *path, int flags)
 		atflags |= AT_SYMLINK_NOFOLLOW;
 	}
 	if (flags & O_NOCROSS){
-		atflags |= AT_MOUNT_NOCROSS;
+		atflags |= AT_NOCROSS;
 	}
 	if (flags & O_DIRECTORY){
 		atflags |= AT_REMOVEDIR;
+	}
+	if (flags & O_REQUIREDRIVE){
+		atflags |= AT_REQUIREDRIVE;
 	}
 	return(pathat_win(Result, AT_FDCWD, path, atflags));
-}
-WIN_NAMEIDATA *
-fdpath_win(WIN_NAMEIDATA *Result, const int fd, int flags)
-{
-	int atflags = AT_SYMLINK_FOLLOW;
-
-	if (flags & O_NOFOLLOW){
-		atflags |= AT_SYMLINK_NOFOLLOW;
-	}
-	if (flags & O_NOCROSS){
-		atflags |= AT_MOUNT_NOCROSS;
-	}
-	if (flags & O_DIRECTORY){
-		atflags |= AT_REMOVEDIR;
-	}
-	return(pathat_win(Result, fd, "", atflags));
 }

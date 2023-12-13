@@ -89,16 +89,13 @@ system_attach(WIN_DEVICE *Device)
 			bResult = config_found("swd", FS_TYPE_PDO, WIN_VCHR, Device);
 			break;
 		case DEV_TYPE_IDE:
-			bResult = config_found("ide", FS_TYPE_PDO, WIN_VBLK, Device);
+			bResult = config_found("ide", FS_TYPE_PDO, WIN_VCHR, Device);
 			break;
 		case DEV_TYPE_OHCI:
 			bResult = config_found("ohci", FS_TYPE_PDO, WIN_VCHR, Device);
 			break;
 		case DEV_TYPE_ACPI:
 			bResult = config_found("acpi", FS_TYPE_PDO, WIN_VCHR, Device);
-			break;
-		case DEV_TYPE_ROOT:
-			bResult = config_found("root", FS_TYPE_PDO, WIN_VBLK, Device);
 			break;
 		default:
 			bResult = FALSE;
@@ -129,7 +126,7 @@ disk_attach(WIN_DEVICE *Device)
 
 	switch (Device->DeviceType){
 		case DEV_TYPE_WD:
-			bResult = config_found("wd", FS_TYPE_PDO, WIN_VBLK, Device);
+			bResult = config_found("hdc", FS_TYPE_PDO, WIN_VBLK, Device);
 			break;
 		case DEV_TYPE_FDC:
 			bResult = config_found("fdc", FS_TYPE_PDO, WIN_VBLK, Device);
@@ -138,10 +135,10 @@ disk_attach(WIN_DEVICE *Device)
 			bResult = config_found("ahci", FS_TYPE_PDO, WIN_VBLK, Device);
 			break;
 		case DEV_TYPE_SD:
-			bResult = config_found("sd", FS_TYPE_PDO, WIN_VBLK, Device);
+			bResult = config_found("scsi", FS_TYPE_PDO, WIN_VBLK, Device);
 			break;
-		case DEV_TYPE_USBSTOR:
-			bResult = config_found("umass", FS_TYPE_PDO, WIN_VBLK, Device);
+		case DEV_TYPE_USB:
+			bResult = config_found("usb", FS_TYPE_PDO, WIN_VBLK, Device);
 			break;
 		default:
 			bResult = FALSE;
@@ -307,7 +304,10 @@ storage_attach(WIN_DEVICE *Device)
 
 	switch (Device->DeviceType){
 		case DEV_TYPE_VOLUME:
-			bResult = config_found("vol", FS_TYPE_DRIVE, WIN_VBLK, Device);
+			bResult = config_found("vol", FS_TYPE_PDO, WIN_VBLK, Device);
+			break;
+		case DEV_TYPE_FIXED:
+			bResult = config_found("wd", FS_TYPE_DRIVE, WIN_VBLK, Device);
 			break;
 		case DEV_TYPE_CDROM:
 			bResult = config_found("cd", FS_TYPE_DRIVE, WIN_VBLK, Device);
@@ -317,6 +317,9 @@ storage_attach(WIN_DEVICE *Device)
 			break;
 		case DEV_TYPE_REMOTE:
 			bResult = config_found("smb", FS_TYPE_DRIVE, WIN_VBLK, Device);
+			break;
+		case DEV_TYPE_USBSTOR:
+			bResult = config_found("sd", FS_TYPE_DRIVE, WIN_VBLK, Device);
 			break;
 		default:
 			bResult = FALSE;

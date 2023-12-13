@@ -213,7 +213,7 @@ ScreenMultiByte(HANDLE Handle, LPCSTR Buffer, DWORD *Result)
 /****************************************************/
 
 BOOL 
-screen_TIOCGWINSZ(HANDLE Handle, WIN_WINSIZE *WinSize)
+screen_TIOCGWINSZ(HANDLE Handle, WIN_WINSIZE *Result)
 {
 	CONSOLE_SCREEN_BUFFER_INFO sbInfo;
 	BOOL bResult = FALSE;
@@ -221,10 +221,10 @@ screen_TIOCGWINSZ(HANDLE Handle, WIN_WINSIZE *WinSize)
 	if (!GetConsoleScreenBufferInfo(Handle, &sbInfo)){
 		WIN_ERR("GetConsoleScreenBufferInfo(%d): %s\n", Handle, win_strerror(GetLastError()));
 	}else{
-		WinSize->Column = (sbInfo.srWindow.Right - sbInfo.srWindow.Left) + 1;
-		WinSize->Row = (sbInfo.srWindow.Bottom - sbInfo.srWindow.Top) + 1;
-		WinSize->XPixel = sbInfo.dwCursorPosition.X + 1;
-		WinSize->YPixel = sbInfo.dwCursorPosition.Y + 1;
+		Result->Column = (sbInfo.srWindow.Right - sbInfo.srWindow.Left) + 1;
+		Result->Row = (sbInfo.srWindow.Bottom - sbInfo.srWindow.Top) + 1;
+		Result->XPixel = sbInfo.dwCursorPosition.X + 1;
+		Result->YPixel = sbInfo.dwCursorPosition.Y + 1;
 		bResult = TRUE;
 	}
 	return(bResult);

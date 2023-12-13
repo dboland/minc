@@ -39,10 +39,10 @@ char_fstat(WIN_VNODE *Node, WIN_VATTR *Result)
 
 	switch (Node->DeviceType){
 		case DEV_TYPE_NULL:
-			bResult = pipe_fstat(Node, Result);
+			bResult = PipeStatFile(Node, Result);
 			break;
 		default:
-			bResult = raw_fstat(DEVICE(Node->DeviceId), Result);
+			bResult = CharStatFile(DEVICE(Node->DeviceId), Result);
 	}
 	return(bResult);
 }

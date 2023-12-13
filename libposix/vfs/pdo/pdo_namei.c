@@ -35,39 +35,72 @@ GENERIC_MAPPING AccessMap = {WIN_S_IREAD, WIN_S_IWRITE, WIN_S_IEXEC, WIN_S_IRWX}
 /****************************************************/
 
 BOOL 
-DevOpenFile(WIN_NAMEIDATA *Path, WIN_FLAGS *Flags, WIN_VNODE *Result)
+PdoOpenFile(WIN_NAMEIDATA *Path, WIN_FLAGS *Flags, WIN_VNODE *Result)
 {
 	BOOL bResult = FALSE;
-	HANDLE hResult;
+
+	Result->DeviceType = Path->DeviceType;
+	Result->DeviceId = Path->DeviceId;
+	Result->FileType = Path->FileType;
+	Result->FSType = FS_TYPE_PDO;
+	Result->Handle = Path->Handle;
+	Result->Attribs = Flags->Attribs;
+	Result->CloseExec = Flags->CloseExec;
+	Result->Flags = win_F_GETFD(Path->Handle);
+//	Result->Access = win_F_GETFL(Path->Handle);
+	Result->Access = Flags->Access;
+	MapGenericMask(&Result->Access, &AccessMap);
+	Result->Device = DEVICE(Path->DeviceId);
+	return(TRUE);
+}
+BOOL 
+PdoStatFile(HANDLE Handle, WIN_VATTR *Result)
+{
+	BOOL bResult = FALSE;
+	PSECURITY_DESCRIPTOR psd;
+
+	if (!win_acl_get_fd(Handle, &psd)){
+		return(FALSE);
+	}else if (!GetFileInformationByHandle(Handle, (BY_HANDLE_FILE_INFORMATION *)Result)){
+		WIN_ERR("GetFileInformationByHandle(%d): %s\n", Handle, win_strerror(GetLastError()));
+	}else if (vfs_acl_stat(psd, Result)){
+		Result->DeviceId = __Mounts->DeviceId;
+		bResult = TRUE;
+	}
+	LocalFree(psd);
+	return(bResult);
+}
+
+/****************************************************/
+
+BOOL 
+pdo_lookup(WIN_NAMEIDATA *Path, DWORD Flags)
+{
+	BOOL bResult = FALSE;
 	WIN_INODE iNode;
 	DWORD dwSize = sizeof(WIN_INODE);
 	WIN_DEVICE *pwDevice;
+	HANDLE hResult;
 	SECURITY_ATTRIBUTES sa = {sizeof(sa), NULL, TRUE};
 
-	hResult = CreateFileW(Path->Resolved, GENERIC_READ, FILE_SHARE_READ, &sa, 
-		OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, NULL);
+	hResult = CreateFileW(Path->Resolved, GENERIC_READ, FILE_SHARE_READ, 
+		&sa, OPEN_EXISTING, FILE_ATTRIBUTE_SYSTEM, NULL);
 	if (hResult == INVALID_HANDLE_VALUE){
-		return(FALSE);
+		WIN_ERR("pdo_lookup(%ls): %s\n", Path->Resolved, win_strerror(GetLastError()));
 	}else if (!ReadFile(hResult, &iNode, dwSize, &dwSize, NULL)){
-		WIN_ERR("DevOpenFile(%ls): %s\n", Path->Resolved, win_strerror(GetLastError()));
+		WIN_ERR("ReadFile(%ls): %s\n", Path->Resolved, win_strerror(GetLastError()));
 	}else if (iNode.Magic != TypeNameVirtual){
 		SetLastError(ERROR_BAD_DEVICE);
 	}else{
 		pwDevice = DEVICE(iNode.DeviceId);
-		Result->Handle = hResult;
-		Result->FSType = FS_TYPE_PDO;
-		Result->FileType = iNode.FileType;
-		Result->DeviceType = pwDevice->DeviceType;
-		Result->DeviceId = iNode.DeviceId;
-		Result->Attribs = Flags->Attribs;
-		Result->CloseExec = Flags->CloseExec;
-		Result->Flags = win_F_GETFD(hResult);
-//		Result->Access = win_F_GETFL(hResult);
-		Result->Access = Flags->Access;
-		MapGenericMask(&Result->Access, &AccessMap);
-		Result->Device = pwDevice;
+		Path->DeviceType = pwDevice->DeviceType;
+		Path->DeviceId = iNode.DeviceId;
+		Path->FileType = iNode.FileType;
+		Path->FSType = FS_TYPE_PDO;
+		Path->Handle = hResult;
 		bResult = TRUE;
-//VfsDebugDevice(pDevice, "DevOpenFile");
+//VfsDebugPath(Path, "pdo_lookup");
 	}
 	return(bResult);
 }
+

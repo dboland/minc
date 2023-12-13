@@ -366,7 +366,7 @@ sys_fchdir(call_t call, int fildes)
 	WIN_NAMEIDATA wPath;
 	WIN_TASK *pwTask = call.Task;
 
-	if (!vfs_chdir(pwTask, fdpath_win(&wPath, fildes, 0))){
+	if (!vfs_chdir(pwTask, pathat_win(&wPath, fildes, "", AT_REQUIREDRIVE))){
 		result -= errno_posix(GetLastError());
 	}
 	return(result);
@@ -378,7 +378,7 @@ sys_chdir(call_t call, const char *path)
 	WIN_NAMEIDATA wPath;
 	WIN_TASK *pwTask = call.Task;
 
-	if (!vfs_chdir(pwTask, path_win(&wPath, path, 0))){
+	if (!vfs_chdir(pwTask, path_win(&wPath, path, O_REQUIREDRIVE))){
 		result -= errno_posix(GetLastError());
 	}
 	return(result);
@@ -438,14 +438,14 @@ sys_symlinkat(call_t call, const char *name1, int fd, const char *name2)
 {
 	WIN_NAMEIDATA wnTarget;
 
-	return(__symlinkat(pathat_win(&wnTarget, 0, name1, 0), fd, name2));
+	return(__symlinkat(pathat_win(&wnTarget, 0, name1, AT_REQUIREDRIVE), fd, name2));
 }
 int 
 sys_symlink(call_t call, const char *name1, const char *name2)
 {
 	WIN_NAMEIDATA wnTarget;
 
-	return(__symlinkat(pathat_win(&wnTarget, 0, name1, 0), AT_FDCWD, name2));
+	return(__symlinkat(pathat_win(&wnTarget, 0, name1, AT_REQUIREDRIVE), AT_FDCWD, name2));
 }
 int 
 __faccessat(int dirfd, const char *pathname, int mode, int flags)

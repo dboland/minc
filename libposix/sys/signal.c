@@ -204,10 +204,10 @@ sigproc_win(DWORD CtrlType, CONTEXT *Context)
 			signum = SIGTSTP;
 			break;
 		case CTRL_LOGOFF_EVENT:
-		case CTRL_CLOSE_EVENT:
+		case CTRL_SHUTDOWN_EVENT:
 			signum = SIGKILL;		/* cannot be caught or ignored */
 			break;
-		case CTRL_SHUTDOWN_EVENT:
+		case CTRL_CLOSE_EVENT:
 			signum = SIGTERM;		/* default of kill command */
 			break;
 		case CTRL_ACCESS_VIOLATION_EVENT:

@@ -45,7 +45,10 @@
 /* sys/fcntl.c */
 
 #define O_NOCROSS		0x1000
-#define AT_MOUNT_NOCROSS	0x10
+#define O_REQUIREDRIVE		0x2000
+
+#define AT_NOCROSS		0x10
+#define AT_REQUIREDRIVE		0x20
 
 /* sys/signal.c */
 

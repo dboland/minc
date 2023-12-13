@@ -28,12 +28,6 @@
  *
  */
 
-//#define WIN_MAILSLOT_ROOT	L"\\\\.\\MAILSLOT\\"
-//#define WIN_PIPE_ROOT		L"\\\\.\\PIPE\\"
-#define WIN_PROCESS_ROOT	L"\\\\.\\GLOBALROOT\\"
-//#define WIN_VOLUME_ROOT		L"\\\\.\\"
-//#define WIN_DEVICE_ROOT		L"\\??\\"
-
 typedef enum _WIN_FS_TYPE {
 	FS_TYPE_UNKNOWN,
 	FS_TYPE_DISK,
@@ -102,9 +96,9 @@ typedef enum _WIN_VTAGTYPE {
 #define TypeNameVirtual			0x7366762E	/* ".vfs" */
 
 #define FILE_ATTRIBUTE_SYMLINK		0x00000008
-#define FILE_ATTRIBUTE_TRAVERSE		(FILE_ATTRIBUTE_HIDDEN | FILE_ATTRIBUTE_SYSTEM)
+#define FILE_ATTRIBUTE_PDO		(FILE_ATTRIBUTE_ARCHIVE | FILE_ATTRIBUTE_SYSTEM)
 #define FILE_ATTRIBUTE_MOUNT		(FILE_ATTRIBUTE_DIRECTORY | FILE_ATTRIBUTE_SYSTEM)
-#define FILE_ATTRIBUTE_VFS		(FILE_ATTRIBUTE_HIDDEN | FILE_ATTRIBUTE_SYSTEM | FILE_ATTRIBUTE_DIRECTORY)
+#define FILE_ATTRIBUTE_VOLUME		(FILE_ATTRIBUTE_HIDDEN | FILE_ATTRIBUTE_DIRECTORY | FILE_ATTRIBUTE_SYSTEM)
 
 #define WIN_SYMLOOP_MAX			8
 
@@ -124,8 +118,10 @@ typedef struct _WIN_NAMEIDATA {
 	DWORD DeviceId;
 	WIN_FS_TYPE FSType;
 	WCHAR Resolved[WIN_PATH_MAX];
+	HANDLE Handle;
 	DWORD Attribs;
 	DWORD Flags;			/* see below */
+	WCHAR *Base;
 	WCHAR *Last;
 	WCHAR *R;			/* current WCHAR in resolved path buffer */
 	WCHAR *S;			/* current WCHAR in source path buffer */
@@ -138,6 +134,7 @@ typedef struct _WIN_NAMEIDATA {
 #define WIN_FOLLOW		0x000040	/* follow symbolic links */
 #define WIN_NOFOLLOW		0x000000	/* do not follow symbolic links (pseudo) */
 #define WIN_MODMASK		0x0000fc	/* mask of operational modifiers */
+
 #define WIN_NOCROSSMOUNT	0x000100	/* do not cross mount points */
 #define WIN_RDONLY		0x000200	/* lookup with read-only semantics */
 #define WIN_HASBUF		0x000400	/* has allocated pathname buffer */
@@ -150,6 +147,9 @@ typedef struct _WIN_NAMEIDATA {
 #define WIN_REQUIREDIR		0x080000	/* must be a directory */
 #define WIN_STRIPSLASHES	0x100000	/* strip trailing slashes */
 #define WIN_PDIRUNLOCK		0x200000	/* vfs_lookup() unlocked parent dir */
+
+#define WIN_REQUIREDRIVE	0x400000
+#define WIN_PATHCOPY		0x800000
 
 /*
  * vfs_termio.c
@@ -207,6 +207,7 @@ typedef struct _WIN_DEVICE {
 	DWORD Index;
 	WCHAR NtName[MAX_NAME];
 	WCHAR ClassId[MAX_GUID];
+	WCHAR NtPath[MAX_PATH];
 } WIN_DEVICE;
 
 #define WIN_DVF_BUS_READY		0x0100
@@ -239,6 +240,7 @@ typedef struct _WIN_CFDATA {
 	LPWSTR Strings;
 	LPCWSTR Next;
 	DWORD FSType;
+	DWORD DeviceType;
 	LPCWSTR DosPath;
 	LPCWSTR NtName;
 	DWORD Depth;
@@ -338,13 +340,13 @@ typedef struct _WIN_MOUNT {
 	DWORD DeviceType;
 	DWORD DeviceId;
 	WIN_FS_TYPE FSType;
-	WCHAR Path[MAX_PATH];
+	CHAR Name[MAX_NAME];
 	DWORD VolumeSerial;
 	DWORD Flags;
 	FILETIME Time;
 	UINT DriveType;
 	WCHAR Drive[MAX_LABEL];
-	WCHAR NtName[MAX_NAME];
+	WCHAR Path[MAX_PATH];
 } WIN_MOUNT;
 
 typedef struct _WIN_STATFS {
@@ -374,6 +376,8 @@ typedef struct _WIN_STATFS {
 #define WIN_MNT_WANTRDWR	0x02000000	/* want upgrade to read/write */
 #define WIN_MNT_SOFTDEP		0x04000000	/* soft dependencies being done */
 #define WIN_MNT_DOOMED		0x08000000	/* device behind filesystem is gone */
+
+#define WIN_MNT_VFSFLAGS	WIN_MNT_NOWAIT | WIN_MNT_REVERSED
 
 /*
  * vfs_stat.c

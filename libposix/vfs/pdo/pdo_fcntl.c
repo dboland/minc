@@ -67,19 +67,20 @@ pdo_open(WIN_NAMEIDATA *Path, WIN_FLAGS *Flags, WIN_MODE *Mode, WIN_VNODE *Resul
 {
 	BOOL bResult = FALSE;
 
-	if (!DevOpenFile(Path, Flags, Result)){
+//	if (!pwDevice->Flags){
+//		SetLastError(ERROR_DEVICE_NOT_AVAILABLE);
+//	}else 
+	if (!PdoOpenFile(Path, Flags, Result)){
 		return(FALSE);
-	}else if (!Result->Device->Flags){
-		SetLastError(ERROR_DEVICE_NOT_AVAILABLE);
-	}else switch (Result->DeviceType){
+	}else switch (Path->DeviceType){
 		case DEV_TYPE_CONSOLE:
-			bResult = config_activate(Result->Device, Result);
+			bResult = config_activate(DEVICE(Path->DeviceId), Result);
 			break;
 		case DEV_CLASS_TTY:
 			bResult = tty_open(DEVICE(__CTTY->DeviceId), Flags, Result);
 			break;
 		case DEV_TYPE_NULL:
-			bResult = null_open(Result->Device, Flags, Result);
+			bResult = null_open(DEVICE(Path->DeviceId), Flags, Result);
 			break;
 //		case DEV_TYPE_INPUT:
 //			bResult = char_open("CONIN$", Flags, Result);

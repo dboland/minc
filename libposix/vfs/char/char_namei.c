@@ -57,6 +57,25 @@ CharOpenFile(LPCSTR Name, WIN_FLAGS *Flags, PSECURITY_ATTRIBUTES sa)
 	}
 	return(hResult);
 }
+BOOL 
+CharStatFile(WIN_DEVICE *Device, WIN_VATTR *Result)
+{
+	BOOL bResult = FALSE;
+	PSECURITY_DESCRIPTOR psd;
+
+	if (!win_acl_get_fd(Device->Handle, &psd)){
+		return(FALSE);
+	}else if (!GetFileInformationByHandle(Device->Handle, (BY_HANDLE_FILE_INFORMATION *)Result)){
+		WIN_ERR("GetFileInformationByHandle(%d): %s\n", Device->Handle, win_strerror(GetLastError()));
+	}else if (vfs_acl_stat(psd, Result)){
+		Result->DeviceId = __Mounts->DeviceId;
+		Result->Mode.FileType = Device->FileType;
+		Result->SpecialId = Device->DeviceId;
+		bResult = TRUE;
+	}
+	LocalFree(psd);
+	return(bResult);
+}
 
 /****************************************************/
 

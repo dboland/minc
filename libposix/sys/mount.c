@@ -67,7 +67,7 @@ fsflags_posix(DWORD Flags)
 struct statfs *
 statfs_posix(struct statfs *buf, WIN_STATFS *Stat)
 {
-	WIN_DEVICE *pDevice = DEVICE(Stat->DeviceId);
+	WIN_DEVICE *pwDevice = DEVICE(Stat->DeviceId);
 
 	win_bzero(buf, sizeof(struct statfs));
 
@@ -89,8 +89,7 @@ statfs_posix(struct statfs *buf, WIN_STATFS *Stat)
 	pathn_posix(buf->f_mntonname, win_wcslcase((LPWSTR)Stat->Drive), MNAMELEN);
 
 	/* mounted file system */
-//	win_strncpy(win_stpcpy(buf->f_mntfromname, "/dev/"), win_strlcase(pDevice->Name), MNAMELEN - 5);
-	win_strncpy(win_stpcpy(buf->f_mntfromname, "/dev/"), pDevice->Name, MNAMELEN - 5);
+	win_strncpy(win_stpcpy(buf->f_mntfromname, "/dev/"), pwDevice->Name, MNAMELEN - 5);
 
 	/* special for mount request */
 	win_strncpy(buf->f_mntfromspec, buf->f_mntfromname, MNAMELEN);
@@ -101,46 +100,43 @@ statfs_posix(struct statfs *buf, WIN_STATFS *Stat)
 /****************************************************/
 
 int
-mount_NTFS(WIN_TASK *Task, const char *dir, struct ntfs_args *args)
+mount_NTFS(WIN_NAMEIDATA *Path, struct ntfs_args *args)
 {
 	int result = 0;
-	WIN_NAMEIDATA wPath;
+	WIN_NAMEIDATA wdPath = {0};
 	WIN_MODE wMode;
-	WIN_VATTR wAttr;
 
-	if (!vfs_stat(path_win(&wPath, args->fspec, O_NOFOLLOW), &wAttr)){
+	if (path_win(&wdPath, args->fspec, O_NOFOLLOW)->Attribs == -1){
 		result -= errno_posix(GetLastError());
-	}else if (!drive_mount(path_win(&wPath, dir, O_NOCROSS), &wAttr, mode_win(&wMode, args->mode))){
+	}else if (!drive_mount(Path, DEVICE(wdPath.DeviceId), mode_win(&wMode, args->mode))){
 		result -= errno_posix(GetLastError());
 	}
 	return(result);
 }
 int
-mount_MSDOS(WIN_TASK *Task, const char *dir, struct msdosfs_args *args)
+mount_MSDOS(WIN_NAMEIDATA *Path, struct msdosfs_args *args)
 {
 	int result = 0;
-	WIN_NAMEIDATA wPath;
+	WIN_NAMEIDATA wdPath = {0};
 	WIN_MODE wMode;
-	WIN_VATTR wAttr;
 
-	if (!vfs_stat(path_win(&wPath, args->fspec, O_NOFOLLOW), &wAttr)){
+	if (path_win(&wdPath, args->fspec, O_NOFOLLOW)->Attribs == -1){
 		result -= errno_posix(GetLastError());
-	}else if (!drive_mount(path_win(&wPath, dir, O_NOCROSS), &wAttr, mode_win(&wMode, args->mask))){
+	}else if (!drive_mount(Path, DEVICE(wdPath.DeviceId), mode_win(&wMode, args->mask))){
 		result -= errno_posix(GetLastError());
 	}
 	return(result);
 }
 int
-mount_CD9660(WIN_TASK *Task, const char *dir, struct iso_args *args)
+mount_CD9660(WIN_NAMEIDATA *Path, struct iso_args *args)
 {
 	int result = 0;
-	WIN_NAMEIDATA wPath;
+	WIN_NAMEIDATA wdPath = {0};
 	WIN_MODE wMode;
-	WIN_VATTR wAttr;
 
-	if (!vfs_stat(path_win(&wPath, args->fspec, O_NOFOLLOW), &wAttr)){
+	if (path_win(&wdPath, args->fspec, O_NOFOLLOW)->Attribs == -1){
 		result -= errno_posix(GetLastError());
-	}else if (!drive_mount(path_win(&wPath, dir, O_NOCROSS), &wAttr, mode_win(&wMode, 0666))){
+	}else if (!drive_mount(Path, DEVICE(wdPath.DeviceId), mode_win(&wMode, 0666))){
 		result -= errno_posix(GetLastError());
 	}
 	return(result);
@@ -152,16 +148,16 @@ int
 sys_mount(call_t call, const char *type, const char *dir, int flags, void *data)
 {
 	int result = 0;
-	WIN_TASK *pwTask = call.Task;
+	WIN_NAMEIDATA wPath = {0};
 
 	if (!win_strcmp(type, MOUNT_NTFS)){
-		result = mount_NTFS(pwTask, dir, (struct ntfs_args *)data);
+		result = mount_NTFS(path_win(&wPath, dir, 0), (struct ntfs_args *)data);
 
 	}else if (!win_strcmp(type, MOUNT_MSDOS)){
-		result = mount_MSDOS(pwTask, dir, (struct msdosfs_args *)data);
+		result = mount_MSDOS(path_win(&wPath, dir, 0), (struct msdosfs_args *)data);
 
 	}else if (!win_strcmp(type, MOUNT_CD9660)){
-		result = mount_CD9660(pwTask, dir, (struct iso_args *)data);
+		result = mount_CD9660(path_win(&wPath, dir, 0), (struct iso_args *)data);
 
 	}else{
 		result = -EOPNOTSUPP;
@@ -173,7 +169,7 @@ int
 sys_unmount(call_t call, const char *dir, int flags)
 {
 	int result = 0;
-	WIN_NAMEIDATA wPath;
+	WIN_NAMEIDATA wPath = {0};
 
 	if (!drive_unmount(path_win(&wPath, dir, O_NOCROSS))){
 		result -= errno_posix(GetLastError());
@@ -202,7 +198,7 @@ sys_fstatfs(call_t call, int fd, struct statfs *buf)
 	WIN_NAMEIDATA wPath;
 	WIN_TASK *pwTask = call.Task;
 
-	if (!drive_statfs(fdpath_win(&wPath, fd, 0), &fsInfo)){
+	if (!drive_statfs(pathat_win(&wPath, fd, "", AT_SYMLINK_FOLLOW), &fsInfo)){
 		result -= errno_posix(GetLastError());
 	}else{
 		statfs_posix(buf, &fsInfo);

@@ -79,8 +79,7 @@ DWORD		__TaskId;
 SEQUENCE 	__ANSI_BUF;
 CHAR		__INPUT_BUF[WIN_MAX_INPUT + 2];
 UCHAR 		__Char;
-HGLOBAL		__Lock;				/* Clipboard lock */
-LPCSTR		__Clipboard;
+HGLOBAL		__Lock;			/* Clipboard lock */
 
 WIN_SESSION	*__Session;
 WIN_TASK	*__Tasks;
@@ -92,10 +91,11 @@ LARGE_INTEGER	*__Globals;
 WIN_TERMIO 	*__CTTY;
 CHAR 		*__Escape;
 CHAR		*__Input = __INPUT_BUF;
+CONST CHAR	*__Clipboard;		/* Clipboard buffer */
 
 BOOL vfs_namei(HANDLE Handle, DWORD Index, WIN_VNODE *Result);
 BOOL proc_poll(VOID);
-//BOOL vfs_F_DUPFD(WIN_VNODE *Node, BOOL CloseExec, WIN_VNODE *Result);
+BOOL vfs_readlink(WIN_NAMEIDATA *Path, BOOL MakeReal);
 
 #include "vfs_acl.c"
 #include "vfs_debug.c"
@@ -106,8 +106,8 @@ BOOL proc_poll(VOID);
 #include "registry/registry.c"
 #include "pipe/pipe.c"
 #include "char/char.c"
-#include "pdo/pdo.c"
 #include "drive/drive.c"
+#include "pdo/pdo.c"
 #include "disk/disk.c"
 #include "volume/volume.c"
 #include "mailslot/mailslot.c"
@@ -117,8 +117,8 @@ BOOL proc_poll(VOID);
 #include "vfs_fcntl.c"
 #include "vfs_stdlib.c"
 #include "vfs_unistd.c"
-#include "vfs_namei.c"
 #include "vfs_syscall.c"
+#include "vfs_namei.c"
 #include "process/process.c"
 #include "vfs_uio.c"
 #include "vfs_filio.c"

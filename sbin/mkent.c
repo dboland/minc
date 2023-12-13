@@ -45,7 +45,6 @@
 #include "win/iphlpapi.h"
 #include "win/aclapi.h"
 #include "win_posix.h"
-#include "dev_types.h"
 #include "vfs_posix.h"
 #include "ws2_posix.h"
 #include "msvc_posix.h"
@@ -68,23 +67,23 @@ int _paths;
 /****************************************************/
 
 void 
-print_fsent(WIN_MOUNT *Mount, WIN_STATFS *Stat, LPCWSTR TypeName, DWORD Flags)
+print_fsent(WIN_STATFS *Stat, WIN_MOUNT *Mount)
 {
 	char path[MAXPATHLEN];
 	char line[255], *l = line;
-	WIN_DEVICE *pDevice = drive_match(Mount->NtName, Mount->DeviceType);
+	LPWSTR pszTypeName = Stat->TypeName;
 
-	l += sprintf(l, "/dev/%s", pDevice->Name);
-	l += sprintf(l, "\t%s", path_posix(path, win_wcslcase((LPWSTR)Stat->Drive)));
+	l += sprintf(l, "/dev/%s", Mount->Name);
+	l += sprintf(l, "\t%s", path_posix(path, win_wcslcase((LPWSTR)Mount->Drive)));
 
-	if (!wcsncmp(TypeName, L"FAT", 3)){
+	if (!wcsncmp(pszTypeName, L"FAT", 3)){
 		l += sprintf(l, "\tmsdos");
-	}else if (!wcscmp(TypeName, L"ISO9660")){
+	}else if (!wcscmp(pszTypeName, L"ISO9660")){
 		l += sprintf(l, "\tcd9660");
 	}else{
-		l += sprintf(l, "\t%ls", win_wcslcase((LPWSTR)TypeName));
+		l += sprintf(l, "\t%ls", win_wcslcase(pszTypeName));
 	}
-	if (Flags & FILE_READ_ONLY_VOLUME){
+	if (Stat->Flags & FILE_READ_ONLY_VOLUME){
 		l += sprintf(l, "\tro");
 	}else{
 		l += sprintf(l, "\trw");
@@ -92,9 +91,10 @@ print_fsent(WIN_MOUNT *Mount, WIN_STATFS *Stat, LPCWSTR TypeName, DWORD Flags)
 	switch (Mount->DriveType){
 		case DRIVE_REMOVABLE:
 		case DRIVE_CDROM:
+		case DRIVE_REMOTE:
 			l += sprintf(l, ",noauto");
 	}
-	if (!(Flags & FILE_PERSISTENT_ACLS)){
+	if (!(Stat->Flags & FILE_PERSISTENT_ACLS)){
 		l += sprintf(l, ",nosuid");
 	}
 
@@ -211,7 +211,7 @@ mk_fstab(FILE *stream)
 	int result = 0;
 	WIN_MOUNT wMount;
 	WIN_CFDATA cfData;
-	DWORD dwFlags = WIN_MNT_NOWAIT | WIN_MNT_REVERSED;
+	DWORD dwFlags = WIN_MNT_VFSFLAGS;
 	WIN_STATFS wsInfo;
 	WIN_CFDRIVER cfDriver;
 
@@ -219,16 +219,14 @@ mk_fstab(FILE *stream)
 		fprintf(stderr, "vol_setfsstat(): %s\n", win_strerror(errno_win()));
 	}else while (vfs_getvfs(&cfData, dwFlags)){
 		if (cfData.FSType == FS_TYPE_DRIVE){
-			if (!drive_statvfs(&cfData, dwFlags, &wMount)){
-				drive_match(wMount.NtName, wMount.DeviceType);
-			}else if (drive_getfsstat(&wMount, dwFlags, &wsInfo)){
-				print_fsent(&wMount, &wsInfo, wsInfo.TypeName, wsInfo.Flags);
-			}else{
-				drive_match(wMount.NtName, wMount.DeviceType);
+			drive_statvfs(&cfData, dwFlags, &wMount);
+			drive_match(cfData.NtName, cfData.DeviceType, &wMount);
+			if (drive_getfsstat(&wMount, dwFlags, &wsInfo)){
+				print_fsent(&wsInfo, &wMount);
 			}
 		}else if (cfData.FSType == FS_TYPE_PDO){
 			pdo_statvfs(&cfData, dwFlags, &cfDriver);
-			pdo_match(cfData.NtName, cfDriver.DeviceType, &cfDriver);
+			pdo_match(cfData.NtName, cfData.DeviceType, &cfDriver);
 		}
 	}
 	vfs_endvfs(&cfData);

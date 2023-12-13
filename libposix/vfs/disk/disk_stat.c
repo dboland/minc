@@ -37,7 +37,6 @@ disk_fstat(WIN_VNODE *Node, WIN_VATTR *Result)
 {
 	BOOL bResult = FALSE;
 
-//VfsDebugNode(Node, "disk_fstat");
 	switch (Node->FileType){
 		case WIN_VDIR:
 			bResult = dir_fstat(Node, Result);

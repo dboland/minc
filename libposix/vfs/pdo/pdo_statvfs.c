@@ -198,6 +198,6 @@ pdo_statvfs(WIN_CFDATA *Config, DWORD Flags, WIN_CFDRIVER *Driver)
 	}else{
 		WIN_ERR("reg_open(%ls): %s\n", iNode.Resolved, win_strerror(GetLastError()));
 	}
-	Driver->DeviceType = DevLookup(Config->BusName, Driver->NtClass, Driver->Service);
+	Config->DeviceType = DevLookup(Config->BusName, Driver->NtClass, Driver->Service);
 	return(bResult);
 }

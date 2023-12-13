@@ -122,16 +122,16 @@ win_strcat(LPSTR Destination, LPCSTR Source)
 	return(pszResult);
 }
 LPSTR 
-win_strncpy(LPSTR Destination, LPCSTR Source, DWORD Length)
+win_strncpy(LPSTR Destination, LPCSTR Source, LONG Length)
 {
 	LPSTR pszResult = Destination;
 	CHAR C;
 
 	while (C = *Source++){
-		Length--;
 		if (Length < 1){
 			break;
 		}
+		Length--;
 		*Destination++ = C;
 	}
 	*Destination = 0;
@@ -194,12 +194,12 @@ win_index(LPCSTR String, CHAR Chr)
 	return(pszResult);
 }
 VOID 
-win_memcpy(LPVOID Destination, LPCVOID Source, DWORD Size)
+win_memcpy(LPVOID Destination, LPCVOID Source, SIZE_T Size)
 {
 	CopyMemory(Destination, Source, Size);
 }
 VOID 
-win_memset(PVOID Dest, CHAR Fill, DWORD Size)
+win_memset(PVOID Dest, CHAR Fill, SIZE_T Size)
 {
 	FillMemory(Dest, Size, Fill);
 }

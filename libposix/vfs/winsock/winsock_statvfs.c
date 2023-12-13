@@ -57,18 +57,18 @@ WSALookup(DWORD LinkType)
 	return(dwResult);
 }
 LPWSTR 
-WSALinkName(LPWSTR Buffer, UCHAR Source[], DWORD Size)
+WSALinkName(LPWSTR Buffer, UCHAR Source[], LONG Length)
 {
 	WCHAR *psz = Buffer;
 
 	*Buffer = 0;
-	if (Size){
+	if (Length){
 		psz += msvc_swprintf(psz, L"%.2X", *Source++);
-		Size--;
+		Length--;
 	}
-	while (Size){
+	while (Length){
 		psz += msvc_swprintf(psz, L"-%.2X", *Source++);
-		Size--;
+		Length--;
 	}
 	return(Buffer);
 }

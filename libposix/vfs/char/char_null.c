@@ -45,6 +45,7 @@ null_open(WIN_DEVICE *Device, WIN_FLAGS *Flags, WIN_VNODE *Result)
 		Result->FSType = FS_TYPE_CHAR;
 		Result->Flags = win_F_GETFD(hResult);
 		Result->Access = win_F_GETFL(hResult);
+		Result->Device = Device;
 		bResult = TRUE;
 	}
 	return(bResult);

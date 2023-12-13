@@ -56,6 +56,6 @@ disk_init(WIN_MOUNT *Root, HINSTANCE Instance)
 	Root->DeviceType = DEV_TYPE_ROOT;
 	Root->DeviceId = DEV_TYPE_ROOT;
 	Root->FSType = FS_TYPE_DISK;
-//VfsDebugMount(Root, "drive_init");
+//VfsDebugMount(Root, "disk_init");
 //	DefineDosDeviceW(DDD_RAW_TARGET_PATH, L"MINC:", L"\\Device\\HarddiskVolume1\\MinC");
 }

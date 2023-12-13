@@ -104,3 +104,20 @@ LinkCreateInfo(HANDLE Handle, LPCSTR FileName, WIN_VATTR *Stat)
 	WriteFile(Handle, FileName, win_strlen(FileName) + 1, &dwCount, NULL);
 	LocalFree(vInfo);
 }
+
+/**************************************************************/
+
+BOOL 
+link_lookup(WIN_NAMEIDATA *Path, DWORD Flags)
+{
+	BOOL bResult = TRUE;
+
+	if (!DiskGlobType(Path, L".lnk")){
+		bResult = FALSE;
+	}else if (Flags & WIN_FOLLOW){
+		bResult = vfs_readlink(Path, TRUE);
+	}else{
+		Path->Attribs |= FILE_ATTRIBUTE_SYMLINK;
+	}
+	return(bResult);
+}

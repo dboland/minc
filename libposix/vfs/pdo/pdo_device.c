@@ -30,6 +30,8 @@
 
 #include <winbase.h>
 
+#define DEVINTERFACE_PARTITION	L"{53f5630a-b6bf-11d0-94f2-00a0c91efb8b}"
+
 /************************************************************/
 
 BOOL 
@@ -59,6 +61,7 @@ pdo_match(LPCWSTR NtName, DWORD DeviceType, WIN_CFDRIVER *Driver)
 		pwDevice++;
 		sUnit++;
 	}
+	Driver->DeviceType = DeviceType;
 	Driver->Flags = pwDevice->Flags;
 	win_strcpy(Driver->Name, pwDevice->Name);
 	return(bResult);

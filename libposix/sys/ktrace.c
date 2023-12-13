@@ -233,7 +233,6 @@ ktrace_SET(WIN_TASK *Task , const char *tracefile, int trpoints)
 		result -= errno_posix(GetLastError());
 	}else{
 		Task->TracePoints = trpoints;
-		result = 0;
 	}
 	return(result);
 }
@@ -246,7 +245,6 @@ ktrace_CLEAR(WIN_TASK *Task)
 		result -= errno_posix(GetLastError());
 	}else{
 		Task->TracePoints = 0;
-		result = 0;
 	}
 	return(result);
 }
@@ -288,7 +286,6 @@ sys_utrace(call_t call, const char *label, void *addr, size_t len)
 		result = -EINVAL;
 	}else{
 		ktrace_USER(pwTask, label, addr, len);
-		result = 0;
 	}
 	return(result);
 }

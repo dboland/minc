@@ -32,61 +32,65 @@
 
 /****************************************************/
 
-LPWSTR 
+LPCWSTR 
 win_basename(LPCWSTR FileName)
 {
-	LPWSTR F = (LPWSTR)FileName;
-	LPWSTR B = F;
+	LPCWSTR Base = FileName;
+	LPCWSTR F = FileName;
 	WCHAR C;
 
 	while (C = *F++){
 		if (C == '\\'){
-			B = F;
+			Base = F;
 		}
 	}
-	return(B);
+	return(Base);
 }
 LPWSTR 
 win_dirname(LPWSTR FileName)
 {
+	LPWSTR Base = FileName;
 	LPWSTR F = FileName;
-	LPWSTR B1 = FileName;
-	LPWSTR B2 = FileName;
+	WCHAR C;
 
-	while (*F){
-		if (*F == '\\'){
-			B1 = B2;
-			B2 = F + 1;
+	while (C = *F){
+		if (C == '\\'){
+			Base = F;
 		}
 		F++;
 	}
-	if (!*B2){
-		*B1 = 0;
-	}else{
-		*B2 = 0;
-	}
+	*Base = 0;
 	return(FileName);
 }
 LPWSTR 
 win_dirname_r(LPCWSTR FileName, LPWSTR DirName)
 {
+	LPWSTR Base = DirName;
 	LPWSTR D = DirName;
-	LPWSTR B1 = DirName;
-	LPWSTR B2 = DirName;
+	WCHAR C;
 
-	while (*D = *FileName++){
-		if (*D == '\\'){
-			B1 = B2;
-			B2 = D + 1;
+	while (C = *FileName++){
+		if (C == '\\'){
+			Base = D;
 		}
-		D++;
+		*D++ = C;
 	}
-	if (!*B2){
-		*B1 = 0;
-	}else{
-		*B2 = 0;
-	}
+	*Base = 0;
 	return(DirName);
+}
+LPWSTR 
+win_volname(LPWSTR FileName)
+{
+	LPWSTR F = FileName;
+	WCHAR C;
+
+	while (C = *F++){
+		if (C == '\\'){
+			break;
+		}
+	}
+	*F = 0;
+	return(FileName);
 }
 LPWSTR 
 win_typename(LPCWSTR FileName)
@@ -106,21 +110,6 @@ win_typename(LPCWSTR FileName)
 	if (!R){
 		R = F;
 	}
-	return(R);
-}
-LPWSTR 
-win_drivename(LPCWSTR FileName, LPWSTR Drive)
-{
-	LPWSTR R = Drive;
-	WCHAR C;
-
-	while (C = *FileName++){
-		if (C == '\\'){
-			break;
-		}
-		*Drive++ = C;
-	}
-	*Drive = 0;
 	return(R);
 }
 BOOL 

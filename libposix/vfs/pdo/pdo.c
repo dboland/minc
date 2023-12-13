@@ -66,7 +66,7 @@ pdo_init(WIN_DEV_CLASS Devices[])
 	config_init("input", FS_TYPE_CHAR, WIN_VCHR, DEV_TYPE_INPUT);
 	config_init("screen", FS_TYPE_CHAR, WIN_VCHR, DEV_TYPE_SCREEN);
 
-	config_init("root", FS_TYPE_DISK, WIN_VDIR, DEV_TYPE_ROOT);
+	config_init("root", FS_TYPE_DISK, WIN_VBLK, DEV_TYPE_ROOT);
 
 	con_init(DEVICE(DEV_TYPE_CONSOLE));
 }

@@ -42,14 +42,14 @@ DiskCreateFile(WIN_NAMEIDATA *Path, WIN_FLAGS *Flags, WIN_MODE *Mode, WIN_VNODE 
 	WIN_ACL_CONTROL wControl;
 	SECURITY_ATTRIBUTES sa = {sizeof(sa), &wControl.Security, FALSE};
 
-//	Flags->Access |= WRITE_DAC | WRITE_OWNER;		/* disk_fchown() */
+	Flags->Access |= WRITE_DAC | WRITE_OWNER;		/* disk_fchown() */
 	if (!win_acl_get_file(win_dirname_r(Path->Resolved, szDirName), &psd)){
 		return(FALSE);
 	}else if (!win_acl_init(Mode, &wControl)){
 		WIN_ERR("win_acl_init(%s): %s\n", szDirName, win_strerror(GetLastError()));
 	}else if (vfs_acl_create(psd, Mode, 0, &wControl)){
-		hResult = CreateFileW(Path->Resolved, Flags->Access, Flags->Share, &sa, 
-			Flags->Creation, Flags->Attribs, NULL);
+		hResult = CreateFileW(Path->Resolved, Flags->Access, Flags->Share, 
+			&sa, Flags->Creation, Flags->Attribs, NULL);
 		if (hResult != INVALID_HANDLE_VALUE){
 			Result->Handle = hResult;
 			Result->FSType = Path->FSType;
@@ -74,8 +74,8 @@ DiskOpenFile(WIN_NAMEIDATA *Path, WIN_FLAGS *Flags, WIN_VNODE *Result)
 	BOOL bResult = FALSE;
 	SECURITY_ATTRIBUTES sa = {sizeof(sa), NULL, FALSE};
 
-	hResult = CreateFileW(Path->Resolved, Flags->Access, Flags->Share, &sa, 
-		Flags->Creation, Flags->Attribs, NULL);
+	hResult = CreateFileW(Path->Resolved, Flags->Access, Flags->Share, 
+		&sa, Flags->Creation, Flags->Attribs, NULL);
 	if (hResult != INVALID_HANDLE_VALUE){
 		Result->Handle = hResult;
 		Result->FSType = Path->FSType;
@@ -109,6 +109,22 @@ DiskStatFile(LPCWSTR FileName, DWORD Attribs, WIN_VATTR *Result)
 		bResult = CloseHandle(hFile);
 	}
 	LocalFree(psd);
+	return(bResult);
+}
+BOOL 
+DiskGlobType(WIN_NAMEIDATA *Path, LPCWSTR TypeName)
+{
+	BOOL bResult = FALSE;
+	DWORD dwAttribs;
+
+	win_wcscpy(Path->R, TypeName);
+	dwAttribs = GetFileAttributesW(Path->Resolved);
+	if (dwAttribs == -1){
+		*Path->R = 0;		/* undo extension probe */
+	}else{
+		Path->Attribs = dwAttribs;
+		bResult = TRUE;
+	}
 	return(bResult);
 }
 

@@ -41,7 +41,7 @@ ${LIBPOSIX}: arch.d ${OBJECTS} version.o
 	${LD} ${LDFLAGS} -e _DllMainCRTStartup@12 --out-implib=${IMPLIB} --disable-auto-import --enable-stdcall-fixup \
 	-o $@ --image-base=${IMGBASE_LIBPOSIX} ${OBJECTS} $(shell /bin/ls arch/*.o) version.o \
 	-L${WINDIR} -L${GCCDIR} -lmsvcrt -ladvapi32 -lshell32 -luser32 -lntdll -lkernel32 \
-	-lnetapi32 -lws2_32 -limagehlp -liphlpapi -lrpcrt4 -lgcc
+	-lnetapi32 -lws2_32 -limagehlp -liphlpapi -lrpcrt4 -lmpr -lgcc
 
 clean:
 	/bin/rm -f arch/*.o *.o *.a *.dll

@@ -347,12 +347,15 @@ VfsAccessFlags(ACCESS_MASK Access, DWORD Type)
 	VfsSpecificFlags(Access, Type, "+ specific");
 }
 VOID 
-VfsNameIFlags(DWORD Flags, LPCSTR Label)
+VfsPathFlags(DWORD Flags, LPCSTR Label)
 {
 	msvc_printf("%s(0x%x): ", Label, Flags);
 	win_flagname(WIN_FOLLOW, "FOLLOW", Flags, &Flags);
 	win_flagname(WIN_NOCROSSMOUNT, "NOCROSSMOUNT", Flags, &Flags);
 	win_flagname(WIN_ISSYMLINK, "ISSYMLINK", Flags, &Flags);
+	win_flagname(WIN_REQUIREDIR, "REQUIREDIR", Flags, &Flags);
+	win_flagname(WIN_REQUIREDRIVE, "REQUIREDRIVE", Flags, &Flags);
+	win_flagname(WIN_PATHCOPY, "PATHCOPY", Flags, &Flags);
 	msvc_printf(" remain(0x%x)\n", Flags);
 }
 
@@ -363,23 +366,28 @@ VfsDebugPath(WIN_NAMEIDATA *Path, LPCSTR Label)
 {
 	msvc_printf("%s(%ls): MountId(%d) Type(%s:%s) DevType(0x%x) DevId(0x%x)\n", 
 		Label, Path->Resolved, Path->MountId, FSType(Path->FSType), _FType[Path->FileType], Path->DeviceType, Path->DeviceId);
-	VfsNameIFlags(Path->Flags, "+ flags");
-	VfsFileAttribs(Path->Attribs, L"+ attribs");
+	VfsPathFlags(Path->Flags, "+ Flags");
+	VfsFileAttribs(Path->Attribs, L"+ Attribs");
+	msvc_printf("+ Base: %ls\n", Path->Base);
+	msvc_printf("+ S: %ls\n", Path->S);
 }
 VOID 
 VfsDebugNode(WIN_VNODE *Node, LPCSTR Label)
 {
 	msvc_printf("%s(%d): Type(%s:%s) Handle(%d) Event(%d) Access(0x%x) CloEx(%d) DevType(0x%x) DevId(0x%x)\n", 
 		Label, Node->FileId, FSType(Node->FSType), FType(Node->FileType), Node->Handle, Node->Event, Node->Access, Node->CloseExec, Node->DeviceType, Node->DeviceId);
-	VfsFileFlags(Node->Flags, L"+ flags");
-	VfsFileAttribs(Node->Attribs, L"+ attribs");
+	VfsFileFlags(Node->Flags, L"+ Flags");
+	VfsFileAttribs(Node->Attribs, L"+ Attribs");
 	VfsAccessFlags(Node->Access, OB_TYPE_FILE);
 }
 VOID 
 VfsDebugDevice(WIN_DEVICE *Device, LPCSTR Label)
 {
-	msvc_printf("%s(%s): Flags(0x%x) NtName(%ls) Handle(%d) Index(%d) Type(%s:%s) IO([%d][%d]) DevType(0x%x) DevId(0x%x) ClassId(%ls)\n", 
-		Label, Device->Name, Device->Flags, Device->NtName, Device->Handle, Device->Index, FSType(Device->FSType), _FType[Device->FileType], Device->Input, Device->Output, Device->DeviceType, Device->DeviceId, Device->ClassId);
+	msvc_printf("%s(%s): Flags(0x%x) Handle(%d) Index(%d) Type(%s:%s) I/O([%d][%d]) DevType(0x%x) DevId(0x%x)\n", 
+		Label, Device->Name, Device->Flags, Device->Handle, Device->Index, FSType(Device->FSType), _FType[Device->FileType], Device->Input, Device->Output, Device->DeviceType, Device->DeviceId);
+	msvc_printf("+ ClassId: %ls\n", Device->ClassId);
+	msvc_printf("+ NtName: %ls\n", Device->NtName);
+	msvc_printf("+ NtPath: %ls\n", Device->NtPath);
 }
 VOID 
 VfsDebugTask(WIN_TASK *Task, LPCSTR Label)
@@ -390,14 +398,16 @@ VfsDebugTask(WIN_TASK *Task, LPCSTR Label)
 VOID 
 VfsDebugStat(WIN_VATTR *Stat, LPCSTR Label)
 {
-	msvc_printf("%s(%s): Device(0x%x) Attribs(0x%x) Special(0x%x) Links(%d) Size(%d)\n", 
-		Label, Stat->VolumeLabel, Stat->DeviceId, Stat->Attributes, Stat->SpecialId, Stat->NumberOfLinks, Stat->FileSizeLow);
+	msvc_printf("%s(%s): Device(0x%x) Attribs(0x%x) Special(0x%x) Links(%d) Size(%d) Type(%s)\n", 
+		Label, Stat->VolumeLabel, Stat->DeviceId, Stat->Attributes, Stat->SpecialId, Stat->NumberOfLinks, Stat->FileSizeLow, _FType[Stat->Mode.FileType]);
 }
 VOID 
 VfsDebugMount(WIN_MOUNT *Mount, LPCSTR Label)
 {
-	msvc_printf("%s(%d): Flags(0x%x) Serial(%lu) FSType(%s) DevType(0x%x) DevId(0x%x) Path(%ls)\n", 
-		Label, Mount->MountId, Mount->Flags, Mount->VolumeSerial, FSType(Mount->FSType), Mount->DeviceType, Mount->DeviceId, Mount->Path);
+	msvc_printf("%s(%d): Flags(0x%x) Serial(%lu) FSType(%s) DevType(0x%x) DevId(0x%x)\n", 
+		Label, Mount->MountId, Mount->Flags, Mount->VolumeSerial, FSType(Mount->FSType), Mount->DeviceType, Mount->DeviceId);
+	msvc_printf("+ Path: %ls\n", Mount->Path);
+	msvc_printf("+ Drive: %ls\n", Mount->Drive);
 }
 VOID 
 VfsDebugPoll(WIN_VNODE *Node, WIN_POLLFD *Info, LPCSTR Label)

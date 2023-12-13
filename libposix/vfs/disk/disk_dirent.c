@@ -48,8 +48,6 @@ DiskGetEntity(WIN32_FIND_DATAW *Data, DWORD Index, WIN_DIRENT *Result)
 		}else if (!win_wcscmp(pszType, L".lnk")){
 			Result->FileType = WIN_VLNK;
 			*pszType = 0;					/* chop off extension */
-		}else if (!win_wcscmp(pszType, L".vfs")){
-			*pszType = 0;
 		}
 		bResult = TRUE;
 	}

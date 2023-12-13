@@ -115,26 +115,19 @@ BOOL
 vfs_mknod(WIN_NAMEIDATA *Path, WIN_MODE *Mode, DWORD DeviceId)
 {
 	BOOL bResult = FALSE;
-	WIN_FLAGS wFlags = {GENERIC_WRITE, FILE_SHARE_READ, 
-		CREATE_ALWAYS, FILE_ATTRIBUTE_NORMAL, 0};
-	WIN_VNODE vNode = {0};
 	WIN_INODE iNode = {TypeNameVirtual, Mode->FileType, 0, 
 		DeviceId, FS_TYPE_PDO, 0};
 	DWORD dwSize = sizeof(WIN_INODE);
-	SHORT sClass = DeviceId >> 8;
-	SHORT sUnit = DeviceId & 0xFF;
+	HANDLE hFile;
 
-	Path->R = win_wcpcpy(Path->R, L".vfs");
-	if (sClass >= DEV_CLASS_MAX){
-		SetLastError(ERROR_BAD_DEVICE);
-	}else if (sUnit >= WIN_UNIT_MAX){
-		SetLastError(ERROR_NOT_ENOUGH_MEMORY);
-	}else if (!DiskCreateFile(Path, &wFlags, Mode, &vNode)){
+	hFile = CreateFileW(Path->Resolved, GENERIC_WRITE, FILE_SHARE_READ, 
+		NULL, CREATE_ALWAYS, FILE_ATTRIBUTE_SYSTEM, NULL);
+	if (hFile == INVALID_HANDLE_VALUE){
 		return(FALSE);
-	}else if (!WriteFile(vNode.Handle, &iNode, dwSize, &dwSize, NULL)){
+	}else if (!WriteFile(hFile, &iNode, dwSize, &dwSize, NULL)){
 		WIN_ERR("WriteFile(%ls): %s\n", Path->Resolved, win_strerror(GetLastError()));
 	}else{
-		bResult = CloseHandle(vNode.Handle);
+		bResult = CloseHandle(hFile);
 	}
 	return(bResult);
 }

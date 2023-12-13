@@ -88,9 +88,10 @@
 #define DEV_TYPE_RAMDISK	(DEV_CLASS_CPU + 32)		/* Random Access Memory disk device (rd*) */
 #define DEV_TYPE_PROCESSOR	(DEV_CLASS_CPU + DEV_BUS_CPU)	/* Central Processing Unit */
 
+#define DEV_TYPE_ROOT		(DEV_CLASS_DISK)		/* Root mount point */
 #define DEV_TYPE_AHCI		(DEV_CLASS_DISK + DEV_BUS_SATA)	/* Serial ATA Advanced Host Controller Interface */
 #define DEV_TYPE_FDC		(DEV_CLASS_DISK + DEV_BUS_FDC)	/* Floppy Disk Controller */
-#define DEV_TYPE_USBSTOR	(DEV_CLASS_DISK + DEV_BUS_USB)	/* USB Mass Storage controller */
+#define DEV_TYPE_USB		(DEV_CLASS_DISK + DEV_BUS_USB)	/* USB storage controller */
 #define DEV_TYPE_SD		(DEV_CLASS_DISK + DEV_BUS_SCSI)	/* SCSI Disk controller */
 #define DEV_TYPE_WD		(DEV_CLASS_DISK + DEV_BUS_IDE)	/* WD100x compatible hard disk controller */
 
@@ -132,10 +133,11 @@
 #define DEV_TYPE_WSMOUSE	(DEV_CLASS_MOUSE + DEV_BUS_PCI)
 
 #define DEV_TYPE_VOLUME		(DEV_CLASS_STORAGE)
-#define DEV_TYPE_REMOTE		(DEV_CLASS_STORAGE + DEV_BUS_MAIN)	/* Server Message Block storage */
-#define DEV_TYPE_FLOPPY		(DEV_CLASS_STORAGE + DEV_BUS_FDC)	/* Floppy Disk storage */
 #define DEV_TYPE_CDROM		(DEV_CLASS_STORAGE + DEV_BUS_SCSI)	/* CDROM storage */
-#define DEV_TYPE_ROOT		(DEV_CLASS_STORAGE + DEV_BUS_HDC)	/* Root mount point */
+#define DEV_TYPE_FIXED		(DEV_CLASS_STORAGE + DEV_BUS_HDC)	/* Hard Disk storage */
+#define DEV_TYPE_FLOPPY		(DEV_CLASS_STORAGE + DEV_BUS_FDC)	/* Floppy Disk storage */
+#define DEV_TYPE_USBSTOR	(DEV_CLASS_STORAGE + DEV_BUS_USB)	/* USB Mass Storage */
+#define DEV_TYPE_REMOTE		(DEV_CLASS_STORAGE + DEV_BUS_MAIN)	/* Server Message Block storage */
 
 #define DEV_TYPE_HID		(DEV_CLASS_USB)
 #define DEV_TYPE_USBHUB		(DEV_CLASS_USB + DEV_BUS_USB)

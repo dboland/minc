@@ -225,15 +225,16 @@ vfs_chdir(WIN_TASK *Task, WIN_NAMEIDATA *Path)
 {
 	BOOL bResult = FALSE;
 
-	if (*Path->Last != '\\'){
-		*Path->R++ = '\\';
-		*Path->R = 0;
-	}
+//	if (*Path->Last != '\\'){
+//		*Path->R++ = '\\';
+//		*Path->R = 0;
+//	}
 	if (Path->FileType != WIN_VDIR){
 		SetLastError(ERROR_DIRECTORY);
 	}else if (!vfs_access(Path, WIN_S_IRX)){
 		return(FALSE);
-	}else if (vfs_realpath(Path, WIN_PATH_MAX)){	/* building perl.exe */
+//	}else if (vfs_realpath(Path, WIN_PATH_MAX)){	/* building perl.exe */
+	}else{
 		win_memcpy(&Task->Path, Path, sizeof(WIN_INODE));
 		bResult = TRUE;
 	}
@@ -248,27 +249,13 @@ BOOL
 vfs_fchown(WIN_VNODE *Node, PSID NewUser, PSID NewGroup)
 {
 	BOOL bResult = FALSE;
-	WIN_NAMEIDATA wPath;
+	WIN_NAMEIDATA wPath = {0};
 
 	if (Node->Access & WRITE_DAC){
 		bResult = disk_fchown(Node, NewUser, NewGroup);
 	}else if (vfs_F_GETPATH(Node, &wPath)){		/* install.exe */
+VfsDebugPath(&wPath, "vfs_fchown");
 		bResult = disk_chown(&wPath, NewUser, NewGroup);
-	}
-	return(bResult);
-}
-BOOL 
-vfs_rename(WIN_NAMEIDATA *Path, WIN_NAMEIDATA *Result)
-{
-	BOOL bResult = FALSE;
-
-//VfsDebugPath(Path, "vfs_rename");
-	switch (Path->FSType){
-		case FS_TYPE_DISK:
-			bResult = disk_rename(Path, Result);
-			break;
-		default:
-			SetLastError(ERROR_BAD_FILE_TYPE);
 	}
 	return(bResult);
 }
@@ -330,6 +317,20 @@ vfs_unlink(WIN_NAMEIDATA *Path)
 		case FS_TYPE_PDO:
 		case FS_TYPE_DISK:
 			bResult = disk_unlink(Path);
+			break;
+		default:
+			SetLastError(ERROR_BAD_FILE_TYPE);
+	}
+	return(bResult);
+}
+BOOL 
+vfs_rename(WIN_NAMEIDATA *Path, WIN_NAMEIDATA *Result)
+{
+	BOOL bResult = FALSE;
+
+	switch (Path->FSType){
+		case FS_TYPE_DISK:
+			bResult = disk_rename(Path, Result);
 			break;
 		default:
 			SetLastError(ERROR_BAD_FILE_TYPE);
@@ -446,7 +447,7 @@ vfs_readlink(WIN_NAMEIDATA *Path, BOOL MakeReal)
 		}
 		Path->R = Path->Resolved;
 		if (szBuffer[1] == ':'){	/* nano.exe */
-			drive_lookup(MOUNTID(szBuffer[0]), WIN_NOCROSSMOUNT, Path);
+			vol_lookup(Path, MOUNTID(szBuffer[0]), 0);
 		}else if (MakeReal){
 			Path->R = win_basename(Path->Resolved);
 		}
@@ -468,12 +469,13 @@ vfs_symlink(WIN_NAMEIDATA *Path, WIN_VATTR *Stat, WIN_MODE *Mode, WIN_NAMEIDATA 
 	CHAR szBuffer[MAX_PATH] = "";
 	HANDLE hFile;
 
+//VfsDebugPath(Path, "vfs_symlink");
 	if (*Path->Last == '\\'){	/* GNU conftest.exe */
 		*Path->Last = 0;
 	}
 	Result->R = win_wcpcpy(Result->R, L".lnk");
-	hFile = CreateFileW(Result->Resolved, GENERIC_WRITE, FILE_SHARE_READ, NULL, 
-		CREATE_NEW, FILE_ATTRIBUTE_NORMAL, NULL);
+	hFile = CreateFileW(Result->Resolved, GENERIC_WRITE, FILE_SHARE_READ, 
+		NULL, CREATE_NEW, FILE_ATTRIBUTE_NORMAL, NULL);
 	if (hFile != INVALID_HANDLE_VALUE){
 		slHead.HeaderSize = sizeof(SHELL_LINK_HEADER);
 		slHead.LinkCLSID = CLSID_ShellLink;

@@ -108,7 +108,7 @@ time_posix(const FILETIME *Time)
 {
 	DWORDLONG dwlTime = *(DWORDLONG *)Time;
 
-	dwlTime -= 116444736000000000LL;		/* epoch (100-nanosecond intervals) */
+	dwlTime -= 116444736000000000LL;	/* epoch (100-nanosecond intervals) */
 	dwlTime *= 0.0000001;			/* seconds */
 	return(dwlTime);
 }
@@ -342,7 +342,7 @@ sys_fchmod(call_t call, int fd, mode_t mode)
 /****************************************************/
 
 int 
-sys_chflagsat(call_t call, int fd, const char *path, unsigned int flags, int atflag)
+__chflagsat(int fd, const char *path, unsigned int flags, int atflag)
 {
 	int result = 0;
 	WIN_NAMEIDATA wPath;
@@ -355,7 +355,7 @@ sys_chflagsat(call_t call, int fd, const char *path, unsigned int flags, int atf
 int 
 sys_chflags(call_t call, const char *path, unsigned int flags)
 {
-	return(sys_chflagsat(call, AT_FDCWD, path, flags, 0));
+	return(__chflagsat(AT_FDCWD, path, flags, 0));
 }
 int 
 sys_fchflags(int fd, unsigned int flags)
@@ -404,7 +404,7 @@ __mkdirat(WIN_TASK *Task, int dirfd, const char *pathname, mode_t mode)
 	WIN_MODE wMode;
 	WIN_NAMEIDATA wPath;
 
-	mode &= (~Task->FileMask & 0777);
+	mode &= (~Task->FileMask & 00777);
 	if (!vfs_mkdir(pathat_win(&wPath, dirfd, pathname, AT_SYMLINK_NOFOLLOW), mode_win(&wMode, mode))){
 		result -= errno_posix(GetLastError());
 	}

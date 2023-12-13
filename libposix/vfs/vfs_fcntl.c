@@ -126,14 +126,16 @@ vfs_F_GETPATH(WIN_VNODE *Node, WIN_NAMEIDATA *Result)
 	if (!NT_SUCCESS(ntStatus)){
 		WIN_ERR("NtQueryObject(%d): %s\n", Node->Handle, nt_strerror(ntStatus));
 	}else if (puString->Length){
-		Result->R = win_wcpcpy(Result->Resolved, WIN_PROCESS_ROOT);
-		Result->R = win_wcpcpy(Result->R, puString->Buffer + 1);
+		Result->R = win_wcpcpy(Result->Resolved, L"\\\\.\\GLOBALROOT");
+		Result->Base = Result->R + 1;
+		Result->R = win_wcpcpy(Result->R, puString->Buffer);
 		Result->Last = Result->R - 1;
 		Result->FSType = Node->FSType;
 		Result->Attribs = Node->Attribs;
 		Result->FileType = Node->FileType;
 		Result->DeviceType = Node->DeviceType;
 		Result->DeviceId = Node->DeviceId;
+		Result->MountId = Node->MountId;
 //VfsDebugPath(Result, "vfs_F_GETPATH");
 		bResult = TRUE;
 	}

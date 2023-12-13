@@ -22,7 +22,7 @@
  * DEALINGS IN THE SOFTWARE.
  */
 
-typedef  unsigned int UINT_PTR, *PUINT_PTR;
-typedef  long LONG_PTR, *PLONG_PTR;
-typedef  unsigned long ULONG_PTR, *PULONG_PTR;
+typedef unsigned int UINT_PTR, *PUINT_PTR;
+typedef long LONG_PTR, *PLONG_PTR;
+typedef unsigned long ULONG_PTR, *PULONG_PTR;
 typedef ULONG_PTR SIZE_T, *PSIZE_T;

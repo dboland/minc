@@ -88,6 +88,7 @@ WIN_NAMEIDATA *path_win(WIN_NAMEIDATA *Path, const char *pathname, int flags);
 #include "sys/filio.c"
 #include "sys/dkio.c"
 #include "sys/mtio.c"
+#include "sys/msgbuf.c"
 #include "sys/systm.c"		/* cpu_configure() */
 #include "sys/pciio.c"
 #include "sys/resource.c"
@@ -118,7 +119,6 @@ WIN_NAMEIDATA *path_win(WIN_NAMEIDATA *Path, const char *pathname, int flags);
 #include "netinet/udp.c"
 #include "sys/sockio.c"
 #include "sys/ioctl.c"
-#include "sys/msgbuf.c"
 #include "sys/msg.c"
 
 #define _KERNEL

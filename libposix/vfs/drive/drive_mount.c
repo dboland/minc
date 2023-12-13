@@ -33,19 +33,17 @@
 /************************************************************/
 
 BOOL 
-DriveStatVolume(DWORD Flags, WIN_STATFS *Result)
+DriveStatVolume(LPCWSTR Volume, WIN_STATFS *Result)
 {
 	BOOL bResult = FALSE;
-	WCHAR szVolume[MAX_LABEL];
 
-	win_wcscpy(win_wcpcpy(szVolume, Result->Drive), L"\\");
-	if (!GetVolumeInformationW(szVolume, Result->Label, MAX_LABEL, &Result->Serial, 
+	if (!GetVolumeInformationW(Volume, Result->Label, MAX_LABEL, &Result->Serial, 
 		&Result->MaxPath, &Result->Flags, Result->TypeName, MAX_LABEL)){
-//		WIN_ERR("GetVolumeInformation(%ls): %s\n", szVolume, win_strerror(GetLastError()));
+//		WIN_ERR("GetVolumeInformation(%ls): %s\n", Volume, win_strerror(GetLastError()));
 		return(FALSE);
-	}else if (!GetDiskFreeSpaceW(szVolume, &Result->SectorsPerCluster, 
+	}else if (!GetDiskFreeSpaceW(Volume, &Result->SectorsPerCluster, 
 		&Result->BytesPerSector, &Result->FreeClusters, &Result->ClustersTotal)){
-		WIN_ERR("GetDiskFreeSpace(%ls): %s\n", szVolume, win_strerror(GetLastError()));
+		WIN_ERR("GetDiskFreeSpace(%ls): %s\n", Volume, win_strerror(GetLastError()));
 	}else{
 		bResult = TRUE;
 	}
@@ -64,7 +62,7 @@ drive_getfsstat(WIN_MOUNT *Mount, DWORD Flags, WIN_STATFS *Result)
 	Result->DeviceId = Mount->DeviceId;
 	Result->MountTime = Mount->Time;
 	if (!(Flags & WIN_MNT_NOWAIT)){
-		bResult = DriveStatVolume(Flags, Result);
+		bResult = DriveStatVolume(Mount->Path, Result);
 	}else switch (Mount->DeviceType){
 		case DEV_TYPE_CDROM:
 			win_wcscpy(Result->TypeName, L"ISO9660");
@@ -74,52 +72,57 @@ drive_getfsstat(WIN_MOUNT *Mount, DWORD Flags, WIN_STATFS *Result)
 			win_wcscpy(Result->TypeName, L"FAT");
 			break;
 		default:
-			bResult = DriveStatVolume(Flags, Result);
+			bResult = DriveStatVolume(Mount->Path, Result);
 	}
 	return(bResult);
 }
 BOOL 
 drive_statfs(WIN_NAMEIDATA *Path, WIN_STATFS *Result)
 {
+	BOOL bResult = FALSE;
+
 	/* mount.exe -a
 	 */
-	/* GetVolumeInformationByHandle()? */
 	ZeroMemory(Result, sizeof(WIN_STATFS));
-	win_drivename(Path->Resolved, Result->Drive);
-	return(DriveStatVolume(0, Result));
+VfsDebugPath(Path, "drive_statfs");
+	if (Path->Attribs == FILE_ATTRIBUTE_MOUNT){
+		bResult = DriveStatVolume(Path->Resolved, Result);
+	}else{
+		bResult = DriveStatVolume(win_volname(Path->Resolved), Result);
+	}
+	return(bResult);
 }
 BOOL 
-drive_mount(WIN_NAMEIDATA *Path, WIN_VATTR *Stat, WIN_MODE *Mode)
+drive_mount(WIN_NAMEIDATA *Path, WIN_DEVICE *Device, WIN_MODE *Mode)
 {
 	BOOL bResult = FALSE;
 	WIN_MOUNT *pwMount;
-	LPWSTR pszDrive = win_basename(Path->Resolved);
-	DWORD dwMountId;
-	WIN_DEVICE *pwDevice;
+	LONG lMountId = MOUNTID(Path->Base[0]);
 
+//VfsDebugPath(Path, "drive_mount");
 	if (Path->Attribs == -1){
 		return(FALSE);
 	}else if (Path->FileType != WIN_VDIR){
 		SetLastError(ERROR_DIRECTORY);
-//	}else if (Path->Attribs == FILE_ATTRIBUTE_MOUNT){
-//		SetLastError(ERROR_NOT_READY);
+	}else if (Path->Attribs == FILE_ATTRIBUTE_MOUNT){
+		SetLastError(ERROR_NOT_READY);
 	}else if (!SetFileAttributesW(Path->Resolved, FILE_ATTRIBUTE_SYSTEM)){
 		WIN_ERR("SetFileAttributes(%ls): %s\n", Path->Resolved, win_strerror(GetLastError()));
 	}else{
-		dwMountId = MOUNTID(pszDrive[0]);
-		pwMount = &__Mounts[dwMountId];
-		pwDevice = DEVICE(Stat->SpecialId);
-		pwMount->Drive[0] = msvc_toupper(pszDrive[0]);
+		pwMount = &__Mounts[lMountId];
+		pwMount->Drive[0] = msvc_toupper(Path->Base[0]);
 		pwMount->Drive[1] = ':';
 		pwMount->Drive[2] = 0;
-		pwMount->MountId = dwMountId;
-		pwMount->DeviceId = pwDevice->DeviceId;
-		pwMount->DeviceType = pwDevice->DeviceType;
-		pwMount->VolumeSerial = Stat->VolumeSerialNumber;
+		pwMount->MountId = lMountId;
+		pwMount->DeviceId = Device->DeviceId;
+		pwMount->DeviceType = Device->DeviceType;
+		pwMount->VolumeSerial = Device->Index;
 		pwMount->FileType = WIN_VDIR;
 		pwMount->FSType = Path->FSType;
-		win_wcscpy(win_wcpcpy(pwMount->Path, pwMount->Drive), L"\\");
+		win_wcscpy(pwMount->Path, Device->NtPath);
 		GetSystemTimeAsFileTime(&pwMount->Time);
+//VfsDebugMount(pwMount, "drive_mount");
+//VfsDebugDevice(Device, "drive_mount");
 		bResult = TRUE;
 	}
 	return(bResult);

@@ -94,7 +94,6 @@ __select(WIN_TASK *Task, int nfds, fd_set *restrict readfds, fd_set *restrict wr
 	if (timeout){
 		dwTimeOut = timeout->tv_usec * 0.001;	/* microseconds */
 		dwTimeOut += timeout->tv_sec * 1000;	/* __int64_t (%I64d) */
-//	}else if (!readfds && !writefds && !errorfds){	/* shall block until interrupted by signal */
 	}
 	if (readfds){
 		fdset_poll(pollfds, readfds, (POLLIN | POLLHUP | POLLRDBAND));

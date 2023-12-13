@@ -32,118 +32,103 @@
 
 /****************************************************/
 
-CHAR 
+WCHAR 
 PathRead(WIN_NAMEIDATA *Path)
 {
 	WCHAR *S = Path->S;
 	WCHAR *R = Path->R;
 	WCHAR C;
 
+	*R++ = '\\';
+	Path->Base = R;
 	while (C = *S){
-		if (C == ':'){		/* perl.exe */
-			*R++ = '_';
-		}else{
-			*R++ = C;
-		}
-		S++;
-		if (*S == '/'){
-			*S = '\\';
+		*S++;
+		if (C == '/'){
 			break;
+		}else if (C == ':'){		/* perl.exe */
+			C = '_';
 		}
+		*R++ = C;
 	}
 	*R = 0;
 	Path->S = S;
 	Path->R = R;
-	return(*S);
+	return(C);	/* use *S to skip slash at end (umount.exe) */
 }
-BOOL 
-PathGlobMount(WIN_NAMEIDATA *Path, DWORD Flags)
+VOID 
+PathCopy(WIN_NAMEIDATA *Path)
 {
-	LPWSTR pszDrive = win_basename(Path->Resolved);
+	WCHAR *S = Path->S;
+	WCHAR *R = Path->R;
+	WCHAR *Base = Path->Base;
+	WCHAR C;
 
-	return(drive_lookup(MOUNTID(pszDrive[0]), Flags, Path));
-}
-BOOL 
-PathGlobType(WIN_NAMEIDATA *Path, LPCWSTR TypeName)
-{
-	BOOL bResult = FALSE;
-	DWORD dwAttribs;
-
-	win_wcscpy(Path->R, TypeName);
-	dwAttribs = GetFileAttributesW(Path->Resolved);
-	if (dwAttribs == -1){
-		*Path->R = 0;		/* undo extension probe */
-	}else{
-		Path->Attribs = dwAttribs;
-		bResult = TRUE;
-	}
-	return(bResult);
-}
-BOOL 
-PathGlobLink(WIN_NAMEIDATA *Path, WORD Depth)
-{
-	BOOL bResult = FALSE;
-
-	if (vfs_readlink(Path, TRUE)){
-//VfsDebugPath(Path, "vfs_lookup");
-		if (!PathGlobType(Path, L".lnk")){
-			bResult = TRUE;
-		}else if (Depth >= WIN_SYMLOOP_MAX){
-			SetLastError(ERROR_TOO_MANY_LINKS);
-		}else{
-			bResult = PathGlobLink(Path, Depth + 1);
+	while (C = *S){
+		S++;
+		if (C == '/'){
+			Base = R + 1;
+			C = '\\';
+		}else if (C == ':'){		/* perl.exe */
+			C = '_';
 		}
+		*R++ = C;
 	}
-	return(bResult);
+	*R = 0;
+	Path->Base = Base;
+	Path->S = S;
+	Path->R = R;
 }
 BOOL 
 PathGlob(WIN_NAMEIDATA *Path, DWORD Flags)
 {
 	BOOL bResult = TRUE;
-//	WIN32_FILE_ATTRIBUTE_DATA faData;
 	Path->Attribs = GetFileAttributesW(Path->Resolved);
 
-	if (Path->Attribs == FILE_ATTRIBUTE_MOUNT){
-		bResult = PathGlobMount(Path, Flags);
-	}else if (Path->Attribs != -1){
-		return(TRUE);
-	}else if (!PathGlobType(Path, L".lnk")){
-		bResult = FALSE;
-	}else if (Flags & WIN_FOLLOW){
-		bResult = PathGlobLink(Path, 0);
-	}else{
-		Path->Attribs |= FILE_ATTRIBUTE_SYMLINK;
+	switch (Path->Attribs){
+		case -1:
+			bResult = link_lookup(Path, Flags);
+			break;
+		case FILE_ATTRIBUTE_PDO:
+			bResult = pdo_lookup(Path, Flags);
+			break;
+		case FILE_ATTRIBUTE_MOUNT:
+			bResult = drive_lookup(Path, MOUNTID(Path->Base[0]), Flags);
+			break;
+		case FILE_ATTRIBUTE_VOLUME:
+//			VfsDebugPath(Path, "VOLUME");
+			break;
 	}
-//VfsDebugPath(Path, "PathGlob");
 	return(bResult);
 }
 VOID 
-PathOpen(WIN_NAMEIDATA *Path, LPWSTR Source)
+PathOpen(WIN_NAMEIDATA *Path, LPWSTR Source, DWORD Flags)
 {
-	*Path->R = 0;
+//	if (!win_wcscmp(Source, L".")){		/* ignore dot in mount root */
+//		Source++;
+//	}
 	Path->Attribs = -1;
 	Path->S = Source;
+	Path->FileType = WIN_VREG;
+	Path->Flags = Flags;
+	Path->Base = Path->R;
+//	*Path->R = 0;
 }
 VOID 
 PathClose(WIN_NAMEIDATA *Path, DWORD Flags)
 {
-	DWORD dwFileType = WIN_VREG;
+	BOOL bResult = TRUE;
 
 	if (PathGlob(Path, Flags)){
 		if (Path->Attribs & FILE_ATTRIBUTE_DIRECTORY){
-			dwFileType = WIN_VDIR;
+			Path->FileType = WIN_VDIR;
 		}else if (Path->Attribs & FILE_ATTRIBUTE_SYMLINK){
-			dwFileType = WIN_VLNK;
+			Path->FileType = WIN_VLNK;
 		}
-	}else if (PathGlobType(Path, L".exe")){
-		Path->DeviceType = DEV_CLASS_DISK;
-	}else if (PathGlobType(Path, L".vfs")){
-		Path->FSType = FS_TYPE_PDO;
+	}else if (DiskGlobType(Path, L".exe")){
+		Path->FileType = WIN_VREG;
 //	}else{
-//		WIN_ERR("PathClose(%ls): %s\n", Path->Resolved, win_strerror(GetLastError()));
+//		VfsDebugPath(Path, "PathClose");
 	}
-	Path->Flags = Flags;
-	Path->FileType = dwFileType;
 	Path->Last = Path->R - 1;
 }
 
@@ -152,13 +137,13 @@ PathClose(WIN_NAMEIDATA *Path, DWORD Flags)
 WIN_NAMEIDATA *
 vfs_lookup(WIN_NAMEIDATA *Path, LPWSTR Source, DWORD Flags)
 {
-	PathOpen(Path, Source);
-	while (PathRead(Path)){
-		if (!PathGlob(Path, WIN_FOLLOW)){
-//VfsDebugPath(Path, "vfs_lookup");
-			Path->R = win_wcpcpy(Path->R, Path->S);
+	PathOpen(Path, Source, Flags);
+	if (Flags & WIN_PATHCOPY){
+		PathCopy(Path);
+	}else while (PathRead(Path)){
+		if (!PathGlob(Path, Flags | WIN_FOLLOW)){
+			PathCopy(Path);
 			Path->Last = Path->R - 1;
-//			Path->FileType = 0;
 			return(Path);
 		}
 	}

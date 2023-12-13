@@ -116,16 +116,16 @@ win_wcscmp(LPCWSTR String1, LPCWSTR String2)
 	return(CompareStringW(LOCALE_USER_DEFAULT, NORM_IGNOREWIDTH, String1, -1, String2, -1) - 2);
 }
 LPWSTR 
-win_wcsncpy(LPWSTR Destination, LPCWSTR Source, DWORD Length)
+win_wcsncpy(LPWSTR Destination, LPCWSTR Source, LONG Length)
 {
 	LPWSTR pszResult = Destination;
 	WCHAR C;
 
 	while (C = *Source++){
-		Length--;
 		if (Length < 1){
 			break;
 		}
+		Length--;
 		*Destination++ = C;
 	}
 	*Destination = 0;
