@@ -67,7 +67,7 @@ vfs_stat(WIN_NAMEIDATA *Path, WIN_VATTR *Result)
 	BOOL bResult = FALSE;
 
 	/* CreateFile() yields "Access is denied" on open files
-	 * which meanwhile have been deleted (git.exe).
+	 * which previously have been deleted (git.exe).
 	 */
 	if (Path->Attribs == -1){
 		return(FALSE);
@@ -155,7 +155,7 @@ vfs_mkdir(WIN_NAMEIDATA *Path, WIN_MODE *Mode)
 	BOOL bResult = FALSE;
 	DWORD dwSize = 0;
 	PSECURITY_DESCRIPTOR psd = NULL;
-	WCHAR szParent[WIN_PATH_MAX] = L"";
+	WCHAR szParent[WIN_PATH_MAX];
 	WIN_ACL_CONTROL wControl;
 	SECURITY_ATTRIBUTES sa = {sizeof(sa), &wControl.Security, FALSE};
 	BYTE bAceFlags = OBJECT_INHERIT_ACE + CONTAINER_INHERIT_ACE;

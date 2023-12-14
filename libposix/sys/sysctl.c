@@ -476,7 +476,7 @@ sysctl_VM(WIN_TASK *Task, const int *name, void *oldp, size_t *oldlenp, void *ne
 /****************************************************/
 
 int 
-sysctl_NET_RT(WIN_TASK *Task, const int *name, void *buf, size_t *size)
+sysctl_NET_RT(const int *name, void *buf, size_t *size)
 {
 	int result = 0;
 
@@ -484,13 +484,13 @@ sysctl_NET_RT(WIN_TASK *Task, const int *name, void *buf, size_t *size)
 
 	switch (name[4]){
 		case NET_RT_DUMP:	/* 1 */
-			result = route_NET_RT_DUMP(Task, buf, size);
+			result = route_NET_RT_DUMP(buf, size);
 			break;
 		case NET_RT_FLAGS:	/* 2 */
-			result = route_NET_RT_FLAGS(Task, name, buf, size);
+			result = route_NET_RT_FLAGS(name, buf, size);
 			break;
 		case NET_RT_IFLIST:	/* 3 */
-			result = route_NET_RT_IFLIST(Task, buf, size);
+			result = route_NET_RT_IFLIST(buf, size);
 			break;
 		default:
 			result = -ENOENT;
@@ -498,19 +498,19 @@ sysctl_NET_RT(WIN_TASK *Task, const int *name, void *buf, size_t *size)
 	return(result);
 }
 int 
-sysctl_NET_INET(WIN_TASK *Task, const int *name, void *buf, size_t *size)
+sysctl_NET_INET(const int *name, void *buf, size_t *size)
 {
 	int result = 0;
 
 	switch (name[2]){
 		case IPPROTO_IP:	/* netinet/ip.c */
-			result = ip_NET_INET_IP(Task, name, buf, size);
+			result = ip_NET_INET_IP(name, buf, size);
 			break;
 		case IPPROTO_TCP:	/* netinet/tcp.c */
-			result = tcp_NET_INET_TCP(Task, name, buf, size);
+			result = tcp_NET_INET_TCP(name, buf, size);
 			break;
 		case IPPROTO_UDP:	/* netinet/udp.c */
-			result = udp_NET_INET_UDP(Task, name, buf, size);
+			result = udp_NET_INET_UDP(name, buf, size);
 			break;
 		default:
 			result = -ENOENT;
@@ -518,7 +518,7 @@ sysctl_NET_INET(WIN_TASK *Task, const int *name, void *buf, size_t *size)
 	return(result);
 }
 int 
-sysctl_NET_INET6(WIN_TASK *Task, const int *name, void *buf, size_t *size)
+sysctl_NET_INET6(const int *name, void *buf, size_t *size)
 {
 	int result = 0;
 
@@ -526,7 +526,7 @@ sysctl_NET_INET6(WIN_TASK *Task, const int *name, void *buf, size_t *size)
 
 	switch (name[2]){
 		case IPPROTO_IPV6:	/* 41 */
-			result = in_NET_INET6_IPV6(Task, name, buf, size);
+			result = in_NET_INET6_IPV6(name, buf, size);
 			break;
 		default:
 			result = -ENOENT;
@@ -534,19 +534,19 @@ sysctl_NET_INET6(WIN_TASK *Task, const int *name, void *buf, size_t *size)
 	return(result);
 }
 int 
-sysctl_NET(WIN_TASK *Task, const int *name, void *oldp, size_t *oldlenp, void *newp, size_t newlen)
+sysctl_NET(const int *name, void *oldp, size_t *oldlenp, void *newp, size_t newlen)
 {
 	int result = 0;
 
 	switch (name[1]){
 		case PF_ROUTE:
-			result = sysctl_NET_RT(Task, name, oldp, oldlenp);
+			result = sysctl_NET_RT(name, oldp, oldlenp);
 			break;
 		case PF_INET:
-			result = sysctl_NET_INET(Task, name, oldp, oldlenp);
+			result = sysctl_NET_INET(name, oldp, oldlenp);
 			break;
 		case PF_INET6:
-			result = sysctl_NET_INET6(Task, name, oldp, oldlenp);
+			result = sysctl_NET_INET6(name, oldp, oldlenp);
 			break;
 		case PF_KEY:
 			*oldlenp = 0;		/* no IPSEC (ifconfig.exe) */
@@ -655,7 +655,7 @@ sys___sysctl(call_t call, const int *name, u_int namelen, void *oldp, size_t *ol
 			break;
 		case CTL_NET:
 //sysctl_debug(name, namelen, oldp, oldlenp, newp, newlen);
-			result = sysctl_NET(pwTask, name, oldp, oldlenp, newp, newlen);
+			result = sysctl_NET(name, oldp, oldlenp, newp, newlen);
 			break;
 		case CTL_VFS:
 			result = sysctl_VFS(pwTask, name, oldp, oldlenp, newp, newlen);

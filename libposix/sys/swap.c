@@ -38,7 +38,7 @@ swapctl_STATS(struct swapent *swap, int count)
 	MEMORYSTATUSEX msInfo = {sizeof(MEMORYSTATUSEX), 0};
 	DWORD dwPageSize = __Globals[WIN_HW_PAGESIZE].LowPart;
 	DWORDLONG dwlTotal, dwlAvail, dwlUsed;
-	WIN_DEVICE *pDevice = DEVICE(DEV_TYPE_SWAP);
+	WIN_DEVICE *pwDevice = DEVICE(DEV_TYPE_SWAP);
 
 	win_bzero(swap, sizeof(struct swapent));
 	GlobalMemoryStatusEx(&msInfo);
@@ -47,11 +47,11 @@ swapctl_STATS(struct swapent *swap, int count)
 	dwlAvail = msInfo.ullAvailPageFile;
 	dwlUsed = dwlTotal - dwlAvail;
 
-	swap->se_dev = pDevice->DeviceId;
+	swap->se_dev = pwDevice->DeviceId;
 	swap->se_flags = SWF_ENABLE;
 	swap->se_nblks = (dwlTotal + dwPageSize - 1) / dwPageSize;
 	swap->se_inuse = (dwlUsed + dwPageSize - 1) / dwPageSize;
-	win_strncpy(win_stpcpy(swap->se_path, "/dev/"), pDevice->Name, MAXPATHLEN - 5);
+	win_strncpy(win_stpcpy(swap->se_path, "/dev/"), pwDevice->Name, MAXPATHLEN - 5);
 
 	return(count);
 }

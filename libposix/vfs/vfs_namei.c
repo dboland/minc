@@ -45,7 +45,7 @@ PathRead(WIN_NAMEIDATA *Path)
 		*S++;
 		if (C == '/'){
 			break;
-		}else if (C == ':'){		/* perl.exe */
+		}else if (C == ':'){	/* perl.exe */
 			C = '_';
 		}
 		*R++ = C;
@@ -60,21 +60,18 @@ PathCopy(WIN_NAMEIDATA *Path)
 {
 	WCHAR *S = Path->S;
 	WCHAR *R = Path->R;
-	WCHAR *Base = Path->Base;
 	WCHAR C;
 
 	while (C = *S){
 		S++;
 		if (C == '/'){
-			Base = R + 1;
 			C = '\\';
-		}else if (C == ':'){		/* perl.exe */
+		}else if (C == ':'){
 			C = '_';
 		}
 		*R++ = C;
 	}
 	*R = 0;
-	Path->Base = Base;
 	Path->S = S;
 	Path->R = R;
 }
@@ -103,15 +100,14 @@ PathGlob(WIN_NAMEIDATA *Path, DWORD Flags)
 VOID 
 PathOpen(WIN_NAMEIDATA *Path, LPWSTR Source, DWORD Flags)
 {
-//	if (!win_wcscmp(Source, L".")){		/* ignore dot in mount root */
-//		Source++;
-//	}
+	if (!win_wcscmp(Source, L".")){		/* ignore dot in mount root */
+		Source++;
+	}
 	Path->Attribs = -1;
 	Path->S = Source;
 	Path->FileType = WIN_VREG;
 	Path->Flags = Flags;
 	Path->Base = Path->R;
-//	*Path->R = 0;
 }
 VOID 
 PathClose(WIN_NAMEIDATA *Path, DWORD Flags)
@@ -142,6 +138,8 @@ vfs_lookup(WIN_NAMEIDATA *Path, LPWSTR Source, DWORD Flags)
 		PathCopy(Path);
 	}else while (PathRead(Path)){
 		if (!PathGlob(Path, Flags | WIN_FOLLOW)){
+			*Path->R++ = '\\';
+			Path->Base = Path->R;
 			PathCopy(Path);
 			Path->Last = Path->R - 1;
 			return(Path);

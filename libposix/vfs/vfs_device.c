@@ -128,17 +128,17 @@ disk_attach(WIN_DEVICE *Device)
 		case DEV_TYPE_WD:
 			bResult = config_found("hdc", FS_TYPE_PDO, WIN_VBLK, Device);
 			break;
-		case DEV_TYPE_FDC:
-			bResult = config_found("fdc", FS_TYPE_PDO, WIN_VBLK, Device);
-			break;
-		case DEV_TYPE_AHCI:
-			bResult = config_found("ahci", FS_TYPE_PDO, WIN_VBLK, Device);
-			break;
 		case DEV_TYPE_SD:
 			bResult = config_found("scsi", FS_TYPE_PDO, WIN_VBLK, Device);
 			break;
+		case DEV_TYPE_FDC:
+			bResult = config_found("fdc", FS_TYPE_PDO, WIN_VBLK, Device);
+			break;
 		case DEV_TYPE_USB:
 			bResult = config_found("usb", FS_TYPE_PDO, WIN_VBLK, Device);
+			break;
+		case DEV_TYPE_AHCI:
+			bResult = config_found("ahci", FS_TYPE_PDO, WIN_VBLK, Device);
 			break;
 		default:
 			bResult = FALSE;

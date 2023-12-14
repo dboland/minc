@@ -84,7 +84,6 @@ drive_statfs(WIN_NAMEIDATA *Path, WIN_STATFS *Result)
 	/* mount.exe -a
 	 */
 	ZeroMemory(Result, sizeof(WIN_STATFS));
-VfsDebugPath(Path, "drive_statfs");
 	if (Path->Attribs == FILE_ATTRIBUTE_MOUNT){
 		bResult = DriveStatVolume(Path->Resolved, Result);
 	}else{

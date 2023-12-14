@@ -177,7 +177,7 @@ rtaddr_posix(struct sockaddr_in *addr, DWORD Port, BYTE Address[4])
 /****************************************************/
 
 int 
-route_NET_RT_IFLIST(WIN_TASK *Task, void *buf, size_t *size)
+route_NET_RT_IFLIST(void *buf, size_t *size)
 {
 	int result = 0;
 	WIN_IFDATA ifData;
@@ -208,7 +208,7 @@ route_NET_RT_IFLIST(WIN_TASK *Task, void *buf, size_t *size)
 	return(result);
 }
 int 
-route_NET_RT_OACTIVE(WIN_TASK *Task, void *buf, size_t *size)
+route_NET_RT_OACTIVE(void *buf, size_t *size)
 {
 	int result = 0;
 	PMIB_IPNETTABLE pinTable;
@@ -227,7 +227,7 @@ route_NET_RT_OACTIVE(WIN_TASK *Task, void *buf, size_t *size)
 	return(result);
 }
 int 
-route_NET_RT_DUMP(WIN_TASK *Task, void *buf, size_t *size)
+route_NET_RT_DUMP(void *buf, size_t *size)
 {
 	int result = 0;
 	PMIB_IPFORWARDTABLE pfwTable;
@@ -255,13 +255,13 @@ route_NET_RT_DUMP(WIN_TASK *Task, void *buf, size_t *size)
 	return(result);
 }
 int 
-route_NET_RT_FLAGS(WIN_TASK *Task, const int *name, void *buf, size_t *size)
+route_NET_RT_FLAGS(const int *name, void *buf, size_t *size)
 {
 	int result = 0;
 
 	switch (name[5]){
 		case IFF_OACTIVE:	/* arp.exe -a */
-			result = route_NET_RT_OACTIVE(Task, buf, size);
+			result = route_NET_RT_OACTIVE(buf, size);
 			break;
 		default:
 			result = -ENOENT;

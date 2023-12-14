@@ -448,7 +448,7 @@ sys_symlink(call_t call, const char *name1, const char *name2)
 	return(__symlinkat(pathat_win(&wnTarget, 0, name1, AT_REQUIREDRIVE), AT_FDCWD, name2));
 }
 int 
-__faccessat(int dirfd, const char *pathname, int mode, int flags)
+__faccessat(int dirfd, const char *path, int mode, int flags)
 {
 	int result = 0;
 	WIN_NAMEIDATA wPath;
@@ -463,7 +463,7 @@ __faccessat(int dirfd, const char *pathname, int mode, int flags)
 	if (mode & X_OK){
 		amDesired |= WIN_S_IEXEC;
 	}
-	if (!vfs_access(pathat_win(&wPath, dirfd, pathname, flags), amDesired)){
+	if (!vfs_access(pathat_win(&wPath, dirfd, path, flags), amDesired)){
 		result -= errno_posix(GetLastError());
 	}
 	return(result);

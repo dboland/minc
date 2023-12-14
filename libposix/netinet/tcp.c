@@ -35,7 +35,7 @@
 /****************************************************/
 
 int 
-tcp_NET_INET_TCP(WIN_TASK *Task, const int *name, void *buf, size_t *size)
+tcp_NET_INET_TCP(const int *name, void *buf, size_t *size)
 {
 	int result = 0;
 

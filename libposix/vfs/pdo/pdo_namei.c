@@ -50,7 +50,7 @@ PdoOpenFile(WIN_NAMEIDATA *Path, WIN_FLAGS *Flags, WIN_VNODE *Result)
 //	Result->Access = win_F_GETFL(Path->Handle);
 	Result->Access = Flags->Access;
 	MapGenericMask(&Result->Access, &AccessMap);
-	Result->Device = DEVICE(Path->DeviceId);
+	Result->Device = Path->Device;
 	return(TRUE);
 }
 BOOL 
@@ -83,7 +83,7 @@ pdo_lookup(WIN_NAMEIDATA *Path, DWORD Flags)
 	HANDLE hResult;
 	SECURITY_ATTRIBUTES sa = {sizeof(sa), NULL, TRUE};
 
-	hResult = CreateFileW(Path->Resolved, GENERIC_READ, FILE_SHARE_READ, 
+	hResult = CreateFileW(Path->Resolved, GENERIC_READ, FILE_SHARE_READ | FILE_SHARE_DELETE, 
 		&sa, OPEN_EXISTING, FILE_ATTRIBUTE_SYSTEM, NULL);
 	if (hResult == INVALID_HANDLE_VALUE){
 		WIN_ERR("pdo_lookup(%ls): %s\n", Path->Resolved, win_strerror(GetLastError()));
@@ -98,6 +98,7 @@ pdo_lookup(WIN_NAMEIDATA *Path, DWORD Flags)
 		Path->FileType = iNode.FileType;
 		Path->FSType = FS_TYPE_PDO;
 		Path->Handle = hResult;
+		Path->Device = pwDevice;
 		bResult = TRUE;
 //VfsDebugPath(Path, "pdo_lookup");
 	}

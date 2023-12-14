@@ -78,8 +78,8 @@ statfs_posix(struct statfs *buf, WIN_STATFS *Stat)
 	buf->f_bfree = Stat->FreeClusters;
 	buf->f_bavail = Stat->FreeClusters;
 
-	buf->f_fsid.val[0] = pDevice->DeviceId >> 8;
-	buf->f_fsid.val[1] = pDevice->DeviceId & 0xFF;
+	buf->f_fsid.val[0] = pwDevice->DeviceId >> 8;
+	buf->f_fsid.val[1] = pwDevice->DeviceId & 0xFF;
 	buf->f_ctime = time_posix(&Stat->MountTime);
 
 	/* fs type name and options */

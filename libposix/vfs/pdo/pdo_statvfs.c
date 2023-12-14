@@ -43,9 +43,6 @@ DevLookupBus(LPCWSTR BusName, DWORD Class)
 	}else if (!win_wcsncmp(BusName, L"USB", 3)){
 		dwResult |= DEV_BUS_USB;
 
-//	}else if (!win_wcscmp(BusName, L"USBSTOR")){
-//		dwResult |= DEV_BUS_USB;
-
 	}else if (!win_wcscmp(BusName, L"ACPI")){
 		dwResult |= DEV_BUS_ACPI;
 

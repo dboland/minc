@@ -35,7 +35,7 @@
 /****************************************************/
 
 int 
-udp_NET_INET_UDP(WIN_TASK *Task, const int *name, void *buf, size_t *size)
+udp_NET_INET_UDP(const int *name, void *buf, size_t *size)
 {
 	int result = 0;
 

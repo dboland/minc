@@ -34,7 +34,7 @@
 /****************************************************/
 
 int 
-ip_NET_INET_IP_FORWARDING(WIN_TASK *Task, void *buf, size_t *size)
+ip_NET_INET_IP_FORWARDING(void *buf, size_t *size)
 {
 	int result = 0;
 	ULONG ulStatus;
@@ -51,7 +51,7 @@ ip_NET_INET_IP_FORWARDING(WIN_TASK *Task, void *buf, size_t *size)
 	return(result);
 }
 int 
-ip_NET_INET_IP_DEFTTL(WIN_TASK *Task, void *buf, size_t *size)
+ip_NET_INET_IP_DEFTTL(void *buf, size_t *size)
 {
 	int result = 0;
 	ULONG ulStatus;
@@ -67,16 +67,16 @@ ip_NET_INET_IP_DEFTTL(WIN_TASK *Task, void *buf, size_t *size)
 	return(result);
 }
 int 
-ip_NET_INET_IP(WIN_TASK *Task, const int *name, void *buf, size_t *size)
+ip_NET_INET_IP(const int *name, void *buf, size_t *size)
 {
 	int result = 0;
 
 	switch (name[3]){
 		case IPCTL_FORWARDING:		/* 1 */
-			result = ip_NET_INET_IP_FORWARDING(Task, buf, size);
+			result = ip_NET_INET_IP_FORWARDING(buf, size);
 			break;
 		case IPCTL_DEFTTL:		/* traceroute.exe */
-			result = ip_NET_INET_IP_DEFTTL(Task, buf, size);
+			result = ip_NET_INET_IP_DEFTTL(buf, size);
 			break;
 		default:
 			result = -EOPNOTSUPP;

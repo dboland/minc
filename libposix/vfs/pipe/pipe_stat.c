@@ -45,11 +45,11 @@ pipe_mknod(LPWSTR FileName, LPWSTR Name, WIN_MODE *Mode)
 	WIN_INODE iNode = {TypeNameVirtual, Mode->FileType, DEV_CLASS_CPU, 0, FS_TYPE_PIPE, 0};
 	HANDLE hResult;
 
-	win_wcscpy(win_typename(FileName), L".vfs");
+//	win_wcscpy(win_typename(FileName), L".vfs");
 	win_wcscpy(iNode.Name, Name);
 __PRINTF("  pipe_mknod(%ls): %ls\n", FileName, Name)
 	hResult = CreateFileW(FileName, GENERIC_WRITE, FILE_SHARE_READ, NULL, 
-		CREATE_ALWAYS, FILE_ATTRIBUTE_NORMAL, NULL);
+		CREATE_ALWAYS, FILE_ATTRIBUTE_SYSTEM, NULL);
 	if (hResult == INVALID_HANDLE_VALUE){
 		WIN_ERR("CreateFile(%ls): %s\n", FileName, win_strerror(GetLastError()));
 	}else if (!WriteFile(hResult, &iNode, dwSize, &dwSize, NULL)){

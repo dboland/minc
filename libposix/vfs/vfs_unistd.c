@@ -225,10 +225,9 @@ vfs_chdir(WIN_TASK *Task, WIN_NAMEIDATA *Path)
 {
 	BOOL bResult = FALSE;
 
-//	if (*Path->Last != '\\'){
-//		*Path->R++ = '\\';
-//		*Path->R = 0;
-//	}
+	if (*Path->Last == '\\'){
+		*Path->Last = 0;
+	}
 	if (Path->FileType != WIN_VDIR){
 		SetLastError(ERROR_DIRECTORY);
 	}else if (!vfs_access(Path, WIN_S_IRX)){

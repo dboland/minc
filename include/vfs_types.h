@@ -87,6 +87,70 @@ typedef enum _WIN_VTAGTYPE {
 #define WIN_NAME_MAX		16
 #define WIN_PIPE_BUF		1024
 
+/*
+ * vfs_device.c
+ */
+
+typedef struct _WIN_DEVICE {
+	DWORD Magic;
+	WIN_VTYPE FileType;
+	DWORD DeviceType;
+	DWORD DeviceId;
+	WIN_FS_TYPE FSType;		/* file system Handles are in */
+	CHAR Name[MAX_NAME];
+	HANDLE Handle;
+	HANDLE Input;
+	HANDLE Output;
+	DWORD Flags;			/* see below */
+	DWORD Index;
+	WCHAR NtName[MAX_NAME];
+	WCHAR ClassId[MAX_GUID];
+	WCHAR NtPath[MAX_PATH];
+} WIN_DEVICE;
+
+#define WIN_DVF_BUS_READY		0x0100
+#define WIN_DVF_PORT_READY		0x0200
+#define WIN_DVF_DRIVER_READY		0x0400
+
+/* Flags from NetBSD */
+
+#define WIN_DVF_ACTIVE			0x0001		/* device is activated */
+#define WIN_DVF_PRIV_ALLOC		0x0002		/* device private storage != device */
+#define WIN_DVF_POWER_HANDLERS		0x0004		/* device has suspend/resume support */
+#define WIN_DVF_CLASS_SUSPENDED		0x0008		/* device class suspend was called */
+#define WIN_DVF_DRIVER_SUSPENDED	0x0010		/* device driver suspend was called */
+#define WIN_DVF_BUS_SUSPENDED		0x0020		/* device bus suspend was called */
+#define WIN_DVF_ATTACH_INPROGRESS	0x0040		/* device attach is in progress */
+#define WIN_DVF_DETACH_SHUTDOWN		0x0080		/* device detaches safely at shutdown */
+
+typedef struct _WIN_CFDRIVER {
+	DWORD Flags;
+	DWORD DeviceType;
+	CHAR Name[MAX_NAME];
+	WCHAR ClassId[MAX_GUID];
+	WCHAR NtClass[MAX_NAME];
+	WCHAR Service[MAX_NAME];
+	WCHAR Location[MAX_COMMENT];
+	WCHAR Comment[MAX_COMMENT];
+} WIN_CFDRIVER;
+
+typedef struct _WIN_CFDATA {
+	LPWSTR Strings;
+	LPCWSTR Next;
+	DWORD FSType;
+	DWORD DeviceType;
+	LPCWSTR DosPath;
+	LPCWSTR NtName;
+	DWORD Depth;
+	WCHAR BusName[MAX_NAME];
+	WCHAR ClassName[MAX_NAME];
+	WCHAR NtPath[MAX_TEXT];
+} WIN_CFDATA;
+
+typedef WIN_DEVICE WIN_DEV_CLASS[WIN_UNIT_MAX];
+
+#define DEVICE(rid)	(&__Devices[rid >> 8][rid & 0xFF])
+
 /* 
  * vfs_namei.c
  */
@@ -118,6 +182,7 @@ typedef struct _WIN_NAMEIDATA {
 	DWORD DeviceId;
 	WIN_FS_TYPE FSType;
 	WCHAR Resolved[WIN_PATH_MAX];
+	WIN_DEVICE *Device;
 	HANDLE Handle;
 	DWORD Attribs;
 	DWORD Flags;			/* see below */
@@ -188,70 +253,6 @@ typedef struct _WIN_NAMEIDATA {
 #define WIN_ONLCR		0x00020000
 #define WIN_OXTABS		0x00040000
 #define WIN_OCRNL		0x00100000
-
-/*
- * vfs_device.c
- */
-
-typedef struct _WIN_DEVICE {
-	DWORD Magic;
-	WIN_VTYPE FileType;
-	DWORD DeviceType;
-	DWORD DeviceId;
-	WIN_FS_TYPE FSType;		/* file system Handles are in */
-	CHAR Name[MAX_NAME];
-	HANDLE Handle;
-	HANDLE Input;
-	HANDLE Output;
-	DWORD Flags;			/* see below */
-	DWORD Index;
-	WCHAR NtName[MAX_NAME];
-	WCHAR ClassId[MAX_GUID];
-	WCHAR NtPath[MAX_PATH];
-} WIN_DEVICE;
-
-#define WIN_DVF_BUS_READY		0x0100
-#define WIN_DVF_PORT_READY		0x0200
-#define WIN_DVF_DRIVER_READY		0x0400
-
-/* Flags from NetBSD */
-
-#define WIN_DVF_ACTIVE			0x0001		/* device is activated */
-#define WIN_DVF_PRIV_ALLOC		0x0002		/* device private storage != device */
-#define WIN_DVF_POWER_HANDLERS		0x0004		/* device has suspend/resume support */
-#define WIN_DVF_CLASS_SUSPENDED		0x0008		/* device class suspend was called */
-#define WIN_DVF_DRIVER_SUSPENDED	0x0010		/* device driver suspend was called */
-#define WIN_DVF_BUS_SUSPENDED		0x0020		/* device bus suspend was called */
-#define WIN_DVF_ATTACH_INPROGRESS	0x0040		/* device attach is in progress */
-#define WIN_DVF_DETACH_SHUTDOWN		0x0080		/* device detaches safely at shutdown */
-
-typedef struct _WIN_CFDRIVER {
-	DWORD Flags;
-	DWORD DeviceType;
-	CHAR Name[MAX_NAME];
-	WCHAR ClassId[MAX_GUID];
-	WCHAR NtClass[MAX_NAME];
-	WCHAR Service[MAX_NAME];
-	WCHAR Location[MAX_COMMENT];
-	WCHAR Comment[MAX_COMMENT];
-} WIN_CFDRIVER;
-
-typedef struct _WIN_CFDATA {
-	LPWSTR Strings;
-	LPCWSTR Next;
-	DWORD FSType;
-	DWORD DeviceType;
-	LPCWSTR DosPath;
-	LPCWSTR NtName;
-	DWORD Depth;
-	WCHAR BusName[MAX_NAME];
-	WCHAR ClassName[MAX_NAME];
-	WCHAR NtPath[MAX_TEXT];
-} WIN_CFDATA;
-
-typedef WIN_DEVICE WIN_DEV_CLASS[WIN_UNIT_MAX];
-
-#define DEVICE(rid)	(&__Devices[rid >> 8][rid & 0xFF])
 
 /*
  * vfs_fcntl.c
