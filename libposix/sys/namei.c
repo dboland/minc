@@ -50,7 +50,6 @@ pathnp_posix(char *dest, LPCWSTR Source, LONG Size, BOOL EndPtr)
 	}
 	win_wcstombs(src, Source, Size);
 	if (!win_wcsncmp(Source, Root, len)){
-//		*dest++ = '/';
 		src += len;
 		Size--;
 	}else if (*src && src[1] == ':'){		/* MinGW ld.exe */

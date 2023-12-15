@@ -29,13 +29,14 @@
  */
 
 #include "disk_dirent.c"
-#include "disk_namei.c"
+#include "disk_syscall.c"
 #include "link/link.c"
 #include "file/file.c"
 #include "directory/directory.c"
 #include "disk_fcntl.c"
-#include "disk_stat.c"
 #include "disk_unistd.c"
+#include "disk_namei.c"
+#include "disk_stat.c"
 #include "disk_time.c"
 #include "disk_poll.c"
 
@@ -46,8 +47,8 @@ disk_init(WIN_MOUNT *Root, HINSTANCE Instance)
 {
 	__Mounts = Root;
 
-	/* configure root/swap device,
-	 * origally done by diskconf() in OpenBSD.
+	/* Configure root/swap device. Originally done by
+	 * diskconf() in OpenBSD.
 	 */
 	GetModuleFileNameW(Instance, Root->Path, MAX_PATH);
 	win_dirname(win_dirname(Root->Path));

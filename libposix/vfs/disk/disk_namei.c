@@ -33,85 +33,6 @@
 /****************************************************/
 
 BOOL 
-DiskCreateFile(WIN_NAMEIDATA *Path, WIN_FLAGS *Flags, WIN_MODE *Mode, WIN_VNODE *Result)
-{
-	BOOL bResult = FALSE;
-	PSECURITY_DESCRIPTOR psd;
-	WCHAR szDirName[WIN_PATH_MAX] = L"";
-	HANDLE hResult;
-	WIN_ACL_CONTROL wControl;
-	SECURITY_ATTRIBUTES sa = {sizeof(sa), &wControl.Security, FALSE};
-
-	Flags->Access |= WRITE_DAC | WRITE_OWNER;		/* disk_fchown() */
-	if (!win_acl_get_file(win_dirname_r(Path->Resolved, szDirName), &psd)){
-		return(FALSE);
-	}else if (!win_acl_init(Mode, &wControl)){
-		WIN_ERR("win_acl_init(%s): %s\n", szDirName, win_strerror(GetLastError()));
-	}else if (vfs_acl_create(psd, Mode, 0, &wControl)){
-		hResult = CreateFileW(Path->Resolved, Flags->Access, Flags->Share, 
-			&sa, Flags->Creation, Flags->Attribs, NULL);
-		if (hResult != INVALID_HANDLE_VALUE){
-			Result->Handle = hResult;
-			Result->FSType = Path->FSType;
-			Result->DeviceType = Path->DeviceType;
-			Result->DeviceId = Path->DeviceId;
-			Result->FileType = Path->FileType;
-			Result->Attribs = Flags->Attribs;
-			Result->CloseExec = Flags->CloseExec;
-			Result->Access = win_F_GETFL(hResult);
-			Result->Flags = win_F_GETFD(hResult);
-			bResult = TRUE;
-		}
-	}
-	LocalFree(psd);
-	win_acl_free(&wControl);
-	return(bResult);
-}
-BOOL 
-DiskOpenFile(WIN_NAMEIDATA *Path, WIN_FLAGS *Flags, WIN_VNODE *Result)
-{
-	HANDLE hResult;
-	BOOL bResult = FALSE;
-	SECURITY_ATTRIBUTES sa = {sizeof(sa), NULL, FALSE};
-
-	hResult = CreateFileW(Path->Resolved, Flags->Access, Flags->Share, 
-		&sa, Flags->Creation, Flags->Attribs, NULL);
-	if (hResult != INVALID_HANDLE_VALUE){
-		Result->Handle = hResult;
-		Result->FSType = Path->FSType;
-		Result->DeviceType = Path->DeviceType;
-		Result->DeviceId = Path->DeviceId;
-		Result->FileType = Path->FileType;
-		Result->Attribs = Flags->Attribs;
-		Result->CloseExec = Flags->CloseExec;
-		Result->Access = win_F_GETFL(hResult);
-		Result->Flags = win_F_GETFD(hResult);
-		bResult = TRUE;
-	}
-	return(bResult);
-}
-BOOL 
-DiskStatFile(LPCWSTR FileName, DWORD Attribs, WIN_VATTR *Result)
-{
-	BOOL bResult = FALSE;
-	PSECURITY_DESCRIPTOR psd;
-	HANDLE hFile;
-
-	hFile = CreateFileW(FileName, READ_CONTROL, FILE_SHARE_READ, 
-		NULL, OPEN_EXISTING, Attribs, NULL);
-	if (hFile == INVALID_HANDLE_VALUE){
-		return(FALSE);
-	}else if (!win_acl_get_fd(hFile, &psd)){
-		return(FALSE);
-	}else if (!GetFileInformationByHandle(hFile, (BY_HANDLE_FILE_INFORMATION *)Result)){
-		WIN_ERR("GetFileInformationByHandle(%d): %s\n", hFile, win_strerror(GetLastError()));
-	}else if (vfs_acl_stat(psd, Result)){
-		bResult = CloseHandle(hFile);
-	}
-	LocalFree(psd);
-	return(bResult);
-}
-BOOL 
 DiskGlobType(WIN_NAMEIDATA *Path, LPCWSTR TypeName)
 {
 	BOOL bResult = FALSE;
@@ -127,9 +48,39 @@ DiskGlobType(WIN_NAMEIDATA *Path, LPCWSTR TypeName)
 	}
 	return(bResult);
 }
+BOOL 
+DiskGlobLink(WIN_NAMEIDATA *Path, LONG Depth)
+{
+	BOOL bResult = FALSE;
+
+	if (disk_readlink(Path, TRUE)){
+		if (!DiskGlobType(Path, L".lnk")){
+			bResult = TRUE;
+		}else if (Depth >= WIN_SYMLOOP_MAX){
+			SetLastError(ERROR_TOO_MANY_LINKS);
+		}else{
+			bResult = DiskGlobLink(Path, Depth + 1);
+		}
+	}
+	return(bResult);
+}
 
 /****************************************************/
 
+BOOL 
+disk_lookup(WIN_NAMEIDATA *Path, DWORD Flags)
+{
+	BOOL bResult = TRUE;
+
+	if (!DiskGlobType(Path, L".lnk")){
+		bResult = FALSE;
+	}else if (Flags & WIN_FOLLOW){
+		bResult = DiskGlobLink(Path, 1);
+	}else{
+		Path->Attribs |= FILE_ATTRIBUTE_SYMLINK;
+	}
+	return(bResult);
+}
 BOOL 
 disk_namei(HANDLE Handle, WIN_VNODE *Result)
 {

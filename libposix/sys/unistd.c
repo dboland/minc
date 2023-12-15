@@ -400,7 +400,7 @@ __readlinkat(WIN_TASK *Task, int dirfd, const char *pathname, char *buf, size_t 
 	ssize_t result = 0;
 	WIN_NAMEIDATA wpePath;
 
-	if (!vfs_readlink(pathat_win(&wpePath, dirfd, pathname, AT_SYMLINK_NOFOLLOW), FALSE)){
+	if (!disk_readlink(pathat_win(&wpePath, dirfd, pathname, AT_SYMLINK_NOFOLLOW), FALSE)){
 		result -= errno_posix(GetLastError());
 	}else{
 		result = pathnp_posix(buf, wpePath.Resolved, bufsiz, TRUE) - buf;
@@ -428,7 +428,7 @@ __symlinkat(WIN_NAMEIDATA *Target, int fd, const char *path)
 	if (Target->Attribs != -1){
 		vfs_stat(Target, &wStat);
 	}
-	if (!vfs_symlink(Target, &wStat, mode_win(&wMode, 00755), pathat_win(&wnPath, fd, path, AT_SYMLINK_NOFOLLOW))){
+	if (!disk_symlink(Target, &wStat, mode_win(&wMode, 00755), pathat_win(&wnPath, fd, path, AT_SYMLINK_NOFOLLOW))){
 		result -= errno_posix(GetLastError());
 	}
 	return(result);

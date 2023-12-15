@@ -95,7 +95,7 @@ CONST CHAR	*__Clipboard;		/* Clipboard buffer */
 
 BOOL vfs_namei(HANDLE Handle, DWORD Index, WIN_VNODE *Result);
 BOOL proc_poll(VOID);
-BOOL vfs_readlink(WIN_NAMEIDATA *Path, BOOL MakeReal);
+//BOOL vfs_readlink(WIN_NAMEIDATA *Path, BOOL MakeReal);
 
 #include "vfs_acl.c"
 #include "vfs_debug.c"
@@ -108,8 +108,8 @@ BOOL vfs_readlink(WIN_NAMEIDATA *Path, BOOL MakeReal);
 #include "char/char.c"
 #include "drive/drive.c"
 #include "pdo/pdo.c"
-#include "disk/disk.c"
 #include "volume/volume.c"
+#include "disk/disk.c"
 #include "mailslot/mailslot.c"
 #include "event/event.c"
 #include "winsock/winsock.c"

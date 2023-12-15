@@ -28,5 +28,4 @@
  *
  */
 
-#include "link_namei.c"
 #include "link_unistd.c"

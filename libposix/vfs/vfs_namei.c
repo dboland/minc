@@ -83,7 +83,7 @@ PathGlob(WIN_NAMEIDATA *Path, DWORD Flags)
 
 	switch (Path->Attribs){
 		case -1:
-			bResult = link_lookup(Path, Flags);
+			bResult = disk_lookup(Path, Flags);
 			break;
 		case FILE_ATTRIBUTE_PDO:
 			bResult = pdo_lookup(Path, Flags);
@@ -169,6 +169,5 @@ vfs_namei(HANDLE Handle, DWORD Index, WIN_VNODE *Result)
 		default:
 			SetLastError(ERROR_BAD_FILE_TYPE);
 	}
-//VfsDebugNode(Result, "vfs_namei");
 	return(bResult);
 }
