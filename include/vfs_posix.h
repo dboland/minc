@@ -222,3 +222,4 @@ BOOL vol_stat(LPCWSTR Path, LPSTR Result);
 
 UINT ws2_nametoindex(LPCSTR Name);
 UINT ws2_indextoname(DWORD Index, LPSTR Result);
+BOOL ws2_attach(LPCWSTR NtName, DWORD DeviceType, MIB_IFROW *Interface);

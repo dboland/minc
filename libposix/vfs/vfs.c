@@ -95,7 +95,6 @@ CONST CHAR	*__Clipboard;		/* Clipboard buffer */
 
 BOOL vfs_namei(HANDLE Handle, DWORD Index, WIN_VNODE *Result);
 BOOL proc_poll(VOID);
-//BOOL vfs_readlink(WIN_NAMEIDATA *Path, BOOL MakeReal);
 
 #include "vfs_acl.c"
 #include "vfs_debug.c"

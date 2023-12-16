@@ -160,9 +160,9 @@ vfs_mkdir(WIN_NAMEIDATA *Path, WIN_MODE *Mode)
 	SECURITY_ATTRIBUTES sa = {sizeof(sa), &wControl.Security, FALSE};
 	BYTE bAceFlags = OBJECT_INHERIT_ACE + CONTAINER_INHERIT_ACE;
 
-//	if (*Path->Last == '\\'){	/* git.exe */
-//		*Path->Last = 0;
-//	}
+	if (*Path->Last == '\\'){	/* git.exe */
+		*Path->Last = 0;
+	}
 	if (!win_acl_get_file(win_dirname_r(Path->Resolved, szParent), &psd)){
 		return(FALSE);
 	}else if (!win_acl_init(Mode, &wControl)){
