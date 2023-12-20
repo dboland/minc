@@ -347,7 +347,7 @@ typedef struct _WIN_MOUNT {
 	FILETIME Time;
 	UINT DriveType;
 	WCHAR Drive[MAX_LABEL];
-	WCHAR Path[MAX_PATH];
+	WCHAR Volume[MAX_PATH];
 } WIN_MOUNT;
 
 typedef struct _WIN_STATFS {

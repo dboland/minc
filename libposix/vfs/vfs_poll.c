@@ -33,15 +33,12 @@
 /************************************************************/
 
 DWORD 
-PollGetObjects(HANDLE Timer, WIN_VNODE *Nodes[], HANDLE Result[])
+PollGetObjects(WIN_VNODE *Nodes[], HANDLE Result[])
 {
 	DWORD dwResult = 0;
 	WIN_VNODE *pNode;
 
 	Result[dwResult++] = __Interrupt;
-	if (Timer){
-		Result[dwResult++] = Timer;
-	}
 	while (pNode = *Nodes++){
 		Result[dwResult++] = pNode->Event;
 	}
@@ -84,13 +81,13 @@ PollNoWait(WIN_VNODE *Nodes[], WIN_POLLFD *Info[])
 	return(dwResult);
 }
 BOOL 
-PollWait(WIN_TASK *Task, WIN_VNODE *Nodes[], DWORD *TimeOut)
+PollWait(WIN_VNODE *Nodes[], DWORD *TimeOut)
 {
 	BOOL bResult = FALSE;
 	DWORD dwStatus = 0;
 	LONGLONG llTime = (LONGLONG)GetTickCount();
 	HANDLE hObjects[WSA_MAXIMUM_WAIT_EVENTS];
-	DWORD dwCount = PollGetObjects(Task->Timer, Nodes, hObjects);
+	DWORD dwCount = PollGetObjects(Nodes, hObjects);
 	DWORD dwTimeOut = *TimeOut;
 
 	if (dwTimeOut != INFINITE){
@@ -129,7 +126,7 @@ vfs_poll(WIN_TASK *Task, WIN_VNODE *Nodes[], WIN_POLLFD *Info[], DWORD *TimeOut,
 			bResult = TRUE;
 		}else if (!*TimeOut){
 			bResult = TRUE;
-		}else if (!PollWait(Task, Nodes, TimeOut)){
+		}else if (!PollWait(Nodes, TimeOut)){
 			break;
 		}else if (proc_poll()){
 			break;

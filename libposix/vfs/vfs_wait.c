@@ -74,7 +74,7 @@ WaitTimeOut(WIN_TASK *Children[], DWORD TimeOut)
 	HANDLE hObjects[MAXIMUM_WAIT_OBJECTS];
 	DWORD dwCount = WaitGetObjects(Children, hObjects);
 
-	dwResult = WaitForMultipleObjects(dwCount, hObjects, FALSE, TimeOut);
+	dwResult = WaitForMultipleObjectsEx(dwCount, hObjects, FALSE, TimeOut, TRUE);
 	if (dwResult == WAIT_FAILED){
 		WIN_ERR("WaitForMultipleObjects(%s): %s\n", win_strobj(hObjects, dwCount), win_strerror(GetLastError()));
 		vfs_raise(WM_COMMAND, CTRL_ABORT_EVENT, 0);

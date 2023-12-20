@@ -177,28 +177,24 @@ vfs_raise(UINT Message, WPARAM WParam, LPARAM LParam)
 	return(__SignalProc(CtrlType, &ctx));
 }
 BOOL 
-vfs_sigsuspend(WIN_TASK *Task, CONST UINT *Mask, WPARAM WParam, MSG *Result)
+vfs_sigsuspend(WIN_TASK *Task, CONST UINT *Mask)
 {
 	HACCEL hKeys = NULL;
-	BOOL bResult = TRUE;
 	UINT uiCurrent = Task->ProcMask;
+	MSG msg = {0};
 
 	Task->ProcMask = *Mask;
 	Task->State = WIN_SSLEEP;
-	if (GetMessage(Result, NULL, 0, 0)){
-		if (!TranslateAccelerator(NULL, hKeys, Result)){
-			TranslateMessage(Result);
-			DispatchMessage(Result);
+	if (GetMessage(&msg, NULL, 0, 0)){
+		if (!TranslateAccelerator(NULL, hKeys, &msg)){
+			TranslateMessage(&msg);
+			DispatchMessage(&msg);
 		}
 	}
-	if (Result->wParam == WParam){	/* vfs_nanosleep() */
-		bResult = FALSE;
-	}else if (vfs_raise(Result->message, Result->wParam, Result->lParam)){
+	if (vfs_raise(msg.message, msg.wParam, msg.lParam)){
 		SetLastError(ERROR_SIGNAL_PENDING);
-	}else{
-		bResult = FALSE;
 	}
 	Task->State = WIN_SRUN;
 	Task->ProcMask = uiCurrent;
-	return(bResult);
+	return(FALSE);
 }

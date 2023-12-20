@@ -111,9 +111,8 @@ int
 __sigsuspend(WIN_TASK *Task, const sigset_t *mask)
 {
 	int result = 0;
-	MSG Msg = {0};
 
-	if (vfs_sigsuspend(Task, mask, 0, &Msg)){
+	if (vfs_sigsuspend(Task, mask)){
 		result -= errno_posix(GetLastError());
 	}
 	return(result);

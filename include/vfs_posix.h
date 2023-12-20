@@ -87,7 +87,7 @@ BOOL vfs_mkdir(WIN_NAMEIDATA *Path, WIN_MODE *Mode);
 
 /* vfs_signal.c */
 
-BOOL vfs_sigsuspend(WIN_TASK *Task, CONST UINT *Mask, WPARAM WParam, MSG *Result);
+BOOL vfs_sigsuspend(WIN_TASK *Task, CONST UINT *Mask);
 BOOL vfs_raise(UINT Message, WPARAM WParam, LPARAM LParam);
 BOOL vfs_sigaction(BOOL Enable);
 BOOL vfs_kill_PID(DWORD ThreadId, UINT Message, WPARAM WParam, LPARAM LParam);
@@ -222,4 +222,3 @@ BOOL vol_stat(LPCWSTR Path, LPSTR Result);
 
 UINT ws2_nametoindex(LPCSTR Name);
 UINT ws2_indextoname(DWORD Index, LPSTR Result);
-BOOL ws2_attach(LPCWSTR NtName, DWORD DeviceType, MIB_IFROW *Interface);

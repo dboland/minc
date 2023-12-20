@@ -30,35 +30,23 @@
 
 #include <winbase.h>
 
-#define OpenWaitableTimer __AW(OpenWaitableTimer)
+//#define OpenWaitableTimer __AW(OpenWaitableTimer)
 
 /****************************************************/
 
 VOID CALLBACK 
-TimeTimerProc(PVOID Param, DWORD LowValue, DWORD HighValue)
+TimeProc(PVOID Param, DWORD LowValue, DWORD HighValue)
 {
 	WIN_TASK *pwTask = Param;
-	DWORDLONG dwlTime = (HighValue * 0x100000000) + LowValue;
+//	DWORDLONG dwlTime = (HighValue * 0x100000000) + LowValue;
 
+	/* This procedure will not be called when including the handle 
+	 * created by CreateWaitableTimer() in one of the 
+	 * WaitFor*Ex() functions.
+	 */
 	if (!PostThreadMessage(pwTask->ThreadId, WM_TIMER, LowValue, HighValue)){
 		WIN_ERR("PostThreadMessage(%d): %s\n", pwTask->ThreadId, win_strerror(GetLastError()));
-		vfs_raise(WM_COMMAND, CTRL_ABORT_EVENT, 0);
 	}
-}
-HANDLE 
-TimeGetTimer(WIN_TASK *Task)
-{
-	HANDLE hResult = NULL;
-	WIN_OBJECT_CONTROL wControl;
-
-	if (Task->Timer){
-		return(Task->Timer);
-	}else if (!(hResult = CreateWaitableTimer(NULL, FALSE, NULL))){
-		WIN_ERR("CreateWaitableTimer(): %s\n", win_strerror(GetLastError()));
-	}else{
-		Task->Timer = hResult;
-	}
-	return(hResult);
 }
 
 /****************************************************/
@@ -72,12 +60,13 @@ vfs_clock_gettime_REALTIME(DWORDLONG *Result)
 BOOL 
 vfs_clock_gettime_MONOTONIC(LARGE_INTEGER Frequency, DWORDLONG *Result)
 {
-	BOOL bResult = FALSE;
+	BOOL bResult = TRUE;
 	LARGE_INTEGER liCount;
 
 	if (QueryPerformanceCounter(&liCount)){
-		*Result = (DWORDLONG)(Frequency.QuadPart * liCount.QuadPart);
-		bResult = TRUE;
+		*Result = Frequency.QuadPart * liCount.QuadPart;
+	}else{
+		bResult = FALSE;
 	}
 	return(bResult);
 }
@@ -116,18 +105,18 @@ vfs_setitimer(WIN_TASK *Task, LONG *Interval, DWORDLONG *TimeOut)
 	LONG lInterval = *Interval;
 	DWORDLONG dwlTicks = 0LL;
 	LONGLONG llRemain;
-	HANDLE hTimer = Task->Timer;
+	HANDLE hTimer = NULL;
 
 	liTimeOut.QuadPart = (LONGLONG)(dwlTimeOut * -0.01);	/* 100-nanosecond intervals */
 	if (!vfs_clock_gettime(WIN_CLOCK_MONOTONIC, &dwlTicks)){
+		return(FALSE);
+	}else if (!ProcGetTimer(Task, &hTimer)){
 		return(FALSE);
 	}else if (!dwlTimeOut){
 		lInterval = 0;
 		Task->Timer = NULL;
 		bResult = CloseHandle(hTimer);
-	}else if (!(hTimer = TimeGetTimer(Task))){
-		return(FALSE);
-	}else if (!SetWaitableTimer(hTimer, &liTimeOut, lInterval, TimeTimerProc, Task, FALSE)){
+	}else if (!SetWaitableTimer(hTimer, &liTimeOut, lInterval, TimeProc, Task, FALSE)){
 		WIN_ERR("SetWaitableTimer(%d): %s\n", hTimer, win_strerror(GetLastError()));
 	}else{
 		bResult = TRUE;
@@ -141,32 +130,30 @@ vfs_setitimer(WIN_TASK *Task, LONG *Interval, DWORDLONG *TimeOut)
 	*Interval = Task->Interval;
 	Task->Interval = lInterval;
 	Task->Ticks = (DWORDLONG)(dwlTicks + dwlTimeOut);
-//__PRINTF("vfs_setitimer(%d): Handle(%d), Interval(%d) TimeOut(%d)\n", Task->TaskId, hTimer, *Interval, *TimeOut);
+//VfsDebugTimer(Task, "vfs_setitimer");
 	return(bResult);
 }
 BOOL 
-vfs_nanosleep(WIN_TASK *Task, DWORD Millisecs, DWORD *Remain)
+vfs_nanosleep(WIN_TASK *Task, DWORD TimeOut, DWORD *Remain)
 {
-	DWORDLONG dwlTime = (DWORDLONG)(Millisecs + GetTickCount());
-	LONGLONG llRemain = 0;
 	BOOL bResult = FALSE;
-	UINT uiTimerId;
-	MSG Msg = {0};
-	UINT uiMask = 0;
+	DWORDLONG dwlTime = (DWORDLONG)(TimeOut + GetTickCount());
+	LONGLONG llRemain = 0;
+//	HANDLE hObjects[MAXIMUM_WAIT_OBJECTS];
+	DWORD dwStatus;
 
-	uiTimerId = SetTimer(NULL, 0, Millisecs, NULL);
-	if (!vfs_sigsuspend(Task, &uiMask, uiTimerId, &Msg)){
-		llRemain = dwlTime - GetTickCount();
-	}else{
+	dwStatus = WaitForSingleObjectEx(__Interrupt, TimeOut, TRUE);
+	if (dwStatus == WAIT_FAILED){
+		WIN_ERR("WaitForSingleObjectEx(%d): %s\n", __Interrupt, win_strerror(WSAGetLastError()));
+	}else if (!proc_poll()){
 		bResult = TRUE;
 	}
-	KillTimer(NULL, uiTimerId);
-	if (llRemain < 0){
-		*Remain = 0;
-	}else{
+	llRemain = (LONGLONG)(dwlTime - GetTickCount());
+	if (llRemain > 0){
 		*Remain = llRemain;
+	}else{
+		*Remain = 0;
 	}
-//__PRINTF("vfs_nanosleep(%d): Millisecs(%lu) Remain(%lu)\n", Task->TaskId, Millisecs, *Remain)
 	return(bResult);
 }
 BOOL 
@@ -176,6 +163,7 @@ vfs_utimes(WIN_NAMEIDATA *Path, FILETIME FileTime[2])
 
 	switch (Path->FSType){
 		case FS_TYPE_DISK:
+		case FS_TYPE_PDO:
 			bResult = disk_utimes(Path, FileTime);
 			break;
 		default:

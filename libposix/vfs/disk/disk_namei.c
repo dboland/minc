@@ -33,7 +33,7 @@
 /****************************************************/
 
 BOOL 
-DiskGlobType(WIN_NAMEIDATA *Path, LPCWSTR TypeName)
+DiskGlobType(LPCWSTR TypeName, WIN_NAMEIDATA *Path)
 {
 	BOOL bResult = FALSE;
 	DWORD dwAttribs;
@@ -49,17 +49,17 @@ DiskGlobType(WIN_NAMEIDATA *Path, LPCWSTR TypeName)
 	return(bResult);
 }
 BOOL 
-DiskGlobLink(WIN_NAMEIDATA *Path, LONG Depth)
+DiskGlobLink(LONG Depth, WIN_NAMEIDATA *Path)
 {
 	BOOL bResult = FALSE;
 
 	if (disk_readlink(Path, TRUE)){
-		if (!DiskGlobType(Path, L".lnk")){
+		if (!DiskGlobType(L".lnk", Path)){
 			bResult = TRUE;
 		}else if (Depth >= WIN_SYMLOOP_MAX){
 			SetLastError(ERROR_TOO_MANY_LINKS);
 		}else{
-			bResult = DiskGlobLink(Path, Depth + 1);
+			bResult = DiskGlobLink(Depth + 1, Path);
 		}
 	}
 	return(bResult);
@@ -72,10 +72,10 @@ disk_lookup(WIN_NAMEIDATA *Path, DWORD Flags)
 {
 	BOOL bResult = TRUE;
 
-	if (!DiskGlobType(Path, L".lnk")){
+	if (!DiskGlobType(L".lnk", Path)){
 		bResult = FALSE;
 	}else if (Flags & WIN_FOLLOW){
-		bResult = DiskGlobLink(Path, 1);
+		bResult = DiskGlobLink(1, Path);
 	}else{
 		Path->Attribs |= FILE_ATTRIBUTE_SYMLINK;
 	}

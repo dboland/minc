@@ -62,7 +62,7 @@ drive_getfsstat(WIN_MOUNT *Mount, DWORD Flags, WIN_STATFS *Result)
 	Result->DeviceId = Mount->DeviceId;
 	Result->MountTime = Mount->Time;
 	if (!(Flags & WIN_MNT_NOWAIT)){
-		bResult = DriveStatVolume(Mount->Path, Result);
+		bResult = DriveStatVolume(Mount->Volume, Result);
 	}else switch (Mount->DeviceType){
 		case DEV_TYPE_CDROM:
 			win_wcscpy(Result->TypeName, L"ISO9660");
@@ -72,7 +72,7 @@ drive_getfsstat(WIN_MOUNT *Mount, DWORD Flags, WIN_STATFS *Result)
 			win_wcscpy(Result->TypeName, L"FAT");
 			break;
 		default:
-			bResult = DriveStatVolume(Mount->Path, Result);
+			bResult = DriveStatVolume(Mount->Volume, Result);
 	}
 	return(bResult);
 }
@@ -84,6 +84,7 @@ drive_statfs(WIN_NAMEIDATA *Path, WIN_STATFS *Result)
 	/* mount.exe -a
 	 */
 	ZeroMemory(Result, sizeof(WIN_STATFS));
+//VfsDebugPath(Path, "drive_statfs");
 	if (Path->Attribs == FILE_ATTRIBUTE_MOUNT){
 		bResult = DriveStatVolume(Path->Resolved, Result);
 	}else{
@@ -105,6 +106,8 @@ drive_mount(WIN_NAMEIDATA *Path, WIN_DEVICE *Device, WIN_MODE *Mode)
 		SetLastError(ERROR_DIRECTORY);
 	}else if (Path->Attribs == FILE_ATTRIBUTE_MOUNT){
 		SetLastError(ERROR_NOT_READY);
+	}else if (!Device->Flags){
+		SetLastError(ERROR_DEVICE_NOT_AVAILABLE);
 	}else if (!SetFileAttributesW(Path->Resolved, FILE_ATTRIBUTE_SYSTEM)){
 		WIN_ERR("SetFileAttributes(%ls): %s\n", Path->Resolved, win_strerror(GetLastError()));
 	}else{
@@ -118,7 +121,7 @@ drive_mount(WIN_NAMEIDATA *Path, WIN_DEVICE *Device, WIN_MODE *Mode)
 		pwMount->VolumeSerial = Device->Index;
 		pwMount->FileType = WIN_VDIR;
 		pwMount->FSType = Path->FSType;
-		win_wcscpy(pwMount->Path, Device->NtPath);
+		win_wcscpy(pwMount->Volume, Device->NtPath);
 		GetSystemTimeAsFileTime(&pwMount->Time);
 //VfsDebugMount(pwMount, "drive_mount");
 //VfsDebugDevice(Device, "drive_mount");

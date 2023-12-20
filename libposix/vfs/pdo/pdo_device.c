@@ -55,7 +55,7 @@ pdo_match(LPCWSTR NtName, DWORD DeviceType, WIN_CFDRIVER *Driver)
 			pwDevice->DeviceId = sClass + sUnit;
 			win_wcscpy(pwDevice->NtName, NtName);
 			win_wcscpy(pwDevice->ClassId, Driver->ClassId);
-			bResult = config_attach(pwDevice);
+			bResult = config_attach(pwDevice, sClass);
 			break;
 		}
 		pwDevice++;
@@ -77,7 +77,7 @@ pdo_attach(DWORD DeviceType)
 		if (!pwDevice->Flags){
 			pwDevice->DeviceType = DeviceType;
 			pwDevice->DeviceId = sClass + sUnit;
-			if (!config_attach(pwDevice)){
+			if (!config_attach(pwDevice, sClass)){
 				msvc_printf("Warning: device 0x%x not configured\n", DeviceType);
 			}
 			break;

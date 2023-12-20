@@ -52,6 +52,7 @@ DiskCreateFile(WIN_NAMEIDATA *Path, WIN_FLAGS *Flags, WIN_MODE *Mode, WIN_VNODE 
 			&sa, Flags->Creation, Flags->Attribs, NULL);
 		if (hResult != INVALID_HANDLE_VALUE){
 			Result->Handle = hResult;
+			Result->MountId = Path->MountId;
 			Result->FSType = Path->FSType;
 			Result->DeviceType = Path->DeviceType;
 			Result->DeviceId = Path->DeviceId;
@@ -78,6 +79,7 @@ DiskOpenFile(WIN_NAMEIDATA *Path, WIN_FLAGS *Flags, WIN_VNODE *Result)
 		&sa, Flags->Creation, Flags->Attribs, NULL);
 	if (hResult != INVALID_HANDLE_VALUE){
 		Result->Handle = hResult;
+		Result->MountId = Path->MountId;
 		Result->FSType = Path->FSType;
 		Result->DeviceType = Path->DeviceType;
 		Result->DeviceId = Path->DeviceId;

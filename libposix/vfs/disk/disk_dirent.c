@@ -54,12 +54,12 @@ DiskGetEntity(WIN32_FIND_DATAW *Data, DWORD Index, WIN_DIRENT *Result)
 	return(bResult);
 }
 LPWSTR 
-DiskGetPattern(WIN_VNODE *Node, LPWSTR Buffer)
+DiskGetPattern(WIN_VNODE *Node, LPWSTR Pattern)
 {
-	if (win_F_GETPATH(Node->Handle, Buffer)){
-		win_wcscat(Buffer, L"\\*.*");
+	if (win_F_GETPATH(Node->Handle, Pattern)){
+		win_wcscat(Pattern, L"\\*.*");
 	}
-	return(Buffer);
+	return(Pattern);
 }
 
 /****************************************************/

@@ -348,12 +348,12 @@ usb_attach(WIN_DEVICE *Device)
 	return(bResult);
 }
 BOOL 
-config_attach(WIN_DEVICE *Device)
+config_attach(WIN_DEVICE *Device, USHORT Class)
 {
 	BOOL bResult = TRUE;
-	USHORT sClass = Device->DeviceType & 0xFF00;
+//	USHORT sClass = Device->DeviceType & 0xFF00;
 
-	switch (sClass){
+	switch (Class){
 		case DEV_CLASS_SYSTEM:
 			bResult = system_attach(Device);
 			break;

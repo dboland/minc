@@ -79,59 +79,21 @@ DriveLookup(LPCWSTR ClassName, UINT DriveType)
 	}
 	return(dwResult);
 }
-BOOL 
-DriveLookupRemote(LPCWSTR Volume, LPWSTR Result)
-{
-	BOOL bResult = FALSE;
-	DWORD dwSize = MAX_PATH;
-	WCHAR szBuffer[dwSize];
-	UNIVERSAL_NAME_INFOW *punInfo = (UNIVERSAL_NAME_INFOW *)&szBuffer;
-	DWORD dwResult;
-
-	dwResult = WNetGetUniversalNameW(Volume, UNIVERSAL_NAME_INFO_LEVEL, punInfo, &dwSize);
-	if (dwResult == NO_ERROR){
-		win_wcsncpy(Result, punInfo->lpUniversalName, MAX_GUID);
-		bResult = TRUE;
-	}else{
-		WIN_ERR("WNetGetUniversalNameW(%ls): %s\n", Volume, win_strerror(dwResult));
-	}
-	return(bResult);
-}
-BOOL 
-DriveLookupVolume(LPCWSTR Volume, LPWSTR Result)
-{
-	BOOL bResult = FALSE;
-
-	if (GetVolumeNameForVolumeMountPointW(Volume, Result, MAX_GUID)){
-		Result[2] = '.';		/* replace question mark */
-		bResult = TRUE;
-	}else{
-		win_wcscpy(Result, Volume);
-	}
-	return(bResult);
-}
 
 /****************************************************/
 
 BOOL 
 drive_statvfs(WIN_CFDATA *Config, DWORD Flags, WIN_MOUNT *Result)
 {
-	BOOL bResult = FALSE;
-	WCHAR szVolume[MAX_NAME];
-	DWORD dwDriveType = GetDriveTypeW(Config->DosPath);
+	BOOL bResult = TRUE;
+	LPWSTR psz;
 
 	ZeroMemory(Result, sizeof(WIN_MOUNT));
 	win_wcscpy(Result->Drive, Config->DosPath);
-	win_wcscpy(win_wcpcpy(szVolume, Config->DosPath), L"\\");
-	Config->DeviceType = DriveLookup(Config->ClassName, dwDriveType);
-	switch (dwDriveType){
-		case DRIVE_REMOTE:
-			bResult = DriveLookupRemote(szVolume, Result->Path);
-			break;
-		default:
-			bResult = DriveLookupVolume(szVolume, Result->Path);
-	}
+	Result->DriveType = GetDriveTypeW(Config->DosPath);
+	Config->DeviceType = DriveLookup(Config->ClassName, Result->DriveType);
+	psz = win_wcpcpy(Result->Volume, L"\\\\.\\GLOBALROOT");
+	win_wcscpy(win_wcpcpy(psz, Config->NtPath), L"\\");
 	Result->MountId = MOUNTID(Result->Drive[0]);
-	Result->DriveType = dwDriveType;
 	return(bResult);
 }

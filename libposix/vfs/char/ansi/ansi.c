@@ -35,16 +35,17 @@
 #define FOREGROUND_MAGENTA	(FOREGROUND_BLUE | FOREGROUND_RED)
 #define FOREGROUND_CYAN		(FOREGROUND_BLUE | FOREGROUND_GREEN)
 #define FOREGROUND_BLACK	(0x0)
+#define FOREGROUND_DEFAULT	(FOREGROUND_WHITE)
+#define FOREGROUND_UNDERLINE	(FOREGROUND_CYAN)
+#define FOREGROUND_RGB		(FOREGROUND_YELLOW)
 
 #define BACKGROUND_WHITE	(BACKGROUND_RED | BACKGROUND_GREEN | BACKGROUND_BLUE)
 #define BACKGROUND_YELLOW	(BACKGROUND_RED | BACKGROUND_GREEN)
 #define BACKGROUND_MAGENTA	(BACKGROUND_BLUE | BACKGROUND_RED)
 #define BACKGROUND_CYAN		(BACKGROUND_BLUE | BACKGROUND_GREEN)
 #define BACKGROUND_BLACK	(0x0)
-
-#define FOREGROUND_DEFAULT	(FOREGROUND_WHITE)
 #define BACKGROUND_DEFAULT	(BACKGROUND_BLACK)
-#define FOREGROUND_UNDERLINE	(FOREGROUND_CYAN)
+#define BACKGROUND_RGB		(BACKGROUND_YELLOW)
 
 /****************************************************/
 
@@ -107,8 +108,8 @@ AnsiCursorMove(HANDLE Handle, CONSOLE_SCREEN_BUFFER_INFO *Info, WORD DeltaY, WOR
 BOOL 
 AnsiRenderForeground(CONSOLE_SCREEN_BUFFER_INFO *Info, CHAR Char2)
 {
-	WORD wAttrib = Info->wAttributes & 0xF8;
 	BOOL bResult = TRUE;
+	WORD wAttrib = Info->wAttributes & 0xF8;
 
 	if (Char2 == '0'){
 		wAttrib |= FOREGROUND_BLACK;
@@ -126,6 +127,8 @@ AnsiRenderForeground(CONSOLE_SCREEN_BUFFER_INFO *Info, CHAR Char2)
 		wAttrib |= FOREGROUND_CYAN;
 	}else if (Char2 == '7'){
 		wAttrib |= FOREGROUND_WHITE;
+//	}else if (Char2 == '8'){ 	/* set RGB color (journalctl in Debian) */
+//		wAttrib |= FOREGROUND_RGB;
 	}else if (Char2 == '9'){	/* default (ANSI v.2.53) */
 		wAttrib |= FOREGROUND_DEFAULT;
 	}else{
@@ -137,8 +140,8 @@ AnsiRenderForeground(CONSOLE_SCREEN_BUFFER_INFO *Info, CHAR Char2)
 BOOL 
 AnsiRenderBackground(CONSOLE_SCREEN_BUFFER_INFO *Info, CHAR Char2)
 {
-	WORD wAttrib = Info->wAttributes & 0x8F;
 	BOOL bResult = TRUE;
+	WORD wAttrib = Info->wAttributes & 0x8F;
 
 	if (Char2 == '0'){
 		wAttrib |= BACKGROUND_BLACK;
@@ -156,6 +159,8 @@ AnsiRenderBackground(CONSOLE_SCREEN_BUFFER_INFO *Info, CHAR Char2)
 		wAttrib |= BACKGROUND_CYAN;
 	}else if (Char2 == '7'){
 		wAttrib |= BACKGROUND_WHITE;
+//	}else if (Char2 == '8'){ 	/* RGB color */
+//		wAttrib |= BACKGROUND_RGB;
 	}else if (Char2 == '9'){	/* default (ANSI v.2.53) */
 		wAttrib |= BACKGROUND_DEFAULT;
 	}else{
@@ -250,6 +255,7 @@ AnsiSelectGraphicRendition(HANDLE Handle, CONSOLE_SCREEN_BUFFER_INFO *Info, LPST
 				msvc_printf("{%s}", pszBuffer);
 			}
 			Char1 = Char2 = Char3 = 0;
+			pszBuffer = Buffer;
 		}else if (!Char1){
 			Char1 = C;
 		}else if (!Char2){
@@ -564,7 +570,7 @@ AnsiControl(HANDLE Handle, CHAR C, CONSOLE_SCREEN_BUFFER_INFO *Info, SEQUENCE *S
 //			bResult = AnsiRestoreCursor(Handle, Info);
 			bResult = TRUE;
 			break;
-		case ANSI_VEM:	/* VEM */
+		case ANSI_VEM:		/* VEM */
 			bResult = AnsiVerticalEditingMode(Handle, AnsiStrToInt(Seq->Args));
 			break;
 	}

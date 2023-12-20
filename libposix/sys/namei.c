@@ -38,7 +38,7 @@ char *
 pathnp_posix(char *dest, LPCWSTR Source, LONG Size, BOOL EndPtr)
 {
 	char *result = dest;
-	LPWSTR Root = __Mounts->Path;
+	LPWSTR Root = __Mounts->Volume;
 	int len = win_wcslen(Root);
 	char *type = NULL;
 	char c;
@@ -57,7 +57,8 @@ pathnp_posix(char *dest, LPCWSTR Source, LONG Size, BOOL EndPtr)
 		*dest++ = *src++;
 		src++;
 		Size -= 5;
-	}else if (*src == '\\'){
+//	}else if (*src == '\\'){
+	}else if (!win_strncmp(src, "\\Device", 7)){
 		dest = win_stpcpy(dest, "/proc");
 	}
 	while (c = *src++){
@@ -106,7 +107,7 @@ root_win(WIN_NAMEIDATA *Result, const char *path)
 		Result->R = win_wcpcpy(Result->Resolved, PROCESS_ROOT);
 		path += 6;
 	}else{
-		Result->R = win_wcpcpy(Result->Resolved, __Mounts->Path);
+		Result->R = win_wcpcpy(Result->Resolved, __Mounts->Volume);
 		path++;
 	}
 	return(path);

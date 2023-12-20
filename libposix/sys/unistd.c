@@ -366,7 +366,7 @@ sys_fchdir(call_t call, int fildes)
 	WIN_NAMEIDATA wPath;
 	WIN_TASK *pwTask = call.Task;
 
-	if (!vfs_chdir(pwTask, pathat_win(&wPath, fildes, "", AT_REQUIREDRIVE))){
+	if (!vfs_chdir(pwTask, pathat_win(&wPath, fildes, "", 0))){
 		result -= errno_posix(GetLastError());
 	}
 	return(result);
@@ -378,7 +378,7 @@ sys_chdir(call_t call, const char *path)
 	WIN_NAMEIDATA wPath;
 	WIN_TASK *pwTask = call.Task;
 
-	if (!vfs_chdir(pwTask, path_win(&wPath, path, O_REQUIREDRIVE))){
+	if (!vfs_chdir(pwTask, path_win(&wPath, path, 0))){
 		result -= errno_posix(GetLastError());
 	}
 	return(result);

@@ -103,7 +103,7 @@ int
 mount_NTFS(WIN_NAMEIDATA *Path, struct ntfs_args *args)
 {
 	int result = 0;
-	WIN_NAMEIDATA wdPath = {0};
+	WIN_NAMEIDATA wdPath;
 	WIN_MODE wMode;
 
 	if (path_win(&wdPath, args->fspec, O_NOFOLLOW)->Attribs == -1){
@@ -117,7 +117,7 @@ int
 mount_MSDOS(WIN_NAMEIDATA *Path, struct msdosfs_args *args)
 {
 	int result = 0;
-	WIN_NAMEIDATA wdPath = {0};
+	WIN_NAMEIDATA wdPath;
 	WIN_MODE wMode;
 
 	if (path_win(&wdPath, args->fspec, O_NOFOLLOW)->Attribs == -1){
@@ -131,7 +131,7 @@ int
 mount_CD9660(WIN_NAMEIDATA *Path, struct iso_args *args)
 {
 	int result = 0;
-	WIN_NAMEIDATA wdPath = {0};
+	WIN_NAMEIDATA wdPath;
 	WIN_MODE wMode;
 
 	if (path_win(&wdPath, args->fspec, O_NOFOLLOW)->Attribs == -1){
@@ -148,7 +148,7 @@ int
 sys_mount(call_t call, const char *type, const char *dir, int flags, void *data)
 {
 	int result = 0;
-	WIN_NAMEIDATA wPath = {0};
+	WIN_NAMEIDATA wPath;
 
 	if (!win_strcmp(type, MOUNT_NTFS)){
 		result = mount_NTFS(path_win(&wPath, dir, 0), (struct ntfs_args *)data);
@@ -169,7 +169,7 @@ int
 sys_unmount(call_t call, const char *dir, int flags)
 {
 	int result = 0;
-	WIN_NAMEIDATA wPath = {0};
+	WIN_NAMEIDATA wPath;
 
 	if (!drive_unmount(path_win(&wPath, dir, O_NOCROSS))){
 		result -= errno_posix(GetLastError());
@@ -183,7 +183,7 @@ sys_statfs(call_t call, const char *path, struct statfs *buf)
 	WIN_STATFS fsInfo = {0};
 	WIN_NAMEIDATA wPath;
 
-	if (!drive_statfs(path_win(&wPath, path, 0), &fsInfo)){
+	if (!drive_statfs(path_win(&wPath, path, O_DIRECTORY), &fsInfo)){
 		result -= errno_posix(GetLastError());
 	}else{
 		statfs_posix(buf, &fsInfo);

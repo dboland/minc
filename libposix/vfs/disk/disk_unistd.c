@@ -187,6 +187,7 @@ disk_readlink(WIN_NAMEIDATA *Path, BOOL MakeReal)
 	DWORD dwSize = sizeof(SHELL_LINK_HEADER);
 	CHAR szBuffer[MAX_PATH] = "";
 	HANDLE hFile;
+	LPWSTR pszBase;
 
 	hFile = CreateFileW(Path->Resolved, FILE_READ_DATA, FILE_SHARE_READ, 
 		NULL, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, NULL);
@@ -203,15 +204,17 @@ disk_readlink(WIN_NAMEIDATA *Path, BOOL MakeReal)
 		if (slHead.LinkFlags & HasLinkInfo){
 			LinkReadInfo(hFile, szBuffer);
 		}
-		Path->R = Path->Resolved;
+		pszBase = Path->Resolved;
 		if (szBuffer[1] == ':'){	/* nano.exe */
-			vol_lookup(Path, MOUNTID(szBuffer[0]), 0);
+			Path->MountId = MOUNTID(szBuffer[0]);
 		}else if (MakeReal){
-			Path->R = win_basename(Path->Resolved);
+			pszBase = win_basename(Path->Resolved);
 		}
-		Path->R = win_mbstowcp(Path->R, szBuffer, MAX_PATH);
+		Path->R = win_mbstowcp(pszBase, szBuffer, MAX_PATH);
+		vol_lookup(Path, WIN_NOCROSSMOUNT);
 		Path->Last = Path->R - 1;
 		Path->Attribs = GetFileAttributesW(Path->Resolved);
+//VfsDebugPath(Path, "disk_readlink");
 		bResult = TRUE;
 	}
 	CloseHandle(hFile);
@@ -227,7 +230,7 @@ disk_symlink(WIN_NAMEIDATA *Path, WIN_VATTR *Stat, WIN_MODE *Mode, WIN_NAMEIDATA
 	CHAR szBuffer[MAX_PATH] = "";
 	HANDLE hFile;
 
-//VfsDebugPath(Path, "vfs_symlink");
+//VfsDebugPath(Path, "disk_symlink");
 	if (*Path->Last == '\\'){	/* GNU conftest.exe */
 		*Path->Last = 0;
 	}

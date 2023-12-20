@@ -406,7 +406,7 @@ VfsDebugMount(WIN_MOUNT *Mount, LPCSTR Label)
 {
 	msvc_printf("%s(%d): Flags(0x%x) Serial(%lu) FSType(%s) DevType(0x%x) DevId(0x%x)\n", 
 		Label, Mount->MountId, Mount->Flags, Mount->VolumeSerial, FSType(Mount->FSType), Mount->DeviceType, Mount->DeviceId);
-	msvc_printf("+ Path: %ls\n", Mount->Path);
+	msvc_printf("+ Volume: %ls\n", Mount->Volume);
 	msvc_printf("+ Drive: %ls\n", Mount->Drive);
 }
 VOID 
@@ -447,4 +447,10 @@ VfsDebugConfig(WIN_CFDATA *Config, LPCSTR Label)
 {
 	msvc_printf("%s(%ls): Bus(%ls) FSType(%s), DosPath(%ls) Depth(%d) Class(%ls) NtPath(%ls)\n", 
 		Label, Config->NtName, Config->BusName, FSType(Config->FSType), Config->DosPath, Config->Depth, Config->ClassName, Config->NtPath);
+}
+VOID 
+VfsDebugTimer(WIN_TASK *Task, LPCSTR Label)
+{
+	msvc_printf("%s(%d): Timer(%d) Interval(%d) Ticks(%I64d)\n", 
+		Label, Task->TaskId, Task->Timer, Task->Interval, Task->Ticks);
 }

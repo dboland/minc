@@ -32,29 +32,32 @@
 
 /****************************************************/
 
-BOOL
-drive_lookup(WIN_NAMEIDATA *Path, LONG MountId, DWORD Flags)
+BOOL 
+drive_lookup(WIN_NAMEIDATA *Path, DWORD Flags)
 {
-	BOOL bResult = TRUE;
-	WIN_MOUNT *pwMount = &__Mounts[MountId];
+//	BOOL bResult = TRUE;
+	LONG lMountId = MOUNTID(Path->Base[0]);
+	WIN_MOUNT *pwMount = &__Mounts[lMountId];
 
-	if (MountId < 0 || MountId >= WIN_MOUNT_MAX){
+	if (lMountId < 0 || lMountId >= WIN_MOUNT_MAX){
+VfsDebugPath(Path, "NULL");
 		SetLastError(ERROR_BAD_ARGUMENTS);
-		bResult = FALSE;
-	}else if (Flags & WIN_NOCROSSMOUNT){
-		Path->MountId = MountId;
-	}else if (pwMount->DeviceId){
+	}else if (Flags & WIN_NOCROSSMOUNT){	/* vfs_unmount() */
+		Path->MountId = lMountId;
+	}else if (!pwMount->Flags){
+		SetLastError(ERROR_DEVICE_NOT_AVAILABLE);
+	}else{
 		Path->MountId = pwMount->MountId;
 		Path->DeviceType = pwMount->DeviceType;
 		Path->DeviceId = pwMount->DeviceId;
 		Path->FSType = pwMount->FSType;
-		if (Flags & WIN_REQUIREDRIVE){
-			Path->R = win_wcpcpy(Path->Resolved, pwMount->Drive);
+		if (Flags & WIN_REQUIREDIR){
+			Path->R = win_wcpcpy(Path->Resolved, pwMount->Volume);
 		}else{
-			Path->R = win_wcpcpy(Path->Resolved, pwMount->Path);
+			Path->R = win_wcpcpy(Path->Resolved, pwMount->Drive);
 		}
 		Path->Base = Path->R;
 	}
 //VfsDebugPath(Path, "drive_lookup");
-	return(bResult);
+	return(TRUE);
 }

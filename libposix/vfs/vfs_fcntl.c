@@ -120,27 +120,29 @@ vfs_F_GETPATH(WIN_VNODE *Node, WIN_NAMEIDATA *Result)
 	PUNICODE_STRING puString;
 	BOOL bResult = FALSE;
 	ULONG ulSize = WIN_PATH_MAX * sizeof(WCHAR);
+	LPWSTR psz;
 
 	puString = LocalAlloc(LMEM_FIXED, ulSize);
 	ntStatus = NtQueryObject(Node->Handle, ObjectNameInformation, puString, ulSize, &ulSize);
 	if (!NT_SUCCESS(ntStatus)){
 		WIN_ERR("NtQueryObject(%d): %s\n", Node->Handle, nt_strerror(ntStatus));
 	}else if (puString->Length){
-		Result->R = win_wcpcpy(Result->Resolved, L"\\\\.\\GLOBALROOT");
-		Result->R = win_wcpcpy(Result->R, puString->Buffer);
+		psz = win_wcpcpy(Result->Resolved, L"\\\\.\\GLOBALROOT");
+		psz = win_wcpcpy(psz, puString->Buffer);
+		Result->Last = psz - 1;
+		Result->R = psz;
 		Result->FSType = Node->FSType;
 		Result->Attribs = Node->Attribs;
 		Result->FileType = Node->FileType;
 		Result->DeviceType = Node->DeviceType;
 		Result->DeviceId = Node->DeviceId;
 		Result->MountId = Node->MountId;
-		Result->Last = Result->R - 1;
-		Result->Base = Result->R;
 		Result->Flags = 0;
+		Result->Base = Result->R;
 		Result->S = NULL;
-//VfsDebugPath(Result, "vfs_F_GETPATH");
 		bResult = TRUE;
 	}
+//VfsDebugPath(Result, "vfs_F_GETPATH");
 	LocalFree(puString);
 	return(bResult);
 }

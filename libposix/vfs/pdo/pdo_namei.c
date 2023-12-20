@@ -97,6 +97,7 @@ pdo_lookup(WIN_NAMEIDATA *Path, DWORD Flags)
 		Path->DeviceId = iNode.DeviceId;
 		Path->FileType = iNode.FileType;
 		Path->FSType = FS_TYPE_PDO;
+		Path->Attribs |= FILE_ATTRIBUTE_DEVICE;
 		Path->Handle = hResult;
 		Path->Device = pwDevice;
 		bResult = TRUE;

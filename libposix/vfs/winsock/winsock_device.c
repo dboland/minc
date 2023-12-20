@@ -50,7 +50,7 @@ ws2_attach(LPCWSTR NtName, DWORD DeviceType, MIB_IFROW *Interface)
 			pwDevice->Flags |= WIN_DVF_DRIVER_READY;
 			win_wcscpy(pwDevice->NtName, NtName);
 //			win_wcscpy(pwDevice->ClassId, NDIS_LAN_CLASS);
-			bResult = config_attach(pwDevice);
+			bResult = config_attach(pwDevice, sClass);
 //VfsDebugDevice(pwDevice, "ws2_attach");
 			break;
 		}else if (!win_wcscmp(pwDevice->NtName, NtName)){

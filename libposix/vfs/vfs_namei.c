@@ -89,10 +89,10 @@ PathGlob(WIN_NAMEIDATA *Path, DWORD Flags)
 			bResult = pdo_lookup(Path, Flags);
 			break;
 		case FILE_ATTRIBUTE_MOUNT:
-			bResult = drive_lookup(Path, MOUNTID(Path->Base[0]), Flags);
+			bResult = drive_lookup(Path, Flags);
 			break;
 		case FILE_ATTRIBUTE_VOLUME:
-//			VfsDebugPath(Path, "VOLUME");
+			bResult = vol_lookup(Path, Flags);
 			break;
 	}
 	return(bResult);
@@ -100,9 +100,9 @@ PathGlob(WIN_NAMEIDATA *Path, DWORD Flags)
 VOID 
 PathOpen(WIN_NAMEIDATA *Path, LPWSTR Source, DWORD Flags)
 {
-	if (!win_wcscmp(Source, L".")){		/* ignore dot in mount root */
-		Source++;
-	}
+//	if (!win_wcscmp(Source, L".")){		/* ignore dot in mount root */
+//		Source++;
+//	}
 	Path->Attribs = -1;
 	Path->S = Source;
 	Path->FileType = WIN_VREG;
@@ -120,7 +120,7 @@ PathClose(WIN_NAMEIDATA *Path, DWORD Flags)
 		}else if (Path->Attribs & FILE_ATTRIBUTE_SYMLINK){
 			Path->FileType = WIN_VLNK;
 		}
-	}else if (DiskGlobType(Path, L".exe")){
+	}else if (DiskGlobType(L".exe", Path)){
 		Path->FileType = WIN_VREG;
 //	}else{
 //		VfsDebugPath(Path, "PathClose");

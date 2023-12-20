@@ -246,7 +246,7 @@ sys_openat(call_t call, int dirfd, const char *path, int flags, ...)
 	int result;
 	va_list args;
 	WIN_NAMEIDATA wPath;
-	int atflags = AT_SYMLINK_FOLLOW;
+	int atflags = 0;
 
 	if (flags & O_NOFOLLOW){
 		atflags |= AT_SYMLINK_NOFOLLOW;

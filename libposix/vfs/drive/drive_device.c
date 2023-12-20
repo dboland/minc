@@ -44,16 +44,17 @@ drive_match(LPCWSTR NtName, DWORD DeviceType, WIN_MOUNT *Mount)
 
 	while (sUnit < WIN_UNIT_MAX){
 		if (!win_wcscmp(pwDevice->NtName, NtName)){
-			win_wcscpy(pwDevice->NtPath, Mount->Path);
+			win_wcscpy(pwDevice->NtPath, Mount->Volume);
 			bResult = TRUE;
 			break;
 		}else if (!pwDevice->Flags){
 			win_wcscpy(pwDevice->NtName, NtName);
 			win_wcscpy(pwDevice->ClassId, MOUNTDEV_MOUNTED_DEVICE);
-			win_wcscpy(pwDevice->NtPath, Mount->Path);
+			win_wcscpy(pwDevice->NtPath, Mount->Volume);
+			pwDevice->Index = Mount->MountId;
 			pwDevice->DeviceType = DeviceType;
 			pwDevice->DeviceId = sClass + sUnit;
-			bResult = config_attach(pwDevice);
+			bResult = config_attach(pwDevice, sClass);
 			break;
 		}
 		pwDevice++;

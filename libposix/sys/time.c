@@ -137,13 +137,13 @@ sys_nanosleep(call_t call, const struct timespec *req, struct timespec *rem)
 	/* __int64_t (%I64d) */
 	dwMillisecs = (req->tv_sec & 0xBFFFFFFF) * 1000;	/* limit to DWORD bits */
 	dwMillisecs += req->tv_nsec * 0.000001;			/* nanoseconds */
-	if (req->tv_nsec > 999999999){
+	if (req->tv_nsec > 999999999LL){
 		result = -EINVAL;
 	}else if (!vfs_nanosleep(pwTask, dwMillisecs, &dwRemain)){
 		result -= errno_posix(GetLastError());
 	}
 	if (rem){
-		rem->tv_sec = dwRemain * 0.001;
+		rem->tv_sec = (time_t)(dwRemain * 0.001);
 		rem->tv_nsec = (dwRemain % 1000) * 1000000;	/* nanoseconds */
 	}
 	return(result);
@@ -155,14 +155,13 @@ sys_gettimeofday(call_t call, struct timeval *tv, struct timezone *tz)
 	DWORDLONG dwlTime;
 
 	if (!tv){
-		result = -EINVAL;
+		result = -EFAULT;
 	}else{
 		GetSystemTimeAsFileTime((FILETIME *)&dwlTime);
 		dwlTime -= 116444736000000000LL;		/* epoch */
 		dwlTime *= 0.1;					/* 100-nanosecond intervals */
 		tv->tv_sec = (time_t)(dwlTime * 0.000001);	/* seconds (date.exe) */
 		tv->tv_usec = dwlTime - (tv->tv_sec * 1000000);	/* microseconds (ab.exe) */
-		result = 0;
 	}
 	return(result);
 }
@@ -171,7 +170,9 @@ sys_settimeofday(call_t call, const struct timeval *tp, const struct timezone *t
 {
 	int result = 0;
 
-	if (!win_settimeofday(tp->tv_sec, tp->tv_usec * 0.001)){
+	if (!tp){
+		result = -EFAULT;
+	}else if (!win_settimeofday(tp->tv_sec, tp->tv_usec * 0.001)){
 		result -= errno_posix(GetLastError());
 	}
 	return(result);
