@@ -219,7 +219,7 @@ __openat(WIN_TASK *Task, WIN_NAMEIDATA *Path, int flags, va_list args)
 	CHAR szMessage[MAX_MESSAGE];
 
 	mode &= ~Task->FileMask;
-	if ((Path->Flags & WIN_NOFOLLOW) && (Path->FileType == WIN_VLNK)){
+	if ((Path->FileType == WIN_VLNK) && (Path->Flags == WIN_NOFOLLOW)){
 		result = -ELOOP;
 	}else if (!vfs_open(Path, flags_win(&wFlags, flags), mode_win(&wMode, mode), &vNode)){
 		result -= errno_posix(GetLastError());

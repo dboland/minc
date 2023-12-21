@@ -35,7 +35,6 @@
 BOOL 
 drive_lookup(WIN_NAMEIDATA *Path, DWORD Flags)
 {
-//	BOOL bResult = TRUE;
 	LONG lMountId = MOUNTID(Path->Base[0]);
 	WIN_MOUNT *pwMount = &__Mounts[lMountId];
 
@@ -44,7 +43,7 @@ VfsDebugPath(Path, "NULL");
 		SetLastError(ERROR_BAD_ARGUMENTS);
 	}else if (Flags & WIN_NOCROSSMOUNT){	/* vfs_unmount() */
 		Path->MountId = lMountId;
-	}else if (!pwMount->Flags){
+	}else if (!pwMount->DeviceId){
 		SetLastError(ERROR_DEVICE_NOT_AVAILABLE);
 	}else{
 		Path->MountId = pwMount->MountId;

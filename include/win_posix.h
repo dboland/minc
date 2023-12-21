@@ -84,6 +84,7 @@ PVOID win_malloc(UINT Size);
 PVOID win_realloc(PVOID Buffer, UINT Size);
 VOID win_free(PVOID Buffer);
 DWORD win_getenv(LPCSTR Name, LPCSTR Buffer, DWORD Size);
+BOOL win_getcwd(LPWSTR Path);
 
 /* win_acl.c */
 

@@ -353,7 +353,7 @@ sys___getcwd(call_t call, char *buf, size_t size)
 {
 	WIN_TASK *pwTask = call.Task;
 
-	pathn_posix(buf, pwTask->Path.Name, size);
+	pathn_posix(buf, PSTRING(pwTask->TaskId).Path, size);
 	if (pwTask->Flags & PS_TRACED){
 		ktrace_NAMEI(pwTask, buf, win_strlen(buf));
 	}
@@ -408,9 +408,9 @@ __readlinkat(WIN_TASK *Task, int dirfd, const char *pathname, char *buf, size_t 
 	return(result);
 }
 ssize_t 
-sys_readlinkat(call_t call, int dirfd, const char *pathname, char *buf, size_t bufsiz)
+sys_readlinkat(call_t call, int dirfd, const char *path, char *buf, size_t bufsiz)
 {
-	return(__readlinkat(call.Task, dirfd, pathname, buf, bufsiz));
+	return(__readlinkat(call.Task, dirfd, path, buf, bufsiz));
 }
 int 
 sys_readlink(call_t call, const char *path, char *buf, size_t bufsiz)
@@ -438,14 +438,14 @@ sys_symlinkat(call_t call, const char *name1, int fd, const char *name2)
 {
 	WIN_NAMEIDATA wnTarget;
 
-	return(__symlinkat(pathat_win(&wnTarget, 0, name1, AT_REQUIREDRIVE), fd, name2));
+	return(__symlinkat(pathat_win(&wnTarget, 0, name1, 0), fd, name2));
 }
 int 
 sys_symlink(call_t call, const char *name1, const char *name2)
 {
 	WIN_NAMEIDATA wnTarget;
 
-	return(__symlinkat(pathat_win(&wnTarget, 0, name1, AT_REQUIREDRIVE), AT_FDCWD, name2));
+	return(__symlinkat(pathat_win(&wnTarget, 0, name1, 0), AT_FDCWD, name2));
 }
 int 
 __faccessat(int dirfd, const char *path, int mode, int flags)
@@ -638,9 +638,9 @@ sys_read(call_t call, int fd, void *buf, size_t count)
 	WIN_TASK *pwTask = call.Task;
 	CHAR szMessage[MAX_MESSAGE];
 
-	if (pwTask->TracePoints & KTRFAC_USER){
-		ktrace_USER(pwTask, "VNODE", szMessage, vfs_ktrace(&pwTask->Node[fd], szMessage));
-	}
+//	if (pwTask->TracePoints & KTRFAC_USER){
+//		ktrace_USER(pwTask, "VNODE", szMessage, vfs_ktrace(&pwTask->Node[fd], szMessage));
+//	}
 	if (fd < 0 || fd >= OPEN_MAX){
 		result = -EBADF;
 	}else if (!vfs_read(&pwTask->Node[fd], buf, dwCount, &dwResult)){
@@ -663,9 +663,9 @@ sys_write(call_t call, int fd, const void *buf, size_t nbytes)
 	WIN_TASK *pwTask = call.Task;
 	CHAR szMessage[MAX_MESSAGE];
 
-	if (pwTask->TracePoints & KTRFAC_USER){
-		ktrace_USER(pwTask, "VNODE", szMessage, vfs_ktrace(&pwTask->Node[fd], szMessage));
-	}
+//	if (pwTask->TracePoints & KTRFAC_USER){
+//		ktrace_USER(pwTask, "VNODE", szMessage, vfs_ktrace(&pwTask->Node[fd], szMessage));
+//	}
 	if (pwTask->TracePoints & KTRFAC_GENIO){
 		ktrace_GENIO(pwTask, fd, UIO_WRITE, buf, nbytes);
 	}

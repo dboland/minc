@@ -232,7 +232,9 @@ vfs_chdir(WIN_TASK *Task, WIN_NAMEIDATA *Path)
 		return(FALSE);
 //	}else if (vfs_realpath(Path, WIN_PATH_MAX)){	/* building perl.exe */
 	}else{
-		win_memcpy(&Task->Path, Path, sizeof(WIN_INODE));
+//		win_memcpy(&Task->Path, Path, sizeof(WIN_INODE));
+		Task->MountId = Path->MountId;
+		win_wcscpy(PSTRING(Task->TaskId).Path, Path->Resolved);
 		bResult = TRUE;
 	}
 	return(bResult);

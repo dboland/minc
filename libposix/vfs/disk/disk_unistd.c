@@ -94,7 +94,7 @@ disk_rmdir(WIN_NAMEIDATA *Path)
 {
 	BOOL bResult = FALSE;
 
-	if (*Path->Last == '.'){
+	if (*Path->Last == '.'){		/* GNU conftest.exe */
 		SetLastError(ERROR_BAD_ARGUMENTS);
 	}else if (Path->FileType != WIN_VDIR){
 		SetLastError(ERROR_DIRECTORY);
@@ -187,7 +187,7 @@ disk_readlink(WIN_NAMEIDATA *Path, BOOL MakeReal)
 	DWORD dwSize = sizeof(SHELL_LINK_HEADER);
 	CHAR szBuffer[MAX_PATH] = "";
 	HANDLE hFile;
-	LPWSTR pszBase;
+	LPWSTR pszBase = Path->Resolved;
 
 	hFile = CreateFileW(Path->Resolved, FILE_READ_DATA, FILE_SHARE_READ, 
 		NULL, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, NULL);
@@ -204,14 +204,12 @@ disk_readlink(WIN_NAMEIDATA *Path, BOOL MakeReal)
 		if (slHead.LinkFlags & HasLinkInfo){
 			LinkReadInfo(hFile, szBuffer);
 		}
-		pszBase = Path->Resolved;
 		if (szBuffer[1] == ':'){	/* nano.exe */
-			Path->MountId = MOUNTID(szBuffer[0]);
+			vol_lookup(Path, MOUNTID(szBuffer[0]), WIN_NOCROSSMOUNT);
 		}else if (MakeReal){
 			pszBase = win_basename(Path->Resolved);
 		}
 		Path->R = win_mbstowcp(pszBase, szBuffer, MAX_PATH);
-		vol_lookup(Path, WIN_NOCROSSMOUNT);
 		Path->Last = Path->R - 1;
 		Path->Attribs = GetFileAttributesW(Path->Resolved);
 //VfsDebugPath(Path, "disk_readlink");

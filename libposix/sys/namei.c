@@ -57,8 +57,7 @@ pathnp_posix(char *dest, LPCWSTR Source, LONG Size, BOOL EndPtr)
 		*dest++ = *src++;
 		src++;
 		Size -= 5;
-//	}else if (*src == '\\'){
-	}else if (!win_strncmp(src, "\\Device", 7)){
+	}else if (*src == '\\'){
 		dest = win_stpcpy(dest, "/proc");
 	}
 	while (c = *src++){
@@ -115,7 +114,7 @@ root_win(WIN_NAMEIDATA *Result, const char *path)
 WIN_NAMEIDATA *
 pathat_win(WIN_NAMEIDATA *Result, int dirfd, const char *path, int atflags)
 {
-	WCHAR szPath[PATH_MAX] = L"";
+	WCHAR szPath[PATH_MAX];
 	size_t size;
 	WIN_TASK *pwTask = &__Tasks[CURRENT];
 	DWORD dwFlags = WIN_NOFOLLOW;
@@ -131,10 +130,9 @@ pathat_win(WIN_NAMEIDATA *Result, int dirfd, const char *path, int atflags)
 
 	if (dirfd > 0 && dirfd < OPEN_MAX){
 		vfs_F_GETPATH(&pwTask->Node[dirfd], Result);
-//		*Result->R++ = '\\';		/* GNU rm.exe */
 
 	}else if (*path == '/'){
-		win_memcpy(Result, __Mounts, sizeof(WIN_INODE));
+//		win_memcpy(Result, __Mounts, sizeof(WIN_INODE));
 		path = root_win(Result, path);
 
 	}else if (path[1] == ':'){		/* MSYS sh.exe */
@@ -143,11 +141,11 @@ pathat_win(WIN_NAMEIDATA *Result, int dirfd, const char *path, int atflags)
 		path++;
 
 	}else if (dirfd == AT_FDCWD){
-		win_memcpy(Result, &pwTask->Path, sizeof(WIN_INODE));
-		Result->R += win_wcslen(pwTask->Path.Name);
+		Result->R = win_wcpcpy(Result->Resolved, PSTRING(pwTask->TaskId).Path);
+		Result->MountId = pwTask->MountId;
 
 	}else{
-		dwFlags |= WIN_PATHCOPY;
+		dwFlags = WIN_PATHCOPY;
 
 	}
 
@@ -162,9 +160,6 @@ pathat_win(WIN_NAMEIDATA *Result, int dirfd, const char *path, int atflags)
 	}
 	if (atflags & AT_REMOVEDIR){
 		dwFlags |= WIN_REQUIREDIR;
-	}
-	if (atflags & AT_REQUIREDRIVE){
-		dwFlags |= WIN_REQUIREDRIVE;
 	}
 
 	return(vfs_lookup(Result, szPath, dwFlags));
@@ -183,9 +178,6 @@ path_win(WIN_NAMEIDATA *Result, const char *path, int flags)
 	}
 	if (flags & O_DIRECTORY){
 		atflags |= AT_REMOVEDIR;
-	}
-	if (flags & O_REQUIREDRIVE){
-		atflags |= AT_REQUIREDRIVE;
 	}
 	return(pathat_win(Result, AT_FDCWD, path, atflags));
 }

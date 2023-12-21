@@ -60,7 +60,9 @@ ws2_indextoname(DWORD Index, LPSTR Result)
 	USHORT sUnit = 0;
 
 	*Result = 0;
-	while (sUnit < WIN_UNIT_MAX){
+	if (!Index){
+		WIN_ERR("ws2_indextoname(%d): %s\n", Index, win_strerror(ERROR_BAD_ARGUMENTS));
+	}else while (sUnit < WIN_UNIT_MAX){
 		if (pwDevice->Index == Index){
 			win_strcpy(Result, pwDevice->Name);
 			return(win_strlen(Result));

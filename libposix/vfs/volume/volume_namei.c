@@ -33,24 +33,26 @@
 /****************************************************/
 
 BOOL 
-vol_lookup(WIN_NAMEIDATA *Path, DWORD Flags)
+vol_lookup(WIN_NAMEIDATA *Path, LONG MountId, DWORD Flags)
 {
-	WIN_MOUNT *pwMount = &__Mounts[Path->MountId];
+	WIN_MOUNT *pwMount = &__Mounts[MountId];
 
-	if (!pwMount->Flags){
+	if (!pwMount->DeviceId){
 		SetLastError(ERROR_DEVICE_NOT_AVAILABLE);
-		return(FALSE);
 	}else if (Flags & WIN_NOCROSSMOUNT){	/* disk_readlink() */
 		Path->MountId = pwMount->MountId;
 		Path->DeviceType = pwMount->DeviceType;
 		Path->DeviceId = pwMount->DeviceId;
 		Path->FSType = pwMount->FSType;
-	}else if (Flags & WIN_REQUIREDIR){
-		Path->R = win_wcpcpy(Path->Resolved, pwMount->Volume);
 	}else{
-		Path->R = win_wcpcpy(Path->Resolved, pwMount->Drive);
+		Path->MountId = MountId;
+		if (Flags & WIN_REQUIREDIR){
+			Path->R = win_wcpcpy(Path->Resolved, pwMount->Volume);
+		}else{
+			Path->R = win_wcpcpy(Path->Resolved, pwMount->Drive);
+		}
+		Path->Base = Path->R;
 	}
-	Path->Base = Path->R;
 //VfsDebugPath(Path, "vol_lookup");
 	return(TRUE);
 }

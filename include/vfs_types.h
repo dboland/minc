@@ -192,6 +192,11 @@ typedef struct _WIN_NAMEIDATA {
 	WCHAR *S;			/* current WCHAR in source path buffer */
 } WIN_NAMEIDATA;
 
+//#define WIN_REQUIREDRIVE	0x400000
+#define WIN_PATHCOPY		0x800000
+
+/* sys/namei.h */
+
 #define WIN_LOCKLEAF		0x000004	/* lock inode on return */
 #define WIN_LOCKPARENT		0x000008	/* want parent vnode returned locked */
 #define WIN_WANTPARENT		0x000010	/* want parent vnode returned unlocked */
@@ -212,9 +217,6 @@ typedef struct _WIN_NAMEIDATA {
 #define WIN_REQUIREDIR		0x080000	/* must be a directory */
 #define WIN_STRIPSLASHES	0x100000	/* strip trailing slashes */
 #define WIN_PDIRUNLOCK		0x200000	/* vfs_lookup() unlocked parent dir */
-
-#define WIN_REQUIREDRIVE	0x400000
-#define WIN_PATHCOPY		0x800000
 
 /*
  * vfs_termio.c
@@ -321,10 +323,10 @@ typedef struct _WIN_DIRENT {
 
 typedef struct _WIN_PSTRING {
 	WCHAR Command[WIN_MAX_PROCTITLE];
-	CHAR Message[MAX_MESSAGE];	/* not used so far */
+	WCHAR Path[WIN_PATH_MAX];
 } WIN_PSTRING;
 
-#define MESSAGE(Task)	__Strings[Task->TaskId].Message
+#define PSTRING(TaskId)	__Strings[TaskId]
 
 /*
  * vfs_mount.c
@@ -442,6 +444,7 @@ typedef struct _WIN_TASK {
 	DWORD GroupId;
 	DWORD SessionId;
 	DWORD TerminalId;
+	DWORD MountId;			/* where CWD is mounted */
 	DWORD Nice;
 	DWORD Flags;
 	DWORD Depth;
@@ -462,7 +465,7 @@ typedef struct _WIN_TASK {
 	BOOL IsSetUGid;
 	UINT RealUid, SavedUid;
 	UINT RealGid, SavedGid;
-	WIN_INODE Path;				/* current working directory */
+//	WIN_INODE Path;				/* current working directory */
 	DWORDLONG Limit[WIN_RLIM_NLIMITS];
 	WIN_ATEXITPROC AtExit[WIN_ATEXIT_MAX];
 	WIN_SIGACTION Action[WIN_NSIG];

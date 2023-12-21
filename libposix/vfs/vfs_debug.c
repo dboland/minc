@@ -354,7 +354,7 @@ VfsPathFlags(DWORD Flags, LPCSTR Label)
 	win_flagname(WIN_NOCROSSMOUNT, "NOCROSSMOUNT", Flags, &Flags);
 	win_flagname(WIN_ISSYMLINK, "ISSYMLINK", Flags, &Flags);
 	win_flagname(WIN_REQUIREDIR, "REQUIREDIR", Flags, &Flags);
-	win_flagname(WIN_REQUIREDRIVE, "REQUIREDRIVE", Flags, &Flags);
+//	win_flagname(WIN_REQUIREDRIVE, "REQUIREDRIVE", Flags, &Flags);
 	win_flagname(WIN_PATHCOPY, "PATHCOPY", Flags, &Flags);
 	msvc_printf(" remain(0x%x)\n", Flags);
 }

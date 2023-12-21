@@ -99,25 +99,6 @@ ProcControlHandler(DWORD CtrlType)
 
 /************************************************************/
 
-BOOL 
-proc_getcwd(WIN_INODE *Path)
-{
-	BOOL bResult = FALSE;
-	DWORD dwCount = 0;
-
-	if (dwCount = GetCurrentDirectoryW(MAX_PATH, Path->Name)){
-		win_wcscat(Path->Name, L"\\");
-		Path->Magic = __Mounts->MountId;
-		Path->FileType = __Mounts->FileType;
-		Path->DeviceType = __Mounts->DeviceType;
-		Path->DeviceId = __Mounts->DeviceId;
-		Path->FSType = __Mounts->FSType;
-		bResult = TRUE;
-	}else{
-		WIN_ERR("GetCurrentDirectory(%d): %s\n", MAX_PATH, win_strerror(GetLastError()));
-	}
-	return(bResult);
-}
 WIN_TASK *
 proc_init(WIN_SIGPROC SignalProc)
 {
@@ -139,7 +120,7 @@ proc_init(WIN_SIGPROC SignalProc)
 		vfs_namei(GetStdHandle(STD_INPUT_HANDLE), 0, &pwTask->Node[0]);
 		vfs_namei(GetStdHandle(STD_OUTPUT_HANDLE), 1, &pwTask->Node[1]);
 		vfs_namei(GetStdHandle(STD_ERROR_HANDLE), 2, &pwTask->Node[2]);
-		proc_getcwd(&pwTask->Path);
+		win_getcwd(PSTRING(pwTask->TaskId).Path);
 		win_geteuid(&pwTask->UserSid);
 		win_getegid(&pwTask->GroupSid);
 		pwTask->FileMask = 0022;

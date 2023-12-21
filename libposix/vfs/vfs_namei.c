@@ -92,7 +92,7 @@ PathGlob(WIN_NAMEIDATA *Path, DWORD Flags)
 			bResult = drive_lookup(Path, Flags);
 			break;
 		case FILE_ATTRIBUTE_VOLUME:
-			bResult = vol_lookup(Path, Flags);
+			bResult = vol_lookup(Path, Path->MountId, Flags);
 			break;
 	}
 	return(bResult);
@@ -100,9 +100,6 @@ PathGlob(WIN_NAMEIDATA *Path, DWORD Flags)
 VOID 
 PathOpen(WIN_NAMEIDATA *Path, LPWSTR Source, DWORD Flags)
 {
-//	if (!win_wcscmp(Source, L".")){		/* ignore dot in mount root */
-//		Source++;
-//	}
 	Path->Attribs = -1;
 	Path->S = Source;
 	Path->FileType = WIN_VREG;

@@ -101,6 +101,8 @@
 #define DEV_TYPE_PPP		(DEV_CLASS_IFNET + 24)		/* Point-To-Point network device */
 #define DEV_TYPE_ETH		(DEV_CLASS_IFNET + 28)		/* Ethernet network device */
 #define DEV_TYPE_WLAN		(DEV_CLASS_IFNET + 36)		/* IEEE80211 wireless network device */
+//#define DEV_TYPE_FREE		(DEV_CLASS_IFNET + 40)
+//#define DEV_TYPE_FREE		(DEV_CLASS_IFNET + 44)
 #define DEV_TYPE_NIC		(DEV_CLASS_IFNET + DEV_BUS_PCI)	/* Network Interface Card */
 
 #define DEV_TYPE_MEDIA		(DEV_CLASS_MEDIA)

@@ -284,7 +284,7 @@ mk_ifent(WIN_FS_TYPE Type)
 	}else while (dwCount--){
 		ws2_statvfs(&ifData, pifRow);
 		if (ifData.FSType == Type){
-			printf("%ls: [%03d] %s\n", ifData.NtName, pifRow->dwIndex, pifRow->bDescr);
+			printf("[%03d] %ls: dwType(%d): %s\n", pifRow->dwIndex, ifData.NtName, pifRow->dwType, pifRow->bDescr);
 		}
 		pifRow++;
 	}

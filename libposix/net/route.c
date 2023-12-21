@@ -30,10 +30,10 @@
 
 #include <net/route.h>
 
-#define IFMSGLEN	(sizeof(struct if_msghdr) + sizeof(struct sockaddr_dl))
+#define IFMSGLEN	(sizeof(struct if_msghdr) + sizeof(struct sockaddr_dl) + 24)
 #define IFAMSGLEN	(sizeof(struct ifa_msghdr) + (sizeof(struct sockaddr_in) * 3))
 #define RTMSGLEN	(sizeof(struct rt_msghdr) + (sizeof(struct sockaddr_in) * 2))
-#define INMSGLEN	(sizeof(struct ifa_msghdr) + sizeof(struct sockaddr_in) + sizeof(struct sockaddr_dl))
+#define INMSGLEN	(sizeof(struct ifa_msghdr) + sizeof(struct sockaddr_in) + sizeof(struct sockaddr_dl) + 24)
 
 /****************************************************/
 

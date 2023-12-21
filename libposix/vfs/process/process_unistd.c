@@ -69,6 +69,7 @@ proc_dup(WIN_TASK *Parent, WIN_THREAD_STRUCT *Thread)
 	ptResult->GroupId = Parent->GroupId;
 	ptResult->SessionId = Parent->SessionId;
 	ptResult->TerminalId = Parent->TerminalId;
+	ptResult->MountId = Parent->MountId;
 	ptResult->UserSid = Parent->UserSid;
 	ptResult->GroupSid = Parent->GroupSid;
 	ptResult->FileMask = Parent->FileMask;
@@ -77,12 +78,11 @@ proc_dup(WIN_TASK *Parent, WIN_THREAD_STRUCT *Thread)
 	ptResult->SavedUid = Parent->SavedUid;
 	ptResult->RealGid = Parent->RealGid;
 	ptResult->SavedGid = Parent->SavedGid;
-	win_memcpy(&ptResult->Path, &Parent->Path, sizeof(WIN_INODE));
 	win_memcpy(ptResult->Limit, Parent->Limit, WIN_RLIM_NLIMITS * sizeof(DWORDLONG));
 	win_memcpy(ptResult->AtExit, Parent->AtExit, WIN_ATEXIT_MAX * sizeof(WIN_ATEXITPROC));
 	win_memcpy(ptResult->Action, Parent->Action, WIN_NSIG * sizeof(WIN_SIGACTION));
-	ProcDupChannels(Parent->Node, ptResult->Node);
 	win_memcpy(&__Strings[ptResult->TaskId], &__Strings[Parent->TaskId], sizeof(WIN_PSTRING));
+	ProcDupChannels(Parent->Node, ptResult->Node);
 	return(ptResult);
 }
 BOOL 

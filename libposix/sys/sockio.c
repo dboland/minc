@@ -76,7 +76,7 @@ sock_SIOCGIFDESCR(WIN_TASK *Task, struct ifreq *req)
 	if (dwResult != ERROR_SUCCESS){
 		result -= errno_posix(dwResult);
 	}else{
-		win_strncpy(req->ifr_data, ifRow.bDescr, IFDESCRSIZE);
+		win_strncpy(req->ifr_data, ifRow.bDescr, MIN(ifRow.dwDescrLen, IFDESCRSIZE));
 	}
 	return(result);
 }

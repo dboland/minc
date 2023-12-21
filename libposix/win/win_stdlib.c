@@ -81,3 +81,15 @@ win_getenv(LPCSTR Name, LPSTR Buffer, DWORD Size)
 	dwResult += GetEnvironmentVariable(Name, B, Size - dwResult);
 	return(dwResult);
 }
+BOOL 
+win_getcwd(LPWSTR Path)
+{
+	BOOL bResult = FALSE;
+
+	if (!GetCurrentDirectoryW(MAX_PATH, Path)){
+		WIN_ERR("GetCurrentDirectory(%d): %s\n", MAX_PATH, win_strerror(GetLastError()));
+	}else{
+		bResult = TRUE;
+	}
+	return(bResult);
+}
