@@ -30,10 +30,10 @@
 
 #include <net/route.h>
 
-#define IFMSGLEN	(sizeof(struct if_msghdr) + sizeof(struct sockaddr_dl) + 24)
+#define IFMSGLEN	(sizeof(struct if_msghdr) + sizeof(struct sockaddr_dl))
 #define IFAMSGLEN	(sizeof(struct ifa_msghdr) + (sizeof(struct sockaddr_in) * 3))
 #define RTMSGLEN	(sizeof(struct rt_msghdr) + (sizeof(struct sockaddr_in) * 2))
-#define INMSGLEN	(sizeof(struct ifa_msghdr) + sizeof(struct sockaddr_in) + sizeof(struct sockaddr_dl) + 24)
+#define INMSGLEN	(sizeof(struct ifa_msghdr) + sizeof(struct sockaddr_in) + sizeof(struct sockaddr_dl))
 
 /****************************************************/
 
@@ -185,6 +185,7 @@ route_NET_RT_IFLIST(void *buf, size_t *size)
 	PMIB_IPADDRTABLE pifaTable;
 	PMIB_IPADDRROW pifaRow;
 	DWORD ifCount, ifaCount;
+	BOOL bIsInterface;
 
 	if (!ws2_setvfs(&ifData, FALSE, &pifRow, &ifCount)){
 		result -= errno_posix(GetLastError());

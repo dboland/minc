@@ -30,6 +30,8 @@
 
 #include <iphlpapi.h>
 
+#define NDIS_LAN_CLASS		L"{ad498944-762f-11d0-8dcb-00c04fc3358c}"
+
 /****************************************************/
 
 DWORD 
@@ -101,12 +103,14 @@ ws2_endvfs(WIN_IFDATA *Config)
 	win_free(Config->Table);
 }
 BOOL 
-ws2_statvfs(WIN_IFDATA *Config, PMIB_IFROW Interface)
+ws2_statvfs(WIN_IFDATA *Config, PMIB_IFROW Interface, WIN_IFDRIVER *Driver)
 {
 	BOOL bResult = TRUE;
 
+	ZeroMemory(Driver, sizeof(WIN_IFDRIVER));
 	Config->DeviceType = WSALookup(Interface->dwType);
 	Config->FSType = FS_TYPE_WINSOCK;
+	Config->Index = Interface->dwIndex;
 	if (Interface->dwPhysAddrLen){
 		WSALinkName(Config->NtName, Interface->bPhysAddr, Interface->dwPhysAddrLen);
 	}else if (Config->DeviceType == DEV_TYPE_LOOPBACK){
@@ -117,5 +121,6 @@ ws2_statvfs(WIN_IFDATA *Config, PMIB_IFROW Interface)
 		win_wcscpy(Config->NtName, win_basename(Interface->wszName));
 		bResult = FALSE;
 	}
+	win_wcscpy(Driver->ClassId, NDIS_LAN_CLASS);
 	return(bResult);
 }

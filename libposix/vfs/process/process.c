@@ -28,7 +28,7 @@
  *
  */
 
-#include "process_namei.c"
+#include "process_syscall.c"
 #include "process_stdlib.c"
 #include "process_unistd.c"
 #include "process_poll.c"

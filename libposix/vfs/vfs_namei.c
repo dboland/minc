@@ -102,7 +102,6 @@ PathOpen(WIN_NAMEIDATA *Path, LPWSTR Source, DWORD Flags)
 {
 	Path->Attribs = -1;
 	Path->S = Source;
-	Path->FileType = WIN_VREG;
 	Path->Flags = Flags;
 	Path->Base = Path->R;
 }

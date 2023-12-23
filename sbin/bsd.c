@@ -138,15 +138,14 @@ getty(const char *path)
 		dup2(fd, STDERR_FILENO);
 		if (fd > STDERR_FILENO)
 			close(fd);
+		result = 1;
 	}
 	return(result);
 }
 int 
-shell(void)
+shell(char *args[])
 {
-	int result = 0;
 	const struct passwd *pwd = NULL;
-	char *args[] = {"/bin/ksh", "-l", NULL};
 	char *login = getlogin();
 	char *home = "/";
 
@@ -156,30 +155,25 @@ shell(void)
 		home = pwd->pw_dir;
 	}else{
 		fprintf(stderr, "getpwnam(%s): %s\n", login, strerror(errno));
-		result = -1;
 	}
 	if (chdir(home) < 0){
 		fprintf(stderr, "chdir(%s): %s\n", home, strerror(errno));
-		result = -1;
 	}
 	execve(*args, args, environ);
 	fprintf(stderr, "execve(%s): %s\n", *args, strerror(errno));
-	return(result);
+	return(0);
 }
 int 
 trpoints(const char *opts)
 {
 	int result = KTR_DEFAULT;
 
-	if (!opts){
+	if (!opts)
 		return(result);
-	}
-	if (strchr(opts, 'u')){
+	if (strchr(opts, 'u'))
 		result |= KTRFAC_USER;
-	}
-	if (strchr(opts, 'i')){
+	if (strchr(opts, 'i'))
 		result |= KTRFAC_GENIO;
-	}
 	return(result);
 }
 
@@ -190,8 +184,8 @@ boot(void)
 {
 	char *args[] = {"/sbin/init", NULL};
 
-	ifinit();
 	cpu_configure();
+	ifinit();
 	unmount_fs();		// fsck.exe operation?
 	execve(*args, args, environ);
 	fprintf(stderr, "execve(%s): %s\n", *args, strerror(errno));
@@ -202,9 +196,10 @@ single(void)
 	int result = 0;
 	int mib[2] = {CTL_KERN, KERN_SECURELVL};
 	int level = 1;
+	char *args[] = {"/bin/ksh", "-l", NULL};
 
-	ifinit();
 	cpu_configure();
+	ifinit();
 	unmount_fs();
 	mount_fs();
 	sysctl(mib, 2, NULL, NULL, &level, sizeof(int));
@@ -213,18 +208,22 @@ single(void)
 //	close(2);
 	(void) revoke(_PATH_CONSOLE);
 	setsid();
-	result += getty(_PATH_CONSOLE);
-	result += shell();
+	if (!getty(_PATH_CONSOLE)){
+		args[0] = "/bin/sh";
+		args[1] = NULL;
+	}
+	shell(args);
 	return(result);
 }
 int 
 multi(void)
 {
 	int result = 0;
+	char *args[] = {"/bin/ksh", "-l", NULL};
 
 	setsid();
-	result += getty(PATH_PTMDEV);
-	result += shell();
+	getty(PATH_PTMDEV);
+	shell(args);
 	return(result);
 }
 

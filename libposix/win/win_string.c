@@ -128,10 +128,10 @@ win_strncpy(LPSTR Destination, LPCSTR Source, LONG Length)
 	CHAR C;
 
 	while (C = *Source++){
+		Length--;
 		if (Length < 1){
 			break;
 		}
-		Length--;
 		*Destination++ = C;
 	}
 	*Destination = 0;

@@ -278,11 +278,12 @@ mk_ifent(WIN_FS_TYPE Type)
 	PMIB_IFROW pifRow;
 	DWORD dwCount = 0;
 	WIN_IFDATA ifData;
+	WIN_IFDRIVER ifDriver;
 
 	if (!ws2_setvfs(&ifData, TRUE, &pifRow, &dwCount)){
 		fprintf(stderr, "ws_NET_RT_IFLIST(): %s\n", strerror(errno));
 	}else while (dwCount--){
-		ws2_statvfs(&ifData, pifRow);
+		ws2_statvfs(&ifData, pifRow, &ifDriver);
 		if (ifData.FSType == Type){
 			printf("[%03d] %ls: dwType(%d): %s\n", pifRow->dwIndex, ifData.NtName, pifRow->dwType, pifRow->bDescr);
 		}

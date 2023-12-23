@@ -57,10 +57,18 @@
 
 typedef struct _WIN_IFDATA {
 	PMIB_IFTABLE Table;
+	DWORD Index;
 	DWORD FSType;
 	DWORD DeviceType;
 	WCHAR NtName[MAX_NAME];
 } WIN_IFDATA;
+
+typedef struct _WIN_IFDRIVER {
+	DWORD Flags;
+	DWORD DeviceType;
+	CHAR Name[MAX_NAME];
+	WCHAR ClassId[MAX_GUID];
+} WIN_IFDRIVER;
 
 #define WS2_SOCKET_SIZE		0x2000
 

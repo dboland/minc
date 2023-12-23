@@ -48,7 +48,7 @@ cfexpand(wchar_t *string)
 	return(result);
 }
 int 
-msg_pdo(WIN_CFDATA *Config, WIN_CFDRIVER *Driver, LPSTR Result)
+msgbuf_PDO(WIN_CFDATA *Config, WIN_CFDRIVER *Driver, LPSTR Result)
 {
 	LPSTR psz = Result;
 
@@ -67,7 +67,7 @@ msg_pdo(WIN_CFDATA *Config, WIN_CFDRIVER *Driver, LPSTR Result)
 	return(psz - Result);
 }
 int 
-msg_drive(WIN_CFDATA *Config, WIN_MOUNT *Mount, LPSTR Result)
+msgbuf_DRIVE(WIN_CFDATA *Config, WIN_MOUNT *Mount, LPSTR Result)
 {
 	LPSTR psz = Result;
 
@@ -77,6 +77,23 @@ msg_drive(WIN_CFDATA *Config, WIN_MOUNT *Mount, LPSTR Result)
 		psz += msvc_sprintf(psz, "+ not configured: ");
 	}
 	psz += msvc_sprintf(psz, "%ls at %s", Config->NtName, Mount->Name);
+	psz += msvc_sprintf(psz, ", type 0x%x", Config->DeviceType);
+	*psz++ = '\n';
+	*psz = 0;
+	return(psz - Result);
+}
+int 
+msgbuf_WINSOCK(WIN_IFDATA *Config, WIN_IFDRIVER *Driver, LPSTR Result)
+{
+	LPSTR psz = Result;
+
+	if (Driver->Flags){
+		psz += msvc_sprintf(psz, "%s at ", Driver->Name);
+	}else{
+		psz += msvc_sprintf(psz, "+ not configured: ");
+	}
+	psz += msvc_sprintf(psz, "%ls", Config->NtName);
+	psz += msvc_sprintf(psz, ", index %d", Config->Index);
 	psz += msvc_sprintf(psz, ", type 0x%x", Config->DeviceType);
 	*psz++ = '\n';
 	*psz = 0;
@@ -105,7 +122,7 @@ msgbuf_KERN_MSGBUFSIZE(int *data, size_t *len)
 		}else if (cfData.FSType == FS_TYPE_PDO){
 			pdo_statvfs(&cfData, dwFlags, &cfDriver);
 			if (pdo_match(cfData.NtName, cfData.DeviceType, &cfDriver)){
-				bufsize += msg_pdo(&cfData, &cfDriver, buf);
+				bufsize += msgbuf_PDO(&cfData, &cfDriver, buf);
 				msgbuf = win_realloc(msgbuf, bufsize + MSGBUFSIZE);
 				buf = msgbuf + bufsize;
 			}

@@ -84,15 +84,18 @@ int
 sock_SIOCGIFGROUP(WIN_TASK *Task, struct ifgroupreq *req)
 {
 	char *ifname = req->ifgr_name;
-	char *result = req->ifgr_group;
+	char *result = req->ifgr_groups->ifgrq_group;
 	char c;
 
-	while (c = *ifname++){
-		if (c < '0' || c > '9'){
-			*result++ = c;
+	if (!req->ifgr_len){
+		req->ifgr_len = sizeof(struct ifg_req);
+	}else while (c = *ifname++){
+		if (c >= '0' && c <= '9'){
+			*result = 0;
+			break;
 		}
+		*result++ = c;
 	}
-	*result = 0;
 	return(0);
 }
 int 

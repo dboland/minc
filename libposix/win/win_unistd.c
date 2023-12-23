@@ -88,6 +88,17 @@ win_getegid(SID8 *Sid)
 /************************************************************/
 
 BOOL 
+win_chdir(LPCWSTR Path)
+{
+	BOOL bResult = FALSE;
+
+	if (!SetCurrentDirectoryW(Path)){
+		WIN_ERR("SetCurrentDirectory(%ls): %s\n", Path, win_strerror(GetLastError()));
+	}else{
+		bResult = TRUE;
+	}
+}
+BOOL 
 win_group_member(PSID Group)
 {
 	BOOL bResult = FALSE;
@@ -100,9 +111,9 @@ win_group_member(PSID Group)
 BOOL 
 win_getgroups(SID8 **Groups, DWORD *Count)
 {
+	BOOL bResult = FALSE;
 	PTOKEN_GROUPS ptGroups;
 	HANDLE hToken;
-	BOOL bResult = FALSE;
 	SID8 *grList;
 	DWORD dwCount;
 	DWORD dwIndex = 0;

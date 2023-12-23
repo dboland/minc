@@ -353,7 +353,7 @@ sys___getcwd(call_t call, char *buf, size_t size)
 {
 	WIN_TASK *pwTask = call.Task;
 
-	pathn_posix(buf, PSTRING(pwTask->TaskId).Path, size);
+	pathn_posix(buf, PSTRING(pwTask).Path, size);
 	if (pwTask->Flags & PS_TRACED){
 		ktrace_NAMEI(pwTask, buf, win_strlen(buf));
 	}

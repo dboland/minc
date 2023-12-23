@@ -33,11 +33,11 @@
 /************************************************************/
 
 WIN_TASK *
-ProcCreateTask(DWORD Index)
+ProcCreateTask(DWORD TaskId)
 {
-	WIN_TASK *pwTask = &__Tasks[Index];
+	WIN_TASK *pwTask = &__Tasks[TaskId];
 
-	while (Index < WIN_CHILD_MAX){
+	while (TaskId < WIN_CHILD_MAX){
 		if (!pwTask->Flags){
 			pwTask->Flags = WIN_PS_EMBRYO;
 			pwTask->TaskId = Index;

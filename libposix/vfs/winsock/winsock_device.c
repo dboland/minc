@@ -30,12 +30,10 @@
 
 #include <ddk/ndisguid.h>
 
-#define NDIS_LAN_CLASS		L"{ad498944-762f-11d0-8dcb-00c04fc3358c}"
-
 /************************************************************/
 
 BOOL 
-ws2_attach(LPCWSTR NtName, DWORD DeviceType, MIB_IFROW *Interface)
+ws2_match(LPCWSTR NtName, DWORD DeviceType, DWORD Index, WIN_IFDRIVER *Driver)
 {
 	BOOL bResult = FALSE;
 	WIN_DEVICE *pwDevice = DEVICE(DeviceType);
@@ -43,21 +41,24 @@ ws2_attach(LPCWSTR NtName, DWORD DeviceType, MIB_IFROW *Interface)
 	USHORT sUnit = DeviceType & 0x00FF;
 
 	while (sUnit < WIN_UNIT_MAX){
-		if (!pwDevice->Flags){
+		if (!win_wcscmp(pwDevice->NtName, NtName)){
+			break;
+		}else if (!pwDevice->Flags){
+			pwDevice->Flags = WIN_DVF_DRIVER_READY;
 			pwDevice->DeviceType = DeviceType;
 			pwDevice->DeviceId = sClass + sUnit;
-			pwDevice->Index = Interface->dwIndex;
-			pwDevice->Flags |= WIN_DVF_DRIVER_READY;
+			pwDevice->Index = Index;
 			win_wcscpy(pwDevice->NtName, NtName);
-//			win_wcscpy(pwDevice->ClassId, NDIS_LAN_CLASS);
+			win_wcscpy(pwDevice->ClassId, Driver->ClassId);
 			bResult = config_attach(pwDevice, sClass);
 //VfsDebugDevice(pwDevice, "ws2_attach");
-			break;
-		}else if (!win_wcscmp(pwDevice->NtName, NtName)){
 			break;
 		}
 		pwDevice++;
 		sUnit++;
 	}
+	Driver->DeviceType = DeviceType;
+	Driver->Flags = pwDevice->Flags;
+	win_strcpy(Driver->Name, pwDevice->Name);
 	return(bResult);
 }

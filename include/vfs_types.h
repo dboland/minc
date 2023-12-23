@@ -326,7 +326,7 @@ typedef struct _WIN_PSTRING {
 	WCHAR Path[WIN_PATH_MAX];
 } WIN_PSTRING;
 
-#define PSTRING(TaskId)	__Strings[TaskId]
+#define PSTRING(tsk)	__Strings[tsk->TaskId]
 
 /*
  * vfs_mount.c

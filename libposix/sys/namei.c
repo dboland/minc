@@ -114,7 +114,7 @@ root_win(WIN_NAMEIDATA *Result, const char *path)
 WIN_NAMEIDATA *
 pathat_win(WIN_NAMEIDATA *Result, int dirfd, const char *path, int atflags)
 {
-	WCHAR szPath[PATH_MAX];
+	WCHAR szSource[WIN_PATH_MAX];
 	size_t size;
 	WIN_TASK *pwTask = &__Tasks[CURRENT];
 	DWORD dwFlags = WIN_NOFOLLOW;
@@ -123,26 +123,28 @@ pathat_win(WIN_NAMEIDATA *Result, int dirfd, const char *path, int atflags)
 		ktrace_NAMEI(pwTask, path, win_strlen(path));
 	}
 
+	Result->MountId = 0;
+	Result->DeviceType = DEV_TYPE_ROOT;
+	Result->DeviceId = DEV_TYPE_ROOT;
+	Result->FileType = WIN_VREG;
 	Result->FSType = FS_TYPE_DISK;
 	Result->R = Result->Resolved;
-	Result->MountId = 0;
-	Result->DeviceId = 0;
 
 	if (dirfd > 0 && dirfd < OPEN_MAX){
 		vfs_F_GETPATH(&pwTask->Node[dirfd], Result);
 
 	}else if (*path == '/'){
-//		win_memcpy(Result, __Mounts, sizeof(WIN_INODE));
 		path = root_win(Result, path);
 
 	}else if (path[1] == ':'){		/* MSYS sh.exe */
+		Result->MountId = MOUNTID(path[0]);
 		*Result->R++ = *path++;
 		*Result->R++ = *path++;
 		path++;
 
 	}else if (dirfd == AT_FDCWD){
-		Result->R = win_wcpcpy(Result->Resolved, PSTRING(pwTask->TaskId).Path);
-		Result->MountId = pwTask->MountId;
+		vol_lookup(Result, pwTask->MountId, WIN_NOCROSSMOUNT);
+		Result->R = win_wcpcpy(Result->Resolved, PSTRING(pwTask).Path);
 
 	}else{
 		dwFlags = WIN_PATHCOPY;
@@ -150,7 +152,7 @@ pathat_win(WIN_NAMEIDATA *Result, int dirfd, const char *path, int atflags)
 	}
 
 	size = WIN_PATH_MAX - (Result->R - Result->Resolved);
-	win_mbstowcs(szPath, path, size);
+	win_mbstowcs(szSource, path, size);
 
 	if (!(atflags & AT_SYMLINK_NOFOLLOW)){
 		dwFlags |= WIN_FOLLOW;
@@ -162,7 +164,7 @@ pathat_win(WIN_NAMEIDATA *Result, int dirfd, const char *path, int atflags)
 		dwFlags |= WIN_REQUIREDIR;
 	}
 
-	return(vfs_lookup(Result, szPath, dwFlags));
+	return(vfs_lookup(Result, szSource, dwFlags));
 
 }
 WIN_NAMEIDATA *

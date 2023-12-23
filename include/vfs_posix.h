@@ -104,6 +104,13 @@ BOOL vfs_F_SETLK(WIN_VNODE *Node, DWORD Flags);
 BOOL vfs_F_GETPATH(WIN_VNODE *Node, WIN_NAMEIDATA *Path);
 BOOL vfs_F_DUPFD(WIN_VNODE *Node, BOOL CloseExec, WIN_VNODE *Result);
 
+/* vfs_termios.c */
+
+BOOL vfs_TIOCTL(WIN_VNODE *Node, DWORD Operation, PVOID Param);
+BOOL vfs_TIOCGETA(WIN_VNODE *Node, DWORD Mode[2]);
+BOOL vfs_TIOCSCTTY(WIN_DEVICE *Device, WIN_TASK *Task);
+BOOL vfs_PTMGET(WIN_DEVICE *Device, WIN_PTMGET *Result);
+
 /* vfs_time.c */
 
 BOOL vfs_setitimer(WIN_TASK *Task, LONG *Interval, DWORDLONG *TimeOut);
@@ -121,13 +128,6 @@ BOOL vfs_getvfs(WIN_CFDATA *Config, DWORD Flags);
 BOOL vfs_realpath(WIN_NAMEIDATA *Path, DWORD Size);
 BOOL vfs_atexit(WIN_ATEXITPROC Function);
 BOOL vfs__cxa_finalize(PVOID Param);
-
-/* vfs_termios.c */
-
-BOOL vfs_TIOCTL(WIN_VNODE *Node, DWORD Operation, PVOID Param);
-BOOL vfs_TIOCGETA(WIN_VNODE *Node, DWORD Mode[2]);
-BOOL vfs_TIOCSCTTY(WIN_DEVICE *Device, WIN_TASK *Task);
-BOOL vfs_PTMGET(WIN_DEVICE *Device, WIN_PTMGET *Result);
 
 /* vfs_ktrace.c */
 
@@ -217,6 +217,7 @@ BOOL tty_close(WIN_TERMIO *Terminal);
 
 BOOL vol_fstat(HANDLE Handle, LPSTR Result);
 BOOL vol_stat(LPCWSTR Path, LPSTR Result);
+BOOL vol_lookup(WIN_NAMEIDATA *Path, LONG MountId, DWORD Flags);
 
 /* winsock.c */
 

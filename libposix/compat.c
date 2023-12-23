@@ -37,7 +37,7 @@ runcmd(char *argv[])
 	CHAR szPath[PATH_MAX];
 	WIN_TASK *pwTask = &__Tasks[CURRENT];
 
-	win_wcstombs(szPath, PSTRING(pwTask->TaskId).Path, PATH_MAX);
+	win_wcstombs(szPath, PSTRING(pwTask).Path, PATH_MAX);
 	if (!win_execve(argv_win(pwTask, *argv, argv), szPath)){
 		pwTask->Error = errno_posix(GetLastError());
 	}else{

@@ -120,12 +120,13 @@ proc_init(WIN_SIGPROC SignalProc)
 		vfs_namei(GetStdHandle(STD_INPUT_HANDLE), 0, &pwTask->Node[0]);
 		vfs_namei(GetStdHandle(STD_OUTPUT_HANDLE), 1, &pwTask->Node[1]);
 		vfs_namei(GetStdHandle(STD_ERROR_HANDLE), 2, &pwTask->Node[2]);
-		win_getcwd(PSTRING(pwTask->TaskId).Path);
+		win_getcwd(PSTRING(pwTask).Path);
 		win_geteuid(&pwTask->UserSid);
 		win_getegid(&pwTask->GroupSid);
 		pwTask->FileMask = 0022;
 		ProcInitChannels(pwTask->Node);
 		ProcInitLimits(pwTask->Limit);
+		win_chdir(L"\\");	/* make sure CWD is at mount point */
 	}
 //	if (vfs_setugid(pwTask)){
 //		pwTask->IsSetUGid = 1;

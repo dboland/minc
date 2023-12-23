@@ -105,6 +105,7 @@ BOOL win_group_member(PSID Group);
 BOOL win_getgroups(SID8 **Groups, DWORD *Count);
 BOOL win_setgroups(SID8 Groups[], DWORD Count);
 BOOL win___tfork_thread(WIN___TFORK *Params, SIZE_T Size, LPTHREAD_START_ROUTINE *Start, PVOID Data, DWORD *Result);
+BOOL win_chdir(LPCWSTR Path);
 
 /* win_pwd.c */
 

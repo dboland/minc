@@ -50,10 +50,10 @@ cpu_configure(void)
 		}else if (cfData.FSType == FS_TYPE_PDO){
 			pdo_statvfs(&cfData, dwFlags, &cfDriver);
 			if (pdo_match(cfData.NtName, cfData.DeviceType, &cfDriver)){
-				msg_pdo(&cfData, &cfDriver, szMessage);
+				msgbuf_PDO(&cfData, &cfDriver, szMessage);
 //				msvc_printf(szMessage);
 			}else if (!cfDriver.Flags){
-				msg_pdo(&cfData, &cfDriver, szMessage);
+				msgbuf_PDO(&cfData, &cfDriver, szMessage);
 				msvc_printf(szMessage);
 			}
 		}

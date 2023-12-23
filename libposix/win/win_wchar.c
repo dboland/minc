@@ -122,10 +122,10 @@ win_wcsncpy(LPWSTR Destination, LPCWSTR Source, LONG Length)
 	WCHAR C;
 
 	while (C = *Source++){
+		Length--;
 		if (Length < 1){
 			break;
 		}
-		Length--;
 		*Destination++ = C;
 	}
 	*Destination = 0;

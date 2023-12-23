@@ -186,7 +186,7 @@ fcntl_F_SETLK(WIN_TASK *Task, WIN_VNODE *Node, struct flock *lock)
 			dwFlags = LOCKFILE_EXCLUSIVE_LOCK;
 			break;
 		default:
-			dwFlags = -1;
+			return(-EINVAL);
 	}
 	if (!vfs_F_SETLK(Node, dwFlags)){
 		result -= errno_posix(GetLastError());
@@ -198,8 +198,8 @@ fcntl_F_SETOWN(WIN_TASK *Task, WIN_VNODE *Node, int owner)
 {
 	int result = 0;
 
-	if (owner >= CHILD_MAX){
-		result = -EBADF;
+	if (owner < 0 || owner >= CHILD_MAX){
+		result = -EINVAL;
 	}else{
 		Node->Owner = owner;
 	}
@@ -216,7 +216,7 @@ __openat(WIN_TASK *Task, WIN_NAMEIDATA *Path, int flags, va_list args)
 	WIN_FLAGS wFlags;
 	WIN_MODE wMode;
 	WIN_VNODE vNode = {0};
-	CHAR szMessage[MAX_MESSAGE];
+//	CHAR szMessage[MAX_MESSAGE];
 
 	mode &= ~Task->FileMask;
 	if ((Path->FileType == WIN_VLNK) && (Path->Flags == WIN_NOFOLLOW)){
