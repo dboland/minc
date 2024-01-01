@@ -30,53 +30,6 @@
 
 #include <winbase.h>
 
-/* The Windows CHAR file system seemed quirky until I realized that it
- * is used to implement the WinNT pseudo terminal. This becomes more 
- * apparent in Vista, where a PTY was implemented in the MAILSLOT
- * file system.
- * For instance, opening CONIN$ and CONOUT$ is equivalent to opening /dev/tty.
- * But the resulting handles are not the system console (despite of the 
- * semantics), because if used outside of the current CMD Window, they
- * are invalid.
- * Trying to DuplicateHandle() parent's STD_XXX_HANDLE while in a child
- * process results in "The parameter is incorrect", but the Handle is
- * valid anyway. In Vista the error is "The handle is invalid".
- */
-
-/****************************************************/
-
-HANDLE 
-CharOpenFile(LPCSTR Name, WIN_FLAGS *Flags, PSECURITY_ATTRIBUTES sa)
-{
-	HANDLE hResult = NULL;
-
-	hResult = CreateFile(Name, Flags->Access, Flags->Share, sa, 
-		Flags->Creation, Flags->Attribs, NULL);
-	if (hResult == INVALID_HANDLE_VALUE){
-		WIN_ERR("CreateFile(%s): %s\n", Name, win_strerror(GetLastError()));
-	}
-	return(hResult);
-}
-BOOL 
-CharStatFile(WIN_DEVICE *Device, WIN_VATTR *Result)
-{
-	BOOL bResult = FALSE;
-	PSECURITY_DESCRIPTOR psd;
-
-	if (!win_acl_get_fd(Device->Handle, &psd)){
-		return(FALSE);
-	}else if (!GetFileInformationByHandle(Device->Handle, (BY_HANDLE_FILE_INFORMATION *)Result)){
-		WIN_ERR("GetFileInformationByHandle(%d): %s\n", Device->Handle, win_strerror(GetLastError()));
-	}else if (vfs_acl_stat(psd, Result)){
-		Result->DeviceId = __Mounts->DeviceId;
-		Result->Mode.FileType = Device->FileType;
-		Result->SpecialId = Device->DeviceId;
-		bResult = TRUE;
-	}
-	LocalFree(psd);
-	return(bResult);
-}
-
 /****************************************************/
 
 BOOL 

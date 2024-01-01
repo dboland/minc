@@ -40,7 +40,7 @@ ProcCreateTask(DWORD TaskId)
 	while (TaskId < WIN_CHILD_MAX){
 		if (!pwTask->Flags){
 			pwTask->Flags = WIN_PS_EMBRYO;
-			pwTask->TaskId = Index;
+			pwTask->TaskId = TaskId;
 			pwTask->ThreadId = GetCurrentThreadId();
 			pwTask->ProcessId = GetCurrentProcessId();
 			GetSystemTimeAsFileTime(&pwTask->Started);
@@ -48,10 +48,10 @@ ProcCreateTask(DWORD TaskId)
 		}else if (pwTask->Flags & WIN_PS_NOZOMBIE){
 			ZeroMemory(pwTask, sizeof(WIN_TASK));
 		}
-		Index++;
+		TaskId++;
 		pwTask++;
 	}
-	WIN_ERR("ProcCreateTask(%d): %s\n", Index, win_strerror(ERROR_MAX_THRDS_REACHED));
+	WIN_ERR("ProcCreateTask(%d): %s\n", TaskId, win_strerror(ERROR_MAX_THRDS_REACHED));
 	vfs_raise(WM_COMMAND, CTRL_ABORT_EVENT, 0);
 	return(NULL);
 }

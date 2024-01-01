@@ -69,20 +69,26 @@ win_wcstombp(LPSTR Destination, LPCWSTR Source, INT Size)
 LPWSTR 
 win_wcscpy(LPWSTR Destination, LPCWSTR Source)
 {
-	LPWSTR wszResult = Destination;
+	WCHAR *D = Destination;
+	WCHAR C;
 
-	while (*Destination = *Source++){
-		Destination++;
+	while (C = *Source++){
+		*D++ = C;
 	}
-	return(wszResult);
+	*D = 0;
+	return(Destination);
 }
 LPWSTR 
 win_wcpcpy(LPWSTR Destination, LPCWSTR Source)
 {
-	while (*Destination = *Source++){
-		Destination++;
+	WCHAR *D = Destination;
+	WCHAR C;
+
+	while (C = *Source++){
+		*D++ = C;
 	}
-	return(Destination);
+	*D = 0;
+	return(D);
 }
 LPWSTR 
 win_wcscat(LPWSTR Destination, LPCWSTR Source)
@@ -95,7 +101,7 @@ win_wcscat(LPWSTR Destination, LPCWSTR Source)
 	win_wcscpy(Destination, Source);
 	return(pszResult);
 }
-INT 
+LONG 
 win_wcslen(LPCWSTR String)
 {
 	LONG lResult = 0;
@@ -118,18 +124,18 @@ win_wcscmp(LPCWSTR String1, LPCWSTR String2)
 LPWSTR 
 win_wcsncpy(LPWSTR Destination, LPCWSTR Source, LONG Length)
 {
-	LPWSTR pszResult = Destination;
+	LPWSTR D = Destination;
 	WCHAR C;
 
 	while (C = *Source++){
-		Length--;
+		Length--;		/* not POSIX, but much safer */
 		if (Length < 1){
 			break;
 		}
-		*Destination++ = C;
+		*D++ = C;
 	}
-	*Destination = 0;
-	return(pszResult);
+	*D = 0;
+	return(Destination);
 }
 LPWSTR 
 win_wcslcase(LPWSTR String)

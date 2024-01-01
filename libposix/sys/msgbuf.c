@@ -67,16 +67,17 @@ msgbuf_PDO(WIN_CFDATA *Config, WIN_CFDRIVER *Driver, LPSTR Result)
 	return(psz - Result);
 }
 int 
-msgbuf_DRIVE(WIN_CFDATA *Config, WIN_MOUNT *Mount, LPSTR Result)
+msgbuf_DRIVE(WIN_CFDATA *Config, WIN_CFDRIVER *Driver, LPSTR Result)
 {
 	LPSTR psz = Result;
 
-	if (Mount->Flags){
-		psz += msvc_sprintf(psz, "%ls on ", Config->BusName);
+	if (Driver->Flags){
+		psz += msvc_sprintf(psz, "%s on ", Driver->Name);
 	}else{
 		psz += msvc_sprintf(psz, "+ not configured: ");
 	}
-	psz += msvc_sprintf(psz, "%ls at %s", Config->NtName, Mount->Name);
+	psz += msvc_sprintf(psz, "%ls at %ls", Config->NtName, Config->BusName);
+	psz += msvc_sprintf(psz, " %ls", Driver->Location);
 	psz += msvc_sprintf(psz, ", type 0x%x", Config->DeviceType);
 	*psz++ = '\n';
 	*psz = 0;
@@ -107,7 +108,6 @@ msgbuf_KERN_MSGBUFSIZE(int *data, size_t *len)
 {
 	WIN_CFDATA cfData;
 	WIN_CFDRIVER cfDriver;
-	WIN_MOUNT wMount;
 	DWORD dwFlags = WIN_MNT_VFSFLAGS;
 	char *msgbuf = win_malloc(MSGBUFSIZE);
 	size_t bufsize = 0;
@@ -117,8 +117,8 @@ msgbuf_KERN_MSGBUFSIZE(int *data, size_t *len)
 		return(-ECANCELED);
 	}else while (vfs_getvfs(&cfData, dwFlags)){
 		if (cfData.FSType == FS_TYPE_DRIVE){
-			drive_statvfs(&cfData, dwFlags, &wMount);
-			drive_match(cfData.NtName, cfData.DeviceType, &wMount);
+			drive_statvfs(&cfData, dwFlags, &cfDriver);
+			drive_match(cfData.NtName, cfData.DeviceType, &cfDriver);
 		}else if (cfData.FSType == FS_TYPE_PDO){
 			pdo_statvfs(&cfData, dwFlags, &cfDriver);
 			if (pdo_match(cfData.NtName, cfData.DeviceType, &cfDriver)){

@@ -92,8 +92,8 @@
 #define DEV_TYPE_AHCI		(DEV_CLASS_DISK + DEV_BUS_SATA)	/* Serial ATA Advanced Host Controller Interface */
 #define DEV_TYPE_FDC		(DEV_CLASS_DISK + DEV_BUS_FDC)	/* Floppy Disk Controller */
 #define DEV_TYPE_USB		(DEV_CLASS_DISK + DEV_BUS_USB)	/* USB storage controller */
-#define DEV_TYPE_SD		(DEV_CLASS_DISK + DEV_BUS_SCSI)	/* SCSI Disk controller */
-#define DEV_TYPE_WD		(DEV_CLASS_DISK + DEV_BUS_IDE)	/* WD100x compatible hard disk controller */
+#define DEV_TYPE_SCSI		(DEV_CLASS_DISK + DEV_BUS_SCSI)	/* SCSI Disk controller */
+#define DEV_TYPE_HDC		(DEV_CLASS_DISK + DEV_BUS_HDC)	/* WD100x compatible hard disk controller */
 
 #define DEV_TYPE_NDIS		(DEV_CLASS_IFNET)
 #define DEV_TYPE_TUNNEL		(DEV_CLASS_IFNET + 16)		/* Tunnel type encapsulation */
@@ -101,7 +101,7 @@
 #define DEV_TYPE_PPP		(DEV_CLASS_IFNET + 24)		/* Point-To-Point network device */
 #define DEV_TYPE_ETH		(DEV_CLASS_IFNET + 28)		/* Ethernet network device */
 #define DEV_TYPE_WLAN		(DEV_CLASS_IFNET + 36)		/* IEEE80211 wireless network device */
-//#define DEV_TYPE		(DEV_CLASS_IFNET + 44)
+//#define DEV_TYPE_		(DEV_CLASS_IFNET + 44)
 #define DEV_TYPE_NIC		(DEV_CLASS_IFNET + DEV_BUS_PCI)	/* Network Interface Card */
 
 #define DEV_TYPE_MEDIA		(DEV_CLASS_MEDIA)

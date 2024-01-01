@@ -41,12 +41,13 @@ typedef struct _PUBLIC_OBJECT_BASIC_INFORMATION {
 /****************************************************/
 
 HANDLE 
-win_F_DUPFD(HANDLE Handle, BOOL Inherited)
+win_F_DUPFD(HANDLE Handle, DWORD Flags)
 {
 	HANDLE hResult = NULL;
 	HANDLE hProcess = GetCurrentProcess();
+	BOOL bInherit = (Flags & HANDLE_FLAG_INHERIT);
 
-	if (!DuplicateHandle(hProcess, Handle, hProcess, &hResult, 0, Inherited, DUPLICATE_SAME_ACCESS)){
+	if (!DuplicateHandle(hProcess, Handle, hProcess, &hResult, 0, bInherit, DUPLICATE_SAME_ACCESS)){
 		WIN_ERR("win_F_DUPFD(%d): %s\n", Handle, win_strerror(GetLastError()));
 	}
 	return(hResult);

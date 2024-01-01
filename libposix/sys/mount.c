@@ -141,6 +141,20 @@ mount_CD9660(WIN_NAMEIDATA *Path, struct iso_args *args)
 	}
 	return(result);
 }
+int
+mount_UFS(WIN_NAMEIDATA *Path, struct ufs_args *args)
+{
+	int result = 0;
+	WIN_NAMEIDATA wdPath;
+	WIN_MODE wMode;
+
+	if (path_win(&wdPath, args->fspec, O_NOFOLLOW)->Attribs == -1){
+		result -= errno_posix(GetLastError());
+	}else if (!drive_mount(Path, DEVICE(wdPath.DeviceId), mode_win(&wMode, 0666))){
+		result -= errno_posix(GetLastError());
+	}
+	return(result);
+}
 
 /****************************************************/
 
@@ -158,6 +172,9 @@ sys_mount(call_t call, const char *type, const char *dir, int flags, void *data)
 
 	}else if (!win_strcmp(type, MOUNT_CD9660)){
 		result = mount_CD9660(path_win(&wPath, dir, 0), (struct iso_args *)data);
+
+	}else if (!win_strcmp(type, MOUNT_UFS)){
+		result = mount_UFS(path_win(&wPath, dir, 0), (struct ufs_args *)data);
 
 	}else{
 		result = -EOPNOTSUPP;

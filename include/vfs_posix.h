@@ -182,12 +182,12 @@ DWORD proc_VM_LOADAVG(WIN_TASK Tasks[], WIN_LOADAVG *Load);
 
 /* drive.c */
 
-BOOL drive_statvfs(WIN_CFDATA *Config, DWORD Flags, WIN_MOUNT *Result);
+BOOL drive_statvfs(WIN_CFDATA *Config, DWORD Flags, WIN_CFDRIVER *Result);
 BOOL drive_getfsstat(WIN_MOUNT *Mount, DWORD Flags, WIN_STATFS *Result);
 BOOL drive_statfs(WIN_NAMEIDATA *Path, WIN_STATFS *Result);
 BOOL drive_mount(WIN_NAMEIDATA *Path, WIN_DEVICE *Device, WIN_MODE *Mode);
 BOOL drive_unmount(WIN_NAMEIDATA *Path);
-BOOL drive_match(LPCWSTR NtName, DWORD DeviceType, WIN_MOUNT *Mount);
+BOOL drive_match(LPCWSTR NtName, DWORD DeviceType, WIN_CFDRIVER *Driver);
 
 /* disk.c */
 

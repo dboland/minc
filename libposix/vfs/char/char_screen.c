@@ -158,7 +158,7 @@ ScreenAnsi(HANDLE Handle, CHAR C, SEQUENCE *Seq)
 
 	if (!bResult){
 		Seq->Buf[dwSize] = 0;
-		msvc_printf("{%s}", Seq->Buf);
+		msvc_printf("\e%s", Seq->Buf);
 	}
 
 	__Escape = NULL;

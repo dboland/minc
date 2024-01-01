@@ -62,8 +62,12 @@ drive_getfsstat(WIN_MOUNT *Mount, DWORD Flags, WIN_STATFS *Result)
 	Result->DeviceId = Mount->DeviceId;
 	Result->MountTime = Mount->Time;
 	if (!(Flags & WIN_MNT_NOWAIT)){
-		bResult = DriveStatVolume(Mount->Volume, Result);
+		bResult = DriveStatVolume(Mount->Path, Result);
 	}else switch (Mount->DeviceType){
+		case DEV_TYPE_ROOT:
+			win_wcscpy(Result->TypeName, L"NTFS");
+			Result->Flags = FILE_PERSISTENT_ACLS;
+			break;
 		case DEV_TYPE_CDROM:
 			win_wcscpy(Result->TypeName, L"ISO9660");
 			Result->Flags = FILE_READ_ONLY_VOLUME;
@@ -72,7 +76,7 @@ drive_getfsstat(WIN_MOUNT *Mount, DWORD Flags, WIN_STATFS *Result)
 			win_wcscpy(Result->TypeName, L"FAT");
 			break;
 		default:
-			bResult = DriveStatVolume(Mount->Volume, Result);
+			bResult = DriveStatVolume(Mount->Path, Result);
 	}
 	return(bResult);
 }
@@ -118,10 +122,10 @@ drive_mount(WIN_NAMEIDATA *Path, WIN_DEVICE *Device, WIN_MODE *Mode)
 		pwMount->MountId = lMountId;
 		pwMount->DeviceId = Device->DeviceId;
 		pwMount->DeviceType = Device->DeviceType;
-		pwMount->VolumeSerial = Device->Index;
 		pwMount->FileType = WIN_VDIR;
 		pwMount->FSType = Path->FSType;
-		win_wcscpy(pwMount->Volume, Device->NtPath);
+		win_wcscpy(win_wcpcpy(pwMount->Path, L"\\\\.\\GLOBALROOT"), Device->NtPath);
+		pwMount->VolumeSerial = Device->Index;
 		GetSystemTimeAsFileTime(&pwMount->Time);
 //VfsDebugMount(pwMount, "drive_mount");
 //VfsDebugDevice(Device, "drive_mount");

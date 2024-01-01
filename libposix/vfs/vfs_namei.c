@@ -151,7 +151,7 @@ vfs_namei(HANDLE Handle, DWORD Index, WIN_VNODE *Result)
 	DWORD dwType = GetFileType(Handle);
 
 	if (ERROR_SUCCESS != GetLastError()){
-		WIN_ERR("GetFileType(%d): Index(%d) FileId(%d): %s\n", Handle, Index, Result->FileId, win_strerror(GetLastError()));
+		WIN_ERR("GetFileType(%d): %s\n", Handle, win_strerror(GetLastError()));
 	}else switch (dwType){
 		case FS_TYPE_DISK:
 			bResult = disk_namei(Handle, Result);

@@ -39,14 +39,14 @@ cpu_configure(void)
 	WIN_CFDRIVER cfDriver;
 	DWORD dwFlags = WIN_MNT_VFSFLAGS;
 	CHAR szMessage[MAX_MESSAGE];
-	WIN_MOUNT wMount;
+//	WIN_MOUNT wMount;
 
 	if (!vfs_setvfs(&cfData, dwFlags)){
 		return;
 	}else while (vfs_getvfs(&cfData, dwFlags)){
 		if (cfData.FSType == FS_TYPE_DRIVE){
-			drive_statvfs(&cfData, dwFlags, &wMount);
-			drive_match(cfData.NtName, cfData.DeviceType, &wMount);
+			drive_statvfs(&cfData, dwFlags, &cfDriver);
+			drive_match(cfData.NtName, cfData.DeviceType, &cfDriver);
 		}else if (cfData.FSType == FS_TYPE_PDO){
 			pdo_statvfs(&cfData, dwFlags, &cfDriver);
 			if (pdo_match(cfData.NtName, cfData.DeviceType, &cfDriver)){

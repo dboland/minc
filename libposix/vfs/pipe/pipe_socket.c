@@ -122,7 +122,7 @@ pipe_connect(WIN_VNODE *Node, CONST LPSOCKADDR Name, INT Length)
 		WIN_ERR("ReadFile(%s): %s\n", Name->sa_data, win_strerror(GetLastError()));
 	}else if (!CloseHandle(hResult)){
 		WIN_ERR("CloseHandle(%d): %s\n", hResult, win_strerror(GetLastError()));
-	}else if (PipeOpenFile(iNode.Name, __PipeEvent, Node)){
+	}else if (PipeOpenFile(iNode.NtName, __PipeEvent, Node)){
 		bResult = TRUE;
 	}
 	return(bResult);

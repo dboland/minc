@@ -38,7 +38,7 @@ char *
 pathnp_posix(char *dest, LPCWSTR Source, LONG Size, BOOL EndPtr)
 {
 	char *result = dest;
-	LPWSTR Root = __Mounts->Volume;
+	LPWSTR Root = __Mounts->Path;
 	int len = win_wcslen(Root);
 	char *type = NULL;
 	char c;
@@ -52,6 +52,9 @@ pathnp_posix(char *dest, LPCWSTR Source, LONG Size, BOOL EndPtr)
 	if (!win_wcsncmp(Source, Root, len)){
 		src += len;
 		Size--;
+	}else if (!win_wcscmp(Source, L"minc:")){
+		*dest++ = '/';
+		src += 5;
 	}else if (*src && src[1] == ':'){		/* MinGW ld.exe */
 		dest = win_stpcpy(dest, "/mnt/");
 		*dest++ = *src++;
@@ -106,7 +109,7 @@ root_win(WIN_NAMEIDATA *Result, const char *path)
 		Result->R = win_wcpcpy(Result->Resolved, PROCESS_ROOT);
 		path += 6;
 	}else{
-		Result->R = win_wcpcpy(Result->Resolved, __Mounts->Volume);
+		Result->R = win_wcpcpy(Result->Resolved, __Mounts->Path);
 		path++;
 	}
 	return(path);

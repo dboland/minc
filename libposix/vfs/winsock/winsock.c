@@ -28,7 +28,7 @@
  *
  */
 
-#include "winsock_namei.c"
+#include "winsock_syscall.c"
 #include "winsock_device.c"
 #include "winsock_sockio.c"
 #include "winsock_filio.c"

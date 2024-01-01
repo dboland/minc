@@ -127,8 +127,7 @@ AnsiRenderForeground(CONSOLE_SCREEN_BUFFER_INFO *Info, CHAR Char2)
 		wAttrib |= FOREGROUND_CYAN;
 	}else if (Char2 == '7'){
 		wAttrib |= FOREGROUND_WHITE;
-//	}else if (Char2 == '8'){ 	/* set RGB color (journalctl in Debian) */
-//		wAttrib |= FOREGROUND_RGB;
+//	}else if (Char2 == '8'){ 	/* RGB color follows (journalctl in Debian) */
 	}else if (Char2 == '9'){	/* default (ANSI v.2.53) */
 		wAttrib |= FOREGROUND_DEFAULT;
 	}else{
@@ -159,8 +158,7 @@ AnsiRenderBackground(CONSOLE_SCREEN_BUFFER_INFO *Info, CHAR Char2)
 		wAttrib |= BACKGROUND_CYAN;
 	}else if (Char2 == '7'){
 		wAttrib |= BACKGROUND_WHITE;
-//	}else if (Char2 == '8'){ 	/* RGB color */
-//		wAttrib |= BACKGROUND_RGB;
+//	}else if (Char2 == '8'){ 	/* RGB color follows */
 	}else if (Char2 == '9'){	/* default (ANSI v.2.53) */
 		wAttrib |= BACKGROUND_DEFAULT;
 	}else{
@@ -239,23 +237,23 @@ AnsiRender(CONSOLE_SCREEN_BUFFER_INFO *Info, CHAR Char1, CHAR Char2, CHAR Char3)
 BOOL 
 AnsiSelectGraphicRendition(HANDLE Handle, CONSOLE_SCREEN_BUFFER_INFO *Info, LPSTR Buffer, LONG Size)
 {
-	BOOL bResult = FALSE;
 	CHAR Char1 = 0;
 	CHAR Char2 = 0;
-	CHAR Char3 = 0;	/* alpine.exe (force 16-color mode) */
-	CHAR C = 0;
-	LPSTR pszBuffer = Buffer;
+	CHAR Char3 = 0;				/* 8-bit color mode (alpine.exe) */
+	CHAR C;
+	LPSTR psz = Buffer;
 
 	while (Size--){
 		C = *Buffer++;
-		if (C == '['){	/* skip CSI */
+		if (C == '['){			/* skip CSI */
 			continue;
-		}else if (!Size || C == ';'){
+		}else if (C == ';' || !Size){
 			if (!AnsiRender(Info, Char1, Char2, Char3)){
-				msvc_printf("{%s}", pszBuffer);
+//				msvc_printf("{%s}", psz);
+				return(TRUE);	/* ignore */
 			}
 			Char1 = Char2 = Char3 = 0;
-			pszBuffer = Buffer;
+			psz = Buffer;
 		}else if (!Char1){
 			Char1 = C;
 		}else if (!Char2){

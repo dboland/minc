@@ -124,28 +124,32 @@ win_strcat(LPSTR Destination, LPCSTR Source)
 LPSTR 
 win_strncpy(LPSTR Destination, LPCSTR Source, LONG Length)
 {
-	LPSTR pszResult = Destination;
+	LPSTR D = Destination;
 	CHAR C;
 
 	while (C = *Source++){
-		Length--;
+		Length--;		/* not POSIX, but much safer */
 		if (Length < 1){
 			break;
 		}
-		*Destination++ = C;
+		*D++ = C;
 	}
-	*Destination = 0;
-	return(pszResult);
+	*D = 0;
+	return(Destination);
 }
 LPSTR 
 win_stpcpy(LPSTR Destination, LPCSTR Source)
 {
-	while (*Destination = *Source++){
-		Destination++;
+	LPSTR D = Destination;
+	CHAR C;
+
+	while (C = *Source++){
+		*D++ = C;
 	}
-	return(Destination);
+	*D = 0;
+	return(D);
 }
-INT 
+LONG 
 win_strlen(LPCSTR String)
 {
 	LONG lResult = 0;

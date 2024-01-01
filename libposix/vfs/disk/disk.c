@@ -50,13 +50,16 @@ disk_init(WIN_MOUNT *Root, HINSTANCE Instance)
 	/* Configure root/swap device. Originally done by
 	 * diskconf() in OpenBSD.
 	 */
-	GetModuleFileNameW(Instance, Root->Volume, MAX_PATH);
-	win_dirname(win_dirname(Root->Volume));
+	GetModuleFileNameW(Instance, Root->Path, MAX_PATH);
+	win_dirname(win_dirname(Root->Path));
 	win_wcscpy(Root->Drive, L"MINC:");
 	Root->FileType = WIN_VDIR;
 	Root->DeviceType = DEV_TYPE_ROOT;
 	Root->DeviceId = DEV_TYPE_ROOT;
 	Root->FSType = FS_TYPE_DISK;
 //VfsDebugMount(Root, "disk_init");
-//	DefineDosDeviceW(DDD_RAW_TARGET_PATH, L"MINC:", L"\\Device\\HarddiskVolume1\\MinC");
+//	DefineDosDeviceW(DDD_REMOVE_DEFINITION, Root->Drive, NULL);
+//	if (!DefineDosDeviceW(DDD_RAW_TARGET_PATH, Root->Drive, Root->Path)){
+//		WIN_ERR("DefineDosDevice(%ls): %s\n", Root->Path, win_strerror(GetLastError()));
+//	}
 }

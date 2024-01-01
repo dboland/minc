@@ -36,9 +36,10 @@
 #include <errno.h>
 #include <wchar.h>
 
+#include <sys/param.h>
 #include <sys/stat.h>
 #include <sys/systm.h>
-#include <sys/mntent.h>
+#include <sys/mount.h>
 
 #include "win/windows.h"
 #include "win/winsock2.h"
@@ -67,41 +68,34 @@ int _paths;
 /****************************************************/
 
 void 
-print_fsent(WIN_STATFS *Stat, WIN_MOUNT *Mount)
+print_fsent(DWORD DeviceType, struct statfs *info)
 {
-	char path[MAXPATHLEN];
 	char line[255], *l = line;
-	LPWSTR pszTypeName = Stat->TypeName;
+	mode_t mode;
 
-	l += sprintf(l, "/dev/%s", Mount->Name);
-	l += sprintf(l, "\t%s", path_posix(path, win_wcslcase((LPWSTR)Mount->Drive)));
+	l += sprintf(l, "%s", info->f_mntfromname);
+	l += sprintf(l, "\t%s", info->f_mntonname);
+	l += sprintf(l, "\t%s", info->f_fstypename);
 
-	if (!wcsncmp(pszTypeName, L"FAT", 3)){
-		l += sprintf(l, "\tmsdos");
-	}else if (!wcscmp(pszTypeName, L"ISO9660")){
-		l += sprintf(l, "\tcd9660");
-	}else{
-		l += sprintf(l, "\t%ls", win_wcslcase(pszTypeName));
-	}
-	if (Stat->Flags & FILE_READ_ONLY_VOLUME){
+	if (info->f_flags & MNT_RDONLY){
 		l += sprintf(l, "\tro");
 	}else{
 		l += sprintf(l, "\trw");
 	}
-	switch (Mount->DriveType){
-		case DRIVE_REMOVABLE:
-		case DRIVE_CDROM:
-		case DRIVE_REMOTE:
-			l += sprintf(l, ",noauto");
-	}
-	if (!(Stat->Flags & FILE_PERSISTENT_ACLS)){
+	if (info->f_flags & MNT_NOSUID){
 		l += sprintf(l, ",nosuid");
+	}
+	switch (DeviceType){
+		case DEV_TYPE_FLOPPY:
+		case DEV_TYPE_CDROM:
+		case DEV_TYPE_REMOTE:
+			l += sprintf(l, ",noauto");
 	}
 
 	printf("%s\t0\t0\n", line);	/* frequency, passno (2=raw access) */
 
 	if (_paths){
-		mkdir(path, 00700);
+		mkdir(info->f_mntonname, 00700);
 	}
 }
 void 
@@ -206,23 +200,40 @@ mk_resolv(FILE *stream)
 	}
 }
 int 
+mk_fsent(WIN_CFDATA *Config, WIN_CFDRIVER *Driver, struct statfs *info)
+{
+	int result = 0;
+	WIN_MOUNT wMount = {0};
+	WIN_STATFS fsInfo;
+
+	wMount.DeviceType = Config->DeviceType;
+	wMount.DeviceId = Driver->DeviceId;
+	win_wcscpy(wMount.Drive, Config->DosPath);
+	win_wcscpy(win_wcpcpy(wMount.Path, Config->DosPath), L"\\");
+	if (drive_getfsstat(&wMount, WIN_MNT_VFSFLAGS, &fsInfo)){
+		statfs_posix(info, &fsInfo);
+	}else{
+		result = -1;
+	}
+	return(result);
+}
+int 
 mk_fstab(FILE *stream)
 {
 	int result = 0;
-	WIN_MOUNT wMount;
 	WIN_CFDATA cfData;
 	DWORD dwFlags = WIN_MNT_VFSFLAGS;
-	WIN_STATFS wsInfo;
 	WIN_CFDRIVER cfDriver;
+	struct statfs info;
 
 	if (!vfs_setvfs(&cfData, dwFlags)){
-		fprintf(stderr, "vol_setfsstat(): %s\n", win_strerror(errno_win()));
+		fprintf(stderr, "vfs_setvfs(): %s\n", win_strerror(errno_win()));
 	}else while (vfs_getvfs(&cfData, dwFlags)){
 		if (cfData.FSType == FS_TYPE_DRIVE){
-			drive_statvfs(&cfData, dwFlags, &wMount);
-			drive_match(cfData.NtName, cfData.DeviceType, &wMount);
-			if (drive_getfsstat(&wMount, dwFlags, &wsInfo)){
-				print_fsent(&wsInfo, &wMount);
+			drive_statvfs(&cfData, dwFlags, &cfDriver);
+			drive_match(cfData.NtName, cfData.DeviceType, &cfDriver);
+			if (!mk_fsent(&cfData, &cfDriver, &info)){
+				print_fsent(cfData.DeviceType, &info);
 			}
 		}else if (cfData.FSType == FS_TYPE_PDO){
 			pdo_statvfs(&cfData, dwFlags, &cfDriver);
@@ -233,7 +244,7 @@ mk_fstab(FILE *stream)
 	return(result);
 }
 void 
-mk_fsent(WIN_FS_TYPE Type)
+mk_vfsent(WIN_FS_TYPE Type)
 {
 	WIN_CFDATA fsEnum;
 	char buf[PATH_MAX] = "";
@@ -285,7 +296,7 @@ mk_ifent(WIN_FS_TYPE Type)
 	}else while (dwCount--){
 		ws2_statvfs(&ifData, pifRow, &ifDriver);
 		if (ifData.FSType == Type){
-			printf("[%03d] %ls: dwType(%d): %s\n", pifRow->dwIndex, ifData.NtName, pifRow->dwType, pifRow->bDescr);
+			printf("%ls: dwIndex(%d) dwType(%d): %s\n", ifData.NtName, pifRow->dwIndex, pifRow->dwType, pifRow->bDescr);
 		}
 		pifRow++;
 	}
@@ -323,17 +334,17 @@ main(int argc, char *argv[])
 	}else if (!strcmp(cmd, "resolv")){
 		mk_resolv(stdout);
 	}else if (!strcmp(cmd, "pdo")){
-		mk_fsent(FS_TYPE_PDO);
+		mk_vfsent(FS_TYPE_PDO);
 	}else if (!strcmp(cmd, "vol")){
 		mk_vol(stdout);
 	}else if (!strcmp(cmd, "fdo")){
-		mk_fsent(FS_TYPE_PROCESS);
+		mk_vfsent(FS_TYPE_PROCESS);
 	}else if (!strcmp(cmd, "link")){
-		mk_fsent(FS_TYPE_LINK);
+		mk_vfsent(FS_TYPE_LINK);
 	}else if (!strcmp(cmd, "drive")){
-		mk_fsent(FS_TYPE_DRIVE);
+		mk_vfsent(FS_TYPE_DRIVE);
 	}else if (!strcmp(cmd, "npf")){
-		mk_fsent(FS_TYPE_NPF);
+		mk_vfsent(FS_TYPE_NPF);
 	}else if (!strcmp(cmd, "if")){
 		mk_ifent(FS_TYPE_WINSOCK);
 	}else if (!strcmp(cmd, "ndis")){

@@ -30,12 +30,14 @@
 
 #include <ddk/ntifs.h>		/* Installable File System */
 
+#define MOUNTDEV_MOUNTED_DEVICE		L"{53f5630d-b6bf-11d0-94f2-00a0c91efb8b}"
+
 /************************************************************/
 
 DWORD 
-DriveLookupBus(LPCWSTR ClassName, DWORD Class)
+DriveLookupClass(LPCWSTR ClassName)
 {
-	DWORD dwResult = Class;
+	DWORD dwResult = DEV_CLASS_STORAGE;
 
 	if (!win_wcsncmp(ClassName, L"Floppy", 6)){
 		dwResult |= DEV_BUS_FDC;
@@ -50,16 +52,35 @@ DriveLookupBus(LPCWSTR ClassName, DWORD Class)
 	return(dwResult);
 }
 DWORD 
-DriveLookup(LPCWSTR ClassName, UINT DriveType)
+DriveLookupBus(LPCWSTR BusName)
+{
+	DWORD dwResult = DEV_CLASS_DISK;
+
+	if (!win_wcsncmp(BusName, L"MINC", 4)){
+		dwResult = DEV_TYPE_ROOT;
+
+	}else if (!win_wcsncmp(BusName, L"SCSI", 4)){
+		dwResult = DEV_TYPE_SCSI;
+
+		/* Vista */
+
+	}else if (!win_wcscmp(BusName, L"LOG")){
+		dwResult = DEV_TYPE_PRINTK;
+
+	}
+	return(dwResult);
+}
+DWORD 
+DriveLookup(LPCWSTR BusName, LPCWSTR ClassName, UINT DriveType)
 {
 	DWORD dwResult = 0;
 
 	switch (DriveType){
 		case DRIVE_REMOVABLE:
-			dwResult = DriveLookupBus(ClassName, DEV_CLASS_STORAGE);
+			dwResult = DriveLookupClass(ClassName);
 			break;
 		case DRIVE_NO_ROOT_DIR:		/* Not mounted (no drive letter) */
-			dwResult = DriveLookupBus(ClassName, DEV_CLASS_SYSTEM);
+			dwResult = DriveLookupBus(BusName);
 			break;
 		case DRIVE_FIXED:
 //			dwResult = DEV_TYPE_FIXED;
@@ -83,17 +104,18 @@ DriveLookup(LPCWSTR ClassName, UINT DriveType)
 /****************************************************/
 
 BOOL 
-drive_statvfs(WIN_CFDATA *Config, DWORD Flags, WIN_MOUNT *Result)
+drive_statvfs(WIN_CFDATA *Config, DWORD Flags, WIN_CFDRIVER *Result)
 {
 	BOOL bResult = TRUE;
-	LPWSTR psz;
+//	LPWSTR psz;
+	UINT uiType = GetDriveTypeW(Config->DosPath);
 
-	ZeroMemory(Result, sizeof(WIN_MOUNT));
-	win_wcscpy(Result->Drive, Config->DosPath);
-	Result->DriveType = GetDriveTypeW(Config->DosPath);
-	Config->DeviceType = DriveLookup(Config->ClassName, Result->DriveType);
-	psz = win_wcpcpy(Result->Volume, L"\\\\.\\GLOBALROOT");
-	win_wcscpy(win_wcpcpy(psz, Config->NtPath), L"\\");
-	Result->MountId = MOUNTID(Result->Drive[0]);
+	ZeroMemory(Result, sizeof(WIN_CFDRIVER));
+	if (uiType != DRIVE_NO_ROOT_DIR){
+		win_wcscpy(Result->ClassId, MOUNTDEV_MOUNTED_DEVICE);
+	}
+	win_wcscpy(win_wcpcpy(Result->Location, Config->NtPath), L"\\");
+	Config->DeviceType = DriveLookup(Config->BusName, Config->ClassName, uiType);
+//VfsDebugMount(Result, "drive_statvfs");
 	return(bResult);
 }

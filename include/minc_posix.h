@@ -30,6 +30,10 @@
 
 #include "minc_types.h"
 
+/* mount.c */
+
+struct statfs *statfs_posix(struct statfs *buf, WIN_STATFS *Stat);
+
 /* unistd.c */
 
 int group_member(gid_t gid);

@@ -39,7 +39,6 @@ drive_lookup(WIN_NAMEIDATA *Path, DWORD Flags)
 	WIN_MOUNT *pwMount = &__Mounts[lMountId];
 
 	if (lMountId < 0 || lMountId >= WIN_MOUNT_MAX){
-VfsDebugPath(Path, "NULL");
 		SetLastError(ERROR_BAD_ARGUMENTS);
 	}else if (Flags & WIN_NOCROSSMOUNT){	/* vfs_unmount() */
 		Path->MountId = lMountId;
@@ -51,7 +50,7 @@ VfsDebugPath(Path, "NULL");
 		Path->DeviceId = pwMount->DeviceId;
 		Path->FSType = pwMount->FSType;
 		if (Flags & WIN_REQUIREDIR){
-			Path->R = win_wcpcpy(Path->Resolved, pwMount->Volume);
+			Path->R = win_wcpcpy(Path->Resolved, pwMount->Path);
 		}else{
 			Path->R = win_wcpcpy(Path->Resolved, pwMount->Drive);
 		}

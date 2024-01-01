@@ -28,10 +28,11 @@
  *
  */
 
-#include "pipe_namei.c"
+#include "pipe_syscall.c"
 #include "pipe_filio.c"
 #include "fifo/fifo.c"
 #include "socket/socket.c"
+#include "pipe_namei.c"
 #include "pipe_poll.c"
 #include "pipe_unistd.c"
 #include "pipe_fcntl.c"

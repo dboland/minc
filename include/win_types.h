@@ -129,7 +129,7 @@ typedef __SIZE_TYPE__ WIN_SIZE_T;
 
 /* Domain */
 
-#define DOMAIN_NT_SERVICE_RID_INSTALLER		0x876402C0
+#define DOMAIN_NT_SERVICE_RID_INSTALLER		0x876402C0	/* TrustedInstaller */
 
 typedef struct _WIN_MODE {
 	DWORD FileType;

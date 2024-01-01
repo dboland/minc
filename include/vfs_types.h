@@ -125,7 +125,7 @@ typedef struct _WIN_DEVICE {
 
 typedef struct _WIN_CFDRIVER {
 	DWORD Flags;
-	DWORD DeviceType;
+	DWORD DeviceId;
 	CHAR Name[MAX_NAME];
 	WCHAR ClassId[MAX_GUID];
 	WCHAR NtClass[MAX_NAME];
@@ -172,7 +172,7 @@ typedef struct _WIN_INODE {
 	DWORD DeviceType;		/* in kernelland, everything is a device */
 	DWORD DeviceId;			/* device inode is on */
 	WIN_FS_TYPE FSType;		/* file system Handle is from */
-	WCHAR Name[WIN_PATH_MAX];
+	WCHAR NtName[MAX_PATH];
 } WIN_INODE;
 
 typedef struct _WIN_NAMEIDATA {
@@ -192,7 +192,6 @@ typedef struct _WIN_NAMEIDATA {
 	WCHAR *S;			/* current WCHAR in source path buffer */
 } WIN_NAMEIDATA;
 
-//#define WIN_REQUIREDRIVE	0x400000
 #define WIN_PATHCOPY		0x800000
 
 /* sys/namei.h */
@@ -343,13 +342,11 @@ typedef struct _WIN_MOUNT {
 	DWORD DeviceType;
 	DWORD DeviceId;
 	WIN_FS_TYPE FSType;
-	CHAR Name[MAX_NAME];
 	DWORD VolumeSerial;
 	DWORD Flags;
 	FILETIME Time;
-	UINT DriveType;
 	WCHAR Drive[MAX_LABEL];
-	WCHAR Volume[MAX_PATH];
+	WCHAR Path[MAX_PATH];
 } WIN_MOUNT;
 
 typedef struct _WIN_STATFS {
@@ -465,7 +462,6 @@ typedef struct _WIN_TASK {
 	BOOL IsSetUGid;
 	UINT RealUid, SavedUid;
 	UINT RealGid, SavedGid;
-//	WIN_INODE Path;				/* current working directory */
 	DWORDLONG Limit[WIN_RLIM_NLIMITS];
 	WIN_ATEXITPROC AtExit[WIN_ATEXIT_MAX];
 	WIN_SIGACTION Action[WIN_NSIG];

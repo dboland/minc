@@ -30,60 +30,49 @@
 
 #include <winbase.h>
 
-#define DEVINTERFACE_PARTITION	L"{53f5630a-b6bf-11d0-94f2-00a0c91efb8b}"
+/* The Windows CHAR file system seemed quirky until I realized that it
+ * is used to implement the WinNT pseudo terminal. This becomes more 
+ * apparent in Vista, where a PTY was implemented in the MAILSLOT
+ * file system.
+ * For instance, opening CONIN$ and CONOUT$ is equivalent to opening /dev/tty.
+ * But the resulting handles are not the system console (despite of the 
+ * semantics), because if used outside of the current CMD Window, they
+ * are invalid.
+ * Trying to DuplicateHandle() parent's STD_XXX_HANDLE while in a child
+ * process results in "The parameter is incorrect", but the Handle is
+ * valid anyway. In Vista the error is "The handle is invalid".
+ */
 
-/************************************************************/
+/****************************************************/
 
+HANDLE 
+CharOpenFile(LPCSTR Name, WIN_FLAGS *Flags, PSECURITY_ATTRIBUTES sa)
+{
+	HANDLE hResult = NULL;
+
+	hResult = CreateFile(Name, Flags->Access, Flags->Share, sa, 
+		Flags->Creation, Flags->Attribs, NULL);
+	if (hResult == INVALID_HANDLE_VALUE){
+		WIN_ERR("CreateFile(%s): %s\n", Name, win_strerror(GetLastError()));
+	}
+	return(hResult);
+}
 BOOL 
-pdo_match(LPCWSTR NtName, DWORD DeviceType, WIN_CFDRIVER *Driver)
+CharStatFile(WIN_DEVICE *Device, WIN_VATTR *Result)
 {
 	BOOL bResult = FALSE;
-	WIN_DEVICE *pwDevice = DEVICE(DeviceType);
-	USHORT sClass = DeviceType & 0xFF00;
-	USHORT sUnit = DeviceType & 0x00FF;
+	PSECURITY_DESCRIPTOR psd;
 
-	while (sUnit < WIN_UNIT_MAX){
-		if (!win_wcscmp(pwDevice->NtName, NtName)){
-			if (!win_wcscmp(pwDevice->ClassId, Driver->ClassId)){
-				bResult = TRUE;
-			}else{
-				pwDevice->Flags |= WIN_DVF_PORT_READY;
-			}
-			break;
-		}else if (!pwDevice->Flags){
-			pwDevice->DeviceType = DeviceType;
-			pwDevice->DeviceId = sClass + sUnit;
-			win_wcscpy(pwDevice->NtName, NtName);
-			win_wcscpy(pwDevice->ClassId, Driver->ClassId);
-			bResult = config_attach(pwDevice, sClass);
-			break;
-		}
-		pwDevice++;
-		sUnit++;
+	if (!win_acl_get_fd(Device->Handle, &psd)){
+		return(FALSE);
+	}else if (!GetFileInformationByHandle(Device->Handle, (BY_HANDLE_FILE_INFORMATION *)Result)){
+		WIN_ERR("GetFileInformationByHandle(%d): %s\n", Device->Handle, win_strerror(GetLastError()));
+	}else if (vfs_acl_stat(psd, Result)){
+		Result->DeviceId = __Mounts->DeviceId;
+		Result->Mode.FileType = Device->FileType;
+		Result->SpecialId = Device->DeviceId;
+		bResult = TRUE;
 	}
-	win_strcpy(Driver->Name, pwDevice->Name);
-	Driver->DeviceId = pwDevice->DeviceId;
-	Driver->Flags = pwDevice->Flags;
+	LocalFree(psd);
 	return(bResult);
-}
-WIN_DEVICE *
-pdo_attach(DWORD DeviceType)
-{
-	WIN_DEVICE *pwDevice = DEVICE(DeviceType);
-	USHORT sClass = DeviceType & 0xFF00;
-	USHORT sUnit = DeviceType & 0x00FF;
-
-	while (sUnit < WIN_UNIT_MAX){
-		if (!pwDevice->Flags){
-			pwDevice->DeviceType = DeviceType;
-			pwDevice->DeviceId = sClass + sUnit;
-			if (!config_attach(pwDevice, sClass)){
-				msvc_printf("Warning: device 0x%x not configured\n", DeviceType);
-			}
-			break;
-		}
-		pwDevice++;
-		sUnit++;
-	}
-	return(pwDevice);
 }

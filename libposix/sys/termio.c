@@ -206,7 +206,7 @@ tty_PTMGET(WIN_TASK *Task, WIN_VNODE *Node, struct ptmget *ptm)
 		/* controlling terminal (master) */
 		ptm->cfd = fd_posix(Task, &ptmGet.Master, 0);
 		win_strncpy(ptm->cn, ptmGet.Master.Device->Name, 16);
-		/* slave */
+		/* raw serial device (slave) */
 		ptm->sfd = fd_posix(Task, &ptmGet.Slave, 0);
 		win_strncpy(ptm->sn, ptmGet.Slave.Device->Name, 16);
 	}

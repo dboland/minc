@@ -199,13 +199,14 @@ ws2_sendto(WIN_VNODE *Node, LPCSTR Buffer, UINT Size, DWORD Flags, CONST LPSOCKA
 BOOL 
 ws2_recvfrom(WIN_VNODE *Node, LPSTR Buffer, UINT Size, DWORD Flags, LPSOCKADDR From, UINT *FromLen, DWORD *Result)
 {
-	BOOL bResult = FALSE;
+	BOOL bResult = TRUE;
 	UINT uiResult;
 
 	uiResult = recvfrom(Node->Socket, Buffer, Size, Flags, From, FromLen);
 	if (uiResult != SOCKET_ERROR){
 		*Result = uiResult;
-		bResult = TRUE;
+	}else{
+		bResult = FALSE;
 	}
 	return(bResult);
 }

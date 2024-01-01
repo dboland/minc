@@ -70,7 +70,7 @@ BOOL
 config_activate(WIN_DEVICE *Device, WIN_VNODE *Result)
 {
 	if (!Device->Handle){
-		Device->Handle = win_F_DUPFD(Result->Handle, TRUE);
+		Device->Handle = win_F_DUPFD(Result->Handle, HANDLE_FLAG_INHERIT);
 		Device->Flags |= WIN_DVF_ACTIVE;
 	}
 //VfsDebugDevice(Device, "config_activate");
@@ -125,10 +125,13 @@ disk_attach(WIN_DEVICE *Device)
 	BOOL bResult = TRUE;
 
 	switch (Device->DeviceType){
-		case DEV_TYPE_WD:
+		case DEV_TYPE_ROOT:
+			bResult = config_found("root", FS_TYPE_PDO, WIN_VBLK, Device);
+			break;
+		case DEV_TYPE_HDC:
 			bResult = config_found("hdc", FS_TYPE_PDO, WIN_VBLK, Device);
 			break;
-		case DEV_TYPE_SD:
+		case DEV_TYPE_SCSI:
 			bResult = config_found("scsi", FS_TYPE_PDO, WIN_VBLK, Device);
 			break;
 		case DEV_TYPE_FDC:
@@ -351,7 +354,6 @@ BOOL
 config_attach(WIN_DEVICE *Device, USHORT Class)
 {
 	BOOL bResult = TRUE;
-//	USHORT sClass = Device->DeviceType & 0xFF00;
 
 	switch (Class){
 		case DEV_CLASS_SYSTEM:

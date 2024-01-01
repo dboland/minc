@@ -47,7 +47,7 @@ vol_lookup(WIN_NAMEIDATA *Path, LONG MountId, DWORD Flags)
 	}else{
 		Path->MountId = MountId;
 		if (Flags & WIN_REQUIREDIR){
-			Path->R = win_wcpcpy(Path->Resolved, pwMount->Volume);
+			Path->R = win_wcpcpy(Path->Resolved, pwMount->Path);
 		}else{
 			Path->R = win_wcpcpy(Path->Resolved, pwMount->Drive);
 		}

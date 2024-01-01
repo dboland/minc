@@ -33,7 +33,7 @@
 /****************************************************/
 
 int 
-sock_SIOCGIFFLAGS(WIN_TASK *Task, struct ifreq *req)
+sock_SIOCGIFFLAGS(struct ifreq *req)
 {
 	int result = 0;
 	MIB_IFROW ifRow = {0};
@@ -49,7 +49,7 @@ sock_SIOCGIFFLAGS(WIN_TASK *Task, struct ifreq *req)
 	return(result);
 }
 int 
-sock_SIOCGIFMTU(WIN_TASK *Task, struct ifreq *req)
+sock_SIOCGIFMTU(struct ifreq *req)
 {
 	int result = 0;
 	MIB_IFROW ifRow = {0};
@@ -65,7 +65,7 @@ sock_SIOCGIFMTU(WIN_TASK *Task, struct ifreq *req)
 	return(result);
 }
 int 
-sock_SIOCGIFDESCR(WIN_TASK *Task, struct ifreq *req)
+sock_SIOCGIFDESCR(struct ifreq *req)
 {
 	int result = 0;
 	MIB_IFROW ifRow = {0};
@@ -81,7 +81,7 @@ sock_SIOCGIFDESCR(WIN_TASK *Task, struct ifreq *req)
 	return(result);
 }
 int 
-sock_SIOCGIFGROUP(WIN_TASK *Task, struct ifgroupreq *req)
+sock_SIOCGIFGROUP(struct ifgroupreq *req)
 {
 	char *ifname = req->ifgr_name;
 	char *result = req->ifgr_groups->ifgrq_group;
@@ -99,11 +99,11 @@ sock_SIOCGIFGROUP(WIN_TASK *Task, struct ifgroupreq *req)
 	return(0);
 }
 int 
-sock_SIOCGIFADDR(WIN_TASK *Task, struct ifreq *req)
+sock_SIOCGIFADDR(struct ifreq *req)
 {
 	int result = 0;
 	MIB_IPADDRROW ifaRow = {0};
-	struct sockaddr_in *addr = (struct sockaddr_in *)&req->ifr_addr;
+	struct sockaddr_in *addr = (void *)&req->ifr_addr;
 	DWORD dwResult;
 
 	ifaRow.dwIndex = ws2_nametoindex(req->ifr_name);
@@ -116,11 +116,11 @@ sock_SIOCGIFADDR(WIN_TASK *Task, struct ifreq *req)
 	return(result);
 }
 int 
-sock_SIOCGIFNETMASK(WIN_TASK *Task, struct ifreq *req)
+sock_SIOCGIFNETMASK(struct ifreq *req)
 {
 	int result = 0;
 	MIB_IPADDRROW ifaRow = {0};
-	struct sockaddr_in *addr = (struct sockaddr_in *)&req->ifr_addr;
+	struct sockaddr_in *addr = (void *)&req->ifr_addr;
 	DWORD dwResult;
 
 	ifaRow.dwIndex = ws2_nametoindex(req->ifr_name);
@@ -133,11 +133,11 @@ sock_SIOCGIFNETMASK(WIN_TASK *Task, struct ifreq *req)
 	return(result);
 }
 int 
-sock_SIOCGIFBRDADDR(WIN_TASK *Task, struct ifreq *req)
+sock_SIOCGIFBRDADDR(struct ifreq *req)
 {
 	int result = 0;
 	MIB_IPADDRROW ifaRow = {0};
-	struct sockaddr_in *addr = (struct sockaddr_in *)&req->ifr_addr;
+	struct sockaddr_in *addr = (void *)&req->ifr_addr;
 	DWORD dwBroadcast;
 	DWORD dwResult;
 
@@ -159,27 +159,29 @@ sock_ioctl(WIN_TASK *Task, int fd, unsigned long request, va_list args)
 {
 	int result = 0;
 
+	/* netintro(4)
+	 */
 	switch (request){
 		case SIOCGIFMTU:
-			result = sock_SIOCGIFMTU(Task, va_arg(args, struct ifreq *));
+			result = sock_SIOCGIFMTU(va_arg(args, struct ifreq *));
 			break;
 		case SIOCGIFFLAGS:
-			result = sock_SIOCGIFFLAGS(Task, va_arg(args, struct ifreq *));
+			result = sock_SIOCGIFFLAGS(va_arg(args, struct ifreq *));
 			break;
 		case SIOCGIFGROUP:
-			result = sock_SIOCGIFGROUP(Task, va_arg(args, struct ifgroupreq *));
+			result = sock_SIOCGIFGROUP(va_arg(args, struct ifgroupreq *));
 			break;
 		case SIOCGIFDESCR:
-			result = sock_SIOCGIFDESCR(Task, va_arg(args, struct ifreq *));
+			result = sock_SIOCGIFDESCR(va_arg(args, struct ifreq *));
 			break;
 		case SIOCGIFADDR:
-			result = sock_SIOCGIFADDR(Task, va_arg(args, struct ifreq *));
+			result = sock_SIOCGIFADDR(va_arg(args, struct ifreq *));
 			break;
 		case SIOCGIFNETMASK:
-			result = sock_SIOCGIFNETMASK(Task, va_arg(args, struct ifreq *));
+			result = sock_SIOCGIFNETMASK(va_arg(args, struct ifreq *));
 			break;
 		case SIOCGIFBRDADDR:
-			result = sock_SIOCGIFBRDADDR(Task, va_arg(args, struct ifreq *));
+			result = sock_SIOCGIFBRDADDR(va_arg(args, struct ifreq *));
 			break;
 		default:
 			result = -EOPNOTSUPP;

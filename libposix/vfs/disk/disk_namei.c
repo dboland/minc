@@ -89,7 +89,8 @@ disk_namei(HANDLE Handle, WIN_VNODE *Result)
 
 	Result->Handle = Handle;
 	Result->FSType = FS_TYPE_DISK;
-	Result->DeviceType = DEV_CLASS_DISK;
+	Result->DeviceType = DEV_TYPE_ROOT;
+	Result->DeviceId = DEV_TYPE_ROOT;
 	if (GetFileInformationByHandle(Handle, &fInfo)){
 		if (fInfo.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY){
 			Result->FileType = WIN_VDIR;

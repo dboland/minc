@@ -38,16 +38,15 @@ pipe_fstat(WIN_VNODE *Node, WIN_VATTR *Result)
 	return(PipeStatFile(Node, Result));
 }
 BOOL 
-pipe_mknod(LPWSTR FileName, LPWSTR Name, WIN_MODE *Mode)
+pipe_mknod(LPWSTR FileName, LPWSTR NtName, WIN_MODE *Mode)
 {
 	BOOL bResult = FALSE;
 	DWORD dwSize = sizeof(WIN_INODE);
 	WIN_INODE iNode = {TypeNameVirtual, Mode->FileType, DEV_CLASS_CPU, 0, FS_TYPE_PIPE, 0};
 	HANDLE hResult;
 
-//	win_wcscpy(win_typename(FileName), L".vfs");
-	win_wcscpy(iNode.Name, Name);
-__PRINTF("  pipe_mknod(%ls): %ls\n", FileName, Name)
+	win_wcscpy(iNode.NtName, NtName);
+__PRINTF("  pipe_mknod(%ls): %ls\n", FileName, NtName)
 	hResult = CreateFileW(FileName, GENERIC_WRITE, FILE_SHARE_READ, NULL, 
 		CREATE_ALWAYS, FILE_ATTRIBUTE_SYSTEM, NULL);
 	if (hResult == INVALID_HANDLE_VALUE){
