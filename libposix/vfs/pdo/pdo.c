@@ -28,13 +28,14 @@
  *
  */
 
+#include "pdo_syscall.c"
 #include "pdo_random.c"
 #include "pdo_route.c"
-#include "pdo_namei.c"
 #include "pdo_device.c"
 #include "pdo_termio.c"
 #include "pdo_unistd.c"
 #include "pdo_tty.c"
+#include "pdo_namei.c"
 #include "pdo_fcntl.c"
 #include "pdo_stat.c"
 #include "pdo_poll.c"
@@ -49,24 +50,25 @@ pdo_init(WIN_DEV_CLASS Devices[])
 {
 	__Devices = Devices;
 
-	config_init("mem", FS_TYPE_PDO, WIN_VCHR, DEV_TYPE_MEM);	/* netstat.exe */
-	config_init("kmem", FS_TYPE_PDO, WIN_VCHR, DEV_TYPE_KMEM);
-	config_init("null", FS_TYPE_PDO, WIN_VCHR, DEV_TYPE_NULL);
-	config_init("random", FS_TYPE_PDO, WIN_VCHR, DEV_TYPE_RANDOM);
-	config_init("urandom", FS_TYPE_PDO, WIN_VCHR, DEV_TYPE_URANDOM);
-	config_init("route", FS_TYPE_PDO, WIN_VCHR, DEV_TYPE_ROUTE);
-	config_init("stdin", FS_TYPE_PDO, WIN_VCHR, DEV_TYPE_STDIN);
-	config_init("stdout", FS_TYPE_PDO, WIN_VCHR, DEV_TYPE_STDOUT);
-	config_init("stderr", FS_TYPE_PDO, WIN_VCHR, DEV_TYPE_STDERR);
-	config_init("swap", FS_TYPE_PDO, WIN_VBLK, DEV_TYPE_SWAP);
+	config_init("mem", L"", FS_TYPE_PDO, WIN_VCHR, DEV_TYPE_MEM);	/* netstat.exe */
+	config_init("kmem", L"", FS_TYPE_PDO, WIN_VCHR, DEV_TYPE_KMEM);
+	config_init("null", L"Null", FS_TYPE_PDO, WIN_VCHR, DEV_TYPE_NULL);
+	config_init("random", L"", FS_TYPE_PDO, WIN_VCHR, DEV_TYPE_RANDOM);
+	config_init("urandom", L"", FS_TYPE_PDO, WIN_VCHR, DEV_TYPE_URANDOM);
+	config_init("route", L"", FS_TYPE_PDO, WIN_VCHR, DEV_TYPE_ROUTE);
+	config_init("stdin", L"", FS_TYPE_PDO, WIN_VCHR, DEV_TYPE_STDIN);
+	config_init("stdout", L"", FS_TYPE_PDO, WIN_VCHR, DEV_TYPE_STDOUT);
+	config_init("stderr", L"", FS_TYPE_PDO, WIN_VCHR, DEV_TYPE_STDERR);
+	config_init("swap", L"", FS_TYPE_PDO, WIN_VBLK, DEV_TYPE_SWAP);
 
-	config_init("console", FS_TYPE_CHAR, WIN_VCHR, DEV_TYPE_CONSOLE);
-	config_init("tty", FS_TYPE_CHAR, WIN_VCHR, DEV_CLASS_TTY);
-	config_init("ptm", FS_TYPE_CHAR, WIN_VCHR, DEV_TYPE_PTM);
-	config_init("input", FS_TYPE_CHAR, WIN_VCHR, DEV_TYPE_INPUT);
-	config_init("screen", FS_TYPE_CHAR, WIN_VCHR, DEV_TYPE_SCREEN);
+	config_init("console", L"Console", FS_TYPE_CHAR, WIN_VCHR, DEV_TYPE_CONSOLE);
+	config_init("tty", L"", FS_TYPE_CHAR, WIN_VCHR, DEV_CLASS_TTY);
+	config_init("ptm", L"", FS_TYPE_CHAR, WIN_VCHR, DEV_TYPE_PTM);
+	config_init("input", L"ConIn$", FS_TYPE_CHAR, WIN_VCHR, DEV_TYPE_INPUT);
+	config_init("screen", L"ConOut$", FS_TYPE_CHAR, WIN_VCHR, DEV_TYPE_SCREEN);
+	config_init("printk", L"clfs", FS_TYPE_CHAR, WIN_VCHR, DEV_TYPE_PRINTK);
 
-//	config_init("root", FS_TYPE_DISK, WIN_VBLK, DEV_TYPE_ROOT);
+//	config_init("root", L"MinC", FS_TYPE_DISK, WIN_VBLK, DEV_TYPE_ROOT);
 
 	con_init(DEVICE(DEV_TYPE_CONSOLE));
 }

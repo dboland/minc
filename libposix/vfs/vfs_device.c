@@ -44,11 +44,12 @@
 /****************************************************/
 
 BOOL 
-config_init(LPCSTR Name, DWORD FSType, DWORD FileType, DWORD DeviceType)
+config_init(LPCSTR Name, LPCWSTR NtName, DWORD FSType, DWORD FileType, DWORD DeviceType)
 {
 	WIN_DEVICE *pwDevice = DEVICE(DeviceType);
 
 	win_strncpy(pwDevice->Name, Name, MAX_NAME);
+	win_wcsncpy(pwDevice->NtName, NtName, MAX_NAME);
 	pwDevice->FSType = FSType;
 	pwDevice->FileType = FileType;
 	pwDevice->DeviceType = DeviceType;
@@ -175,6 +176,9 @@ ifnet_attach(WIN_DEVICE *Device)
 		case DEV_TYPE_PPP:
 			bResult = config_found("ppp", FS_TYPE_PDO, WIN_VSOCK, Device);
 			break;
+		case DEV_TYPE_REMOTE:
+			bResult = config_found("smb", FS_TYPE_DRIVE, WIN_VBLK, Device);
+			break;
 		default:
 			bResult = FALSE;
 	}
@@ -209,6 +213,9 @@ serial_attach(WIN_DEVICE *Device)
 	BOOL bResult = TRUE;
 
 	switch (Device->DeviceType){
+//		case DEV_TYPE_PRINTK:
+//			bResult = config_found("printk", FS_TYPE_DISK, WIN_VCHR, Device);
+//			break;
 		case DEV_TYPE_COM:
 			bResult = config_found("serial", FS_TYPE_PDO, WIN_VCHR, Device);
 			break;
@@ -306,10 +313,10 @@ storage_attach(WIN_DEVICE *Device)
 	BOOL bResult = TRUE;
 
 	switch (Device->DeviceType){
-		case DEV_TYPE_VOLUME:
+		case DEV_TYPE_FIXED:
 			bResult = config_found("vol", FS_TYPE_PDO, WIN_VBLK, Device);
 			break;
-		case DEV_TYPE_FIXED:
+		case DEV_TYPE_HARDDISK:
 			bResult = config_found("wd", FS_TYPE_DRIVE, WIN_VBLK, Device);
 			break;
 		case DEV_TYPE_CDROM:
@@ -317,9 +324,6 @@ storage_attach(WIN_DEVICE *Device)
 			break;
 		case DEV_TYPE_FLOPPY:
 			bResult = config_found("fd", FS_TYPE_DRIVE, WIN_VBLK, Device);
-			break;
-		case DEV_TYPE_REMOTE:
-			bResult = config_found("smb", FS_TYPE_DRIVE, WIN_VBLK, Device);
 			break;
 		case DEV_TYPE_USBSTOR:
 			bResult = config_found("sd", FS_TYPE_DRIVE, WIN_VBLK, Device);

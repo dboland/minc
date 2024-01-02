@@ -180,14 +180,14 @@ int
 route_NET_RT_IFLIST(void *buf, size_t *size)
 {
 	int result = 0;
-	WIN_IFDATA ifData;
+	PMIB_IFTABLE pifTable;
 	PMIB_IFROW pifRow;
 	PMIB_IPADDRTABLE pifaTable;
 	PMIB_IPADDRROW pifaRow;
 	DWORD ifCount, ifaCount;
 	BOOL bIsInterface;
 
-	if (!ws2_setvfs(&ifData, FALSE, &pifRow, &ifCount)){
+	if (!ws2_NET_RT_IFLIST(&pifTable, &pifRow, &ifCount)){
 		result -= errno_posix(GetLastError());
 	}else if (!ws2_NET_RT_IFALIST(&pifaTable, &pifaRow, &ifaCount)){
 		result -= errno_posix(GetLastError());
@@ -205,7 +205,7 @@ route_NET_RT_IFLIST(void *buf, size_t *size)
 		ifCount--;
 	}
 	win_free(pifaTable);
-	ws2_endvfs(&ifData);
+	win_free(pifTable);
 	return(result);
 }
 int 

@@ -43,7 +43,7 @@ DriveLookupClass(LPCWSTR ClassName)
 		dwResult |= DEV_BUS_FDC;
 
 //	}else if (!win_wcsncmp(ClassName, L"Harddisk", 8)){
-//		dwResult |= DEV_BUS_USB;
+//		dwResult |= DEV_BUS_HDC;
 
 	}else if (!win_wcscmp(ClassName, L"Ide")){
 		dwResult |= DEV_BUS_IDE;
@@ -70,36 +70,6 @@ DriveLookupBus(LPCWSTR BusName)
 	}
 	return(dwResult);
 }
-DWORD 
-DriveLookup(LPCWSTR BusName, LPCWSTR ClassName, UINT DriveType)
-{
-	DWORD dwResult = 0;
-
-	switch (DriveType){
-		case DRIVE_REMOVABLE:
-			dwResult = DriveLookupClass(ClassName);
-			break;
-		case DRIVE_NO_ROOT_DIR:		/* Not mounted (no drive letter) */
-			dwResult = DriveLookupBus(BusName);
-			break;
-		case DRIVE_FIXED:
-//			dwResult = DEV_TYPE_FIXED;
-			dwResult = DEV_TYPE_VOLUME;
-			break;
-		case DRIVE_CDROM:
-			dwResult = DEV_TYPE_CDROM;
-			break;
-		case DRIVE_REMOTE:
-			dwResult = DEV_TYPE_REMOTE;
-			break;
-		case DRIVE_RAMDISK:
-			dwResult = DEV_TYPE_RAMDISK;
-			break;
-		default:
-			WIN_ERR("GetDriveType(%d): %s\n", DriveType, win_strerror(GetLastError()));
-	}
-	return(dwResult);
-}
 
 /****************************************************/
 
@@ -107,15 +77,38 @@ BOOL
 drive_statvfs(WIN_CFDATA *Config, DWORD Flags, WIN_CFDRIVER *Result)
 {
 	BOOL bResult = TRUE;
-//	LPWSTR psz;
 	UINT uiType = GetDriveTypeW(Config->DosPath);
 
 	ZeroMemory(Result, sizeof(WIN_CFDRIVER));
-	if (uiType != DRIVE_NO_ROOT_DIR){
-		win_wcscpy(Result->ClassId, MOUNTDEV_MOUNTED_DEVICE);
+	switch (uiType){
+		case DRIVE_REMOVABLE:
+			Config->DeviceType = DriveLookupClass(Config->ClassName);
+			break;
+		case DRIVE_NO_ROOT_DIR:		/* Not mounted */
+			Config->DeviceType = DriveLookupBus(Config->BusName);
+			break;
+		case DRIVE_FIXED:
+			win_wcscpy(Result->NtClass, L"disk");
+			Config->DeviceType = DEV_TYPE_FIXED;
+			break;
+		case DRIVE_CDROM:
+			win_wcscpy(Result->NtClass, L"disk");
+			Config->DeviceType = DEV_TYPE_CDROM;
+			break;
+		case DRIVE_REMOTE:
+			win_wcscpy(Result->NtClass, L"net");
+			win_wcscpy(Result->Service, L"srvnet");
+			win_wcscpy(Result->Comment, L"Server Network");
+			Config->DeviceType = DEV_TYPE_REMOTE;
+			break;
+		case DRIVE_RAMDISK:
+			Config->DeviceType = DEV_TYPE_RAMDISK;
+			break;
+		default:
+			WIN_ERR("GetDriveType(%d): %s\n", uiType, win_strerror(GetLastError()));
 	}
+	win_wcscpy(Result->ClassId, MOUNTDEV_MOUNTED_DEVICE);
 	win_wcscpy(win_wcpcpy(Result->Location, Config->NtPath), L"\\");
-	Config->DeviceType = DriveLookup(Config->BusName, Config->ClassName, uiType);
 //VfsDebugMount(Result, "drive_statvfs");
 	return(bResult);
 }

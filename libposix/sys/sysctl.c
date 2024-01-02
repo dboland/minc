@@ -374,7 +374,7 @@ sysctl_HW(WIN_TASK *Task, const int *name, void *oldp, size_t *oldlenp, void *ne
 		case HW_PAGESIZE:
 			*(int *)oldp = __Globals[WIN_HW_PAGESIZE].LowPart;
 			break;
-		case HW_PHYSMEM:	/* gcc.exe/collect2.exe */
+		case HW_PHYSMEM:	/* gcc (collect2.exe) */
 			result = sysctl_HW_PHYSMEM((int *)oldp);
 			break;
 		case HW_PHYSMEM64:

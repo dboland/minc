@@ -30,47 +30,6 @@
 
 #include <winbase.h>
 
-GENERIC_MAPPING AccessMap = {WIN_S_IREAD, WIN_S_IWRITE, WIN_S_IEXEC, WIN_S_IRWX};
-
-/****************************************************/
-
-BOOL 
-PdoOpenFile(WIN_NAMEIDATA *Path, WIN_FLAGS *Flags, WIN_VNODE *Result)
-{
-	BOOL bResult = FALSE;
-
-	Result->DeviceType = Path->DeviceType;
-	Result->DeviceId = Path->DeviceId;
-	Result->FileType = Path->FileType;
-	Result->FSType = FS_TYPE_PDO;
-	Result->Handle = Path->Handle;
-	Result->Attribs = Flags->Attribs;
-	Result->CloseExec = Flags->CloseExec;
-	Result->Flags = win_F_GETFD(Path->Handle);
-//	Result->Access = win_F_GETFL(Path->Handle);
-	Result->Access = Flags->Access;
-	MapGenericMask(&Result->Access, &AccessMap);
-	Result->Device = Path->Device;
-	return(TRUE);
-}
-BOOL 
-PdoStatFile(HANDLE Handle, WIN_VATTR *Result)
-{
-	BOOL bResult = FALSE;
-	PSECURITY_DESCRIPTOR psd;
-
-	if (!win_acl_get_fd(Handle, &psd)){
-		return(FALSE);
-	}else if (!GetFileInformationByHandle(Handle, (BY_HANDLE_FILE_INFORMATION *)Result)){
-		WIN_ERR("GetFileInformationByHandle(%d): %s\n", Handle, win_strerror(GetLastError()));
-	}else if (vfs_acl_stat(psd, Result)){
-		Result->DeviceId = __Mounts->DeviceId;
-		bResult = TRUE;
-	}
-	LocalFree(psd);
-	return(bResult);
-}
-
 /****************************************************/
 
 BOOL 

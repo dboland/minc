@@ -33,7 +33,7 @@
 /************************************************************/
 
 BOOL 
-ws2_match(LPCWSTR NtName, DWORD DeviceType, DWORD Index, WIN_IFDRIVER *Driver)
+ws2_match(LPCWSTR NtName, DWORD DeviceType, DWORD Index, WIN_CFDRIVER *Driver)
 {
 	BOOL bResult = FALSE;
 	WIN_DEVICE *pwDevice = DEVICE(DeviceType);
@@ -57,8 +57,8 @@ ws2_match(LPCWSTR NtName, DWORD DeviceType, DWORD Index, WIN_IFDRIVER *Driver)
 		pwDevice++;
 		sUnit++;
 	}
-	Driver->DeviceType = DeviceType;
-	Driver->Flags = pwDevice->Flags;
 	win_strcpy(Driver->Name, pwDevice->Name);
+	Driver->DeviceId = pwDevice->DeviceId;
+	Driver->Flags = pwDevice->Flags;
 	return(bResult);
 }

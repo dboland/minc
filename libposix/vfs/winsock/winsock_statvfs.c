@@ -59,7 +59,7 @@ WSALookup(DWORD LinkType)
 	return(dwResult);
 }
 LPWSTR 
-WSALinkName(LPWSTR Buffer, UCHAR Source[], LONG Length)
+WSANtName(LPWSTR Buffer, UCHAR Source[], LONG Length)
 {
 	WCHAR *psz = Buffer;
 
@@ -78,7 +78,7 @@ WSALinkName(LPWSTR Buffer, UCHAR Source[], LONG Length)
 /****************************************************/
 
 BOOL 
-ws2_setvfs(WIN_IFDATA *Config, BOOL Ascending, PMIB_IFROW *Interface, DWORD *Count)
+ws2_setvfs(WIN_IFDATA *Config, BOOL Ascending)
 {
 	BOOL bResult = FALSE;
 	PMIB_IFTABLE pifTable = NULL;
@@ -88,11 +88,11 @@ ws2_setvfs(WIN_IFDATA *Config, BOOL Ascending, PMIB_IFROW *Interface, DWORD *Cou
 	if (ws2_NET_RT_IFLIST(&pifTable, &pifRow, &dwCount)){
 		Config->Table = pifTable;
 		if (Ascending){
-			*Interface = pifTable->table;
+			Config->Next = pifTable->table;
 		}else{
-			*Interface = pifRow;
+			Config->Next = pifRow;
 		}
-		*Count = dwCount;
+		Config->Count = dwCount;
 		bResult = TRUE;
 	}
 	return(bResult);
@@ -103,24 +103,37 @@ ws2_endvfs(WIN_IFDATA *Config)
 	win_free(Config->Table);
 }
 BOOL 
-ws2_statvfs(WIN_IFDATA *Config, PMIB_IFROW Interface, WIN_IFDRIVER *Driver)
+ws2_getvfs(WIN_IFDATA *Config, BOOL Ascending, WIN_CFDRIVER *Result)
 {
-	BOOL bResult = TRUE;
+	BOOL bResult = FALSE;
+	PMIB_IFROW pifNext = Config->Next;
 
-	ZeroMemory(Driver, sizeof(WIN_IFDRIVER));
-	Config->DeviceType = WSALookup(Interface->dwType);
-	Config->FSType = FS_TYPE_WINSOCK;
-	Config->Index = Interface->dwIndex;
-	if (Interface->dwPhysAddrLen){
-		WSALinkName(Config->NtName, Interface->bPhysAddr, Interface->dwPhysAddrLen);
-	}else if (Config->DeviceType == DEV_TYPE_LOOPBACK){
-		win_wcscpy(Config->NtName, L"00-00-00-00-00-00");
+	ZeroMemory(Result, sizeof(WIN_CFDRIVER));
+	if (!Config->Count){
+		SetLastError(ERROR_NO_MORE_ITEMS);
 	}else{
-		/* Vista */
-		Config->FSType = FS_TYPE_NDIS;
-		win_wcscpy(Config->NtName, win_basename(Interface->wszName));
-		bResult = FALSE;
+		Config->DeviceType = WSALookup(pifNext->dwType);
+		Config->FSType = FS_TYPE_WINSOCK;
+		Config->Index = pifNext->dwIndex;
+		Config->Type = pifNext->dwType;
+		if (pifNext->dwPhysAddrLen){
+			WSANtName(Config->NtName, pifNext->bPhysAddr, pifNext->dwPhysAddrLen);
+		}else if (Config->DeviceType == DEV_TYPE_LOOPBACK){
+			win_wcscpy(Config->NtName, L"00-00-00-00-00-00");
+		}else{
+			/* Vista */
+			Config->FSType = FS_TYPE_NDIS;
+			win_wcscpy(Config->NtName, win_basename(pifNext->wszName));
+		}
+		win_wcscpy(Result->ClassId, NDIS_LAN_CLASS);
+		win_mbstowcs(Result->Comment, pifNext->bDescr, MAX_COMMENT);
+		if (Ascending){
+			Config->Next++;
+		}else{
+			Config->Next--;
+		}
+		Config->Count--;
+		bResult = TRUE;
 	}
-	win_wcscpy(Driver->ClassId, NDIS_LAN_CLASS);
 	return(bResult);
 }

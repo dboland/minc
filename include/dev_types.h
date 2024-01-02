@@ -102,7 +102,8 @@
 #define DEV_TYPE_ETH		(DEV_CLASS_IFNET + 28)		/* Ethernet network device */
 #define DEV_TYPE_WLAN		(DEV_CLASS_IFNET + 36)		/* IEEE80211 wireless network device */
 //#define DEV_TYPE_		(DEV_CLASS_IFNET + 44)
-#define DEV_TYPE_NIC		(DEV_CLASS_IFNET + DEV_BUS_PCI)	/* Network Interface Card */
+#define DEV_TYPE_NIC		(DEV_CLASS_IFNET + DEV_BUS_PCI)		/* Network Interface Card */
+#define DEV_TYPE_REMOTE		(DEV_CLASS_IFNET + DEV_BUS_MAIN)	/* Server Message Block storage */
 
 #define DEV_TYPE_MEDIA		(DEV_CLASS_MEDIA)
 #define DEV_TYPE_USBVIDEO	(DEV_CLASS_MEDIA + DEV_BUS_USB)
@@ -133,12 +134,11 @@
 #define DEV_TYPE_COMMOUSE	(DEV_CLASS_MOUSE + DEV_BUS_CPU)
 #define DEV_TYPE_WSMOUSE	(DEV_CLASS_MOUSE + DEV_BUS_PCI)
 
-#define DEV_TYPE_VOLUME		(DEV_CLASS_STORAGE)
+#define DEV_TYPE_FIXED		(DEV_CLASS_STORAGE)
 #define DEV_TYPE_CDROM		(DEV_CLASS_STORAGE + DEV_BUS_SCSI)	/* CDROM storage */
-#define DEV_TYPE_FIXED		(DEV_CLASS_STORAGE + DEV_BUS_HDC)	/* Hard Disk storage */
+#define DEV_TYPE_HARDDISK	(DEV_CLASS_STORAGE + DEV_BUS_HDC)	/* Hard Disk storage */
 #define DEV_TYPE_FLOPPY		(DEV_CLASS_STORAGE + DEV_BUS_FDC)	/* Floppy Disk storage */
 #define DEV_TYPE_USBSTOR	(DEV_CLASS_STORAGE + DEV_BUS_USB)	/* USB Mass Storage */
-#define DEV_TYPE_REMOTE		(DEV_CLASS_STORAGE + DEV_BUS_MAIN)	/* Server Message Block storage */
 
 #define DEV_TYPE_HID		(DEV_CLASS_USB)
 #define DEV_TYPE_USBHUB		(DEV_CLASS_USB + DEV_BUS_USB)

@@ -286,19 +286,15 @@ mk_vol(FILE *stream)
 void 
 mk_ifent(WIN_FS_TYPE Type)
 {
-	PMIB_IFROW pifRow;
-	DWORD dwCount = 0;
 	WIN_IFDATA ifData;
-	WIN_IFDRIVER ifDriver;
+	WIN_CFDRIVER ifDriver;
 
-	if (!ws2_setvfs(&ifData, TRUE, &pifRow, &dwCount)){
-		fprintf(stderr, "ws_NET_RT_IFLIST(): %s\n", strerror(errno));
-	}else while (dwCount--){
-		ws2_statvfs(&ifData, pifRow, &ifDriver);
+	if (!ws2_setvfs(&ifData, TRUE)){
+		fprintf(stderr, "ws2_setvfs(): %s\n", strerror(errno));
+	}else while (ws2_getvfs(&ifData, TRUE, &ifDriver)){
 		if (ifData.FSType == Type){
-			printf("%ls: dwIndex(%d) dwType(%d): %s\n", ifData.NtName, pifRow->dwIndex, pifRow->dwType, pifRow->bDescr);
+			printf("%ls: Index(%d) Type(%d): %ls\n", ifData.NtName, ifData.Index, ifData.Type, ifDriver.Comment);
 		}
-		pifRow++;
 	}
 	ws2_endvfs(&ifData);
 }

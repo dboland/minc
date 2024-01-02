@@ -28,53 +28,45 @@
  *
  */
 
-/* iprtrmib.h */
+#include <winbase.h>
 
-#define MIB_IPADDR_PRIMARY		0x0001
-#define MIB_IPADDR_DYNAMIC		0x0004
-#define MIB_IPADDR_DISCONNECTED		0x0008
-#define MIB_IPADDR_DELETED		0x0040
-#define MIB_IPADDR_TRANSIENT		0x0080
+GENERIC_MAPPING AccessMap = {WIN_S_IREAD, WIN_S_IWRITE, WIN_S_IEXEC, WIN_S_IRWX};
 
-/* winsock.h */
+/****************************************************/
 
-#define WIN_MSG_NOSIGNAL	0x400		/* do not send SIGPIPE */
+BOOL 
+PdoOpenFile(WIN_NAMEIDATA *Path, WIN_FLAGS *Flags, WIN_VNODE *Result)
+{
+	BOOL bResult = FALSE;
 
-/* winsock2.h */
+	Result->DeviceType = Path->DeviceType;
+	Result->DeviceId = Path->DeviceId;
+	Result->FileType = Path->FileType;
+	Result->FSType = FS_TYPE_PDO;
+	Result->Handle = Path->Handle;
+	Result->Attribs = Flags->Attribs;
+	Result->CloseExec = Flags->CloseExec;
+	Result->Flags = win_F_GETFD(Path->Handle);
+//	Result->Access = win_F_GETFL(Path->Handle);
+	Result->Access = Flags->Access;
+	MapGenericMask(&Result->Access, &AccessMap);
+	Result->Device = Path->Device;
+	return(TRUE);
+}
+BOOL 
+PdoStatFile(HANDLE Handle, WIN_VATTR *Result)
+{
+	BOOL bResult = FALSE;
+	PSECURITY_DESCRIPTOR psd;
 
-#define WIN_AF_LOCAL	AF_UNIX
-#define WIN_AF_INET	AF_INET
-#define WIN_AF_INET6	23
-#define WIN_AF_ROUTE	24
-
-#define WIN_SCM_RIGHTS		0x01
-#define WIN_SCM_TIMESTAMP	0x04
-#define WIN_SCM_ACCESS		0x08
-
-/*
- * winsock_statvfs.c
- */
-
-typedef struct _WIN_IFDATA {
-	PMIB_IFTABLE Table;
-	PMIB_IFROW Next;
-	DWORD Count;
-	DWORD Index;
-	DWORD Type;
-	DWORD FSType;
-	DWORD DeviceType;
-	WCHAR NtName[MAX_NAME];
-} WIN_IFDATA;
-
-#define WS2_SOCKET_SIZE		0x2000
-
-/*
- * winsock_sockio.c
- */
-
-typedef enum _WS2_ADDRTYPE {
-	WS2_UNICAST,
-	WS2_ANYCAST,
-	WS2_MULTICAST,
-	WS2_DNSSERVER,
-} WS2_ADDRTYPE;
+	if (!win_acl_get_fd(Handle, &psd)){
+		return(FALSE);
+	}else if (!GetFileInformationByHandle(Handle, (BY_HANDLE_FILE_INFORMATION *)Result)){
+		WIN_ERR("GetFileInformationByHandle(%d): %s\n", Handle, win_strerror(GetLastError()));
+	}else if (vfs_acl_stat(psd, Result)){
+		Result->DeviceId = __Mounts->DeviceId;
+		bResult = TRUE;
+	}
+	LocalFree(psd);
+	return(bResult);
+}

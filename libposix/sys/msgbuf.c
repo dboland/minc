@@ -84,7 +84,7 @@ msgbuf_DRIVE(WIN_CFDATA *Config, WIN_CFDRIVER *Driver, LPSTR Result)
 	return(psz - Result);
 }
 int 
-msgbuf_WINSOCK(WIN_IFDATA *Config, WIN_IFDRIVER *Driver, LPSTR Result)
+msgbuf_WINSOCK(WIN_IFDATA *Config, WIN_CFDRIVER *Driver, LPSTR Result)
 {
 	LPSTR psz = Result;
 
@@ -96,6 +96,7 @@ msgbuf_WINSOCK(WIN_IFDATA *Config, WIN_IFDRIVER *Driver, LPSTR Result)
 	psz += msvc_sprintf(psz, "%ls", Config->NtName);
 	psz += msvc_sprintf(psz, ", index %d", Config->Index);
 	psz += msvc_sprintf(psz, ", type 0x%x", Config->DeviceType);
+	psz += msvc_sprintf(psz, ", \"%ls\"", Driver->Comment);
 	*psz++ = '\n';
 	*psz = 0;
 	return(psz - Result);

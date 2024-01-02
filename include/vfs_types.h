@@ -442,6 +442,7 @@ typedef struct _WIN_TASK {
 	DWORD SessionId;
 	DWORD TerminalId;
 	DWORD MountId;			/* where CWD is mounted */
+	DWORD CpuId;
 	DWORD Nice;
 	DWORD Flags;
 	DWORD Depth;

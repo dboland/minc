@@ -44,7 +44,7 @@ drive_match(LPCWSTR NtName, DWORD DeviceType, WIN_CFDRIVER *Driver)
 		if (!win_wcscmp(pwDevice->NtName, NtName)){
 			pwDevice->Flags |= WIN_DVF_PORT_READY;
 			win_wcscpy(pwDevice->NtPath, Driver->Location);
-//			bResult = TRUE;
+			bResult = TRUE;
 			break;
 		}else if (!pwDevice->Flags){
 			win_wcscpy(pwDevice->NtName, NtName);

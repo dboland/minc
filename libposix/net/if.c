@@ -36,25 +36,21 @@ void
 ifinit(void)
 {
 	WIN_IFDATA ifData;
-	WIN_IFDRIVER ifDriver;
-	PMIB_IFROW pifRow;
-	DWORD dwCount = 0;
+	WIN_CFDRIVER cfDriver;
 	CHAR szMessage[MAX_MESSAGE];
 
-	if (!ws2_setvfs(&ifData, FALSE, &pifRow, &dwCount)){
+	if (!ws2_setvfs(&ifData, FALSE)){
 		return;
-	}else while (dwCount--){
-		ws2_statvfs(&ifData, pifRow, &ifDriver);
+	}else while (ws2_getvfs(&ifData, FALSE, &cfDriver)){
 		if (ifData.FSType == FS_TYPE_WINSOCK){
-			if (ws2_match(ifData.NtName, ifData.DeviceType, ifData.Index, &ifDriver)){
-				msgbuf_WINSOCK(&ifData, &ifDriver, szMessage);
+			if (ws2_match(ifData.NtName, ifData.DeviceType, ifData.Index, &cfDriver)){
+				msgbuf_WINSOCK(&ifData, &cfDriver, szMessage);
 //				msvc_printf(szMessage);
-			}else if (!ifDriver.Flags){
-				msgbuf_WINSOCK(&ifData, &ifDriver, szMessage);
+			}else if (!cfDriver.Flags){
+				msgbuf_WINSOCK(&ifData, &cfDriver, szMessage);
 				msvc_printf(szMessage);
 			}
 		}
-		pifRow--;
 	}
 	ws2_endvfs(&ifData);
 }

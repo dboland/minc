@@ -64,10 +64,10 @@ ULONG GetAdapterAddress(PIP_ADAPTER_ADDRESSES *Table, DWORD Index, WS2_ADDRTYPE 
 
 /* winsock_statvfs.c */
 
-BOOL ws2_setvfs(WIN_IFDATA *Config, BOOL Ascending, PMIB_IFROW *Interface, DWORD *Count);
+BOOL ws2_setvfs(WIN_IFDATA *Config, BOOL Ascending);
 VOID ws2_endvfs(WIN_IFDATA *Config);
-BOOL ws2_statvfs(WIN_IFDATA *Config, PMIB_IFROW Interface, WIN_IFDRIVER *Driver);
+BOOL ws2_getvfs(WIN_IFDATA *Config, BOOL Ascending, WIN_CFDRIVER *Result);
 
 /* winsock_device.c */
 
-BOOL ws2_match(LPCWSTR NtName, DWORD DeviceType, DWORD Index, WIN_IFDRIVER *Driver);
+BOOL ws2_match(LPCWSTR NtName, DWORD DeviceType, DWORD Index, WIN_CFDRIVER *Driver);

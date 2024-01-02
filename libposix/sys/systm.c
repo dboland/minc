@@ -46,7 +46,10 @@ cpu_configure(void)
 	}else while (vfs_getvfs(&cfData, dwFlags)){
 		if (cfData.FSType == FS_TYPE_DRIVE){
 			drive_statvfs(&cfData, dwFlags, &cfDriver);
-			drive_match(cfData.NtName, cfData.DeviceType, &cfDriver);
+			if (!drive_match(cfData.NtName, cfData.DeviceType, &cfDriver)){
+				msgbuf_PDO(&cfData, &cfDriver, szMessage);
+				msvc_printf(szMessage);
+			}
 		}else if (cfData.FSType == FS_TYPE_PDO){
 			pdo_statvfs(&cfData, dwFlags, &cfDriver);
 			if (pdo_match(cfData.NtName, cfData.DeviceType, &cfDriver)){

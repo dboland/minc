@@ -55,6 +55,17 @@ rtime_posix(DWORDLONG *Started)
 	dwlRealTime *= 0.0000001;			/* seconds */
 	return((u_int32_t)dwlRealTime);
 }
+long 
+cpuid_posix(u_long mask)
+{
+	long index = 0;
+
+	while (mask){
+		mask >>= 1;
+		index++;
+	}
+	return(index);
+}
 void 
 kargv_posix(pid_t pid, int argc, char *argv[])
 {
@@ -68,7 +79,7 @@ struct kinfo_proc *
 kproc_posix(WIN_TASK *Task, struct kinfo_proc *proc)
 {
 	WIN_TERMIO *pTerminal = &__Terminals[Task->TerminalId];
-	wchar_t *command = win_basename(__Strings[Task->TaskId].Command);
+	wchar_t *command = win_basename(PSTRING(Task).Command);
 	struct timeval tv;
 	WIN_KINFO_PROC kInfo = {0};
 	DWORD dwPageSize = __Globals[WIN_HW_PAGESIZE].LowPart;
@@ -78,7 +89,7 @@ kproc_posix(WIN_TASK *Task, struct kinfo_proc *proc)
 	win_bzero(proc, sizeof(struct kinfo_proc));
 	win_wcstombs(proc->p_comm, command, KI_MAXCOMLEN);
 //	proc->p_flag					/* INT: P_* flags. */
-	proc->p_psflags = Task->Flags;		/* INT: PS_* flags on the process. */
+	proc->p_psflags = Task->Flags;			/* INT: PS_* flags on the process. */
 	proc->p_pid = Task->TaskId;
 	proc->p_ppid = Task->ParentId;
 	proc->p_sid = Task->SessionId;
@@ -110,7 +121,7 @@ kproc_posix(WIN_TASK *Task, struct kinfo_proc *proc)
 		proc->p_ustart_sec = time_posix(&Task->Started);
 	}
 	proc->p_stat = Task->State;			/* CHAR: S* process status (from LWP). */
-	proc->p_cpuid = KI_NOCPU;			/* LONG: CPU id */
+	proc->p_cpuid = cpuid_posix(Task->CpuId);	/* LONG: CPU id */
 	proc->p_nice = Task->Nice;
 	proc->p_xstat = Task->Status >> 8;		/* U_SHORT: Exit status for wait; also stop signal. */
 	proc->p_tracep = (u_int32_t)Task->TraceHandle;

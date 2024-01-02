@@ -78,10 +78,10 @@ DevLookup(LPCWSTR Bus, LPCWSTR Class, LPCWSTR Service)
 	DWORD dwResult = DEV_CLASS_DULL;
 
 	if (!win_wcscmp(Class, L"diskdrive")){
-		dwResult = DevLookupBus(Bus, DEV_CLASS_STORAGE);
+		dwResult = DevLookupBus(Bus, DEV_CLASS_DISK);
 
 	}else if (!win_wcscmp(Class, L"cdrom")){
-		dwResult = DevLookupBus(Bus, DEV_CLASS_STORAGE);
+		dwResult = DevLookupBus(Bus, DEV_CLASS_DISK);
 
 	}else if (!win_wcscmp(Class, L"floppydisk")){
 		dwResult = DevLookupBus(Bus, DEV_CLASS_DISK);
@@ -104,14 +104,14 @@ DevLookup(LPCWSTR Bus, LPCWSTR Class, LPCWSTR Service)
 	}else if (!win_wcscmp(Class, L"image")){
 		dwResult = DevLookupBus(Bus, DEV_CLASS_MEDIA);
 
+	}else if (!win_wcscmp(Class, L"volume")){
+		dwResult = DevLookupBus(Bus, DEV_CLASS_STORAGE);
+
 	}else if (!win_wcscmp(Class, L"hidclass")){
 		dwResult = DevLookupBus(Bus, DEV_CLASS_USB);
 
 	}else if (!win_wcscmp(Class, L"ports")){
 		dwResult = DevLookupClass(Service, DEV_BUS_ISA);
-
-	}else if (!win_wcscmp(Class, L"volume")){
-		dwResult = DEV_TYPE_VOLUME;
 
 	}else if (!win_wcscmp(Service, L"usbprint")){	/* no "Printer" class for USB */
 		dwResult = DEV_TYPE_USBPRINT;
