@@ -52,7 +52,7 @@ pathnp_posix(char *dest, LPCWSTR Source, LONG Size, BOOL EndPtr)
 	if (!win_wcsncmp(Source, Root, len)){
 		src += len;
 		Size--;
-	}else if (!win_wcscmp(Source, L"minc:")){
+	}else if (!win_wcscmp(Source, L"root:")){
 		*dest++ = '/';
 		src += 5;
 	}else if (*src && src[1] == ':'){		/* MinGW ld.exe */
@@ -146,7 +146,7 @@ pathat_win(WIN_NAMEIDATA *Result, int dirfd, const char *path, int atflags)
 		path++;
 
 	}else if (dirfd == AT_FDCWD){
-		vol_lookup(Result, pwTask->MountId, WIN_NOCROSSMOUNT);
+		Result->MountId = pwTask->MountId;
 		Result->R = win_wcpcpy(Result->Resolved, PSTRING(pwTask).Path);
 
 	}else{

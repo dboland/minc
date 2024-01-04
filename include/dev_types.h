@@ -102,8 +102,8 @@
 #define DEV_TYPE_ETH		(DEV_CLASS_IFNET + 28)		/* Ethernet network device */
 #define DEV_TYPE_WLAN		(DEV_CLASS_IFNET + 36)		/* IEEE80211 wireless network device */
 //#define DEV_TYPE_		(DEV_CLASS_IFNET + 44)
-#define DEV_TYPE_NIC		(DEV_CLASS_IFNET + DEV_BUS_PCI)		/* Network Interface Card */
-#define DEV_TYPE_REMOTE		(DEV_CLASS_IFNET + DEV_BUS_MAIN)	/* Server Message Block storage */
+#define DEV_TYPE_NIC		(DEV_CLASS_IFNET + DEV_BUS_PCI)	/* Network Interface Card */
+#define DEV_TYPE_REMOTE		(DEV_CLASS_IFNET + DEV_BUS_CPU)	/* Server Message Block storage */
 
 #define DEV_TYPE_MEDIA		(DEV_CLASS_MEDIA)
 #define DEV_TYPE_USBVIDEO	(DEV_CLASS_MEDIA + DEV_BUS_USB)
@@ -112,7 +112,7 @@
 
 #define DEV_TYPE_CONSOLE	(DEV_CLASS_TTY + 1)		/* system console master device */
 #define DEV_TYPE_PTM		(DEV_CLASS_TTY + 2)		/* serial multiplex device */
-#define DEV_TYPE_PRINTK		(DEV_CLASS_TTY + 3)		/* boot time output device (printf for kernel) */
+#define DEV_TYPE_LOG		(DEV_CLASS_TTY + 3)		/* boot time output device (printf for kernel) */
 #define DEV_TYPE_INPUT		(DEV_CLASS_TTY + 4)		/* interix input multiplex device */
 #define DEV_TYPE_SCREEN		(DEV_CLASS_TTY + 5)		/* interix output multiplex device */
 #define DEV_TYPE_PTY		(DEV_CLASS_TTY + 8)		/* pseudo serial master device */

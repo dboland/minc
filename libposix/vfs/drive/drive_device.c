@@ -42,14 +42,16 @@ drive_match(LPCWSTR NtName, DWORD DeviceType, WIN_CFDRIVER *Driver)
 
 	while (sUnit < WIN_UNIT_MAX){
 		if (!win_wcscmp(pwDevice->NtName, NtName)){
-			pwDevice->Flags |= WIN_DVF_PORT_READY;
+			if (!win_wcscmp(pwDevice->ClassId, Driver->ClassId)){
+				bResult = TRUE;
+			}
 			win_wcscpy(pwDevice->NtPath, Driver->Location);
-			bResult = TRUE;
 			break;
 		}else if (!pwDevice->Flags){
+			pwDevice->Flags = WIN_DVF_DRIVE_READY;
 			win_wcscpy(pwDevice->NtName, NtName);
-			win_wcscpy(pwDevice->ClassId, Driver->ClassId);
 			win_wcscpy(pwDevice->NtPath, Driver->Location);
+			win_wcscpy(pwDevice->ClassId, Driver->ClassId);
 			pwDevice->DeviceType = DeviceType;
 			pwDevice->DeviceId = sClass + sUnit;
 			bResult = config_attach(pwDevice, sClass);

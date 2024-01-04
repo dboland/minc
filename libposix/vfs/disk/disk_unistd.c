@@ -205,7 +205,7 @@ disk_readlink(WIN_NAMEIDATA *Path, BOOL MakeReal)
 			LinkReadInfo(hFile, szBuffer);
 		}
 		if (szBuffer[1] == ':'){	/* nano.exe */
-			vol_lookup(Path, MOUNTID(szBuffer[0]), WIN_NOCROSSMOUNT);
+			drive_lookup(Path, MOUNTID(szBuffer[0]), WIN_NOCROSSMOUNT);
 		}else if (MakeReal){
 			pszBase = win_basename(Path->Resolved);
 		}

@@ -142,7 +142,7 @@ mk_group(FILE *stream)
 			}
 		}else if (wksType != WinApplicationPackageAuthoritySid){	/* NT */
 			continue;
-		}else if (!win_getgrgid(&SidPackageRestrict, &wGroup)){	/* Vista */
+		}else if (!win_getgrgid(&SidPackageRestrict, &wGroup)){		/* Vista */
 			continue;
 		}
 		fprintf(stream, "%s\n", group_posix(buf, MAX_TEXT, &wGroup));
@@ -180,16 +180,16 @@ mk_passwd(FILE *stream)
 void 
 mk_resolv(FILE *stream)
 {
-	ULONG ulSize = 0;
+	LONG lSize = 0;
 	DWORD dwStatus;
 	FIXED_INFO *fInfo;
 	DWORD dwIndex;
 	IP_ADDR_STRING *ipEntry;
 
-	dwStatus = GetNetworkParams(NULL, &ulSize);
-	if (ulSize){
-		fInfo = win_malloc(ulSize);
-		GetNetworkParams(fInfo, &ulSize);
+	dwStatus = GetNetworkParams(NULL, &lSize);
+	if (lSize > 0){
+		fInfo = win_malloc(lSize);
+		GetNetworkParams(fInfo, &lSize);
 		fprintf(stream, "domain %s\n", fInfo->DomainName);
 		for (ipEntry = &fInfo->DnsServerList; ipEntry; ipEntry = ipEntry->Next){
 			fprintf(stream, "nameserver %s\n", ipEntry->IpAddress.String);

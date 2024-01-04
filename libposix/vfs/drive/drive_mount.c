@@ -122,7 +122,7 @@ drive_mount(WIN_NAMEIDATA *Path, WIN_DEVICE *Device, WIN_MODE *Mode)
 		pwMount->MountId = lMountId;
 		pwMount->DeviceId = Device->DeviceId;
 		pwMount->DeviceType = Device->DeviceType;
-		pwMount->FileType = WIN_VDIR;
+		pwMount->FileType = Path->FileType;
 		pwMount->FSType = Path->FSType;
 		win_wcscpy(win_wcpcpy(pwMount->Path, L"\\\\.\\GLOBALROOT"), Device->NtPath);
 		pwMount->VolumeSerial = Device->Index;

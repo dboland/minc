@@ -39,15 +39,15 @@ cpu_configure(void)
 	WIN_CFDRIVER cfDriver;
 	DWORD dwFlags = WIN_MNT_VFSFLAGS;
 	CHAR szMessage[MAX_MESSAGE];
-//	WIN_MOUNT wMount;
 
 	if (!vfs_setvfs(&cfData, dwFlags)){
 		return;
 	}else while (vfs_getvfs(&cfData, dwFlags)){
 		if (cfData.FSType == FS_TYPE_DRIVE){
 			drive_statvfs(&cfData, dwFlags, &cfDriver);
-			if (!drive_match(cfData.NtName, cfData.DeviceType, &cfDriver)){
-				msgbuf_PDO(&cfData, &cfDriver, szMessage);
+			drive_match(cfData.NtName, cfData.DeviceType, &cfDriver);
+			if (!(cfDriver.Flags & WIN_DVF_CONFIG_READY)){
+				msgbuf_DRIVE(&cfData, &cfDriver, szMessage);
 				msvc_printf(szMessage);
 			}
 		}else if (cfData.FSType == FS_TYPE_PDO){
@@ -55,7 +55,7 @@ cpu_configure(void)
 			if (pdo_match(cfData.NtName, cfData.DeviceType, &cfDriver)){
 				msgbuf_PDO(&cfData, &cfDriver, szMessage);
 //				msvc_printf(szMessage);
-			}else if (!cfDriver.Flags){
+			}else if (!(cfDriver.Flags & WIN_DVF_CONFIG_READY)){
 				msgbuf_PDO(&cfData, &cfDriver, szMessage);
 				msvc_printf(szMessage);
 			}

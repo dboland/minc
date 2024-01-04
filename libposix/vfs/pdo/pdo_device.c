@@ -46,11 +46,10 @@ pdo_match(LPCWSTR NtName, DWORD DeviceType, WIN_CFDRIVER *Driver)
 		if (!win_wcscmp(pwDevice->NtName, NtName)){
 			if (!win_wcscmp(pwDevice->ClassId, Driver->ClassId)){
 				bResult = TRUE;
-			}else{
-				pwDevice->Flags |= WIN_DVF_PORT_READY;
 			}
 			break;
 		}else if (!pwDevice->Flags){
+			pwDevice->Flags = WIN_DVF_PDO_READY;
 			pwDevice->DeviceType = DeviceType;
 			pwDevice->DeviceId = sClass + sUnit;
 			win_wcscpy(pwDevice->NtName, NtName);

@@ -44,7 +44,6 @@ ws2_match(LPCWSTR NtName, DWORD DeviceType, DWORD Index, WIN_CFDRIVER *Driver)
 		if (!win_wcscmp(pwDevice->NtName, NtName)){
 			break;
 		}else if (!pwDevice->Flags){
-			pwDevice->Flags = WIN_DVF_DRIVER_READY;
 			pwDevice->DeviceType = DeviceType;
 			pwDevice->DeviceId = sClass + sUnit;
 			pwDevice->Index = Index;

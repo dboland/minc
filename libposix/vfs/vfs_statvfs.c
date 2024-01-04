@@ -35,6 +35,7 @@
  * /mnt/c/MinGW/include/ddk/ntdd*.h
  *
  * grep -r DEVICE_NAME /mnt/c/MinGW/include/ddk/
+ * grep -rn DEFINE_GUID /mnt/c/MinGW/include/ddk/
  * mode.com
  * mountvol.exe
  * devcon.exe (from support.cab in Windows Driver Kit [WDK])

@@ -89,10 +89,10 @@ PathGlob(WIN_NAMEIDATA *Path, DWORD Flags)
 			bResult = pdo_lookup(Path, Flags);
 			break;
 		case FILE_ATTRIBUTE_MOUNT:
-			bResult = drive_lookup(Path, Flags);
+			bResult = vol_lookup(Path, Flags);
 			break;
-		case FILE_ATTRIBUTE_VOLUME:
-			bResult = vol_lookup(Path, Path->MountId, Flags);
+		case FILE_ATTRIBUTE_DRIVE:
+			bResult = drive_lookup(Path, Path->MountId, Flags);
 			break;
 	}
 	return(bResult);

@@ -182,10 +182,10 @@ pdo_statvfs(WIN_CFDATA *Config, DWORD Flags, WIN_CFDRIVER *Driver)
 		}
 		/* Device Driver (*.sys) */
 		if (!reg_read(&vNode, L"Service", Driver->Service, MAX_NAME, &dwSize)){
-			win_wcscpy(Driver->Service, Config->BusName);
+			win_wcscpy(Driver->Service, Driver->NtClass);
 		}
 		if (!reg_read(&vNode, L"LocationInformation", Driver->Location, MAX_COMMENT, &dwSize)){
-			win_wcscpy(Driver->Location, Config->BusName);
+			win_wcscpy(Driver->Location, Driver->Service);
 		}
 		if (reg_read(&vNode, L"FriendlyName", szText, MAX_TEXT, &dwSize)){
 			win_wcscpy(Driver->Comment, szText);

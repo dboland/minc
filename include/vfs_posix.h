@@ -217,7 +217,6 @@ BOOL tty_close(WIN_TERMIO *Terminal);
 
 BOOL vol_fstat(HANDLE Handle, LPSTR Result);
 BOOL vol_stat(LPCWSTR Path, LPSTR Result);
-BOOL vol_lookup(WIN_NAMEIDATA *Path, LONG MountId, DWORD Flags);
 
 /* winsock.c */
 

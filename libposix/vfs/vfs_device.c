@@ -44,17 +44,17 @@
 /****************************************************/
 
 BOOL 
-config_init(LPCSTR Name, LPCWSTR NtName, DWORD FSType, DWORD FileType, DWORD DeviceType)
+config_init(LPCSTR Name, DWORD FSType, DWORD FileType, DWORD DeviceType)
 {
 	WIN_DEVICE *pwDevice = DEVICE(DeviceType);
 
 	win_strncpy(pwDevice->Name, Name, MAX_NAME);
-	win_wcsncpy(pwDevice->NtName, NtName, MAX_NAME);
 	pwDevice->FSType = FSType;
 	pwDevice->FileType = FileType;
 	pwDevice->DeviceType = DeviceType;
 	pwDevice->DeviceId = DeviceType;
-	pwDevice->Flags = WIN_DVF_BUS_READY;
+	pwDevice->Flags |= WIN_DVF_CONFIG_READY;
+//VfsDebugDevice(pwDevice, "config_init");
 	return(TRUE);
 }
 BOOL 
@@ -63,7 +63,7 @@ config_found(LPCSTR Name, DWORD FSType, DWORD FileType, WIN_DEVICE *Device)
 	Device->FSType = FSType;
 	Device->FileType = FileType;
 	_itoa(Device->DeviceId - Device->DeviceType, win_stpcpy(Device->Name, Name), 10);
-	Device->Flags |= WIN_DVF_BUS_READY;
+	Device->Flags |= WIN_DVF_CONFIG_READY;
 //VfsDebugDevice(Device, "config_found");
 	return(TRUE);
 }
@@ -127,10 +127,10 @@ disk_attach(WIN_DEVICE *Device)
 
 	switch (Device->DeviceType){
 		case DEV_TYPE_ROOT:
-			bResult = config_found("root", FS_TYPE_PDO, WIN_VBLK, Device);
+			bResult = config_init("root", FS_TYPE_PDO, WIN_VBLK, DEV_TYPE_ROOT);
 			break;
 		case DEV_TYPE_HDC:
-			bResult = config_found("hdc", FS_TYPE_PDO, WIN_VBLK, Device);
+			bResult = config_found("wdc", FS_TYPE_PDO, WIN_VBLK, Device);
 			break;
 		case DEV_TYPE_SCSI:
 			bResult = config_found("scsi", FS_TYPE_PDO, WIN_VBLK, Device);
@@ -213,9 +213,9 @@ serial_attach(WIN_DEVICE *Device)
 	BOOL bResult = TRUE;
 
 	switch (Device->DeviceType){
-//		case DEV_TYPE_PRINTK:
-//			bResult = config_found("printk", FS_TYPE_DISK, WIN_VCHR, Device);
-//			break;
+		case DEV_TYPE_LOG:
+			bResult = config_init("printk", FS_TYPE_DISK, WIN_VCHR, DEV_TYPE_LOG);
+			break;
 		case DEV_TYPE_COM:
 			bResult = config_found("serial", FS_TYPE_PDO, WIN_VCHR, Device);
 			break;

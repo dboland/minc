@@ -30,7 +30,8 @@
 
 #include <ddk/ntifs.h>		/* Installable File System */
 
-#define MOUNTDEV_MOUNTED_DEVICE		L"{53f5630d-b6bf-11d0-94f2-00a0c91efb8b}"
+//#define DEVINTERFACE_VOLUME		L"{53f5630d-b6bf-11d0-94f2-00a0c91efb8b}"
+#define DEVINTERFACE_PARTITION		L"{53f5630a-b6bf-11d0-94f2-00a0c91efb8b}"
 
 /************************************************************/
 
@@ -56,7 +57,7 @@ DriveLookupBus(LPCWSTR BusName)
 {
 	DWORD dwResult = DEV_CLASS_DISK;
 
-	if (!win_wcsncmp(BusName, L"MINC", 4)){
+	if (!win_wcsncmp(BusName, L"ROOT", 4)){
 		dwResult = DEV_TYPE_ROOT;
 
 	}else if (!win_wcsncmp(BusName, L"SCSI", 4)){
@@ -65,7 +66,7 @@ DriveLookupBus(LPCWSTR BusName)
 		/* Vista */
 
 	}else if (!win_wcscmp(BusName, L"LOG")){
-		dwResult = DEV_TYPE_PRINTK;
+		dwResult = DEV_TYPE_LOG;
 
 	}
 	return(dwResult);
@@ -88,16 +89,13 @@ drive_statvfs(WIN_CFDATA *Config, DWORD Flags, WIN_CFDRIVER *Result)
 			Config->DeviceType = DriveLookupBus(Config->BusName);
 			break;
 		case DRIVE_FIXED:
-			win_wcscpy(Result->NtClass, L"disk");
+			win_wcscpy(Result->ClassId, DEVINTERFACE_PARTITION);
 			Config->DeviceType = DEV_TYPE_FIXED;
 			break;
 		case DRIVE_CDROM:
-			win_wcscpy(Result->NtClass, L"disk");
 			Config->DeviceType = DEV_TYPE_CDROM;
 			break;
 		case DRIVE_REMOTE:
-			win_wcscpy(Result->NtClass, L"net");
-			win_wcscpy(Result->Service, L"srvnet");
 			win_wcscpy(Result->Comment, L"Server Network");
 			Config->DeviceType = DEV_TYPE_REMOTE;
 			break;
@@ -107,7 +105,7 @@ drive_statvfs(WIN_CFDATA *Config, DWORD Flags, WIN_CFDRIVER *Result)
 		default:
 			WIN_ERR("GetDriveType(%d): %s\n", uiType, win_strerror(GetLastError()));
 	}
-	win_wcscpy(Result->ClassId, MOUNTDEV_MOUNTED_DEVICE);
+	win_wcscpy(Result->NtClass, L"drive");
 	win_wcscpy(win_wcpcpy(Result->Location, Config->NtPath), L"\\");
 //VfsDebugMount(Result, "drive_statvfs");
 	return(bResult);

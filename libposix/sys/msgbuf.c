@@ -52,7 +52,7 @@ msgbuf_PDO(WIN_CFDATA *Config, WIN_CFDRIVER *Driver, LPSTR Result)
 {
 	LPSTR psz = Result;
 
-	if (Driver->Flags){
+	if (Driver->Flags & WIN_DVF_CONFIG_READY){
 		psz += msvc_sprintf(psz, "%s on ", Driver->Name);
 	}else{
 		psz += msvc_sprintf(psz, "+ not configured: ");
@@ -60,7 +60,8 @@ msgbuf_PDO(WIN_CFDATA *Config, WIN_CFDRIVER *Driver, LPSTR Result)
 	psz += msvc_sprintf(psz, "%ls at %ls", Config->NtName, Config->BusName);
 	psz += msvc_sprintf(psz, " %ls", cfexpand(Driver->Location));
 	psz += msvc_sprintf(psz, ", type 0x%x", Config->DeviceType);
-	psz += msvc_sprintf(psz, ", driver %ls:%ls", Driver->NtClass, Driver->Service);
+	psz += msvc_sprintf(psz, ", class %ls", Driver->NtClass);
+	psz += msvc_sprintf(psz, ", flags 0x%x", Driver->Flags);
 	psz += msvc_sprintf(psz, ", \"%ls\"", cfexpand(Driver->Comment));
 	*psz++ = '\n';
 	*psz = 0;
@@ -71,14 +72,15 @@ msgbuf_DRIVE(WIN_CFDATA *Config, WIN_CFDRIVER *Driver, LPSTR Result)
 {
 	LPSTR psz = Result;
 
-	if (Driver->Flags){
+	if (Driver->Flags & WIN_DVF_CONFIG_READY){
 		psz += msvc_sprintf(psz, "%s on ", Driver->Name);
 	}else{
 		psz += msvc_sprintf(psz, "+ not configured: ");
 	}
 	psz += msvc_sprintf(psz, "%ls at %ls", Config->NtName, Config->BusName);
-	psz += msvc_sprintf(psz, " %ls", Driver->Location);
+	psz += msvc_sprintf(psz, " %ls", cfexpand(Driver->NtClass));
 	psz += msvc_sprintf(psz, ", type 0x%x", Config->DeviceType);
+	psz += msvc_sprintf(psz, ", flags 0x%x", Driver->Flags);
 	*psz++ = '\n';
 	*psz = 0;
 	return(psz - Result);
@@ -88,7 +90,7 @@ msgbuf_WINSOCK(WIN_IFDATA *Config, WIN_CFDRIVER *Driver, LPSTR Result)
 {
 	LPSTR psz = Result;
 
-	if (Driver->Flags){
+	if (Driver->Flags & WIN_DVF_CONFIG_READY){
 		psz += msvc_sprintf(psz, "%s at ", Driver->Name);
 	}else{
 		psz += msvc_sprintf(psz, "+ not configured: ");
@@ -96,6 +98,7 @@ msgbuf_WINSOCK(WIN_IFDATA *Config, WIN_CFDRIVER *Driver, LPSTR Result)
 	psz += msvc_sprintf(psz, "%ls", Config->NtName);
 	psz += msvc_sprintf(psz, ", index %d", Config->Index);
 	psz += msvc_sprintf(psz, ", type 0x%x", Config->DeviceType);
+	psz += msvc_sprintf(psz, ", flags 0x%x", Driver->Flags);
 	psz += msvc_sprintf(psz, ", \"%ls\"", Driver->Comment);
 	*psz++ = '\n';
 	*psz = 0;
@@ -119,7 +122,11 @@ msgbuf_KERN_MSGBUFSIZE(int *data, size_t *len)
 	}else while (vfs_getvfs(&cfData, dwFlags)){
 		if (cfData.FSType == FS_TYPE_DRIVE){
 			drive_statvfs(&cfData, dwFlags, &cfDriver);
-			drive_match(cfData.NtName, cfData.DeviceType, &cfDriver);
+			if (drive_match(cfData.NtName, cfData.DeviceType, &cfDriver)){
+				bufsize += msgbuf_DRIVE(&cfData, &cfDriver, buf);
+				msgbuf = win_realloc(msgbuf, bufsize + MSGBUFSIZE);
+				buf = msgbuf + bufsize;
+			}
 		}else if (cfData.FSType == FS_TYPE_PDO){
 			pdo_statvfs(&cfData, dwFlags, &cfDriver);
 			if (pdo_match(cfData.NtName, cfData.DeviceType, &cfDriver)){
