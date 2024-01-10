@@ -56,7 +56,6 @@ disk_init(WIN_MOUNT *Mount, HINSTANCE Instance)
 	Mount->FileType = WIN_VDIR;
 	Mount->DeviceType = DEV_TYPE_ROOT;
 	Mount->DeviceId = DEV_TYPE_ROOT;
-	Mount->FSType = FS_TYPE_DISK;
 //VfsDebugMount(Root, "disk_init");
 //	DefineDosDeviceW(DDD_REMOVE_DEFINITION, Mount->Drive, NULL);
 //	if (!DefineDosDeviceW(DDD_RAW_TARGET_PATH, Mount->Drive, Mount->Path)){

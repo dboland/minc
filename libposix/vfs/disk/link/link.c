@@ -28,4 +28,5 @@
  *
  */
 
+#include "link_syscall.c"
 #include "link_unistd.c"

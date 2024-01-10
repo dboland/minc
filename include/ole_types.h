@@ -28,31 +28,6 @@
  *
  */
 
-typedef struct _VOLUME_ID {
-	DWORD VolumeIDSize;
-	DWORD DriveType;
-	DWORD DriveSerialNumber;
-	DWORD VolumeLabelOffset;
-} VOLUME_ID;
-
-typedef struct _COMMON_NETWORK_RELATIVE_LINK {
-	DWORD CommonNetworkRelativeLinkSize;
-	DWORD CommonNetworkRelativeLinkFlags;
-	DWORD NetNameOffset;
-	DWORD DeviceNameOffset;
-	DWORD NetworkProviderType;
-} COMMON_NETWORK_RELATIVE_LINK;
-
-typedef struct _LINK_INFO {
-	DWORD LinkInfoSize;
-	DWORD LinkInfoHeaderSize;
-	DWORD LinkInfoFlags;
-	DWORD VolumeIDOffset;
-	DWORD LocalBasePathOffset;
-	DWORD CommonNetworkRelativeLinkOffset;
-	DWORD CommonPathSuffixOffset;
-} LINK_INFO;
-
 typedef struct _SHELL_LINK_HEADER {
 	DWORD HeaderSize;
 	CLSID LinkCLSID;
@@ -69,6 +44,31 @@ typedef struct _SHELL_LINK_HEADER {
 	DWORD Reserved2;
 	DWORD Reserved3;
 } SHELL_LINK_HEADER;
+
+typedef struct _LINK_INFO {
+	DWORD LinkInfoSize;
+	DWORD LinkInfoHeaderSize;
+	DWORD LinkInfoFlags;
+	DWORD VolumeIDOffset;
+	DWORD LocalBasePathOffset;
+	DWORD CommonNetworkRelativeLinkOffset;
+	DWORD CommonPathSuffixOffset;
+} LINK_INFO;
+
+typedef struct _VOLUME_ID {
+	DWORD VolumeIDSize;
+	DWORD DriveType;
+	DWORD DriveSerialNumber;
+	DWORD VolumeLabelOffset;
+} VOLUME_ID;
+
+typedef struct _COMMON_NETWORK_RELATIVE_LINK {
+	DWORD CommonNetworkRelativeLinkSize;
+	DWORD CommonNetworkRelativeLinkFlags;
+	DWORD NetNameOffset;
+	DWORD DeviceNameOffset;
+	DWORD NetworkProviderType;
+} COMMON_NETWORK_RELATIVE_LINK;
 
 /* LinkFlags */
 

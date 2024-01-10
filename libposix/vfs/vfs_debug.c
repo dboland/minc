@@ -364,8 +364,8 @@ VfsPathFlags(DWORD Flags, LPCSTR Label)
 VOID 
 VfsDebugPath(WIN_NAMEIDATA *Path, LPCSTR Label)
 {
-	msvc_printf("%s(%ls): MountId(%d) Type(%s:%s) DevType(0x%x) DevId(0x%x)\n", 
-		Label, Path->Resolved, Path->MountId, FSType(Path->FSType), _FType[Path->FileType], Path->DeviceType, Path->DeviceId);
+	msvc_printf("%s(%ls): MountId(%d) Type(%s:%s)\n", 
+		Label, Path->Resolved, Path->MountId, FSType(Path->FSType), _FType[Path->FileType]);
 	VfsPathFlags(Path->Flags, "+ Flags");
 	VfsFileAttribs(Path->Attribs, L"+ Attribs");
 	msvc_printf("+ Base: %ls\n", Path->Base);
@@ -398,14 +398,14 @@ VfsDebugTask(WIN_TASK *Task, LPCSTR Label)
 VOID 
 VfsDebugStat(WIN_VATTR *Stat, LPCSTR Label)
 {
-	msvc_printf("%s(%s): Device(0x%x) Attribs(0x%x) Special(0x%x) Links(%d) Size(%d) Type(%s)\n", 
-		Label, Stat->VolumeLabel, Stat->DeviceId, Stat->Attributes, Stat->SpecialId, Stat->NumberOfLinks, Stat->FileSizeLow, _FType[Stat->Mode.FileType]);
+	msvc_printf("%s(%d): Device(0x%x) Attribs(0x%x) Special(0x%x) Links(%d) Size(%d) Type(%s)\n", 
+		Label, Stat->VolumeSerialNumber, Stat->DeviceId, Stat->Attributes, Stat->SpecialId, Stat->NumberOfLinks, Stat->FileSizeLow, _FType[Stat->Mode.FileType]);
 }
 VOID 
 VfsDebugMount(WIN_MOUNT *Mount, LPCSTR Label)
 {
-	msvc_printf("%s(%d): Flags(0x%x) Serial(%lu) FSType(%s) DevType(0x%x) DevId(0x%x)\n", 
-		Label, Mount->MountId, Mount->Flags, Mount->VolumeSerial, FSType(Mount->FSType), Mount->DeviceType, Mount->DeviceId);
+	msvc_printf("%s(%d): Flags(0x%x) Serial(%lu) DevType(0x%x) DevId(0x%x)\n", 
+		Label, Mount->MountId, Mount->Flags, Mount->VolumeSerial, Mount->DeviceType, Mount->DeviceId);
 	msvc_printf("+ Path: %ls\n", Mount->Path);
 	msvc_printf("+ Drive: %ls\n", Mount->Drive);
 }
@@ -431,7 +431,7 @@ VfsDebugDrive(WIN_STATFS *Info, LPCSTR Label)
 //	VfsVolumeFlags(Info->Flags, "  flags");
 }
 VOID 
-VfsDebugLink(MIB_IFROW *Interface, LPCSTR Label)
+VfsDebugInterface(MIB_IFROW *Interface, LPCSTR Label)
 {
 	msvc_printf("%s(%ls): Descript(%s)\n", 
 		Label, Interface->wszName, Interface->bDescr);
@@ -453,4 +453,14 @@ VfsDebugTimer(WIN_TASK *Task, LPCSTR Label)
 {
 	msvc_printf("%s(%d): Timer(%d) Interval(%d) Ticks(%I64d)\n", 
 		Label, Task->TaskId, Task->Timer, Task->Interval, Task->Ticks);
+}
+VOID 
+VfsDebugLink(LINK_INFO *Info, LPSTR Label)
+{
+	msvc_printf("%s(%d): LinkInfoHeaderSize(%d) Flags(0x%x) VolumeIDOffset(%d)\n", 
+		Label, sizeof(SHELL_LINK_HEADER), Info->LinkInfoHeaderSize, Info->LinkInfoFlags, Info->VolumeIDOffset);
+	msvc_printf("+ LocalBasePathOffset(%d)\n", Info->LocalBasePathOffset);
+	msvc_printf("+ CommonNetworkRelativeLinkOffset(%d)\n", Info->CommonNetworkRelativeLinkOffset);
+	msvc_printf("+ CommonPathSuffixOffset(%d)\n", Info->CommonPathSuffixOffset);
+//	msvc_printf("+ LocalBasePathOffsetUnicode(%d)\n", Info->LocalBasePathOffsetUnicode);
 }

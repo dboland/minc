@@ -59,8 +59,8 @@ msgbuf_PDO(WIN_CFDATA *Config, WIN_CFDRIVER *Driver, LPSTR Result)
 	}
 	psz += msvc_sprintf(psz, "%ls at %ls", Config->NtName, Config->BusName);
 	psz += msvc_sprintf(psz, " %ls", cfexpand(Driver->Location));
-	psz += msvc_sprintf(psz, ", type 0x%x", Config->DeviceType);
 	psz += msvc_sprintf(psz, ", class %ls", Driver->NtClass);
+	psz += msvc_sprintf(psz, ", type 0x%x", Config->DeviceType);
 	psz += msvc_sprintf(psz, ", flags 0x%x", Driver->Flags);
 	psz += msvc_sprintf(psz, ", \"%ls\"", cfexpand(Driver->Comment));
 	*psz++ = '\n';
@@ -78,7 +78,7 @@ msgbuf_DRIVE(WIN_CFDATA *Config, WIN_CFDRIVER *Driver, LPSTR Result)
 		psz += msvc_sprintf(psz, "+ not configured: ");
 	}
 	psz += msvc_sprintf(psz, "%ls at %ls", Config->NtName, Config->BusName);
-	psz += msvc_sprintf(psz, " %ls", cfexpand(Driver->NtClass));
+	psz += msvc_sprintf(psz, " %ls", Driver->NtClass);
 	psz += msvc_sprintf(psz, ", type 0x%x", Config->DeviceType);
 	psz += msvc_sprintf(psz, ", flags 0x%x", Driver->Flags);
 	*psz++ = '\n';

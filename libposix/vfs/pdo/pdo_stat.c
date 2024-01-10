@@ -48,11 +48,13 @@ BOOL
 pdo_stat(WIN_NAMEIDATA *Path, WIN_VATTR *Result)
 {
 	BOOL bResult = FALSE;
+	WIN_FLAGS wFlags = {0};
+	WIN_VNODE vNode;
 
-	if (PdoStatFile(Path->Handle, Result)){
-		Result->Mode.FileType = Path->FileType;
-		Result->SpecialId = Path->DeviceId;
-		bResult = CloseHandle(Path->Handle);
+	if (!PdoOpenFile(Path, &wFlags, &vNode)){
+		return(FALSE);
+	}else if (pdo_fstat(&vNode, Result)){
+		bResult = CloseHandle(vNode.Handle);
 	}
 	return(bResult);
 }

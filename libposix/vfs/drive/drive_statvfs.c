@@ -107,6 +107,6 @@ drive_statvfs(WIN_CFDATA *Config, DWORD Flags, WIN_CFDRIVER *Result)
 	}
 	win_wcscpy(Result->NtClass, L"drive");
 	win_wcscpy(win_wcpcpy(Result->Location, Config->NtPath), L"\\");
-//VfsDebugMount(Result, "drive_statvfs");
+//	win_wcscpy(Result->Location, Config->NtPath);
 	return(bResult);
 }

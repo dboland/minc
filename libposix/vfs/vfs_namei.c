@@ -62,6 +62,7 @@ PathCopy(WIN_NAMEIDATA *Path)
 	WCHAR *R = Path->R;
 	WCHAR C;
 
+	Path->Base = R;
 	while (C = *S){
 		S++;
 		if (C == '/'){
@@ -86,13 +87,13 @@ PathGlob(WIN_NAMEIDATA *Path, DWORD Flags)
 			bResult = disk_lookup(Path, Flags);
 			break;
 		case FILE_ATTRIBUTE_PDO:
-			bResult = pdo_lookup(Path, Flags);
-			break;
-		case FILE_ATTRIBUTE_MOUNT:
-			bResult = vol_lookup(Path, Flags);
+			Path->Attribs |= FILE_ATTRIBUTE_DEVICE;
 			break;
 		case FILE_ATTRIBUTE_DRIVE:
-			bResult = drive_lookup(Path, Path->MountId, Flags);
+			bResult = vol_lookup(Path, Flags);
+			break;
+		case FILE_ATTRIBUTE_VOLUME:
+			bResult = drive_lookup(Path, Flags);
 			break;
 	}
 	return(bResult);
@@ -104,6 +105,7 @@ PathOpen(WIN_NAMEIDATA *Path, LPWSTR Source, DWORD Flags)
 	Path->S = Source;
 	Path->Flags = Flags;
 	Path->Base = Path->R;
+
 }
 VOID 
 PathClose(WIN_NAMEIDATA *Path, DWORD Flags)
@@ -115,6 +117,9 @@ PathClose(WIN_NAMEIDATA *Path, DWORD Flags)
 			Path->FileType = WIN_VDIR;
 		}else if (Path->Attribs & FILE_ATTRIBUTE_SYMLINK){
 			Path->FileType = WIN_VLNK;
+		}
+		if (Path->Attribs & FILE_ATTRIBUTE_DEVICE){
+			Path->FSType = FS_TYPE_PDO;
 		}
 	}else if (DiskGlobType(L".exe", Path)){
 		Path->FileType = WIN_VREG;
@@ -135,7 +140,6 @@ vfs_lookup(WIN_NAMEIDATA *Path, LPWSTR Source, DWORD Flags)
 	}else while (PathRead(Path)){
 		if (!PathGlob(Path, Flags | WIN_FOLLOW)){
 			*Path->R++ = '\\';
-			Path->Base = Path->R;
 			PathCopy(Path);
 			Path->Last = Path->R - 1;
 			return(Path);

@@ -49,7 +49,7 @@ DiskGlobType(LPCWSTR TypeName, WIN_NAMEIDATA *Path)
 	return(bResult);
 }
 BOOL 
-DiskGlobLink(LONG Depth, WIN_NAMEIDATA *Path)
+DiskGlobLink(WIN_NAMEIDATA *Path, LONG Depth)
 {
 	BOOL bResult = FALSE;
 
@@ -59,7 +59,7 @@ DiskGlobLink(LONG Depth, WIN_NAMEIDATA *Path)
 		}else if (Depth >= WIN_SYMLOOP_MAX){
 			SetLastError(ERROR_TOO_MANY_LINKS);
 		}else{
-			bResult = DiskGlobLink(Depth + 1, Path);
+			bResult = DiskGlobLink(Path, Depth + 1);
 		}
 	}
 	return(bResult);
@@ -75,7 +75,7 @@ disk_lookup(WIN_NAMEIDATA *Path, DWORD Flags)
 	if (!DiskGlobType(L".lnk", Path)){
 		bResult = FALSE;
 	}else if (Flags & WIN_FOLLOW){
-		bResult = DiskGlobLink(1, Path);
+		bResult = DiskGlobLink(Path, 0);
 	}else{
 		Path->Attribs |= FILE_ATTRIBUTE_SYMLINK;
 	}

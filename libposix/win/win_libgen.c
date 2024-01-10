@@ -79,18 +79,34 @@ win_dirname_r(LPCWSTR FileName, LPWSTR DirName)
 	return(DirName);
 }
 LPWSTR 
-win_volname(LPWSTR FileName)
+win_volname(LPWSTR Result, LPCWSTR FileName)
 {
-	LPWSTR F = FileName;
+	LPWSTR R = Result;
 	WCHAR C;
 
-	while (C = *F++){
+	while (C = *FileName++){
+		*R++ = C;
 		if (C == '\\'){
 			break;
 		}
 	}
-	*F = 0;
-	return(FileName);
+	*R = 0;
+	return(Result);
+}
+LPWSTR 
+win_drivename(LPWSTR Result, LPCWSTR FileName)
+{
+	LPWSTR R = Result;
+	WCHAR C;
+
+	while (C = *FileName++){
+		*R++ = C;
+		if (C == ':'){
+			break;
+		}
+	}
+	*R = 0;
+	return(Result);
 }
 LPWSTR 
 win_typename(LPCWSTR FileName)

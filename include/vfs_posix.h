@@ -185,7 +185,7 @@ DWORD proc_VM_LOADAVG(WIN_TASK Tasks[], WIN_LOADAVG *Load);
 BOOL drive_statvfs(WIN_CFDATA *Config, DWORD Flags, WIN_CFDRIVER *Result);
 BOOL drive_getfsstat(WIN_MOUNT *Mount, DWORD Flags, WIN_STATFS *Result);
 BOOL drive_statfs(WIN_NAMEIDATA *Path, WIN_STATFS *Result);
-BOOL drive_mount(WIN_NAMEIDATA *Path, WIN_DEVICE *Device, WIN_MODE *Mode);
+BOOL drive_mount(WIN_NAMEIDATA *Path, WIN_VNODE *Node, WIN_MODE *Mode);
 BOOL drive_unmount(WIN_NAMEIDATA *Path);
 BOOL drive_match(LPCWSTR NtName, DWORD DeviceType, WIN_CFDRIVER *Driver);
 
@@ -196,7 +196,7 @@ BOOL disk_futimes(WIN_VNODE *Node, FILETIME FileTime[2]);
 BOOL disk_open(WIN_NAMEIDATA *Path, WIN_FLAGS *Flags, WIN_MODE *Mode, WIN_VNODE *Result);
 BOOL disk_close(WIN_VNODE *Node);
 BOOL disk_readlink(WIN_NAMEIDATA *Path, BOOL MakeReal);
-BOOL disk_symlink(WIN_NAMEIDATA *Path, WIN_VATTR *Stat, WIN_MODE *Mode, WIN_NAMEIDATA *Result);
+BOOL disk_symlink(WIN_NAMEIDATA *Path, WIN_NAMEIDATA *Result);
 
 /* registry.c */
 
@@ -207,6 +207,7 @@ BOOL reg_close(WIN_VNODE *Node);
 
 /* pdo.c */
 
+BOOL pdo_open(WIN_NAMEIDATA *Path, WIN_FLAGS *Flags, WIN_MODE *Mode, WIN_VNODE *Result);
 DWORD pdo_statvfs(WIN_CFDATA *Config, DWORD Flags, WIN_CFDRIVER *Result);
 BOOL pdo_match(LPCWSTR NtName, DWORD DeviceType, WIN_CFDRIVER *Driver);
 BOOL pdo_DIOCGDINFO(WIN_DEVICE *Device);

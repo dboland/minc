@@ -38,8 +38,6 @@ vol_lookup(WIN_NAMEIDATA *Path, DWORD Flags)
 	LONG lMountId = MOUNTID(Path->Base[0]);
 	WIN_MOUNT *pwMount = &__Mounts[lMountId];
 
-	/* Lookup both device info and volume
-	 */
 	if (lMountId < 0 || lMountId >= WIN_MOUNT_MAX){
 		SetLastError(ERROR_BAD_ARGUMENTS);
 	}else if (Flags & WIN_NOCROSSMOUNT){	/* vfs_unmount() */
@@ -48,9 +46,6 @@ vol_lookup(WIN_NAMEIDATA *Path, DWORD Flags)
 		SetLastError(ERROR_DEVICE_NOT_AVAILABLE);
 	}else{
 		Path->MountId = pwMount->MountId;
-		Path->DeviceType = pwMount->DeviceType;
-		Path->DeviceId = pwMount->DeviceId;
-		Path->FSType = pwMount->FSType;
 		if (Flags & WIN_REQUIREDIR){
 			Path->R = win_wcpcpy(Path->Resolved, pwMount->Path);
 		}else{

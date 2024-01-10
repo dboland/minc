@@ -127,8 +127,6 @@ pathat_win(WIN_NAMEIDATA *Result, int dirfd, const char *path, int atflags)
 	}
 
 	Result->MountId = 0;
-	Result->DeviceType = DEV_TYPE_ROOT;
-	Result->DeviceId = DEV_TYPE_ROOT;
 	Result->FileType = WIN_VREG;
 	Result->FSType = FS_TYPE_DISK;
 	Result->R = Result->Resolved;

@@ -135,11 +135,11 @@ disk_attach(WIN_DEVICE *Device)
 		case DEV_TYPE_SCSI:
 			bResult = config_found("scsi", FS_TYPE_PDO, WIN_VBLK, Device);
 			break;
-		case DEV_TYPE_FDC:
-			bResult = config_found("fdc", FS_TYPE_PDO, WIN_VBLK, Device);
-			break;
 		case DEV_TYPE_USB:
 			bResult = config_found("usb", FS_TYPE_PDO, WIN_VBLK, Device);
+			break;
+		case DEV_TYPE_FDC:
+			bResult = config_found("fdc", FS_TYPE_PDO, WIN_VBLK, Device);
 			break;
 		case DEV_TYPE_AHCI:
 			bResult = config_found("ahci", FS_TYPE_PDO, WIN_VBLK, Device);
@@ -216,14 +216,14 @@ serial_attach(WIN_DEVICE *Device)
 		case DEV_TYPE_LOG:
 			bResult = config_init("printk", FS_TYPE_DISK, WIN_VCHR, DEV_TYPE_LOG);
 			break;
-		case DEV_TYPE_COM:
-			bResult = config_found("serial", FS_TYPE_PDO, WIN_VCHR, Device);
-			break;
 		case DEV_TYPE_TTY:
 			bResult = config_found("tty", FS_TYPE_MAILSLOT, WIN_VCHR, Device);
 			break;
 		case DEV_TYPE_PTY:
 			bResult = config_found("pty", FS_TYPE_CHAR, WIN_VCHR, Device);
+			break;
+		case DEV_TYPE_COM:
+			bResult = config_found("serial", FS_TYPE_PDO, WIN_VCHR, Device);
 			break;
 		default:
 			bResult = FALSE;

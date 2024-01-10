@@ -84,20 +84,21 @@ BOOL
 drive_statfs(WIN_NAMEIDATA *Path, WIN_STATFS *Result)
 {
 	BOOL bResult = FALSE;
+	WCHAR szVolume[MAX_NAME];
 
 	/* mount.exe -a
 	 */
 	ZeroMemory(Result, sizeof(WIN_STATFS));
 //VfsDebugPath(Path, "drive_statfs");
-	if (Path->Attribs == FILE_ATTRIBUTE_MOUNT){
+	if (Path->Attribs == FILE_ATTRIBUTE_DRIVE){
 		bResult = DriveStatVolume(Path->Resolved, Result);
 	}else{
-		bResult = DriveStatVolume(win_volname(Path->Resolved), Result);
+		bResult = DriveStatVolume(win_volname(szVolume, Path->Resolved), Result);
 	}
 	return(bResult);
 }
 BOOL 
-drive_mount(WIN_NAMEIDATA *Path, WIN_DEVICE *Device, WIN_MODE *Mode)
+drive_mount(WIN_NAMEIDATA *Path, WIN_VNODE *Node, WIN_MODE *Mode)
 {
 	BOOL bResult = FALSE;
 	WIN_MOUNT *pwMount;
@@ -108,10 +109,8 @@ drive_mount(WIN_NAMEIDATA *Path, WIN_DEVICE *Device, WIN_MODE *Mode)
 		return(FALSE);
 	}else if (Path->FileType != WIN_VDIR){
 		SetLastError(ERROR_DIRECTORY);
-	}else if (Path->Attribs == FILE_ATTRIBUTE_MOUNT){
+	}else if (Path->Attribs == FILE_ATTRIBUTE_DRIVE){
 		SetLastError(ERROR_NOT_READY);
-	}else if (!Device->Flags){
-		SetLastError(ERROR_DEVICE_NOT_AVAILABLE);
 	}else if (!SetFileAttributesW(Path->Resolved, FILE_ATTRIBUTE_SYSTEM)){
 		WIN_ERR("SetFileAttributes(%ls): %s\n", Path->Resolved, win_strerror(GetLastError()));
 	}else{
@@ -120,16 +119,15 @@ drive_mount(WIN_NAMEIDATA *Path, WIN_DEVICE *Device, WIN_MODE *Mode)
 		pwMount->Drive[1] = ':';
 		pwMount->Drive[2] = 0;
 		pwMount->MountId = lMountId;
-		pwMount->DeviceId = Device->DeviceId;
-		pwMount->DeviceType = Device->DeviceType;
-		pwMount->FileType = Path->FileType;
-		pwMount->FSType = Path->FSType;
-		win_wcscpy(win_wcpcpy(pwMount->Path, L"\\\\.\\GLOBALROOT"), Device->NtPath);
-		pwMount->VolumeSerial = Device->Index;
+		pwMount->DeviceId = Node->DeviceId;
+		pwMount->DeviceType = Node->DeviceType;
+		pwMount->FileType = Node->FileType;
+		win_wcscpy(win_wcpcpy(pwMount->Path, L"\\\\.\\GLOBALROOT"), Node->Device->NtPath);
+//		pwMount->VolumeSerial = Device->Index;
 		GetSystemTimeAsFileTime(&pwMount->Time);
 //VfsDebugMount(pwMount, "drive_mount");
 //VfsDebugDevice(Device, "drive_mount");
-		bResult = TRUE;
+		bResult = CloseHandle(Node->Handle);
 	}
 	return(bResult);
 }
@@ -142,7 +140,7 @@ drive_unmount(WIN_NAMEIDATA *Path)
 		return(FALSE);
 	}else if (Path->FileType != WIN_VDIR){
 		SetLastError(ERROR_DIRECTORY);
-	}else if (Path->Attribs != FILE_ATTRIBUTE_MOUNT){
+	}else if (Path->Attribs != FILE_ATTRIBUTE_DRIVE){
 		bResult = TRUE;
 	}else if (!SetFileAttributesW(Path->Resolved, FILE_ATTRIBUTE_NORMAL)){
 		WIN_ERR("SetFileAttributes(%ls): %s\n", Path->Resolved, win_strerror(GetLastError()));

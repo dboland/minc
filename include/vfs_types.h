@@ -161,8 +161,8 @@ typedef WIN_DEVICE WIN_DEV_CLASS[WIN_UNIT_MAX];
 
 #define FILE_ATTRIBUTE_SYMLINK		0x00000008
 #define FILE_ATTRIBUTE_PDO		(FILE_ATTRIBUTE_ARCHIVE | FILE_ATTRIBUTE_SYSTEM)
-#define FILE_ATTRIBUTE_MOUNT		(FILE_ATTRIBUTE_DIRECTORY | FILE_ATTRIBUTE_SYSTEM)
-#define FILE_ATTRIBUTE_DRIVE		(FILE_ATTRIBUTE_HIDDEN | FILE_ATTRIBUTE_DIRECTORY | FILE_ATTRIBUTE_SYSTEM)
+#define FILE_ATTRIBUTE_DRIVE		(FILE_ATTRIBUTE_DIRECTORY | FILE_ATTRIBUTE_SYSTEM)
+#define FILE_ATTRIBUTE_VOLUME		(FILE_ATTRIBUTE_HIDDEN | FILE_ATTRIBUTE_DIRECTORY | FILE_ATTRIBUTE_SYSTEM)
 
 #define WIN_SYMLOOP_MAX			8
 
@@ -178,12 +178,8 @@ typedef struct _WIN_INODE {
 typedef struct _WIN_NAMEIDATA {
 	DWORD MountId;
 	WIN_VTYPE FileType;
-	DWORD DeviceType;
-	DWORD DeviceId;
 	WIN_FS_TYPE FSType;
 	WCHAR Resolved[WIN_PATH_MAX];
-	WIN_DEVICE *Device;
-	HANDLE Handle;
 	DWORD Attribs;
 	DWORD Flags;			/* see below */
 	WCHAR *Base;
@@ -341,7 +337,6 @@ typedef struct _WIN_MOUNT {
 	WIN_VTYPE FileType;
 	DWORD DeviceType;
 	DWORD DeviceId;
-	WIN_FS_TYPE FSType;
 	DWORD VolumeSerial;
 	DWORD Flags;
 	FILETIME Time;
@@ -396,7 +391,6 @@ typedef struct _WIN_VATTR {
 	DWORD FileIndexLow;		/* object identifier low */
 	DWORD DeviceId;			/* device inode is on */
 	DWORD SpecialId;		/* device inode represents (if special file) */
-	CHAR VolumeLabel[MAX_LABEL];	/* vfs_symlink() */
 	WIN_MODE Mode;
 	SID8 UserSid;
 	SID8 GroupSid;

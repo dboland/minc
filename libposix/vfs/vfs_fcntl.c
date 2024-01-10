@@ -134,8 +134,6 @@ vfs_F_GETPATH(WIN_VNODE *Node, WIN_NAMEIDATA *Result)
 		Result->FSType = Node->FSType;
 		Result->Attribs = Node->Attribs;
 		Result->FileType = Node->FileType;
-		Result->DeviceType = Node->DeviceType;
-		Result->DeviceId = Node->DeviceId;
 		Result->MountId = Node->MountId;
 		Result->Flags = 0;
 		Result->Base = Result->R;

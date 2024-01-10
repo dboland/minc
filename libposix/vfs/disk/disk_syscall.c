@@ -54,8 +54,6 @@ DiskCreateFile(WIN_NAMEIDATA *Path, WIN_FLAGS *Flags, WIN_MODE *Mode, WIN_VNODE 
 			Result->Handle = hResult;
 			Result->MountId = Path->MountId;
 			Result->FSType = Path->FSType;
-			Result->DeviceType = Path->DeviceType;
-			Result->DeviceId = Path->DeviceId;
 			Result->FileType = Path->FileType;
 			Result->Attribs = Flags->Attribs;
 			Result->CloseExec = Flags->CloseExec;
@@ -81,8 +79,6 @@ DiskOpenFile(WIN_NAMEIDATA *Path, WIN_FLAGS *Flags, WIN_VNODE *Result)
 		Result->Handle = hResult;
 		Result->MountId = Path->MountId;
 		Result->FSType = Path->FSType;
-		Result->DeviceType = Path->DeviceType;
-		Result->DeviceId = Path->DeviceId;
 		Result->FileType = Path->FileType;
 		Result->Attribs = Flags->Attribs;
 		Result->CloseExec = Flags->CloseExec;

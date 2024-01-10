@@ -33,21 +33,13 @@
 /****************************************************/
 
 BOOL 
-drive_lookup(WIN_NAMEIDATA *Path, LONG MountId, DWORD Flags)
+drive_lookup(WIN_NAMEIDATA *Path, DWORD Flags)
 {
-	WIN_MOUNT *pwMount = &__Mounts[MountId];
+	WIN_MOUNT *pwMount = &__Mounts[Path->MountId];
 
-	/* Lookup volume or device info
-	 */
 	if (!pwMount->DeviceId){
 		SetLastError(ERROR_DEVICE_NOT_AVAILABLE);
-	}else if (Flags & WIN_NOCROSSMOUNT){		/* disk_readlink() */
-		Path->MountId = pwMount->MountId;
-		Path->DeviceType = pwMount->DeviceType;
-		Path->DeviceId = pwMount->DeviceId;
-		Path->FSType = pwMount->FSType;
 	}else{
-//		Path->MountId = MountId;
 		if (Flags & WIN_REQUIREDIR){
 			Path->R = win_wcpcpy(Path->Resolved, pwMount->Path);
 		}else{

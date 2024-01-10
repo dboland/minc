@@ -38,20 +38,37 @@ BOOL
 PdoOpenFile(WIN_NAMEIDATA *Path, WIN_FLAGS *Flags, WIN_VNODE *Result)
 {
 	BOOL bResult = FALSE;
+	WIN_INODE iNode;
+	DWORD dwSize = sizeof(WIN_INODE);
+	WIN_DEVICE *pwDevice;
+	HANDLE hResult;
+	SECURITY_ATTRIBUTES sa = {sizeof(sa), NULL, TRUE};
 
-	Result->DeviceType = Path->DeviceType;
-	Result->DeviceId = Path->DeviceId;
-	Result->FileType = Path->FileType;
-	Result->FSType = FS_TYPE_PDO;
-	Result->Handle = Path->Handle;
-	Result->Attribs = Flags->Attribs;
-	Result->CloseExec = Flags->CloseExec;
-	Result->Flags = win_F_GETFD(Path->Handle);
-//	Result->Access = win_F_GETFL(Path->Handle);
-	Result->Access = Flags->Access;
-	MapGenericMask(&Result->Access, &AccessMap);
-	Result->Device = Path->Device;
-	return(TRUE);
+//VfsDebugPath(Path, "PdoOpenFile");
+	hResult = CreateFileW(Path->Resolved, GENERIC_READ, FILE_SHARE_READ, 
+		&sa, OPEN_EXISTING, FILE_ATTRIBUTE_SYSTEM, NULL);
+	if (hResult == INVALID_HANDLE_VALUE){
+		WIN_ERR("PdoOpenFile(%ls): %s\n", Path->Resolved, win_strerror(GetLastError()));
+	}else if (!ReadFile(hResult, &iNode, dwSize, &dwSize, NULL)){
+		WIN_ERR("ReadFile(%ls): %s\n", Path->Resolved, win_strerror(GetLastError()));
+	}else if (iNode.Magic != TypeNameVirtual){
+		SetLastError(ERROR_BAD_DEVICE);
+	}else{
+		pwDevice = DEVICE(iNode.DeviceId);
+		Result->Handle = hResult;
+		Result->DeviceType = pwDevice->DeviceType;
+		Result->DeviceId = iNode.DeviceId;
+		Result->FileType = iNode.FileType;
+		Result->FSType = FS_TYPE_PDO;
+		Result->Attribs = Path->Attribs;
+		Result->CloseExec = Flags->CloseExec;
+		Result->Access = Flags->Access;
+		Result->Flags = win_F_GETFD(hResult);
+		MapGenericMask(&Result->Access, &AccessMap);
+		Result->Device = pwDevice;
+		bResult = TRUE;
+	}
+	return(bResult);
 }
 BOOL 
 PdoStatFile(HANDLE Handle, WIN_VATTR *Result)

@@ -35,7 +35,6 @@
 #include "pdo_termio.c"
 #include "pdo_unistd.c"
 #include "pdo_tty.c"
-#include "pdo_namei.c"
 #include "pdo_fcntl.c"
 #include "pdo_stat.c"
 #include "pdo_poll.c"

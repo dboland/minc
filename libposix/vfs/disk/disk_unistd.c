@@ -205,13 +205,13 @@ disk_readlink(WIN_NAMEIDATA *Path, BOOL MakeReal)
 			LinkReadInfo(hFile, szBuffer);
 		}
 		if (szBuffer[1] == ':'){	/* nano.exe */
-			drive_lookup(Path, MOUNTID(szBuffer[0]), WIN_NOCROSSMOUNT);
+			Path->MountId = MOUNTID(szBuffer[0]);
 		}else if (MakeReal){
-			pszBase = win_basename(Path->Resolved);
+			pszBase = Path->Base;
 		}
 		Path->R = win_mbstowcp(pszBase, szBuffer, MAX_PATH);
 		Path->Last = Path->R - 1;
-		Path->Attribs = GetFileAttributesW(Path->Resolved);
+		Path->Attribs = slHead.FileAttributes;
 //VfsDebugPath(Path, "disk_readlink");
 		bResult = TRUE;
 	}
@@ -219,16 +219,13 @@ disk_readlink(WIN_NAMEIDATA *Path, BOOL MakeReal)
 	return(bResult);
 }
 BOOL 
-disk_symlink(WIN_NAMEIDATA *Path, WIN_VATTR *Stat, WIN_MODE *Mode, WIN_NAMEIDATA *Result)
+disk_symlink(WIN_NAMEIDATA *Path, WIN_NAMEIDATA *Result)
 {
 	BOOL bResult = FALSE;
-	SHELL_LINK_HEADER slHead = {0};
 	DWORD dwTerminalBlock = 0;
-	DWORD dwSize;
-	CHAR szBuffer[MAX_PATH] = "";
+	DWORD dwResult;
 	HANDLE hFile;
 
-//VfsDebugPath(Path, "disk_symlink");
 	if (*Path->Last == '\\'){	/* GNU conftest.exe */
 		*Path->Last = 0;
 	}
@@ -236,18 +233,8 @@ disk_symlink(WIN_NAMEIDATA *Path, WIN_VATTR *Stat, WIN_MODE *Mode, WIN_NAMEIDATA
 	hFile = CreateFileW(Result->Resolved, GENERIC_WRITE, FILE_SHARE_READ, 
 		NULL, CREATE_NEW, FILE_ATTRIBUTE_NORMAL, NULL);
 	if (hFile != INVALID_HANDLE_VALUE){
-		slHead.HeaderSize = sizeof(SHELL_LINK_HEADER);
-		slHead.LinkCLSID = CLSID_ShellLink;
-		slHead.LinkFlags = HasLinkInfo;
-		slHead.FileAttributes = Stat->Attributes;
-		slHead.CreationTime = Stat->CreationTime;
-		slHead.AccessTime = Stat->LastAccessTime;
-		slHead.WriteTime = Stat->LastWriteTime;
-		slHead.FileSize = Stat->FileSizeLow;
-		WriteFile(hFile, &slHead, sizeof(slHead), &dwSize, NULL);
-		win_wcstombs(szBuffer, Path->Resolved, MAX_PATH);
-		LinkCreateInfo(hFile, szBuffer, Stat);
-		WriteFile(hFile, &dwTerminalBlock, sizeof(DWORD), &dwSize, NULL);
+		LinkCreateFile(hFile, Path->Resolved, Result->Resolved);
+		WriteFile(hFile, &dwTerminalBlock, sizeof(DWORD), &dwResult, NULL);
 		bResult = CloseHandle(hFile);
 	}
 	return(bResult);

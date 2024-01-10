@@ -104,11 +104,13 @@ mount_NTFS(WIN_NAMEIDATA *Path, struct ntfs_args *args)
 {
 	int result = 0;
 	WIN_NAMEIDATA wdPath;
-	WIN_MODE wMode;
+	WIN_MODE wMode = {0};
+	WIN_FLAGS wFlags = {0};
+	WIN_VNODE vNode;
 
-	if (path_win(&wdPath, args->fspec, O_NOFOLLOW)->Attribs == -1){
+	if (!pdo_open(path_win(&wdPath, args->fspec, O_NOFOLLOW), &wFlags, &wMode, &vNode)){
 		result -= errno_posix(GetLastError());
-	}else if (!drive_mount(Path, DEVICE(wdPath.DeviceId), mode_win(&wMode, args->mode))){
+	}else if (!drive_mount(Path, &vNode, mode_win(&wMode, args->mode))){
 		result -= errno_posix(GetLastError());
 	}
 	return(result);
@@ -118,11 +120,13 @@ mount_MSDOS(WIN_NAMEIDATA *Path, struct msdosfs_args *args)
 {
 	int result = 0;
 	WIN_NAMEIDATA wdPath;
-	WIN_MODE wMode;
+	WIN_MODE wMode = {0};
+	WIN_FLAGS wFlags = {0};
+	WIN_VNODE vNode;
 
-	if (path_win(&wdPath, args->fspec, O_NOFOLLOW)->Attribs == -1){
+	if (!pdo_open(path_win(&wdPath, args->fspec, O_NOFOLLOW), &wFlags, &wMode, &vNode)){
 		result -= errno_posix(GetLastError());
-	}else if (!drive_mount(Path, DEVICE(wdPath.DeviceId), mode_win(&wMode, args->mask))){
+	}else if (!drive_mount(Path, &vNode, mode_win(&wMode, args->mask))){
 		result -= errno_posix(GetLastError());
 	}
 	return(result);
@@ -132,11 +136,13 @@ mount_CD9660(WIN_NAMEIDATA *Path, struct iso_args *args)
 {
 	int result = 0;
 	WIN_NAMEIDATA wdPath;
-	WIN_MODE wMode;
+	WIN_MODE wMode = {0};
+	WIN_FLAGS wFlags = {0};
+	WIN_VNODE vNode;
 
-	if (path_win(&wdPath, args->fspec, O_NOFOLLOW)->Attribs == -1){
+	if (!pdo_open(path_win(&wdPath, args->fspec, O_NOFOLLOW), &wFlags, &wMode, &vNode)){
 		result -= errno_posix(GetLastError());
-	}else if (!drive_mount(Path, DEVICE(wdPath.DeviceId), mode_win(&wMode, 0666))){
+	}else if (!drive_mount(Path, &vNode, mode_win(&wMode, 0666))){
 		result -= errno_posix(GetLastError());
 	}
 	return(result);
@@ -146,11 +152,13 @@ mount_UFS(WIN_NAMEIDATA *Path, struct ufs_args *args)
 {
 	int result = 0;
 	WIN_NAMEIDATA wdPath;
-	WIN_MODE wMode;
+	WIN_MODE wMode = {0};
+	WIN_FLAGS wFlags = {0};
+	WIN_VNODE vNode;
 
-	if (path_win(&wdPath, args->fspec, O_NOFOLLOW)->Attribs == -1){
+	if (!pdo_open(path_win(&wdPath, args->fspec, O_NOFOLLOW), &wFlags, &wMode, &vNode)){
 		result -= errno_posix(GetLastError());
-	}else if (!drive_mount(Path, DEVICE(wdPath.DeviceId), mode_win(&wMode, 0666))){
+	}else if (!drive_mount(Path, &vNode, mode_win(&wMode, 0666))){
 		result -= errno_posix(GetLastError());
 	}
 	return(result);
