@@ -30,15 +30,28 @@
 
 #include <sys/time.h>
 
+#define WIN_EPOCH	116444736000000000LL
+
 /****************************************************/
 
+struct timeval *
+timeval_posix(struct timeval *tp, FILETIME *Time, DWORDLONG Offset)
+{
+	LONGLONG llTime = *(LONGLONG *)Time;
+
+	llTime -= Offset;				/* epoch */
+	llTime *= 0.1;					/* microseconds */
+	tp->tv_sec = (time_t)(llTime * 0.000001);
+	tp->tv_usec = llTime - (tp->tv_sec * 1000000);
+	return(tp);
+}
 FILETIME 
 timeval_win(const struct timeval *timev)
 {
 	DWORDLONG dwlTime = (DWORDLONG)timev->tv_sec;
 	FILETIME ftResult;
 
-	dwlTime *= 10000000LL;			/* 100-nanosecond intervals */
+	dwlTime *= 10000000LL;				/* 100-nanosecond intervals */
 	dwlTime += 116444736000000000LL;		/* epoch */
 	dwlTime += (timev->tv_usec * 10);		/* microseconds */
 	*(DWORDLONG *)&ftResult = dwlTime;
@@ -69,7 +82,7 @@ timespec_win(const struct timespec *times)
 	if (times->tv_nsec == UTIME_NOW){
 		GetSystemTimeAsFileTime(&ftResult);
 	}else if (times->tv_nsec != UTIME_OMIT){
-		dwlTime *= 10000000LL;		/* 100-nanosecond intervals */
+		dwlTime *= 10000000LL;			/* 100-nanosecond intervals */
 		dwlTime += 116444736000000000LL;	/* epoch */
 		dwlTime += (times->tv_nsec * 0.1);
 		*(DWORDLONG *)&ftResult = dwlTime;
@@ -98,7 +111,7 @@ int
 clock_gettime_REALTIME(struct timespec *tp, DWORDLONG Time)
 {
 	Time -= 116444736000000000LL;			/* epoch (100-nanosecond intervals) */
-	tp->tv_sec = (time_t)(Time * 0.0000001);		/* seconds (gcc needs cast!) */
+	tp->tv_sec = (time_t)(Time * 0.0000001);	/* seconds (gcc needs cast!) */
 	Time *= 100;
 	tp->tv_nsec = Time - (tp->tv_sec * 1000000000);	/* nanoseconds */
 	return(0);
@@ -109,7 +122,7 @@ clock_gettime_MONOTONIC(struct timespec *tp, DWORDLONG Time)
 	DWORD dwTime = Time & 0xFFFFFFFF;
 
 	tp->tv_sec = (time_t)(Time * 0.000000001);	/* seconds (gcc needs cast!) */
-//	tp->tv_nsec = dwTime % 1000000000;			/* nanoseconds */
+//	tp->tv_nsec = dwTime % 1000000000;		/* nanoseconds */
 	tp->tv_nsec = Time - (tp->tv_sec * 1000000000);	/* nanoseconds */
 	return(0);
 }
@@ -137,7 +150,7 @@ sys_nanosleep(call_t call, const struct timespec *req, struct timespec *rem)
 	/* __int64_t (%I64d) */
 	dwMillisecs = (req->tv_sec & 0xBFFFFFFF) * 1000;	/* limit to DWORD bits */
 	dwMillisecs += req->tv_nsec * 0.000001;			/* nanoseconds */
-	if (req->tv_nsec > 999999999LL){
+	if (req->tv_nsec > 999999999){
 		result = -EINVAL;
 	}else if (!vfs_nanosleep(pwTask, dwMillisecs, &dwRemain)){
 		result -= errno_posix(GetLastError());
@@ -183,15 +196,26 @@ sys_clock_gettime(call_t call, clockid_t clk_id, struct timespec *tp)
 	int result = 0;
 	DWORDLONG dwlTime = 0;
 
-	if (!vfs_clock_gettime(clk_id, &dwlTime)){
+	if (!tp){
+		result = -EFAULT;
+	}else if (!vfs_clock_gettime(clk_id, &dwlTime)){
 		result -= errno_posix(GetLastError());
-	}else if (clk_id == CLOCK_REALTIME){			/* git.exe */
-		result = clock_gettime_REALTIME(tp, dwlTime);
-	}else if (clk_id == CLOCK_MONOTONIC){			/* git.exe */
-		result = clock_gettime_MONOTONIC(tp, dwlTime);
+	}else switch (clk_id){
+		case CLOCK_REALTIME:			/* git.exe */
+			result = clock_gettime_REALTIME(tp, dwlTime);
+			break;
+		case CLOCK_MONOTONIC:			/* git.exe */
+			result = clock_gettime_MONOTONIC(tp, dwlTime);
+			break;
+		case CLOCK_VIRTUAL:
+		case CLOCK_PROCESS_CPUTIME_ID:
+		case CLOCK_THREAD_CPUTIME_ID:
+		case CLOCK_UPTIME:
+			result = -EOPNOTSUPP;
+			break;
+		default:
+			result = -EINVAL;
 	}
-//msvc_printf("clock_gettime(%I64d): tv_sec(%I64d) tv_nsec(%lu)\n", 
-//		dwlTime, tp->tv_sec, tp->tv_nsec);
 	return(result);
 }
 int 
@@ -207,20 +231,23 @@ sys_setitimer(call_t call, int which, const struct itimerval *restrict value, st
 	if (value){
 		lInterval = (value->it_interval.tv_sec & 0xBFFFFFFF) * 1000;
 		lInterval += value->it_interval.tv_usec * 0.001;
-		dwlTimeOut = value->it_value.tv_usec * 1000;
+		dwlTimeOut = (DWORDLONG)(value->it_value.tv_usec * 1000);
 		dwlTimeOut += (DWORDLONG)(value->it_value.tv_sec * 1000000000);
 	}
-//__PRINTF("sys_setitimer(%d): Interval(%d) TimeOut(%I64d)\n", task->pid, lInterval, dwlTimeOut)
-	if (which == ITIMER_REAL){
-		result = setitimer_REAL(pwTask, &lInterval, &dwlTimeOut);
-	}else{
-		return(-EOPNOTSUPP);
+	switch (which){
+		case ITIMER_REAL:
+			result = setitimer_REAL(pwTask, &lInterval, &dwlTimeOut);
+			break;
+		case ITIMER_VIRTUAL:
+		case ITIMER_PROF:
+			return(-EOPNOTSUPP);
+		default:
+			return(-EINVAL);
 	}
 	if (ovalue){
 		dwResult = dwlTimeOut & 0xFFFFFFFF;
 		ovalue->it_value.tv_sec = (time_t)(dwlTimeOut * 0.000000001);
 		ovalue->it_value.tv_usec = (dwResult % 1000000000) * 0.001;
-//__PRINTF("sys_setitimer(out:value): sec(%I64d) usec(%lu)\n", ovalue->it_value.tv_sec, ovalue->it_value.tv_usec)
 		ovalue->it_interval.tv_sec = (time_t)(lInterval * 0.001);
 		ovalue->it_interval.tv_usec = (lInterval % 1000) * 1000;
 	}
@@ -241,29 +268,29 @@ sys_futimens(call_t call, int fd, const struct timespec times[2])
 	return(result);
 }
 int 
-__utimensat(WIN_TASK *Task, int dirfd, const char *file, FILETIME Time[2], int flags)
+__utimensat(int dirfd, const char *path, FILETIME Times[2], int flags)
 {
 	int result = 0;
 	WIN_NAMEIDATA wPath;
 
-	if (!vfs_utimes(pathat_win(&wPath, dirfd, file, flags), Time)){
+	if (!vfs_utimes(pathat_win(&wPath, dirfd, path, flags), Times)){
 		result -= errno_posix(GetLastError());
 	}
 	return(result);
 }
 int 
-sys_utimensat(call_t call, int dirfd, const char *file, const struct timespec times[2], int flags)
+sys_utimensat(call_t call, int dirfd, const char *file, const struct timespec times[2], int flag)
 {
 	FILETIME fTime[2];
 
-	return(__utimensat(call.Task, dirfd, file, utimespec_win(fTime, times), flags));
+	return(__utimensat(dirfd, file, utimespec_win(fTime, times), flag));
 }
 int 
 sys_utimes(call_t call, const char *path, const struct timeval times[2])
 {
 	FILETIME fTime[2];
 
-	return(__utimensat(call.Task, AT_FDCWD, path, utimeval_win(fTime, times), 0));
+	return(__utimensat(AT_FDCWD, path, utimeval_win(fTime, times), 0));
 }
 int 
 sys_futimes(call_t call, int fd, const struct timeval tv[2])

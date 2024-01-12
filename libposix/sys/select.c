@@ -69,8 +69,8 @@ timev_posix(struct timeval *tp, DWORD Millisecs)
 	LONGLONG llTime = (LONGLONG)Millisecs;
 
 	if (llTime > 0){
-		tp->tv_usec = (Millisecs % 1000) * 1000;	/* microseconds */
 		tp->tv_sec = (time_t)(llTime * 0.001);		/* __int64_t (%I64d) */
+		tp->tv_usec = (Millisecs % 1000) * 1000;	/* microseconds */
 	}else{
 		tp->tv_usec = 0;
 		tp->tv_sec = 0LL;

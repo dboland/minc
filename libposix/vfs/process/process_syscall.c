@@ -36,7 +36,7 @@ WIN_TASK *
 ProcCreateTask(DWORD TaskId)
 {
 	WIN_TASK *pwTask = &__Tasks[TaskId];
-	DWORD dwProcess;
+	DWORD dwAffinity = 0;
 
 	while (TaskId < WIN_CHILD_MAX){
 		if (!pwTask->Flags){
@@ -45,7 +45,6 @@ ProcCreateTask(DWORD TaskId)
 			pwTask->ThreadId = GetCurrentThreadId();
 			pwTask->ProcessId = GetCurrentProcessId();
 			GetSystemTimeAsFileTime(&pwTask->Started);
-			GetProcessAffinityMask(GetCurrentProcess(), &dwProcess, &pwTask->CpuId);
 			return(pwTask);
 		}else if (pwTask->Flags & WIN_PS_NOZOMBIE){
 			ZeroMemory(pwTask, sizeof(WIN_TASK));

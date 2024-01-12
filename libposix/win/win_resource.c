@@ -43,7 +43,7 @@ win_getrlimit_DATA(WIN_RLIMIT *Limit)
 	HANDLE hHeap = GetProcessHeap();
 	PROCESS_HEAP_ENTRY phEntry = {0};
 
-	/* GetProcessWorkingSetSize()? */
+	/* GetProcessWorkingSetSize() */
 	Limit->Current = 0;
 	while (wCount--){
 		if (!win_strncmp(isHeader->Name, ".data", 5)){
@@ -77,4 +77,9 @@ win_getrlimit_AS(WIN_RLIMIT *Limit)
 		bResult = TRUE;
 	}
 	return(bResult);
+}
+BOOL 
+win_getrusage(VOID)
+{
+	/* GetProcessMemoryInfo() */
 }

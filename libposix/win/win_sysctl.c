@@ -39,7 +39,7 @@ win_KERN_CLOCKRATE(DWORDLONG *Result)
 	LARGE_INTEGER liFrequency;
 
 	if (bResult = QueryPerformanceFrequency(&liFrequency)){
-		liFrequency.QuadPart *= 0.001;	/* picoseconds */
+		liFrequency.QuadPart *= 0.001;					/* picoseconds */
 		*Result = (DWORDLONG)(liFrequency.LowPart % 1000000000);	/* nanoseconds */
 	}
 	return(bResult);
@@ -88,19 +88,17 @@ win_KERN_PROC(DWORD ThreadId, WIN_KINFO_PROC *Result)
 {
 	BOOL bResult = FALSE;
 	HANDLE hThread = NULL;
-	PFILETIME ftCreation = &Result->Created;
-	PFILETIME ftExit = &Result->Exited;
-	PFILETIME ftKernel = &Result->Kernel;
-	PFILETIME ftUser = &Result->User;
+	PFILETIME pftCreation = &Result->Created;
+	PFILETIME pftExit = &Result->Exited;
+	PFILETIME pftKernel = &Result->Kernel;
+	PFILETIME pftUser = &Result->User;
 
-	/* GetProcessMemoryInfo()? */
-	hThread = OpenThread(THREAD_QUERY_INFORMATION, FALSE, ThreadId);
-	if (!hThread){
+	if (!(hThread = OpenThread(THREAD_QUERY_INFORMATION, FALSE, ThreadId))){
 		return(FALSE);
-	}else if (!GetThreadTimes(hThread, ftCreation, ftExit, ftKernel, ftUser)){
-		WIN_ERR("GetThreadTimes(%d): %s\n", hThread, win_strerror(GetLastError()));
-	}else{
+	}else if (GetThreadTimes(hThread, pftCreation, pftExit, pftKernel, pftUser)){
 		bResult = CloseHandle(hThread);
+	}else{
+		WIN_ERR("GetThreadTimes(%d): %s\n", hThread, win_strerror(GetLastError()));
 	}
 	return(bResult);
 }

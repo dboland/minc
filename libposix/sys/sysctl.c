@@ -44,11 +44,20 @@ sysctl_debug(const int *name, u_int namelen, void *oldp, size_t *oldlenp, void *
 	msvc_printf("): oldp(0x%x) oldlen(%d) newp(0x%x) newlen(%d)\n", 
 		oldp, *oldlenp, newp, newlen);
 }
+long 
+ticks_posix(FILETIME *Time)
+{
+	LONGLONG llTime = *(LONGLONG *)Time;
+
+	llTime -= 116444736000000000LL;	/* epoch */
+	llTime *= 0.0000001;		/* milliseconds */
+	return(llTime);
+}
 
 /****************************************************/
 
 int 
-sysctl_KERN_CLOCKRATE(WIN_TASK *Task, struct clockinfo *info)
+sysctl_KERN_CLOCKRATE(struct clockinfo *info)
 {
 	int result = 0;
 	DWORDLONG dwlHertz, dwlTick;
@@ -67,7 +76,7 @@ sysctl_KERN_CLOCKRATE(WIN_TASK *Task, struct clockinfo *info)
 	return(result);
 }
 int 
-sysctl_KERN_HOSTNAME(WIN_TASK *Task, char *curname, size_t *csize, const char *newname, size_t nsize)
+sysctl_KERN_HOSTNAME(char *curname, size_t *csize, const char *newname, size_t nsize)
 {
 	int result = 0;
 	size_t size = 0;
@@ -75,14 +84,13 @@ sysctl_KERN_HOSTNAME(WIN_TASK *Task, char *curname, size_t *csize, const char *n
 	if (csize){
 		size = *csize;
 	}
-	/* size not needed for new name */
 	if (!win_KERN_HOSTNAME(curname, newname, size)){
 		result -= errno_posix(GetLastError());
 	}
 	return(result);
 }
 int 
-sysctl_KERN_DOMAINNAME(WIN_TASK *Task, char *curname, size_t *csize, const char *newname, size_t nsize)
+sysctl_KERN_DOMAINNAME(char *curname, size_t *csize, const char *newname, size_t nsize)
 {
 	int result = 0;
 	size_t size = 0;
@@ -90,7 +98,6 @@ sysctl_KERN_DOMAINNAME(WIN_TASK *Task, char *curname, size_t *csize, const char 
 	if (csize){
 		size = *csize;
 	}
-	/* size not needed for new name */
 	if (!win_KERN_DOMAINNAME(curname, newname, size)){
 		result -= errno_posix(GetLastError());
 	}
@@ -170,21 +177,25 @@ sysctl_KERN_PROC_ARGS(WIN_TASK *Task, const int *name, void *buf, size_t *size)
 	return(result);
 }
 int 
-sysctl_KERN_CPTIME(WIN_TASK *Task, long states[CPUSTATES])
+sysctl_KERN_CPTIME(long states[CPUSTATES])
 {
-	win_bzero(states, sizeof(long) * CPUSTATES);
-//	states[2] = GetTickCount();
+	FILETIME ftIdle, ftKernel, ftUser;
+
+	GetSystemTimes(&ftIdle, &ftKernel, &ftUser);
+	states[CP_USER] = ticks_posix(&ftUser);
+	states[CP_NICE] = 0;
+	states[CP_SYS] = ticks_posix(&ftKernel);
+	states[CP_INTR] = 0;
+	states[CP_IDLE] = ticks_posix(&ftIdle);
 	return(0);
 }
 int 
-sysctl_KERN_CPTIME2(WIN_TASK *Task, int cpu, u_int64_t states[CPUSTATES])
+sysctl_KERN_CPTIME2(int cpu, u_int64_t states[CPUSTATES])
 {
-	win_bzero(states, sizeof(u_int64_t) * CPUSTATES);
-//	states[2] = GetTickCount();
-	return(0);
+	return(-ENOENT);
 }
 int 
-sysctl_KERN_VERSION(WIN_TASK *Task, char *buf, size_t bufsize)
+sysctl_KERN_VERSION(char *buf, size_t bufsize)
 {
 	int size = 0;
 
@@ -193,7 +204,7 @@ sysctl_KERN_VERSION(WIN_TASK *Task, char *buf, size_t bufsize)
 	return(0);
 }
 int 
-sysctl_KERN_SECURELVL(WIN_TASK *Task, int *oldvalue, int *newvalue)
+sysctl_KERN_SECURELVL(int *oldvalue, int *newvalue)
 {
 	int result = 0;
 
@@ -207,7 +218,7 @@ sysctl_KERN_SECURELVL(WIN_TASK *Task, int *oldvalue, int *newvalue)
 	return(result);
 }
 int 
-sysctl_KERN_TIMECOUNTER_TICK(WIN_TASK *Task, int *value)
+sysctl_KERN_TIMECOUNTER_TICK(int *value)
 {
 	int result = 0;
 	DWORDLONG dwlValue;
@@ -220,13 +231,13 @@ sysctl_KERN_TIMECOUNTER_TICK(WIN_TASK *Task, int *value)
 	return(result);
 }
 int 
-sysctl_KERN_TIMECOUNTER(WIN_TASK *Task, const int *name, void *oldvalue, void *newvalue)
+sysctl_KERN_TIMECOUNTER(const int *name, void *oldvalue, void *newvalue)
 {
 	int result = 0;
 
 	switch (name[2]){
 		case KERN_TIMECOUNTER_TICK:
-			result = sysctl_KERN_TIMECOUNTER_TICK(Task, (int *)oldvalue);
+			result = sysctl_KERN_TIMECOUNTER_TICK((int *)oldvalue);
 			break;
 		default:
 			result = -ENOENT;
@@ -240,7 +251,7 @@ sysctl_KERN(WIN_TASK *Task, const int *name, void *oldp, size_t *oldlenp, void *
 
 	switch (name[1]){
 		case KERN_CLOCKRATE:		/* mcount() */
-			result = sysctl_KERN_CLOCKRATE(Task, (struct clockinfo *)oldp);
+			result = sysctl_KERN_CLOCKRATE((struct clockinfo *)oldp);
 			break;
 		case KERN_RAWPARTITION:	/* GNU conftest.exe */
 			*(int *)oldp = 0;
@@ -258,10 +269,10 @@ sysctl_KERN(WIN_TASK *Task, const int *name, void *oldp, size_t *oldlenp, void *
 			*(int *)oldp = OPEN_MAX;
 			break;
 		case KERN_HOSTNAME:
-			result = sysctl_KERN_HOSTNAME(Task, (char *)oldp, oldlenp, (const char *)newp, newlen);
+			result = sysctl_KERN_HOSTNAME((char *)oldp, oldlenp, (const char *)newp, newlen);
 			break;
 		case KERN_DOMAINNAME:
-			result = sysctl_KERN_DOMAINNAME(Task, (char *)oldp, oldlenp, (const char *)newp, newlen);
+			result = sysctl_KERN_DOMAINNAME((char *)oldp, oldlenp, (const char *)newp, newlen);
 			break;
 		case KERN_OSTYPE:
 			win_strncpy(oldp, "OpenBSD", *oldlenp);
@@ -294,19 +305,19 @@ sysctl_KERN(WIN_TASK *Task, const int *name, void *oldp, size_t *oldlenp, void *
 			*(int *)oldp = 1948;
 			break;
 		case KERN_CPTIME:	/* the number of ticks spent by the system (top.exe) */
-			result = sysctl_KERN_CPTIME(Task, (long *)oldp);
+			result = sysctl_KERN_CPTIME((long *)oldp);
 			break;
 		case KERN_CPTIME2:	/* ticks per CPU (top.exe) */
-			result = sysctl_KERN_CPTIME2(Task, name[2], (u_int64_t *)oldp);
+			result = sysctl_KERN_CPTIME2(name[2], (u_int64_t *)oldp);
 			break;
 		case KERN_VERSION:
-			result = sysctl_KERN_VERSION(Task, oldp, *oldlenp);
+			result = sysctl_KERN_VERSION(oldp, *oldlenp);
 			break;
 		case KERN_SECURELVL:
-			result = sysctl_KERN_SECURELVL(Task, (int *)oldp, (int *)newp);
+			result = sysctl_KERN_SECURELVL((int *)oldp, (int *)newp);
 			break;
 		case KERN_TIMECOUNTER:
-			result = sysctl_KERN_TIMECOUNTER(Task, name, oldp, newp);
+			result = sysctl_KERN_TIMECOUNTER(name, oldp, newp);
 			break;
 		case KERN_TTYCOUNT:
 			*(int *)oldp = WIN_TTY_MAX;

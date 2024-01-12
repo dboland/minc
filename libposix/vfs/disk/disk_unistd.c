@@ -223,7 +223,7 @@ disk_symlink(WIN_NAMEIDATA *Path, WIN_NAMEIDATA *Result)
 {
 	BOOL bResult = FALSE;
 	DWORD dwTerminalBlock = 0;
-	DWORD dwResult;
+	DWORD dwSize = sizeof(DWORD);
 	HANDLE hFile;
 
 	if (*Path->Last == '\\'){	/* GNU conftest.exe */
@@ -234,7 +234,7 @@ disk_symlink(WIN_NAMEIDATA *Path, WIN_NAMEIDATA *Result)
 		NULL, CREATE_NEW, FILE_ATTRIBUTE_NORMAL, NULL);
 	if (hFile != INVALID_HANDLE_VALUE){
 		LinkCreateFile(hFile, Path->Resolved, Result->Resolved);
-		WriteFile(hFile, &dwTerminalBlock, sizeof(DWORD), &dwResult, NULL);
+		WriteFile(hFile, &dwTerminalBlock, dwSize, &dwSize, NULL);
 		bResult = CloseHandle(hFile);
 	}
 	return(bResult);

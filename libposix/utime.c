@@ -38,7 +38,7 @@ time_win(const time_t time)
 	DWORDLONG dwlTime = (DWORDLONG)time;
 	FILETIME ftResult;
 
-	dwlTime *= 10000000LL;		/* 100-nanosecond intervals */
+	dwlTime *= 10000000LL;			/* 100-nanosecond intervals */
 	dwlTime += 116444736000000000LL;	/* epoch */
 	*(DWORDLONG *)&ftResult = dwlTime;
 	return(ftResult);

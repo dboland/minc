@@ -125,5 +125,8 @@ sys_wait4(call_t call, pid_t pid, int *status, int options, struct rusage *rusag
 	if (status){
 		*status = wuResult.Status;
 	}
+	if (rusage){
+		getrusage_SELF(pwTask, rusage);
+	}
 	return(result);
 }

@@ -67,6 +67,21 @@ rlimit_posix(WIN_TASK *Task, int resource, struct rlimit *rlp)
 	}
 	return(result);
 }
+int 
+getrusage_SELF(WIN_TASK *Task, struct rusage *usage)
+{
+	int result = 0;
+	WIN_KINFO_PROC kInfo;
+
+	win_bzero(usage, sizeof(struct rusage));
+	if (!win_KERN_PROC(Task->ThreadId, &kInfo)){
+		result -= errno_posix(GetLastError());
+	}else{
+		timeval_posix(&usage->ru_utime, &kInfo.User, 0LL);
+		timeval_posix(&usage->ru_stime, &kInfo.Kernel, 0LL);
+	}
+	return(result);
+}
 
 /************************************************************/
 
@@ -75,12 +90,17 @@ sys_getrusage(call_t call, int who, struct rusage *usage)
 {
 	int result = 0;
 
-	if (who == RUSAGE_SELF){
-		win_memset(usage, 0, sizeof(struct rusage));
-		usage->ru_utime.tv_sec = 100;
-		usage->ru_stime.tv_sec = 100;
-	}else{
-		result = -EOPNOTSUPP;
+	if (!usage){
+		result = -EFAULT;
+	}else switch (who){
+		case RUSAGE_SELF:
+			result = getrusage_SELF(call.Task, usage);
+			break;
+		case RUSAGE_CHILDREN:
+			result = -EOPNOTSUPP;
+			break;
+		default:
+			result = -EINVAL;
 	}
 	return(result);
 }
