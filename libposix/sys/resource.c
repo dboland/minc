@@ -67,18 +67,49 @@ rlimit_posix(WIN_TASK *Task, int resource, struct rlimit *rlp)
 	}
 	return(result);
 }
+void 
+rtime_posix(struct timeval *tp, DWORDLONG *Time)
+{
+	LONGLONG llTime = *Time;
+
+	llTime *= 0.1;					/* microseconds */
+	tp->tv_sec = (time_t)(llTime * 0.000001);
+	tp->tv_usec = llTime - (tp->tv_sec * 1000000);
+//__PRINTF("rtime_posix: %I64d.%d\n", tp->tv_sec, tp->tv_usec)
+}
 int 
 getrusage_SELF(WIN_TASK *Task, struct rusage *usage)
 {
 	int result = 0;
-	WIN_KINFO_PROC kInfo;
+	WIN_RUSAGE ruInfo = {0};
 
-	win_bzero(usage, sizeof(struct rusage));
-	if (!win_KERN_PROC(Task->ThreadId, &kInfo)){
+	if (!vfs_getrusage_SELF(Task->ThreadId, &ruInfo)){
 		result -= errno_posix(GetLastError());
 	}else{
-		timeval_posix(&usage->ru_utime, &kInfo.User, 0LL);
-		timeval_posix(&usage->ru_stime, &kInfo.Kernel, 0LL);
+		win_bzero(usage, sizeof(struct rusage));
+		rtime_posix(&usage->ru_utime, (DWORDLONG *)&ruInfo.User);
+		rtime_posix(&usage->ru_stime, (DWORDLONG *)&ruInfo.Kernel);
+		if (Task->TracePoints & KTRFAC_STRUCT){
+			ktrace_STRUCT(Task, "rusage", 6, usage, sizeof(struct rusage));
+		}
+	}
+	return(result);
+}
+int 
+getrusage_CHILDREN(WIN_TASK *Task, struct rusage *usage)
+{
+	int result = 0;
+	WIN_RUSAGE ruInfo = {0};
+
+	if (!vfs_getrusage_CHILDREN(Task->TaskId, &ruInfo)){
+		result -= errno_posix(GetLastError());
+	}else{
+		win_bzero(usage, sizeof(struct rusage));
+		rtime_posix(&usage->ru_utime, &ruInfo.User);
+		rtime_posix(&usage->ru_stime, &ruInfo.Kernel);
+		if (Task->TracePoints & KTRFAC_STRUCT){
+			ktrace_STRUCT(Task, "rusage", 6, usage, sizeof(struct rusage));
+		}
 	}
 	return(result);
 }
@@ -97,7 +128,7 @@ sys_getrusage(call_t call, int who, struct rusage *usage)
 			result = getrusage_SELF(call.Task, usage);
 			break;
 		case RUSAGE_CHILDREN:
-			result = -EOPNOTSUPP;
+			result = getrusage_CHILDREN(call.Task, usage);
 			break;
 		default:
 			result = -EINVAL;
@@ -130,7 +161,6 @@ sys_setrlimit(call_t call, int resource, const struct rlimit *rlp)
 	}else if (resource < 0 || resource >= RLIM_NLIMITS){
 		result = -EINVAL;
 	}else if (rlp->rlim_cur > rlp->rlim_max){
-//__PRINTF("  sys_setrlimit(%d): cur(%I64d) max(%I64d)\n", resource, rlp->rlim_cur, rlp->rlim_max)
 		result = -EINVAL;
 	}else{
 		pwTask->Limit[resource] = rlp->rlim_cur;

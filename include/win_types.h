@@ -253,6 +253,11 @@ typedef struct _WIN_RLIMIT {
 	DWORDLONG Maximum;
 } WIN_RLIMIT;
 
+typedef struct _WIN_RUSAGE {
+	DWORDLONG Kernel;
+	DWORDLONG User;
+} WIN_RUSAGE;
+
 /*
  * win_sched.c
  *

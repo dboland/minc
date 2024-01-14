@@ -48,6 +48,11 @@ TimeProc(PVOID Param, DWORD LowValue, DWORD HighValue)
 		WIN_ERR("PostThreadMessage(%d): %s\n", pwTask->ThreadId, win_strerror(GetLastError()));
 	}
 }
+LONGLONG 
+TimeGetTickCount(VOID)
+{
+	return((LONGLONG)(GetTickCount() * 10000));
+}
 
 /****************************************************/
 
@@ -110,7 +115,7 @@ vfs_setitimer(WIN_TASK *Task, LONG *Interval, DWORDLONG *TimeOut)
 	liTimeOut.QuadPart = (LONGLONG)(dwlTimeOut * -0.01);	/* 100-nanosecond intervals */
 	if (!vfs_clock_gettime(WIN_CLOCK_MONOTONIC, &dwlTicks)){
 		return(FALSE);
-	}else if (!ProcGetTimer(Task, &hTimer)){
+	}else if (!proc_getitimer(Task, &hTimer)){
 		return(FALSE);
 	}else if (!dwlTimeOut){
 		lInterval = 0;
@@ -134,26 +139,31 @@ vfs_setitimer(WIN_TASK *Task, LONG *Interval, DWORDLONG *TimeOut)
 	return(bResult);
 }
 BOOL 
-vfs_nanosleep(WIN_TASK *Task, DWORD TimeOut, DWORD *Remain)
+vfs_nanosleep(DWORDLONG *TimeOut, DWORDLONG *Remain)
 {
 	BOOL bResult = FALSE;
-	DWORDLONG dwlTime = (DWORDLONG)(TimeOut + GetTickCount());
-	LONGLONG llRemain = 0;
-//	HANDLE hObjects[MAXIMUM_WAIT_OBJECTS];
-	DWORD dwStatus;
+	LONGLONG llTimeOut = *TimeOut;
+	LONGLONG llRemain = llTimeOut + TimeGetTickCount();
+	HANDLE hTimer = CreateWaitableTimer(NULL, FALSE, NULL);
+	HANDLE hObjects[2] = {__Interrupt, hTimer};
+	LARGE_INTEGER liTimeOut;
+	DWORD dwResult;
 
-	dwStatus = WaitForSingleObjectEx(__Interrupt, TimeOut, TRUE);
-	if (dwStatus == WAIT_FAILED){
-		WIN_ERR("WaitForSingleObjectEx(%d): %s\n", __Interrupt, win_strerror(WSAGetLastError()));
+	liTimeOut.QuadPart = -llTimeOut;
+	SetWaitableTimer(hTimer, &liTimeOut, 0, NULL, NULL, FALSE);
+	dwResult = WaitForMultipleObjectsEx(2, hObjects, FALSE, INFINITE, TRUE);
+	if (dwResult == WAIT_FAILED){
+		WIN_ERR("WaitForMultipleObjectsEx(%s): %s\n", win_strobj(hObjects, 2), win_strerror(GetLastError()));
 	}else if (!proc_poll()){
 		bResult = TRUE;
 	}
-	llRemain = (LONGLONG)(dwlTime - GetTickCount());
+	llRemain -= TimeGetTickCount();
 	if (llRemain > 0){
 		*Remain = llRemain;
 	}else{
-		*Remain = 0;
+		*Remain = 0LL;
 	}
+	CloseHandle(hTimer);
 	return(bResult);
 }
 BOOL 

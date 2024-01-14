@@ -30,51 +30,50 @@
 
 #include <psapi.h>
 
-PIMAGE_NT_HEADERS NTAPI ImageNtHeader(PVOID);
+/************************************************************/
+
+BOOL 
+ResAddUsage(HANDLE Handle, WIN_RUSAGE *Result)
+{
+	BOOL bResult = FALSE;
+	FILETIME ftCreation, ftExit, ftKernel, ftUser;
+
+	if (GetThreadTimes(Handle, &ftCreation, &ftExit, &ftKernel, &ftUser)){
+		Result->Kernel += *(DWORDLONG *)&ftKernel;
+		Result->User += *(DWORDLONG *)&ftUser;
+		bResult = TRUE;
+	}
+	return(bResult);
+}
 
 /************************************************************/
 
 BOOL 
-win_getrlimit_DATA(WIN_RLIMIT *Limit)
+vfs_getrusage_SELF(DWORD ThreadId, WIN_RUSAGE *Result)
 {
-	IMAGE_NT_HEADERS *intHeaders = ImageNtHeader(GetModuleHandle(NULL));
-	WORD wCount = intHeaders->FileHeader.NumberOfSections;
-	IMAGE_SECTION_HEADER *isHeader = (IMAGE_SECTION_HEADER *)(intHeaders + 1);
-	HANDLE hHeap = GetProcessHeap();
-	PROCESS_HEAP_ENTRY phEntry = {0};
+	BOOL bResult = FALSE;
+	HANDLE hThread;
 
-	/* GetProcessWorkingSetSize() */
-	Limit->Current = 0;
-	while (wCount--){
-		if (!win_strncmp(isHeader->Name, ".data", 5)){
-			Limit->Current += isHeader->Misc.VirtualSize;
-		}else if (!win_strncmp(isHeader->Name, ".rdata", 6)){
-			Limit->Current += isHeader->Misc.VirtualSize;
-		}
-		isHeader++;
+	if (!(hThread = OpenThread(THREAD_QUERY_INFORMATION, FALSE, ThreadId))){
+		return(FALSE);
+	}else if (ResAddUsage(hThread, Result)){
+		bResult = CloseHandle(hThread);
 	}
-	Limit->Maximum = Limit->Current;
-	while (HeapWalk(hHeap, &phEntry)){
-		if (!phEntry.Region.dwUnCommittedSize){
-			break;
-		}
-		Limit->Current += phEntry.Region.dwCommittedSize;
-		Limit->Maximum += phEntry.Region.dwCommittedSize + phEntry.Region.dwUnCommittedSize;
-	}
-	return(TRUE);
+	return(bResult);
 }
 BOOL 
-win_getrlimit_AS(WIN_RLIMIT *Limit)
+vfs_getrusage_CHILDREN(DWORD ParentId, WIN_RUSAGE *Result)
 {
-	MEMORY_BASIC_INFORMATION mbInfo;
-	BOOL bResult = FALSE;
+	BOOL bResult = TRUE;
+	DWORD dwIndex = WIN_PID_INIT;
+	WIN_TASK *pwTask = &__Tasks[dwIndex];
 
-	if (!VirtualQuery(&mbInfo, &mbInfo, sizeof(MEMORY_BASIC_INFORMATION))){
-		WIN_ERR("VirtualQuery(%s): %s\n", "RLIMIT_AS", win_strerror(GetLastError()));
-	}else{
-		Limit->Current = mbInfo.BaseAddress - mbInfo.AllocationBase;
-		Limit->Maximum = mbInfo.BaseAddress + mbInfo.RegionSize - mbInfo.AllocationBase;
-		bResult = TRUE;
+	while (dwIndex < WIN_CHILD_MAX){
+		if (pwTask->ParentId == ParentId){
+			bResult = ResAddUsage(pwTask->Handle, Result);
+		}
+		dwIndex++;
+		pwTask++;
 	}
 	return(bResult);
 }

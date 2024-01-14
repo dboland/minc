@@ -33,7 +33,7 @@
 /****************************************************/
 
 BOOL 
-ProcGetTimer(WIN_TASK *Task, HANDLE *Result)
+proc_getitimer(WIN_TASK *Task, HANDLE *Result)
 {
 	BOOL bResult = TRUE;
 	HANDLE hResult = NULL;

@@ -54,7 +54,7 @@ kargv_posix(pid_t pid, int argc, char *argv[])
 	pathn_posix(buf, __Strings[pid].Command, WIN_MAX_PROCTITLE);
 }
 void 
-rtime_posix(FILETIME *Started, int *sec, int *usec)
+ktime_posix(FILETIME *Started, int *sec, int *usec)
 {
 	DWORDLONG dwlStarted = *(DWORDLONG *)Started;
 	DWORDLONG dwlRealTime;
@@ -104,13 +104,14 @@ kproc_posix(WIN_TASK *Task, struct kinfo_proc *proc)
 	proc->p_vm_ssize = (WIN_STACKSIZE + dwPageSize - 1) / dwPageSize;
 	if (win_KERN_PROC(Task->ThreadId, &kInfo)){
 		proc->p_uvalid = 1;			/* CHAR: following p_u* members from struct user are valid */
-		timeval_posix(&tv, &kInfo.Created, WIN_EPOCH);
+		timeval_posix(&tv, &kInfo.Created);
 		proc->p_ustart_sec = tv.tv_sec;
 		proc->p_ustart_usec = tv.tv_usec;
-		rtime_posix(&kInfo.Created, &proc->p_rtime_sec, &proc->p_rtime_usec);
+		ktime_posix(&kInfo.Created, &proc->p_rtime_sec, &proc->p_rtime_usec);
 	}
 	proc->p_stat = Task->State;			/* CHAR: S* process status (from LWP). */
-	proc->p_cpuid = KI_NOCPU;			/* LONG: CPU id */
+//	proc->p_cpuid = KI_NOCPU;			/* LONG: CPU id */
+	proc->p_cpuid = Task->Processor;		/* LONG: CPU id */
 	proc->p_nice = Task->Nice;
 	proc->p_xstat = Task->Status >> 8;		/* U_SHORT: Exit status for wait; also stop signal. */
 	proc->p_tracep = (u_int32_t)Task->TraceHandle;

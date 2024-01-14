@@ -130,6 +130,7 @@ BOOL proc_poll(VOID);
 #include "vfs_time.c"
 #include "vfs_wait.c"
 #include "vfs_ktrace.c"
+#include "vfs_resource.c"
 //#include "vfs_ldt.c"
 
 /****************************************************/

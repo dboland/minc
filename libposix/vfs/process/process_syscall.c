@@ -28,7 +28,7 @@
  *
  */
 
-#include <winbase.h>
+#include <ddk/winddk.h>
 
 /************************************************************/
 
@@ -44,6 +44,7 @@ ProcCreateTask(DWORD TaskId)
 			pwTask->TaskId = TaskId;
 			pwTask->ThreadId = GetCurrentThreadId();
 			pwTask->ProcessId = GetCurrentProcessId();
+			pwTask->Processor = KeGetCurrentProcessorNumber();
 			GetSystemTimeAsFileTime(&pwTask->Started);
 			return(pwTask);
 		}else if (pwTask->Flags & WIN_PS_NOZOMBIE){

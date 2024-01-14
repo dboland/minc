@@ -128,9 +128,9 @@ proc_init(WIN_SIGPROC SignalProc)
 		ProcInitLimits(pwTask->Limit);
 		win_chdir(L"\\");	/* make sure CWD is at mount point */
 	}
-//	if (vfs_setugid(pwTask)){
-//		pwTask->IsSetUGid = 1;
-//	}
+	if (vfs_setugid(pwTask)){
+		pwTask->IsSetUGid = 1;
+	}
 	__TaskId = pwTask->TaskId;
 	__CTTY = &__Terminals[pwTask->TerminalId];
 	return(pwTask);

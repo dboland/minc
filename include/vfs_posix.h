@@ -114,8 +114,8 @@ BOOL vfs_PTMGET(WIN_DEVICE *Device, WIN_PTMGET *Result);
 /* vfs_time.c */
 
 BOOL vfs_setitimer(WIN_TASK *Task, LONG *Interval, DWORDLONG *TimeOut);
-BOOL vfs_nanosleep(WIN_TASK *Task, DWORD Millisecs, DWORD *Remain);
 BOOL vfs_clock_gettime(DWORD ClockId, DWORDLONG *Result);
+BOOL vfs_nanosleep(DWORDLONG *TimeOut, DWORDLONG *Remain);
 
 /* vfs_statvfs.c */
 
@@ -169,6 +169,11 @@ BOOL vfs_utimes(WIN_NAMEIDATA *Path, FILETIME FileTime[2]);
 /* vfs_wait.c */
 
 BOOL vfs_wait4(WIN_TASK *Task, WIN_TASK *Children[], BOOL NoHang, DWORD Status, WIN_USAGE *Result);
+
+/* vfs_resource.c */
+
+BOOL vfs_getrusage_SELF(DWORD ThreadId, WIN_RUSAGE *Result);
+BOOL vfs_getrusage_CHILDREN(DWORD ParentId, WIN_RUSAGE *Result);
 
 /****************************************************/
 

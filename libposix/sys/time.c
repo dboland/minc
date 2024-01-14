@@ -30,16 +30,14 @@
 
 #include <sys/time.h>
 
-#define WIN_EPOCH	116444736000000000LL
-
 /****************************************************/
 
 struct timeval *
-timeval_posix(struct timeval *tp, FILETIME *Time, DWORDLONG Offset)
+timeval_posix(struct timeval *tp, FILETIME *Time)
 {
 	LONGLONG llTime = *(LONGLONG *)Time;
 
-	llTime -= Offset;				/* epoch */
+	llTime -= 116444736000000000LL;			/* epoch */
 	llTime *= 0.1;					/* microseconds */
 	tp->tv_sec = (time_t)(llTime * 0.000001);
 	tp->tv_usec = llTime - (tp->tv_sec * 1000000);
@@ -143,21 +141,25 @@ int
 sys_nanosleep(call_t call, const struct timespec *req, struct timespec *rem)
 {
 	int result = 0;
-	DWORD dwRemain;
-	DWORD dwMillisecs;
-	WIN_TASK *pwTask = call.Task;
+	DWORDLONG dwlRemain = 0;
+	LONGLONG llTimeOut;
 
-	/* __int64_t (%I64d) */
-	dwMillisecs = (req->tv_sec & 0xBFFFFFFF) * 1000;	/* limit to DWORD bits */
-	dwMillisecs += req->tv_nsec * 0.000001;			/* nanoseconds */
-	if (req->tv_nsec > 999999999){
-		result = -EINVAL;
-	}else if (!vfs_nanosleep(pwTask, dwMillisecs, &dwRemain)){
+	if (!req){
+		return(-EFAULT);
+	}else if (req->tv_nsec < 0 || req->tv_nsec > 1000000000){
+		return(-EINVAL);
+	}else{
+		llTimeOut = (LONGLONG)(req->tv_sec * 10000000);
+		llTimeOut += req->tv_nsec * 0.01;
+	}
+	if (!vfs_nanosleep(&llTimeOut, &dwlRemain)){
 		result -= errno_posix(GetLastError());
 	}
 	if (rem){
-		rem->tv_sec = (time_t)(dwRemain * 0.001);
-		rem->tv_nsec = (dwRemain % 1000) * 1000000;	/* nanoseconds */
+		rem->tv_sec = (time_t)(dwlRemain * 0.0000001);
+		rem->tv_nsec = dwlRemain - (rem->tv_sec * 1000000);	/* nanoseconds */
+	}else{
+		result = -EFAULT;
 	}
 	return(result);
 }
