@@ -91,6 +91,17 @@ typedef __SIZE_TYPE__ WIN_SIZE_T;
 #define ENABLE_LVB_GRID_WORLDWIDE		0x0010
 #define DISABLE_NEWLINE_AUTO_RETURN		0x0008
 
+/* winternl.h */
+
+typedef struct _SYSTEM_PROCESSOR_PERFORMANCE_INFORMATION {
+    LARGE_INTEGER IdleTime;
+    LARGE_INTEGER KernelTime;
+    LARGE_INTEGER UserTime;
+    LARGE_INTEGER DpcTime;
+    LARGE_INTEGER InterruptTime;
+    ULONG InterruptCount;
+} SYSTEM_PROCESSOR_PERFORMANCE_INFORMATION;
+
 /*
  * win_acl.c
  */

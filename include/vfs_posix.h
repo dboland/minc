@@ -114,7 +114,6 @@ BOOL vfs_PTMGET(WIN_DEVICE *Device, WIN_PTMGET *Result);
 /* vfs_time.c */
 
 BOOL vfs_setitimer(WIN_TASK *Task, LONG *Interval, DWORDLONG *TimeOut);
-BOOL vfs_clock_gettime(DWORD ClockId, DWORDLONG *Result);
 BOOL vfs_nanosleep(DWORDLONG *TimeOut, DWORDLONG *Remain);
 
 /* vfs_statvfs.c */

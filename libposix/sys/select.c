@@ -63,19 +63,19 @@ fdset_select(fd_set *fds, struct pollfd pollfds[], short flags)
 	}
 	return(count);
 }
-struct timeval *
-timev_posix(struct timeval *tp, DWORD Millisecs)
+void 
+stime_posix(struct timeval *tp, DWORD Millisecs)
 {
 	LONGLONG llTime = (LONGLONG)Millisecs;
 
+	llTime *= 1000;						/* microseconds */
 	if (llTime > 0){
-		tp->tv_sec = (time_t)(llTime * 0.001);		/* __int64_t (%I64d) */
-		tp->tv_usec = (Millisecs % 1000) * 1000;	/* microseconds */
+		tp->tv_sec = (time_t)(llTime * 0.000001);	/* __int64_t (%I64d) */
+		tp->tv_usec = llTime - (tp->tv_sec * 1000000);
 	}else{
-		tp->tv_usec = 0;
 		tp->tv_sec = 0LL;
+		tp->tv_usec = 0;
 	}
-	return(tp);
 }
 
 /****************************************************/
@@ -110,9 +110,9 @@ __select(WIN_TASK *Task, int nfds, fd_set *restrict readfds, fd_set *restrict wr
 		nfds = WSA_MAXIMUM_WAIT_EVENTS;
 	}
 	if (!pollfd_win(Task, vnVector, fdVector, pollfds, nfds)){
-		result = -EINVAL;
+		return(-EINVAL);
 	}else if (!vfs_poll(Task, vnVector, fdVector, &dwTimeOut, &dwResult)){
-		result -= errno_posix(GetLastError());
+		return(-errno_posix(GetLastError()));
 	}
 	if (errorfds){
 		result += fdset_select(errorfds, pollfds, (POLLERR | POLLNVAL));
@@ -124,7 +124,7 @@ __select(WIN_TASK *Task, int nfds, fd_set *restrict readfds, fd_set *restrict wr
 		result += fdset_select(readfds, pollfds, (POLLIN | POLLHUP | POLLRDBAND));
 	}
 	if (timeout){
-		timev_posix(timeout, dwTimeOut);
+		stime_posix(timeout, dwTimeOut);
 	}
 	return(result);
 }

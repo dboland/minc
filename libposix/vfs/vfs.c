@@ -112,7 +112,6 @@ BOOL proc_poll(VOID);
 #include "mailslot/mailslot.c"
 #include "event/event.c"
 #include "winsock/winsock.c"
-#include "global/global.c"
 #include "vfs_fcntl.c"
 #include "vfs_stdlib.c"
 #include "vfs_unistd.c"

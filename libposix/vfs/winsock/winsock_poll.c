@@ -91,7 +91,7 @@ ws2_poll(WIN_VNODE *Node, WIN_POLLFD *Info)
 	WSANETWORKEVENTS nwEvents = {0};
 	ULONG ulCount = 0;
 
-	if (!(Node->Attribs & FILE_FLAG_OVERLAPPED)){	/* wget.exe */
+	if (!(Node->Attribs & FILE_FLAG_OVERLAPPED)){		/* wget.exe */
 		sResult = WSAUnblock(Node);
 	}else if (SOCKET_ERROR == WSAEnumNetworkEvents(Node->Socket, Node->Event, &nwEvents)){
 		WIN_ERR("WSAEnumNetworkEvents(%d): %s\n", Node->Socket, win_strerror(WSAGetLastError()));

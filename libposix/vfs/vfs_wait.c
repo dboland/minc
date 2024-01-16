@@ -70,15 +70,15 @@ BOOL
 WaitTimeOut(WIN_TASK *Children[], DWORD TimeOut)
 {
 	BOOL bResult = FALSE;
-	DWORD dwResult = 0;
+	DWORD dwStatus;
 	HANDLE hObjects[MAXIMUM_WAIT_OBJECTS];
 	DWORD dwCount = WaitGetObjects(Children, hObjects);
 
-	dwResult = WaitForMultipleObjectsEx(dwCount, hObjects, FALSE, TimeOut, TRUE);
-	if (dwResult == WAIT_FAILED){
+	dwStatus = WaitForMultipleObjectsEx(dwCount, hObjects, FALSE, TimeOut, TRUE);
+	if (dwStatus == WAIT_FAILED){
 		WIN_ERR("WaitForMultipleObjects(%s): %s\n", win_strobj(hObjects, dwCount), win_strerror(GetLastError()));
 		vfs_raise(WM_COMMAND, CTRL_ABORT_EVENT, 0);
-//	}else if (!dwResult){
+//	}else if (!dwStatus){
 //		SetLastError(ERROR_SIGNAL_PENDING);
 	}else{
 		bResult = TRUE;

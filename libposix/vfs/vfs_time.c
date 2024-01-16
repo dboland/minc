@@ -30,8 +30,6 @@
 
 #include <winbase.h>
 
-//#define OpenWaitableTimer __AW(OpenWaitableTimer)
-
 /****************************************************/
 
 VOID CALLBACK 
@@ -57,51 +55,6 @@ TimeGetTickCount(VOID)
 /****************************************************/
 
 BOOL 
-vfs_clock_gettime_REALTIME(DWORDLONG *Result)
-{
-	GetSystemTimeAsFileTime((FILETIME *)Result);
-	return(TRUE);
-}
-BOOL 
-vfs_clock_gettime_MONOTONIC(LARGE_INTEGER Frequency, DWORDLONG *Result)
-{
-	BOOL bResult = TRUE;
-	LARGE_INTEGER liCount;
-
-	if (QueryPerformanceCounter(&liCount)){
-		*Result = Frequency.QuadPart * liCount.QuadPart;
-	}else{
-		bResult = FALSE;
-	}
-	return(bResult);
-}
-
-/****************************************************/
-
-BOOL 
-vfs_clock_gettime(DWORD ClockId, DWORDLONG *Result)
-{
-	BOOL bResult = FALSE;
-
-	switch (ClockId){
-		case WIN_CLOCK_REALTIME:	/* gmake.exe */
-			bResult = vfs_clock_gettime_REALTIME(Result);
-			break;
-		case WIN_CLOCK_MONOTONIC:	/* git.exe */
-			bResult = vfs_clock_gettime_MONOTONIC(__Globals[WIN_KERN_CLOCKRATE], Result);
-			break;
-		case WIN_CLOCK_VIRTUAL:
-		case WIN_CLOCK_PROCESS_CPUTIME_ID:
-		case WIN_CLOCK_THREAD_CPUTIME_ID:
-		case WIN_CLOCK_UPTIME:
-			SetLastError(ERROR_NOT_SUPPORTED);
-			break;
-		default:
-			SetLastError(ERROR_BAD_ARGUMENTS);
-	}
-	return(bResult);
-}
-BOOL 
 vfs_setitimer(WIN_TASK *Task, LONG *Interval, DWORDLONG *TimeOut)
 {
 	BOOL bResult = FALSE;
@@ -110,31 +63,34 @@ vfs_setitimer(WIN_TASK *Task, LONG *Interval, DWORDLONG *TimeOut)
 	LONG lInterval = *Interval;
 	DWORDLONG dwlTicks = 0LL;
 	LONGLONG llRemain;
-	HANDLE hTimer = NULL;
+	HANDLE hTimer;
+	PTIMERAPCROUTINE ptProc = TimeProc;
 
+	/* If not set to NULL, the completion routine will be called
+	 * one last time when resetting the timer (ftp.exe).
+	 */
+	if (!dwlTimeOut){
+		ptProc = NULL;
+	}
 	liTimeOut.QuadPart = (LONGLONG)(dwlTimeOut * -0.01);	/* 100-nanosecond intervals */
-	if (!vfs_clock_gettime(WIN_CLOCK_MONOTONIC, &dwlTicks)){
+	if (!win_clock_gettime_MONOTONIC(&dwlTicks)){
 		return(FALSE);
 	}else if (!proc_getitimer(Task, &hTimer)){
 		return(FALSE);
-	}else if (!dwlTimeOut){
-		lInterval = 0;
-		Task->Timer = NULL;
-		bResult = CloseHandle(hTimer);
-	}else if (!SetWaitableTimer(hTimer, &liTimeOut, lInterval, TimeProc, Task, FALSE)){
+	}else if (!SetWaitableTimer(hTimer, &liTimeOut, lInterval, ptProc, Task, FALSE)){
 		WIN_ERR("SetWaitableTimer(%d): %s\n", hTimer, win_strerror(GetLastError()));
 	}else{
 		bResult = TRUE;
 	}
-	llRemain = (LONGLONG)(Task->Ticks - dwlTicks);
-	if (llRemain < 0){
-		*TimeOut = 0LL;
-	}else{
+	llRemain = Task->Ticks - dwlTicks;
+	if (llRemain > 0){
 		*TimeOut = llRemain;
+	}else{
+		*TimeOut = 0LL;
 	}
 	*Interval = Task->Interval;
 	Task->Interval = lInterval;
-	Task->Ticks = (DWORDLONG)(dwlTicks + dwlTimeOut);
+	Task->Ticks = dwlTicks + dwlTimeOut;
 //VfsDebugTimer(Task, "vfs_setitimer");
 	return(bResult);
 }
@@ -149,7 +105,7 @@ vfs_nanosleep(DWORDLONG *TimeOut, DWORDLONG *Remain)
 	LARGE_INTEGER liTimeOut;
 	DWORD dwResult;
 
-	liTimeOut.QuadPart = -llTimeOut;
+	liTimeOut.QuadPart = -llTimeOut;	/* relative time */
 	SetWaitableTimer(hTimer, &liTimeOut, 0, NULL, NULL, FALSE);
 	dwResult = WaitForMultipleObjectsEx(2, hObjects, FALSE, INFINITE, TRUE);
 	if (dwResult == WAIT_FAILED){

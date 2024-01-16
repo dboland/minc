@@ -102,27 +102,41 @@ utimespec_win(FILETIME FileTime[2], const struct timespec times[2])
 	}
 	return(FileTime);
 }
+void 
+itimeval_posix(struct timeval *tp, LONGLONG TimeOut)
+{
+	TimeOut *= 0.001;				/* microseconds */
+	tp->tv_sec = (time_t)(TimeOut * 0.000001);
+	tp->tv_usec = TimeOut - (tp->tv_sec * 1000000);
+}
 
 /****************************************************/
 
 int 
-clock_gettime_REALTIME(struct timespec *tp, DWORDLONG Time)
+clock_gettime_REALTIME(struct timespec *tp)
 {
-	Time -= 116444736000000000LL;			/* epoch (100-nanosecond intervals) */
-	tp->tv_sec = (time_t)(Time * 0.0000001);	/* seconds (gcc needs cast!) */
-	Time *= 100;
-	tp->tv_nsec = Time - (tp->tv_sec * 1000000000);	/* nanoseconds */
+	LONGLONG llTime;
+
+	GetSystemTimeAsFileTime((FILETIME *)&llTime);
+	llTime -= 116444736000000000LL;			/* epoch (100-nanosecond intervals) */
+	llTime *= 100;					/* nanoseconds */
+	tp->tv_sec = (time_t)(llTime * 0.000000001);	/* seconds (gcc needs cast!) */
+	tp->tv_nsec = llTime - (tp->tv_sec * 1000000000);
 	return(0);
 }
 int 
-clock_gettime_MONOTONIC(struct timespec *tp, DWORDLONG Time)
+clock_gettime_MONOTONIC(struct timespec *tp)
 {
-	DWORD dwTime = Time & 0xFFFFFFFF;
+	int result = 0;
+	LONGLONG llTime;
 
-	tp->tv_sec = (time_t)(Time * 0.000000001);	/* seconds (gcc needs cast!) */
-//	tp->tv_nsec = dwTime % 1000000000;		/* nanoseconds */
-	tp->tv_nsec = Time - (tp->tv_sec * 1000000000);	/* nanoseconds */
-	return(0);
+	if (!win_clock_gettime_MONOTONIC(&llTime)){
+		result -= errno_posix(GetLastError());
+	}else{
+		tp->tv_sec = (time_t)(llTime * 0.000000001);		/* seconds (gcc needs cast!) */
+		tp->tv_nsec = llTime - (tp->tv_sec * 1000000000);	/* nanoseconds */
+	}
+	return(result);
 }
 int 
 setitimer_REAL(WIN_TASK *Task, LONG *Interval, DWORDLONG *TimeOut)
@@ -141,7 +155,7 @@ int
 sys_nanosleep(call_t call, const struct timespec *req, struct timespec *rem)
 {
 	int result = 0;
-	DWORDLONG dwlRemain = 0;
+	DWORDLONG dwlRemain = 0LL;
 	LONGLONG llTimeOut;
 
 	if (!req){
@@ -174,9 +188,9 @@ sys_gettimeofday(call_t call, struct timeval *tv, struct timezone *tz)
 	}else{
 		GetSystemTimeAsFileTime((FILETIME *)&dwlTime);
 		dwlTime -= 116444736000000000LL;		/* epoch */
-		dwlTime *= 0.1;					/* 100-nanosecond intervals */
+		dwlTime *= 0.1;					/* microseconds */
 		tv->tv_sec = (time_t)(dwlTime * 0.000001);	/* seconds (date.exe) */
-		tv->tv_usec = dwlTime - (tv->tv_sec * 1000000);	/* microseconds (ab.exe) */
+		tv->tv_usec = dwlTime - (tv->tv_sec * 1000000);	/* ab.exe */
 	}
 	return(result);
 }
@@ -193,30 +207,31 @@ sys_settimeofday(call_t call, const struct timeval *tp, const struct timezone *t
 	return(result);
 }
 int 
-sys_clock_gettime(call_t call, clockid_t clk_id, struct timespec *tp)
+sys_clock_gettime(call_t call, clockid_t clockid, struct timespec *tp)
 {
 	int result = 0;
-	DWORDLONG dwlTime = 0;
+	WIN_TASK *pwTask = call.Task;
 
 	if (!tp){
-		result = -EFAULT;
-	}else if (!vfs_clock_gettime(clk_id, &dwlTime)){
-		result -= errno_posix(GetLastError());
-	}else switch (clk_id){
+		return(-EFAULT);
+	}
+	switch (clockid){
 		case CLOCK_REALTIME:			/* git.exe */
-			result = clock_gettime_REALTIME(tp, dwlTime);
+			result = clock_gettime_REALTIME(tp);
 			break;
 		case CLOCK_MONOTONIC:			/* git.exe */
-			result = clock_gettime_MONOTONIC(tp, dwlTime);
+			result = clock_gettime_MONOTONIC(tp);
 			break;
 		case CLOCK_VIRTUAL:
 		case CLOCK_PROCESS_CPUTIME_ID:
 		case CLOCK_THREAD_CPUTIME_ID:
 		case CLOCK_UPTIME:
-			result = -EOPNOTSUPP;
-			break;
+			return(-EOPNOTSUPP);
 		default:
-			result = -EINVAL;
+			return(-EINVAL);
+	}
+	if (pwTask->TracePoints & KTRFAC_STRUCT){
+		ktrace_STRUCT(pwTask, "reltimespec", 11, tp, sizeof(struct timespec));
 	}
 	return(result);
 }
@@ -225,8 +240,7 @@ sys_setitimer(call_t call, int which, const struct itimerval *restrict value, st
 {
 	int result = 0;
 	LONG lInterval = 0;
-	DWORDLONG dwlTimeOut = 0;
-	DWORD dwResult;
+	DWORDLONG dwlTimeOut = 0LL;
 	WIN_TASK *pwTask = call.Task;
 
 	/* OpenBSD's profiler passes NULL */
@@ -247,9 +261,7 @@ sys_setitimer(call_t call, int which, const struct itimerval *restrict value, st
 			return(-EINVAL);
 	}
 	if (ovalue){
-		dwResult = dwlTimeOut & 0xFFFFFFFF;
-		ovalue->it_value.tv_sec = (time_t)(dwlTimeOut * 0.000000001);
-		ovalue->it_value.tv_usec = (dwResult % 1000000000) * 0.001;
+		itimeval_posix(&ovalue->it_value, dwlTimeOut);
 		ovalue->it_interval.tv_sec = (time_t)(lInterval * 0.001);
 		ovalue->it_interval.tv_usec = (lInterval % 1000) * 1000;
 	}

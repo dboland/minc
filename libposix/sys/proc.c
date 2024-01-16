@@ -66,13 +66,13 @@ ktime_posix(FILETIME *Started, int *sec, int *usec)
 	*usec = dwlRealTime - (*sec * 1000000);
 }
 struct kinfo_proc *
-kproc_posix(WIN_TASK *Task, struct kinfo_proc *proc)
+kproc_posix(struct kinfo_proc *proc, WIN_TASK *Task)
 {
 	WIN_TERMIO *pTerminal = &__Terminals[Task->TerminalId];
 	wchar_t *command = win_basename(PSTRING(Task).Command);
 	struct timeval tv;
 	WIN_KINFO_PROC kInfo = {0};
-	DWORD dwPageSize = __Globals[WIN_HW_PAGESIZE].LowPart;
+	DWORD dwPageSize = win_HW_PAGESIZE();
 
 	/* see: src/sys/sys/sysctl.h */
 
@@ -110,7 +110,6 @@ kproc_posix(WIN_TASK *Task, struct kinfo_proc *proc)
 		ktime_posix(&kInfo.Created, &proc->p_rtime_sec, &proc->p_rtime_usec);
 	}
 	proc->p_stat = Task->State;			/* CHAR: S* process status (from LWP). */
-//	proc->p_cpuid = KI_NOCPU;			/* LONG: CPU id */
 	proc->p_cpuid = Task->Processor;		/* LONG: CPU id */
 	proc->p_nice = Task->Nice;
 	proc->p_xstat = Task->Status >> 8;		/* U_SHORT: Exit status for wait; also stop signal. */
@@ -131,7 +130,7 @@ proc_KERN_PROC_ALL(WIN_TASK *Task, struct kinfo_proc *buf, size_t *size)
 		if (!buf){
 			*size += sizeof(struct kinfo_proc);
 		}else{
-			buf = kproc_posix(Task, buf);
+			buf = kproc_posix(buf, Task);
 		}
 	}
 	return(buf);
@@ -143,7 +142,7 @@ proc_KERN_PROC_PGRP(WIN_TASK *Task, pid_t pgid, struct kinfo_proc *buf, size_t *
 		if (!buf){
 			*size += sizeof(struct kinfo_proc);
 		}else{
-			buf = kproc_posix(Task, buf);
+			buf = kproc_posix(buf, Task);
 		}
 	}
 	return(buf);
@@ -160,7 +159,7 @@ proc_KERN_PROC_UID(WIN_TASK *Task, uid_t uid, struct kinfo_proc *buf, size_t *si
 		if (!buf){
 			*size += sizeof(struct kinfo_proc);
 		}else{
-			buf = kproc_posix(Task, buf);
+			buf = kproc_posix(buf, Task);
 		}
 	}
 	return(buf);
@@ -172,7 +171,7 @@ proc_KERN_PROC_KTHREAD(WIN_TASK *Task, int tid, struct kinfo_proc *buf, size_t *
 		if (!buf){
 			*size += sizeof(struct kinfo_proc);
 		}else{
-			buf = kproc_posix(Task, buf);
+			buf = kproc_posix(buf, Task);
 		}
 	}
 	return(buf);

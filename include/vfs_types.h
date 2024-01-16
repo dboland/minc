@@ -321,7 +321,7 @@ typedef struct _WIN_PSTRING {
 	WCHAR Path[WIN_PATH_MAX];
 } WIN_PSTRING;
 
-#define PSTRING(tsk)	__Strings[tsk->TaskId]
+#define PSTRING(TASK)	__Strings[TASK->TaskId]
 
 /*
  * vfs_mount.c
@@ -397,17 +397,6 @@ typedef struct _WIN_VATTR {
 } WIN_VATTR;
 
 /*
- * vfs_time.c
- */
-
-#define WIN_CLOCK_REALTIME		0
-#define WIN_CLOCK_VIRTUAL		1
-#define WIN_CLOCK_PROCESS_CPUTIME_ID	2
-#define WIN_CLOCK_MONOTONIC		3
-#define WIN_CLOCK_THREAD_CPUTIME_ID	4
-#define WIN_CLOCK_UPTIME		5
-
-/*
  * vfs_sysctl.c
  */
 
@@ -415,8 +404,6 @@ typedef enum _WIN_GLOBAL {
 	WIN_KERN_SECURELVL,
 	WIN_KERN_VERSION,
 	WIN_KERN_BUILD,
-	WIN_KERN_CLOCKRATE,
-	WIN_HW_PAGESIZE,
 	WIN_KERN_MSGBUF,
 	WIN_GLOBAL_MAX
 } WIN_GLOBAL;
@@ -440,8 +427,6 @@ typedef struct _WIN_TASK {
 	DWORD Nice;
 	DWORD Flags;
 	DWORD Depth;
-	DWORDLONG Ticks;		/* number of ticks in nanoseconds */
-	LONG Interval;			/* last interval in milliseconds */
 	SID8 UserSid;			/* effective user id */
 	SID8 GroupSid;			/* effective group id */
 	HANDLE TraceHandle;
@@ -450,6 +435,8 @@ typedef struct _WIN_TASK {
 	DWORD State;
 	DWORD Code;			/* syscall currently running */
 	HANDLE Timer;
+	DWORDLONG Ticks;		/* number of ticks in nanoseconds */
+	LONG Interval;			/* last interval in milliseconds */
 	UINT ProcMask;			/* blocked signals */
 	UINT Pending;			/* pending signals */
 	INT Error;

@@ -34,17 +34,16 @@
 
 /****************************************************/
 
-struct timespec *
-times_posix(struct timespec *ts)
+void 
+ttime_posix(struct timespec *ts)
 {
 	DWORDLONG dwlTime;
 
 	GetSystemTimeAsFileTime((FILETIME *)&dwlTime);
-	dwlTime -= 116444736000000000LL;			/* epoch, 100-nanosecond intervals */
-	ts->tv_sec = (time_t)(dwlTime * 0.0000001);
-	dwlTime *= 100;
-	ts->tv_nsec = dwlTime - (ts->tv_sec * 1000000000);	/* nanoseconds */
-	return(ts);
+	dwlTime -= 116444736000000000LL;		/* epoch, 100-nanosecond intervals */
+	dwlTime *= 100;					/* nanoseconds */
+	ts->tv_sec = (time_t)(dwlTime * 0.000000001);	/* seconds (gcc needs cast!) */
+	ts->tv_nsec = dwlTime - (ts->tv_sec * 1000000000);
 }
 
 /****************************************************/
@@ -80,7 +79,7 @@ ktrace_SYSCALL(WIN_TASK *Task, register_t code, size_t argsize, register_t args[
 	header.ktr_type = KTR_SYSCALL;
 	header.ktr_pid = Task->TaskId;
 	header.ktr_tid = Task->ThreadId;
-	times_posix(&header.ktr_time);
+	ttime_posix(&header.ktr_time);
 	win_strncpy(header.ktr_comm, __PROGNAME, MAXCOMLEN);
 	header.ktr_len = sizeof(struct ktr_syscall) + argsize + iovData[3].Length;
 	data.ktr_code = code;
@@ -101,7 +100,7 @@ ktrace_SYSRET(WIN_TASK *Task, register_t code, int result)
 	header.ktr_type = KTR_SYSRET;
 	header.ktr_pid = Task->TaskId;
 	header.ktr_tid = Task->ThreadId;
-	times_posix(&header.ktr_time);
+	ttime_posix(&header.ktr_time);
 	win_strncpy(header.ktr_comm, __PROGNAME, MAXCOMLEN);
 	header.ktr_len = sizeof(struct ktr_sysret);
 	data.ktr_code = code;
@@ -126,7 +125,7 @@ ktrace_NAMEI(WIN_TASK *Task, const char *path, size_t size)
 	header.ktr_type = KTR_NAMEI;
 	header.ktr_pid = Task->TaskId;
 	header.ktr_tid = Task->ThreadId;
-	times_posix(&header.ktr_time);
+	ttime_posix(&header.ktr_time);
 	win_strncpy(header.ktr_comm, __PROGNAME, MAXCOMLEN);
 	header.ktr_len = size;
 	win_writev(Task->TraceHandle, iovData, 2, &ulResult);
@@ -145,7 +144,7 @@ ktrace_PSIG(WIN_TASK *Task, int signo, sig_t action, siginfo_t *info)
 	header.ktr_type = KTR_PSIG;
 	header.ktr_pid = Task->TaskId;
 	header.ktr_tid = Task->ThreadId;
-	times_posix(&header.ktr_time);
+	ttime_posix(&header.ktr_time);
 	win_strncpy(header.ktr_comm, __PROGNAME, MAXCOMLEN);
 	header.ktr_len = sizeof(struct ktr_psig);
 	data.signo = signo;
@@ -170,7 +169,7 @@ ktrace_GENIO(WIN_TASK *Task, int fd, enum uio_rw rw, const void *buffer, ssize_t
 	header.ktr_type = KTR_GENIO;
 	header.ktr_pid = Task->TaskId;
 	header.ktr_tid = Task->ThreadId;
-	times_posix(&header.ktr_time);
+	ttime_posix(&header.ktr_time);
 	win_strncpy(header.ktr_comm, __PROGNAME, MAXCOMLEN);
 	header.ktr_len = sizeof(struct ktr_genio) + size;
 	data.ktr_fd = fd;
@@ -192,7 +191,7 @@ ktrace_STRUCT(WIN_TASK *Task, const char *name, size_t len, const void *data, si
 	header.ktr_pid = Task->TaskId;
 	header.ktr_tid = Task->ThreadId;
 	header.ktr_len = len + 1 + size;
-	times_posix(&header.ktr_time);
+	ttime_posix(&header.ktr_time);
 	win_strncpy(header.ktr_comm, __PROGNAME, MAXCOMLEN);
 	win_writev(Task->TraceHandle, iovData, 3, &ulResult);
 }
@@ -212,7 +211,7 @@ ktrace_USER(WIN_TASK *Task, const char *label, void *addr, size_t len)
 	header.ktr_pid = Task->TaskId;
 	header.ktr_tid = Task->ThreadId;
 	header.ktr_len = sizeof(struct ktr_user) + len;
-	times_posix(&header.ktr_time);
+	ttime_posix(&header.ktr_time);
 	win_strncpy(header.ktr_comm, __PROGNAME, MAXCOMLEN);
 	win_strncpy(data.ktr_id, label, KTR_USER_MAXIDLEN);
 	win_writev(Task->TraceHandle, iovData, 3, &ulResult);

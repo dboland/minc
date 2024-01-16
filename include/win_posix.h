@@ -135,13 +135,18 @@ DWORD win_F_GETFD(HANDLE Handle);
 HANDLE win_F_DISINHERIT(HANDLE Handle, DWORD ProcessId);
 HANDLE win_F_INHERIT(HANDLE Handle, ACCESS_MASK Access, DWORD ProcessId);
 
-/* vfs_sysctl.c */
+/* win_sysctl.c */
 
-BOOL win_KERN_CLOCKRATE(DWORDLONG *Result);
+UINT win_HW_PAGESIZE(VOID);
+DWORD win_HW_NCPU(VOID);
+UINT win_HW_USERMEM(VOID);
+UINT win_HW_PHYSMEM(VOID);
+DWORDLONG win_HW_PHYSMEM64(VOID);
+UINT win_KERN_CLOCKRATE(VOID);
 BOOL win_KERN_HOSTNAME(LPSTR Current, LPCSTR New, DWORD Size);
 BOOL win_KERN_DOMAINNAME(LPSTR Current, LPCSTR New, DWORD Size);
 BOOL win_KERN_PROC(DWORD ThreadId, WIN_KINFO_PROC *Result);
-BOOL win_KERN_TIMECOUNTER_TICK(DWORDLONG *Result);
+BOOL win_KERN_CPTIME2(SYSTEM_PROCESSOR_PERFORMANCE_INFORMATION Buffer[], ULONG Size);
 
 /* win_mman.c */
 
@@ -180,6 +185,16 @@ VOID win_ldt_attach(DWORD Count);
 BOOL win_ldt_read(HANDLE Handle, DWORD Selector, LPCSTR Label);
 BOOL win_ldt_write(DWORD Selector, DWORD Base, DWORD Limit);
 
+/* win_time.c */
+
+BOOL win_clock_gettime_MONOTONIC(DWORDLONG *Result);
+BOOL win_settimeofday(DWORDLONG Time, WORD MilliSeconds);
+
+/* win_mount.c */
+
+BOOL win_mount(LPCWSTR Directory, LPCWSTR Volume);
+BOOL win_unmount(LPCWSTR Directory);
+
 /* win_signal.c */
 
 BOOL win_kill(DWORD ThreadId, UINT Message, WPARAM WParam, LPARAM LParam);
@@ -188,11 +203,3 @@ BOOL win_kill(DWORD ThreadId, UINT Message, WPARAM WParam, LPARAM LParam);
 
 BOOL win_writev(HANDLE Handle, const WIN_IOVEC Data[], DWORD Count, ULONG *Result);
 
-/* win_time.c */
-
-BOOL win_settimeofday(DWORDLONG Time, WORD MilliSeconds);
-
-/* win_mount.c */
-
-BOOL win_mount(LPCWSTR Directory, LPCWSTR Volume);
-BOOL win_unmount(LPCWSTR Directory);

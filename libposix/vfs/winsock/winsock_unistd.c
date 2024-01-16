@@ -38,8 +38,8 @@ ws2_close(WIN_VNODE *Node)
 	BOOL bResult = FALSE;
 	ULONG ulCount;
 
-	/* closesocket() hangs on duplicates (login.exe)
-	 * This occurs when other threads are doing ReadFile()
+	/* closesocket() hangs on duplicates (login.exe). This occurs
+	 * when other threads are doing ReadFile().
 	 */
 	if (SOCKET_ERROR == closesocket(Node->Socket)){
 //		WIN_ERR("closesocket(%d): %s\n", Node->Socket, win_strerror(WSAGetLastError()));
@@ -55,7 +55,16 @@ ws2_close(WIN_VNODE *Node)
 BOOL 
 ws2_write(WIN_VNODE *Node, LPCSTR Buffer, DWORD Size, DWORD *Result)
 {
-	return(fifo_write(Node, Buffer, Size, Result));
+	BOOL bResult = FALSE;
+	DWORD dwStatus;
+
+	dwStatus = WaitForSingleObjectEx(__Interrupt, 0, TRUE);
+	if (dwStatus == WAIT_IO_COMPLETION){
+		bResult = proc_poll();
+	}else{
+		bResult = fifo_write(Node, Buffer, Size, Result);
+	}
+	return(bResult);
 }
 BOOL 
 ws2_read(WIN_VNODE *Node, LPSTR Buffer, DWORD Size, DWORD *Result)

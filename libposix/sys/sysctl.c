@@ -53,27 +53,27 @@ ticks_posix(FILETIME *Time)
 	llTime *= 0.0000001;		/* milliseconds */
 	return(llTime);
 }
+u_int64_t
+ticks64_posix(LARGE_INTEGER *Time)
+{
+	LONGLONG llTime = Time->QuadPart;
+
+	llTime -= 116444736000000000LL;	/* epoch */
+	llTime *= 0.0000001;		/* milliseconds */
+	return(llTime);
+}
 
 /****************************************************/
 
 int 
 sysctl_KERN_CLOCKRATE(struct clockinfo *info)
 {
-	int result = 0;
-	DWORDLONG dwlHertz, dwlTick;
-
-	if (!win_KERN_CLOCKRATE(&dwlHertz)){
-		result -= errno_posix(GetLastError());
-	}else if (!win_KERN_TIMECOUNTER_TICK(&dwlTick)){
-		result -= errno_posix(GetLastError());
-	}else{
-		info->hz = dwlHertz;
-		info->tick = dwlTick;
-		info->tickadj = 0;
-		info->stathz = dwlHertz;
-		info->profhz = dwlHertz;
-	}
-	return(result);
+	info->hz = win_KERN_CLOCKRATE();
+	info->tick = 1000000000 / info->hz;
+	info->tickadj = 0;
+	info->stathz = info->hz;
+	info->profhz = info->hz;
+	return(0);
 }
 int 
 sysctl_KERN_HOSTNAME(char *curname, size_t *csize, const char *newname, size_t nsize)
@@ -117,7 +117,7 @@ sysctl_KERN_PROC(const int *name, void *data, size_t *size)
 			if (!data){
 				*size += sizeof(struct kinfo_proc);
 			}else{
-				data = kproc_posix(pwTask, data);
+				data = kproc_posix(data, pwTask);
 			}
 		}
 		pid++;
@@ -147,8 +147,7 @@ sysctl_KERN_PROC_NEW(const int *name, void *data, size_t *size)
 				data = proc_KERN_PROC_UID(pwTask, name[3], (struct kinfo_proc *)data, size);
 				break;
 			default:
-//				__errno_posix(Task, ERROR_NOT_SUPPORTED);
-				return(-1);
+				return(-EINVAL);
 		}
 		pid++;
 		pwTask++;
@@ -192,7 +191,24 @@ sysctl_KERN_CPTIME(long states[CPUSTATES])
 int 
 sysctl_KERN_CPTIME2(int cpu, u_int64_t states[CPUSTATES])
 {
-	return(-ENOENT);
+	int result = 0;
+	LONG lCount = win_HW_NCPU();
+	ULONG ulSize = sizeof(SYSTEM_PROCESSOR_PERFORMANCE_INFORMATION) * lCount;
+	SYSTEM_PROCESSOR_PERFORMANCE_INFORMATION *sppInfo = win_malloc(ulSize);
+
+	if (cpu >= lCount){
+		result = -EINVAL;
+	}else if (!win_KERN_CPTIME2(sppInfo, ulSize)){
+		result -= errno_posix(GetLastError());
+	}else{
+		states[CP_USER] = ticks64_posix(&sppInfo[cpu].UserTime);
+		states[CP_NICE] = ticks64_posix(&sppInfo[cpu].DpcTime);
+		states[CP_SYS] = ticks64_posix(&sppInfo[cpu].KernelTime);
+		states[CP_INTR] = ticks64_posix(&sppInfo[cpu].InterruptTime);
+		states[CP_IDLE] = ticks64_posix(&sppInfo[cpu].IdleTime);
+	}
+	win_free(sppInfo);
+	return(result);
 }
 int 
 sysctl_KERN_VERSION(char *buf, size_t bufsize)
@@ -200,7 +216,7 @@ sysctl_KERN_VERSION(char *buf, size_t bufsize)
 	int size = 0;
 
 	size += msvc_sprintf(buf, "OpenBSD %s (MINC): #%s: ", "6.1", VERSION);
-	size += msvc_strtime(__Globals[WIN_KERN_BUILD].LowPart, buf + size, bufsize - size);
+	size += msvc_strtime(BUILD, buf + size, bufsize - size);
 	return(0);
 }
 int 
@@ -214,33 +230,6 @@ sysctl_KERN_SECURELVL(int *oldvalue, int *newvalue)
 		__Globals[WIN_KERN_SECURELVL].LowPart = *newvalue;
 	}else{
 		result = -EINVAL;
-	}
-	return(result);
-}
-int 
-sysctl_KERN_TIMECOUNTER_TICK(int *value)
-{
-	int result = 0;
-	DWORDLONG dwlValue;
-
-	if (!win_KERN_TIMECOUNTER_TICK(&dwlValue)){
-		result = -ENOENT;
-	}else{
-		*value = (int)dwlValue;
-	}
-	return(result);
-}
-int 
-sysctl_KERN_TIMECOUNTER(const int *name, void *oldvalue, void *newvalue)
-{
-	int result = 0;
-
-	switch (name[2]){
-		case KERN_TIMECOUNTER_TICK:
-			result = sysctl_KERN_TIMECOUNTER_TICK((int *)oldvalue);
-			break;
-		default:
-			result = -ENOENT;
 	}
 	return(result);
 }
@@ -316,9 +305,6 @@ sysctl_KERN(WIN_TASK *Task, const int *name, void *oldp, size_t *oldlenp, void *
 		case KERN_SECURELVL:
 			result = sysctl_KERN_SECURELVL((int *)oldp, (int *)newp);
 			break;
-		case KERN_TIMECOUNTER:
-			result = sysctl_KERN_TIMECOUNTER(name, oldp, newp);
-			break;
 		case KERN_TTYCOUNT:
 			*(int *)oldp = WIN_TTY_MAX;
 			break;
@@ -338,42 +324,6 @@ sysctl_KERN(WIN_TASK *Task, const int *name, void *oldp, size_t *oldlenp, void *
 /****************************************************/
 
 int 
-sysctl_HW_PHYSMEM(int *value)
-{
-	MEMORYSTATUS msInfo = {sizeof(MEMORYSTATUS), 0};
-
-	GlobalMemoryStatus(&msInfo);
-	*value = msInfo.dwTotalPhys;
-	return(0);
-}
-int 
-sysctl_HW_PHYSMEM64(quad_t *value)
-{
-	MEMORYSTATUSEX msInfo = {sizeof(MEMORYSTATUSEX), 0};
-
-	GlobalMemoryStatusEx(&msInfo);
-	*value = msInfo.ullTotalPhys;
-	return(0);
-}
-int 
-sysctl_HW_USERMEM(int *value)
-{
-	SYSTEM_INFO sInfo;
-
-	GetSystemInfo(&sInfo);
-	*value = sInfo.lpMaximumApplicationAddress - sInfo.lpMinimumApplicationAddress;
-	return(0);
-}
-int 
-sysctl_HW_NCPU(int *value)
-{
-	SYSTEM_INFO sInfo;
-
-	GetSystemInfo(&sInfo);
-	*value = sInfo.dwNumberOfProcessors;
-	return(0);
-}
-int 
 sysctl_HW(WIN_TASK *Task, const int *name, void *oldp, size_t *oldlenp, void *newp, size_t newlen)
 {
 	int result = 0;
@@ -383,19 +333,19 @@ sysctl_HW(WIN_TASK *Task, const int *name, void *oldp, size_t *oldlenp, void *ne
 			win_strncpy(oldp, MACHINE, *oldlenp);
 			break;
 		case HW_PAGESIZE:
-			*(int *)oldp = __Globals[WIN_HW_PAGESIZE].LowPart;
+			*(int *)oldp = win_HW_PAGESIZE();
 			break;
 		case HW_PHYSMEM:	/* gcc (collect2.exe) */
-			result = sysctl_HW_PHYSMEM((int *)oldp);
+			*(int *)oldp = win_HW_PHYSMEM();
 			break;
 		case HW_PHYSMEM64:
-			result = sysctl_HW_PHYSMEM64((quad_t *)oldp);
+			*(quad_t *)oldp = win_HW_PHYSMEM64();
 			break;
 		case HW_USERMEM:
-			result = sysctl_HW_USERMEM((int *)oldp);
+			*(int *)oldp = win_HW_USERMEM();
 			break;
 		case HW_NCPU:
-			result = sysctl_HW_NCPU((int *)oldp);
+			*(int *)oldp = win_HW_NCPU();
 			break;
 		case HW_DISKNAMES:
 			win_strncpy(oldp, "wd0:,cd0:,sd0:", *oldlenp);
@@ -422,16 +372,15 @@ sysctl_VM_LOADAVG(WIN_TASK *Task, struct loadavg *load, size_t size)
 int 
 sysctl_VM_UVMEXP(WIN_TASK *Task, struct uvmexp *uvm, size_t size)
 {
-//	int result = -1;
 	MEMORYSTATUSEX msInfo = {sizeof(MEMORYSTATUSEX), 0};
-	SYSTEM_INFO sInfo;
 	DWORD dwPageSize;
 	DWORDLONG dwlTotal, dwlAvail, dwlUsed;
+	SYSTEM_INFO sInfo;
 
 	win_bzero(uvm, size);
 	GetSystemInfo(&sInfo);
-	dwPageSize = sInfo.dwPageSize;
 	GlobalMemoryStatusEx(&msInfo);
+	dwPageSize = sInfo.dwPageSize;
 
 	uvm->pagemask = sInfo.dwActiveProcessorMask;
 
@@ -665,7 +614,6 @@ sys___sysctl(call_t call, const int *name, u_int namelen, void *oldp, size_t *ol
 			result = sysctl_VM(pwTask, name, oldp, oldlenp, newp, newlen);
 			break;
 		case CTL_NET:
-//sysctl_debug(name, namelen, oldp, oldlenp, newp, newlen);
 			result = sysctl_NET(name, oldp, oldlenp, newp, newlen);
 			break;
 		case CTL_VFS:

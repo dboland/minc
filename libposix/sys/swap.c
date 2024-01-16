@@ -36,7 +36,7 @@ int
 swapctl_STATS(struct swapent *swap, int count)
 {
 	MEMORYSTATUSEX msInfo = {sizeof(MEMORYSTATUSEX), 0};
-	DWORD dwPageSize = __Globals[WIN_HW_PAGESIZE].LowPart;
+	DWORD dwPageSize = win_HW_PAGESIZE();
 	DWORDLONG dwlTotal, dwlAvail, dwlUsed;
 	WIN_DEVICE *pwDevice = DEVICE(DEV_TYPE_SWAP);
 

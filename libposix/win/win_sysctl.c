@@ -32,29 +32,59 @@
 
 /****************************************************/
 
-BOOL 
-win_KERN_CLOCKRATE(DWORDLONG *Result)
+UINT 
+win_HW_PAGESIZE(VOID)
 {
-	BOOL bResult;
-	LARGE_INTEGER liFrequency;
+	SYSTEM_INFO sInfo;
 
-	if (bResult = QueryPerformanceFrequency(&liFrequency)){
-		liFrequency.QuadPart *= 0.001;					/* picoseconds */
-		*Result = (DWORDLONG)(liFrequency.LowPart % 1000000000);	/* nanoseconds */
-	}
-	return(bResult);
+	GetSystemInfo(&sInfo);
+	return(sInfo.dwPageSize);
 }
-BOOL 
-win_KERN_TIMECOUNTER_TICK(DWORDLONG *Result)
+DWORD 
+win_HW_NCPU(VOID)
 {
-	BOOL bResult;
-	LARGE_INTEGER liCount;
+	SYSTEM_INFO sInfo;
 
-	if (bResult = QueryPerformanceCounter(&liCount)){
-		*Result = (DWORDLONG)(liCount.QuadPart * 0.000000001);	/* seconds */
-	}
-	return(bResult);
+	GetSystemInfo(&sInfo);
+	return(sInfo.dwNumberOfProcessors);
 }
+UINT 
+win_HW_USERMEM(VOID)
+{
+	SYSTEM_INFO sInfo;
+
+	GetSystemInfo(&sInfo);
+	return(sInfo.lpMaximumApplicationAddress - sInfo.lpMinimumApplicationAddress);
+}
+UINT 
+win_HW_PHYSMEM(VOID)
+{
+	MEMORYSTATUS msInfo = {sizeof(MEMORYSTATUS), 0};
+
+	GlobalMemoryStatus(&msInfo);
+	return(msInfo.dwTotalPhys);
+}
+DWORDLONG 
+win_HW_PHYSMEM64(VOID)
+{
+	MEMORYSTATUSEX msInfo = {sizeof(MEMORYSTATUSEX), 0};
+
+	GlobalMemoryStatusEx(&msInfo);
+	return(msInfo.ullTotalPhys);
+}
+UINT 
+win_KERN_CLOCKRATE(VOID)
+{
+	LARGE_INTEGER liFrequency = {0, 0};
+
+	if (!QueryPerformanceFrequency(&liFrequency)){
+		WIN_ERR("QueryPerformanceFrequency(): %s\n", win_strerror(GetLastError()));
+	}
+	return(liFrequency.LowPart);
+}
+
+/****************************************************/
+
 BOOL 
 win_KERN_HOSTNAME(LPSTR Current, LPCSTR New, DWORD Size)
 {
@@ -99,6 +129,20 @@ win_KERN_PROC(DWORD ThreadId, WIN_KINFO_PROC *Result)
 		bResult = CloseHandle(hThread);
 	}else{
 		WIN_ERR("GetThreadTimes(%d): %s\n", hThread, win_strerror(GetLastError()));
+	}
+	return(bResult);
+}
+BOOL 
+win_KERN_CPTIME2(SYSTEM_PROCESSOR_PERFORMANCE_INFORMATION Buffer[], ULONG Size)
+{
+	BOOL bResult = FALSE;
+	NTSTATUS ntStatus;
+
+	ntStatus = NtQuerySystemInformation(SystemProcessorPerformanceInformation, Buffer, Size, NULL);
+	if (!NT_SUCCESS(ntStatus)){
+		WIN_ERR("NtQuerySystemInformation(SystemProcessorPerformanceInformation): %s\n", nt_strerror(ntStatus));
+	}else{
+		bResult = TRUE;
 	}
 	return(bResult);
 }

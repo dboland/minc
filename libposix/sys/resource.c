@@ -75,7 +75,6 @@ rtime_posix(struct timeval *tp, DWORDLONG *Time)
 	llTime *= 0.1;					/* microseconds */
 	tp->tv_sec = (time_t)(llTime * 0.000001);
 	tp->tv_usec = llTime - (tp->tv_sec * 1000000);
-//__PRINTF("rtime_posix: %I64d.%d\n", tp->tv_sec, tp->tv_usec)
 }
 int 
 getrusage_SELF(WIN_TASK *Task, struct rusage *usage)
