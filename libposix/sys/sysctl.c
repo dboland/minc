@@ -323,8 +323,32 @@ sysctl_KERN(WIN_TASK *Task, const int *name, void *oldp, size_t *oldlenp, void *
 
 /****************************************************/
 
+void 
+sysctl_HW_DISKNAMES(char *buf, size_t size)
+{
+	WIN_DEVICE *pwDevice = DEVICE(DEV_CLASS_STORAGE);
+	int unit = 0;
+	char name[MAX_NAME];
+	char *sep = "";
+	int len;
+
+	while (unit < WIN_UNIT_MAX){
+		if (pwDevice->Flags){
+			if (size < MAX_NAME){
+				break;
+			}
+			disk_HW_DISKNAMES(pwDevice, name);
+			len = msvc_sprintf(buf, "%s%s", sep, name);
+			buf += len;
+			size -= len;
+			sep = ",";
+		}
+		unit++;
+		pwDevice++;
+	}
+}
 int 
-sysctl_HW(WIN_TASK *Task, const int *name, void *oldp, size_t *oldlenp, void *newp, size_t newlen)
+sysctl_HW(const int *name, void *oldp, size_t *oldlenp, void *newp, size_t newlen)
 {
 	int result = 0;
 
@@ -348,7 +372,7 @@ sysctl_HW(WIN_TASK *Task, const int *name, void *oldp, size_t *oldlenp, void *ne
 			*(int *)oldp = win_HW_NCPU();
 			break;
 		case HW_DISKNAMES:
-			win_strncpy(oldp, "wd0:,cd0:,sd0:", *oldlenp);
+			sysctl_HW_DISKNAMES((char *)oldp, *oldlenp);
 			break;
 		default:
 			result = -ENOENT;
@@ -359,7 +383,7 @@ sysctl_HW(WIN_TASK *Task, const int *name, void *oldp, size_t *oldlenp, void *ne
 /****************************************************/
 
 int 
-sysctl_VM_LOADAVG(WIN_TASK *Task, struct loadavg *load, size_t size)
+sysctl_VM_LOADAVG(struct loadavg *load, size_t size)
 {
 	int result = 0;
 	DWORD dwCount = size / sizeof(struct loadavg);
@@ -370,7 +394,7 @@ sysctl_VM_LOADAVG(WIN_TASK *Task, struct loadavg *load, size_t size)
 	return(result);
 }
 int 
-sysctl_VM_UVMEXP(WIN_TASK *Task, struct uvmexp *uvm, size_t size)
+sysctl_VM_UVMEXP(struct uvmexp *uvm, size_t size)
 {
 	MEMORYSTATUSEX msInfo = {sizeof(MEMORYSTATUSEX), 0};
 	DWORD dwPageSize;
@@ -387,8 +411,6 @@ sysctl_VM_UVMEXP(WIN_TASK *Task, struct uvmexp *uvm, size_t size)
 	dwlTotal = msInfo.ullTotalPhys;
 	dwlAvail = msInfo.ullAvailPhys;
 	dwlUsed = dwlTotal - dwlAvail;
-
-//__PRINTF("Phys: dwAvail(%I64d) dwTotal(%I64d) dwUsed(%I64d)\n", dwAvail, dwTotal, dwUsed)
 
 	uvm->active = (dwlUsed + dwPageSize - 1) / dwPageSize;
 	uvm->inactive = (dwlAvail + dwPageSize - 1) / dwPageSize;
@@ -419,13 +441,13 @@ sysctl_VM(WIN_TASK *Task, const int *name, void *oldp, size_t *oldlenp, void *ne
 
 	switch (name[1]){
 		case VM_LOADAVG:
-			result = sysctl_VM_LOADAVG(Task, (struct loadavg *)oldp, *oldlenp);
+			result = sysctl_VM_LOADAVG((struct loadavg *)oldp, *oldlenp);
 			break;
 		case VM_MAXSLP:	/* time to be blocked before being swappable (ps.exe) */
 			*(int *)oldp = 0;
 			break;
 		case VM_UVMEXP:	/* statistics about the UVM memory management system (top.exe) */
-			result = sysctl_VM_UVMEXP(Task, (struct uvmexp *)oldp, *oldlenp);
+			result = sysctl_VM_UVMEXP((struct uvmexp *)oldp, *oldlenp);
 			break;
 		default:
 			result = -ENOENT;
@@ -608,7 +630,7 @@ sys___sysctl(call_t call, const int *name, u_int namelen, void *oldp, size_t *ol
 			result = sysctl_KERN(pwTask, name, oldp, oldlenp, newp, newlen);
 			break;
 		case CTL_HW:
-			result = sysctl_HW(pwTask, name, oldp, oldlenp, newp, newlen);
+			result = sysctl_HW(name, oldp, oldlenp, newp, newlen);
 			break;
 		case CTL_VM:
 			result = sysctl_VM(pwTask, name, oldp, oldlenp, newp, newlen);

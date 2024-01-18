@@ -32,6 +32,37 @@
 
 /****************************************************/
 
+BOOL CALLBACK 
+ConsoleControlHandler(DWORD CtrlType)
+{
+	BOOL bResult = TRUE;
+	DWORD dwGroupId = __CTTY->GroupId;
+	DWORD dwMode = __CTTY->Mode[0];
+	WIN_TASK *pwTask = &__Tasks[__TaskId];
+
+	/* To deliver signals, Windows (CSRSS.EXE) actually forks!
+	 * Copying the call stack to a new thread and executing
+	 * our code. Let's make sure it uses our Task struct too:
+	 */
+	TlsSetValue(__TlsIndex, (PVOID)__TaskId);
+	if (dwMode & ENABLE_PROCESSED_INPUT){
+		if (pwTask->GroupId == dwGroupId){
+			if (!vfs_raise(WM_COMMAND, CtrlType, 0)){
+				pwTask->Flags |= WIN_PS_EXITING;
+				/* causes ExitProcess() */
+				bResult = FALSE;
+			}else{
+				/* syslogd.exe -d */
+				vfs_kill_ANY(pwTask->TaskId, WM_COMMAND, CtrlType, 0);
+				SetEvent(__Interrupt);
+			}
+		}
+	}
+	return(bResult);
+}
+
+/****************************************************/
+
 BOOL 
 con_TIOCGWINSZ(WIN_DEVICE *Device, WIN_WINSIZE *WinSize)
 {
@@ -88,4 +119,3 @@ con_poll(WIN_DEVICE *Device, WIN_POLLFD *Info)
 	dwResult += screen_poll(Device->Output, Info);
 	return(dwResult);
 }
-

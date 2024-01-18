@@ -201,6 +201,7 @@ BOOL disk_open(WIN_NAMEIDATA *Path, WIN_FLAGS *Flags, WIN_MODE *Mode, WIN_VNODE 
 BOOL disk_close(WIN_VNODE *Node);
 BOOL disk_readlink(WIN_NAMEIDATA *Path, BOOL MakeReal);
 BOOL disk_symlink(WIN_NAMEIDATA *Path, WIN_NAMEIDATA *Result);
+BOOL disk_HW_DISKNAMES(WIN_DEVICE *Device, LPSTR Result);
 
 /* registry.c */
 
@@ -227,3 +228,4 @@ BOOL vol_stat(LPCWSTR Path, LPSTR Result);
 
 UINT ws2_nametoindex(LPCSTR Name);
 UINT ws2_indextoname(DWORD Index, LPSTR Result);
+

@@ -80,13 +80,10 @@ LinkCreateVolumeInfo(LPCWSTR RealName)
 	DWORD dwSize = sizeof(VOLUME_ID);
 	BYTE *Data;
 	WCHAR szBuffer[MAX_NAME];
-	WCHAR szLabel[MAX_NAME] = L"";
-	DWORD dwMaxPath, dwFlags, dwSerial;
+	WCHAR szLabel[MAX_NAME];
+	DWORD dwSerial;
 
-	if (!GetVolumeInformationW(win_volname(szBuffer, RealName), szLabel, MAX_NAME, 
-		&dwSerial, &dwMaxPath, &dwFlags, NULL, 0)){
-		WIN_ERR("GetVolumeInformation(%ls): %s\n", RealName, win_strerror(GetLastError()));
-	}
+	DiskStatVolume(win_volname(szBuffer, RealName), TRUE, szLabel, &dwSerial);
 	dwSize += win_wcslen(szLabel) + 1;
 	Info = LocalAlloc(LPTR, dwSize);
 	Data = (BYTE *)Info;

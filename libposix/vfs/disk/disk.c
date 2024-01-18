@@ -28,6 +28,7 @@
  *
  */
 
+#include "disk_sysctl.c"
 #include "disk_dirent.c"
 #include "disk_syscall.c"
 #include "link/link.c"

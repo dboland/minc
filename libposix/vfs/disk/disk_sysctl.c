@@ -33,52 +33,37 @@
 /****************************************************/
 
 BOOL 
-fifo_close(WIN_VNODE *Node)
+DiskStatVolume(LPCWSTR Volume, BOOL Verbose, LPWSTR Label, DWORD *Serial)
 {
 	BOOL bResult = FALSE;
+	DWORD dwMaxPath, dwFlags;
 
-	if (!CloseHandle(Node->Handle)){
-		WIN_ERR("fifo_close(%d): %s\n", Node->Handle, win_strerror(GetLastError()));
-	}else if (!SetEvent(Node->Event)){
-		WIN_ERR("SetEvent(%d): %s\n", Node->Event, win_strerror(GetLastError()));
-//	}else if (!CloseHandle(Node->Event)){
-//		WIN_ERR("fifo_close(%d): %s\n", Node->Event, win_strerror(GetLastError()));
-	}else{
+	if (GetVolumeInformationW(Volume, Label, MAX_LABEL, Serial, &dwMaxPath, &dwFlags, NULL, 0)){
 		bResult = TRUE;
-	}
-	ZeroMemory(Node, sizeof(WIN_VNODE));
-	return(bResult);
-}
-BOOL 
-fifo_read(WIN_VNODE *Node, LPSTR Buffer, DWORD Size, DWORD *Result)
-{
-	BOOL bResult = FALSE;
-
-	/* When in non-blocking mode and no data present,
-	 * result should be -1 and errno EAGAIN (perl.exe).
-	 */
-	if (ReadFile(Node->Handle, Buffer, Size, Result, NULL)){
-		return(TRUE);
-	}else if (ERROR_BROKEN_PIPE == GetLastError()){	/* write end closed */
-		bResult = TRUE;
-	}else if (ERROR_NO_DATA == GetLastError()){
-		SetLastError(ERROR_MORE_DATA);
+	}else if (Verbose){
+		WIN_ERR("GetVolumeInformation(%ls): %s\n", Volume, win_strerror(GetLastError()));
 	}
 	return(bResult);
 }
-BOOL 
-fifo_write(WIN_VNODE *Node, LPCSTR Buffer, DWORD Size, DWORD *Result)
-{
-	BOOL bResult = FALSE;
-	OVERLAPPED ovl = {0, 0, 0, 0, Node->Event};
 
-	/* Unlike named pipes, anonymous pipes don't block when Size
-	 * is larger than WIN_PIPE_BUF.
-	 */
-	if (WriteFile(Node->Handle, Buffer, Size, Result, &ovl)){
-		bResult = TRUE;
-	}else if (ERROR_BROKEN_PIPE == GetLastError()){	/* read end closed */
-		SetLastError(ERROR_PIPE_NOT_CONNECTED);
+/****************************************************/
+
+BOOL 
+disk_HW_DISKNAMES(WIN_DEVICE *Device, LPSTR Result)
+{
+	BOOL bResult = TRUE;
+	WCHAR szLabel[MAX_LABEL];
+	DWORD dwSerial = 0;
+	WCHAR szVolume[MAX_PATH] = L"\\\\.\\GLOBALROOT";
+
+	win_wcscat(szVolume, Device->NtPath);
+	switch (Device->DeviceType){
+		case DEV_TYPE_FIXED:
+			bResult = DiskStatVolume(szVolume, FALSE, szLabel, &dwSerial);
+			msvc_sprintf(Result, "%s:%lu", Device->Name, dwSerial);
+			break;
+		default:
+			win_strcpy(Result, Device->Name);
 	}
 	return(bResult);
 }
