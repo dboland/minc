@@ -89,7 +89,6 @@ drive_statfs(WIN_NAMEIDATA *Path, WIN_STATFS *Result)
 	/* mount.exe -a
 	 */
 	ZeroMemory(Result, sizeof(WIN_STATFS));
-//VfsDebugPath(Path, "drive_statfs");
 	if (Path->Attribs == FILE_ATTRIBUTE_DRIVE){
 		bResult = DriveStatVolume(Path->Resolved, Result);
 	}else{
@@ -107,6 +106,8 @@ drive_mount(WIN_NAMEIDATA *Path, WIN_VNODE *Node, WIN_MODE *Mode)
 //VfsDebugPath(Path, "drive_mount");
 	if (Path->Attribs == -1){
 		return(FALSE);
+	}else if (Path->Base[1]){			/* not a drive letter */
+		SetLastError(ERROR_BAD_ARGUMENTS);
 	}else if (Path->FileType != WIN_VDIR){
 		SetLastError(ERROR_DIRECTORY);
 	}else if (Path->Attribs == FILE_ATTRIBUTE_DRIVE){
@@ -123,7 +124,6 @@ drive_mount(WIN_NAMEIDATA *Path, WIN_VNODE *Node, WIN_MODE *Mode)
 		pwMount->DeviceType = Node->DeviceType;
 		pwMount->FileType = Node->FileType;
 		win_wcscpy(win_wcpcpy(pwMount->Path, L"\\\\.\\GLOBALROOT"), Node->Device->NtPath);
-//		pwMount->VolumeSerial = Device->Index;
 		GetSystemTimeAsFileTime(&pwMount->Time);
 //VfsDebugMount(pwMount, "drive_mount");
 //VfsDebugDevice(Device, "drive_mount");

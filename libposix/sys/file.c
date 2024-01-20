@@ -33,7 +33,7 @@
 /****************************************************/
 
 void *
-kfile_posix(struct kinfo_file *buf, DWORD ProcessId, WIN_TASK *Task, WIN_VNODE *Node)
+kfile_posix(struct kinfo_file *buf, WIN_TASK *Task, WIN_VNODE *Node)
 {
 	WIN_VATTR wStat = {0};
 	struct stat info;
@@ -44,7 +44,7 @@ kfile_posix(struct kinfo_file *buf, DWORD ProcessId, WIN_TASK *Task, WIN_VNODE *
 
 	win_bzero(buf, sizeof(struct kinfo_file));
 	win_memcpy(&vNode, Node, sizeof(WIN_VNODE));
-	if ((Task->ProcessId != ProcessId) && !(Node->Flags & HANDLE_FLAG_INHERIT)){
+	if (!(Node->Flags & HANDLE_FLAG_INHERIT)){
 		if (hResult = win_F_INHERIT(Node->Handle, 0, Task->ProcessId)){
 			vNode.Handle = hResult;
 			vNode.Access = win_F_GETFL(hResult);
@@ -79,7 +79,7 @@ VfsDebugNode(&vNode, "kfile_posix");
 /****************************************************/
 
 void *
-file_KERN_FILE_BYPID(void *buf, size_t *size, DWORD ProcessId, WIN_TASK *Task, WIN_VNODE Node[])
+file_KERN_FILE_BYPID(void *buf, size_t *size, WIN_TASK *Task, WIN_VNODE Node[])
 {
 	size_t result = 0;
 	int fd = 0;
@@ -87,7 +87,7 @@ file_KERN_FILE_BYPID(void *buf, size_t *size, DWORD ProcessId, WIN_TASK *Task, W
 	while (fd < OPEN_MAX){
 		if (Node->Access){
 			if (buf){
-				buf = kfile_posix(buf, ProcessId, Task, Node);
+				buf = kfile_posix(buf, Task, Node);
 			}
 			result += sizeof(struct kinfo_file);
 		}
@@ -98,7 +98,7 @@ file_KERN_FILE_BYPID(void *buf, size_t *size, DWORD ProcessId, WIN_TASK *Task, W
 	return(buf);
 }
 int 
-file_KERN_FILE(WIN_TASK *Task, const int *name, void *buf, size_t *size)
+file_KERN_FILE(const int *name, void *buf, size_t *size)
 {
 	int result = 0;
 	WIN_TASK *pwTask = &__Tasks[1];
@@ -108,7 +108,7 @@ file_KERN_FILE(WIN_TASK *Task, const int *name, void *buf, size_t *size)
 	*size = 0;
 	while (pid < CHILD_MAX){
 		if (pwTask->Flags && pwTask->State != WIN_SZOMB){
-			buf = file_KERN_FILE_BYPID(buf, size, Task->ProcessId, pwTask, pwTask->Node);
+			buf = file_KERN_FILE_BYPID(buf, size, pwTask, pwTask->Node);
 		}
 		pwTask++;
 		pid++;

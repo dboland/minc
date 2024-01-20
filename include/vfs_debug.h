@@ -38,3 +38,4 @@ VOID VfsAccessFlags(ACCESS_MASK Access, DWORD Type);
 
 VOID VfsDebugNode(WIN_VNODE *Node, LPCSTR Label);
 VOID VfsDebugStat(WIN_VATTR *Stat, LPCSTR Label);
+VOID VfsDebugThread(WIN_THREAD_STRUCT *Thread, LPSTR Label);

@@ -170,7 +170,6 @@ sys_pathconf(call_t call, const char *path, int name)
 			result = WIN_PIPE_BUF;
 			break;
 		default:
-			__PRINTF("sys_pathconf(%s) name(%d)\n", path, name)
 			result = -EOPNOTSUPP;
 	}
 	return(result);
@@ -422,11 +421,7 @@ __symlinkat(WIN_NAMEIDATA *Target, int fd, const char *path)
 {
 	int result = 0;
 	WIN_NAMEIDATA wnPath;
-	WIN_VATTR wStat = {0};
 
-//	if (Target->Attribs != -1){
-//		vfs_stat(Target, &wStat);
-//	}
 	if (!disk_symlink(Target, pathat_win(&wnPath, fd, path, AT_SYMLINK_NOFOLLOW))){
 		result -= errno_posix(GetLastError());
 	}
@@ -635,11 +630,7 @@ sys_read(call_t call, int fd, void *buf, size_t count)
 	DWORD dwResult = -1;		/* WinNT EOF on ReadFile() */
 	DWORD dwCount = count;
 	WIN_TASK *pwTask = call.Task;
-	CHAR szMessage[MAX_MESSAGE];
 
-//	if (pwTask->TracePoints & KTRFAC_USER){
-//		ktrace_USER(pwTask, "VNODE", szMessage, vfs_ktrace(&pwTask->Node[fd], szMessage));
-//	}
 	if (fd < 0 || fd >= OPEN_MAX){
 		result = -EBADF;
 	}else if (!vfs_read(&pwTask->Node[fd], buf, dwCount, &dwResult)){
@@ -660,11 +651,7 @@ sys_write(call_t call, int fd, const void *buf, size_t nbytes)
 	ssize_t result = 0;
 	DWORD dwResult = 0;		/* WinNT EOF on WriteFile() */
 	WIN_TASK *pwTask = call.Task;
-	CHAR szMessage[MAX_MESSAGE];
 
-//	if (pwTask->TracePoints & KTRFAC_USER){
-//		ktrace_USER(pwTask, "VNODE", szMessage, vfs_ktrace(&pwTask->Node[fd], szMessage));
-//	}
 	if (pwTask->TracePoints & KTRFAC_GENIO){
 		ktrace_GENIO(pwTask, fd, UIO_WRITE, buf, nbytes);
 	}

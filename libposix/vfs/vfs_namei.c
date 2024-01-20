@@ -53,7 +53,7 @@ PathRead(WIN_NAMEIDATA *Path)
 	*R = 0;
 	Path->S = S;
 	Path->R = R;
-	return(C);	/* use *S to skip slash at end (umount.exe) */
+	return(C);	/* Note: use *S to skip slash at end (umount.exe) */
 }
 VOID 
 PathCopy(WIN_NAMEIDATA *Path)

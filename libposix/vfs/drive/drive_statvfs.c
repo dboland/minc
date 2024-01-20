@@ -103,7 +103,7 @@ drive_statvfs(WIN_CFDATA *Config, DWORD Flags, WIN_CFDRIVER *Result)
 			Config->DeviceType = DEV_TYPE_RAMDISK;
 			break;
 		default:
-			WIN_ERR("GetDriveType(%d): %s\n", uiType, win_strerror(GetLastError()));
+			bResult = FALSE;
 	}
 	win_wcscpy(Result->NtClass, L"drive");
 	win_wcscpy(win_wcpcpy(Result->Location, Config->NtPath), L"\\");

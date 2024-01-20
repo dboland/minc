@@ -101,8 +101,7 @@ task_init(char *cmdbuf, char *argv[], void *frame_address)
 void 
 task_copy(WIN_THREAD_STRUCT *Thread)
 {
-//__PRINTF("PARENT: return(0x%lx) origin(0x%lx) size(0x%lx) source(0x%lx) dest(0x%lx) offset(0x%lx) Tls(0x%lx) Token(%lu) Flags(0x%x) di(0x%lx) si(0x%lx) bx(0x%lx) cx(0x%lx) dx(0x%lx) cs(0x%lx) ds(0x%lx) es(0x%lx) fs(0x%lx) gs(0x%lx) ss(0x%lx)\n", 
-//		Parent->ret, Parent->origin, Parent->size, Parent->source, Parent->dest, Parent->offset, Parent->Tls, Parent->Token, Parent->Flags, Parent->di, Parent->si, Parent->bx, Parent->cx, Parent->dx, Parent->cs, Parent->ds, Parent->es, Parent->fs, Parent->gs, Parent->ss)
+//VfsDebugThread(Thread, "PARENT");
 	/* copy frames */
 	copy_stack(Thread->origin, Thread->source, &Thread->dest);
 	/* add current frame */

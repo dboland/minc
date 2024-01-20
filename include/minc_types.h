@@ -54,12 +54,12 @@ typedef void (*atexit_t)(void);
 typedef void (*action_t)(int, siginfo_t *, void *);
 
 typedef struct {
-	int c_edx;
-	int c_eax;
-	int c_edi;
-	int c_esi;
-	int c_ebx;
-	int c_ecx;
+	int c_dx;
+	int c_ax;
+	int c_di;
+	int c_si;
+	int c_bx;
+	int c_cx;
 	WIN_TASK *Task;
 	ULONG Code;
 	ULONG Base;	/* return address */

@@ -53,8 +53,8 @@ kargv_posix(pid_t pid, int argc, char *argv[])
 	*argv = NULL;
 	pathn_posix(buf, __Strings[pid].Command, WIN_MAX_PROCTITLE);
 }
-void 
-ktime_posix(FILETIME *Started, int *sec, int *usec)
+u_int64_t 
+ktime_posix(FILETIME *Started)
 {
 	DWORDLONG dwlStarted = *(DWORDLONG *)Started;
 	DWORDLONG dwlRealTime;
@@ -62,8 +62,15 @@ ktime_posix(FILETIME *Started, int *sec, int *usec)
 	GetSystemTimeAsFileTime((LPFILETIME)&dwlRealTime);
 	dwlRealTime -= dwlStarted;			/* 100-nanosecond intervals */
 	dwlRealTime *= 0.1;				/* microseconds */
-	*sec = dwlRealTime * 0.000001;
-	*usec = dwlRealTime - (*sec * 1000000);
+	return(dwlRealTime);
+}
+u_int64_t 
+kticks_posix(FILETIME *Time)
+{
+	DWORDLONG dwlTime = *(LONGLONG *)Time;
+
+	dwlTime *= 0.0001;				/* milliseconds */
+	return(dwlTime);
 }
 struct kinfo_proc *
 kproc_posix(struct kinfo_proc *proc, WIN_TASK *Task)
@@ -73,6 +80,8 @@ kproc_posix(struct kinfo_proc *proc, WIN_TASK *Task)
 	struct timeval tv;
 	WIN_KINFO_PROC kInfo = {0};
 	DWORD dwPageSize = win_HW_PAGESIZE();
+	u_int64_t rtime;
+	u_int64_t nticks;
 
 	/* see: src/sys/sys/sysctl.h */
 
@@ -104,16 +113,30 @@ kproc_posix(struct kinfo_proc *proc, WIN_TASK *Task)
 	proc->p_vm_ssize = (WIN_STACKSIZE + dwPageSize - 1) / dwPageSize;
 	if (win_KERN_PROC(Task->ThreadId, &kInfo)){
 		proc->p_uvalid = 1;			/* CHAR: following p_u* members from struct user are valid */
+
 		timeval_posix(&tv, &kInfo.Created);
 		proc->p_ustart_sec = tv.tv_sec;
 		proc->p_ustart_usec = tv.tv_usec;
-		ktime_posix(&kInfo.Created, &proc->p_rtime_sec, &proc->p_rtime_usec);
+
+		rtime = ktime_posix(&kInfo.Created);
+		proc->p_rtime_sec = rtime * 0.000001;
+		proc->p_rtime_usec = rtime - (proc->p_rtime_sec * 1000000);
+
+		proc->p_uticks = kticks_posix(&kInfo.User);
+		proc->p_sticks = kticks_posix(&kInfo.Kernel);
+
+		rtime *= 0.001;				/* milliseconds */
+		if (rtime){
+			nticks = proc->p_uticks + proc->p_sticks;
+			proc->p_pctcpu = (nticks * 100) / rtime;
+		}
 	}
 	proc->p_stat = Task->State;			/* CHAR: S* process status (from LWP). */
 	proc->p_cpuid = Task->Processor;		/* LONG: CPU id */
 	proc->p_nice = Task->Nice;
 	proc->p_xstat = Task->Status >> 8;		/* U_SHORT: Exit status for wait; also stop signal. */
 	proc->p_tracep = (u_int32_t)Task->TraceHandle;
+	proc->p_traceflag = Task->TracePoints;
 	if (proc->p_stat == SSLEEP){
 		win_strncpy(proc->p_wmesg, syscallnames[Task->Code], KI_WMESGLEN);
 	}

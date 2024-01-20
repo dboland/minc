@@ -562,7 +562,7 @@ syscall_enter(call_t call)
 void 
 syscall_leave(call_t call)
 {
-	int result = call.c_eax;
+	int result = call.c_ax;
 	int code = call.Code;
 	WIN_TASK *pwTask = call.Task;
 

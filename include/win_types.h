@@ -30,11 +30,6 @@
 
 #include "arch_types.h"
 
-/* winnt.h */
-
-typedef double DOUBLE;
-typedef __SIZE_TYPE__ WIN_SIZE_T;
-
 /* winerror.h */
 
 #define ERROR_BAD_FILE_TYPE		222L		/* Invalid file system */
@@ -55,6 +50,9 @@ typedef __SIZE_TYPE__ WIN_SIZE_T;
 
 /* winnt.h */
 
+typedef double DOUBLE;
+typedef __SIZE_TYPE__ WIN_SIZE_T;
+
 #define WIN_S_IREAD	(FILE_READ_DATA | FILE_READ_EA | FILE_READ_ATTRIBUTES)
 #define WIN_S_IWRITE	(FILE_WRITE_DATA | FILE_WRITE_EA | FILE_WRITE_ATTRIBUTES | FILE_APPEND_DATA)
 #define WIN_S_IEXEC	(FILE_EXECUTE)
@@ -66,13 +64,13 @@ typedef __SIZE_TYPE__ WIN_SIZE_T;
 
 #define SYSTEM_TIMEOFDAY_INFORMATION	SYSTEM_TIME_OF_DAY_INFORMATION
 
-#define WIN_PATH_MAX			1024
+#define WIN_PATH_MAX	1024
 
 /* from Cygwin */
 
-#define WIN_S_ISTXT		FILE_READ_DATA		// 1
-#define WIN_S_ISGID		FILE_WRITE_DATA		// 2
-#define WIN_S_ISUID		FILE_APPEND_DATA	// 4
+#define WIN_S_ISTXT	FILE_READ_DATA
+#define WIN_S_ISGID	FILE_WRITE_DATA
+#define WIN_S_ISUID	FILE_APPEND_DATA
 
 /* wincon.h */
 

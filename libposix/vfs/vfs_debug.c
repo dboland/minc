@@ -464,3 +464,9 @@ VfsDebugLink(LINK_INFO *Info, LPSTR Label)
 	msvc_printf("+ CommonPathSuffixOffset(%d)\n", Info->CommonPathSuffixOffset);
 //	msvc_printf("+ LocalBasePathOffsetUnicode(%d)\n", Info->LocalBasePathOffsetUnicode);
 }
+VOID 
+VfsDebugThread(WIN_THREAD_STRUCT *Thread, LPSTR Label)
+{
+	msvc_printf("%s: return(0x%lx) origin(0x%lx) size(0x%lx) source(0x%lx) dest(0x%lx) offset(0x%lx) Token(%lu) Flags(0x%x)\n", 
+		Label, Thread->raddr, Thread->origin, Thread->size, Thread->source, Thread->dest, Thread->offset, Thread->Token, Thread->Flags);
+}

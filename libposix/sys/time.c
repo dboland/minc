@@ -172,8 +172,6 @@ sys_nanosleep(call_t call, const struct timespec *req, struct timespec *rem)
 	if (rem){
 		rem->tv_sec = (time_t)(dwlRemain * 0.0000001);
 		rem->tv_nsec = dwlRemain - (rem->tv_sec * 1000000);	/* nanoseconds */
-	}else{
-		result = -EFAULT;
 	}
 	return(result);
 }

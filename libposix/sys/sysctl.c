@@ -155,7 +155,7 @@ sysctl_KERN_PROC_NEW(const int *name, void *data, size_t *size)
 	return(result);
 }
 int 
-sysctl_KERN_PROC_ARGS(WIN_TASK *Task, const int *name, void *buf, size_t *size)
+sysctl_KERN_PROC_ARGS(const int *name, void *buf, size_t *size)
 {
 	int result = 0;
 	pid_t pid = name[2];
@@ -196,7 +196,7 @@ sysctl_KERN_CPTIME2(int cpu, u_int64_t states[CPUSTATES])
 	ULONG ulSize = sizeof(SYSTEM_PROCESSOR_PERFORMANCE_INFORMATION) * lCount;
 	SYSTEM_PROCESSOR_PERFORMANCE_INFORMATION *sppInfo = win_malloc(ulSize);
 
-	if (cpu >= lCount){
+	if (cpu < 0 || cpu >= lCount){
 		result = -EINVAL;
 	}else if (!win_KERN_CPTIME2(sppInfo, ulSize)){
 		result -= errno_posix(GetLastError());
@@ -234,7 +234,7 @@ sysctl_KERN_SECURELVL(int *oldvalue, int *newvalue)
 	return(result);
 }
 int 
-sysctl_KERN(WIN_TASK *Task, const int *name, void *oldp, size_t *oldlenp, void *newp, size_t newlen)
+sysctl_KERN(const int *name, void *oldp, size_t *oldlenp, void *newp, size_t newlen)
 {
 	int result = 0;
 
@@ -285,7 +285,7 @@ sysctl_KERN(WIN_TASK *Task, const int *name, void *oldp, size_t *oldlenp, void *
 			result = sysctl_KERN_PROC(name, oldp, oldlenp);
 			break;
 		case KERN_PROC_ARGS:
-			result = sysctl_KERN_PROC_ARGS(Task, name, oldp, oldlenp);
+			result = sysctl_KERN_PROC_ARGS(name, oldp, oldlenp);
 			break;
 		case KERN_FSCALE:	/* The kernel fixed-point scale factor (ps.exe) */
 			*(int *)oldp = FSCALE;
@@ -312,7 +312,7 @@ sysctl_KERN(WIN_TASK *Task, const int *name, void *oldp, size_t *oldlenp, void *
 //			*(int *)oldp = 0;
 //			break;
 		case KERN_FILE:		/* fstat.exe */
-			result = file_KERN_FILE(Task, name, oldp, oldlenp);
+			result = file_KERN_FILE(name, oldp, oldlenp);
 			break;
 		case KERN_HOSTID:	/* alpine.exe */
 		default:
@@ -336,12 +336,12 @@ sysctl_HW_DISKNAMES(char *buf, size_t size)
 		if (pwDevice->Flags){
 			if (size < MAX_NAME){
 				break;
+			}else if (disk_HW_DISKNAMES(pwDevice, name)){
+				len = msvc_sprintf(buf, "%s%s", sep, name);
+				buf += len;
+				size -= len;
+				sep = ",";
 			}
-			disk_HW_DISKNAMES(pwDevice, name);
-			len = msvc_sprintf(buf, "%s%s", sep, name);
-			buf += len;
-			size -= len;
-			sep = ",";
 		}
 		unit++;
 		pwDevice++;
@@ -435,7 +435,7 @@ sysctl_VM_UVMEXP(struct uvmexp *uvm, size_t size)
 	return(0);
 }
 int 
-sysctl_VM(WIN_TASK *Task, const int *name, void *oldp, size_t *oldlenp, void *newp, size_t newlen)
+sysctl_VM(const int *name, void *oldp, size_t *oldlenp, void *newp, size_t newlen)
 {
 	int result = 0;
 
@@ -548,7 +548,7 @@ sysctl_VFS_BCACHESTAT(struct bcachestats *bcstats, size_t size)
 	return(0);
 }
 int 
-sysctl_VFS_GENERIC(WIN_TASK *Task, const int *name, void *buf, size_t *size)
+sysctl_VFS_GENERIC(const int *name, void *buf, size_t *size)
 {
 	int result = 0;
 
@@ -562,13 +562,13 @@ sysctl_VFS_GENERIC(WIN_TASK *Task, const int *name, void *buf, size_t *size)
 	return(result);
 }
 int 
-sysctl_VFS(WIN_TASK *Task, const int *name, void *oldp, size_t *oldlenp, void *newp, size_t newlen)
+sysctl_VFS(const int *name, void *oldp, size_t *oldlenp, void *newp, size_t newlen)
 {
 	int result = 0;
 
 	switch (name[1]){
 		case VFS_GENERIC:
-			result = sysctl_VFS_GENERIC(Task, name, oldp, oldlenp);
+			result = sysctl_VFS_GENERIC(name, oldp, oldlenp);
 			break;
 		default:
 			result = -ENOENT;
@@ -579,7 +579,7 @@ sysctl_VFS(WIN_TASK *Task, const int *name, void *oldp, size_t *oldlenp, void *n
 /****************************************************/
 
 int 
-sysctl_MACHDEP_CPU_BIOS(WIN_TASK *Task, const int *name, char **buf, size_t *size)
+sysctl_MACHDEP_CPU_BIOS(const int *name, char **buf, size_t *size)
 {
 	int result = 0;
 
@@ -598,7 +598,7 @@ sysctl_MACHDEP_CPU_BIOS(WIN_TASK *Task, const int *name, char **buf, size_t *siz
 	return(result);
 }
 int 
-sysctl_MACHDEP(WIN_TASK *Task, const int *name, void *oldp, size_t *oldlenp, void *newp, size_t newlen)
+sysctl_MACHDEP(const int *name, void *oldp, size_t *oldlenp, void *newp, size_t newlen)
 {
 	int result = 0;
 
@@ -607,7 +607,7 @@ sysctl_MACHDEP(WIN_TASK *Task, const int *name, void *oldp, size_t *oldlenp, voi
 			*(dev_t *)oldp = DEV_TYPE_CONSOLE;
 			break;
 		case CPU_BIOS:
-			result = sysctl_MACHDEP_CPU_BIOS(Task, name, (char **)oldp, oldlenp);
+			result = sysctl_MACHDEP_CPU_BIOS(name, (char **)oldp, oldlenp);
 			break;
 		default:
 			result = -ENOENT;
@@ -627,22 +627,22 @@ sys___sysctl(call_t call, const int *name, u_int namelen, void *oldp, size_t *ol
 		result = -EINVAL;
 	}else switch(name[0]){
 		case CTL_KERN:
-			result = sysctl_KERN(pwTask, name, oldp, oldlenp, newp, newlen);
+			result = sysctl_KERN(name, oldp, oldlenp, newp, newlen);
 			break;
 		case CTL_HW:
 			result = sysctl_HW(name, oldp, oldlenp, newp, newlen);
 			break;
 		case CTL_VM:
-			result = sysctl_VM(pwTask, name, oldp, oldlenp, newp, newlen);
+			result = sysctl_VM(name, oldp, oldlenp, newp, newlen);
 			break;
 		case CTL_NET:
 			result = sysctl_NET(name, oldp, oldlenp, newp, newlen);
 			break;
 		case CTL_VFS:
-			result = sysctl_VFS(pwTask, name, oldp, oldlenp, newp, newlen);
+			result = sysctl_VFS(name, oldp, oldlenp, newp, newlen);
 			break;
 		case CTL_MACHDEP:
-			result = sysctl_MACHDEP(pwTask, name, oldp, oldlenp, newp, newlen);
+			result = sysctl_MACHDEP(name, oldp, oldlenp, newp, newlen);
 			break;
 		default:
 			result = -ENOENT;

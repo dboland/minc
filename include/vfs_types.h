@@ -130,7 +130,7 @@ typedef struct _WIN_CFDRIVER {
 	WCHAR ClassId[MAX_GUID];
 	WCHAR NtClass[MAX_NAME];
 	WCHAR Service[MAX_NAME];
-	WCHAR Location[MAX_COMMENT];
+	WCHAR Location[MAX_PATH];
 	WCHAR Comment[MAX_COMMENT];
 } WIN_CFDRIVER;
 

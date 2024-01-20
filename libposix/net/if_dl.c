@@ -40,10 +40,10 @@ dladdr_posix(struct sockaddr_dl *addr, DWORD Index, DWORD Type, BYTE Address[], 
 	addr->sdl_len = sizeof(struct sockaddr_dl);
 	addr->sdl_family = AF_LINK;
 	addr->sdl_index = Index;
-	addr->sdl_type = Type;		/* net/if_types.h */
+	addr->sdl_type = Type;				/* net/if_types.h */
 	addr->sdl_nlen = ws2_indextoname(Index, data);	/* interface name length, no trailing 0 reqd. */
 	data += addr->sdl_nlen;
-	addr->sdl_alen = Size;	/* link level address length */
+	addr->sdl_alen = Size;				/* link level address length */
 	win_memcpy(data, Address, Size);
 	return(addr + 1);
 }
