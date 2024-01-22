@@ -161,8 +161,6 @@ ws2_NET_INET6_IPV6_DAD_PENDING(DWORD *Count)
 		*Count = dwCount;
 		win_free(pifaTable);
 		bResult = TRUE;
-	}else{
-		SetLastError(ulStatus);
 	}
 	return(bResult);
 }

@@ -40,7 +40,7 @@ kfile_posix(struct kinfo_file *buf, WIN_TASK *Task, WIN_VNODE *Node)
 	WIN_VNODE vNode;
 	WCHAR szBuffer[MAX_PATH];
 	HANDLE hResult = NULL;
-	wchar_t *command = win_basename(__Strings[Task->TaskId].Command);
+	wchar_t *command = win_basename(PSTRING(Task).Command);
 
 	win_bzero(buf, sizeof(struct kinfo_file));
 	win_memcpy(&vNode, Node, sizeof(WIN_VNODE));
@@ -101,8 +101,8 @@ int
 file_KERN_FILE(const int *name, void *buf, size_t *size)
 {
 	int result = 0;
-	WIN_TASK *pwTask = &__Tasks[1];
-	pid_t pid = 1;
+	pid_t pid = WIN_PID_INIT;
+	WIN_TASK *pwTask = &__Tasks[pid];
 	DWORD dwRemain;
 
 	*size = 0;

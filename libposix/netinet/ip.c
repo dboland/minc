@@ -34,7 +34,7 @@
 /****************************************************/
 
 int 
-ip_NET_INET_IP_FORWARDING(void *buf, size_t *size)
+ip_NET_INET_IP_FORWARDING(int *enabled, size_t *size)
 {
 	int result = 0;
 	ULONG ulStatus;
@@ -44,14 +44,14 @@ ip_NET_INET_IP_FORWARDING(void *buf, size_t *size)
 	if (ulStatus != ERROR_SUCCESS){
 		result -= errno_posix(ulStatus);
 	}else if (ipStats.dwForwarding == MIB_IP_FORWARDING){
-		*(int *)buf = 1;
+		*enabled = 1;
 	}else{
-		*(int *)buf = 0;
+		*enabled = 0;
 	}
 	return(result);
 }
 int 
-ip_NET_INET_IP_DEFTTL(void *buf, size_t *size)
+ip_NET_INET_IP_DEFTTL(int *value, size_t *size)
 {
 	int result = 0;
 	ULONG ulStatus;
@@ -61,8 +61,7 @@ ip_NET_INET_IP_DEFTTL(void *buf, size_t *size)
 	if (ulStatus != ERROR_SUCCESS){
 		result -= errno_posix(ulStatus);
 	}else{
-		*(int *)buf = ipStats.dwDefaultTTL;
-		result = 0;
+		*value = ipStats.dwDefaultTTL;
 	}
 	return(result);
 }
@@ -73,10 +72,10 @@ ip_NET_INET_IP(const int *name, void *buf, size_t *size)
 
 	switch (name[3]){
 		case IPCTL_FORWARDING:		/* 1 */
-			result = ip_NET_INET_IP_FORWARDING(buf, size);
+			result = ip_NET_INET_IP_FORWARDING((int *)buf, size);
 			break;
 		case IPCTL_DEFTTL:		/* traceroute.exe */
-			result = ip_NET_INET_IP_DEFTTL(buf, size);
+			result = ip_NET_INET_IP_DEFTTL((int *)buf, size);
 			break;
 		default:
 			result = -EOPNOTSUPP;

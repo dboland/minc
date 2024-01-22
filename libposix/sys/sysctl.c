@@ -162,7 +162,6 @@ sysctl_KERN_PROC_ARGS(const int *name, void *buf, size_t *size)
 
 	/* sys/proc.c */
 
-//__PRINTF("PROC_ARGV(%d): buf(0x%x) size(%d)\n", pid, buf, *size)
 	switch (name[3]){
 		case KERN_PROC_ARGV:
 			kargv_posix(pid, 1, buf);
@@ -220,14 +219,14 @@ sysctl_KERN_VERSION(char *buf, size_t bufsize)
 	return(0);
 }
 int 
-sysctl_KERN_SECURELVL(int *oldvalue, int *newvalue)
+sysctl_KERN_SECURELVL(int *oldvalue, int newvalue)
 {
 	int result = 0;
 
 	if (oldvalue){
 		*oldvalue = __Globals[WIN_KERN_SECURELVL].LowPart;
 	}else if (newvalue){
-		__Globals[WIN_KERN_SECURELVL].LowPart = *newvalue;
+		__Globals[WIN_KERN_SECURELVL].LowPart = newvalue;
 	}else{
 		result = -EINVAL;
 	}
@@ -290,7 +289,7 @@ sysctl_KERN(const int *name, void *oldp, size_t *oldlenp, void *newp, size_t new
 		case KERN_FSCALE:	/* The kernel fixed-point scale factor (ps.exe) */
 			*(int *)oldp = FSCALE;
 			break;
-		case KERN_CCPU:	/* The scheduler exponential decay value (ps.exe) */
+		case KERN_CCPU:		/* The scheduler exponential decay value (ps.exe) */
 			*(int *)oldp = 1948;
 			break;
 		case KERN_CPTIME:	/* the number of ticks spent by the system (top.exe) */
@@ -303,7 +302,7 @@ sysctl_KERN(const int *name, void *oldp, size_t *oldlenp, void *newp, size_t new
 			result = sysctl_KERN_VERSION(oldp, *oldlenp);
 			break;
 		case KERN_SECURELVL:
-			result = sysctl_KERN_SECURELVL((int *)oldp, (int *)newp);
+			result = sysctl_KERN_SECURELVL((int *)oldp, *(int *)newp);
 			break;
 		case KERN_TTYCOUNT:
 			*(int *)oldp = WIN_TTY_MAX;

@@ -196,12 +196,18 @@ mode_win(WIN_MODE *Result, mode_t mode)
 		default:
 			Result->FileType = WIN_VNON;
 	}
+	/* We need at least FILE_READ_ATTRIBUTES to CreateHardLink() 
+	 * on a file with zero permissions (mutt_dotlock.exe).
+	 */
+	Result->User = FILE_READ_ATTRIBUTES;
 	if (mode & S_IRUSR) Result->User += WIN_S_IREAD;
 	if (mode & S_IWUSR) Result->User += WIN_S_IWRITE;
 	if (mode & S_IXUSR) Result->User += WIN_S_IEXEC;
+	Result->Group = FILE_READ_ATTRIBUTES;
 	if (mode & S_IRGRP) Result->Group += WIN_S_IREAD;
 	if (mode & S_IWGRP) Result->Group += WIN_S_IWRITE;
 	if (mode & S_IXGRP) Result->Group += WIN_S_IEXEC;
+	Result->Other = FILE_READ_ATTRIBUTES;
 	if (mode & S_IROTH) Result->Other += WIN_S_IREAD;
 	if (mode & S_IWOTH) Result->Other += WIN_S_IWRITE;
 	if (mode & S_IXOTH) Result->Other += WIN_S_IEXEC;

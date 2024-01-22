@@ -51,100 +51,159 @@ groups_win(DWORD *Count)
 
 /*******************************************************/
 
-uid_t 
-__getuid(WIN_TASK *Task)
+int 
+__seteuid(WIN_TASK *Task, uid_t uid)
 {
 	SID8 sidUser;
-	uid_t uid = Task->RealUid;
+	int result = 0;
 
 	if (!uid){
-		uid = rid_posix(win_getuid(&sidUser));
-		Task->RealUid = uid;
+		uid = WIN_ROOT_UID;
 	}
-	if (uid == WIN_ROOT_UID){
-		uid = 0;
+	if (uid == rid_posix(&Task->UserSid)){	/* PRIV_START check (ssh.exe) */
+		return(0);
+	}else if (__getuid(Task) && __geteuid(Task)){
+		result = -EPERM;
+	}else if (!vfs_seteuid(Task, rid_win(&sidUser, uid))){
+		result -= errno_posix(GetLastError());
 	}
-	return(uid);
-}
-uid_t 
-__geteuid(WIN_TASK *Task)
-{
-	SID8 sidUser;
-	uid_t uid = rid_posix(&Task->UserSid);
-
-	if (uid == WIN_ROOT_UID){
-		uid = 0;
-	}
-	return(uid);
-}
-uid_t 
-sys_getuid(call_t call)
-{
-	return(__getuid(call.Task));
-}
-uid_t 
-sys_geteuid(call_t call)
-{
-	return(__geteuid(call.Task));
+	return(result);
 }
 int 
-sys_getresuid(call_t call, uid_t *ruid, uid_t *euid, uid_t *suid)
+__setuid(WIN_TASK *Task, uid_t uid)
 {
-	WIN_TASK *pwTask = call.Task;
+	int result = 0;
 
-	*euid = __geteuid(pwTask);
-	*ruid = pwTask->RealUid;
-	*suid = pwTask->SavedUid;
+	if (!uid){
+		uid = WIN_ROOT_UID;
+	}
+	if (uid == Task->RealUid){
+		return(0);
+	}else if (!__seteuid(Task, uid)){
+		Task->RealUid = rid_posix(&Task->UserSid);
+	}
+	return(result);
+}
+int 
+sys_seteuid(call_t call, uid_t uid)
+{
+	return(__seteuid(call.Task, uid));
+}
+int 
+sys_setuid(call_t call, uid_t uid)
+{
+	return(__setuid(call.Task, uid));
+}
+int 
+__setreuid(WIN_TASK *Task, uid_t ruid, uid_t euid)
+{
+	int result = 0;
+
+	if (ruid == __getuid(Task)){
+		result = __seteuid(Task, euid);
+	}else{
+		result = __setuid(Task, ruid);
+	}
+	return(result);
+}
+int 
+sys_setreuid(call_t call, uid_t ruid, uid_t euid)
+{
+	return(__setreuid(call.Task, ruid, euid));
+}
+int 
+sys_setresuid(call_t call, uid_t ruid, uid_t euid, uid_t suid)
+{
+	if (!suid){
+		suid = WIN_ROOT_UID;
+	}
+	if (!__setreuid(call.Task, ruid, euid)){
+		call.Task->SavedUid = suid;
+	}else{
+		return(-EPERM);
+	}
 	return(0);
 }
-gid_t 
-__getgid(WIN_TASK *Task)
+
+/****************************************************/
+
+int 
+__setegid(WIN_TASK *Task, gid_t gid)
 {
 	SID8 sidGroup;
-	gid_t gid = Task->RealGid;
+	int result = 0;
 
 	if (!gid){
-		gid = rid_posix(win_getgid(&sidGroup));
-		Task->RealGid = gid;
+		gid = WIN_ROOT_GID;
 	}
-	if (gid == WIN_ROOT_GID){
-		gid = 0;
+	if (gid == rid_posix(&Task->GroupSid)){	/* PRIV_START check (ssh.exe) */
+		return(0);
+	}else if (__getuid(Task) && __geteuid(Task)){
+		result = -EPERM;
+	}else if (!vfs_setegid(Task, rid_win(&sidGroup, gid))){
+		result -= errno_posix(GetLastError());
 	}
-	return(gid);
-}
-gid_t 
-__getegid(WIN_TASK *Task)
-{
-	SID8 sidGroup;
-	gid_t gid = rid_posix(&Task->GroupSid);
-
-	if (gid == WIN_ROOT_GID){
-		gid = 0;
-	}
-	return(gid);
-}
-gid_t 
-sys_getgid(call_t call)
-{
-	return(__getgid(call.Task));
-}
-gid_t 
-sys_getegid(call_t call)
-{
-	return(__getegid(call.Task));
+	return(result);
 }
 int 
-sys_getresgid(call_t call, gid_t *rgid, gid_t *egid, gid_t *sgid)
+sys_setegid(call_t call, gid_t gid)
 {
-	WIN_TASK *pwTask = call.Task;
+	return(__setegid(call.Task, gid));
+}
+int 
+__setgid(WIN_TASK *Task, gid_t gid)
+{
+	int result = 0;
 
-	*egid = __getegid(pwTask);
-	*rgid = pwTask->RealGid;
-	*sgid = pwTask->SavedGid;
+	if (!gid){
+		gid = WIN_ROOT_GID;
+	}
+	if (gid == Task->RealGid){
+		result = 0;
+	}else if (__setegid(Task, gid)){
+		result -= errno_posix(GetLastError());
+	}else{
+		Task->RealGid = rid_posix(&Task->GroupSid);
+	}
+	return(result);
+}
+int 
+sys_setgid(call_t call, gid_t gid)
+{
+	return(__setgid(call.Task, gid));
+}
+int 
+__setregid(WIN_TASK *Task, gid_t rgid, gid_t egid)
+{
+	int result = 0;
+
+	if (rgid == Task->RealGid){
+		result = __setegid(Task, egid);
+	}else{
+		result = __setgid(Task, rgid);
+	}
+	return(result);
+}
+int 
+sys_setregid(call_t call, gid_t rgid, gid_t egid)
+{
+	return(__setregid(call.Task, rgid, egid));
+}
+int 
+sys_setresgid(call_t call, gid_t rgid, gid_t egid, gid_t sgid)
+{
+	if (!sgid){
+		sgid = WIN_ROOT_GID;
+	}
+	if (!__setregid(call.Task, rgid, egid)){
+		call.Task->SavedGid = sgid;
+	}else{
+		return(-EPERM);
+	}
 	return(0);
 }
 
-/*******************************************************/
+/****************************************************/
 
 long 
 sys_pathconf(call_t call, const char *path, int name)

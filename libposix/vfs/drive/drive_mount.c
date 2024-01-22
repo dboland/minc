@@ -28,7 +28,7 @@
  *
  */
 
-#include <ddk/ntifs.h>
+#include <ddk/mountmgr.h>
 
 /************************************************************/
 
@@ -88,6 +88,7 @@ drive_statfs(WIN_NAMEIDATA *Path, WIN_STATFS *Result)
 
 	/* mount.exe -a
 	 */
+//VfsDebugPath(Path, "drive_statfs");
 	ZeroMemory(Result, sizeof(WIN_STATFS));
 	if (Path->Attribs == FILE_ATTRIBUTE_DRIVE){
 		bResult = DriveStatVolume(Path->Resolved, Result);
@@ -106,12 +107,12 @@ drive_mount(WIN_NAMEIDATA *Path, WIN_VNODE *Node, WIN_MODE *Mode)
 //VfsDebugPath(Path, "drive_mount");
 	if (Path->Attribs == -1){
 		return(FALSE);
-	}else if (Path->Base[1]){			/* not a drive letter */
-		SetLastError(ERROR_BAD_ARGUMENTS);
 	}else if (Path->FileType != WIN_VDIR){
 		SetLastError(ERROR_DIRECTORY);
 	}else if (Path->Attribs == FILE_ATTRIBUTE_DRIVE){
 		SetLastError(ERROR_NOT_READY);
+	}else if (Path->Base[1]){			/* not a drive letter */
+		SetLastError(ERROR_BAD_ARGUMENTS);
 	}else if (!SetFileAttributesW(Path->Resolved, FILE_ATTRIBUTE_SYSTEM)){
 		WIN_ERR("SetFileAttributes(%ls): %s\n", Path->Resolved, win_strerror(GetLastError()));
 	}else{
@@ -126,7 +127,7 @@ drive_mount(WIN_NAMEIDATA *Path, WIN_VNODE *Node, WIN_MODE *Mode)
 		win_wcscpy(win_wcpcpy(pwMount->Path, L"\\\\.\\GLOBALROOT"), Node->Device->NtPath);
 		GetSystemTimeAsFileTime(&pwMount->Time);
 //VfsDebugMount(pwMount, "drive_mount");
-//VfsDebugDevice(Device, "drive_mount");
+//VfsDebugDevice(Node->Device, "drive_mount");
 		bResult = CloseHandle(Node->Handle);
 	}
 	return(bResult);

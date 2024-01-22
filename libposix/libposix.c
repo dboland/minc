@@ -93,6 +93,7 @@ WIN_NAMEIDATA *path_win(WIN_NAMEIDATA *Path, const char *pathname, int flags);
 #include "sys/systm.c"		/* cpu_configure() */
 #include "sys/pciio.c"
 #include "sys/resource.c"
+#include "sys/syscall.c"
 #include "sys/unistd.c"
 #include "sys/wait.c"
 #include "sys/signal.c"
@@ -105,7 +106,7 @@ WIN_NAMEIDATA *path_win(WIN_NAMEIDATA *Path, const char *pathname, int flags);
 #include "sys/sem.c"
 #include "sys/swap.c"
 #include "sys/reboot.c"
-#include "sys/syscall.c"
+//#include "sys/syscall.c"
 #include "sys/dirent.c"
 #include "dev/wscons/wsconsio.c"
 #include "net/if.c"		/* ifinit() */

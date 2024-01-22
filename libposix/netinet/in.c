@@ -45,15 +45,15 @@ inaddr_posix(struct sockaddr_in *addr, DWORD Port, BYTE Address[4])
 /****************************************************/
 
 int 
-in_NET_INET6_IPV6_DAD_PENDING(const int *name, void *buf, size_t *size)
+in_NET_INET6_IPV6_DAD_PENDING(int *count, size_t *size)
 {
 	int result = 0;
 	DWORD dwResult;
 
-	if (!ws2_NET_INET6_IPV6_DAD_PENDING(&dwResult)){
-		result -= errno_posix(GetLastError());
+	if (ws2_NET_INET6_IPV6_DAD_PENDING(&dwResult)){
+		*count = dwResult;
 	}else{
-		*(int *)buf = dwResult;
+		result = -ENOENT;
 	}
 	return(result);
 }
@@ -64,10 +64,10 @@ in_NET_INET6_IPV6(const int *name, void *buf, size_t *size)
 
 	switch (name[3]){
 		case IPV6CTL_FORWARDING:	/* 1 */
-			result = ip_NET_INET_IP_FORWARDING(buf, size);
+			result = ip_NET_INET_IP_FORWARDING((int *)buf, size);
 			break;
 		case IPV6CTL_DAD_PENDING:	/* 49 */
-			result = in_NET_INET6_IPV6_DAD_PENDING(name, buf, size);
+			result = in_NET_INET6_IPV6_DAD_PENDING((int *)buf, size);
 			break;
 		default:
 			result = -ENOENT;

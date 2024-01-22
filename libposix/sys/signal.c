@@ -40,14 +40,13 @@
 #define BIT_SIGTTIN		0x00100000
 #define BIT_SIGTTOU		0x00200000
 #define BIT_SIGCONT		0x00040000
-#define BIT_SIGINT		0x00000002
 
 #define SIGMASK_TTY	\
 	(BIT_SIGTTIN | BIT_SIGTTOU | BIT_SIGSTOP | BIT_SIGCONT)
 #define SIGMASK_IGNORE	\
 	(BIT_SIGTHR | BIT_SIGWINCH | BIT_SIGCHLD | BIT_SIGURG | BIT_SIGINFO)
 
-static const DWORD __sig_win[NSIG] = {
+static const DWORD __SIG_WIN[NSIG] = {
 	0,
 	CTRL_HANGUP_EVENT,
 	CTRL_C_EVENT,
@@ -295,7 +294,7 @@ kill_GRP(WIN_TASK *Task, DWORD GroupId, int sig)
 {
 	int result = 0;
 
-	if (!vfs_kill_GRP(GroupId, WM_COMMAND, __sig_win[sig], Task->TaskId)){
+	if (!vfs_kill_GRP(GroupId, WM_COMMAND, __SIG_WIN[sig], Task->TaskId)){
 		result -= errno_posix(GetLastError());
 	}
 	return(result);
@@ -305,7 +304,7 @@ kill_SYS(WIN_TASK *Task, int sig)
 {
 	int result = 0;
 
-	if (!vfs_kill_SYS(Task->TaskId, WM_COMMAND, __sig_win[sig], Task->TaskId)){
+	if (!vfs_kill_SYS(Task->TaskId, WM_COMMAND, __SIG_WIN[sig], Task->TaskId)){
 		result -= errno_posix(GetLastError());
 	}
 	return(result);
@@ -424,7 +423,7 @@ sys_kill(call_t call, pid_t pid, int sig)
 	}else if (pid >= CHILD_MAX){
 		result = -EINVAL;
 
-	}else if (!vfs_kill_PID(pid_win(pid), WM_COMMAND, __sig_win[sig], pwTask->TaskId)){
+	}else if (!vfs_kill_PID(pid_win(pid), WM_COMMAND, __SIG_WIN[sig], pwTask->TaskId)){
 		result -= errno_posix(GetLastError());
 
 	}

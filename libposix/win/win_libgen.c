@@ -86,10 +86,11 @@ win_volname(LPWSTR Result, LPCWSTR FileName)
 
 	while (C = *FileName++){
 		*R++ = C;
-		if (C == '\\'){
+		if (C == ':'){
 			break;
 		}
 	}
+	*R++ = '\\';
 	*R = 0;
 	return(Result);
 }
