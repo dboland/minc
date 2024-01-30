@@ -50,24 +50,26 @@ BOOL vfs_getsockname(WIN_VNODE *Node, LPSOCKADDR Name, INT *Length);
 
 /* winsock_sysctl.c */
 
-BOOL ws2_NET_RT_IFLIST(PMIB_IFTABLE *Table, PMIB_IFROW *Row, DWORD *Count);
-BOOL ws2_NET_RT_IFALIST(PMIB_IPADDRTABLE *Table, PMIB_IPADDRROW *Row, DWORD *Count);
 BOOL ws2_NET_RT_DUMP(PMIB_IPFORWARDTABLE *Table, PMIB_IPFORWARDROW *Row, DWORD *Count);
 BOOL ws2_NET_RT_OACTIVE(PMIB_IPNETTABLE *Table, PMIB_IPNETROW *Row, DWORD *Count);
 BOOL ws2_NET_INET6_IPV6_DAD_PENDING(DWORD *Count);
 
-/* winsock_sockio.c */
-
-DWORD GetAddrEntry(MIB_IPADDRROW *Address);
-ULONG GetAdapterEntry(PIP_ADAPTER_ADDRESSES *Table, DWORD Index, PIP_ADAPTER_ADDRESSES *Result);
-ULONG GetAdapterAddress(PIP_ADAPTER_ADDRESSES *Table, DWORD Index, WS2_ADDRTYPE Type, PVOID *Result);
-
 /* winsock_statvfs.c */
 
-BOOL ws2_setvfs(WIN_IFDATA *Config, BOOL Ascending);
+BOOL ws2_setvfs(WIN_IFDATA *Config);
 VOID ws2_endvfs(WIN_IFDATA *Config);
-BOOL ws2_getvfs(WIN_IFDATA *Config, BOOL Ascending, WIN_CFDRIVER *Result);
+BOOL ws2_getvfs(WIN_IFDATA *Config, WIN_CFDRIVER *Result);
 
 /* winsock_device.c */
 
 BOOL ws2_match(LPCWSTR NtName, DWORD DeviceType, DWORD Index, WIN_CFDRIVER *Driver);
+
+/* winsock_if.c */
+
+BOOL ws2_setifent(WIN_IFENUM *Enum);
+VOID ws2_endifent(WIN_IFENUM *Enum);
+BOOL ws2_getifent(WIN_IFENUM *Enum, WIN_IFENT *Result);
+
+/* winsock_ifaddrs.c */
+
+DWORD ws2_getifaddrs(MIB_IPADDRROW *Address);

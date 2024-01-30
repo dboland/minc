@@ -32,17 +32,96 @@
 
 /****************************************************/
 
+DWORD 
+WSAGetIfFlags(PIP_ADAPTER_ADDRESSES Adapter)
+{
+	DWORD dwResult = WIN_IFF_UP;
+
+	if (Adapter->OperStatus == IfOperStatusUp){
+		dwResult |= WIN_IFF_RUNNING;
+	}
+//	if (Mask){
+//		result |= WIN_IFF_BROADCAST;
+//	}
+	if (!(Adapter->Flags & IP_ADAPTER_NO_MULTICAST)){
+		dwResult |= WIN_IFF_MULTICAST;
+	}
+	switch (Adapter->IfType){
+		case IF_TYPE_PPP:
+			dwResult |= WIN_IFF_POINTOPOINT;
+			break;
+		case IF_TYPE_SOFTWARE_LOOPBACK:
+			dwResult |= WIN_IFF_LOOPBACK;
+			break;
+	}
+	return(dwResult);
+}
+
+/****************************************************/
+
+BOOL 
+ws2_setifent(WIN_IFENUM *Enum)
+{
+	BOOL bResult = FALSE;
+	ULONG ulStatus;
+	PIP_ADAPTER_ADDRESSES pTable;
+	LONG lSize = 0;
+	ULONG ulFlags = GAA_FLAG_SKIP_DNS_SERVER | GAA_FLAG_SKIP_MULTICAST;
+
+	ulStatus = GetAdaptersAddresses(AF_UNSPEC, ulFlags, NULL, NULL, &lSize);
+	if (lSize > 0){
+		pTable = win_malloc(lSize);
+		GetAdaptersAddresses(AF_UNSPEC, ulFlags, NULL, pTable, &lSize);
+		Enum->Table = pTable;
+		Enum->Next = pTable;
+		bResult = TRUE;
+	}else{
+		WIN_ERR("GetAdaptersAddresses(AF_UNSPEC): %s", win_strerror(ulStatus));
+	}
+	return(bResult);
+}
+VOID 
+ws2_endifent(WIN_IFENUM *Enum)
+{
+	win_free(Enum->Table);
+}
+BOOL 
+ws2_getifent(WIN_IFENUM *Enum, WIN_IFENT *Result)
+{
+	BOOL bResult = FALSE;
+	PIP_ADAPTER_ADDRESSES pAdapter = Enum->Next;
+
+	if (!pAdapter){
+		SetLastError(ERROR_NO_MORE_ITEMS);
+	}else{
+		Result->IfIndex = pAdapter->IfIndex;
+		Result->IfType = pAdapter->IfType;
+		Result->IfFlags = WSAGetIfFlags(pAdapter);
+		Result->Mtu = pAdapter->Mtu;
+		Result->Unicast = pAdapter->FirstUnicastAddress;
+		Result->AddrLen = pAdapter->PhysicalAddressLength;
+		win_memcpy(Result->PhysAddr, pAdapter->PhysicalAddress, Result->AddrLen);
+		win_wcstombs(Result->Description, pAdapter->Description, MAXLEN_IFDESCR);
+		Enum->Next = pAdapter->Next;
+		bResult = TRUE;
+	}
+	return(bResult);
+}
+
+/****************************************************/
+
 UINT 
 ws2_nametoindex(LPCSTR Name)
 {
 	WIN_DEVICE *pwDevice = DEVICE(DEV_CLASS_IFNET);
 	USHORT sUnit = 0;
+	UINT uiError = ERROR_BAD_DEVICE;
 
 	while (sUnit < WIN_UNIT_MAX){
 		if (!win_strcmp(pwDevice->Name, Name)){
 			if (!pwDevice->Flags){
-				SetLastError(ERROR_DEVICE_NOT_AVAILABLE);
-				return(0);
+				uiError = ERROR_DEVICE_NOT_AVAILABLE;
+				break;
 			}else{
 				return(pwDevice->Index);
 			}
@@ -50,7 +129,7 @@ ws2_nametoindex(LPCSTR Name)
 		pwDevice++;
 		sUnit++;
 	}
-	SetLastError(ERROR_BAD_DEVICE);
+	SetLastError(uiError);
 	return(0);
 }
 UINT 
@@ -58,8 +137,11 @@ ws2_indextoname(DWORD Index, LPSTR Result)
 {
 	WIN_DEVICE *pwDevice = DEVICE(DEV_CLASS_IFNET);
 	USHORT sUnit = 0;
+	UINT uiError = ERROR_BAD_DEVICE;
 
-	while (sUnit < WIN_UNIT_MAX){
+	if (!Index){		/* XP */
+		uiError = ERROR_INVALID_PARAMETER;
+	}else while (sUnit < WIN_UNIT_MAX){
 		if (pwDevice->Index == Index){
 			win_strcpy(Result, pwDevice->Name);
 			return(win_strlen(Result));
@@ -67,6 +149,6 @@ ws2_indextoname(DWORD Index, LPSTR Result)
 		pwDevice++;
 		sUnit++;
 	}
-	SetLastError(ERROR_BAD_DEVICE);
+	SetLastError(uiError);
 	return(0);
 }

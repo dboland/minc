@@ -47,6 +47,9 @@ vfs_close(WIN_VNODE *Node)
 		case FS_TYPE_WINSOCK:
 			bResult = ws2_close(Node);
 			break;
+		case FS_TYPE_PDO:
+			bResult = pdo_close(Node);
+			break;
 		default:
 			bResult = disk_close(Node);
 	}
@@ -175,7 +178,7 @@ vfs_dup(WIN_VNODE *Node, WIN_VNODE *Result)
 {
 	BOOL bResult = FALSE;
 
-	Result->FileId = Node->FileId;	/* pdo_F_DUPFD() */
+	Result->FileId = Node->FileId;		/* pdo_F_DUPFD() */
 	if (vfs_F_DUPFD(Node, FALSE, Result)){
 		bResult = TRUE;
 	}
@@ -225,15 +228,15 @@ vfs_chdir(WIN_TASK *Task, WIN_NAMEIDATA *Path)
 {
 	BOOL bResult = FALSE;
 
+	/* perl.exe creates really weird paths.
+	 */
 //VfsDebugPath(Path, "vfs_chdir");
 	if (Path->FileType != WIN_VDIR){
 		SetLastError(ERROR_DIRECTORY);
 	}else if (!vfs_access(Path, WIN_S_IRX)){
 		return(FALSE);
-//	}else if (vfs_realpath(Path, WIN_PATH_MAX)){	/* building perl.exe */
-	}else{
+	}else if (win_realpath(Path->Resolved, WIN_PATH_MAX, PSTRING(Task).Path)){
 		Task->MountId = Path->MountId;
-		win_wcscpy(PSTRING(Task).Path, Path->Resolved);
 		bResult = TRUE;
 	}
 	return(bResult);

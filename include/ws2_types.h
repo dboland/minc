@@ -28,6 +28,27 @@
  *
  */
 
+#define WIN_SCM_RIGHTS		0x01
+#define WIN_SCM_TIMESTAMP	0x04
+#define WIN_SCM_ACCESS		0x08
+
+#define WIN_IFF_UP          0x1             /* interface is up */
+#define WIN_IFF_BROADCAST   0x2             /* broadcast address valid */
+#define WIN_IFF_DEBUG       0x4             /* turn on debugging */
+#define WIN_IFF_LOOPBACK    0x8             /* is a loopback net */
+#define WIN_IFF_POINTOPOINT 0x10            /* interface is point-to-point link */
+#define WIN_IFF_NOTRAILERS  0x20            /* avoid use of trailers */
+#define WIN_IFF_RUNNING     0x40            /* resources allocated */
+#define WIN_IFF_NOARP       0x80            /* no address resolution protocol */
+#define WIN_IFF_PROMISC     0x100           /* receive all packets */
+#define WIN_IFF_ALLMULTI    0x200           /* receive all multicast packets */
+#define WIN_IFF_OACTIVE     0x400           /* transmission in progress */
+#define WIN_IFF_SIMPLEX     0x800           /* can't hear own transmissions */
+#define WIN_IFF_LINK0       0x1000          /* per link layer defined bit */
+#define WIN_IFF_LINK1       0x2000          /* per link layer defined bit */
+#define WIN_IFF_LINK2       0x4000          /* per link layer defined bit */
+#define WIN_IFF_MULTICAST   0x8000          /* supports multicast */
+
 /* iprtrmib.h */
 
 #define MIB_IPADDR_PRIMARY		0x0001
@@ -47,18 +68,13 @@
 #define WIN_AF_INET6	23
 #define WIN_AF_ROUTE	24
 
-#define WIN_SCM_RIGHTS		0x01
-#define WIN_SCM_TIMESTAMP	0x04
-#define WIN_SCM_ACCESS		0x08
-
 /*
  * winsock_statvfs.c
  */
 
 typedef struct _WIN_IFDATA {
-	PMIB_IFTABLE Table;
-	PMIB_IFROW Next;
-	DWORD Count;
+	PVOID Table;
+	PIP_ADAPTER_ADDRESSES Next;
 	DWORD Index;
 	DWORD Type;
 	DWORD FSType;
@@ -69,12 +85,21 @@ typedef struct _WIN_IFDATA {
 #define WS2_SOCKET_SIZE		0x2000
 
 /*
- * winsock_sockio.c
+ * winsock_if.c
  */
 
-typedef enum _WS2_ADDRTYPE {
-	WS2_UNICAST,
-	WS2_ANYCAST,
-	WS2_MULTICAST,
-	WS2_DNSSERVER,
-} WS2_ADDRTYPE;
+typedef struct _WIN_IFENUM {
+	PVOID Table;
+	PIP_ADAPTER_ADDRESSES Next;
+} WIN_IFENUM;
+
+typedef struct _WIN_IFENT {
+	DWORD IfIndex;
+	DWORD IfType;
+	DWORD IfFlags;
+	DWORD Mtu;
+	PIP_ADAPTER_UNICAST_ADDRESS Unicast;
+	DWORD AddrLen;
+	BYTE PhysAddr[MAXLEN_PHYSADDR];
+	CHAR Description[MAXLEN_IFDESCR];
+} WIN_IFENT;

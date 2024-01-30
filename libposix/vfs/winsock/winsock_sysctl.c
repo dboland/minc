@@ -54,48 +54,6 @@ ws2_NET_RT_DUMP(PMIB_IPFORWARDTABLE *Table, PMIB_IPFORWARDROW *Row, DWORD *Count
 	return(bResult);
 }
 BOOL 
-ws2_NET_RT_IFLIST(PMIB_IFTABLE *Table, PMIB_IFROW *Row, DWORD *Count)
-{
-	BOOL bResult = FALSE;
-	LONG lSize = 0;
-	DWORD dwStatus;
-	MIB_IFTABLE *ifTable;
-
-	dwStatus = GetIfTable(NULL, &lSize, FALSE);
-	if (lSize > 0){
-		ifTable = win_malloc(lSize);
-		GetIfTable(ifTable, &lSize, FALSE);
-		*Table = ifTable;
-		*Row = &ifTable->table[ifTable->dwNumEntries - 1];
-		*Count = ifTable->dwNumEntries;
-		bResult = TRUE;
-	}else{
-		WIN_ERR("GetIfTable(): %s", win_strerror(dwStatus));
-	}
-	return(bResult);
-}
-BOOL 
-ws2_NET_RT_IFALIST(PMIB_IPADDRTABLE *Table, PMIB_IPADDRROW *Row, DWORD *Count)
-{
-	BOOL bResult = FALSE;
-	LONG lSize = 0;
-	DWORD dwStatus;
-	MIB_IPADDRTABLE *addrTable;
-
-	dwStatus = GetIpAddrTable(NULL, &lSize, FALSE);
-	if (lSize > 0){
-		addrTable = win_malloc(lSize + sizeof(MIB_IPADDRROW));
-		GetIpAddrTable(addrTable, &lSize, FALSE);
-		*Table = addrTable;
-		*Row = &addrTable->table[addrTable->dwNumEntries - 1];
-		*Count = addrTable->dwNumEntries;
-		bResult = TRUE;
-	}else{
-		WIN_ERR("GetIpAddrTable(): %s", win_strerror(dwStatus));
-	}
-	return(bResult);
-}
-BOOL 
 ws2_NET_RT_UNKNOWN(PMIB_TCPTABLE *Table, PMIB_TCPROW *Row, DWORD *Count)
 {
 	BOOL bResult = FALSE;

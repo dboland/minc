@@ -374,8 +374,8 @@ VfsDebugPath(WIN_NAMEIDATA *Path, LPCSTR Label)
 VOID 
 VfsDebugNode(WIN_VNODE *Node, LPCSTR Label)
 {
-	msvc_printf("%s(%d): Type(%s:%s) Handle(%d) Event(%d) Access(0x%x) CloEx(%d) DevType(0x%x) DevId(0x%x)\n", 
-		Label, Node->FileId, FSType(Node->FSType), FType(Node->FileType), Node->Handle, Node->Event, Node->Access, Node->CloseExec, Node->DeviceType, Node->DeviceId);
+	msvc_printf("%s(%d): Type(%s:%s) Handle(%d) Access(0x%x) CloEx(%d) DevType(0x%x) DevId(0x%x)\n", 
+		Label, Node->FileId, FSType(Node->FSType), FType(Node->FileType), Node->Handle, Node->Access, Node->CloseExec, Node->DeviceType, Node->DeviceId);
 	VfsFileFlags(Node->Flags, L"+ Flags");
 	VfsFileAttribs(Node->Attribs, L"+ Attribs");
 	VfsAccessFlags(Node->Access, OB_TYPE_FILE);

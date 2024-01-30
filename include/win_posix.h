@@ -67,6 +67,19 @@ LPWSTR win_wcslcase(LPWSTR String);
 INT win_wcslen(LPCWSTR String);
 LPWSTR win_wcsucase(LPWSTR String);
 
+/* win_sysctl.c */
+
+UINT win_HW_PAGESIZE(VOID);
+DWORD win_HW_NCPU(VOID);
+UINT win_HW_USERMEM(VOID);
+UINT win_HW_PHYSMEM(VOID);
+DWORDLONG win_HW_PHYSMEM64(VOID);
+UINT win_KERN_CLOCKRATE(VOID);
+BOOL win_KERN_HOSTNAME(LPSTR Current, LPCSTR New, DWORD Size);
+BOOL win_KERN_DOMAINNAME(LPSTR Current, LPCSTR New, DWORD Size);
+BOOL win_KERN_PROC(DWORD ThreadId, WIN_KINFO_PROC *Result);
+BOOL win_KERN_CPTIME2(SYSTEM_PROCESSOR_PERFORMANCE_INFORMATION Buffer[], ULONG Size);
+
 /* win_libgen.c */
 
 LPWSTR win_dirname(LPWSTR FileName);
@@ -79,23 +92,6 @@ BOOL win_flagname(DWORD Flag, LPCSTR Name, DWORD Mask, DWORD *Remain);
 LPWSTR win_docname_r(LPCWSTR FileName, LPWSTR Buffer, LONG Size);
 BOOL win_sidname(SID8 *Sid, LPSTR Buffer, DWORD Length);
 
-/* win_stdlib.c */
-
-PVOID win_malloc(UINT Size);
-PVOID win_realloc(PVOID Buffer, UINT Size);
-VOID win_free(PVOID Buffer);
-DWORD win_getenv(LPCSTR Name, LPCSTR Buffer, DWORD Size);
-BOOL win_getcwd(LPWSTR Path);
-
-/* win_acl.c */
-
-VOID win_acl_PROCESS_ATTACH(VOID);
-BOOL win_acl_get_file(LPCWSTR FileName, PSECURITY_DESCRIPTOR *Result);
-BOOL win_acl_get_fd(HANDLE Handle, PSECURITY_DESCRIPTOR *Result);
-BOOL win_acl_init(WIN_MODE *Mode, WIN_ACL_CONTROL *Result);
-BOOL win_acl_dup(PSECURITY_DESCRIPTOR Security, WIN_ACL_CONTROL *Result);
-VOID win_acl_free(WIN_ACL_CONTROL *Control);
-
 /* win_unistd.c */
 
 SID8 *win_getuid(SID8 *Sid);
@@ -107,6 +103,24 @@ BOOL win_getgroups(SID8 **Groups, DWORD *Count);
 BOOL win_setgroups(SID8 Groups[], DWORD Count);
 BOOL win___tfork_thread(WIN___TFORK *Params, SIZE_T Size, LPTHREAD_START_ROUTINE *Start, PVOID Data, DWORD *Result);
 BOOL win_chdir(LPCWSTR Path);
+
+/* win_stdlib.c */
+
+PVOID win_malloc(UINT Size);
+PVOID win_realloc(PVOID Buffer, UINT Size);
+VOID win_free(PVOID Buffer);
+DWORD win_getenv(LPCSTR Name, LPCSTR Buffer, DWORD Size);
+BOOL win_getcwd(LPWSTR Path);
+BOOL win_realpath(LPCWSTR Path, DWORD Size, LPWSTR Resolved);
+
+/* win_acl.c */
+
+VOID win_acl_PROCESS_ATTACH(VOID);
+BOOL win_acl_get_file(LPCWSTR FileName, PSECURITY_DESCRIPTOR *Result);
+BOOL win_acl_get_fd(HANDLE Handle, PSECURITY_DESCRIPTOR *Result);
+BOOL win_acl_init(WIN_MODE *Mode, WIN_ACL_CONTROL *Result);
+BOOL win_acl_dup(PSECURITY_DESCRIPTOR Security, WIN_ACL_CONTROL *Result);
+VOID win_acl_free(WIN_ACL_CONTROL *Control);
 
 /* win_pwd.c */
 
@@ -134,19 +148,6 @@ ACCESS_MASK win_F_GETFL(HANDLE Handle);
 DWORD win_F_GETFD(HANDLE Handle);
 HANDLE win_F_DISINHERIT(HANDLE Handle, DWORD ProcessId);
 HANDLE win_F_INHERIT(HANDLE Handle, ACCESS_MASK Access, DWORD ProcessId);
-
-/* win_sysctl.c */
-
-UINT win_HW_PAGESIZE(VOID);
-DWORD win_HW_NCPU(VOID);
-UINT win_HW_USERMEM(VOID);
-UINT win_HW_PHYSMEM(VOID);
-DWORDLONG win_HW_PHYSMEM64(VOID);
-UINT win_KERN_CLOCKRATE(VOID);
-BOOL win_KERN_HOSTNAME(LPSTR Current, LPCSTR New, DWORD Size);
-BOOL win_KERN_DOMAINNAME(LPSTR Current, LPCSTR New, DWORD Size);
-BOOL win_KERN_PROC(DWORD ThreadId, WIN_KINFO_PROC *Result);
-BOOL win_KERN_CPTIME2(SYSTEM_PROCESSOR_PERFORMANCE_INFORMATION Buffer[], ULONG Size);
 
 /* win_mman.c */
 

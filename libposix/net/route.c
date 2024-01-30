@@ -38,49 +38,7 @@
 /****************************************************/
 
 void *
-ifmsg_posix(void *buf, MIB_IFROW *Interface)
-{
-	struct if_msghdr *hdr = buf;
-	struct if_data *data = &hdr->ifm_data;
-	struct sockaddr_dl *addr;
-
-	hdr->ifm_msglen = IFMSGLEN;
-	hdr->ifm_version = RTM_VERSION;
-	hdr->ifm_type = RTM_IFINFO;
-	hdr->ifm_hdrlen = sizeof(struct if_msghdr);
-	hdr->ifm_index = Interface->dwIndex;
-//	hdr->ifm_tableid
-	/* announce type of records added below */
-	hdr->ifm_addrs = RTA_IFP | RTA_IFA;
-	hdr->ifm_flags = ifflags_posix(Interface, 0xFFFFFFFF);
-//	hdr->ifm_xflags
-	data->ifi_type = Interface->dwType;
-	data->ifi_addrlen = sizeof(struct sockaddr_dl);
-	data->ifi_hdrlen = sizeof(struct if_data);
-//	data->ifi_link_state
-	data->ifi_mtu = Interface->dwMtu;
-//	data->ifi_metric
-	data->ifi_baudrate = Interface->dwSpeed;
-	data->ifi_ipackets = Interface->dwInUcastPkts;
-	data->ifi_ierrors = Interface->dwInErrors;
-	data->ifi_opackets = Interface->dwOutUcastPkts;
-	data->ifi_oerrors = Interface->dwOutErrors;
-//	data->ifi_collisions
-	data->ifi_ibytes = Interface->dwInOctets;
-	data->ifi_obytes = Interface->dwOutOctets;
-//	data->ifi_imcasts
-//	data->ifi_omcasts
-//	data->ifi_iqdrops
-//	data->ifi_noproto
-//	data->ifi_capabilities
-//	data->ifi_lastchange
-//	data->ifi_mclpool
-	addr = buf + hdr->ifm_hdrlen;
-	dladdr_posix(addr++, Interface->dwIndex, Interface->dwType, Interface->bPhysAddr, Interface->dwPhysAddrLen);
-	return(addr);
-}
-void *
-ifamsg_posix(void *buf, MIB_IFROW *Interface, MIB_IPADDRROW *Address)
+ifamsg_posix_OLD(void *buf, MIB_IFROW *Interface, MIB_IPADDRROW *Address)
 {
 	struct ifa_msghdr *hdr = buf;
 	struct sockaddr_in *addr;
@@ -94,7 +52,7 @@ ifamsg_posix(void *buf, MIB_IFROW *Interface, MIB_IPADDRROW *Address)
 //	hdr->ifam_tableid
 	/* records added below need to be announced here */
 	hdr->ifam_addrs = RTA_NETMASK | RTA_IFA | RTA_BRD;
-	hdr->ifam_flags = ifflags_posix(Interface, Address->dwMask);
+	hdr->ifam_flags = ifflags_posix(Interface);
 //	hdr->ifam_metric
 	addr = buf + hdr->ifam_hdrlen;
 	/* order is important */
@@ -102,6 +60,76 @@ ifamsg_posix(void *buf, MIB_IFROW *Interface, MIB_IPADDRROW *Address)
 	inaddr_posix(addr++, 0, (BYTE *)&Address->dwAddr);
 	inaddr_posix(addr++, 0, (BYTE *)&dwBroadcast);
 	return(addr);
+}
+void *
+ifamsg_posix(WIN_TASK *Task, void *buf, WIN_IFENT *Adapter, PSOCKET_ADDRESS Address)
+{
+	struct ifa_msghdr *hdr = buf;
+	socklen_t addrlen = Address->iSockaddrLength;
+
+	hdr->ifam_msglen = sizeof(struct ifa_msghdr) + addrlen;
+	hdr->ifam_version = RTM_VERSION;
+	hdr->ifam_type = RTM_NEWADDR;
+	hdr->ifam_hdrlen = sizeof(struct ifa_msghdr);
+	hdr->ifam_index = Adapter->IfIndex;
+//	hdr->ifam_tableid
+	/* records added below need to be announced here */
+	hdr->ifam_addrs = RTA_IFA;
+	hdr->ifam_flags = Adapter->IfFlags;
+//	hdr->ifam_metric
+	buf += hdr->ifam_hdrlen;
+	saddr_posix(Task, buf, &addrlen, Address->lpSockaddr);
+	return(buf + addrlen);
+}
+void *
+ifmsg_posix(WIN_TASK *Task, void *buf, WIN_IFENT *Adapter)
+{
+	struct if_msghdr *hdr = buf;
+	struct if_data *data = &hdr->ifm_data;
+	MIB_IFROW ifRow = {0};
+	PIP_ADAPTER_UNICAST_ADDRESS paUnicast = Adapter->Unicast;
+
+	hdr->ifm_msglen = IFMSGLEN;
+	hdr->ifm_version = RTM_VERSION;
+	hdr->ifm_type = RTM_IFINFO;
+	hdr->ifm_hdrlen = sizeof(struct if_msghdr);
+	hdr->ifm_index = Adapter->IfIndex;
+//	hdr->ifm_tableid
+	/* announce type of records added below */
+	hdr->ifm_addrs = RTA_IFP | RTA_IFA;
+	hdr->ifm_flags = Adapter->IfFlags;
+//	hdr->ifm_xflags
+	data->ifi_type = Adapter->IfType;
+	data->ifi_addrlen = sizeof(struct sockaddr_dl);
+	data->ifi_hdrlen = sizeof(struct if_data);
+//	data->ifi_link_state
+	data->ifi_mtu = Adapter->Mtu;
+//	data->ifi_metric
+	ifRow.dwIndex = Adapter->IfIndex;
+	if (ERROR_SUCCESS == GetIfEntry(&ifRow)){
+		data->ifi_baudrate = ifRow.dwSpeed;
+		data->ifi_ipackets = ifRow.dwInUcastPkts;
+		data->ifi_ierrors = ifRow.dwInErrors;
+		data->ifi_opackets = ifRow.dwOutUcastPkts;
+		data->ifi_oerrors = ifRow.dwOutErrors;
+//		data->ifi_collisions
+		data->ifi_ibytes = ifRow.dwInOctets;
+		data->ifi_obytes = ifRow.dwOutOctets;
+	}
+//	data->ifi_imcasts
+//	data->ifi_omcasts
+//	data->ifi_iqdrops
+//	data->ifi_noproto
+//	data->ifi_capabilities
+//	data->ifi_lastchange
+//	data->ifi_mclpool
+	buf += hdr->ifm_hdrlen;
+	buf = dladdr_posix(buf, Adapter->IfIndex, Adapter->IfType, Adapter->PhysAddr, Adapter->AddrLen);
+	while (paUnicast){
+		buf = ifamsg_posix(Task, buf, Adapter, &paUnicast->Address);
+		paUnicast = paUnicast->Next;
+	}
+	return(buf);
 }
 void *
 rtmsg_posix(void *buf, MIB_IFROW *Interface, MIB_IPFORWARDROW *Address)
@@ -120,7 +148,7 @@ rtmsg_posix(void *buf, MIB_IFROW *Interface, MIB_IPFORWARDROW *Address)
 //	hdr->rtm_mpls
 	/* address types added below */
 	hdr->rtm_addrs = RTA_DST | RTA_GATEWAY;
-	hdr->rtm_flags = ifflags_posix(Interface, 0xFFFFFFFF);
+	hdr->rtm_flags = ifflags_posix(Interface);
 //	hdr->rtm_fmask
 //	hdr->rtm_pid
 //	hdr->rtm_seq
@@ -146,6 +174,7 @@ void *
 inmsg_posix(void *buf, MIB_IPNETROW *Address)
 {
 	struct ifa_msghdr *hdr = buf;
+//	WIN_IFENT ifInfo = {0};
 
 	hdr->ifam_msglen = INMSGLEN;
 	hdr->ifam_version = RTM_VERSION;
@@ -173,6 +202,18 @@ rtaddr_posix(struct sockaddr_in *addr, DWORD Port, BYTE Address[4])
 	addr->sin_port = Port;
 	win_memcpy(&addr->sin_addr, Address, 4);
 } */
+size_t 
+ifmsg_size(PIP_ADAPTER_UNICAST_ADDRESS Unicast)
+{
+	size_t result = IFMSGLEN;
+
+	while (Unicast){
+		result += sizeof(struct ifa_msghdr);
+		result += Unicast->Address.iSockaddrLength;
+		Unicast = Unicast->Next;
+	}
+	return(result);
+}
 
 /****************************************************/
 
@@ -180,32 +221,23 @@ int
 route_NET_RT_IFLIST(void *buf, size_t *size)
 {
 	int result = 0;
-	PMIB_IFTABLE pifTable;
-	PMIB_IFROW pifRow;
-	PMIB_IPADDRTABLE pifaTable;
-	PMIB_IPADDRROW pifaRow;
-	DWORD ifCount, ifaCount;
-	BOOL bIsInterface;
+	WIN_IFENUM ifEnum;
+	WIN_IFENT ifInfo;
+	WIN_TASK *pwTask = &__Tasks[CURRENT];
 
-	if (!ws2_NET_RT_IFLIST(&pifTable, &pifRow, &ifCount)){
-		result -= errno_posix(GetLastError());
-	}else if (!ws2_NET_RT_IFALIST(&pifaTable, &pifaRow, &ifaCount)){
-		result -= errno_posix(GetLastError());
-	}else if (!buf){
-		*size = IFMSGLEN * ifCount;
-		*size += IFAMSGLEN * ifaCount;
-	}else while (ifCount){
-		buf = ifmsg_posix(buf, pifRow);
-		if (ifaCount && (pifRow->dwIndex == pifaRow->dwIndex)){
-			buf = ifamsg_posix(buf, pifRow, pifaRow);
-			pifaRow--;
-			ifaCount--;
-		}
-		pifRow--;
-		ifCount--;
+	if (!buf){
+		*size = 0;
 	}
-	win_free(pifaTable);
-	win_free(pifTable);
+	if (!ws2_setifent(&ifEnum)){
+		result -= errno_posix(GetLastError());
+	}else while (ws2_getifent(&ifEnum, &ifInfo)){
+		if (!buf){
+			*size += ifmsg_size(ifInfo.Unicast);
+		}else{
+			buf = ifmsg_posix(pwTask, buf, &ifInfo);
+		}
+	}
+	ws2_endifent(&ifEnum);
 	return(result);
 }
 int 

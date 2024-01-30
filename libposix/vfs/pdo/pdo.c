@@ -49,7 +49,7 @@ pdo_init(WIN_DEV_CLASS Devices[])
 {
 	__Devices = Devices;
 
-	config_init("mem", FS_TYPE_PDO, WIN_VCHR, DEV_TYPE_MEM);	/* netstat.exe */
+	config_init("mem", FS_TYPE_PDO, WIN_VCHR, DEV_TYPE_MEM);
 	config_init("kmem", FS_TYPE_PDO, WIN_VCHR, DEV_TYPE_KMEM);
 	config_init("null", FS_TYPE_PDO, WIN_VCHR, DEV_TYPE_NULL);
 	config_init("random", FS_TYPE_PDO, WIN_VCHR, DEV_TYPE_RANDOM);

@@ -42,20 +42,21 @@ errno_posix(DWORD Error)
 			result = 0;
 			break;
 		case WSAEINVAL:
-		case ERROR_NOT_LOCKED:			// 158: The segment is already unlocked
-		case ERROR_INVALID_PARAMETER:		// 87: The parameter is incorrect (mailslot_read())
 		case ERROR_INVALID_PRIMARY_GROUP:
 		case ERROR_BAD_ARGUMENTS:		// 160
+		case ERROR_NOT_LOCKED:			/* 158: The segment is already unlocked */
+		case ERROR_INVALID_PARAMETER:		/* 87: The parameter is incorrect (mailslot_read()) */
+//		case ERROR_INVALID_DATA:		/* 13: The data is invalid. */
 			result = EINVAL;
 			break;
 		case NERR_GroupNotFound:
 		case NERR_UserNotFound:
-		case ERROR_NONE_MAPPED:			// 1332: No mapping between account names and security IDs was done.
+		case ERROR_NONE_MAPPED:			/* 1332: No mapping between account names and security IDs was done. */
 		case NTE_BAD_KEYSET:
 		case ERROR_MOD_NOT_FOUND:
 		case ERROR_FILE_NOT_FOUND:
-		case ERROR_INVALID_NAME:		// 123: The filename, directory name, or volume label syntax is incorrect
-		case ERROR_PATH_NOT_FOUND:		// 3: The system cannot find the file specified (gcc.exe)
+		case ERROR_INVALID_NAME:		/* 123: The filename, directory name, or volume label syntax is incorrect */
+		case ERROR_PATH_NOT_FOUND:		/* 3: The system cannot find the file specified (gcc.exe) */
 			result = ENOENT;
 			break;
 		case ERROR_PRIVILEGE_NOT_HELD:
@@ -66,8 +67,8 @@ errno_posix(DWORD Error)
 		case ERROR_INVALID_OWNER:		/* trying to force owner on remote disk (vim.exe) */
 			result = EPERM;
 			break;
-		case ERROR_BAD_PATHNAME:		// 161: The specified path is invalid
-		case ERROR_DIRECTORY:			// 267: The directory name is invalid
+		case ERROR_DIRECTORY:			/* 267: The directory name is invalid */
+		case ERROR_BAD_PATHNAME:		/* 161: The specified path is invalid */
 			result = ENOTDIR;
 			break;
 		case ERROR_INSUFFICIENT_BUFFER:
@@ -86,13 +87,13 @@ errno_posix(DWORD Error)
 			result = ENAMETOOLONG;
 			break;
 		case WSAEACCES:
-		case WSAEPROVIDERFAILEDINIT:		// 10106: The requested service provider could not be loaded or initialized.
+		case WSAEPROVIDERFAILEDINIT:		/* 10106: The requested service provider could not be loaded or initialized. */
 		case ERROR_SQL_ACCESS_DENIED:
 		case ERROR_ACCESS_DENIED:
 			result = EACCES;
 			break;
 		case ERROR_FILE_EXISTS:
-		case ERROR_ALREADY_EXISTS:		// 183: MoveFileEx() on directory
+		case ERROR_ALREADY_EXISTS:		/* 183: MoveFileEx() on directory */
 			result = EEXIST;
 			break;
 		case ERROR_DIR_NOT_EMPTY:
@@ -105,7 +106,7 @@ errno_posix(DWORD Error)
 		case ERROR_BAD_FILE_TYPE:
 			result = EFTYPE;
 			break;
-		case ERROR_BAD_PIPE:			/* The pipe state is invalid */
+		case ERROR_BAD_PIPE:			/* 230: The pipe state is invalid */
 			result = ENOTCONN;
 			break;
 		case WSAEBADF:
@@ -118,20 +119,20 @@ errno_posix(DWORD Error)
 		case ERROR_BAD_EXE_FORMAT:
 			result = ENOEXEC;
 			break;
-		case ERROR_INVALID_FUNCTION:		// when trying to stat DOS devices (COM1, LPT1, CON, AUX)
+		case ERROR_INVALID_FUNCTION:		/* trying to stat DOS devices (COM1, LPT1, CON, AUX) */
 		case ERROR_NOT_SUPPORTED:
 			result = EOPNOTSUPP;
 			break;
 		case ERROR_INVALID_THREAD_ID:
 			result = ESRCH;
 			break;
-		case ERROR_NO_DATA:			// 232: The pipe is being closed (read end closed)
-		case ERROR_PIPE_NOT_CONNECTED:		// 233: No process is on the other end of the pipe.
+		case ERROR_NO_DATA:			/* 232: The pipe is being closed (read end closed) */
+		case ERROR_PIPE_NOT_CONNECTED:		/* 233: No process is on the other end of the pipe. */
 			vfs_raise(WM_COMMAND, CTRL_PIPE_EVENT, 0);
-		case ERROR_BROKEN_PIPE:			// 109: The pipe has been ended (write end closed)
+		case ERROR_BROKEN_PIPE:			/* 109: The pipe has been ended (write end closed) */
 			result = EPIPE;
 			break;
-		case ERROR_PIPE_CONNECTED:		// 535: There is a process on other end of the pipe
+		case ERROR_PIPE_CONNECTED:		/* 535: There is a process on other end of the pipe */
 			result = ESPIPE;
 			break;
 		case ERROR_WAIT_NO_CHILDREN:
@@ -141,7 +142,7 @@ errno_posix(DWORD Error)
 			result = EMFILE;
 			break;
 		case WSAEFAULT:
-		case ERROR_NOACCESS:			// Invalid access to memory location
+		case ERROR_NOACCESS:			/* 998: Invalid access to memory location */
 		case ERROR_INVALID_ADDRESS:
 			result = EFAULT;
 			break;

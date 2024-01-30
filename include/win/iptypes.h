@@ -231,7 +231,7 @@ typedef struct _IP_ADAPTER_ADDRESSES {
   PWCHAR FriendlyName;
   BYTE PhysicalAddress[MAX_ADAPTER_ADDRESS_LENGTH];
   DWORD PhysicalAddressLength;
-  DWORD Flags;
+  ULONG Flags;
   DWORD Mtu;
   DWORD IfType;
   IF_OPER_STATUS OperStatus;

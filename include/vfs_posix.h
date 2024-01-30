@@ -100,7 +100,7 @@ BOOL vfs_kill_SYS(DWORD CallerId, UINT Message, WPARAM WParam, LPARAM LParam);
 BOOL vfs_open(WIN_NAMEIDATA *Path, WIN_FLAGS *Flags, WIN_MODE *Mode, WIN_VNODE *Result);
 BOOL vfs_F_CNTL(WIN_VNODE *Node, DWORD Command, PVOID Param);
 BOOL vfs_F_SETFL(WIN_VNODE *Node, WIN_FLAGS *Flags);
-BOOL vfs_F_SETLK(WIN_VNODE *Node, DWORD Flags);
+BOOL vfs_F_SETLK(WIN_VNODE *Node, DWORD Flags, DWORDLONG Offset, LARGE_INTEGER *Size);
 BOOL vfs_F_GETPATH(WIN_VNODE *Node, WIN_NAMEIDATA *Path);
 BOOL vfs_F_DUPFD(WIN_VNODE *Node, BOOL CloseExec, WIN_VNODE *Result);
 
@@ -124,7 +124,6 @@ BOOL vfs_getvfs(WIN_CFDATA *Config, DWORD Flags);
 
 /* vfs_stdlib.c */
 
-BOOL vfs_realpath(WIN_NAMEIDATA *Path, DWORD Size);
 BOOL vfs_atexit(WIN_ATEXITPROC Function);
 BOOL vfs__cxa_finalize(PVOID Param);
 

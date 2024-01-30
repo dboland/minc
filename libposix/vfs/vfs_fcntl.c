@@ -169,26 +169,19 @@ vfs_F_ADDACE(WIN_VNODE *Node, PSID Sid)
 	return(bResult);
 }
 BOOL 
-vfs_F_SETLK(WIN_VNODE *Node, DWORD Flags)
+vfs_F_SETLK(WIN_VNODE *Node, DWORD Flags, DWORDLONG Offset, LARGE_INTEGER *Size)
 {
 	BOOL bResult = FALSE;
-	WCHAR szPath[WIN_PATH_MAX];
-	DWORD dwCreation = OPEN_EXISTING;
-	DWORD dwAttribs = Node->Attribs;
-	HANDLE hResult = NULL;
-	DWORD dwShare = 0;
+	OVERLAPPED ovl = {0, 0, Offset & 0xFFFFFFFF, Offset >> 32, NULL};
 
-//	if (Node->FileType == WIN_VDIR){
-//		dwAttribs |= FILE_FLAG_BACKUP_SEMANTICS;
+//	if (!Size->QuadPart){
+//		Size->QuadPart = 0x7FFFFFFFFFFFFFFFLL;
 //	}
-	if (Flags & LOCKFILE_UNLOCK){
-		bResult = CloseHandle(Node->Lock);
-	}else if (Node->Lock){
-		SetLastError(WSAEWOULDBLOCK);
-	}else if (!win_F_GETPATH(Node->Handle, szPath)){
-		return(FALSE);
-	}else if (hResult = CreateFileW(szPath, Node->Access, dwShare, NULL, dwCreation, dwAttribs, NULL)){
-		Node->Lock = hResult;
+	if (Flags != LOCKFILE_UNLOCK){
+		bResult = LockFileEx(Node->Handle, Flags, 0, Size->LowPart, Size->HighPart, &ovl);
+	}else if (!UnlockFileEx(Node->Handle, 0, Size->LowPart, Size->HighPart, &ovl)){
+		WIN_ERR("UnlockFileEx(%I64d): %s\n", Size->QuadPart, win_strerror(GetLastError()));
+	}else{
 		bResult = TRUE;
 	}
 	return(bResult);

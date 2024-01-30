@@ -193,20 +193,21 @@ sysctl_KERN_CPTIME2(int cpu, u_int64_t states[CPUSTATES])
 	int result = 0;
 	LONG lCount = win_HW_NCPU();
 	ULONG ulSize = sizeof(SYSTEM_PROCESSOR_PERFORMANCE_INFORMATION) * lCount;
-	SYSTEM_PROCESSOR_PERFORMANCE_INFORMATION *sppInfo = win_malloc(ulSize);
+	SYSTEM_PROCESSOR_PERFORMANCE_INFORMATION *psppInfo = win_malloc(ulSize);
 
 	if (cpu < 0 || cpu >= lCount){
 		result = -EINVAL;
-	}else if (!win_KERN_CPTIME2(sppInfo, ulSize)){
+	}else if (!win_KERN_CPTIME2(psppInfo, ulSize)){
 		result -= errno_posix(GetLastError());
 	}else{
-		states[CP_USER] = ticks64_posix(&sppInfo[cpu].UserTime);
-		states[CP_NICE] = ticks64_posix(&sppInfo[cpu].DpcTime);
-		states[CP_SYS] = ticks64_posix(&sppInfo[cpu].KernelTime);
-		states[CP_INTR] = ticks64_posix(&sppInfo[cpu].InterruptTime);
-		states[CP_IDLE] = ticks64_posix(&sppInfo[cpu].IdleTime);
+		psppInfo += cpu;
+		states[CP_USER] = ticks64_posix(&psppInfo->UserTime);
+		states[CP_NICE] = ticks64_posix(&psppInfo->DpcTime);
+		states[CP_SYS] = ticks64_posix(&psppInfo->KernelTime);
+		states[CP_INTR] = ticks64_posix(&psppInfo->InterruptTime);
+		states[CP_IDLE] = ticks64_posix(&psppInfo->IdleTime);
 	}
-	win_free(sppInfo);
+	win_free(psppInfo);
 	return(result);
 }
 int 
@@ -219,16 +220,16 @@ sysctl_KERN_VERSION(char *buf, size_t bufsize)
 	return(0);
 }
 int 
-sysctl_KERN_SECURELVL(int *oldvalue, int newvalue)
+sysctl_KERN_SECURELVL(int *oldvalue, int *newvalue)
 {
 	int result = 0;
 
 	if (oldvalue){
 		*oldvalue = __Globals[WIN_KERN_SECURELVL].LowPart;
 	}else if (newvalue){
-		__Globals[WIN_KERN_SECURELVL].LowPart = newvalue;
+		__Globals[WIN_KERN_SECURELVL].LowPart = *newvalue;
 	}else{
-		result = -EINVAL;
+		result = -EFAULT;
 	}
 	return(result);
 }
@@ -302,7 +303,7 @@ sysctl_KERN(const int *name, void *oldp, size_t *oldlenp, void *newp, size_t new
 			result = sysctl_KERN_VERSION(oldp, *oldlenp);
 			break;
 		case KERN_SECURELVL:
-			result = sysctl_KERN_SECURELVL((int *)oldp, *(int *)newp);
+			result = sysctl_KERN_SECURELVL((int *)oldp, (int *)newp);
 			break;
 		case KERN_TTYCOUNT:
 			*(int *)oldp = WIN_TTY_MAX;
@@ -442,10 +443,10 @@ sysctl_VM(const int *name, void *oldp, size_t *oldlenp, void *newp, size_t newle
 		case VM_LOADAVG:
 			result = sysctl_VM_LOADAVG((struct loadavg *)oldp, *oldlenp);
 			break;
-		case VM_MAXSLP:	/* time to be blocked before being swappable (ps.exe) */
+		case VM_MAXSLP:			/* time to be blocked before being swappable (ps.exe) */
 			*(int *)oldp = 0;
 			break;
-		case VM_UVMEXP:	/* statistics about the UVM memory management system (top.exe) */
+		case VM_UVMEXP:			/* statistics about the UVM memory management system (top.exe) */
 			result = sysctl_VM_UVMEXP((struct uvmexp *)oldp, *oldlenp);
 			break;
 		default:

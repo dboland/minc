@@ -93,3 +93,18 @@ win_getcwd(LPWSTR Path)
 	}
 	return(bResult);
 }
+BOOL 
+win_realpath(LPCWSTR Path, DWORD Size, LPWSTR Resolved)
+{
+	BOOL bResult = FALSE;
+	LPWSTR pszBase = NULL;
+
+	/* Note: GetFullPathName() does not merge slashes.
+	 */
+	if (!GetFullPathNameW(Path, Size, Resolved, &pszBase)){
+		WIN_ERR("GetFullPathName(%ls): %s\n", Path, win_strerror(GetLastError()));
+	}else{
+		bResult = TRUE;
+	}
+	return(bResult);
+}

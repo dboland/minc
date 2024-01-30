@@ -42,6 +42,7 @@ ws2_match(LPCWSTR NtName, DWORD DeviceType, DWORD Index, WIN_CFDRIVER *Driver)
 
 	while (sUnit < WIN_UNIT_MAX){
 		if (!win_wcscmp(pwDevice->NtName, NtName)){
+			bResult = TRUE;
 			break;
 		}else if (!pwDevice->Flags){
 			pwDevice->DeviceType = DeviceType;
@@ -50,12 +51,12 @@ ws2_match(LPCWSTR NtName, DWORD DeviceType, DWORD Index, WIN_CFDRIVER *Driver)
 			win_wcscpy(pwDevice->NtName, NtName);
 			win_wcscpy(pwDevice->ClassId, Driver->ClassId);
 			bResult = config_attach(pwDevice, sClass);
-//VfsDebugDevice(pwDevice, "ws2_attach");
 			break;
 		}
 		pwDevice++;
 		sUnit++;
 	}
+//VfsDebugDevice(pwDevice, "ws2_attach");
 	win_strcpy(Driver->Name, pwDevice->Name);
 	Driver->DeviceId = pwDevice->DeviceId;
 	Driver->Flags = pwDevice->Flags;

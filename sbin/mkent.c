@@ -289,9 +289,9 @@ mk_ifent(WIN_FS_TYPE Type)
 	WIN_IFDATA ifData;
 	WIN_CFDRIVER ifDriver;
 
-	if (!ws2_setvfs(&ifData, TRUE)){
+	if (!ws2_setvfs(&ifData)){
 		fprintf(stderr, "ws2_setvfs(): %s\n", strerror(errno));
-	}else while (ws2_getvfs(&ifData, TRUE, &ifDriver)){
+	}else while (ws2_getvfs(&ifData, &ifDriver)){
 		if (ifData.FSType == Type){
 			printf("%ls: Index(%d) Type(%d): %ls\n", ifData.NtName, ifData.Index, ifData.Type, ifDriver.Comment);
 		}

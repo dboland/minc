@@ -59,18 +59,15 @@ WSALookup(DWORD LinkType)
 	return(dwResult);
 }
 LPWSTR 
-WSANtName(LPWSTR Buffer, UCHAR Source[], LONG Length)
+WSAQueryDosDevice(LPWSTR Buffer, UCHAR Source[], LONG Length)
 {
 	WCHAR *psz = Buffer;
+	WCHAR *pszSep = L"";
 
-	*Buffer = 0;
-	if (Length){
-		psz += msvc_swprintf(psz, L"%.2X", *Source++);
-		Length--;
-	}
-	while (Length){
-		psz += msvc_swprintf(psz, L"-%.2X", *Source++);
-		Length--;
+	*psz = 0;
+	while (Length--){
+		psz += msvc_swprintf(psz, L"%s%.2X", pszSep, *Source++);
+		pszSep = L"-";
 	}
 	return(Buffer);
 }
@@ -78,22 +75,25 @@ WSANtName(LPWSTR Buffer, UCHAR Source[], LONG Length)
 /****************************************************/
 
 BOOL 
-ws2_setvfs(WIN_IFDATA *Config, BOOL Ascending)
+ws2_setvfs(WIN_IFDATA *Config)
 {
 	BOOL bResult = FALSE;
-	PMIB_IFTABLE pifTable = NULL;
-	PMIB_IFROW pifRow;
-	DWORD dwCount;
+	ULONG ulStatus;
+	PIP_ADAPTER_ADDRESSES pTable;
+	LONG lSize = 0;
+	ULONG ulFlags = GAA_FLAG_SKIP_DNS_SERVER | GAA_FLAG_SKIP_MULTICAST;
+	DWORD dwCount = 0;
 
-	if (ws2_NET_RT_IFLIST(&pifTable, &pifRow, &dwCount)){
-		Config->Table = pifTable;
-		if (Ascending){
-			Config->Next = pifTable->table;
-		}else{
-			Config->Next = pifRow;
-		}
-		Config->Count = dwCount;
+	ulStatus = GetAdaptersAddresses(AF_UNSPEC, ulFlags, NULL, NULL, &lSize);
+	if (lSize > 0){
+		pTable = win_malloc(lSize);
+		GetAdaptersAddresses(AF_UNSPEC, ulFlags, NULL, pTable, &lSize);
+		Config->Table = pTable;
+		Config->Next = pTable;
+		Config->Index = 0;
 		bResult = TRUE;
+	}else{
+		WIN_ERR("GetAdaptersAddresses(AF_UNSPEC): %s", win_strerror(ulStatus));
 	}
 	return(bResult);
 }
@@ -103,36 +103,23 @@ ws2_endvfs(WIN_IFDATA *Config)
 	win_free(Config->Table);
 }
 BOOL 
-ws2_getvfs(WIN_IFDATA *Config, BOOL Ascending, WIN_CFDRIVER *Result)
+ws2_getvfs(WIN_IFDATA *Config, WIN_CFDRIVER *Result)
 {
 	BOOL bResult = FALSE;
-	PMIB_IFROW pifNext = Config->Next;
+	PIP_ADAPTER_ADDRESSES pRow = Config->Next;
 
-	ZeroMemory(Result, sizeof(WIN_CFDRIVER));
-	if (!Config->Count){
+	if (!pRow){
 		SetLastError(ERROR_NO_MORE_ITEMS);
 	}else{
-		Config->DeviceType = WSALookup(pifNext->dwType);
+		ZeroMemory(Result, sizeof(WIN_CFDRIVER));
+		Config->DeviceType = WSALookup(pRow->IfType);
 		Config->FSType = FS_TYPE_WINSOCK;
-		Config->Index = pifNext->dwIndex;
-		Config->Type = pifNext->dwType;
-		if (pifNext->dwPhysAddrLen){
-			WSANtName(Config->NtName, pifNext->bPhysAddr, pifNext->dwPhysAddrLen);
-		}else if (Config->DeviceType == DEV_TYPE_LOOPBACK){
-			win_wcscpy(Config->NtName, L"00-00-00-00-00-00");
-		}else{
-			/* Vista */
-			Config->FSType = FS_TYPE_NDIS;
-			win_wcscpy(Config->NtName, win_basename(pifNext->wszName));
-		}
+		Config->Index = pRow->IfIndex;
+		Config->Type = pRow->IfType;
 		win_wcscpy(Result->ClassId, NDIS_LAN_CLASS);
-		win_mbstowcs(Result->Comment, pifNext->bDescr, MAX_COMMENT);
-		if (Ascending){
-			Config->Next++;
-		}else{
-			Config->Next--;
-		}
-		Config->Count--;
+		win_mbstowcs(Config->NtName, pRow->AdapterName, MAX_NAME);
+		win_wcscpy(Result->Comment, pRow->FriendlyName);
+		Config->Next = pRow->Next;
 		bResult = TRUE;
 	}
 	return(bResult);

@@ -41,27 +41,9 @@ vfs__cxa_finalize(PVOID Param)
 
 	while (dwIndex--){
 		if (Function = pwTask->AtExit[dwIndex]){
-//__PRINTF("vfs__cxa_finalize(%d): Function(0x%x)\n", dwIndex, Function);
 			Function();
 		}
 	}
-}
-BOOL 
-vfs_realpath(WIN_NAMEIDATA *Path, DWORD Size)
-{
-	BOOL bResult = FALSE;
-	LPWSTR pszDoc = NULL;
-	WCHAR szRealPath[WIN_PATH_MAX] = L"";
-
-	/* GetFullPathName() does not merge slashes */
-	if (!GetFullPathNameW(Path->Resolved, Size, szRealPath, &pszDoc)){	/* building perl.exe */
-		WIN_ERR("GetFullPathName(%ls): %s\n", Path->Resolved, win_strerror(GetLastError()));
-	}else{
-		Path->R = win_wcpcpy(Path->Resolved, szRealPath);
-		Path->Last = Path->R - 1;
-		bResult = TRUE;
-	}
-	return(bResult);
 }
 BOOL 
 vfs_atexit(WIN_ATEXITPROC Function)

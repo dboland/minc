@@ -170,27 +170,39 @@ fcntl_F_SETFD(WIN_VNODE *Node, int flags)
 	return(0);
 }
 int 
-fcntl_F_SETLK(WIN_TASK *Task, WIN_VNODE *Node, struct flock *lock)
+fcntl_F_SETLK(WIN_VNODE *Node, struct flock *lock)
 {
 	int result = 0;
 	DWORD dwFlags = 0;
+	LARGE_INTEGER liSize;
 
+	liSize.QuadPart = lock->l_len;
 	switch (lock->l_type){
-		case F_RDLCK:
+		case F_RDLCK:		/* 1 */
 			dwFlags = LOCKFILE_SHARED;
 			break;
-		case F_UNLCK:
+		case F_UNLCK:		/* 2 */
 			dwFlags = LOCKFILE_UNLOCK;
 			break;
-		case F_WRLCK:
+		case F_WRLCK:		/* 3 */
 			dwFlags = LOCKFILE_EXCLUSIVE_LOCK;
 			break;
 		default:
 			return(-EINVAL);
 	}
-	if (!vfs_F_SETLK(Node, dwFlags)){
+	if (!vfs_F_SETLK(Node, dwFlags, lock->l_start, &liSize)){
 		result -= errno_posix(GetLastError());
 	}
+	return(result);
+}
+int 
+fcntl_F_GETLK(WIN_VNODE *Node, struct flock *lock)
+{
+	int result = 0;
+
+//	if (Node->Locked){
+//		lock->l_type = F_UNLCK;
+//	}
 	return(result);
 }
 int 
@@ -265,6 +277,8 @@ sys_flock(call_t call, int fd, int operation)
 	int result = 0;
 	WIN_TASK *pwTask = call.Task;
 	DWORD dwFlags = 0;
+	LARGE_INTEGER liSize = {0xFFFFFFFF, 0x7FFFFFFF};
+	DWORDLONG dwlOffset = 0LL;
 
 	if (operation & LOCK_EX){
 		dwFlags |= LOCKFILE_EXCLUSIVE_LOCK;
@@ -273,11 +287,11 @@ sys_flock(call_t call, int fd, int operation)
 		dwFlags |= LOCKFILE_FAIL_IMMEDIATELY;
 	}
 	if (operation & LOCK_UN){
-		dwFlags |= LOCKFILE_UNLOCK;
+		dwFlags = LOCKFILE_UNLOCK;
 	}
 	if (fd < 0 || fd >= OPEN_MAX){
 		result = -EBADF;
-	}else if (!vfs_F_SETLK(&pwTask->Node[fd], dwFlags)){
+	}else if (!vfs_F_SETLK(&pwTask->Node[fd], dwFlags, dwlOffset, &liSize)){
 		result -= errno_posix(GetLastError());
 	}
 	return(result);
@@ -310,8 +324,11 @@ sys_fcntl(call_t call, int fd, int cmd, ...)
 		case F_GETFL:
 			result = flflags_posix(&vNodes[fd]);
 			break;
-		case F_SETLK:		/* mutt.exe */
-			result = fcntl_F_SETLK(pwTask, &vNodes[fd], va_arg(args, struct flock *));
+		case F_SETLK:		/* makewhatis.exe (mandoc) */
+			result = fcntl_F_SETLK(&vNodes[fd], va_arg(args, struct flock *));
+			break;
+		case F_GETLK:
+			result = fcntl_F_GETLK(&vNodes[fd], va_arg(args, struct flock *));
 			break;
 		case F_SETOWN:		/* see ioctl(2) */
 			result = fcntl_F_SETOWN(pwTask, &vNodes[fd], va_arg(args, int));

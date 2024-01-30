@@ -39,14 +39,14 @@ ifinit(void)
 	WIN_CFDRIVER cfDriver;
 	CHAR szMessage[MAX_MESSAGE];
 
-	if (!ws2_setvfs(&ifData, FALSE)){
+	if (!ws2_setvfs(&ifData)){
 		return;
-	}else while (ws2_getvfs(&ifData, FALSE, &cfDriver)){
+	}else while (ws2_getvfs(&ifData, &cfDriver)){
 		if (ifData.FSType == FS_TYPE_WINSOCK){
 			if (ws2_match(ifData.NtName, ifData.DeviceType, ifData.Index, &cfDriver)){
 				msgbuf_WINSOCK(&ifData, &cfDriver, szMessage);
 //				msvc_printf(szMessage);
-			}else if (!cfDriver.Flags){
+			}else if (!(cfDriver.Flags & WIN_DVF_CONFIG_READY)){
 				msgbuf_WINSOCK(&ifData, &cfDriver, szMessage);
 				msvc_printf(szMessage);
 			}

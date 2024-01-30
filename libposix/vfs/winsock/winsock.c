@@ -30,7 +30,6 @@
 
 #include "winsock_syscall.c"
 #include "winsock_device.c"
-#include "winsock_sockio.c"
 #include "winsock_filio.c"
 #include "winsock_fcntl.c"
 #include "winsock_poll.c"
@@ -40,6 +39,7 @@
 #include "winsock_statvfs.c"
 #include "winsock_stat.c"
 #include "winsock_if.c"
+#include "winsock_ifaddrs.c"
 
 /************************************************************/
 

@@ -33,81 +33,33 @@
 /****************************************************/
 
 DWORD 
-GetAddrEntry(MIB_IPADDRROW *Address)
+ws2_getifaddrs(MIB_IPADDRROW *Address)
 {
 	DWORD dwStatus;
-	MIB_IPADDRTABLE *pipaTable;
-	MIB_IPADDRROW *pipaRow;
 	LONG lSize = 0;
-	DWORD dwCount = 0;
+	MIB_IPADDRTABLE *pTable;
+	MIB_IPADDRROW *pRow;
 	DWORD dwIndex = Address->dwIndex;
+	DWORD dwCount;
 
 	dwStatus = GetIpAddrTable(NULL, &lSize, FALSE);
 	if (lSize > 0){
-		pipaTable = win_malloc(lSize);
-		dwStatus = GetIpAddrTable(pipaTable, &lSize, FALSE);
-		pipaRow = pipaTable->table;
-		dwCount = pipaTable->dwNumEntries;
+		pTable = win_malloc(lSize);
+		GetIpAddrTable(pTable, &lSize, FALSE);
+		pRow = pTable->table;
+		dwCount = pTable->dwNumEntries;
+		dwStatus = WSAEADDRNOTAVAIL;
 		while (dwCount--){
-			if (pipaRow->dwIndex == dwIndex && pipaRow->wType & MIB_IPADDR_PRIMARY){
-				win_memcpy(Address, pipaRow, sizeof(MIB_IPADDRROW));
+			if (pRow->dwIndex == dwIndex && pRow->wType & MIB_IPADDR_PRIMARY){
+				win_memcpy(Address, pRow, sizeof(MIB_IPADDRROW));
+				dwStatus = ERROR_SUCCESS;
 				break;
 			}
-			pipaRow++;
+			pRow++;
 		}
-		win_free(pipaTable);
+		win_free(pTable);
 	}else{
-		WIN_ERR("GetIpAddrTable(%d): %s\n", dwIndex, win_strerror(dwStatus));
+		WIN_ERR("GetIpAddrTable(): %s\n", win_strerror(dwStatus));
 	}
 	return(dwStatus);
-}
-ULONG 
-GetAdapterEntry(PIP_ADAPTER_ADDRESSES *Table, DWORD Index, PIP_ADAPTER_ADDRESSES *Result)
-{
-	ULONG ulStatus;
-	PIP_ADAPTER_ADDRESSES pifaRow;
-	LONG lSize = 0;
-	ULONG ulFlags = GAA_FLAG_INCLUDE_PREFIX;
-
-	ulStatus = GetAdaptersAddresses(AF_UNSPEC, ulFlags, NULL, NULL, &lSize);
-	if (lSize > 0){
-		pifaRow = win_malloc(lSize);
-		ulStatus = GetAdaptersAddresses(AF_UNSPEC, ulFlags, NULL, pifaRow, &lSize);
-		*Table = pifaRow;
-		while (pifaRow){
-			if (pifaRow->IfIndex == Index){
-				*Result = pifaRow;
-				break;
-			}
-			pifaRow = pifaRow->Next;
-		}
-	}else{
-		WIN_ERR("GetAdaptersAddresses(): %s\n", win_strerror(ulStatus));
-	}
-	return(ulStatus);
-}
-ULONG 
-GetAdapterAddress(PIP_ADAPTER_ADDRESSES *Table, DWORD Index, WS2_ADDRTYPE Type, PVOID *Result)
-{
-	ULONG ulStatus;
-	PIP_ADAPTER_ADDRESSES pifaRow;
-
-	ulStatus = GetAdapterEntry(Table, Index, &pifaRow);
-	if (ulStatus != ERROR_SUCCESS){
-		return(ulStatus);
-	}else switch (Type){
-		case WS2_UNICAST:
-			*(PIP_ADAPTER_UNICAST_ADDRESS *)Result = pifaRow->FirstUnicastAddress;
-			break;
-		case WS2_ANYCAST:
-			*(PIP_ADAPTER_ANYCAST_ADDRESS *)Result = pifaRow->FirstAnycastAddress;
-			break;
-		case WS2_MULTICAST:
-			*(PIP_ADAPTER_MULTICAST_ADDRESS *)Result = pifaRow->FirstMulticastAddress;
-			break;
-		case WS2_DNSSERVER:
-			*(PIP_ADAPTER_DNS_SERVER_ADDRESS *)Result = pifaRow->FirstDnsServerAddress;
-			break;
-	}
-	return(ulStatus);
 }

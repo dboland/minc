@@ -29,6 +29,7 @@
  */
 
 #include <sys/sockio.h>
+#include <netinet6/in6_var.h>
 
 /****************************************************/
 
@@ -36,15 +37,15 @@ int
 sock_SIOCGIFFLAGS(struct ifreq *req)
 {
 	int result = 0;
-	MIB_IFROW ifRow = {0};
-	DWORD dwResult;
+	MIB_IFROW ifInfo;
+	DWORD dwStatus;
 
-	ifRow.dwIndex = ws2_nametoindex(req->ifr_name);
-	dwResult = GetIfEntry(&ifRow);
-	if (dwResult != ERROR_SUCCESS){
-		result -= errno_posix(dwResult);
+	ifInfo.dwIndex = ws2_nametoindex(req->ifr_name);
+	dwStatus = GetIfEntry(&ifInfo);
+	if (dwStatus != ERROR_SUCCESS){
+		result -= errno_posix(dwStatus);
 	}else{
-		req->ifr_flags = ifflags_posix(&ifRow, 0xFFFFFFFF);
+		req->ifr_flags = ifflags_posix(&ifInfo);
 	}
 	return(result);
 }
@@ -52,15 +53,15 @@ int
 sock_SIOCGIFMTU(struct ifreq *req)
 {
 	int result = 0;
-	MIB_IFROW ifRow = {0};
-	DWORD dwResult;
+	MIB_IFROW ifInfo;
+	DWORD dwStatus;
 
-	ifRow.dwIndex = ws2_nametoindex(req->ifr_name);
-	dwResult = GetIfEntry(&ifRow);
-	if (dwResult != ERROR_SUCCESS){
-		result -= errno_posix(dwResult);
+	ifInfo.dwIndex = ws2_nametoindex(req->ifr_name);
+	dwStatus = GetIfEntry(&ifInfo);
+	if (dwStatus != ERROR_SUCCESS){
+		result -= errno_posix(dwStatus);
 	}else{
-		req->ifr_mtu = ifRow.dwMtu;
+		req->ifr_mtu = ifInfo.dwMtu;
 	}
 	return(result);
 }
@@ -68,15 +69,15 @@ int
 sock_SIOCGIFDESCR(struct ifreq *req)
 {
 	int result = 0;
-	MIB_IFROW ifRow = {0};
-	DWORD dwResult;
+	MIB_IFROW ifInfo;
+	DWORD dwStatus;
 
-	ifRow.dwIndex = ws2_nametoindex(req->ifr_name);
-	dwResult = GetIfEntry(&ifRow);
-	if (dwResult != ERROR_SUCCESS){
-		result -= errno_posix(dwResult);
+	ifInfo.dwIndex = ws2_nametoindex(req->ifr_name);
+	dwStatus = GetIfEntry(&ifInfo);
+	if (dwStatus != ERROR_SUCCESS){
+		result -= errno_posix(dwStatus);
 	}else{
-		win_strncpy(req->ifr_data, ifRow.bDescr, MIN(ifRow.dwDescrLen, IFDESCRSIZE));
+		win_strncpy(req->ifr_data, ifInfo.bDescr, MIN(ifInfo.dwDescrLen, IFDESCRSIZE));
 	}
 	return(result);
 }
@@ -102,16 +103,16 @@ int
 sock_SIOCGIFADDR(struct ifreq *req)
 {
 	int result = 0;
-	MIB_IPADDRROW ifaRow = {0};
 	struct sockaddr_in *addr = (void *)&req->ifr_addr;
-	DWORD dwResult;
+	MIB_IPADDRROW ifaInfo;
+	DWORD dwStatus;
 
-	ifaRow.dwIndex = ws2_nametoindex(req->ifr_name);
-	dwResult = GetAddrEntry(&ifaRow);
-	if (dwResult != ERROR_SUCCESS){
-		result -= errno_posix(dwResult);
+	ifaInfo.dwIndex = ws2_nametoindex(req->ifr_name);
+	dwStatus = ws2_getifaddrs(&ifaInfo);
+	if (dwStatus != ERROR_SUCCESS){
+		result -= errno_posix(dwStatus);
 	}else{
-		inaddr_posix(addr, 0, (BYTE *)&ifaRow.dwAddr);
+		inaddr_posix(addr, 0, (BYTE *)&ifaInfo.dwAddr);
 	}
 	return(result);
 }
@@ -119,16 +120,16 @@ int
 sock_SIOCGIFNETMASK(struct ifreq *req)
 {
 	int result = 0;
-	MIB_IPADDRROW ifaRow = {0};
 	struct sockaddr_in *addr = (void *)&req->ifr_addr;
-	DWORD dwResult;
+	MIB_IPADDRROW ifaInfo;
+	DWORD dwStatus;
 
-	ifaRow.dwIndex = ws2_nametoindex(req->ifr_name);
-	dwResult = GetAddrEntry(&ifaRow);
-	if (dwResult != ERROR_SUCCESS){
-		result -= errno_posix(dwResult);
+	ifaInfo.dwIndex = ws2_nametoindex(req->ifr_name);
+	dwStatus = ws2_getifaddrs(&ifaInfo);
+	if (dwStatus != ERROR_SUCCESS){
+		result -= errno_posix(dwStatus);
 	}else{
-		inaddr_posix(addr, 0, (BYTE *)&ifaRow.dwMask);
+		inaddr_posix(addr, 0, (BYTE *)&ifaInfo.dwMask);
 	}
 	return(result);
 }
@@ -136,17 +137,17 @@ int
 sock_SIOCGIFBRDADDR(struct ifreq *req)
 {
 	int result = 0;
-	MIB_IPADDRROW ifaRow = {0};
 	struct sockaddr_in *addr = (void *)&req->ifr_addr;
 	DWORD dwBroadcast;
-	DWORD dwResult;
+	MIB_IPADDRROW ifaInfo;
+	DWORD dwStatus;
 
-	ifaRow.dwIndex = ws2_nametoindex(req->ifr_name);
-	dwResult = GetAddrEntry(&ifaRow);
-	if (dwResult != ERROR_SUCCESS){
-		result -= errno_posix(dwResult);
+	ifaInfo.dwIndex = ws2_nametoindex(req->ifr_name);
+	dwStatus = ws2_getifaddrs(&ifaInfo);
+	if (dwStatus != ERROR_SUCCESS){
+		result -= errno_posix(dwStatus);
 	}else{
-		dwBroadcast = ifaRow.dwAddr | ~ifaRow.dwMask;
+		dwBroadcast = ifaInfo.dwAddr | ~ifaInfo.dwMask;
 		inaddr_posix(addr, 0, (BYTE *)&dwBroadcast);
 	}
 	return(result);
@@ -182,6 +183,11 @@ sock_ioctl(WIN_TASK *Task, int fd, unsigned long request, va_list args)
 			break;
 		case SIOCGIFBRDADDR:
 			result = sock_SIOCGIFBRDADDR(va_arg(args, struct ifreq *));
+			break;
+		case SIOCGIFNETMASK_IN6:
+		case SIOCGIFAFLAG_IN6:
+		case SIOCGIFALIFETIME_IN6:
+			result = -EADDRNOTAVAIL;
 			break;
 		default:
 			result = -EOPNOTSUPP;

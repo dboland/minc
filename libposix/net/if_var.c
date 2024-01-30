@@ -33,7 +33,7 @@
 /****************************************************/
 
 int 
-ifflags_posix(MIB_IFROW *Interface, DWORD Mask)
+ifflags_posix(MIB_IFROW *Interface)
 {
 	int result = 0;
 
@@ -43,12 +43,6 @@ ifflags_posix(MIB_IFROW *Interface, DWORD Mask)
 	if (Interface->dwOperStatus == IF_OPER_STATUS_OPERATIONAL){
 		result |= IFF_RUNNING;
 	}
-	if (Mask){
-		result |= IFF_BROADCAST;
-	}
-//	if (Interface->FirstMulticastAddress){
-//		result |= IFF_MULTICAST;
-//	}
 	switch (Interface->dwType){
 		case IF_TYPE_PPP:
 			result |= IFF_POINTOPOINT;

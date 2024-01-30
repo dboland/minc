@@ -33,6 +33,21 @@
 /****************************************************/
 
 BOOL 
+pdo_close(WIN_VNODE *Node)
+{
+	BOOL bResult = FALSE;
+
+	if (Node->Handle == INVALID_HANDLE_VALUE){	/* DEV_TYPE_ROUTE (route.exe) */
+		bResult = TRUE;
+	}else if (!CloseHandle(Node->Handle)){
+		WIN_ERR("file_close(%d): %s\n", Node->Handle, win_strerror(GetLastError()));
+	}else{
+		ZeroMemory(Node, sizeof(WIN_VNODE));
+		bResult = TRUE;
+	}
+	return(bResult);
+}
+BOOL 
 pdo_read(WIN_DEVICE *Device, LPSTR Buffer, LONG Size, DWORD *Result)
 {
 	BOOL bResult = FALSE;

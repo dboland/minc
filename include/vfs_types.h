@@ -290,7 +290,7 @@ typedef struct _WIN_VNODE {
 		HKEY Key;
 	};
 	WIN_DEVICE *Device;
-	HANDLE Lock;
+	DWORDLONG Reqion;
 	HANDLE Object;
 	DWORD Index;
 	BOOL CloseExec;
