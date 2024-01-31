@@ -28,46 +28,38 @@
  *
  */
 
-#include "winsock_syscall.c"
-#include "winsock_device.c"
-#include "winsock_filio.c"
-#include "winsock_fcntl.c"
-#include "winsock_poll.c"
-#include "winsock_socket.c"
-#include "winsock_sockio.c"
-#include "winsock_unistd.c"
-#include "winsock_sysctl.c"
-#include "winsock_statvfs.c"
-#include "winsock_stat.c"
-#include "winsock_if.c"
-#include "winsock_ifaddrs.c"
+#include <iprtrmib.h>
 
-/************************************************************/
+/****************************************************/
 
-BOOL 
-ws2_init(VOID)
+DWORD 
+ws2_SIOCGIFADDR(MIB_IPADDRROW *Address)
 {
-	BOOL bResult = FALSE;
-	WSADATA wsaData;
-//	WORD wVersion = 0x0101;		//v. 1.1
-	WORD wVersion = 0x0202;		//v. 2.2
+	DWORD dwStatus;
+	LONG lSize = 0;
+	MIB_IPADDRTABLE *pTable;
+	MIB_IPADDRROW *pRow;
+	DWORD dwIndex = Address->dwIndex;
+	DWORD dwCount;
 
-	if (WSAStartup(wVersion, &wsaData)){
-		WIN_ERR("WSAStartup(0x%x): %s\n", wVersion, win_strerror(WSAGetLastError()));
+	dwStatus = GetIpAddrTable(NULL, &lSize, FALSE);
+	if (lSize > 0){
+		pTable = win_malloc(lSize);
+		GetIpAddrTable(pTable, &lSize, FALSE);
+		pRow = pTable->table;
+		dwCount = pTable->dwNumEntries;
+		dwStatus = WSAEADDRNOTAVAIL;
+		while (dwCount--){
+			if (pRow->dwIndex == dwIndex && pRow->wType & MIB_IPADDR_PRIMARY){
+				win_memcpy(Address, pRow, sizeof(MIB_IPADDRROW));
+				dwStatus = ERROR_SUCCESS;
+				break;
+			}
+			pRow++;
+		}
+		win_free(pTable);
 	}else{
-		bResult = TRUE;
+		WIN_ERR("GetIpAddrTable(): %s\n", win_strerror(dwStatus));
 	}
-	return(bResult);
-}
-BOOL 
-ws2_finish(VOID)
-{
-	BOOL bResult = FALSE;
-
-	if (WSACleanup()){
-		WIN_ERR("WSACleanup(): %s\n", win_strerror(WSAGetLastError()));
-	}else{
-		bResult = TRUE;
-	}
-	return(bResult);
+	return(dwStatus);
 }

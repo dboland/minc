@@ -33,33 +33,78 @@
 /****************************************************/
 
 DWORD 
-ws2_getifaddrs(MIB_IPADDRROW *Address)
+WSAGetIfFlags(PIP_ADAPTER_ADDRESSES Adapter)
 {
-	DWORD dwStatus;
-	LONG lSize = 0;
-	MIB_IPADDRTABLE *pTable;
-	MIB_IPADDRROW *pRow;
-	DWORD dwIndex = Address->dwIndex;
-	DWORD dwCount;
+	DWORD dwResult = WIN_IFF_UP;
 
-	dwStatus = GetIpAddrTable(NULL, &lSize, FALSE);
+	if (Adapter->OperStatus == IfOperStatusUp){
+		dwResult |= WIN_IFF_RUNNING;
+	}
+	if (!(Adapter->Flags & IP_ADAPTER_NO_MULTICAST)){
+		dwResult |= WIN_IFF_MULTICAST;
+	}
+	switch (Adapter->IfType){
+		case IF_TYPE_PPP:
+			dwResult |= WIN_IFF_POINTOPOINT;
+			break;
+		case IF_TYPE_SOFTWARE_LOOPBACK:
+			dwResult |= WIN_IFF_LOOPBACK;
+		case IF_TYPE_ETHERNET_CSMACD:
+		case IF_TYPE_IEEE80211:
+			dwResult |= WIN_IFF_BROADCAST;
+			break;
+	}
+	return(dwResult);
+}
+
+/****************************************************/
+
+BOOL 
+ws2_setifaddrs(WIN_IFENUM *Enum)
+{
+	BOOL bResult = FALSE;
+	ULONG ulStatus;
+	PIP_ADAPTER_ADDRESSES pTable;
+	LONG lSize = 0;
+	ULONG ulFlags = GAA_FLAG_SKIP_DNS_SERVER | GAA_FLAG_SKIP_MULTICAST;
+
+	ulStatus = GetAdaptersAddresses(AF_UNSPEC, ulFlags, NULL, NULL, &lSize);
 	if (lSize > 0){
 		pTable = win_malloc(lSize);
-		GetIpAddrTable(pTable, &lSize, FALSE);
-		pRow = pTable->table;
-		dwCount = pTable->dwNumEntries;
-		dwStatus = WSAEADDRNOTAVAIL;
-		while (dwCount--){
-			if (pRow->dwIndex == dwIndex && pRow->wType & MIB_IPADDR_PRIMARY){
-				win_memcpy(Address, pRow, sizeof(MIB_IPADDRROW));
-				dwStatus = ERROR_SUCCESS;
-				break;
-			}
-			pRow++;
-		}
-		win_free(pTable);
+		GetAdaptersAddresses(AF_UNSPEC, ulFlags, NULL, pTable, &lSize);
+		Enum->Table = pTable;
+		Enum->Next = pTable;
+		bResult = TRUE;
 	}else{
-		WIN_ERR("GetIpAddrTable(): %s\n", win_strerror(dwStatus));
+		WIN_ERR("GetAdaptersAddresses(AF_UNSPEC): %s", win_strerror(ulStatus));
 	}
-	return(dwStatus);
+	return(bResult);
 }
+VOID 
+ws2_endifaddrs(WIN_IFENUM *Enum)
+{
+	win_free(Enum->Table);
+}
+BOOL 
+ws2_getifaddrs(WIN_IFENUM *Enum, WIN_IFENT *Result)
+{
+	BOOL bResult = FALSE;
+	PIP_ADAPTER_ADDRESSES pAdapter = Enum->Next;
+
+	if (!pAdapter){
+		SetLastError(ERROR_NO_MORE_ITEMS);
+	}else{
+		Result->IfIndex = pAdapter->IfIndex;
+		Result->IfType = pAdapter->IfType;
+		Result->IfFlags = WSAGetIfFlags(pAdapter);
+		Result->Mtu = pAdapter->Mtu;
+		Result->Unicast = pAdapter->FirstUnicastAddress;
+		Result->AddrLen = pAdapter->PhysicalAddressLength;
+		win_memcpy(Result->PhysAddr, pAdapter->PhysicalAddress, Result->AddrLen);
+		win_wcstombs(Result->Description, pAdapter->Description, MAXLEN_IFDESCR);
+		Enum->Next = pAdapter->Next;
+		bResult = TRUE;
+	}
+	return(bResult);
+}
+

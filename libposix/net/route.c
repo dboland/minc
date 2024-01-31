@@ -228,16 +228,16 @@ route_NET_RT_IFLIST(void *buf, size_t *size)
 	if (!buf){
 		*size = 0;
 	}
-	if (!ws2_setifent(&ifEnum)){
+	if (!ws2_setifaddrs(&ifEnum)){
 		result -= errno_posix(GetLastError());
-	}else while (ws2_getifent(&ifEnum, &ifInfo)){
+	}else while (ws2_getifaddrs(&ifEnum, &ifInfo)){
 		if (!buf){
 			*size += ifmsg_size(ifInfo.Unicast);
 		}else{
 			buf = ifmsg_posix(pwTask, buf, &ifInfo);
 		}
 	}
-	ws2_endifent(&ifEnum);
+	ws2_endifaddrs(&ifEnum);
 	return(result);
 }
 int 

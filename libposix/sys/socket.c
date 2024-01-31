@@ -119,11 +119,11 @@ saddr_win(WIN_TASK *Task, SOCKADDR *Result, const struct sockaddr *addr)
 	if (!addr){
 		return(NULL);
 	}
-	if (addr->sa_len){
+	if (addr->sa_len){		/* not always set (lynx.exe) */
 		len = addr->sa_len;
 	}
 	if (Task->TracePoints & KTRFAC_STRUCT){
-		ktrace_STRUCT(Task, "sockaddr", 8, addr, addr->sa_len);
+		ktrace_STRUCT(Task, "sockaddr", 8, addr, len);
 	}
 	Result->sa_family = af_win(addr->sa_family);
 	if (addr->sa_family == AF_LOCAL){

@@ -108,7 +108,7 @@ sock_SIOCGIFADDR(struct ifreq *req)
 	DWORD dwStatus;
 
 	ifaInfo.dwIndex = ws2_nametoindex(req->ifr_name);
-	dwStatus = ws2_getifaddrs(&ifaInfo);
+	dwStatus = ws2_SIOCGIFADDR(&ifaInfo);
 	if (dwStatus != ERROR_SUCCESS){
 		result -= errno_posix(dwStatus);
 	}else{
@@ -125,7 +125,7 @@ sock_SIOCGIFNETMASK(struct ifreq *req)
 	DWORD dwStatus;
 
 	ifaInfo.dwIndex = ws2_nametoindex(req->ifr_name);
-	dwStatus = ws2_getifaddrs(&ifaInfo);
+	dwStatus = ws2_SIOCGIFADDR(&ifaInfo);
 	if (dwStatus != ERROR_SUCCESS){
 		result -= errno_posix(dwStatus);
 	}else{
@@ -143,7 +143,7 @@ sock_SIOCGIFBRDADDR(struct ifreq *req)
 	DWORD dwStatus;
 
 	ifaInfo.dwIndex = ws2_nametoindex(req->ifr_name);
-	dwStatus = ws2_getifaddrs(&ifaInfo);
+	dwStatus = ws2_SIOCGIFADDR(&ifaInfo);
 	if (dwStatus != ERROR_SUCCESS){
 		result -= errno_posix(dwStatus);
 	}else{

@@ -48,12 +48,6 @@ BOOL vfs_listen(WIN_VNODE *Node, INT Backlog);
 BOOL vfs_getpeername(WIN_VNODE *Node, LPSOCKADDR Name, INT *Length);
 BOOL vfs_getsockname(WIN_VNODE *Node, LPSOCKADDR Name, INT *Length);
 
-/* winsock_sysctl.c */
-
-BOOL ws2_NET_RT_DUMP(PMIB_IPFORWARDTABLE *Table, PMIB_IPFORWARDROW *Row, DWORD *Count);
-BOOL ws2_NET_RT_OACTIVE(PMIB_IPNETTABLE *Table, PMIB_IPNETROW *Row, DWORD *Count);
-BOOL ws2_NET_INET6_IPV6_DAD_PENDING(DWORD *Count);
-
 /* winsock_statvfs.c */
 
 BOOL ws2_setvfs(WIN_IFDATA *Config);
@@ -64,12 +58,19 @@ BOOL ws2_getvfs(WIN_IFDATA *Config, WIN_CFDRIVER *Result);
 
 BOOL ws2_match(LPCWSTR NtName, DWORD DeviceType, DWORD Index, WIN_CFDRIVER *Driver);
 
-/* winsock_if.c */
-
-BOOL ws2_setifent(WIN_IFENUM *Enum);
-VOID ws2_endifent(WIN_IFENUM *Enum);
-BOOL ws2_getifent(WIN_IFENUM *Enum, WIN_IFENT *Result);
-
 /* winsock_ifaddrs.c */
 
-DWORD ws2_getifaddrs(MIB_IPADDRROW *Address);
+BOOL ws2_setifaddrs(WIN_IFENUM *Enum);
+VOID ws2_endifaddrs(WIN_IFENUM *Enum);
+BOOL ws2_getifaddrs(WIN_IFENUM *Enum, WIN_IFENT *Result);
+
+/* winsock_sockio.c */
+
+DWORD ws2_SIOCGIFADDR(MIB_IPADDRROW *Address);
+
+/* winsock_sysctl.c */
+
+BOOL ws2_NET_RT_DUMP(PMIB_IPFORWARDTABLE *Table, PMIB_IPFORWARDROW *Row, DWORD *Count);
+BOOL ws2_NET_RT_OACTIVE(PMIB_IPNETTABLE *Table, PMIB_IPNETROW *Row, DWORD *Count);
+BOOL ws2_NET_INET6_IPV6_DAD_PENDING(DWORD *Count);
+
