@@ -290,15 +290,21 @@ typedef struct _WIN_VNODE {
 		HKEY Key;
 	};
 	WIN_DEVICE *Device;
-	DWORDLONG Reqion;
+	LONGLONG LockRegion;
+	LONGLONG LockSize;
 	HANDLE Object;
 	DWORD Index;
 	BOOL CloseExec;
 	LONG Owner;
 } WIN_VNODE;
 
-#define LOCKFILE_SHARED		0x00000000
-#define LOCKFILE_UNLOCK		0x00000010
+typedef struct _WIN_FLOCK {
+	LARGE_INTEGER Offset;
+	LARGE_INTEGER Size;
+} WIN_FLOCK;
+
+#define LOCKFILE_SHARED			0x00000000
+#define LOCKFILE_UNLOCK			0x00000010
 
 /*
  * vfs_dirent.c

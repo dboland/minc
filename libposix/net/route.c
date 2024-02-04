@@ -228,7 +228,7 @@ route_NET_RT_IFLIST(void *buf, size_t *size)
 	if (!buf){
 		*size = 0;
 	}
-	if (!ws2_setifaddrs(&ifEnum)){
+	if (!ws2_setifaddrs(WIN_AF_UNSPEC, &ifEnum)){
 		result -= errno_posix(GetLastError());
 	}else while (ws2_getifaddrs(&ifEnum, &ifInfo)){
 		if (!buf){

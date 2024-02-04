@@ -63,6 +63,7 @@
 
 /* winsock2.h */
 
+#define WIN_AF_UNSPEC	AF_UNSPEC
 #define WIN_AF_LOCAL	AF_UNIX
 #define WIN_AF_INET	AF_INET
 #define WIN_AF_INET6	23
@@ -101,5 +102,4 @@ typedef struct _WIN_IFENT {
 	PIP_ADAPTER_UNICAST_ADDRESS Unicast;
 	DWORD AddrLen;
 	BYTE PhysAddr[MAXLEN_PHYSADDR];
-	CHAR Description[MAXLEN_IFDESCR];
 } WIN_IFENT;

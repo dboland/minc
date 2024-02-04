@@ -33,7 +33,7 @@
 /****************************************************/
 
 BOOL 
-rand_read(WIN_DEVICE *Device, LPSTR Buffer, DWORD Size, DWORD *Result)
+rand_read(LPSTR Buffer, DWORD Size, DWORD *Result)
 {
 	BOOL bResult = FALSE;
 	DWORD dwResult = 0;

@@ -169,22 +169,32 @@ vfs_F_ADDACE(WIN_VNODE *Node, PSID Sid)
 	return(bResult);
 }
 BOOL 
-vfs_F_SETLK(WIN_VNODE *Node, DWORD Flags, DWORDLONG Offset, LARGE_INTEGER *Size)
+vfs_F_SETLK(WIN_VNODE *Node, DWORD Flags, LARGE_INTEGER *Offset, LARGE_INTEGER *Size)
 {
-	BOOL bResult = FALSE;
-	OVERLAPPED ovl = {0, 0, Offset & 0xFFFFFFFF, Offset >> 32, NULL};
+	OVERLAPPED ovl = {0, 0, Offset->LowPart, Offset->HighPart, Node->Event};
+	DWORDLONG dwlSegment = Size->QuadPart * Offset->QuadPart;
 
-//	if (!Size->QuadPart){
-//		Size->QuadPart = 0x7FFFFFFFFFFFFFFFLL;
-//	}
-	if (Flags != LOCKFILE_UNLOCK){
-		bResult = LockFileEx(Node->Handle, Flags, 0, Size->LowPart, Size->HighPart, &ovl);
-	}else if (!UnlockFileEx(Node->Handle, 0, Size->LowPart, Size->HighPart, &ovl)){
-		WIN_ERR("UnlockFileEx(%I64d): %s\n", Size->QuadPart, win_strerror(GetLastError()));
-	}else{
-		bResult = TRUE;
+	/* Windows locking works opposite to POSIX locking. Exclusive locks
+	 * cannot overlap an existing locked region of a file. Shared locks
+	 * can overlap a locked region provided locks held on that region
+	 * are shared locks.
+	 */
+	if (UnlockFileEx(Node->Handle, 0, Size->LowPart, Size->HighPart, &ovl)){
+		Node->LockRegion -= dwlSegment;
+		Node->LockSize -= Size->QuadPart;
+	}else if (ERROR_NOT_LOCKED != GetLastError()){
+		return(FALSE);
 	}
-	return(bResult);
+	if (Flags == LOCKFILE_UNLOCK){
+		return(TRUE);
+	}
+	if (!LockFileEx(Node->Handle, Flags, 0, Size->LowPart, Size->HighPart, &ovl)){
+		return(FALSE);
+	}else{
+		Node->LockRegion += dwlSegment;
+		Node->LockSize += Size->QuadPart;
+	}
+	return(TRUE);
 }
 BOOL 
 vfs_F_CNTL(WIN_VNODE *Node, DWORD Command, PVOID Param)

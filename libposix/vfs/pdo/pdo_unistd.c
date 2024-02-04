@@ -65,7 +65,7 @@ pdo_read(WIN_DEVICE *Device, LPSTR Buffer, LONG Size, DWORD *Result)
 			break;
 		case DEV_TYPE_RANDOM:		/* pwgen.exe */
 		case DEV_TYPE_URANDOM:
-			bResult = rand_read(Device, Buffer, Size, Result);
+			bResult = rand_read(Buffer, Size, Result);
 			break;
 		default:
 			SetLastError(ERROR_BAD_DEVICE);

@@ -98,27 +98,23 @@ ws2_NET_RT_OACTIVE(PMIB_IPNETTABLE *Table, PMIB_IPNETROW *Row, DWORD *Count)
 BOOL 
 ws2_NET_INET6_IPV6_DAD_PENDING(DWORD *Count)
 {
-	BOOL bResult = FALSE;
-	ULONG ulStatus;
-	PIP_ADAPTER_ADDRESSES pifaTable, pifaRow;
-	LONG lSize = 0;
-	ULONG ulFlags = GAA_FLAG_INCLUDE_PREFIX;
+	WIN_IFENUM ifEnum;
+	WIN_IFENT ifInfo;
+	PIP_ADAPTER_UNICAST_ADDRESS paUnicast;
 	DWORD dwCount = 0;
 
-	ulStatus = GetAdaptersAddresses(AF_INET6, ulFlags, NULL, NULL, &lSize);
-	if (lSize > 0){
-		pifaTable = win_malloc(lSize);
-		GetAdaptersAddresses(AF_INET6, ulFlags, NULL, pifaTable, &lSize);
-		pifaRow = pifaTable;
-		while (pifaRow){
-			if (pifaRow->FirstUnicastAddress && pifaRow->FirstUnicastAddress->DadState == IpDadStateDuplicate){
+	if (!ws2_setifaddrs(WIN_AF_INET6, &ifEnum)){
+		return(FALSE);
+	}else while (ws2_getifaddrs(&ifEnum, &ifInfo)){
+		paUnicast = ifInfo.Unicast;
+		while (paUnicast){
+			if (paUnicast->DadState == IpDadStateDuplicate){
 				dwCount++;
 			}
-			pifaRow = pifaRow->Next;
+			paUnicast = paUnicast->Next;
 		}
-		*Count = dwCount;
-		win_free(pifaTable);
-		bResult = TRUE;
 	}
-	return(bResult);
+	ws2_endifaddrs(&ifEnum);
+	*Count = dwCount;
+	return(TRUE);
 }

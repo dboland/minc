@@ -60,7 +60,7 @@ WSAGetIfFlags(PIP_ADAPTER_ADDRESSES Adapter)
 /****************************************************/
 
 BOOL 
-ws2_setifaddrs(WIN_IFENUM *Enum)
+ws2_setifaddrs(ULONG Family, WIN_IFENUM *Result)
 {
 	BOOL bResult = FALSE;
 	ULONG ulStatus;
@@ -68,15 +68,15 @@ ws2_setifaddrs(WIN_IFENUM *Enum)
 	LONG lSize = 0;
 	ULONG ulFlags = GAA_FLAG_SKIP_DNS_SERVER | GAA_FLAG_SKIP_MULTICAST;
 
-	ulStatus = GetAdaptersAddresses(AF_UNSPEC, ulFlags, NULL, NULL, &lSize);
+	ulStatus = GetAdaptersAddresses(Family, ulFlags, NULL, NULL, &lSize);
 	if (lSize > 0){
 		pTable = win_malloc(lSize);
-		GetAdaptersAddresses(AF_UNSPEC, ulFlags, NULL, pTable, &lSize);
-		Enum->Table = pTable;
-		Enum->Next = pTable;
+		GetAdaptersAddresses(Family, ulFlags, NULL, pTable, &lSize);
+		Result->Table = pTable;
+		Result->Next = pTable;
 		bResult = TRUE;
 	}else{
-		WIN_ERR("GetAdaptersAddresses(AF_UNSPEC): %s", win_strerror(ulStatus));
+		WIN_ERR("GetAdaptersAddresses(%d): %s", Family, win_strerror(ulStatus));
 	}
 	return(bResult);
 }
@@ -101,7 +101,6 @@ ws2_getifaddrs(WIN_IFENUM *Enum, WIN_IFENT *Result)
 		Result->Unicast = pAdapter->FirstUnicastAddress;
 		Result->AddrLen = pAdapter->PhysicalAddressLength;
 		win_memcpy(Result->PhysAddr, pAdapter->PhysicalAddress, Result->AddrLen);
-		win_wcstombs(Result->Description, pAdapter->Description, MAXLEN_IFDESCR);
 		Enum->Next = pAdapter->Next;
 		bResult = TRUE;
 	}

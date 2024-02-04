@@ -78,8 +78,8 @@
 #define DEV_TYPE_NULL		(DEV_CLASS_CPU + 3)		/* null byte write device */
 #define DEV_TYPE_PORT		(DEV_CLASS_CPU + 4)		/* I/O port access */
 #define DEV_TYPE_ZERO		(DEV_CLASS_CPU + 5)		/* null byte read device */
-#define DEV_TYPE_RANDOM		(DEV_CLASS_CPU + 8)		/* random generator pseudo device */
-#define DEV_TYPE_URANDOM	(DEV_CLASS_CPU + 9)		/* crypto random generator pseudo device */
+#define DEV_TYPE_URANDOM	(DEV_CLASS_CPU + 8)		/* random generator pseudo device */
+#define DEV_TYPE_RANDOM		(DEV_CLASS_CPU + 9)		/* crypto random generator pseudo device */
 #define DEV_TYPE_ROUTE		(DEV_CLASS_CPU + 10)		/* message routing pseudo device */
 #define DEV_TYPE_STDIN		(DEV_CLASS_CPU + 16)		/* standard stream pseudo device */
 #define DEV_TYPE_STDOUT		(DEV_CLASS_CPU + 17)		/* standard stream pseudo device */
@@ -143,4 +143,3 @@
 #define DEV_TYPE_HID		(DEV_CLASS_USB)
 #define DEV_TYPE_USBHUB		(DEV_CLASS_USB + DEV_BUS_USB)
 #define DEV_TYPE_UHCI		(DEV_CLASS_USB + DEV_BUS_PCI)	/* USB Universal Host Controller Interface */
-

@@ -35,7 +35,7 @@
 int 
 errno_posix(DWORD Error)
 {
-	int result = -1;				// ERESTART
+	int result = -1;				/* ERESTART */
 
 	switch (Error){
 		case ERROR_SUCCESS:
@@ -43,7 +43,7 @@ errno_posix(DWORD Error)
 			break;
 		case WSAEINVAL:
 		case ERROR_INVALID_PRIMARY_GROUP:
-		case ERROR_BAD_ARGUMENTS:		// 160
+		case ERROR_BAD_ARGUMENTS:		/* 160 */
 		case ERROR_NOT_LOCKED:			/* 158: The segment is already unlocked */
 		case ERROR_INVALID_PARAMETER:		/* 87: The parameter is incorrect (mailslot_read()) */
 //		case ERROR_INVALID_DATA:		/* 13: The data is invalid. */
@@ -173,9 +173,9 @@ errno_posix(DWORD Error)
 			break;
 		case ERROR_PIPE_BUSY:			/* 231: All pipe instances are busy */
 			SetEvent(__PipeEvent);		/* logger.exe */
-		case ERROR_LOCK_VIOLATION:
+		case ERROR_LOCK_VIOLATION:		/* 33: Another process has locked a portion of the file. */
 		case ERROR_MORE_DATA:
-		case ERROR_IO_PENDING:
+//		case ERROR_IO_PENDING:
 			result = EAGAIN;
 			break;
 		case ERROR_NOT_SAME_DEVICE:

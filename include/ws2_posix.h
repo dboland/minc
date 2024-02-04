@@ -60,7 +60,7 @@ BOOL ws2_match(LPCWSTR NtName, DWORD DeviceType, DWORD Index, WIN_CFDRIVER *Driv
 
 /* winsock_ifaddrs.c */
 
-BOOL ws2_setifaddrs(WIN_IFENUM *Enum);
+BOOL ws2_setifaddrs(ULONG Family, WIN_IFENUM *Result);
 VOID ws2_endifaddrs(WIN_IFENUM *Enum);
 BOOL ws2_getifaddrs(WIN_IFENUM *Enum, WIN_IFENT *Result);
 

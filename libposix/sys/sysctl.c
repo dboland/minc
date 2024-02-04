@@ -234,6 +234,17 @@ sysctl_KERN_SECURELVL(int *oldvalue, int *newvalue)
 	return(result);
 }
 int 
+sysctl_KERN_ARND(char *buf, size_t size)
+{
+	int result = 0;
+	DWORD dwResult;
+
+	if (!rand_read(buf, size, &dwResult)){
+		result -= errno_posix(GetLastError());
+	}
+	return(result);
+}
+int 
 sysctl_KERN(const int *name, void *oldp, size_t *oldlenp, void *newp, size_t newlen)
 {
 	int result = 0;
@@ -308,11 +319,11 @@ sysctl_KERN(const int *name, void *oldp, size_t *oldlenp, void *newp, size_t new
 		case KERN_TTYCOUNT:
 			*(int *)oldp = WIN_TTY_MAX;
 			break;
-//		case KERN_ALLOWKMEM:
-//			*(int *)oldp = 0;
-//			break;
 		case KERN_FILE:		/* fstat.exe */
 			result = file_KERN_FILE(name, oldp, oldlenp);
+			break;
+		case KERN_ARND:		/* makewhatis.exe */
+			result = sysctl_KERN_ARND((char *)oldp, *(size_t *)oldlenp);
 			break;
 		case KERN_HOSTID:	/* alpine.exe */
 		default:
@@ -623,6 +634,8 @@ sys___sysctl(call_t call, const int *name, u_int namelen, void *oldp, size_t *ol
 	int result = 0;
 	WIN_TASK *pwTask = call.Task;
 
+	/* sysctl(3)
+	 */
 	if (namelen < 2 || namelen >= CTL_MAXNAME){
 		result = -EINVAL;
 	}else switch(name[0]){
