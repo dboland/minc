@@ -174,7 +174,7 @@ errno_posix(DWORD Error)
 			SetEvent(__PipeEvent);		/* logger.exe */
 		case ERROR_LOCK_VIOLATION:		/* 33: Another process has locked a portion of the file. */
 		case ERROR_MORE_DATA:
-//		case ERROR_IO_PENDING:
+		case ERROR_IO_PENDING:
 			result = EAGAIN;
 			break;
 		case ERROR_NOT_SAME_DEVICE:
