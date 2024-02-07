@@ -99,7 +99,7 @@ ws2_poll(WIN_VNODE *Node, WIN_POLLFD *Info)
 		sResult = WSAPollEvents(Node, nwEvents.lNetworkEvents);
 	}else if (!ws2_FIONREAD(Node->Socket, &ulCount)){	/* ssh.exe */
 		sResult = WIN_POLLERR;
-	}else if (ulCount){		/* ab.exe */
+	}else if (ulCount){					/* ab.exe */
 		sResult = WIN_POLLIN;
 	}else{
 		sResult = Node->Pending;

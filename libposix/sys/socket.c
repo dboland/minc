@@ -91,9 +91,9 @@ af_posix(DWORD Family)
 struct sockaddr *
 saddr_posix(WIN_TASK *Task, struct sockaddr *result, socklen_t *addrlen, SOCKADDR *Address)
 {
-	/* Note: in a Windows Socket address the sa_len field is missing.
-	 * This is compensated by adding 1 byte at the end of the structure.
-	 * So, in total the two structures end up the same size.
+	/* In a Windows Socket address the sa_len field is missing. This is
+	 * compensated by adding 2 bytes at the end of the structure. So, in
+	 * total the two structures end up the same size.
 	 */
 	if (!result){
 		return(NULL);
@@ -135,17 +135,16 @@ saddr_win(WIN_TASK *Task, SOCKADDR *Result, const struct sockaddr *addr)
 	return(Result);
 }
 LPWSABUF
-iovec_win(struct iovec vec[], unsigned int size)
+iovec_win(struct iovec vec[], unsigned int count)
 {
 	size_t len;
 	void *base;
 	LPWSABUF result = (LPWSABUF)vec;
 
-	/* WinSock's message header (WSAMSG) is 99% compatible.
-	 * Only the two fields in its iovec structure (WSABUF) 
-	 * need to be reversed.
+	/* WinSock's message header (WSAMSG) is 99% compatible. Only the
+	 * two fields in its iovec structure (WSABUF) need to be reversed.
 	 */
-	while (size--){
+	while (count--){
 		len = vec->iov_len;
 		base = vec->iov_base;
 		vec->iov_len = (size_t)base;
@@ -409,7 +408,7 @@ sys_getsockopt(call_t call, int sockfd, int level, int optname, void *optval, so
 		result = -EBADF;
 	}else if (!vfs_getsockopt(&pwTask->Node[sockfd], level, optname, optval, optlen)){
 		result -= errno_posix(WSAGetLastError());
-	}else if (level == SOL_SOCKET && optname == SO_ERROR){	// perl.exe
+	}else if (level == SOL_SOCKET && optname == SO_ERROR){	/* perl.exe */
 		*(int *)optval = errno_posix(*(DWORD *)optval);
 	}
 	return(result);

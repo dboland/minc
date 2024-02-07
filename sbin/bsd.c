@@ -190,7 +190,7 @@ boot(void)
 	execve(*args, args, environ);
 	fprintf(stderr, "execve(%s): %s\n", *args, strerror(errno));
 }
-int 
+void 
 single(void)
 {
 	int result = 0;
@@ -215,7 +215,7 @@ single(void)
 	shell(args);
 	return(result);
 }
-int 
+void 
 multi(void)
 {
 	int result = 0;
@@ -232,7 +232,7 @@ multi(void)
 int 
 main(int argc, char *argv[], char *envp[])
 {
-	int result = 0;
+//	int result = 0;
 	int mib[2] = {CTL_KERN, KERN_SECURELVL};
 	size_t size = sizeof(int);
 	int level = 0;
@@ -263,10 +263,10 @@ main(int argc, char *argv[], char *envp[])
 		case 0:
 			if (_boot)
 				boot();
-			else if (level == 0)
-				result += single();
+			else if (!level)
+				single();
 			else
-				result += multi();
+				multi();
 			break;
 		default:
 			waitpid(pid, &status, 0);

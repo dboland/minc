@@ -290,8 +290,8 @@ typedef struct _WIN_VNODE {
 		HKEY Key;
 	};
 	WIN_DEVICE *Device;
-	LONGLONG LockRegion;
-	LONGLONG LockSize;
+	DWORDLONG LockRegion;
+	DWORDLONG LockSize;
 	HANDLE Object;
 	DWORD Index;
 	BOOL CloseExec;
@@ -406,13 +406,13 @@ typedef struct _WIN_VATTR {
  * vfs_sysctl.c
  */
 
-typedef enum _WIN_GLOBAL {
-	WIN_KERN_SECURELVL,
-	WIN_KERN_VERSION,
-	WIN_KERN_BUILD,
-	WIN_KERN_MSGBUF,
-	WIN_GLOBAL_MAX
-} WIN_GLOBAL;
+typedef struct _WIN_GLOBALS {
+	UINT SecureLevel;
+	CHAR *MsgBuffer;
+	UINT MsgBufSize;
+	SID8 SidMachine;
+	SID8 SidNone;
+} WIN_GLOBALS;
 
 /*
  * vfs_sched.c
@@ -526,7 +526,7 @@ typedef struct _WIN_SESSION {
 	WIN_TERMIO Terminals[WIN_TTY_MAX];
 	WIN_PSTRING Strings[WIN_CHILD_MAX];
 	WIN_MOUNT Mounts[WIN_MOUNT_MAX];
-	LARGE_INTEGER Globals[WIN_GLOBAL_MAX];
+	WIN_GLOBALS Globals[1];
 } WIN_SESSION;
 
 /*

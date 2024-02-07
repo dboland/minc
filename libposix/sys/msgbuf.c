@@ -137,16 +137,16 @@ msgbuf_KERN_MSGBUFSIZE(int *data, size_t *len)
 		}
 	}
 	vfs_endvfs(&cfData);
-	__Globals[WIN_KERN_MSGBUF].LowPart = bufsize;
-	__Globals[WIN_KERN_MSGBUF].HighPart = (DWORD)msgbuf;
+	__Globals->MsgBufSize = bufsize;
+	__Globals->MsgBuffer = msgbuf;
 	*data = bufsize;
 	return(0);
 }
 int 
 msgbuf_KERN_MSGBUF(char data[], size_t *len)
 {
-	size_t bufsize = __Globals[WIN_KERN_MSGBUF].LowPart;
-	char *msgbuf = (char *)__Globals[WIN_KERN_MSGBUF].HighPart;
+	size_t bufsize = __Globals->MsgBufSize;
+	char *msgbuf = __Globals->MsgBuffer;
 	struct msgbuf *msg = (struct msgbuf *)data;
 
 	msg->msg_magic = MSG_MAGIC;

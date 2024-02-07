@@ -54,10 +54,8 @@ extern DWORD 	__TlsIndex;
 
 extern SID8 SidSystem;
 extern SID8 SidAdmins;
-extern SID8 SidNone;
 extern SID8 SidEveryone;
 extern SID8 SidAuthenticated;
-extern SID8 SidMachine;
 extern SID8 SidUsers;
 extern SID8 SidGuests;
 extern SID8 SidBuiltin;
@@ -87,7 +85,9 @@ WIN_DEV_CLASS	*__Devices;
 WIN_TERMIO	*__Terminals;
 WIN_MOUNT	*__Mounts;
 WIN_PSTRING	*__Strings;
-LARGE_INTEGER	*__Globals;
+WIN_GLOBALS	*__Globals;
+SID8		*__SidMachine;
+SID8		*__SidNone;
 WIN_TERMIO 	*__CTTY;
 CHAR 		*__Escape;
 CHAR		*__Input = __INPUT_BUF;
@@ -102,6 +102,7 @@ BOOL proc_poll(VOID);
 #include "vfs_statvfs.c"
 #include "vfs_libgen.c"
 #include "vfs_device.c"
+#include "vfs_sysctl.c"
 #include "registry/registry.c"
 #include "pipe/pipe.c"
 #include "char/char.c"
@@ -145,11 +146,11 @@ vfs_PROCESS_ATTACH(HINSTANCE Instance, LPVOID Reserved)
 	__Mounts = __Session->Mounts;
 	__Strings = __Session->Strings;
 	__Globals = __Session->Globals;
+	__SidMachine = &__Globals->SidMachine;
+	__SidNone = &__Globals->SidNone;
 	__PipeEvent = event_attach(OBJECT_NAME("PipeEvent"), FALSE);
 	__MailEvent = event_attach(OBJECT_NAME("MailEvent"), FALSE);
 	__Interrupt = event_attach(OBJECT_NAME("Interrupt"), FALSE);
-	win_acl_PROCESS_ATTACH();
-//	win_ldt_attach(WIN_CHILD_MAX + 1);
 	return(TRUE);
 }
 BOOL 

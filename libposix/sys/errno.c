@@ -87,7 +87,6 @@ errno_posix(DWORD Error)
 			result = ENAMETOOLONG;
 			break;
 		case WSAEACCES:
-		case WSAEPROVIDERFAILEDINIT:		/* 10106: The requested service provider could not be loaded or initialized. */
 		case ERROR_SQL_ACCESS_DENIED:
 		case ERROR_ACCESS_DENIED:
 			result = EACCES;

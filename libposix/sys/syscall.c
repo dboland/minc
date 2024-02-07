@@ -41,21 +41,26 @@ env_win(char *const envp[])
 	int size = 0;
 	int len;
 	char *entry = NULL;
-	PVOID pvResult = win_malloc(PATH_MAX * 2);
+	PVOID pvResult = win_malloc(WIN_PATH_MAX);
 	char *p = pvResult;
-	int count = 1;
 
-	/* Keep Windows "Path" variable on top (login_passwd.exe) */
-	size = win_getenv("Path", pvResult, PATH_MAX * 2) + 1;
+	/* Keep Windows "Path" variable on top (login_passwd.exe).
+	 * Keep Windows "SystemRoot" variable, needed for WSASocket().
+	 */
+	size = win_getenv("Path", pvResult, WIN_PATH_MAX) + 1;
+	p += size;
+	size += win_getenv("SystemRoot", p, MAX_PATH) + 1;
 	while (entry = *envp++){
-		if (win_strncmp(entry, "Path=", 5)){
-			len = win_strlen(entry) + 1;
-			pvResult = win_realloc(pvResult, size + len);
-			p = pvResult + size;
-			p = win_stpcpy(p, entry) + 1;
-			size = p - (char *)pvResult;
-			count++;
+		if (!win_strncmp(entry, "SystemRoot=", 11)){
+			continue;
+		}else if (!win_strncmp(entry, "Path=", 5)){
+			continue;
 		}
+		len = win_strlen(entry) + 1;
+		pvResult = win_realloc(pvResult, size + len);
+		p = pvResult + size;
+		p = win_stpcpy(p, entry) + 1;
+		size = p - (char *)pvResult;
 	}
 	*p = 0;
 	return(pvResult);
@@ -513,7 +518,7 @@ syscall_leave(call_t call)
 	/* Note: WriteFile() will touch the %edx register.
 	 */
 	if (pwTask->TracePoints & KTRFAC_SYSRET){
-		ktrace_SYSRET(pwTask, call.Code, result);
+		ktrace_SYSRET(pwTask, code, result);
 	}
 }
 

@@ -45,18 +45,6 @@ AclLookupW(LPCWSTR Name, SID8 *Result)
 
 /************************************************************/
 
-VOID 
-win_acl_PROCESS_ATTACH(VOID)
-{
-	WCHAR wszDomain[MAX_NAME];
-	DWORD bufLen = MAX_NAME;
-
-	GetComputerNameW(wszDomain, &bufLen);
-	AclLookupW(wszDomain, &SidMachine);
-	SidMachine.SubAuthorityCount++;
-	SidNone = SidMachine;
-	SidNone.SubAuthority[SidNone.SubAuthorityCount-1] = DOMAIN_GROUP_RID_USERS;
-}
 BOOL 
 win_acl_get_file(LPCWSTR FileName, PSECURITY_DESCRIPTOR *Result)
 {

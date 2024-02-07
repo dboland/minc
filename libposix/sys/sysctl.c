@@ -225,9 +225,9 @@ sysctl_KERN_SECURELVL(int *oldvalue, int *newvalue)
 	int result = 0;
 
 	if (oldvalue){
-		*oldvalue = __Globals[WIN_KERN_SECURELVL].LowPart;
+		*oldvalue = __Globals->SecureLevel;
 	}else if (newvalue){
-		__Globals[WIN_KERN_SECURELVL].LowPart = *newvalue;
+		__Globals->SecureLevel = *newvalue;
 	}else{
 		result = -EFAULT;
 	}

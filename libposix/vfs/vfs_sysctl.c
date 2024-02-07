@@ -32,49 +32,8 @@
 
 /************************************************************/
 
-LPVOID 
-SHMCreate(LPCSTR Name, DWORD SizeLow)
-{
-	LPVOID lpvResult = NULL;
-	WIN_OBJECT_CONTROL wControl;
-	SECURITY_ATTRIBUTES sa = {sizeof(sa), &wControl.Security, FALSE};
-
-	if (!AclCreateControl(WIN_S_IRW, &wControl)){
-		return(NULL);
-	}else if (!(__Shared = CreateFileMapping(INVALID_HANDLE_VALUE, &sa, PAGE_READWRITE, 0, SizeLow, Name))){
-		WIN_ERR("CreateFileMapping(%s): %s\n", Name, win_strerror(GetLastError()));
-	}else if (lpvResult = MapViewOfFile(__Shared, FILE_MAP_WRITE, 0, 0, 0)){
-		ZeroMemory(lpvResult, SizeLow);
-	}else{
-		WIN_ERR("MapViewOfFile(%d): %s\n", __Shared, win_strerror(GetLastError()));
-	}
-	return(lpvResult);
-}
-
-/************************************************************/
-
-WIN_SESSION *
-vfs_shm_init(LPCSTR Name, HINSTANCE Instance)
-{
-	WIN_SESSION *wsResult = NULL;
-
-	if (!(__Shared = OpenFileMapping(FILE_MAP_WRITE, FALSE, Name))){
-		wsResult = SHMCreate(Name, sizeof(WIN_SESSION));
-		pdo_init(wsResult->Devices);
-		disk_init(wsResult->Mounts, Instance);
-		con_init(DEVICE(DEV_TYPE_CONSOLE));
-		sysctl_init(wsResult->Globals);
-	}else if (!(wsResult = MapViewOfFile(__Shared, FILE_MAP_WRITE, 0, 0, 0))){
-		WIN_ERR("MapViewOfFile(%d): %s\n", __Shared, win_strerror(GetLastError()));
-	}
-	return(wsResult);
-}
 VOID 
-vfs_shm_finish(WIN_SESSION *Session)
+sysctl_init(WIN_GLOBALS *Globals)
 {
-	if (!UnmapViewOfFile(Session)){
-		WIN_ERR("UnmapViewOfFile(%d): %s\n", Session, win_strerror(GetLastError()));
-	}else{
-		CloseHandle(__Shared);
-	}
+	AclInit(&Globals->SidMachine, &Globals->SidNone);
 }

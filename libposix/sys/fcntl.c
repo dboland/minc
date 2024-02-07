@@ -238,7 +238,6 @@ __openat(WIN_TASK *Task, WIN_NAMEIDATA *Path, int flags, va_list args)
 	WIN_FLAGS wFlags;
 	WIN_MODE wMode;
 	WIN_VNODE vNode = {0};
-//	CHAR szMessage[MAX_MESSAGE];
 
 	mode &= ~Task->FileMask;
 	if ((Path->FileType == WIN_VLNK) && (Path->Flags == WIN_NOFOLLOW)){

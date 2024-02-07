@@ -112,10 +112,10 @@ win_getpwnam(LPCWSTR Account, WIN_PWENT *Result)
 BOOL 
 win_getpwuid(SID8 *Sid, WIN_PWENT *Result)
 {
+	BOOL bResult = FALSE;
 	DWORD accLen = MAX_NAME;
 	DWORD domLen = MAX_NAME;
 	SID_NAME_USE snType = 0;
-	BOOL bResult = FALSE;
 
 	ZeroMemory(Result, sizeof(WIN_PWENT));
 	if (LookupAccountSidW(NULL, Sid, Result->Account, &accLen, Result->Domain, &domLen, &snType)){

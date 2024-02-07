@@ -125,11 +125,12 @@ BOOL
 vfs_setlogin(WIN_TASK *Task, LPCSTR Name)
 {
 	BOOL bResult = FALSE;
+	DWORD dwSize = sizeof(SID8);
 	SID8 sid;
 
 	if (!win_group_member(&SidAdmins)){
 		SetLastError(ERROR_PRIVILEGE_NOT_HELD);
-	}else if (AclLookup(Name, &sid)){
+	}else if (AclLookup(Name, &sid, &dwSize)){
 		bResult = vfs_seteuid(Task, &sid);
 	}
 	return(bResult);

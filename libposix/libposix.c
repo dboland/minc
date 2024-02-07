@@ -48,17 +48,17 @@ extern WIN_DEV_CLASS 	*__Devices;
 extern WIN_TERMIO 	*__Terminals;
 extern WIN_PSTRING 	*__Strings;
 extern WIN_MOUNT	*__Mounts;
-extern LARGE_INTEGER	*__Globals;
+extern WIN_GLOBALS	*__Globals;
 extern WIN_TERMIO 	*__CTTY;
+extern SID8 		*__SidNone;
+extern SID8 		*__SidMachine;
 
 extern DWORD	 	__TlsIndex;
 extern HANDLE		__Interrupt;
 extern HANDLE		__PipeEvent;
 
 extern SID8 SidNull;
-extern SID8 SidNone;
 extern SID8 SidBuiltin;
-extern SID8 SidMachine;
 extern SID8 SidAdmins;
 extern SID8 SidEveryone;
 extern SID8 SidAuthenticated;

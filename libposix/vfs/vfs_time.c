@@ -66,7 +66,7 @@ vfs_setitimer(WIN_TASK *Task, LONG *Interval, DWORDLONG *TimeOut)
 	HANDLE hTimer;
 	PTIMERAPCROUTINE ptProc = TimeProc;
 
-	/* If not set to NULL, the completion routine will be called
+	/* If not set to NULL, the completion routine would be called
 	 * one last time when resetting the timer (ftp.exe).
 	 */
 	if (!dwlTimeOut){

@@ -62,7 +62,6 @@ SID8 SidAuthenticated		= {1, 1, {0, 0, 0, 0, 0, 5}, 11};
 SID8 SidRestricted		= {1, 1, {0, 0, 0, 0, 0, 5}, 12};
 SID8 SidThisOrganization	= {1, 1, {0, 0, 0, 0, 0, 5}, 15};
 SID8 SidSystem			= {1, 1, {0, 0, 0, 0, 0, 5}, 18};
-SID8 SidMachine			= {1, 2, {0, 0, 0, 0, 0, 5}, 21, 0};
 SID8 SidBuiltin			= {1, 2, {0, 0, 0, 0, 0, 5}, 32, 0};
 SID8 SidAdmins			= {1, 2, {0, 0, 0, 0, 0, 5}, 32, 544};
 SID8 SidUsers			= {1, 2, {0, 0, 0, 0, 0, 5}, 32, 545};
@@ -86,7 +85,6 @@ SID8 SidIntegrityLow		= {1, 1, {0, 0, 0, 0, 0, 16}, 0x1000};
 SID8 SidIntegrityMedium		= {1, 1, {0, 0, 0, 0, 0, 16}, 0x2000};
 SID8 SidIntegrityHigh		= {1, 1, {0, 0, 0, 0, 0, 16}, 0x3000};
 SID8 SidIntegritySystem		= {1, 1, {0, 0, 0, 0, 0, 16}, 0x4000};
-SID8 SidNone			= {0};
 
 #include "win_string.c"
 #include "win_wchar.c"

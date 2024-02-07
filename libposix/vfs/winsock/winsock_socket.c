@@ -81,6 +81,9 @@ ws2_socket(UINT Family, UINT Type, INT Protocol, WIN_VNODE *Result)
 	BOOL bResult = FALSE;
 	SOCKET sResult;
 
+	/* WSASocket() needs the "SystemRoot" environment variable
+	 * to be present (WSAEPROVIDERFAILEDINIT).
+	 */
 	sResult = WSASocket(Family, Type, Protocol, NULL, 0, 0);
 	if (sResult != INVALID_SOCKET){
 		Result->Socket = sResult;

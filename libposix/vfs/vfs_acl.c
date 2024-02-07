@@ -48,22 +48,36 @@
 /************************************************************/
 
 BOOL 
-AclLookup(LPCSTR Name, SID8 *Result)
+AclLookup(LPCSTR Name, SID8 *Sid, DWORD *Size)
 {
 	BOOL bResult = FALSE;
-	CHAR szDomain[MAX_NAME];
-	DWORD bufLen = MAX_NAME;
-	DWORD sidLen = sizeof(SID8);
+	DWORD dwSize = MAX_NAME;
+	CHAR szDomain[dwSize];
 	SID_NAME_USE snType = 0;
 
-	if (!*Name){	/* inetd.exe */
+	if (!*Name){			/* inetd.exe */
 		SetLastError(ERROR_BAD_ARGUMENTS);
-	}else if (!LookupAccountName(NULL, Name, Result, &sidLen, szDomain, &bufLen, &snType)){
+	}else if (!LookupAccountName(NULL, Name, Sid, Size, szDomain, &dwSize, &snType)){
 		WIN_ERR("LookupAccountName(%s): %s\n", Name, win_strerror(GetLastError()));
 	}else{
 		bResult = TRUE;
 	}
 	return(bResult);
+}
+VOID 
+AclInit(SID8 *SidMachine, SID8 *SidNone)
+{
+	DWORD namLen = MAX_NAME;
+	CHAR szName[namLen];
+	DWORD sidLen = sizeof(SID8);
+
+	if (!GetComputerName(szName, &namLen)){
+		WIN_ERR("GetComputerName(): %s\n", win_strerror(GetLastError()));
+	}else if (AclLookup(szName, SidMachine, &sidLen)){
+		SidMachine->SubAuthorityCount++;
+		CopySid(sidLen, SidNone, SidMachine);
+		SidNone->SubAuthority[SidNone->SubAuthorityCount-1] = DOMAIN_GROUP_RID_USERS;
+	}
 }
 DWORD 
 AclOwnerType(ACE_PEEK *Entry, DWORD *TypeMask)
@@ -198,7 +212,7 @@ vfs_acl_create(WIN_PSD Security, WIN_MODE *Mode, BYTE Flags, WIN_ACL_CONTROL *Re
 		aMaskNew = pEntry->Mask & ~WIN_S_IRWX;
 		bFlagsNew = pEntry->Header.AceFlags & ~ALL_INHERIT_ACE;
 		if (dwType == WIN_ACL_USER){
-			if (EqualPrefixSid(&pEntry->Sid, &SidMachine)){
+			if (EqualPrefixSid(&pEntry->Sid, __SidMachine)){
 				pEntry = AclDupEntry(pEntry, win_geteuid(&sid), &aceBuf);
 			}
 			pEntry->Mask = aMaskNew + Mode->User;
@@ -293,13 +307,13 @@ vfs_acl_chown(WIN_PSD Security, PSID NewUser, PSID NewGroup, WIN_ACL_CONTROL *Re
 		aceBuf.Header = pEntry->Header;
 		aceBuf.Mask = pEntry->Mask;
 		if (dwType == WIN_ACL_USER){
-			if (!EqualSid(NewUser, &SidNone)){
+			if (!EqualSid(NewUser, __SidNone)){
 				aceBuf.Header.AceSize = aceSize + GetLengthSid(NewUser);
 				CopySid(GetLengthSid(NewUser), &aceBuf.Sid, NewUser);
 				pEntry = (ACE_PEEK *)&aceBuf;
 			}
 		}else if (dwType == WIN_ACL_GROUP){
-			if (!EqualSid(NewGroup, &SidNone)){
+			if (!EqualSid(NewGroup, __SidNone)){
 				aceBuf.Header.AceSize = aceSize + GetLengthSid(NewGroup);
 				CopySid(GetLengthSid(NewGroup), &aceBuf.Sid, NewGroup);
 				pEntry = (ACE_PEEK *)&aceBuf;

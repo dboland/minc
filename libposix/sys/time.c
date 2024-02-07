@@ -164,7 +164,7 @@ sys_nanosleep(call_t call, const struct timespec *req, struct timespec *rem)
 		return(-EINVAL);
 	}else{
 		llTimeOut = (LONGLONG)(req->tv_sec * 10000000);
-		llTimeOut += req->tv_nsec * 0.01;
+		llTimeOut += req->tv_nsec * 0.01;			/* 100-nanosecond intervals */
 	}
 	if (!vfs_nanosleep(&llTimeOut, &dwlRemain)){
 		result -= errno_posix(GetLastError());
