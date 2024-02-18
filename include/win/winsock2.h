@@ -85,4 +85,3 @@ typedef struct _WSAMSG {
         WSABUF          Control;
         DWORD           dwFlags;
 } WSAMSG, *PWSAMSG, *LPWSAMSG;
-

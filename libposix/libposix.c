@@ -80,7 +80,10 @@ WIN_NAMEIDATA *path_win(WIN_NAMEIDATA *Path, const char *pathname, int flags);
 #include "sys/ktrace.c"
 #include "sys/vnode.c"
 #include "sys/namei.c"
+#include "sys/msgbuf.c"
+#include "sys/systm.c"		/* cpu_configure() */
 #include "sys/stat.c"
+#include "sys/syscall.c"
 #include "sys/fcntl.c"
 #include "sys/time.c"
 #include "sys/proc.c"
@@ -89,11 +92,8 @@ WIN_NAMEIDATA *path_win(WIN_NAMEIDATA *Path, const char *pathname, int flags);
 #include "sys/filio.c"
 #include "sys/dkio.c"
 #include "sys/mtio.c"
-#include "sys/msgbuf.c"
-#include "sys/systm.c"		/* cpu_configure() */
 #include "sys/pciio.c"
 #include "sys/resource.c"
-#include "sys/syscall.c"
 #include "sys/unistd.c"
 #include "sys/wait.c"
 #include "sys/signal.c"

@@ -92,7 +92,7 @@ print_fsent(DWORD DeviceType, struct statfs *info)
 			l += sprintf(l, ",noauto");
 	}
 
-	printf("%s\t0\t0\n", line);	/* frequency, passno (2=raw access) */
+	printf("%s\t0\t0\n", line);	/* frequency, passno (1=root, 2=other) */
 
 	if (_paths){
 		mkdir(info->f_mntonname, 00700);

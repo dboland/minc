@@ -193,7 +193,6 @@ boot(void)
 void 
 single(void)
 {
-	int result = 0;
 	int mib[2] = {CTL_KERN, KERN_SECURELVL};
 	int level = 1;
 	char *args[] = {"/bin/ksh", "-l", NULL};
@@ -213,18 +212,15 @@ single(void)
 		args[1] = NULL;
 	}
 	shell(args);
-	return(result);
 }
 void 
 multi(void)
 {
-	int result = 0;
 	char *args[] = {"/bin/ksh", "-l", NULL};
 
 	setsid();
 	getty(PATH_PTMDEV);
 	shell(args);
-	return(result);
 }
 
 /************************************************************/
@@ -232,7 +228,6 @@ multi(void)
 int 
 main(int argc, char *argv[], char *envp[])
 {
-//	int result = 0;
 	int mib[2] = {CTL_KERN, KERN_SECURELVL};
 	size_t size = sizeof(int);
 	int level = 0;
@@ -271,5 +266,4 @@ main(int argc, char *argv[], char *envp[])
 		default:
 			waitpid(pid, &status, 0);
 	}
-	return(result);
 }

@@ -54,15 +54,7 @@ ws2_close(WIN_VNODE *Node)
 BOOL 
 ws2_write(WIN_VNODE *Node, LPCSTR Buffer, DWORD Size, DWORD *Result)
 {
-	BOOL bResult = FALSE;
-	DWORD dwStatus = WaitForSingleObjectEx(__Interrupt, 0, TRUE);
-
-	if (dwStatus == WAIT_IO_COMPLETION){
-		bResult = !proc_poll();
-	}else{
-		bResult = fifo_write(Node, Buffer, Size, Result);
-	}
-	return(bResult);
+	return(fifo_write(Node, Buffer, Size, Result));
 }
 BOOL 
 ws2_read(WIN_VNODE *Node, LPSTR Buffer, DWORD Size, DWORD *Result)

@@ -42,6 +42,11 @@ typedef struct _WIN_CAP_CONTROL {
 	ACCESS_ALLOWED_ACE8 Ace[3];
 } WIN_CAP_CONTROL;
 
+/* The "Replace a process level token" (SeAssignPrimaryTokenPrivilege) setting
+ * determines which user accounts can call the CreateProcessAsUser() application
+ * programming interface (API) so that one service can start another.
+ */
+
 /************************************************************/
 
 BOOL 
@@ -331,7 +336,7 @@ win_cap_setuid(WIN_PWENT *Passwd, HANDLE *Result)
 		CapTogglePrivilege(hToken, "SeDelegateSessionUserImpersonatePrivilege", SE_PRIVILEGE_ENABLED);
 
 		if (Passwd->Integrity == SECURITY_MANDATORY_SYSTEM_RID){
-			wControl.Privs = CapAddPrivilege(wControl.Privs, "SeTcbPrivilege");
+//			wControl.Privs = CapAddPrivilege(wControl.Privs, "SeTcbPrivilege");
 		}else if (!SetTokenInformation(hToken, TokenSessionId, &wControl.SessionId, sizeof(DWORD))){
 			WIN_ERR("SetTokenInformation(TokenSessionId(%d)): %s\n", wControl.SessionId, win_strerror(GetLastError()));
 		}
@@ -363,10 +368,10 @@ win_cap_setgroups(SID8 *Primary, SID8 Groups[], DWORD Count, HANDLE *Result)
 		wControl.Groups = CapCreateGroups(Groups, Count);
 		wControl.Primary = *Primary;
 
-		win_cap_set_mode(&wControl.User, GENERIC_ALL, &wControl.DefaultAcl);
-
 		CapTogglePrivilege(hToken, "SeCreateTokenPrivilege", SE_PRIVILEGE_ENABLED);
 //		CapTogglePrivilege(hToken, "SeDelegateSessionUserImpersonatePrivilege", SE_PRIVILEGE_ENABLED);
+
+		win_cap_set_mode(&wControl.User, GENERIC_ALL, &wControl.DefaultAcl);
 
 		bResult = CapCreateToken(&wControl, Result);
 

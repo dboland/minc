@@ -63,7 +63,7 @@ vfs_closefrom(WIN_VNODE Nodes[])
 
 	/* Contrary to Raymond Chen's rant on
 	 * 'anal-rententive memory management' (ONT, 2012),
-	 * named pipes are not closed on program exit.
+	 * named pipes are not closed on program exit (login.exe).
 	 */
 	while (dwIndex < WIN_OPEN_MAX){
 		if (Nodes->FileType == WIN_VSOCK){

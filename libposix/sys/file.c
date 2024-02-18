@@ -70,8 +70,7 @@ kfile_posix(struct kinfo_file *buf, WIN_TASK *Task, WIN_VNODE *Node)
 		buf->f_gid = info.st_gid;		/* GID_T: descriptor credentials */
 		buf->va_size = info.st_size;
 	}else{
-//__PRINTF("path: %ls\n", win_F_GETPATH(vNode.Handle, szBuffer));
-VfsDebugNode(&vNode, "kfile_posix");
+		vfs_ktrace("kfile_posix", STRUCT_VNODE, &vNode);
 	}
 	return(buf + 1);
 }

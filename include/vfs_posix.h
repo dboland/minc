@@ -131,7 +131,6 @@ BOOL vfs__cxa_finalize(PVOID Param);
 
 BOOL vfs_ktrace_SET(WIN_TASK *Task, WIN_NAMEIDATA *Path, PVOID Buffer, LONG Size);
 BOOL vfs_ktrace_CLEAR(WIN_TASK *Task);
-DWORD vfs_ktrace(WIN_VNODE *Node, LPSTR Message);
 
 /* vfs_filio.c */
 

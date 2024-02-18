@@ -31,6 +31,8 @@
 #include <winbase.h>
 #include <ddk/ntifs.h>	// Object types
 
+#include "vfs_debug.h"
+
 static const CHAR *_FSType[] = {
 	"UNKNOWN", 
 	"DISK", 
@@ -354,7 +356,6 @@ VfsPathFlags(DWORD Flags, LPCSTR Label)
 	win_flagname(WIN_NOCROSSMOUNT, "NOCROSSMOUNT", Flags, &Flags);
 	win_flagname(WIN_ISSYMLINK, "ISSYMLINK", Flags, &Flags);
 	win_flagname(WIN_REQUIREDIR, "REQUIREDIR", Flags, &Flags);
-//	win_flagname(WIN_REQUIREDRIVE, "REQUIREDRIVE", Flags, &Flags);
 	win_flagname(WIN_PATHCOPY, "PATHCOPY", Flags, &Flags);
 	msvc_printf(" remain(0x%x)\n", Flags);
 }
@@ -469,4 +470,91 @@ VfsDebugThread(WIN_THREAD_STRUCT *Thread, LPSTR Label)
 {
 	msvc_printf("%s: return(0x%lx) origin(0x%lx) size(0x%lx) source(0x%lx) dest(0x%lx) offset(0x%lx) Token(%lu) Flags(0x%x)\n", 
 		Label, Thread->raddr, Thread->origin, Thread->size, Thread->source, Thread->dest, Thread->offset, Thread->Token, Thread->Flags);
+}
+
+/****************************************************/
+
+LPSTR 
+vfs_flagname(LPSTR Buffer, DWORD Flag, LPCSTR Name, DWORD Mask, DWORD *Remain)
+{
+	if (Mask & Flag){
+		*Remain &= ~Flag;
+		Buffer += msvc_sprintf(Buffer, "[%s]", Name);
+	}
+	return(Buffer);
+}
+LPSTR 
+vfs_ktrace_FLAGS(LPSTR Buffer, DWORD Flags)
+{
+	LPSTR psz = Buffer;
+
+	psz += msvc_sprintf(psz, "+ Flags([0x%x]", Flags);
+	psz = vfs_flagname(psz, HANDLE_FLAG_INHERIT, "INHERIT", Flags, &Flags);
+	psz = vfs_flagname(psz, HANDLE_FLAG_PROTECT_FROM_CLOSE, "PROTECT_FROM_CLOSE", Flags, &Flags);
+	psz += msvc_sprintf(psz, "[0x%x])\n", Flags);
+	return(psz);
+}
+LPSTR 
+vfs_ktrace_ATTRIBS(LPSTR Buffer, DWORD Attribs)
+{
+	LPSTR psz = Buffer;
+
+	psz += msvc_sprintf(psz, "+ Attribs([0x%x]", Attribs);
+	if (Attribs != -1){
+		psz = vfs_flagname(psz, FILE_FLAG_BACKUP_SEMANTICS, "BACKUP_SEMANTICS", Attribs, &Attribs);
+		psz = vfs_flagname(psz, FILE_FLAG_OVERLAPPED, "OVERLAPPED", Attribs, &Attribs);
+		psz = vfs_flagname(psz, FILE_ATTRIBUTE_READONLY, "READONLY", Attribs, &Attribs);
+		psz = vfs_flagname(psz, FILE_ATTRIBUTE_HIDDEN, "HIDDEN", Attribs, &Attribs);
+		psz = vfs_flagname(psz, FILE_ATTRIBUTE_SYSTEM, "SYSTEM", Attribs, &Attribs);
+		psz = vfs_flagname(psz, FILE_ATTRIBUTE_SYMLINK, "SYMLINK", Attribs, &Attribs);
+		psz = vfs_flagname(psz, FILE_ATTRIBUTE_DIRECTORY, "DIRECTORY", Attribs, &Attribs);
+		psz = vfs_flagname(psz, FILE_ATTRIBUTE_ARCHIVE, "ARCHIVE", Attribs, &Attribs);
+		psz = vfs_flagname(psz, FILE_ATTRIBUTE_DEVICE, "DEVICE", Attribs, &Attribs);
+		psz = vfs_flagname(psz, FILE_ATTRIBUTE_NORMAL, "NORMAL", Attribs, &Attribs);
+		psz = vfs_flagname(psz, FILE_ATTRIBUTE_TEMPORARY, "TEMPORARY", Attribs, &Attribs);
+		psz = vfs_flagname(psz, FILE_ATTRIBUTE_REPARSE_POINT, "REPARSE_POINT", Attribs, &Attribs);
+		psz = vfs_flagname(psz, FILE_ATTRIBUTE_COMPRESSED, "COMPRESSED", Attribs, &Attribs);
+		psz = vfs_flagname(psz, FILE_ATTRIBUTE_OFFLINE, "OFFLINE", Attribs, &Attribs);
+	}
+	psz += msvc_sprintf(psz, "[0x%x])\n", Attribs);
+	return(psz);
+}
+DWORD 
+vfs_ktrace_VNODE(WIN_VNODE *Node, LPSTR Buffer)
+{
+	LPSTR psz = Buffer;
+
+	psz += msvc_sprintf(psz, "FileId(%d) Type(%s:%s) Handle(%d) Access(0x%x) CloEx(%d) DevType(0x%x) DevId(0x%x)\n", 
+		Node->FileId, _FSType[Node->FSType], FType(Node->FileType), Node->Handle, Node->Access, Node->CloseExec, Node->DeviceType, Node->DeviceId);
+	psz = vfs_ktrace_ATTRIBS(psz, Node->Attribs);
+	psz = vfs_ktrace_FLAGS(psz, Node->Flags);
+	return(psz - Buffer);
+}
+DWORD 
+vfs_ktrace_NAMEI(WIN_NAMEIDATA *Path, LPSTR Buffer)
+{
+	LPSTR psz = Buffer;
+
+	psz += msvc_sprintf(psz, "Resolved(%ls): MountId(%d) Type(%s:%s)\n", 
+		Path->Resolved, Path->MountId, FSType(Path->FSType), _FType[Path->FileType]);
+	psz = vfs_ktrace_ATTRIBS(psz, Path->Attribs);
+	return(psz - Buffer);
+}
+
+/****************************************************/
+
+VOID 
+vfs_ktrace(LPCSTR Label, STRUCT_TYPE Type, PVOID Data)
+{
+	CHAR szText[MAX_TEXT];
+
+	switch (Type){
+		case STRUCT_VNODE:
+			vfs_ktrace_VNODE((WIN_VNODE *)Data, szText);
+			break;
+		case STRUCT_NAMEIDATA:
+			vfs_ktrace_NAMEI((WIN_NAMEIDATA *)Data, szText);
+			break;
+	}
+	msvc_printf("%s: %s\n", Label, szText);
 }

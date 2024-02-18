@@ -176,9 +176,6 @@ ifnet_attach(WIN_DEVICE *Device)
 		case DEV_TYPE_PPP:
 			bResult = config_found("ppp", FS_TYPE_PDO, WIN_VSOCK, Device);
 			break;
-		case DEV_TYPE_REMOTE:
-			bResult = config_found("smb", FS_TYPE_DRIVE, WIN_VBLK, Device);
-			break;
 		default:
 			bResult = FALSE;
 	}
@@ -327,6 +324,9 @@ storage_attach(WIN_DEVICE *Device)
 			break;
 		case DEV_TYPE_USBSTOR:
 			bResult = config_found("sd", FS_TYPE_DRIVE, WIN_VBLK, Device);
+			break;
+		case DEV_TYPE_REMOTE:
+			bResult = config_found("smb", FS_TYPE_DRIVE, WIN_VBLK, Device);
 			break;
 		default:
 			bResult = FALSE;

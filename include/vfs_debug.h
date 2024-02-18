@@ -28,14 +28,13 @@
  *
  */
 
-LPSTR VfsTypeName(DWORD FileType);
-VOID VfsFileAttribs(DWORD Attribs, LPCWSTR Label);
-VOID VfsFileFlags(DWORD Flags, LPCWSTR Label);
-VOID VfsVolumeFlags(DWORD Flags, LPCSTR Label);
-VOID VfsTermFlags(DWORD Mode[2], LPCSTR Label);
-VOID VfsNetFlags(LONG NetworkEvents, LPCSTR Label);
-VOID VfsAccessFlags(ACCESS_MASK Access, DWORD Type);
+typedef enum _STRUCT_TYPE{
+	STRUCT_UNKNOWN,
+	STRUCT_VNODE,
+	STRUCT_NAMEIDATA
+} STRUCT_TYPE;
 
-VOID VfsDebugNode(WIN_VNODE *Node, LPCSTR Label);
-VOID VfsDebugStat(WIN_VATTR *Stat, LPCSTR Label);
-VOID VfsDebugThread(WIN_THREAD_STRUCT *Thread, LPSTR Label);
+DWORD vfs_ktrace_VNODE(WIN_VNODE *Node, LPSTR Buffer);
+DWORD vfs_ktrace_NAMEI(WIN_NAMEIDATA *Path, LPSTR Buffer);
+
+VOID vfs_ktrace(LPCSTR Label, STRUCT_TYPE Type, PVOID Data);

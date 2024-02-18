@@ -78,11 +78,6 @@ typedef struct tagMSG {
         POINT pt;
 } MSG,*LPMSG,*PMSG;
 
-typedef VOID (CALLBACK *TIMERPROC)(HWND, UINT, UINT, DWORD);
-
-WINUSERAPI UINT WINAPI SetTimer(HWND,UINT,UINT,TIMERPROC);
-WINUSERAPI BOOL WINAPI KillTimer(HWND,UINT);
-
 /*
  * wincon.h
  */

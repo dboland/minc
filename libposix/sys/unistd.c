@@ -54,13 +54,13 @@ groups_win(DWORD *Count)
 int 
 __seteuid(WIN_TASK *Task, uid_t uid)
 {
-	SID8 sidUser;
 	int result = 0;
+	SID8 sidUser;
 
 	if (!uid){
 		uid = WIN_ROOT_UID;
 	}
-	if (uid == rid_posix(&Task->UserSid)){	/* PRIV_START check (ssh.exe) */
+	if (uid == rid_posix(&Task->UserSid)){		/* PRIV_START check (ssh.exe) */
 		return(0);
 	}else if (__getuid(Task) && __geteuid(Task)){
 		result = -EPERM;
@@ -68,6 +68,11 @@ __seteuid(WIN_TASK *Task, uid_t uid)
 		result -= errno_posix(GetLastError());
 	}
 	return(result);
+}
+int 
+sys_seteuid(call_t call, uid_t uid)
+{
+	return(__seteuid(call.Task, uid));
 }
 int 
 __setuid(WIN_TASK *Task, uid_t uid)
@@ -81,13 +86,10 @@ __setuid(WIN_TASK *Task, uid_t uid)
 		return(0);
 	}else if (!__seteuid(Task, uid)){
 		Task->RealUid = rid_posix(&Task->UserSid);
+	}else{
+		result = -EPERM;
 	}
 	return(result);
-}
-int 
-sys_seteuid(call_t call, uid_t uid)
-{
-	return(__seteuid(call.Task, uid));
 }
 int 
 sys_setuid(call_t call, uid_t uid)
@@ -99,6 +101,9 @@ __setreuid(WIN_TASK *Task, uid_t ruid, uid_t euid)
 {
 	int result = 0;
 
+	if (!ruid){
+		ruid = WIN_ROOT_UID;
+	}
 	if (ruid == __getuid(Task)){
 		result = __seteuid(Task, euid);
 	}else{
@@ -114,15 +119,17 @@ sys_setreuid(call_t call, uid_t ruid, uid_t euid)
 int 
 sys_setresuid(call_t call, uid_t ruid, uid_t euid, uid_t suid)
 {
+	int result = 0;
+
 	if (!suid){
 		suid = WIN_ROOT_UID;
 	}
 	if (!__setreuid(call.Task, ruid, euid)){
 		call.Task->SavedUid = suid;
 	}else{
-		return(-EPERM);
+		result = -EPERM;
 	}
-	return(0);
+	return(result);
 }
 
 /****************************************************/
@@ -130,13 +137,13 @@ sys_setresuid(call_t call, uid_t ruid, uid_t euid, uid_t suid)
 int 
 __setegid(WIN_TASK *Task, gid_t gid)
 {
-	SID8 sidGroup;
 	int result = 0;
+	SID8 sidGroup;
 
 	if (!gid){
 		gid = WIN_ROOT_GID;
 	}
-	if (gid == rid_posix(&Task->GroupSid)){	/* PRIV_START check (ssh.exe) */
+	if (gid == rid_posix(&Task->GroupSid)){		/* PRIV_START check (ssh.exe) */
 		return(0);
 	}else if (__getuid(Task) && __geteuid(Task)){
 		result = -EPERM;

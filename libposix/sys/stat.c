@@ -31,6 +31,8 @@
 #include <sys/stat.h>
 
 #define SF_HIDDEN	0x00080000	/* from MacOS */
+#define SF_SYSTEM	0x00100000
+#define SF_DEVICE	0x00200000
 
 static const mode_t __FTYPE_POSIX[] = {
 	0,
@@ -126,6 +128,12 @@ attr_win(unsigned int flags)
 	if (flags & SF_IMMUTABLE){
 		dwResult |= FILE_ATTRIBUTE_READONLY;
 	}
+	if (flags & SF_SYSTEM){
+		dwResult |= FILE_ATTRIBUTE_SYSTEM;
+	}
+	if (flags & SF_DEVICE){
+		dwResult |= FILE_ATTRIBUTE_DEVICE;
+	}
 	return(dwResult);
 }
 u_int32_t 
@@ -141,6 +149,12 @@ attr_posix(DWORD Attribs)
 	}
 	if (Attribs & FILE_ATTRIBUTE_READONLY){
 		result |= SF_IMMUTABLE;
+	}
+	if (Attribs & FILE_ATTRIBUTE_SYSTEM){
+		result |= SF_SYSTEM;
+	}
+	if (Attribs & FILE_ATTRIBUTE_DEVICE){
+		result |= SF_DEVICE;
 	}
 	return(result);
 }

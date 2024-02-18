@@ -160,7 +160,7 @@ win_getgrouplist(WIN_PWENT *Passwd, SID8 *Primary, SID8 *Result[], DWORD *Count)
 {
 	BOOL bResult = TRUE;
 	NET_API_STATUS naStatus;
-	LPLOCALGROUP_USERS_INFO_0 lguInfo = NULL;
+	LPLOCALGROUP_USERS_INFO_0 plguInfo = NULL;
 	DWORD dwRead = 0;
 	DWORD dwTotal = 0;
 	DWORD dwCount = 0;
@@ -168,25 +168,27 @@ win_getgrouplist(WIN_PWENT *Passwd, SID8 *Primary, SID8 *Result[], DWORD *Count)
 	DWORD dwIndex = 0;
 	SID8 *sidResult = win_malloc(dwSize);
 
-	naStatus = NetUserGetLocalGroups(NULL, Passwd->Account, 0, LG_INCLUDE_INDIRECT, (LPBYTE *)&lguInfo, MAX_PREFERRED_LENGTH, &dwRead, &dwTotal);
+	naStatus = NetUserGetLocalGroups(NULL, Passwd->Account, 0, LG_INCLUDE_INDIRECT, (LPBYTE *)&plguInfo, MAX_PREFERRED_LENGTH, &dwRead, &dwTotal);
 	if (naStatus == NERR_Success){
 		dwSize += sizeof(SID8) * dwRead;
 		sidResult = win_realloc(sidResult, dwSize);
 		while (dwIndex < dwRead){
-			AclLookupW(lguInfo[dwIndex].lgrui0_name, &sidResult[dwCount]);
+			AclLookupW(plguInfo->lgrui0_name, &sidResult[dwCount]);
 			if (!EqualSid(&sidResult[dwCount], Primary)){
 				dwCount++;
 			}
 			dwIndex++;
+			plguInfo++;
 		}
-		NetApiBufferFree(lguInfo);
+		NetApiBufferFree(plguInfo);
 	}else if (naStatus != NERR_UserNotFound){
 		WIN_ERR("NetUserGetLocalGroups(): %s\n", win_strerror(naStatus));
 		bResult = FALSE;
 	}
 	if (Passwd->Privileges == USER_PRIV_GUEST){
-		/* WS2_32.DLL/IPHLPAPI.DLL access */
-		sidResult[dwCount++] = SidUsers;
+		sidResult[dwCount++] = SidUsers;	/* WS2_32.DLL/IPHLPAPI.DLL access */
+	}else if (Passwd->Privileges == USER_PRIV_ADMIN){
+		sidResult[dwCount++] = SidLocalService;	/* Vista */
 	}
 	sidResult[dwCount++] = *Primary;
 	*Result = sidResult;

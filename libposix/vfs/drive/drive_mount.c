@@ -88,14 +88,8 @@ drive_statfs(WIN_NAMEIDATA *Path, WIN_STATFS *Result)
 
 	/* mount.exe -a
 	 */
-//VfsDebugPath(Path, "drive_statfs");
 	ZeroMemory(Result, sizeof(WIN_STATFS));
-	if (Path->Attribs == FILE_ATTRIBUTE_DRIVE){
-		bResult = DriveStatVolume(Path->Resolved, Result);
-	}else{
-		bResult = DriveStatVolume(win_volname(szVolume, Path->Resolved), Result);
-	}
-	return(bResult);
+	return(DriveStatVolume(win_volname(szVolume, Path->Resolved), Result));
 }
 BOOL 
 drive_mount(WIN_NAMEIDATA *Path, WIN_VNODE *Node, WIN_MODE *Mode)

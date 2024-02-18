@@ -146,7 +146,6 @@ sigproc_posix(WIN_TASK *Task, int signum, ucontext_t *ucontext)
 	int flags = sigaction->sa_flags;
 	action_t action = sigaction->sa_sigaction;
 	siginfo_t info = {0};
-//	sigset_t sigbit = sigmask(signum);
 
 	info.si_signo = signum;
 	info.si_errno = Task->Error;
@@ -156,6 +155,9 @@ sigproc_posix(WIN_TASK *Task, int signum, ucontext_t *ucontext)
 	info.si_addr = (void *)ucontext->sc_eip;
 	if (Task->TracePoints & KTRFAC_PSIG){
 		ktrace_PSIG(Task, signum, handler, &info);
+	}
+	if (flags & SA_RESTART){
+		result = -1;
 	}
 //	if (sigbit & Task->ProcMask){
 //		Task->Pending |= sigbit;

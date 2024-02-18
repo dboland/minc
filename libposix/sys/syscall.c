@@ -167,8 +167,8 @@ shebang_win(WIN_VNODE *Node, WIN_NAMEIDATA *Path, const char *filename, LPSTR Re
 uid_t 
 __getuid(WIN_TASK *Task)
 {
-	SID8 sidUser;
 	uid_t uid = Task->RealUid;
+	SID8 sidUser;
 
 	if (!uid){
 		uid = rid_posix(win_getuid(&sidUser));
@@ -180,20 +180,19 @@ __getuid(WIN_TASK *Task)
 	return(uid);
 }
 uid_t 
+sys_getuid(call_t call)
+{
+	return(__getuid(call.Task));
+}
+uid_t 
 __geteuid(WIN_TASK *Task)
 {
-	SID8 sidUser;
 	uid_t uid = rid_posix(&Task->UserSid);
 
 	if (uid == WIN_ROOT_UID){
 		uid = 0;
 	}
 	return(uid);
-}
-uid_t 
-sys_getuid(call_t call)
-{
-	return(__getuid(call.Task));
 }
 uid_t 
 sys_geteuid(call_t call)
@@ -206,15 +205,15 @@ sys_getresuid(call_t call, uid_t *ruid, uid_t *euid, uid_t *suid)
 	WIN_TASK *pwTask = call.Task;
 
 	*euid = __geteuid(pwTask);
-	*ruid = pwTask->RealUid;
+	*ruid = __getuid(pwTask);
 	*suid = pwTask->SavedUid;
 	return(0);
 }
 gid_t 
 __getgid(WIN_TASK *Task)
 {
-	SID8 sidGroup;
 	gid_t gid = Task->RealGid;
+	SID8 sidGroup;
 
 	if (!gid){
 		gid = rid_posix(win_getgid(&sidGroup));
@@ -226,20 +225,19 @@ __getgid(WIN_TASK *Task)
 	return(gid);
 }
 gid_t 
+sys_getgid(call_t call)
+{
+	return(__getgid(call.Task));
+}
+gid_t 
 __getegid(WIN_TASK *Task)
 {
-	SID8 sidGroup;
 	gid_t gid = rid_posix(&Task->GroupSid);
 
 	if (gid == WIN_ROOT_GID){
 		gid = 0;
 	}
 	return(gid);
-}
-gid_t 
-sys_getgid(call_t call)
-{
-	return(__getgid(call.Task));
 }
 gid_t 
 sys_getegid(call_t call)
@@ -252,7 +250,7 @@ sys_getresgid(call_t call, gid_t *rgid, gid_t *egid, gid_t *sgid)
 	WIN_TASK *pwTask = call.Task;
 
 	*egid = __getegid(pwTask);
-	*rgid = pwTask->RealGid;
+	*rgid = __getgid(pwTask);
 	*sgid = pwTask->SavedGid;
 	return(0);
 }
@@ -437,7 +435,7 @@ sys_execve(call_t call, const char *path, char *const argv[], char *const envp[]
 	CHAR szCommand[PATH_MAX] = "";
 
 	if (!path || !envp){
-		result = -EINVAL;
+		result = -EFAULT;
 	}else if (!disk_open(path_win(&wPath, path, 0), &wFlags, mode_win(&wMode, 0666), &vNode)){
 		result -= errno_posix(GetLastError());
 	}else if (!shebang_win(&vNode, &wPath, path, szCommand)){
@@ -495,13 +493,16 @@ syscall_enter(call_t call)
 	void *result = ent->sy_call;
 	WIN_TASK *pwTask = &__Tasks[CURRENT];
 
-	pwTask->Code = code;
-	if (pwTask->TracePoints & KTRFAC_SYSCALL){
-		ktrace_SYSCALL(pwTask, code, ent->sy_argsize, &call.Base + 1);
+	if (pwTask->Timer){
+		WaitForSingleObjectEx(__Interrupt, 0, TRUE);
 	}
 	if (proc_poll()){
 		result = sys_interrupt;
 	}
+	if (pwTask->TracePoints & KTRFAC_SYSCALL){
+		ktrace_SYSCALL(pwTask, code, ent->sy_argsize, &call.Base + 1);
+	}
+	pwTask->Code = code;
 	call.Task = pwTask;
 	return(result);
 }

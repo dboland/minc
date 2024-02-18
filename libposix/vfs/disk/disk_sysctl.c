@@ -59,6 +59,7 @@ disk_HW_DISKNAMES(WIN_DEVICE *Device, LPSTR Result)
 	win_wcscat(szVolume, Device->NtPath);
 	switch (Device->DeviceType){
 		case DEV_TYPE_FIXED:
+		case DEV_TYPE_REMOTE:
 			bResult = DiskStatVolume(szVolume, FALSE, szLabel, &dwSerial);
 			msvc_sprintf(Result, "%s:%lu", Device->Name, dwSerial);
 			break;

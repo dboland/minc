@@ -172,6 +172,8 @@ sys_mount(call_t call, const char *type, const char *dir, int flags, void *data)
 	int result = 0;
 	WIN_NAMEIDATA wPath;
 
+	/* mount(2)
+	 */
 	if (!win_strcmp(type, MOUNT_NTFS)){
 		result = mount_NTFS(path_win(&wPath, dir, 0), (struct ntfs_args *)data);
 
@@ -207,11 +209,15 @@ sys_statfs(call_t call, const char *path, struct statfs *buf)
 	int result = 0;
 	WIN_STATFS fsInfo = {0};
 	WIN_NAMEIDATA wPath;
+	WIN_TASK *pwTask = call.Task;
 
-	if (!drive_statfs(path_win(&wPath, path, O_DIRECTORY), &fsInfo)){
+	if (!drive_statfs(path_win(&wPath, path, 0), &fsInfo)){
 		result -= errno_posix(GetLastError());
 	}else{
 		statfs_posix(buf, &fsInfo);
+	}
+	if (pwTask->TracePoints & KTRFAC_USER){
+		ktrace_WIN(pwTask, STRUCT_NAMEIDATA, &wPath);
 	}
 	return(result);
 }
