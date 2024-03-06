@@ -50,7 +50,11 @@
 
 /* winnt.h */
 
-#define WIN_S_IREAD	(FILE_READ_DATA | FILE_READ_EA)
+/* We need at least FILE_WRITE_ATTRIBUTES to CreateHardLink() 
+ * on a file with zero permissions (mutt_dotlock.exe).
+ */
+
+#define WIN_S_IREAD	(FILE_READ_DATA)
 #define WIN_S_IWRITE	(FILE_WRITE_DATA | FILE_WRITE_EA | FILE_APPEND_DATA)
 #define WIN_S_IEXEC	(FILE_EXECUTE)
 #define WIN_S_IRX	(WIN_S_IREAD | WIN_S_IEXEC)
@@ -266,8 +270,9 @@ typedef struct _WIN_RUSAGE {
 
 /*
  * win_sched.c
- *
- * Init, svinit, sh, init.sh, systemd, upstart, openrc all can act as
+ */
+
+/* Init, svinit, sh, init.sh, systemd, upstart, openrc all can act as
  * init programs. (Rob Landley, OpenioTSummit, 2017, 1:24:30)
  */
 

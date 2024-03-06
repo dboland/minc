@@ -231,7 +231,7 @@ vfs_acl_create(WIN_PSD Security, WIN_MODE *Mode, BYTE Flags, WIN_ACL_CONTROL *Re
 	/* When creating files/subfolders in in user's profile tree (git.exe)
 	 */
 	if (!(dwTypeMask & WIN_ACL_OTHER)){
-		aMaskNew = READ_CONTROL | SYNCHRONIZE | Mode->Other;
+		aMaskNew = READ_CONTROL | FILE_READ_ATTRIBUTES | SYNCHRONIZE | Mode->Other;
 		AclAddEntry(aclNew, Flags, aMaskNew, &SidAuthenticated);
 	}
 	if (!SetSecurityDescriptorDacl(&Result->Security, bPresent, aclNew, bDefaulted)){
