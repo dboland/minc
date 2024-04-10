@@ -33,7 +33,7 @@
 
 #include "vfs_debug.h"
 
-static const CHAR *_FSType[] = {
+static const CHAR *__FSType[] = {
 	"UNKNOWN", 
 	"DISK", 
 	"CHAR", 
@@ -48,7 +48,7 @@ static const CHAR *_FSType[] = {
 	"NPF",
 	"NDIS"
 };
-static const CHAR *_FType[] = {
+static const CHAR *__FType[] = {
 	"VNON", 
 	"VREG", 
 	"VDIR", 
@@ -70,7 +70,7 @@ FSType(WIN_FS_TYPE Type)
 	if (Type >= FS_TYPE_MAX){
 		pszResult = "INVALID";
 	}else{
-		pszResult = _FSType[Type];
+		pszResult = __FSType[Type];
 	}
 	return(pszResult);
 }
@@ -82,117 +82,141 @@ FType(WIN_VTYPE Type)
 	if (Type >= WIN_VMAX){
 		pszResult = "INVALID";
 	}else{
-		pszResult = _FType[Type];
+		pszResult = __FType[Type];
 	}
 	return(pszResult);
 }
-VOID 
-VfsFileAttribs(DWORD Attribs, LPCWSTR Label)
+LPSTR 
+VfsFlagName(LPSTR Buffer, DWORD Flag, LPCSTR Name, DWORD Mask, DWORD *Remain)
 {
-	msvc_printf("%ls(0x%x): ", Label, Attribs);
-	if (Attribs != -1){
-		win_flagname(FILE_FLAG_BACKUP_SEMANTICS, "BACKUP_SEMANTICS", Attribs, &Attribs);
-		win_flagname(FILE_FLAG_OVERLAPPED, "OVERLAPPED", Attribs, &Attribs);
-		win_flagname(FILE_ATTRIBUTE_READONLY, "READONLY", Attribs, &Attribs);
-		win_flagname(FILE_ATTRIBUTE_HIDDEN, "HIDDEN", Attribs, &Attribs);
-		win_flagname(FILE_ATTRIBUTE_SYSTEM, "SYSTEM", Attribs, &Attribs);
-		win_flagname(FILE_ATTRIBUTE_SYMLINK, "SYMLINK", Attribs, &Attribs);
-		win_flagname(FILE_ATTRIBUTE_DIRECTORY, "DIRECTORY", Attribs, &Attribs);
-		win_flagname(FILE_ATTRIBUTE_ARCHIVE, "ARCHIVE", Attribs, &Attribs);
-		win_flagname(FILE_ATTRIBUTE_DEVICE, "DEVICE", Attribs, &Attribs);
-		win_flagname(FILE_ATTRIBUTE_NORMAL, "NORMAL", Attribs, &Attribs);
-		win_flagname(FILE_ATTRIBUTE_TEMPORARY, "TEMPORARY", Attribs, &Attribs);
-		win_flagname(FILE_ATTRIBUTE_REPARSE_POINT, "REPARSE_POINT", Attribs, &Attribs);
-		win_flagname(FILE_ATTRIBUTE_COMPRESSED, "COMPRESSED", Attribs, &Attribs);
-		win_flagname(FILE_ATTRIBUTE_OFFLINE, "OFFLINE", Attribs, &Attribs);
+	LPSTR psz = Buffer;
+
+	if (Mask & Flag){
+		*Remain &= ~Flag;
+		psz += msvc_sprintf(psz, "[%s]", Name);
 	}
-	msvc_printf(" remain(0x%x)\n", Attribs);
+	return(psz);
 }
-VOID 
-VfsFileFlags(DWORD Flags, LPCWSTR Label)
+LPSTR 
+VfsFileFlags(LPSTR Buffer, DWORD Flags)
 {
-	msvc_printf("%ls(0x%x): ", Label, Flags);
-	win_flagname(HANDLE_FLAG_INHERIT, "INHERIT", Flags, &Flags);
-	win_flagname(HANDLE_FLAG_PROTECT_FROM_CLOSE, "PROTECT_FROM_CLOSE", Flags, &Flags);
-	msvc_printf(" remain(0x%x)\n", Flags);
+	LPSTR psz = Buffer;
+
+	psz += msvc_sprintf(psz, "+ Flags([0x%x]", Flags);
+	psz = VfsFlagName(psz, HANDLE_FLAG_INHERIT, "INHERIT", Flags, &Flags);
+	psz = VfsFlagName(psz, HANDLE_FLAG_PROTECT_FROM_CLOSE, "PROTECT_FROM_CLOSE", Flags, &Flags);
+	psz += msvc_sprintf(psz, "[0x%x])\n", Flags);
+	return(psz);
 }
-VOID 
-VfsVolumeFlags(DWORD Flags, LPCSTR Label)
+LPSTR 
+VfsFileAttribs(LPSTR Buffer, DWORD Attribs)
 {
-	msvc_printf("%s(0x%x): ", Label, Flags);
-	win_flagname(FILE_CASE_SENSITIVE_SEARCH, "CASE_SENSITIVE_SEARCH", Flags, &Flags);
-	win_flagname(FILE_CASE_PRESERVED_NAMES, "CASE_PRESERVED_NAMES", Flags, &Flags);
-	win_flagname(FILE_UNICODE_ON_DISK, "UNICODE_ON_DISK", Flags, &Flags);
-	win_flagname(FILE_PERSISTENT_ACLS, "PERSISTENT_ACLS", Flags, &Flags);
-	win_flagname(FILE_FILE_COMPRESSION, "FILE_COMPRESSION", Flags, &Flags);
-	win_flagname(FILE_VOLUME_QUOTAS, "VOLUME_QUOTAS", Flags, &Flags);
-	win_flagname(FILE_SUPPORTS_SPARSE_FILES, "SPARSE_FILES", Flags, &Flags);
-	win_flagname(FILE_SUPPORTS_REPARSE_POINTS, "REPARSE_POINTS", Flags, &Flags);
-	win_flagname(FILE_SUPPORTS_REMOTE_STORAGE, "REMOTE_STORAGE", Flags, &Flags);
-	win_flagname(FS_LFN_APIS, "FS_LFN_APIS", Flags, &Flags);
-	win_flagname(FILE_VOLUME_IS_COMPRESSED, "VOLUME_IS_COMPRESSED", Flags, &Flags);
-	win_flagname(FILE_SUPPORTS_OBJECT_IDS, "OBJECT_IDS", Flags, &Flags);
-	win_flagname(FILE_SUPPORTS_ENCRYPTION, "ENCRYPTION", Flags, &Flags);
-	win_flagname(FILE_NAMED_STREAMS, "NAMED_STREAMS", Flags, &Flags);
-	win_flagname(FILE_READ_ONLY_VOLUME, "READ_ONLY_VOLUME", Flags, &Flags);
-	win_flagname(FILE_SEQUENTIAL_WRITE_ONCE, "SEQUENTIAL_WRITE_ONCE", Flags, &Flags);
-	win_flagname(FILE_SUPPORTS_TRANSACTIONS, "TRANSACTIONS", Flags, &Flags);
-	win_flagname(FILE_SUPPORTS_HARD_LINKS, "HARD_LINKS", Flags, &Flags);
-	win_flagname(FILE_SUPPORTS_EXTENDED_ATTRIBUTES, "EXTENDED_ATTRIBUTES", Flags, &Flags);
-	win_flagname(FILE_SUPPORTS_OPEN_BY_FILE_ID, "OPEN_BY_FILE_ID", Flags, &Flags);
-	win_flagname(FILE_SUPPORTS_USN_JOURNAL, "USN_JOURNAL", Flags, &Flags);
-	msvc_printf(" remain(0x%x)\n", Flags);
+	LPSTR psz = Buffer;
+
+	psz += msvc_sprintf(psz, "+ Attribs([0x%x]", Attribs);
+	if (Attribs != -1){
+		psz = VfsFlagName(psz, FILE_FLAG_BACKUP_SEMANTICS, "BACKUP_SEMANTICS", Attribs, &Attribs);
+		psz = VfsFlagName(psz, FILE_FLAG_OVERLAPPED, "OVERLAPPED", Attribs, &Attribs);
+		psz = VfsFlagName(psz, FILE_ATTRIBUTE_READONLY, "READONLY", Attribs, &Attribs);
+		psz = VfsFlagName(psz, FILE_ATTRIBUTE_HIDDEN, "HIDDEN", Attribs, &Attribs);
+		psz = VfsFlagName(psz, FILE_ATTRIBUTE_SYSTEM, "SYSTEM", Attribs, &Attribs);
+		psz = VfsFlagName(psz, FILE_ATTRIBUTE_SYMLINK, "SYMLINK", Attribs, &Attribs);
+		psz = VfsFlagName(psz, FILE_ATTRIBUTE_DIRECTORY, "DIRECTORY", Attribs, &Attribs);
+		psz = VfsFlagName(psz, FILE_ATTRIBUTE_ARCHIVE, "ARCHIVE", Attribs, &Attribs);
+		psz = VfsFlagName(psz, FILE_ATTRIBUTE_DEVICE, "DEVICE", Attribs, &Attribs);
+		psz = VfsFlagName(psz, FILE_ATTRIBUTE_NORMAL, "NORMAL", Attribs, &Attribs);
+		psz = VfsFlagName(psz, FILE_ATTRIBUTE_TEMPORARY, "TEMPORARY", Attribs, &Attribs);
+		psz = VfsFlagName(psz, FILE_ATTRIBUTE_REPARSE_POINT, "REPARSE_POINT", Attribs, &Attribs);
+		psz = VfsFlagName(psz, FILE_ATTRIBUTE_COMPRESSED, "COMPRESSED", Attribs, &Attribs);
+		psz = VfsFlagName(psz, FILE_ATTRIBUTE_OFFLINE, "OFFLINE", Attribs, &Attribs);
+	}
+	psz += msvc_sprintf(psz, "[0x%x])\n", Attribs);
+	return(psz);
 }
-VOID 
-VfsTermFlags(DWORD Mode[2], LPCSTR Label)
+LPSTR 
+VfsVolumeFlags(LPSTR Buffer, DWORD Flags, LPCSTR Label)
 {
+	LPSTR psz = Buffer;
+
+	psz += msvc_sprintf(psz, "%s(0x%x): ", Label, Flags);
+	psz = VfsFlagName(psz, FILE_CASE_SENSITIVE_SEARCH, "CASE_SENSITIVE_SEARCH", Flags, &Flags);
+	psz = VfsFlagName(psz, FILE_CASE_PRESERVED_NAMES, "CASE_PRESERVED_NAMES", Flags, &Flags);
+	psz = VfsFlagName(psz, FILE_UNICODE_ON_DISK, "UNICODE_ON_DISK", Flags, &Flags);
+	psz = VfsFlagName(psz, FILE_PERSISTENT_ACLS, "PERSISTENT_ACLS", Flags, &Flags);
+	psz = VfsFlagName(psz, FILE_FILE_COMPRESSION, "FILE_COMPRESSION", Flags, &Flags);
+	psz = VfsFlagName(psz, FILE_VOLUME_QUOTAS, "VOLUME_QUOTAS", Flags, &Flags);
+	psz = VfsFlagName(psz, FILE_SUPPORTS_SPARSE_FILES, "SPARSE_FILES", Flags, &Flags);
+	psz = VfsFlagName(psz, FILE_SUPPORTS_REPARSE_POINTS, "REPARSE_POINTS", Flags, &Flags);
+	psz = VfsFlagName(psz, FILE_SUPPORTS_REMOTE_STORAGE, "REMOTE_STORAGE", Flags, &Flags);
+	psz = VfsFlagName(psz, FS_LFN_APIS, "FS_LFN_APIS", Flags, &Flags);
+	psz = VfsFlagName(psz, FILE_VOLUME_IS_COMPRESSED, "VOLUME_IS_COMPRESSED", Flags, &Flags);
+	psz = VfsFlagName(psz, FILE_SUPPORTS_OBJECT_IDS, "OBJECT_IDS", Flags, &Flags);
+	psz = VfsFlagName(psz, FILE_SUPPORTS_ENCRYPTION, "ENCRYPTION", Flags, &Flags);
+	psz = VfsFlagName(psz, FILE_NAMED_STREAMS, "NAMED_STREAMS", Flags, &Flags);
+	psz = VfsFlagName(psz, FILE_READ_ONLY_VOLUME, "READ_ONLY_VOLUME", Flags, &Flags);
+	psz = VfsFlagName(psz, FILE_SEQUENTIAL_WRITE_ONCE, "SEQUENTIAL_WRITE_ONCE", Flags, &Flags);
+	psz = VfsFlagName(psz, FILE_SUPPORTS_TRANSACTIONS, "TRANSACTIONS", Flags, &Flags);
+	psz = VfsFlagName(psz, FILE_SUPPORTS_HARD_LINKS, "HARD_LINKS", Flags, &Flags);
+	psz = VfsFlagName(psz, FILE_SUPPORTS_EXTENDED_ATTRIBUTES, "EXTENDED_ATTRIBUTES", Flags, &Flags);
+	psz = VfsFlagName(psz, FILE_SUPPORTS_OPEN_BY_FILE_ID, "OPEN_BY_FILE_ID", Flags, &Flags);
+	psz = VfsFlagName(psz, FILE_SUPPORTS_USN_JOURNAL, "USN_JOURNAL", Flags, &Flags);
+	psz += msvc_sprintf(psz, " remain(0x%x)\n", Flags);
+	return(psz);
+}
+LPSTR 
+VfsTermFlags(LPSTR Buffer, WIN_IOMODE *Mode, LPCSTR Label)
+{
+	LPSTR psz = Buffer;
 	DWORD dwRemain;
 
-	dwRemain = Mode[0];
-	msvc_printf("%s(0): 0x%x: ", Label, dwRemain);
-	win_flagname(WIN_INLCR, "WIN_INLCR", dwRemain, &dwRemain);
-	win_flagname(WIN_ICRNL, "WIN_ICRNL", dwRemain, &dwRemain);
-	win_flagname(ENABLE_ECHO_INPUT, "ECHO_INPUT", dwRemain, &dwRemain);
-	win_flagname(ENABLE_INSERT_MODE, "INSERT_MODE", dwRemain, &dwRemain);
-	win_flagname(ENABLE_LINE_INPUT, "LINE_INPUT", dwRemain, &dwRemain);
-	win_flagname(ENABLE_MOUSE_INPUT, "MOUSE_INPUT", dwRemain, &dwRemain);
-	win_flagname(ENABLE_PROCESSED_INPUT, "PROCESSED_INPUT", dwRemain, &dwRemain);
-	win_flagname(ENABLE_QUICK_EDIT_MODE, "QUICK_EDIT_MODE", dwRemain, &dwRemain);
-	win_flagname(ENABLE_WINDOW_INPUT, "WINDOW_INPUT", dwRemain, &dwRemain);
-	win_flagname(ENABLE_VIRTUAL_TERMINAL_INPUT, "VIRTUAL_TERMINAL_INPUT", dwRemain, &dwRemain);
-	win_flagname(ENABLE_EXTENDED_FLAGS, "EXTENDED_FLAGS", dwRemain, &dwRemain);
-	win_flagname(ENABLE_AUTO_POSITION, "AUTO_POSITION", dwRemain, &dwRemain);
-	msvc_printf(" remain(0x%x)\n", dwRemain);
+	dwRemain = Mode->Input;
+	psz += msvc_sprintf(psz, "%s(0): 0x%x: ", Label, dwRemain);
+	psz = VfsFlagName(psz, WIN_INLCR, "WIN_INLCR", dwRemain, &dwRemain);
+	psz = VfsFlagName(psz, WIN_ICRNL, "WIN_ICRNL", dwRemain, &dwRemain);
+	psz = VfsFlagName(psz, ENABLE_ECHO_INPUT, "ECHO_INPUT", dwRemain, &dwRemain);
+	psz = VfsFlagName(psz, ENABLE_INSERT_MODE, "INSERT_MODE", dwRemain, &dwRemain);
+	psz = VfsFlagName(psz, ENABLE_LINE_INPUT, "LINE_INPUT", dwRemain, &dwRemain);
+	psz = VfsFlagName(psz, ENABLE_MOUSE_INPUT, "MOUSE_INPUT", dwRemain, &dwRemain);
+	psz = VfsFlagName(psz, ENABLE_PROCESSED_INPUT, "PROCESSED_INPUT", dwRemain, &dwRemain);
+	psz = VfsFlagName(psz, ENABLE_QUICK_EDIT_MODE, "QUICK_EDIT_MODE", dwRemain, &dwRemain);
+	psz = VfsFlagName(psz, ENABLE_WINDOW_INPUT, "WINDOW_INPUT", dwRemain, &dwRemain);
+	psz = VfsFlagName(psz, ENABLE_VIRTUAL_TERMINAL_INPUT, "VIRTUAL_TERMINAL_INPUT", dwRemain, &dwRemain);
+	psz = VfsFlagName(psz, ENABLE_EXTENDED_FLAGS, "EXTENDED_FLAGS", dwRemain, &dwRemain);
+	psz = VfsFlagName(psz, ENABLE_AUTO_POSITION, "AUTO_POSITION", dwRemain, &dwRemain);
+	psz += msvc_sprintf(psz, " remain(0x%x)\n", dwRemain);
 
-	dwRemain = Mode[1];
-	msvc_printf("%s(1): 0x%x: ", Label, dwRemain);
-	win_flagname(WIN_ONLCR, "WIN_ONLCR", dwRemain, &dwRemain);
-	win_flagname(WIN_OCRNL, "WIN_OCRNL", dwRemain, &dwRemain);
-	win_flagname(WIN_OXTABS, "WIN_OXTABS", dwRemain, &dwRemain);
-	win_flagname(ENABLE_PROCESSED_OUTPUT, "PROCESSED_OUTPUT", dwRemain, &dwRemain);
-	win_flagname(ENABLE_WRAP_AT_EOL_OUTPUT, "WRAP_AT_EOL_OUTPUT", dwRemain, &dwRemain);
-	win_flagname(ENABLE_VIRTUAL_TERMINAL_PROCESSING, "VIRTUAL_TERMINAL_PROCESSING", dwRemain, &dwRemain);
-	win_flagname(DISABLE_NEWLINE_AUTO_RETURN, "DISABLE_NEWLINE_AUTO_RETURN", dwRemain, &dwRemain);
-	win_flagname(ENABLE_LVB_GRID_WORLDWIDE, "LVB_GRID_WORLDWIDE", dwRemain, &dwRemain);
-	msvc_printf(" remain(0x%x)\n", dwRemain);
+	dwRemain = Mode->Output;
+	psz += msvc_sprintf(psz, "%s(1): 0x%x: ", Label, dwRemain);
+	psz = VfsFlagName(psz, WIN_ONLCR, "WIN_ONLCR", dwRemain, &dwRemain);
+	psz = VfsFlagName(psz, WIN_OCRNL, "WIN_OCRNL", dwRemain, &dwRemain);
+	psz = VfsFlagName(psz, WIN_OXTABS, "WIN_OXTABS", dwRemain, &dwRemain);
+	psz = VfsFlagName(psz, ENABLE_PROCESSED_OUTPUT, "PROCESSED_OUTPUT", dwRemain, &dwRemain);
+	psz = VfsFlagName(psz, ENABLE_WRAP_AT_EOL_OUTPUT, "WRAP_AT_EOL_OUTPUT", dwRemain, &dwRemain);
+	psz = VfsFlagName(psz, ENABLE_VIRTUAL_TERMINAL_PROCESSING, "VIRTUAL_TERMINAL_PROCESSING", dwRemain, &dwRemain);
+	psz = VfsFlagName(psz, DISABLE_NEWLINE_AUTO_RETURN, "DISABLE_NEWLINE_AUTO_RETURN", dwRemain, &dwRemain);
+	psz = VfsFlagName(psz, ENABLE_LVB_GRID_WORLDWIDE, "LVB_GRID_WORLDWIDE", dwRemain, &dwRemain);
+	psz += msvc_sprintf(psz, " remain(0x%x)\n", dwRemain);
+	return(psz);
 }
-VOID 
-VfsNetFlags(LONG NetworkEvents, LPCSTR Label)
+LPSTR 
+VfsNetFlags(LPSTR Buffer, LONG NetworkEvents, LPCSTR Label)
 {
+	LPSTR psz = Buffer;
 	DWORD dwRemain = NetworkEvents;
 
-	msvc_printf("%s(0x%x): ", Label, NetworkEvents);
-	win_flagname(FD_READ, "READ", dwRemain, &dwRemain);
-	win_flagname(FD_WRITE, "WRITE", dwRemain, &dwRemain);
-	win_flagname(FD_OOB, "OOB", dwRemain, &dwRemain);
-	win_flagname(FD_ACCEPT, "ACCEPT", dwRemain, &dwRemain);
-	win_flagname(FD_CONNECT, "CONNECT", dwRemain, &dwRemain);
-	win_flagname(FD_CLOSE, "CLOSE", dwRemain, &dwRemain);
-	win_flagname(FD_QOS_BIT, "QOS_BIT", dwRemain, &dwRemain);
-	win_flagname(FD_GROUP_QOS, "GROUP_QOS", dwRemain, &dwRemain);
-	win_flagname(FD_ROUTING_INTERFACE_CHANGE, "ROUTING_INTERFACE_CHANGE", dwRemain, &dwRemain);
-	win_flagname(FD_ADDRESS_LIST_CHANGE, "ADDRESS_LIST_CHANGE", dwRemain, &dwRemain);
-	msvc_printf(" remain(0x%x)\n", dwRemain);
+	psz += msvc_sprintf(psz, "%s(0x%x): ", Label, NetworkEvents);
+	psz = VfsFlagName(psz, FD_READ, "READ", dwRemain, &dwRemain);
+	psz = VfsFlagName(psz, FD_WRITE, "WRITE", dwRemain, &dwRemain);
+	psz = VfsFlagName(psz, FD_OOB, "OOB", dwRemain, &dwRemain);
+	psz = VfsFlagName(psz, FD_ACCEPT, "ACCEPT", dwRemain, &dwRemain);
+	psz = VfsFlagName(psz, FD_CONNECT, "CONNECT", dwRemain, &dwRemain);
+	psz = VfsFlagName(psz, FD_CLOSE, "CLOSE", dwRemain, &dwRemain);
+	psz = VfsFlagName(psz, FD_QOS_BIT, "QOS_BIT", dwRemain, &dwRemain);
+	psz = VfsFlagName(psz, FD_GROUP_QOS, "GROUP_QOS", dwRemain, &dwRemain);
+	psz = VfsFlagName(psz, FD_ROUTING_INTERFACE_CHANGE, "ROUTING_INTERFACE_CHANGE", dwRemain, &dwRemain);
+	psz = VfsFlagName(psz, FD_ADDRESS_LIST_CHANGE, "ADDRESS_LIST_CHANGE", dwRemain, &dwRemain);
+	psz += msvc_sprintf(psz, " remain(0x%x)\n", dwRemain);
+	return(psz);
 }
 BOOL 
 TestAccess(ACCESS_MASK Mask, ACCESS_MASK Access, ACCESS_MASK *Remain)
@@ -205,9 +229,10 @@ TestAccess(ACCESS_MASK Mask, ACCESS_MASK Access, ACCESS_MASK *Remain)
 	}
 	return(bResult);
 }
-VOID 
-VfsGenericFlags(ACCESS_MASK Access, DWORD Type, LPCSTR Label)
+LPSTR 
+VfsGenericFlags(LPSTR Buffer, ACCESS_MASK Access, DWORD Type, LPCSTR Label)
 {
+	LPSTR psz = Buffer;
 	char mask[4] = "---";
 	ACCESS_MASK dwGeneric = Access & 0xF0000000;
 
@@ -220,48 +245,54 @@ VfsGenericFlags(ACCESS_MASK Access, DWORD Type, LPCSTR Label)
 			if (Access & GENERIC_EXECUTE) mask[2] = 'x';	// 0x20000000
 		}
 		if (Type == OB_TYPE_FILE){
-			msvc_printf("%s(0x%08lx): file(%s)\n", Label, dwGeneric, mask);
+			psz += msvc_sprintf(psz, "%s(0x%08lx): file(%s)\n", Label, dwGeneric, mask);
 		}else{
-			msvc_printf("%s(0x%08lx): process(%s)\n", Label, dwGeneric, mask);
+			psz += msvc_sprintf(psz, "%s(0x%08lx): process(%s)\n", Label, dwGeneric, mask);
 		}
 	}
+	return(psz);
 }
-VOID 
-VfsReservedFlags(ACCESS_MASK Access, DWORD Type, LPCSTR Label)
+LPSTR 
+VfsReservedFlags(LPSTR Buffer, ACCESS_MASK Access, DWORD Type, LPCSTR Label)
 {
+	LPSTR psz = Buffer;
 	ACCESS_MASK dwRemain = Access & 0x0F000000;
 
 	if (dwRemain){
-		msvc_printf("%s(0x%08lx):", Label, dwRemain);
-		win_flagname(ACCESS_SYSTEM_SECURITY, "SYSTEM_SECURITY", dwRemain, &dwRemain);
-		msvc_printf(" remain(0x%x)\n", dwRemain);
+		psz += msvc_sprintf(psz, "%s(0x%08lx):", Label, dwRemain);
+		psz = VfsFlagName(psz, ACCESS_SYSTEM_SECURITY, "SYSTEM_SECURITY", dwRemain, &dwRemain);
+		psz += msvc_sprintf(psz, " remain(0x%x)\n", dwRemain);
 	}
+	return(psz);
 }
-VOID 
-VfsStandardFlags(ACCESS_MASK Access, DWORD Type, LPCSTR Label)
+LPSTR 
+VfsStandardFlags(LPSTR Buffer, ACCESS_MASK Access, DWORD Type, LPCSTR Label)
 {
+	LPSTR psz = Buffer;
 	ACCESS_MASK dwRemain = Access & 0x00FF0000;
 
 	if (dwRemain){
-		msvc_printf("%s(0x%08lx): ", Label, dwRemain);
-		win_flagname(DELETE, "DELETE", dwRemain, &dwRemain);
-		win_flagname(READ_CONTROL, "READ_CONTROL", dwRemain, &dwRemain);
-		win_flagname(WRITE_DAC, "WRITE_DAC", dwRemain, &dwRemain);
-		win_flagname(WRITE_OWNER, "WRITE_OWNER", dwRemain, &dwRemain);
-		win_flagname(SYNCHRONIZE, "SYNCHRONIZE", dwRemain, &dwRemain);
-		msvc_printf(" remain(0x%x)\n", dwRemain);
+		psz += msvc_sprintf(psz, "%s(0x%08lx): ", Label, dwRemain);
+		psz = VfsFlagName(psz, DELETE, "DELETE", dwRemain, &dwRemain);
+		psz = VfsFlagName(psz, READ_CONTROL, "READ_CONTROL", dwRemain, &dwRemain);
+		psz = VfsFlagName(psz, WRITE_DAC, "WRITE_DAC", dwRemain, &dwRemain);
+		psz = VfsFlagName(psz, WRITE_OWNER, "WRITE_OWNER", dwRemain, &dwRemain);
+		psz = VfsFlagName(psz, SYNCHRONIZE, "SYNCHRONIZE", dwRemain, &dwRemain);
+		psz += msvc_sprintf(psz, " remain(0x%x)\n", dwRemain);
 	}
+	return(psz);
 }
-VOID 
-VfsSpecificFlags(ACCESS_MASK Perms, DWORD Type, LPCSTR Label)
+LPSTR 
+VfsSpecificFlags(LPSTR Buffer, ACCESS_MASK Perms, DWORD Type, LPCSTR Label)
 {
-	/* /c/MinGW/include/winnt.h */
-
+	LPSTR psz = Buffer;
 	char mask[4];
 	ACCESS_MASK dwRemain = Perms & 0x0000FFFF;
 
+	/* /c/MinGW/include/winnt.h */
+
 	if (dwRemain){
-		msvc_printf("%s(0x%08lx): ", Label, dwRemain);
+		psz += msvc_sprintf(psz, "%s(0x%08lx): ", Label, dwRemain);
 		if (Type == OB_TYPE_FILE){
 			strcpy(mask, "---");
 			// 0x0001
@@ -273,10 +304,10 @@ VfsSpecificFlags(ACCESS_MASK Perms, DWORD Type, LPCSTR Label)
 			// 0x0020
 			if (TestAccess(Perms, FILE_EXECUTE, &dwRemain))
 				mask[2] = 'x';
-			msvc_printf("file(%s) ", mask);
+			psz += msvc_sprintf(psz, "file(%s) ", mask);
 		}else{
-			win_flagname(PROCESS_TERMINATE, "TERMINATE", dwRemain, &dwRemain);
-			win_flagname(PROCESS_CREATE_THREAD, "CREATE_THREAD", dwRemain, &dwRemain);
+			psz = VfsFlagName(psz, PROCESS_TERMINATE, "TERMINATE", dwRemain, &dwRemain);
+			psz = VfsFlagName(psz, PROCESS_CREATE_THREAD, "CREATE_THREAD", dwRemain, &dwRemain);
 		}
 		if (Type == OB_TYPE_FILE){
 			strcpy(mask, "---");
@@ -286,10 +317,10 @@ VfsSpecificFlags(ACCESS_MASK Perms, DWORD Type, LPCSTR Label)
 			// 0x0100
 			if (TestAccess(Perms, FILE_WRITE_ATTRIBUTES, &dwRemain))
 				mask[1] = 'w';
-			msvc_printf("attr(%s) ", mask);
+			psz += msvc_sprintf(psz, "attr(%s) ", mask);
 		}else{
-			win_flagname(PROCESS_CREATE_PROCESS, "CREATE_PROCESS", dwRemain, &dwRemain);
-			win_flagname(PROCESS_SET_QUOTA, "SET_QUOTA", dwRemain, &dwRemain);
+			psz = VfsFlagName(psz, PROCESS_CREATE_PROCESS, "CREATE_PROCESS", dwRemain, &dwRemain);
+			psz = VfsFlagName(psz, PROCESS_SET_QUOTA, "SET_QUOTA", dwRemain, &dwRemain);
 		}
 		strcpy(mask, "---");
 		if (Type == OB_TYPE_FILE){
@@ -299,7 +330,7 @@ VfsSpecificFlags(ACCESS_MASK Perms, DWORD Type, LPCSTR Label)
 			// 0x0010
 			if (TestAccess(Perms, FILE_WRITE_EA, &dwRemain))
 				mask[1] = 'w';
-			msvc_printf("xattr(%s) ", mask);
+			psz += msvc_sprintf(psz, "xattr(%s) ", mask);
 		}else{
 			// 0x0008
 			if (TestAccess(Perms, PROCESS_VM_OPERATION, &dwRemain))
@@ -310,7 +341,7 @@ VfsSpecificFlags(ACCESS_MASK Perms, DWORD Type, LPCSTR Label)
 			// 0x0020
 			if (TestAccess(Perms, PROCESS_VM_WRITE, &dwRemain))
 				mask[1] = 'w';
-			msvc_printf(" vm(%s)", mask);
+			psz += msvc_sprintf(psz, " vm(%s)", mask);
 		}
 		if (Type != OB_TYPE_FILE){
 			strcpy(mask, "---");
@@ -323,73 +354,52 @@ VfsSpecificFlags(ACCESS_MASK Perms, DWORD Type, LPCSTR Label)
 			// 0x0800
 			if (TestAccess(Perms, PROCESS_SUSPEND_RESUME, &dwRemain))
 				mask[2] = 'x';
-			msvc_printf(" process(%s) ", mask);
+			psz += msvc_sprintf(psz, " process(%s) ", mask);
 		}
 		if (Type == OB_TYPE_FILE){
 			/* 0x0004 */
-			win_flagname(FILE_APPEND_DATA, "APPEND_DATA", dwRemain, &dwRemain);
+			psz = VfsFlagName(psz, FILE_APPEND_DATA, "APPEND_DATA", dwRemain, &dwRemain);
 			/* 0x0040 */
-			win_flagname(FILE_DELETE_CHILD, "DELETE_CHILD", dwRemain, &dwRemain);
+			psz = VfsFlagName(psz, FILE_DELETE_CHILD, "DELETE_CHILD", dwRemain, &dwRemain);
 		}else{
 			/* 0x0004 */
-			win_flagname(TOKEN_IMPERSONATE, "IMPERSONATE", dwRemain, &dwRemain);
+			psz = VfsFlagName(psz, TOKEN_IMPERSONATE, "IMPERSONATE", dwRemain, &dwRemain);
 			/* 0x0040 */
-			win_flagname(PROCESS_DUP_HANDLE, "DUP_HANDLE", dwRemain, &dwRemain);
+			psz = VfsFlagName(psz, PROCESS_DUP_HANDLE, "DUP_HANDLE", dwRemain, &dwRemain);
 		}
-		win_flagname(PROCESS_QUERY_LIMITED_INFORMATION, "QUERY_LIMITED", dwRemain, &dwRemain);
-		msvc_printf(" remain(0x%x)\n", dwRemain);
+		psz = VfsFlagName(psz, PROCESS_QUERY_LIMITED_INFORMATION, "QUERY_LIMITED", dwRemain, &dwRemain);
+		psz += msvc_sprintf(psz, " remain(0x%x)\n", dwRemain);
 	}
+	return(psz);
 }
-VOID 
-VfsAccessFlags(ACCESS_MASK Access, DWORD Type)
+LPSTR 
+VfsFileAccess(LPSTR Buffer, ACCESS_MASK Access, DWORD Type)
 {
-	VfsGenericFlags(Access, Type, "+ generic");
-	VfsReservedFlags(Access, Type, "+ reserved");
-	VfsStandardFlags(Access, Type, "+ standard");
-	VfsSpecificFlags(Access, Type, "+ specific");
+	LPSTR psz = Buffer;
+
+	psz = VfsGenericFlags(psz, Access, Type, "+ generic");
+	psz = VfsReservedFlags(psz, Access, Type, "+ reserved");
+	psz = VfsStandardFlags(psz, Access, Type, "+ standard");
+	psz = VfsSpecificFlags(psz, Access, Type, "+ specific");
+	return(psz);
 }
-VOID 
-VfsPathFlags(DWORD Flags, LPCSTR Label)
+LPSTR 
+VfsPathFlags(LPSTR Buffer, DWORD Flags, LPCSTR Label)
 {
-	msvc_printf("%s(0x%x): ", Label, Flags);
-	win_flagname(WIN_FOLLOW, "FOLLOW", Flags, &Flags);
-	win_flagname(WIN_NOCROSSMOUNT, "NOCROSSMOUNT", Flags, &Flags);
-	win_flagname(WIN_ISSYMLINK, "ISSYMLINK", Flags, &Flags);
-	win_flagname(WIN_REQUIREDIR, "REQUIREDIR", Flags, &Flags);
-	win_flagname(WIN_PATHCOPY, "PATHCOPY", Flags, &Flags);
-	msvc_printf(" remain(0x%x)\n", Flags);
+	LPSTR psz = Buffer;
+
+	psz += msvc_sprintf(psz, "%s(0x%x): ", Label, Flags);
+	psz = VfsFlagName(psz, WIN_FOLLOW, "FOLLOW", Flags, &Flags);
+	psz = VfsFlagName(psz, WIN_NOCROSSMOUNT, "NOCROSSMOUNT", Flags, &Flags);
+	psz = VfsFlagName(psz, WIN_ISSYMLINK, "ISSYMLINK", Flags, &Flags);
+	psz = VfsFlagName(psz, WIN_REQUIREDIR, "REQUIREDIR", Flags, &Flags);
+	psz = VfsFlagName(psz, WIN_PATHCOPY, "PATHCOPY", Flags, &Flags);
+	psz += msvc_sprintf(psz, " remain(0x%x)\n", Flags);
+	return(psz);
 }
 
 /****************************************************/
 
-VOID 
-VfsDebugPath(WIN_NAMEIDATA *Path, LPCSTR Label)
-{
-	msvc_printf("%s(%ls): MountId(%d) Type(%s:%s)\n", 
-		Label, Path->Resolved, Path->MountId, FSType(Path->FSType), _FType[Path->FileType]);
-	VfsPathFlags(Path->Flags, "+ Flags");
-	VfsFileAttribs(Path->Attribs, L"+ Attribs");
-	msvc_printf("+ Base: %ls\n", Path->Base);
-	msvc_printf("+ S: %ls\n", Path->S);
-}
-VOID 
-VfsDebugNode(WIN_VNODE *Node, LPCSTR Label)
-{
-	msvc_printf("%s(%d): Type(%s:%s) Handle(%d) Access(0x%x) CloEx(%d) DevType(0x%x) DevId(0x%x)\n", 
-		Label, Node->FileId, FSType(Node->FSType), FType(Node->FileType), Node->Handle, Node->Access, Node->CloseExec, Node->DeviceType, Node->DeviceId);
-	VfsFileFlags(Node->Flags, L"+ Flags");
-	VfsFileAttribs(Node->Attribs, L"+ Attribs");
-	VfsAccessFlags(Node->Access, OB_TYPE_FILE);
-}
-VOID 
-VfsDebugDevice(WIN_DEVICE *Device, LPCSTR Label)
-{
-	msvc_printf("%s(%s): Flags(0x%x) Handle(%d) Index(%d) Type(%s:%s) I/O([%d][%d]) DevType(0x%x) DevId(0x%x)\n", 
-		Label, Device->Name, Device->Flags, Device->Handle, Device->Index, FSType(Device->FSType), _FType[Device->FileType], Device->Input, Device->Output, Device->DeviceType, Device->DeviceId);
-	msvc_printf("+ ClassId: %ls\n", Device->ClassId);
-	msvc_printf("+ NtName: %ls\n", Device->NtName);
-	msvc_printf("+ NtPath: %ls\n", Device->NtPath);
-}
 VOID 
 VfsDebugTask(WIN_TASK *Task, LPCSTR Label)
 {
@@ -400,7 +410,7 @@ VOID
 VfsDebugStat(WIN_VATTR *Stat, LPCSTR Label)
 {
 	msvc_printf("%s(%d): Device(0x%x) Attribs(0x%x) Special(0x%x) Links(%d) Size(%d) Type(%s)\n", 
-		Label, Stat->VolumeSerialNumber, Stat->DeviceId, Stat->Attributes, Stat->SpecialId, Stat->NumberOfLinks, Stat->FileSizeLow, _FType[Stat->Mode.FileType]);
+		Label, Stat->VolumeSerialNumber, Stat->DeviceId, Stat->Attributes, Stat->SpecialId, Stat->NumberOfLinks, Stat->FileSizeLow, __FType[Stat->Mode.FileType]);
 }
 VOID 
 VfsDebugMount(WIN_MOUNT *Mount, LPCSTR Label)
@@ -414,15 +424,7 @@ VOID
 VfsDebugPoll(WIN_VNODE *Node, WIN_POLLFD *Info, LPCSTR Label)
 {
 	msvc_printf("%s(%d): Type(%s:%s) Handle(%d) Device(0x%x) Events(0x%x) Result(0x%x) Access(0x%x)\n", 
-		Label, Node->FileId, FSType(Node->FSType), _FType[Node->FileType], Node->Handle, Node->DeviceType, Info->Events, Info->Result, Node->Access);
-}
-VOID 
-VfsDebugTTY(WIN_TERMIO *Terminal, LPCSTR Label)
-{
-	msvc_printf("%s(%d): Device(0x%x) Group(%d) Session(%d) Row(%d) Col(%d)\n", 
-		Label, Terminal->TerminalId, Terminal->DeviceId, Terminal->GroupId, Terminal->SessionId, Terminal->WinSize.Row, Terminal->WinSize.Column);
-	VfsTermFlags(Terminal->Mode, "+ mode");
-	VfsDebugDevice(DEVICE(Terminal->DeviceId), "+ device");
+		Label, Node->FileId, FSType(Node->FSType), __FType[Node->FileType], Node->Handle, Node->DeviceType, Info->Events, Info->Result, Node->Access);
 }
 VOID 
 VfsDebugDrive(WIN_STATFS *Info, LPCSTR Label)
@@ -474,70 +476,50 @@ VfsDebugThread(WIN_THREAD_STRUCT *Thread, LPSTR Label)
 
 /****************************************************/
 
-LPSTR 
-vfs_flagname(LPSTR Buffer, DWORD Flag, LPCSTR Name, DWORD Mask, DWORD *Remain)
-{
-	if (Mask & Flag){
-		*Remain &= ~Flag;
-		Buffer += msvc_sprintf(Buffer, "[%s]", Name);
-	}
-	return(Buffer);
-}
-LPSTR 
-vfs_ktrace_FLAGS(LPSTR Buffer, DWORD Flags)
-{
-	LPSTR psz = Buffer;
-
-	psz += msvc_sprintf(psz, "+ Flags([0x%x]", Flags);
-	psz = vfs_flagname(psz, HANDLE_FLAG_INHERIT, "INHERIT", Flags, &Flags);
-	psz = vfs_flagname(psz, HANDLE_FLAG_PROTECT_FROM_CLOSE, "PROTECT_FROM_CLOSE", Flags, &Flags);
-	psz += msvc_sprintf(psz, "[0x%x])\n", Flags);
-	return(psz);
-}
-LPSTR 
-vfs_ktrace_ATTRIBS(LPSTR Buffer, DWORD Attribs)
-{
-	LPSTR psz = Buffer;
-
-	psz += msvc_sprintf(psz, "+ Attribs([0x%x]", Attribs);
-	if (Attribs != -1){
-		psz = vfs_flagname(psz, FILE_FLAG_BACKUP_SEMANTICS, "BACKUP_SEMANTICS", Attribs, &Attribs);
-		psz = vfs_flagname(psz, FILE_FLAG_OVERLAPPED, "OVERLAPPED", Attribs, &Attribs);
-		psz = vfs_flagname(psz, FILE_ATTRIBUTE_READONLY, "READONLY", Attribs, &Attribs);
-		psz = vfs_flagname(psz, FILE_ATTRIBUTE_HIDDEN, "HIDDEN", Attribs, &Attribs);
-		psz = vfs_flagname(psz, FILE_ATTRIBUTE_SYSTEM, "SYSTEM", Attribs, &Attribs);
-		psz = vfs_flagname(psz, FILE_ATTRIBUTE_SYMLINK, "SYMLINK", Attribs, &Attribs);
-		psz = vfs_flagname(psz, FILE_ATTRIBUTE_DIRECTORY, "DIRECTORY", Attribs, &Attribs);
-		psz = vfs_flagname(psz, FILE_ATTRIBUTE_ARCHIVE, "ARCHIVE", Attribs, &Attribs);
-		psz = vfs_flagname(psz, FILE_ATTRIBUTE_DEVICE, "DEVICE", Attribs, &Attribs);
-		psz = vfs_flagname(psz, FILE_ATTRIBUTE_NORMAL, "NORMAL", Attribs, &Attribs);
-		psz = vfs_flagname(psz, FILE_ATTRIBUTE_TEMPORARY, "TEMPORARY", Attribs, &Attribs);
-		psz = vfs_flagname(psz, FILE_ATTRIBUTE_REPARSE_POINT, "REPARSE_POINT", Attribs, &Attribs);
-		psz = vfs_flagname(psz, FILE_ATTRIBUTE_COMPRESSED, "COMPRESSED", Attribs, &Attribs);
-		psz = vfs_flagname(psz, FILE_ATTRIBUTE_OFFLINE, "OFFLINE", Attribs, &Attribs);
-	}
-	psz += msvc_sprintf(psz, "[0x%x])\n", Attribs);
-	return(psz);
-}
 DWORD 
-vfs_ktrace_VNODE(WIN_VNODE *Node, LPSTR Buffer)
+vfs_VNODE(WIN_VNODE *Node, LPSTR Buffer)
 {
 	LPSTR psz = Buffer;
 
 	psz += msvc_sprintf(psz, "FileId(%d) Type(%s:%s) Handle(%d) Access(0x%x) CloEx(%d) DevType(0x%x) DevId(0x%x)\n", 
-		Node->FileId, _FSType[Node->FSType], FType(Node->FileType), Node->Handle, Node->Access, Node->CloseExec, Node->DeviceType, Node->DeviceId);
-	psz = vfs_ktrace_ATTRIBS(psz, Node->Attribs);
-	psz = vfs_ktrace_FLAGS(psz, Node->Flags);
+		Node->FileId, __FSType[Node->FSType], FType(Node->FileType), Node->Handle, Node->Access, Node->CloseExec, Node->DeviceType, Node->DeviceId);
+	psz = VfsFileAttribs(psz, Node->Attribs);
+	psz = VfsFileFlags(psz, Node->Flags);
+	psz = VfsFileAccess(psz, Node->Access, OB_TYPE_FILE);
 	return(psz - Buffer);
 }
 DWORD 
-vfs_ktrace_NAMEI(WIN_NAMEIDATA *Path, LPSTR Buffer)
+vfs_NAMEI(WIN_NAMEIDATA *Path, LPSTR Buffer)
 {
 	LPSTR psz = Buffer;
 
 	psz += msvc_sprintf(psz, "Resolved(%ls): MountId(%d) Type(%s:%s)\n", 
-		Path->Resolved, Path->MountId, FSType(Path->FSType), _FType[Path->FileType]);
-	psz = vfs_ktrace_ATTRIBS(psz, Path->Attribs);
+		Path->Resolved, Path->MountId, FSType(Path->FSType), __FType[Path->FileType]);
+	psz = VfsPathFlags(psz, Path->Flags, "+ Flags");
+	psz = VfsFileAttribs(psz, Path->Attribs);
+	return(psz - Buffer);
+}
+DWORD 
+vfs_DEVICE(WIN_DEVICE *Device, LPSTR Buffer)
+{
+	LPSTR psz = Buffer;
+
+	psz += msvc_sprintf(psz, "Name(%s) Type(%s:%s) Flags(0x%x) Handle(%d) Index(%d) I/O([%d][%d]) DevType(0x%x) DevId(0x%x)\n", 
+		Device->Name, FSType(Device->FSType), __FType[Device->FileType], Device->Flags, Device->Handle, Device->Index, Device->Input, Device->Output, Device->DeviceType, Device->DeviceId);
+	psz += msvc_sprintf(psz, "+ ClassId: %ls\n", Device->ClassId);
+	psz += msvc_sprintf(psz, "+ NtName: %ls\n", Device->NtName);
+	psz += msvc_sprintf(psz, "+ NtPath: %ls\n", Device->NtPath);
+	return(psz - Buffer);
+}
+DWORD 
+vfs_TERMIO(WIN_TTY *Terminal, LPSTR Buffer)
+{
+	LPSTR psz = Buffer;
+
+	psz += msvc_sprintf(psz, "Id(%d) Device(0x%x) Group(%d) Session(%d) Row(%d) Col(%d)\n", 
+		Terminal->TerminalId, Terminal->DeviceId, Terminal->GroupId, Terminal->SessionId, Terminal->WinSize.Row, Terminal->WinSize.Column);
+	psz = VfsTermFlags(psz, &Terminal->Mode, "+ mode");
+//	psz += vfs_ktrace_DEVICE(DEVICE(Terminal->DeviceId), "+ device", psz);
 	return(psz - Buffer);
 }
 
@@ -550,11 +532,17 @@ vfs_ktrace(LPCSTR Label, STRUCT_TYPE Type, PVOID Data)
 
 	switch (Type){
 		case STRUCT_VNODE:
-			vfs_ktrace_VNODE((WIN_VNODE *)Data, szText);
+			vfs_VNODE((WIN_VNODE *)Data, szText);
 			break;
-		case STRUCT_NAMEIDATA:
-			vfs_ktrace_NAMEI((WIN_NAMEIDATA *)Data, szText);
+		case STRUCT_NAMEI:
+			vfs_NAMEI((WIN_NAMEIDATA *)Data, szText);
+			break;
+		case STRUCT_DEVICE:
+			vfs_DEVICE((WIN_DEVICE *)Data, szText);
+			break;
+		case STRUCT_TTY:
+			vfs_TERMIO((WIN_TTY *)Data, szText);
 			break;
 	}
-	msvc_printf("%s: %s\n", Label, szText);
+	msvc_printf("%s: %s", Label, szText);
 }

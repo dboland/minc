@@ -107,9 +107,9 @@ BOOL vfs_F_DUPFD(WIN_VNODE *Node, BOOL CloseExec, WIN_VNODE *Result);
 /* vfs_termios.c */
 
 BOOL vfs_TIOCTL(WIN_VNODE *Node, DWORD Operation, PVOID Param);
-BOOL vfs_TIOCGETA(WIN_VNODE *Node, DWORD Mode[2]);
+BOOL vfs_TIOCGETA(WIN_VNODE *Node, WIN_IOMODE *Mode);
 BOOL vfs_TIOCSCTTY(WIN_DEVICE *Device, WIN_TASK *Task);
-BOOL vfs_PTMGET(WIN_DEVICE *Device, WIN_PTMGET *Result);
+BOOL vfs_PTMGET(WIN_VNODE *Node, WIN_VNODE *Result);
 
 /* vfs_time.c */
 
@@ -215,7 +215,7 @@ DWORD pdo_statvfs(WIN_CFDATA *Config, DWORD Flags, WIN_CFDRIVER *Result);
 BOOL pdo_match(LPCWSTR NtName, DWORD DeviceType, WIN_CFDRIVER *Driver);
 BOOL pdo_DIOCGDINFO(WIN_DEVICE *Device);
 BOOL pdo_WSKBDIO_GTYPE(UINT *Type, UINT *SubType, UINT *FKeys);
-BOOL tty_close(WIN_TERMIO *Terminal);
+BOOL tty_close(WIN_TTY *Terminal);
 BOOL rand_read(LPSTR Buffer, DWORD Size, DWORD *Result);
 
 /* volume.c */

@@ -37,7 +37,7 @@ ScreenCarriageReturn(HANDLE Handle, CONSOLE_SCREEN_BUFFER_INFO *Info)
 {
 	COORD cPos = Info->dwCursorPosition;
 
-	if (__CTTY->Mode[1] & WIN_OCRNL){
+	if (__CTTY->Mode.Output & WIN_OCRNL){
 		cPos.Y++;
 	}else{
 		cPos.X = 0;
@@ -62,7 +62,7 @@ ScreenLineFeed(HANDLE Handle, CONSOLE_SCREEN_BUFFER_INFO *Info)
 	 */
 	if (__CTTY->VEdit){
 		sBottom = Info->srWindow.Bottom;
-	}else if (__CTTY->Mode[1] & WIN_ONLCR){
+	}else if (__CTTY->Mode.Output & WIN_ONLCR){
 		cPos.X = 0;
 	}
 	if (cPos.Y == sBottom){
@@ -82,27 +82,27 @@ ScreenControl(HANDLE Handle, CHAR C)
 	if (!GetConsoleScreenBufferInfo(Handle, &csbInfo)){
 		__PRINTF("[%d]", C)
 	}else switch (C){
-		case 0:	/* Null filler (NUL) */
+		case 0:		/* Null filler (NUL) */
 			break;
-		case 1:	/* Start of header (SOH) */
-			/* raspbian login (telnet.exe) */
+		case 1:		/* Start of header (SOH) */
+				/* raspbian login (telnet.exe) */
 			break;
-		case 2:	/* Start of Text (STX) */
+		case 2:		/* Start of Text (STX) */
 			break;
-		case 3:	/* End of text (ETX) */
+		case 3:		/* End of text (ETX) */
 			msvc_sprintf(__INPUT_BUF, "\006");	/* ACK */
 			break;
-		case 5:	/* Enquiry (ENQ) */
+		case 5:		/* Enquiry (ENQ) */
 			msvc_sprintf(__INPUT_BUF, "\006");	/* ACK */
 			break;
-		case 8:	/* Backspace (BS) */
+		case 8:		/* Backspace (BS) */
 			AnsiCursorBack(Handle, &csbInfo, 1);
 			break;
 		case 10:	/* Linefeed (LF) */
 			ScreenLineFeed(Handle, &csbInfo);
 			break;
 		case 12:	/* Formfeed (FF) */
-			/* ignore form-feed, they are intended for paper output! */
+				/* ignore form-feed, they are intended for paper output! */
 			WriteFile(Handle, "\n", 1, &dwCount, NULL);
 			break;
 		case 13:	/* Carriage return (CR) */
@@ -243,7 +243,7 @@ screen_write(HANDLE Handle, LPCSTR Buffer, DWORD Size, DWORD *Result)
 	DWORD dwCount;
 	BOOL bResult = TRUE;
 	DWORD dwResult = 0;
-	DWORD dwMode = __CTTY->Mode[1];
+	DWORD dwMode = __CTTY->Mode.Output;
 	UINT uiCodePage = GetConsoleOutputCP();
 
 	if (dwMode & ENABLE_VIRTUAL_TERMINAL_PROCESSING){

@@ -35,6 +35,7 @@
 #define INTERFACE_ROOT	L"SYSTEM\\CurrentControlSet\\Control\\DeviceClasses\\"
 #define MOUNT_ROOT	L"SYSTEM\\MountedDevices\\"
 #define CONSOLE_ROOT	L"Console\\"
+#define BIOS_ROOT	L"HARDWARE\DESCRIPTION\System\\"
 
 /****************************************************/
 

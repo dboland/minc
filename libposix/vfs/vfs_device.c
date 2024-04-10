@@ -92,11 +92,14 @@ system_attach(WIN_DEVICE *Device)
 		case DEV_TYPE_IDE:
 			bResult = config_found("ide", FS_TYPE_PDO, WIN_VCHR, Device);
 			break;
-		case DEV_TYPE_OHCI:
-			bResult = config_found("ohci", FS_TYPE_PDO, WIN_VCHR, Device);
+		case DEV_TYPE_PCI:
+			bResult = config_found("pci", FS_TYPE_PDO, WIN_VCHR, Device);
 			break;
 		case DEV_TYPE_ACPI:
 			bResult = config_found("acpi", FS_TYPE_PDO, WIN_VCHR, Device);
+			break;
+		case DEV_TYPE_EHCI:
+			bResult = config_found("ehci", FS_TYPE_PDO, WIN_VCHR, Device);
 			break;
 		default:
 			bResult = FALSE;

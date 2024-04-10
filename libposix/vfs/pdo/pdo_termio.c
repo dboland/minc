@@ -55,7 +55,7 @@ pdo_TIOCGWINSZ(WIN_DEVICE *Device, WIN_WINSIZE *WinSize)
 	return(bResult);
 }
 BOOL 
-pdo_TIOCGETA(WIN_DEVICE *Device, DWORD Mode[2])
+pdo_TIOCGETA(WIN_DEVICE *Device, WIN_IOMODE *Mode)
 {
 	BOOL bResult = FALSE;
 
@@ -65,8 +65,7 @@ pdo_TIOCGETA(WIN_DEVICE *Device, DWORD Mode[2])
 			bResult = con_TIOCGETA(Device, Mode);
 			break;
 		case DEV_TYPE_TTY:
-			Mode[0] = __CTTY->Mode[0];
-			Mode[1] = __CTTY->Mode[1];
+			*Mode = __CTTY->Mode;
 			bResult = TRUE;
 			break;
 		default:
@@ -75,7 +74,7 @@ pdo_TIOCGETA(WIN_DEVICE *Device, DWORD Mode[2])
 	return(bResult);
 }
 BOOL 
-pdo_TIOCSETA(WIN_DEVICE *Device, DWORD Mode[2])
+pdo_TIOCSETA(WIN_DEVICE *Device, WIN_IOMODE *Mode)
 {
 	BOOL bResult = FALSE;
 
@@ -85,8 +84,7 @@ pdo_TIOCSETA(WIN_DEVICE *Device, DWORD Mode[2])
 			bResult = con_TIOCSETA(Device, Mode);
 			break;
 		case DEV_TYPE_TTY:
-			__CTTY->Mode[0] = Mode[0];
-			__CTTY->Mode[1] = Mode[1];
+			__CTTY->Mode = *Mode;
 			bResult = TRUE;
 			break;
 		default:

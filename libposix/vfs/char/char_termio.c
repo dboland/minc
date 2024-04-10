@@ -52,21 +52,21 @@ char_TIOCGWINSZ(WIN_VNODE *Node, WIN_WINSIZE *WinSize)
 	return(bResult);
 }
 BOOL 
-char_TIOCGETA(WIN_VNODE *Node, DWORD Mode[2])
+char_TIOCGETA(WIN_VNODE *Node, WIN_IOMODE *Mode)
 {
 	BOOL bResult = FALSE;
 
-//VfsDebugNode(Node, "char_TIOCGETA");
+//vfs_ktrace("char_TIOCGETA", STRUCT_VNODE, Node);
 	switch (Node->DeviceType){
 		case DEV_TYPE_CONSOLE:
 		case DEV_TYPE_PTY:
 			bResult = con_TIOCGETA(DEVICE(Node->DeviceId), Mode);
 			break;
 		case DEV_TYPE_INPUT:
-			bResult = GetConsoleMode(Node->Handle, &Mode[0]);
+			bResult = GetConsoleMode(Node->Handle, &Mode->Input);
 			break;
 		case DEV_TYPE_SCREEN:
-			bResult = GetConsoleMode(Node->Handle, &Mode[1]);
+			bResult = GetConsoleMode(Node->Handle, &Mode->Output);
 			break;
 		default:
 			SetLastError(ERROR_BAD_DEVICE);
@@ -75,7 +75,7 @@ char_TIOCGETA(WIN_VNODE *Node, DWORD Mode[2])
 	return(bResult);
 }
 BOOL 
-char_TIOCSETA(WIN_VNODE *Node, DWORD Mode[2])
+char_TIOCSETA(WIN_VNODE *Node, WIN_IOMODE *Mode)
 {
 	BOOL bResult = FALSE;
 
@@ -86,10 +86,10 @@ char_TIOCSETA(WIN_VNODE *Node, DWORD Mode[2])
 			bResult = con_TIOCSETA(DEVICE(Node->DeviceId), Mode);
 			break;
 		case DEV_TYPE_INPUT:
-			bResult = SetConsoleMode(Node->Handle, Mode[0] & 0xFFFF);
+			bResult = SetConsoleMode(Node->Handle, Mode->Input & 0xFFFF);
 			break;
 		case DEV_TYPE_SCREEN:
-			bResult = SetConsoleMode(Node->Handle, Mode[1] & 0xFFFF);
+			bResult = SetConsoleMode(Node->Handle, Mode->Output & 0xFFFF);
 			break;
 		default:
 			SetLastError(ERROR_BAD_DEVICE);

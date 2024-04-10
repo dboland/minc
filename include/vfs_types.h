@@ -92,11 +92,10 @@ typedef enum _WIN_VTAGTYPE {
  */
 
 typedef struct _WIN_DEVICE {
-	DWORD Magic;
 	WIN_VTYPE FileType;
 	DWORD DeviceType;
 	DWORD DeviceId;
-	WIN_FS_TYPE FSType;		/* file system Handles are in */
+	WIN_FS_TYPE FSType;		/* file system Handles are from */
 	CHAR Name[MAX_NAME];
 	HANDLE Handle;
 	HANDLE Input;
@@ -237,6 +236,7 @@ typedef struct _WIN_NAMEIDATA {
 /* sys/termios.h */
 
 #define WIN_ISIG		0x00800000
+//#define WIN_ICANON		0x01000000
 
 /* line In */
 
@@ -488,13 +488,19 @@ typedef struct _WIN_WINSIZE {
 	USHORT YPixel;
 } WIN_WINSIZE;
 
-typedef struct _WIN_TERMIO {
+typedef struct _WIN_IOMODE {
+//	DWORD Line;
+	DWORD Input;
+	DWORD Output;
+} WIN_IOMODE;
+
+typedef struct _WIN_TTY {
 	DWORD TerminalId;
 	DWORD DeviceId;
 	DWORD GroupId;
 	DWORD SessionId;
 	WIN_WINSIZE WinSize;
-	DWORD Mode[2];
+	WIN_IOMODE Mode;
 	BOOL RVideo;
 	DWORD ScrollRate;
 	BOOL NoWait;
@@ -502,12 +508,12 @@ typedef struct _WIN_TERMIO {
 	BOOL VEdit;
 	COORD Cursor;
 	DWORD Flags;
-} WIN_TERMIO;
+} WIN_TTY;
 
-typedef struct _WIN_PTMGET {
-	WIN_VNODE Master;
-	WIN_VNODE Slave;
-} WIN_PTMGET;
+//typedef struct _WIN_PTMGET {
+//	WIN_VNODE Master;
+//	WIN_VNODE Slave;
+//} WIN_PTMGET;
 
 /*
  * vfs_ktrace.c
@@ -523,7 +529,7 @@ typedef struct _WIN_PTMGET {
 typedef struct _WIN_SESSION {
 	WIN_TASK Tasks[WIN_CHILD_MAX];
 	WIN_DEV_CLASS Devices[DEV_CLASS_MAX];
-	WIN_TERMIO Terminals[WIN_TTY_MAX];
+	WIN_TTY Terminals[WIN_TTY_MAX];
 	WIN_PSTRING Strings[WIN_CHILD_MAX];
 	WIN_MOUNT Mounts[WIN_MOUNT_MAX];
 	WIN_GLOBALS Globals[1];

@@ -247,17 +247,6 @@ ktrace_CLEAR(WIN_TASK *Task)
 	}
 	return(result);
 }
-void 
-ktrace_WIN(WIN_TASK *Task, STRUCT_TYPE Type, PVOID Data)
-{
-	CHAR szText[MAX_TEXT];
-
-	switch (Type){
-	case STRUCT_NAMEIDATA:
-		ktrace_USER(Task, "NAMEIDATA", szText, vfs_ktrace_NAMEI(Data, szText));
-		break;
-	}
-}
 
 /****************************************************/
 

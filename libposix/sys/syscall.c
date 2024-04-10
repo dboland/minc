@@ -493,14 +493,14 @@ syscall_enter(call_t call)
 	void *result = ent->sy_call;
 	WIN_TASK *pwTask = &__Tasks[CURRENT];
 
+	if (pwTask->TracePoints & KTRFAC_SYSCALL){
+		ktrace_SYSCALL(pwTask, code, ent->sy_argsize, &call.Base + 1);
+	}
 	if (pwTask->Timer){
 		WaitForSingleObjectEx(__Interrupt, 0, TRUE);
 	}
 	if (proc_poll()){
 		result = sys_interrupt;
-	}
-	if (pwTask->TracePoints & KTRFAC_SYSCALL){
-		ktrace_SYSCALL(pwTask, code, ent->sy_argsize, &call.Base + 1);
 	}
 	pwTask->Code = code;
 	call.Task = pwTask;

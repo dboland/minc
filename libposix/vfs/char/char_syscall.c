@@ -46,12 +46,12 @@
 /****************************************************/
 
 HANDLE 
-CharOpenFile(LPCSTR Name, WIN_FLAGS *Flags, PSECURITY_ATTRIBUTES sa)
+CharOpenFile(LPCSTR Name, WIN_FLAGS *Flags, PSECURITY_ATTRIBUTES Security)
 {
 	HANDLE hResult = NULL;
 
-	hResult = CreateFile(Name, Flags->Access, Flags->Share, sa, 
-		Flags->Creation, Flags->Attribs, NULL);
+	hResult = CreateFile(Name, Flags->Access, Flags->Share, 
+		Security, Flags->Creation, Flags->Attribs, NULL);
 	if (hResult == INVALID_HANDLE_VALUE){
 		WIN_ERR("CreateFile(%s): %s\n", Name, win_strerror(GetLastError()));
 	}

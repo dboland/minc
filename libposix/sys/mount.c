@@ -210,6 +210,7 @@ sys_statfs(call_t call, const char *path, struct statfs *buf)
 	WIN_STATFS fsInfo = {0};
 	WIN_NAMEIDATA wPath;
 	WIN_TASK *pwTask = call.Task;
+	CHAR szText[MAX_TEXT];
 
 	if (!drive_statfs(path_win(&wPath, path, 0), &fsInfo)){
 		result -= errno_posix(GetLastError());
@@ -217,7 +218,7 @@ sys_statfs(call_t call, const char *path, struct statfs *buf)
 		statfs_posix(buf, &fsInfo);
 	}
 	if (pwTask->TracePoints & KTRFAC_USER){
-		ktrace_WIN(pwTask, STRUCT_NAMEIDATA, &wPath);
+		ktrace_USER(pwTask, "WIN_NAMEIDATA", szText, vfs_NAMEI(&wPath, szText));
 	}
 	return(result);
 }

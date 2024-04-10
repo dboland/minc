@@ -35,6 +35,6 @@
 BOOL 
 pdo_DIOCGDINFO(WIN_DEVICE *Device)
 {
-	VfsDebugDevice(Device, "pdo_DIOCGDINFO");
+	vfs_ktrace("pdo_DIOCGDINFO", STRUCT_DEVICE, Device);
 	return(FALSE);
 }

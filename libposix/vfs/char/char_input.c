@@ -54,7 +54,7 @@ InputChar(CHAR C, DWORD KeyState, CHAR *Result)
 VOID 
 InputReturn(DWORD KeyState, CHAR *Result)
 {
-	if (__CTTY->Mode[0] & WIN_ICRNL){
+	if (__CTTY->Mode.Input & WIN_ICRNL){
 		InputChar('\n', KeyState, Result);
 	}else{
 		InputChar('\r', KeyState, Result);
@@ -204,8 +204,8 @@ InputReadEvent(HANDLE Handle, CHAR *Buffer)
 
 	*Buffer = 0;
 	if (!ReadConsoleInput(Handle, &iRecord, 1, &dwCount)){
-		WIN_ERR("ReadConsoleInput(%d): %s\n", Handle, win_strerror(GetLastError()));
-//		vfs_raise(WM_COMMAND, CTRL_ABORT_EVENT, 0);
+//		WIN_ERR("ReadConsoleInput(%d): %s\n", Handle, win_strerror(GetLastError()));
+		vfs_raise(WM_COMMAND, CTRL_ABORT_EVENT, 0);
 	}else{
 		bResult = InputEvent(&iRecord, Buffer);
 	}
@@ -220,8 +220,8 @@ InputReadLine(HANDLE Handle, DWORD Mode, CHAR *Buffer)
 
 	*Buffer = 0;
 	if (!ReadFile(Handle, Buffer, WIN_MAX_INPUT, &lCount, NULL)){
-		WIN_ERR("InputReadLine(%d): %s\n", Handle, win_strerror(GetLastError()));
-//		vfs_raise(WM_COMMAND, CTRL_ABORT_EVENT, 0);
+//		WIN_ERR("InputReadLine(%d): %s\n", Handle, win_strerror(GetLastError()));
+		vfs_raise(WM_COMMAND, CTRL_ABORT_EVENT, 0);
 	}else if (lCount > 0){
 		lCount--;
 		if (Mode & ENABLE_PROCESSED_INPUT){
@@ -238,7 +238,7 @@ InputReadLine(HANDLE Handle, DWORD Mode, CHAR *Buffer)
 BOOL 
 InputReadClipboard(CHAR *Buffer)
 {
-	BOOL bResult = FALSE;
+	BOOL bResult = TRUE;
 	LONG lSize = WIN_MAX_INPUT;
 	CHAR C;
 
@@ -262,28 +262,12 @@ InputReadClipboard(CHAR *Buffer)
 /****************************************************/
 
 BOOL 
-input_TIOCFLUSH(HANDLE Handle)
-{
-	BOOL bResult = FALSE;
-
-	/* "Handle is invalid" if CONIN$ buffer empty */
-	if (!FlushConsoleInputBuffer(Handle)){
-		WIN_ERR("FlushConsoleInputBuffer(%d): %s\n", Handle, win_strerror(GetLastError()));
-	}else{
-		bResult = TRUE;
-	}
-	return(bResult);
-}
-
-/****************************************************/
-
-BOOL 
 input_read(HANDLE Handle, LPSTR Buffer, DWORD Size, DWORD *Result)
 {
 	CHAR C = 0;
 	BOOL bResult = FALSE;
 	DWORD dwResult = 0;
-	DWORD dwMode = __CTTY->Mode[0];
+	DWORD dwMode = __CTTY->Mode.Input;
 	LONG lSize = Size;
 
 	if (dwMode & ENABLE_VIRTUAL_TERMINAL_INPUT){
@@ -322,7 +306,6 @@ input_poll(HANDLE Handle, WIN_POLLFD *Info)
 		sResult = WIN_POLLIN;
 	}else if (!PeekConsoleInput(Handle, &iRecord, 1, &dwCount)){
 		WIN_ERR("PeekConsoleInput(%d): %s\n", Handle, win_strerror(GetLastError()));
-//		vfs_raise(WM_COMMAND, CTRL_ABORT_EVENT, 0);
 	}else if (!dwCount){
 		sResult = 0;
 	}else if (InputReadEvent(Handle, __INPUT_BUF)){
@@ -334,4 +317,20 @@ input_poll(HANDLE Handle, WIN_POLLFD *Info)
 		dwResult++;
 	}
 	return(dwResult);
+}
+
+/****************************************************/
+
+BOOL 
+input_TIOCFLUSH(HANDLE Handle)
+{
+	BOOL bResult = FALSE;
+
+	/* "Handle is invalid" if CONIN$ buffer empty */
+	if (!FlushConsoleInputBuffer(Handle)){
+		WIN_ERR("FlushConsoleInputBuffer(%d): %s\n", Handle, win_strerror(GetLastError()));
+	}else{
+		bResult = TRUE;
+	}
+	return(bResult);
 }

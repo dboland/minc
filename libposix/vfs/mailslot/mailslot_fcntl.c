@@ -32,55 +32,18 @@
 
 /****************************************************/
 
-WIN_TTY *
-TTYCreate(WIN_DEVICE *Device)
-{
-	DWORD dwIndex = 1;
-	WIN_TTY *ptResult = &__Terminals[dwIndex];
-
-	while (dwIndex < WIN_TTY_MAX){
-		if (!ptResult->TerminalId){
-			ptResult->TerminalId = dwIndex;
-			ptResult->DeviceId = Device->DeviceId;
-			if (!pdo_TIOCGETA(Device, &ptResult->Mode)){
-				ptResult->Mode.Input = ENABLE_PROCESSED_INPUT + ENABLE_ECHO_INPUT + ENABLE_LINE_INPUT;
-				ptResult->Mode.Output = ENABLE_PROCESSED_OUTPUT + ENABLE_WRAP_AT_EOL_OUTPUT;
-			}
-			if (!pdo_TIOCGWINSZ(Device, &ptResult->WinSize)){
-				ptResult->WinSize.Row = 30;
-				ptResult->WinSize.Column = 80;
-			}
-//			reg_TIOCGETA(Device, ptResult->Mode);
-			/* CR is MSDOS default, but UNIX cooked mode expects NL */
-			ptResult->Mode.Input |= WIN_ICRNL | ENABLE_WINDOW_INPUT;
-			ptResult->Mode.Output |= WIN_ONLCR | WIN_OXTABS;
-			ptResult->ScrollRate = 1;
-//vfs_ktrace("TTYCreate", STRUCT_DEVICE, Device);
-			return(ptResult);
-		}
-		ptResult++;
-		dwIndex++;
-	}
-	SetLastError(ERROR_NOT_ENOUGH_MEMORY);
-	return(NULL);
-}
-
-/****************************************************/
-
 BOOL 
-tty_open(WIN_DEVICE *Device, WIN_FLAGS *Flags, WIN_VNODE *Result)
-{
-	Result->Event = Device->Input;
-	Result->Device = Device;
-	return(config_activate(Device, Result));
-}
-BOOL 
-tty_close(WIN_TTY *Terminal)
+mail_open(WIN_DEVICE *Device, WIN_FLAGS *Flags, WIN_VNODE *Result)
 {
 	BOOL bResult = FALSE;
+	CHAR szPath[MAX_PATH] = "\\\\.\\MAILSLOT\\master\\";
+	WIN_OBJECT_CONTROL wControl;
+	SECURITY_ATTRIBUTES sa = {sizeof(sa), &wControl.Security, TRUE};
 
-	if (pdo_revoke(DEVICE(Terminal->DeviceId))){
-		ZeroMemory(Terminal, sizeof(WIN_TTY));
+	if (AclCreateControl(WIN_S_IRWX, &wControl)){
+		Device->Input = MailCreateFile(win_strcat(szPath, Device->Name), &sa);
+		Device->Output = MailOpenFile(szPath, Flags, &sa);
+		Result->Device = Device;
 		bResult = TRUE;
 	}
 	return(bResult);

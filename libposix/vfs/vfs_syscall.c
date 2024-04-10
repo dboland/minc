@@ -183,7 +183,7 @@ vfs_setsid(WIN_TASK *Task)
 BOOL 
 vfs_setugid(WIN_TASK *Task)
 {
-	BOOL bResult = FALSE;
+	BOOL bResult = TRUE;
 	WCHAR szPath[MAX_PATH];
 	WIN_VATTR wStat = {0};
 

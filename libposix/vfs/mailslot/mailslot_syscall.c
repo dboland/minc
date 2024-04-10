@@ -33,25 +33,36 @@
 /****************************************************/
 
 HANDLE 
-MailOpenFile(LPCSTR FileName, WIN_FLAGS *Flags)
+MailCreateFile(LPCSTR FileName, SECURITY_ATTRIBUTES *Security)
 {
 	HANDLE hResult = NULL;
-	DWORD dwAccess = GENERIC_WRITE + READ_CONTROL;
-	SECURITY_ATTRIBUTES sa = {sizeof(sa), NULL, TRUE};
 
-	hResult = CreateFile(FileName, dwAccess, FILE_SHARE_READ, &sa, 
-		Flags->Creation, Flags->Attribs, NULL);
+	hResult = CreateMailslot(FileName, WIN_MAX_INPUT, MAILSLOT_WAIT_FOREVER, Security);
 	if (hResult == INVALID_HANDLE_VALUE){
-		WIN_ERR("CreateFile(%ls): %s\n", FileName, win_strerror(GetLastError()));
+		WIN_ERR("CreateMailslot(%s): %s\n", FileName, win_strerror(GetLastError()));
+	}
+	return(hResult);
+}
+HANDLE 
+MailOpenFile(LPCSTR FileName, WIN_FLAGS *Flags, SECURITY_ATTRIBUTES *Security)
+{
+	HANDLE hResult = NULL;
+
+	hResult = CreateFile(FileName, Flags->Access, Flags->Share, 
+		Security, Flags->Creation, Flags->Attribs, NULL);
+	if (hResult == INVALID_HANDLE_VALUE){
+		WIN_ERR("CreateFile(%s): %s\n", FileName, win_strerror(GetLastError()));
 	}
 	return(hResult);
 }
 BOOL 
-MailCreateInput(WIN_DEVICE *Device, WIN_FLAGS *Flags, WIN_VNODE *Result)
+MailCreateSlave(WIN_DEVICE *Device, HANDLE Event, WIN_VNODE *Result)
 {
 	BOOL bResult = FALSE;
-	CHAR szPath[MAX_PATH] = "\\\\.\\MAILSLOT\\input\\";
+	CHAR szPath[MAX_PATH] = "\\\\.\\MAILSLOT\\slave\\";
 	HANDLE hResult = NULL;
+	WIN_FLAGS wFlags = {GENERIC_WRITE | READ_CONTROL, FILE_SHARE_READ,
+		OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, 0};
 	SECURITY_ATTRIBUTES sa = {sizeof(sa), NULL, TRUE};
 
 	hResult = CreateMailslot(win_strcat(szPath, Device->Name), WIN_MAX_INPUT, 
@@ -60,43 +71,13 @@ MailCreateInput(WIN_DEVICE *Device, WIN_FLAGS *Flags, WIN_VNODE *Result)
 		WIN_ERR("CreateMailslot(%s): %s\n", szPath, win_strerror(GetLastError()));
 	}else{
 		Device->Input = hResult;
-		Device->Output = MailOpenFile(szPath, Flags);
-		Device->FSType = FS_TYPE_MAILSLOT;
-		Device->FileType = WIN_VCHR;
-		Result->Event = __MailEvent;
+		Device->Output = MailOpenFile(szPath, &wFlags, &sa);
+		Result->Event = Event;
 		Result->FSType = FS_TYPE_PDO;
-		Result->FileType = WIN_VCHR;
+		Result->FileType = Device->FileType;
 		Result->DeviceType = Device->DeviceType;
-		Result->Attribs = Flags->Attribs;
-		Result->Access = win_F_GETFL(hResult);
-		Result->Flags = win_F_GETFD(hResult);
-		Result->Device = Device;
-		bResult = TRUE;
-	}
-	return(bResult);
-}
-BOOL 
-MailCreateOutput(WIN_DEVICE *Device, WIN_FLAGS *Flags, WIN_VNODE *Result)
-{
-	BOOL bResult = FALSE;
-	CHAR szPath[MAX_PATH] = "\\\\.\\MAILSLOT\\output\\";
-	HANDLE hResult = NULL;
-	SECURITY_ATTRIBUTES sa = {sizeof(sa), NULL, TRUE};
-
-	hResult = CreateMailslot(win_strcat(szPath, Device->Name), WIN_MAX_INPUT, 
-		MAILSLOT_WAIT_FOREVER, &sa);
-	if (hResult == INVALID_HANDLE_VALUE){
-		WIN_ERR("CreateMailslot(%s): %s\n", szPath, win_strerror(GetLastError()));
-	}else{
-		Device->Input = hResult;
-		Device->Output = MailOpenFile(szPath, Flags);
-		Device->FSType = FS_TYPE_MAILSLOT;
-		Device->FileType = WIN_VCHR;
-		Result->Event = __MailEvent;
-		Result->FSType = FS_TYPE_PDO;
-		Result->FileType = WIN_VCHR;
-		Result->DeviceType = Device->DeviceType;
-		Result->Attribs = Flags->Attribs;
+		Result->DeviceId = Device->DeviceId;
+		Result->Attribs = FILE_ATTRIBUTE_NORMAL;
 		Result->Access = win_F_GETFL(hResult);
 		Result->Flags = win_F_GETFD(hResult);
 		Result->Device = Device;

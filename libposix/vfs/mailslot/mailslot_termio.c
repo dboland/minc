@@ -39,12 +39,11 @@ mail_PTMGET(WIN_DEVICE *Master, WIN_DEVICE *Slave)
 	HANDLE hMaster = Master->Output;
 	HANDLE hSlave = Slave->Output;
 
-	if (Master->Flags & WIN_DVF_ACTIVE){
+	if (Slave->Flags & WIN_DVF_ACTIVE){
 		SetLastError(ERROR_NOT_READY);
 	}else{
 		Master->Output = hSlave;
 		Slave->Output = hMaster;
-		Master->Flags |= WIN_DVF_ACTIVE;
 		Slave->Flags |= WIN_DVF_ACTIVE;
 		bResult = TRUE;
 	}

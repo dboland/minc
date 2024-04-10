@@ -447,12 +447,12 @@ AnsiDeviceStatusReport(CONSOLE_SCREEN_BUFFER_INFO *Info, CHAR Parm, CHAR *Result
 	return(bResult);
 }
 BOOL 
-AnsiSetMode(WIN_TERMIO *Terminal, WORD Arg)
+AnsiSetMode(WIN_TTY *Terminal, WORD Arg)
 {
 	BOOL bResult = TRUE;
 
 	if (Arg == 4){			/* IRM */
-		Terminal->Mode[0] |= ENABLE_INSERT_MODE;
+		Terminal->Mode.Input |= ENABLE_INSERT_MODE;
 	}else if (Arg == 7){		/* VEM */
 		Terminal->VEdit = TRUE;
 	}else{
@@ -461,12 +461,12 @@ AnsiSetMode(WIN_TERMIO *Terminal, WORD Arg)
 	return(bResult);
 }
 BOOL 
-AnsiResetMode(WIN_TERMIO *Terminal, WORD Arg)
+AnsiResetMode(WIN_TTY *Terminal, WORD Arg)
 {
 	BOOL bResult = TRUE;
 
 	if (Arg == 4){
-		Terminal->Mode[0] &= ~ENABLE_INSERT_MODE;
+		Terminal->Mode.Input &= ~ENABLE_INSERT_MODE;
 	}else if (Arg == 7){
 		Terminal->VEdit = FALSE;
 	}else{

@@ -67,11 +67,11 @@
 
 /* System device types */
 
-#define DEV_TYPE_SWD		(DEV_CLASS_DULL)
-#define DEV_TYPE_ACPI		(DEV_CLASS_DULL + DEV_BUS_ACPI)
-#define DEV_TYPE_OHCI		(DEV_CLASS_DULL + DEV_BUS_PCI)	/* USB Open Host Controller Interface */
-#define DEV_TYPE_EHCI		(DEV_CLASS_DULL + DEV_BUS_USB)	/* USB Enhanced Host Controller Interface (USB 2.0) */
-#define DEV_TYPE_IDE		(DEV_CLASS_DULL + DEV_BUS_IDE)	/* Integrated Disk Electronics device */
+#define DEV_TYPE_SWD		(DEV_CLASS_SYSTEM)
+#define DEV_TYPE_ACPI		(DEV_CLASS_SYSTEM + DEV_BUS_ACPI)
+#define DEV_TYPE_EHCI		(DEV_CLASS_SYSTEM + DEV_BUS_USB)	/* USB Enhanced Host Controller Interface (USB 2.0) */
+#define DEV_TYPE_IDE		(DEV_CLASS_SYSTEM + DEV_BUS_IDE)	/* Integrated Disk Electronics bus */
+#define DEV_TYPE_PCI		(DEV_CLASS_SYSTEM + DEV_BUS_PCI)	/* Peripheral Component Interconnect bus */
 
 #define DEV_TYPE_MEM		(DEV_CLASS_CPU + 1)		/* physical memory device */
 #define DEV_TYPE_KMEM		(DEV_CLASS_CPU + 2)		/* kernel memory device (libposix.dll) */
@@ -142,4 +142,5 @@
 
 #define DEV_TYPE_HID		(DEV_CLASS_USB)
 #define DEV_TYPE_USBHUB		(DEV_CLASS_USB + DEV_BUS_USB)
-#define DEV_TYPE_UHCI		(DEV_CLASS_USB + DEV_BUS_PCI)	/* USB Universal Host Controller Interface */
+#define DEV_TYPE_UHCI		(DEV_CLASS_USB + DEV_BUS_PCI)	/* USB Universal Host Controller Interface (USB 1.0) */
+//#define DEV_TYPE_OHCI		(DEV_CLASS_USB + DEV_BUS_PCI)	/* USB Open Host Controller Interface (USB 1.1) */

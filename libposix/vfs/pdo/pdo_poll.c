@@ -37,14 +37,13 @@ pdo_poll(WIN_DEVICE *Device, WIN_POLLFD *Info)
 {
 	DWORD dwResult = 1;
 
-VfsDebugDevice(Device, "pdo_poll");
 	switch (Device->FSType){
 		case FS_TYPE_CHAR:
 			dwResult = input_poll(Device->Input, Info);
 			break;
-//		case FS_TYPE_MAILSLOT:
-//			dwResult = mail_poll(Device->Input, Info);
-//			break;
+		case FS_TYPE_MAILSLOT:
+			dwResult = mail_poll(Device->Input, Info);
+			break;
 		default:
 			Info->Result = WIN_POLLERR;
 			SetLastError(ERROR_BAD_DEVICE);

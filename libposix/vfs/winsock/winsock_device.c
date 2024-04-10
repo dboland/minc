@@ -56,7 +56,7 @@ ws2_match(LPCWSTR NtName, DWORD DeviceType, DWORD Index, WIN_CFDRIVER *Driver)
 		pwDevice++;
 		sUnit++;
 	}
-//VfsDebugDevice(pwDevice, "ws2_attach");
+//VfsDebugDevice(pwDevice, "ws2_match");
 	win_strcpy(Driver->Name, pwDevice->Name);
 	Driver->DeviceId = pwDevice->DeviceId;
 	Driver->Flags = pwDevice->Flags;

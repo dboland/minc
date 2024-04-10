@@ -37,7 +37,7 @@ mail_fstat(WIN_VNODE *Node, WIN_VATTR *Result)
 {
 	BOOL bResult = FALSE;
 	PSECURITY_DESCRIPTOR psd = NULL;
-	WCHAR szPath[WIN_PATH_MAX] = L"";
+	WCHAR szPath[WIN_PATH_MAX];
 
 	ZeroMemory(Result, sizeof(WIN_VATTR));
 	Result->Mode.FileType = Node->FileType;

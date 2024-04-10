@@ -44,7 +44,7 @@
 #define SIGMASK_TTY	\
 	(BIT_SIGTTIN | BIT_SIGTTOU | BIT_SIGSTOP | BIT_SIGCONT)
 #define SIGMASK_IGNORE	\
-	(BIT_SIGTHR | BIT_SIGWINCH | BIT_SIGCHLD | BIT_SIGURG | BIT_SIGINFO)
+	(BIT_SIGWINCH | BIT_SIGCHLD | BIT_SIGURG | BIT_SIGINFO)
 
 static const DWORD __SIG_WIN[NSIG] = {
 	0,
@@ -112,7 +112,9 @@ __sigsuspend(WIN_TASK *Task, const sigset_t *mask)
 {
 	int result = 0;
 
-	if (vfs_sigsuspend(Task, mask)){
+	if (!mask){
+		result = -EFAULT;
+	}else if (vfs_sigsuspend(Task, mask)){
 		result -= errno_posix(GetLastError());
 	}
 	return(result);
@@ -130,7 +132,7 @@ sigproc_default(WIN_TASK *Task, int signum)
 		__sigsuspend(Task, &mask);
 	}else if (sigbit & SIGMASK_TTY){
 		result = 0;		/* mark as handled (interrupt syscalls) */
-	}else if (sigbit & ~(SIGMASK_IGNORE)){
+	}else if (sigbit & ~SIGMASK_IGNORE){
 		Task->Status = signum;
 		Task->Flags |= WIN_PS_EXITING;
 		win_exit(127);
@@ -146,6 +148,7 @@ sigproc_posix(WIN_TASK *Task, int signum, ucontext_t *ucontext)
 	int flags = sigaction->sa_flags;
 	action_t action = sigaction->sa_sigaction;
 	siginfo_t info = {0};
+	sigset_t sigbit = sigmask(signum);
 
 	info.si_signo = signum;
 	info.si_errno = Task->Error;
@@ -159,8 +162,9 @@ sigproc_posix(WIN_TASK *Task, int signum, ucontext_t *ucontext)
 	if (flags & SA_RESTART){
 		result = -1;
 	}
-//	if (sigbit & Task->ProcMask){
+//	if (sigbit & Task->ProcMask){		/* this will hang in boot (init.exe) */
 //		Task->Pending |= sigbit;
+//		result = -1;
 //	}else 
 	if (handler == SIG_DFL){		/* 0 */
 		result = sigproc_default(Task, signum);
@@ -174,21 +178,6 @@ sigproc_posix(WIN_TASK *Task, int signum, ucontext_t *ucontext)
 		handler(signum);
 	}
 	return(result);
-}
-int 
-sigproc_pending(WIN_TASK *Task, sigset_t newset)
-{
-	int signum = NSIG;
-	ucontext_t ucontext = {0};
-	sigset_t pending = Task->Pending & ~newset;
-
-//__PRINTF("sigproc_pending(0x%x): newset(0x%x)\n", Task->Pending, newset)
-	while (signum--){
-		if (sigmask(signum) & pending){
-			sigproc_posix(Task, signum, &ucontext);
-		}
-	}
-	Task->Pending = 0;
 }
 BOOL CALLBACK 
 sigproc_win(DWORD CtrlType, CONTEXT *Context)
@@ -372,9 +361,6 @@ sys_sigprocmask(call_t call, int how, const sigset_t *restrict set, sigset_t *re
 		}else if (how == SIG_SETMASK){	// 3
 			curset = newset;
 		}
-//		if (how != SIG_BLOCK){
-//			sigproc_pending(pwTask, curset);
-//		}
 		pwTask->ProcMask = curset;
 	}
 	return(result);

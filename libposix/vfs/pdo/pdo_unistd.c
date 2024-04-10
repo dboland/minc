@@ -57,9 +57,9 @@ pdo_read(WIN_DEVICE *Device, LPSTR Buffer, LONG Size, DWORD *Result)
 		case DEV_TYPE_CONSOLE:
 			bResult = input_read(Device->Input, Buffer, Size, Result);
 			break;
-//		case DEV_TYPE_TTY:
-//			bResult = mail_read(Device->Input, Buffer, Size, Result);
-//			break;
+		case DEV_TYPE_TTY:
+			bResult = mail_read(Device->Input, Buffer, Size, Result);
+			break;
 		case DEV_TYPE_ROUTE:
 			bResult = route_read(Device, Buffer, Size, Result);
 			break;
@@ -82,9 +82,9 @@ pdo_write(WIN_DEVICE *Device, LPCSTR Buffer, DWORD Size, DWORD *Result)
 		case DEV_TYPE_CONSOLE:
 			bResult = screen_write(Device->Output, Buffer, Size, Result);
 			break;
-//		case DEV_TYPE_TTY:
-//			bResult = mail_write(Device->Output, Buffer, Size, Result);
-//			break;
+		case DEV_TYPE_TTY:
+			bResult = mail_write(Device->Output, Buffer, Size, Result);
+			break;
 		case DEV_TYPE_ROUTE:
 			bResult = route_write(Device, Buffer, Size, Result);
 			break;
@@ -116,7 +116,7 @@ pdo_revoke(WIN_DEVICE *Device)
 
 	switch (Device->DeviceType){
 		case DEV_TYPE_PTY:
-			bResult = pty_revoke(Device);
+			bResult = ptm_revoke(Device);
 			break;
 		case DEV_TYPE_CONSOLE:
 			bResult = TRUE;

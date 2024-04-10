@@ -75,7 +75,7 @@ kticks_posix(FILETIME *Time)
 struct kinfo_proc *
 kproc_posix(struct kinfo_proc *proc, WIN_TASK *Task)
 {
-	WIN_TERMIO *pTerminal = &__Terminals[Task->TerminalId];
+	WIN_TTY *pTerminal = &__Terminals[Task->TerminalId];
 	wchar_t *command = win_basename(PSTRING(Task).Command);
 	struct timeval tv;
 	WIN_KINFO_PROC kInfo = {0};

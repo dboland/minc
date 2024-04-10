@@ -43,8 +43,10 @@ termio_debug(struct termios *term, const char *lable)
 	dwRemain = term->c_lflag;
 	msvc_printf("  local(0x%x): ", dwRemain);
 	win_flagname(ECHO, "ECHO", dwRemain, &dwRemain);
+	win_flagname(ECHOCTL, "ECHOCTL", dwRemain, &dwRemain);
 	win_flagname(ISIG, "ISIG", dwRemain, &dwRemain);
 	win_flagname(ICANON, "ICANON", dwRemain, &dwRemain);
+	win_flagname(NOKERNINFO, "NOKERNINFO", dwRemain, &dwRemain);
 	msvc_printf(" remain(0x%x)\n", dwRemain);
 
 	dwRemain = term->c_iflag;
@@ -66,7 +68,7 @@ termio_debug(struct termios *term, const char *lable)
 	msvc_printf(" remain(0x%x)\n", dwRemain);
 }
 struct termios *
-termio_posix(struct termios *term, DWORD Mode[2])
+termio_posix(struct termios *term, WIN_IOMODE *Mode)
 {
 	win_bzero(term, sizeof(struct termios));
 	memcpy(term->c_cc, ttydefchars, sizeof(ttydefchars));
@@ -77,78 +79,78 @@ termio_posix(struct termios *term, DWORD Mode[2])
 	/* don't clear eighth bit (libncurses, bitchx.exe) */
 	term->c_cflag = CS8;
 
-	if (Mode[0] & ENABLE_ECHO_INPUT){
+	if (Mode->Input & ENABLE_ECHO_INPUT){
 		term->c_lflag |= ECHO;
 	}
-	if (Mode[0] & ENABLE_LINE_INPUT){
+	if (Mode->Input & ENABLE_LINE_INPUT){
 		term->c_lflag |= ICANON;
 	}
-	if (Mode[0] & ENABLE_PROCESSED_INPUT){
+	if (Mode->Input & ENABLE_PROCESSED_INPUT){
 		term->c_lflag |= ISIG;
 	}
-	if (Mode[0] & WIN_IXON){
+	if (Mode->Input & WIN_IXON){
 		term->c_iflag |= IXON;
 	}
-	if (Mode[0] & WIN_IXOFF){
+	if (Mode->Input & WIN_IXOFF){
 		term->c_iflag |= IXOFF;
 	}
-	if (Mode[0] & WIN_INLCR){
+	if (Mode->Input & WIN_INLCR){
 		term->c_iflag |= INLCR;
 	}
-	if (Mode[0] & WIN_ICRNL){
+	if (Mode->Input & WIN_ICRNL){
 		term->c_iflag |= ICRNL;
 	}
-	if (Mode[1] & WIN_ONLCR){
+	if (Mode->Output & WIN_ONLCR){
 		term->c_oflag |= ONLCR;
 	}
-	if (Mode[1] & WIN_OXTABS){
+	if (Mode->Output & WIN_OXTABS){
 		term->c_oflag |= OXTABS;
 	}
-	if (Mode[1] & WIN_OCRNL){
+	if (Mode->Output & WIN_OCRNL){
 		term->c_oflag |= OCRNL;
 	}
 //termio_debug(term, "termios_posix");
 	return(term);
 }
-DWORD *
-termio_win(DWORD Mode[2], struct termios *term)
+WIN_IOMODE *
+termio_win(WIN_IOMODE *Mode, struct termios *term)
 {
-	Mode[0] = __CTTY->Mode[0] & ~ENABLE_ALL_INPUT;
-	Mode[1] = __CTTY->Mode[1] & ~ENABLE_ALL_OUTPUT;
+	Mode->Input = __CTTY->Mode.Input & ~ENABLE_ALL_INPUT;
+	Mode->Output = __CTTY->Mode.Output & ~ENABLE_ALL_OUTPUT;
 
-	if (Mode[1] & ENABLE_VIRTUAL_TERMINAL_PROCESSING){
-		Mode[1] |= DISABLE_NEWLINE_AUTO_RETURN;
+	if (Mode->Output & ENABLE_VIRTUAL_TERMINAL_PROCESSING){
+		Mode->Output |= DISABLE_NEWLINE_AUTO_RETURN;
 	}
 //termio_debug(term, "termio_win");
-	if (term->c_lflag & ECHO){
-		Mode[0] |= ENABLE_LINE_INPUT | ENABLE_ECHO_INPUT;
+	if (term->c_lflag & ECHO){	/* telnet.exe */
+		Mode->Input |= ENABLE_LINE_INPUT | ENABLE_ECHO_INPUT;
 	}else if (term->c_lflag & ICANON){
-		Mode[0] |= ENABLE_LINE_INPUT;
+		Mode->Input |= ENABLE_LINE_INPUT;
 	}
 	if (term->c_lflag & ISIG){
-		Mode[0] |= ENABLE_PROCESSED_INPUT;
+		Mode->Input |= ENABLE_PROCESSED_INPUT;
 	}
 	if (term->c_iflag & IXON){
-		Mode[0] |= WIN_IXON;
+		Mode->Input |= WIN_IXON;
 	}
 	if (term->c_iflag & IXOFF){
-		Mode[0] |= WIN_IXOFF;
+		Mode->Input |= WIN_IXOFF;
 	}
 	if (term->c_iflag & INLCR){
-		Mode[0] |= WIN_INLCR;
+		Mode->Input |= WIN_INLCR;
 	}
 	if (term->c_iflag & ICRNL){
-		Mode[0] |= WIN_ICRNL;
+		Mode->Input |= WIN_ICRNL;
 	}
 	if (term->c_oflag & ONLCR){
-		Mode[1] |= WIN_ONLCR;
-		Mode[1] &= ~DISABLE_NEWLINE_AUTO_RETURN;
+		Mode->Output |= WIN_ONLCR;
+		Mode->Output &= ~DISABLE_NEWLINE_AUTO_RETURN;
 	}
 	if (term->c_oflag & OXTABS){
-		Mode[1] |= WIN_OXTABS;
+		Mode->Output |= WIN_OXTABS;
 	}
 	if (term->c_oflag & OCRNL){
-		Mode[1] |= WIN_OCRNL;
+		Mode->Output |= WIN_OCRNL;
 	}
 	return(Mode);
 }
@@ -159,14 +161,14 @@ int
 tty_TIOCGETA(WIN_TASK *Task, WIN_VNODE *Node, WORD Operation, struct termios *term)
 {
 	int result = 0;
-	DWORD dwMode[2] = {0};
+	WIN_IOMODE ioMode = {0};
 
-	if (!vfs_TIOCGETA(Node, dwMode)){
+	if (!vfs_TIOCGETA(Node, &ioMode)){
 		result -= errno_posix(GetLastError());
 	}else{
-		dwMode[0] |= (__CTTY->Mode[0] & 0xFFFF0000);
-		dwMode[1] |= (__CTTY->Mode[1] & 0xFFFF0000);
-		termio_posix(term, dwMode);
+		ioMode.Input |= (__CTTY->Mode.Input & 0xFFFF0000);
+		ioMode.Output |= (__CTTY->Mode.Output & 0xFFFF0000);
+		termio_posix(term, &ioMode);
 	}
 	return(result);
 }
@@ -174,13 +176,12 @@ int
 tty_TIOCSETA(WIN_TASK *Task, WIN_VNODE *Node, WORD Operation, struct termios *term)
 {
 	int result = 0;
-	DWORD dwMode[2] = {0};
+	WIN_IOMODE ioMode = {0};
 
-	if (!vfs_TIOCTL(Node, Operation, termio_win(dwMode, term))){
+	if (!vfs_TIOCTL(Node, Operation, termio_win(&ioMode, term))){
 		result -= errno_posix(GetLastError());
 	}else{
-		__CTTY->Mode[0] = dwMode[0];
-		__CTTY->Mode[1] = dwMode[1];
+		__CTTY->Mode = ioMode;
 	}
 	return(result);
 }
@@ -194,8 +195,8 @@ tty_TIOCSCTTY(WIN_TASK *Task, WIN_VNODE *Node)
 	}
 	return(result);
 }
-int 
-tty_PTMGET(WIN_TASK *Task, WIN_VNODE *Node, struct ptmget *ptm)
+/* int 
+tty_PTMGET_OLD(WIN_TASK *Task, WIN_VNODE *Node, struct ptmget *ptm)
 {
 	int result = 0;
 	WIN_PTMGET ptmGet = {0};
@@ -203,12 +204,30 @@ tty_PTMGET(WIN_TASK *Task, WIN_VNODE *Node, struct ptmget *ptm)
 	if (!vfs_PTMGET(Node->Device, &ptmGet)){
 		result -= errno_posix(GetLastError());
 	}else{
-		/* controlling terminal (master) */
+		// controlling terminal (master)
 		ptm->cfd = fd_posix(Task, &ptmGet.Master, 0);
 		win_strncpy(ptm->cn, ptmGet.Master.Device->Name, 16);
-		/* raw serial device (slave) */
+		// raw serial device (slave)
 		ptm->sfd = fd_posix(Task, &ptmGet.Slave, 0);
 		win_strncpy(ptm->sn, ptmGet.Slave.Device->Name, 16);
+	}
+	return(result);
+} */
+int 
+tty_PTMGET(WIN_TASK *Task, WIN_VNODE *Node, struct ptmget *ptm)
+{
+	int result = 0;
+	WIN_VNODE vnResult = {0};
+
+	if (!vfs_PTMGET(Node, &vnResult)){
+		result -= errno_posix(GetLastError());
+	}else{
+		/* controlling terminal (master) */
+		ptm->cfd = fd_posix(Task, &vnResult, 0);
+		win_strncpy(ptm->cn, vnResult.Device->Name, 16);
+		/* raw serial device (slave) */
+		ptm->sfd = fd_posix(Task, Node, 0);
+		win_strncpy(ptm->sn, Node->Device->Name, 16);
 	}
 	return(result);
 }
@@ -230,27 +249,27 @@ tty_ioctl(WIN_TASK *Task, int fd, unsigned long request, va_list args)
 {
 	int result = 0;
 	DWORD wOperation = request & 0xFF;
-	WIN_VNODE *pvNode = &Task->Node[fd];
+	WIN_VNODE *pNode = &Task->Node[fd];
 
-	if (!pvNode->Access){
+	if (!pNode->Access){
 		result = -EBADF;
 	}else switch (request){
 		case PTMGET:
-			result = tty_PTMGET(Task, pvNode, va_arg(args, struct ptmget *));
+			result = tty_PTMGET(Task, pNode, va_arg(args, struct ptmget *));
 			break;
 		case TIOCSCTTY:
-			result = tty_TIOCSCTTY(Task, pvNode);
+			result = tty_TIOCSCTTY(Task, pNode);
 			break;
 		case TIOCGETA:
-			result = tty_TIOCGETA(Task, pvNode, wOperation, va_arg(args, struct termios *));
+			result = tty_TIOCGETA(Task, pNode, wOperation, va_arg(args, struct termios *));
 			break;
 		case TIOCSETA:
 		case TIOCSETAW:
 		case TIOCSETAF:
-			result = tty_TIOCSETA(Task, pvNode, wOperation, va_arg(args, struct termios *));
+			result = tty_TIOCSETA(Task, pNode, wOperation, va_arg(args, struct termios *));
 			break;
 		default:
-			result = tty_TIOCTL(Task, pvNode, wOperation, va_arg(args, PVOID));
+			result = tty_TIOCTL(Task, pNode, wOperation, va_arg(args, PVOID));
 	}
 	return(result);
 }

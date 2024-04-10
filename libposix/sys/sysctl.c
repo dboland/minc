@@ -28,7 +28,7 @@
  *
  */
 
-#include <uvm/uvm_param.h>		/* VM_LOADAVG */
+#include <uvm/uvm_param.h>	/* VM_LOADAVG */
 #include <uvm/uvm_extern.h>	/* struct uvmexp */
 
 /****************************************************/

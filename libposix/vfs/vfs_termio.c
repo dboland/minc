@@ -54,11 +54,11 @@ vfs_TIOCGWINSZ(WIN_VNODE *Node, WIN_WINSIZE *WinSize)
 	return(bResult);
 }
 BOOL 
-vfs_TIOCGETA(WIN_VNODE *Node, DWORD Mode[2])
+vfs_TIOCGETA(WIN_VNODE *Node, WIN_IOMODE *Mode)
 {
 	BOOL bResult = FALSE;
 
-//VfsDebugNode(Node, "vfs_TIOCGETA");
+//vfs_ktrace("vfs_TIOCGETA", STRUCT_VNODE, Node);
 	switch (Node->FSType){
 		case FS_TYPE_PDO:
 			bResult = pdo_TIOCGETA(Node->Device, Mode);
@@ -67,8 +67,7 @@ vfs_TIOCGETA(WIN_VNODE *Node, DWORD Mode[2])
 			bResult = char_TIOCGETA(Node, Mode);
 			break;
 		case FS_TYPE_MAILSLOT:
-			Mode[0] = __CTTY->Mode[0] & 0xFFFF;
-			Mode[1] = __CTTY->Mode[1] & 0xFFFF;
+			*Mode = __CTTY->Mode;
 			bResult = TRUE;
 			break;
 		default:
@@ -112,7 +111,7 @@ vfs_TIOCDRAIN(WIN_VNODE *Node)
 	return(bResult);
 }
 BOOL 
-vfs_TIOCSETAF(WIN_VNODE *Node, DWORD Mode[2], BOOL Flush, BOOL Drain)
+vfs_TIOCSETAF(WIN_VNODE *Node, WIN_IOMODE *Mode, BOOL Flush, BOOL Drain)
 {
 	BOOL bResult = FALSE;
 
@@ -128,8 +127,7 @@ vfs_TIOCSETAF(WIN_VNODE *Node, DWORD Mode[2], BOOL Flush, BOOL Drain)
 			bResult = char_TIOCSETA(Node, Mode);
 			break;
 		case FS_TYPE_MAILSLOT:
-//			__CTTY->Mode[0] = Mode[0];
-//			__CTTY->Mode[1] = Mode[1];
+			__CTTY->Mode = *Mode;
 			bResult = TRUE;
 			break;
 		default:
@@ -144,7 +142,7 @@ BOOL
 vfs_TIOCSCTTY(WIN_DEVICE *Device, WIN_TASK *Task)
 {
 	BOOL bResult = FALSE;
-	WIN_TERMIO *pTerminal;
+	WIN_TTY *pTerminal;
 
 	if (Task->Flags & WIN_PS_CONTROLT){
 		SetLastError(ERROR_LOGON_SESSION_EXISTS);
@@ -159,17 +157,32 @@ vfs_TIOCSCTTY(WIN_DEVICE *Device, WIN_TASK *Task)
 	}
 	return(bResult);
 }
-BOOL 
+/* BOOL 
 vfs_PTMGET(WIN_DEVICE *Device, WIN_PTMGET *Result)
 {
 	BOOL bResult = FALSE;
-	WIN_FLAGS wFlags = {GENERIC_READ + GENERIC_WRITE, 
-		FILE_SHARE_READ + FILE_SHARE_WRITE, OPEN_EXISTING, 0, 0};
+	WIN_OBJECT_CONTROL wControl;
+	SECURITY_ATTRIBUTES sa = {sizeof(sa), &wControl.Security, TRUE};
+//	HANDLE hEvent = CreateEvent(NULL, FALSE, FALSE, NULL);
 
-	if (!MailCreateOutput(Device, &wFlags, &Result->Master)){
+	if (!AclCreateControl(WIN_S_IRWX, &wControl)){
 		return(FALSE);
-	}else if (MailCreateInput(pdo_attach(DEV_TYPE_TTY), &wFlags, &Result->Slave)){
+	}else if (!MailCreateOutput(Device, &sa, __MailEvent, &Result->Master)){
+		return(FALSE);
+	}else if (MailCreateInput(pdo_attach(DEV_TYPE_TTY), &sa, __MailEvent, &Result->Slave)){
 		bResult = mail_PTMGET(Device, Result->Slave.Device);
+	}
+	return(bResult);
+} */
+BOOL 
+vfs_PTMGET(WIN_VNODE *Node, WIN_VNODE *Result)
+{
+	BOOL bResult = FALSE;
+//	HANDLE hEvent = CreateEvent(NULL, FALSE, FALSE, NULL);
+
+	if (MailCreateSlave(pdo_attach(DEV_TYPE_TTY), __MailEvent, Result)){
+		Node->Event = __MailEvent;
+		bResult = mail_PTMGET(Node->Device, Result->Device);
 	}
 	return(bResult);
 }
@@ -191,13 +204,13 @@ vfs_TIOCTL(WIN_VNODE *Node, DWORD Operation, PVOID Param)
 			bResult = vfs_TIOCDRAIN(Node);
 			break;
 		case WIN_TIOCSETA:
-			bResult = vfs_TIOCSETAF(Node, (DWORD *)Param, FALSE, FALSE);
+			bResult = vfs_TIOCSETAF(Node, (WIN_IOMODE *)Param, FALSE, FALSE);
 			break;
 		case WIN_TIOCSETAW:
-			bResult = vfs_TIOCSETAF(Node, (DWORD *)Param, FALSE, TRUE);
+			bResult = vfs_TIOCSETAF(Node, (WIN_IOMODE *)Param, FALSE, TRUE);
 			break;
 		case WIN_TIOCSETAF:
-			bResult = vfs_TIOCSETAF(Node, (DWORD *)Param, TRUE, TRUE);
+			bResult = vfs_TIOCSETAF(Node, (WIN_IOMODE *)Param, TRUE, TRUE);
 			break;
 		case WIN_TIOCGWINSZ:
 			bResult = vfs_TIOCGWINSZ(Node, (WIN_WINSIZE *)Param);
@@ -213,7 +226,7 @@ vfs_TIOCTL(WIN_VNODE *Node, DWORD Operation, PVOID Param)
 			break;
 		/* line discipline: raw/cooked mode, see ./sys/kern/tty_conf.c */
 		case WIN_TIOCGETD:
-			*(UINT *)Param = (__CTTY->Mode[0] & ENABLE_LINE_INPUT);
+			*(UINT *)Param = (__CTTY->Mode.Input & ENABLE_LINE_INPUT);
 			break;
 		case WIN_TIOCSFLAGS:		/* ttyflags.exe */
 			bResult = vfs_TIOCSFLAGS(DEVICE(Node->DeviceId), *(DWORD *)Param);

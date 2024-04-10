@@ -45,11 +45,11 @@
 
 extern WIN_TASK 	*__Tasks;
 extern WIN_DEV_CLASS 	*__Devices;
-extern WIN_TERMIO 	*__Terminals;
+extern WIN_TTY 		*__Terminals;
 extern WIN_PSTRING 	*__Strings;
 extern WIN_MOUNT	*__Mounts;
 extern WIN_GLOBALS	*__Globals;
-extern WIN_TERMIO 	*__CTTY;
+extern WIN_TTY	 	*__CTTY;
 extern SID8 		*__SidNone;
 extern SID8 		*__SidMachine;
 

@@ -33,6 +33,7 @@
 #include "pdo_route.c"
 #include "pdo_device.c"
 #include "pdo_termio.c"
+#include "pdo_ptm.c"
 #include "pdo_unistd.c"
 #include "pdo_tty.c"
 #include "pdo_fcntl.c"
@@ -49,6 +50,8 @@ pdo_init(WIN_DEV_CLASS Devices[])
 {
 	__Devices = Devices;
 
+//	config_init("pci0", FS_TYPE_PDO, WIN_VCHR, DEV_TYPE_PCI);
+
 	config_init("mem", FS_TYPE_PDO, WIN_VCHR, DEV_TYPE_MEM);
 	config_init("kmem", FS_TYPE_PDO, WIN_VCHR, DEV_TYPE_KMEM);
 	config_init("null", FS_TYPE_PDO, WIN_VCHR, DEV_TYPE_NULL);
@@ -61,8 +64,8 @@ pdo_init(WIN_DEV_CLASS Devices[])
 	config_init("swap", FS_TYPE_PDO, WIN_VBLK, DEV_TYPE_SWAP);
 
 	config_init("console", FS_TYPE_CHAR, WIN_VCHR, DEV_TYPE_CONSOLE);
-	config_init("tty", FS_TYPE_CHAR, WIN_VCHR, DEV_CLASS_TTY);
-	config_init("ptm", FS_TYPE_CHAR, WIN_VCHR, DEV_TYPE_PTM);
+	config_init("tty", FS_TYPE_MAILSLOT, WIN_VCHR, DEV_CLASS_TTY);
+	config_init("ptm", FS_TYPE_PDO, WIN_VCHR, DEV_TYPE_PTM);
 	config_init("input", FS_TYPE_CHAR, WIN_VCHR, DEV_TYPE_INPUT);
 	config_init("screen", FS_TYPE_CHAR, WIN_VCHR, DEV_TYPE_SCREEN);
 

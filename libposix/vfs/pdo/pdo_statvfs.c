@@ -33,7 +33,7 @@
 /************************************************************/
 
 DWORD 
-DevLookupBus(LPCWSTR BusName, DWORD Class)
+PDOLookupBus(LPCWSTR BusName, DWORD Class)
 {
 	DWORD dwResult = Class;
 
@@ -59,7 +59,7 @@ DevLookupBus(LPCWSTR BusName, DWORD Class)
 	return(dwResult);
 }
 DWORD 
-DevLookupClass(LPCWSTR Service, DWORD Bus)
+PDOLookupClass(LPCWSTR Service, DWORD Bus)
 {
 	DWORD dwResult = Bus;
 
@@ -73,65 +73,65 @@ DevLookupClass(LPCWSTR Service, DWORD Bus)
 	return(dwResult);
 }
 DWORD 
-DevLookup(LPCWSTR Bus, LPCWSTR Class, LPCWSTR Service)
+PDOLookup(LPCWSTR Bus, LPCWSTR Class, LPCWSTR Service)
 {
 	DWORD dwResult = DEV_CLASS_DULL;
 
 	if (!win_wcscmp(Class, L"diskdrive")){
-		dwResult = DevLookupBus(Bus, DEV_CLASS_DISK);
+		dwResult = PDOLookupBus(Bus, DEV_CLASS_DISK);
 
 	}else if (!win_wcscmp(Class, L"cdrom")){
-		dwResult = DevLookupBus(Bus, DEV_CLASS_DISK);
+		dwResult = PDOLookupBus(Bus, DEV_CLASS_DISK);
 
 	}else if (!win_wcscmp(Class, L"floppydisk")){
-		dwResult = DevLookupBus(Bus, DEV_CLASS_DISK);
+		dwResult = PDOLookupBus(Bus, DEV_CLASS_DISK);
 
 	}else if (!win_wcscmp(Class, L"net")){
-		dwResult = DevLookupBus(Bus, DEV_CLASS_IFNET);
+		dwResult = PDOLookupBus(Bus, DEV_CLASS_IFNET);
 
 	}else if (!win_wcscmp(Class, L"display")){
-		dwResult = DevLookupBus(Bus, DEV_CLASS_DISPLAY);
+		dwResult = PDOLookupBus(Bus, DEV_CLASS_DISPLAY);
 
 	}else if (!win_wcscmp(Class, L"keyboard")){
-		dwResult = DevLookupBus(Bus, DEV_CLASS_KEYBOARD);
+		dwResult = PDOLookupBus(Bus, DEV_CLASS_KEYBOARD);
 
 	}else if (!win_wcscmp(Class, L"mouse")){
-		dwResult = DevLookupBus(Bus, DEV_CLASS_MOUSE);
+		dwResult = PDOLookupBus(Bus, DEV_CLASS_MOUSE);
 
 	}else if (!win_wcscmp(Class, L"media")){
-		dwResult = DevLookupBus(Bus, DEV_CLASS_MEDIA);
+		dwResult = PDOLookupBus(Bus, DEV_CLASS_MEDIA);
 
 	}else if (!win_wcscmp(Class, L"image")){
-		dwResult = DevLookupBus(Bus, DEV_CLASS_MEDIA);
+		dwResult = PDOLookupBus(Bus, DEV_CLASS_MEDIA);
 
 	}else if (!win_wcscmp(Class, L"volume")){
-		dwResult = DevLookupBus(Bus, DEV_CLASS_STORAGE);
+		dwResult = PDOLookupBus(Bus, DEV_CLASS_STORAGE);
 
 	}else if (!win_wcscmp(Class, L"hidclass")){
-		dwResult = DevLookupBus(Bus, DEV_CLASS_USB);
+		dwResult = PDOLookupBus(Bus, DEV_CLASS_USB);
 
 	}else if (!win_wcscmp(Class, L"ports")){
-		dwResult = DevLookupClass(Service, DEV_BUS_ISA);
+		dwResult = PDOLookupClass(Service, DEV_BUS_ISA);
 
 	}else if (!win_wcscmp(Service, L"usbprint")){	/* no "Printer" class for USB */
 		dwResult = DEV_TYPE_USBPRINT;
 
 	}else if (!win_wcscmp(Class, L"usb")){
-		dwResult = DevLookupBus(Bus, DEV_CLASS_USB);
+		dwResult = PDOLookupBus(Bus, DEV_CLASS_USB);
 
 		/* Vista */
 
 	}else if (!win_wcscmp(Class, L"hdc")){
-		dwResult = DevLookupBus(Bus, DEV_CLASS_DISK);
+		dwResult = PDOLookupBus(Bus, DEV_CLASS_DISK);
 
 	}else if (!win_wcscmp(Class, L"printqueue")){
-		dwResult = DevLookupBus(Bus, DEV_CLASS_PRINTER);
+		dwResult = PDOLookupBus(Bus, DEV_CLASS_PRINTER);
 
 	}else if (!win_wcscmp(Class, L"monitor")){
-		dwResult = DevLookupBus(Bus, DEV_CLASS_DISPLAY);
+		dwResult = PDOLookupBus(Bus, DEV_CLASS_DISPLAY);
 
 	}else if (!win_wcscmp(Class, L"bluetooth")){
-		dwResult = DevLookupBus(Bus, DEV_CLASS_USB);
+		dwResult = PDOLookupBus(Bus, DEV_CLASS_USB);
 
 	}else if (!win_wcscmp(Class, L"audioendpoint")){
 		dwResult = DEV_TYPE_AUDIO;
@@ -140,13 +140,13 @@ DevLookup(LPCWSTR Bus, LPCWSTR Class, LPCWSTR Service)
 		dwResult = DEV_TYPE_PROCESSOR;
 
 	}else{
-		dwResult = DevLookupBus(Bus, DEV_CLASS_SYSTEM);
+		dwResult = PDOLookupBus(Bus, DEV_CLASS_SYSTEM);
 
 	}
 	return(dwResult);
 }
-BOOL 
-DevClass(LPCWSTR ClassID, LPWSTR Result)
+VOID 
+PDOClass(LPCWSTR ClassID, LPWSTR Result)
 {
 	WIN_VNODE vNode;
 	DWORD dwResult;
@@ -178,7 +178,7 @@ pdo_statvfs(WIN_CFDATA *Config, DWORD Flags, WIN_CFDRIVER *Driver)
 		win_wcscpy(Driver->ClassId, iNode.R);
 		/* Device Class ("Components" in msinfo32.exe) */
 		if (reg_read(&vNode, L"ClassGUID", szClass, MAX_GUID, &dwSize)){
-			DevClass(szClass, Driver->NtClass);
+			PDOClass(szClass, Driver->NtClass);
 		}
 		/* Device Driver (*.sys) */
 		if (!reg_read(&vNode, L"Service", Driver->Service, MAX_NAME, &dwSize)){
@@ -196,6 +196,6 @@ pdo_statvfs(WIN_CFDATA *Config, DWORD Flags, WIN_CFDRIVER *Driver)
 	}else{
 		WIN_ERR("reg_open(%ls): %s\n", iNode.Resolved, win_strerror(GetLastError()));
 	}
-	Config->DeviceType = DevLookup(Config->BusName, Driver->NtClass, Driver->Service);
+	Config->DeviceType = PDOLookup(Config->BusName, Driver->NtClass, Driver->Service);
 	return(bResult);
 }

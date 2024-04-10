@@ -37,7 +37,7 @@ ConsoleControlHandler(DWORD CtrlType)
 {
 	BOOL bResult = TRUE;
 	DWORD dwGroupId = __CTTY->GroupId;
-	DWORD dwMode = __CTTY->Mode[0];
+	DWORD dwMode = __CTTY->Mode.Input;
 	WIN_TASK *pwTask = &__Tasks[__TaskId];
 
 	/* To deliver signals, Windows (CSRSS.EXE) actually forks!
@@ -69,13 +69,13 @@ con_TIOCGWINSZ(WIN_DEVICE *Device, WIN_WINSIZE *WinSize)
 	return(screen_TIOCGWINSZ(Device->Output, WinSize));
 }
 BOOL 
-con_TIOCGETA(WIN_DEVICE *Device, DWORD Mode[2])
+con_TIOCGETA(WIN_DEVICE *Device, WIN_IOMODE *Mode)
 {
 	BOOL bResult = FALSE;
 
-	if (!GetConsoleMode(Device->Input, &Mode[0])){
+	if (!GetConsoleMode(Device->Input, &Mode->Input)){
 		WIN_ERR("GetConsoleMode(%d): %s\n", Device->Input, win_strerror(GetLastError()));
-	}else if (!GetConsoleMode(Device->Output, &Mode[1])){
+	}else if (!GetConsoleMode(Device->Output, &Mode->Output)){
 		WIN_ERR("GetConsoleMode(%d): %s\n", Device->Output, win_strerror(GetLastError()));
 	}else{
 		bResult = TRUE;
@@ -83,13 +83,13 @@ con_TIOCGETA(WIN_DEVICE *Device, DWORD Mode[2])
 	return(bResult);
 }
 BOOL 
-con_TIOCSETA(WIN_DEVICE *Device, DWORD Mode[2])
+con_TIOCSETA(WIN_DEVICE *Device, WIN_IOMODE *Mode)
 {
 	BOOL bResult = FALSE;
 
-	if (!SetConsoleMode(Device->Input, Mode[0] & 0xFFFF)){
+	if (!SetConsoleMode(Device->Input, Mode->Input & 0xFFFF)){
 		WIN_ERR("SetConsoleMode(%d): %s\n", Device->Input, win_strerror(GetLastError()));
-	}else if (!SetConsoleMode(Device->Output, Mode[1] & 0xFFFF)){
+	}else if (!SetConsoleMode(Device->Output, Mode->Output & 0xFFFF)){
 		WIN_ERR("SetConsoleMode(%d): %s\n", Device->Output, win_strerror(GetLastError()));
 	}else{
 		bResult = TRUE;
@@ -109,6 +109,26 @@ con_init(WIN_DEVICE *Device)
 
 	Device->Input = CharOpenFile("CONIN$", &wFlags, &sa);
 	Device->Output = CharOpenFile("CONOUT$", &wFlags, &sa);
+}
+BOOL 
+con_open(WIN_DEVICE *Device, WIN_FLAGS *Flags, WIN_VNODE *Result)
+{
+	BOOL bResult = FALSE;
+	HANDLE hResult;
+
+	hResult = CreateFile("CON", GENERIC_WRITE, Flags->Share, 
+		NULL, Flags->Creation, Flags->Attribs, NULL);
+	if (hResult == INVALID_HANDLE_VALUE){
+		WIN_ERR("CreateFile(CON): %s\n", win_strerror(GetLastError()));
+	}else{
+		Result->Handle = hResult;
+//		Result->FSType = FS_TYPE_CHAR;
+		Result->Attribs = Flags->Attribs;
+		Result->Access = win_F_GETFL(hResult);
+		Result->Flags = win_F_GETFD(hResult);
+		bResult = TRUE;
+	}
+	return(bResult);
 }
 DWORD 
 con_poll(WIN_DEVICE *Device, WIN_POLLFD *Info)

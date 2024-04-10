@@ -78,6 +78,7 @@ proc_dup(WIN_TASK *Parent, WIN_THREAD_STRUCT *Thread)
 	ptResult->SavedUid = Parent->SavedUid;
 	ptResult->RealGid = Parent->RealGid;
 	ptResult->SavedGid = Parent->SavedGid;
+	ptResult->ProcMask = Parent->ProcMask;
 	win_memcpy(ptResult->Limit, Parent->Limit, WIN_RLIM_NLIMITS * sizeof(DWORDLONG));
 	win_memcpy(ptResult->AtExit, Parent->AtExit, WIN_ATEXIT_MAX * sizeof(WIN_ATEXITPROC));
 	win_memcpy(ptResult->Action, Parent->Action, WIN_NSIG * sizeof(WIN_SIGACTION));

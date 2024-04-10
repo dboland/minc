@@ -39,6 +39,7 @@ pdo_F_DUPFD(WIN_DEVICE *Device, HANDLE Process, DWORD Options, WIN_VNODE *Result
 	HANDLE hDevice = NULL;
 	HANDLE hResult = NULL;
 
+//vfs_ktrace("pdo_F_DUPFD", STRUCT_DEVICE, Device);
 	if (!Result->FileId){
 		hDevice = Device->Input;
 	}else{
@@ -74,6 +75,7 @@ pdo_open(WIN_NAMEIDATA *Path, WIN_FLAGS *Flags, WIN_MODE *Mode, WIN_VNODE *Resul
 	}else switch (Result->DeviceType){
 		case DEV_TYPE_CONSOLE:
 			bResult = config_activate(Result->Device, Result);
+//			bResult = con_open(Result->Device, Flags, Result);
 			break;
 		case DEV_CLASS_TTY:
 			bResult = tty_open(DEVICE(__CTTY->DeviceId), Flags, Result);
@@ -88,7 +90,7 @@ pdo_open(WIN_NAMEIDATA *Path, WIN_FLAGS *Flags, WIN_MODE *Mode, WIN_VNODE *Resul
 //			bResult = char_open("CONOUT$", Flags, Result);
 //			break;
 		case DEV_TYPE_PTM:
-			bResult = pty_open(pdo_attach(DEV_TYPE_PTY), Flags, Result);
+			bResult = ptm_open(pdo_attach(DEV_TYPE_PTY), Flags, Result);
 			break;
 		case DEV_TYPE_STDIN:		/* sort.exe */
 			bResult = vfs_namei(GetStdHandle(STD_INPUT_HANDLE), 0, Result);

@@ -71,8 +71,8 @@ mail_read(HANDLE Handle, LPSTR Buffer, DWORD Size, DWORD *Result)
 		Size = WIN_MAX_INPUT;
 	}
 	if (!ReadFile(Handle, Buffer, Size, Result, NULL)){
-//		WIN_ERR("mail_read(%d): %s\n", Handle, win_strerror(GetLastError()));
-		*Result = -1;
+		vfs_raise(WM_COMMAND, CTRL_ABORT_EVENT, 0);
+//		*Result = -1;
 	}else{
 		bResult = TRUE;
 	}

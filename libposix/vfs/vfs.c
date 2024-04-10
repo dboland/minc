@@ -82,13 +82,13 @@ HGLOBAL		__Lock;			/* Clipboard lock */
 WIN_SESSION	*__Session;
 WIN_TASK	*__Tasks;
 WIN_DEV_CLASS	*__Devices;
-WIN_TERMIO	*__Terminals;
+WIN_TTY		*__Terminals;
 WIN_MOUNT	*__Mounts;
 WIN_PSTRING	*__Strings;
 WIN_GLOBALS	*__Globals;
 SID8		*__SidMachine;
 SID8		*__SidNone;
-WIN_TERMIO 	*__CTTY;
+WIN_TTY 	*__CTTY;
 CHAR 		*__Escape;
 CHAR		*__Input = __INPUT_BUF;
 CONST CHAR	*__Clipboard;		/* Clipboard buffer */
@@ -108,9 +108,9 @@ BOOL proc_poll(VOID);
 #include "char/char.c"
 #include "drive/drive.c"
 #include "disk/disk.c"
+#include "mailslot/mailslot.c"
 #include "pdo/pdo.c"
 #include "volume/volume.c"
-#include "mailslot/mailslot.c"
 #include "event/event.c"
 #include "winsock/winsock.c"
 #include "vfs_fcntl.c"
