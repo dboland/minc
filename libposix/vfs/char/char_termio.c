@@ -52,7 +52,7 @@ char_TIOCGWINSZ(WIN_VNODE *Node, WIN_WINSIZE *WinSize)
 	return(bResult);
 }
 BOOL 
-char_TIOCGETA(WIN_VNODE *Node, WIN_IOMODE *Mode)
+char_TIOCGETA(WIN_VNODE *Node, WIN_TERMIO *Mode)
 {
 	BOOL bResult = FALSE;
 
@@ -75,7 +75,7 @@ char_TIOCGETA(WIN_VNODE *Node, WIN_IOMODE *Mode)
 	return(bResult);
 }
 BOOL 
-char_TIOCSETA(WIN_VNODE *Node, WIN_IOMODE *Mode)
+char_TIOCSETA(WIN_VNODE *Node, WIN_TERMIO *Mode)
 {
 	BOOL bResult = FALSE;
 

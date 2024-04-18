@@ -61,7 +61,7 @@ errno_posix(DWORD Error)
 			break;
 		case ERROR_PRIVILEGE_NOT_HELD:
 		case ERROR_NOT_ALL_ASSIGNED:
-		case ERROR_LOGON_SESSION_EXISTS:
+//		case ERROR_LOGON_SESSION_EXISTS:
 		case ERROR_INVALID_OPERATION:
 		case ERROR_ELEVATION_REQUIRED:
 		case ERROR_INVALID_OWNER:		/* trying to force owner on remote disk (vim.exe) */

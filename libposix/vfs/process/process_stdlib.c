@@ -50,11 +50,11 @@ ProcInitLimits(DWORDLONG Limits[])
 {
 	Limits[WIN_RLIMIT_CPU] = WIN_RLIM_INFINITY;
 	Limits[WIN_RLIMIT_FSIZE] = WIN_FSIZE_MAX;
-	Limits[WIN_RLIMIT_DATA] = 0x00100000L;		/* SizeOfHeapReserve? */
+	Limits[WIN_RLIMIT_DATA] = 0x00100000LL;		/* SizeOfHeapReserve? */
 	Limits[WIN_RLIMIT_STACK] = WIN_STACKSIZE;
 	Limits[WIN_RLIMIT_CORE] = WIN_RLIM_INFINITY;
-	Limits[WIN_RLIMIT_RSS] = 0x7FFFFFFFL;		/* ksh.exe ("memory") */
-	Limits[WIN_RLIMIT_MEMLOCK] = 0x7FFFFFFFL;
+	Limits[WIN_RLIMIT_RSS] = 0x7FFFFFFFLL;		/* ksh.exe ("memory") */
+	Limits[WIN_RLIMIT_MEMLOCK] = 0x7FFFFFFFLL;
 	Limits[WIN_RLIMIT_NPROC] = WIN_CHILD_MAX;
 	Limits[WIN_RLIMIT_NOFILE] = WIN_OPEN_MAX;
 }
@@ -79,7 +79,7 @@ proc_init(WIN_SIGPROC SignalProc)
 
 	__SignalProc = SignalProc;
 	SetUnhandledExceptionFilter(SigExceptionProc);
-	SetConsoleCtrlHandler(ConsoleControlHandler, TRUE);
+	SetConsoleCtrlHandler(ConControlHandler, TRUE);
 	SetLastError(ERROR_SUCCESS);
 	GetStartupInfo(&si);
 	if (si.dwFlags & STARTF_PS_EXEC){
@@ -100,9 +100,9 @@ proc_init(WIN_SIGPROC SignalProc)
 		ProcInitLimits(pwTask->Limit);
 		win_chdir(L"\\");	/* make sure CWD is at mount point */
 	}
-	if (vfs_setugid(pwTask)){
-		pwTask->IsSetUGid = 1;
-	}
+//	if (vfs_setugid(pwTask)){
+//		pwTask->IsSetUGid = 1;
+//	}
 	__TaskId = pwTask->TaskId;
 	__CTTY = &__Terminals[pwTask->TerminalId];
 	return(pwTask);

@@ -55,7 +55,7 @@ pdo_TIOCGWINSZ(WIN_DEVICE *Device, WIN_WINSIZE *WinSize)
 	return(bResult);
 }
 BOOL 
-pdo_TIOCGETA(WIN_DEVICE *Device, WIN_IOMODE *Mode)
+pdo_TIOCGETA(WIN_DEVICE *Device, WIN_TERMIO *Mode)
 {
 	BOOL bResult = FALSE;
 
@@ -74,7 +74,7 @@ pdo_TIOCGETA(WIN_DEVICE *Device, WIN_IOMODE *Mode)
 	return(bResult);
 }
 BOOL 
-pdo_TIOCSETA(WIN_DEVICE *Device, WIN_IOMODE *Mode)
+pdo_TIOCSETA(WIN_DEVICE *Device, WIN_TERMIO *Mode)
 {
 	BOOL bResult = FALSE;
 

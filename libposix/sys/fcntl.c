@@ -134,14 +134,18 @@ fdflags_posix(WIN_VNODE *Node)
 /****************************************************/
 
 int 
-fcntl_F_DUP(WIN_TASK *Task, WIN_VNODE *Node, DWORD Command, int offset)
+fcntl_F_DUPFD(WIN_TASK *Task, WIN_VNODE *Node, int cmd, int offset)
 {
 	int result = 0;
 	WIN_VNODE vnResult = {0};
+	BOOL bCloseExec = FALSE;
 
+	if (cmd == F_DUPFD_CLOEXEC){
+		bCloseExec = TRUE;
+	}
 	if (offset < 0 || offset >= OPEN_MAX){
 		result = -EBADF;
-	}else if (!vfs_F_CNTL(Node, Command, &vnResult)){
+	}else if (!vfs_F_DUPFD(Node, bCloseExec, &vnResult)){
 		result -= errno_posix(GetLastError());
 	}else{
 		result = fd_posix(Task, &vnResult, offset);
@@ -231,6 +235,49 @@ fcntl_F_SETOWN(WIN_TASK *Task, WIN_VNODE *Node, int owner)
 /****************************************************/
 
 int 
+sys_fcntl(call_t call, int fd, int cmd, ...)
+{
+	int result = 0;
+	va_list args;
+	WIN_TASK *pwTask = call.Task;
+	WIN_VNODE *vNodes = pwTask->Node;
+
+	va_start(args, cmd);
+	if (fd < 0 || fd >= OPEN_MAX){
+		result = -EBADF;
+	}else switch (cmd){
+		case F_DUPFD:
+		case F_DUPFD_CLOEXEC:
+			result = fcntl_F_DUPFD(pwTask, &vNodes[fd], cmd, va_arg(args, int));
+			break;
+		case F_SETFD:
+			result = fcntl_F_SETFD(&vNodes[fd], va_arg(args, int));
+			break;
+		case F_GETFD:
+			result = fdflags_posix(&vNodes[fd]);
+			break;
+		case F_SETFL:
+			result = fcntl_F_SETFL(pwTask, &vNodes[fd], va_arg(args, int));
+			break;
+		case F_GETFL:
+			result = flflags_posix(&vNodes[fd]);
+			break;
+		case F_SETLK:		/* makewhatis (mandoc.exe) */
+			result = fcntl_F_SETLK(pwTask, &vNodes[fd], va_arg(args, struct flock *));
+			break;
+		case F_GETLK:
+			result = fcntl_F_GETLK(&vNodes[fd], va_arg(args, struct flock *));
+			break;
+		case F_SETOWN:		/* see ioctl(2) */
+			result = fcntl_F_SETOWN(pwTask, &vNodes[fd], va_arg(args, int));
+			break;
+		default:
+			result = -EOPNOTSUPP;
+	}
+	va_end(args);
+	return(result);
+}
+int 
 __openat(WIN_TASK *Task, WIN_NAMEIDATA *Path, int flags, va_list args)
 {
 	int result = 0;
@@ -303,48 +350,5 @@ sys_flock(call_t call, int fd, int operation)
 	}else if (!vfs_F_SETLK(&pwTask->Node[fd], dwFlags, &liOffset, &liSize)){
 		result -= errno_posix(GetLastError());
 	}
-	return(result);
-}
-int 
-sys_fcntl(call_t call, int fd, int cmd, ...)
-{
-	int result = 0;
-	va_list args;
-	WIN_TASK *pwTask = call.Task;
-	WIN_VNODE *vNodes = pwTask->Node;
-
-	va_start(args, cmd);
-	if (fd < 0 || fd >= OPEN_MAX){
-		result = -EBADF;
-	}else switch (cmd){
-		case F_DUPFD:
-		case F_DUPFD_CLOEXEC:
-			result = fcntl_F_DUP(pwTask, &vNodes[fd], cmd, va_arg(args, int));
-			break;
-		case F_SETFD:
-			result = fcntl_F_SETFD(&vNodes[fd], va_arg(args, int));
-			break;
-		case F_GETFD:
-			result = fdflags_posix(&vNodes[fd]);
-			break;
-		case F_SETFL:
-			result = fcntl_F_SETFL(pwTask, &vNodes[fd], va_arg(args, int));
-			break;
-		case F_GETFL:
-			result = flflags_posix(&vNodes[fd]);
-			break;
-		case F_SETLK:		/* makewhatis (mandoc.exe) */
-			result = fcntl_F_SETLK(pwTask, &vNodes[fd], va_arg(args, struct flock *));
-			break;
-		case F_GETLK:
-			result = fcntl_F_GETLK(&vNodes[fd], va_arg(args, struct flock *));
-			break;
-		case F_SETOWN:		/* see ioctl(2) */
-			result = fcntl_F_SETOWN(pwTask, &vNodes[fd], va_arg(args, int));
-			break;
-		default:
-			result = -EOPNOTSUPP;
-	}
-	va_end(args);
 	return(result);
 }

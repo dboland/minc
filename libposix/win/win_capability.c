@@ -336,7 +336,7 @@ win_cap_setuid(WIN_PWENT *Passwd, HANDLE *Result)
 		CapTogglePrivilege(hToken, "SeDelegateSessionUserImpersonatePrivilege", SE_PRIVILEGE_ENABLED);
 
 		if (Passwd->Integrity == SECURITY_MANDATORY_SYSTEM_RID){
-//			wControl.Privs = CapAddPrivilege(wControl.Privs, "SeTcbPrivilege");
+			wControl.Privs = CapAddPrivilege(wControl.Privs, "SeTcbPrivilege");
 		}else if (!SetTokenInformation(hToken, TokenSessionId, &wControl.SessionId, sizeof(DWORD))){
 			WIN_ERR("SetTokenInformation(TokenSessionId(%d)): %s\n", wControl.SessionId, win_strerror(GetLastError()));
 		}

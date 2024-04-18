@@ -54,7 +54,7 @@ vfs_TIOCGWINSZ(WIN_VNODE *Node, WIN_WINSIZE *WinSize)
 	return(bResult);
 }
 BOOL 
-vfs_TIOCGETA(WIN_VNODE *Node, WIN_IOMODE *Mode)
+vfs_TIOCGETA(WIN_VNODE *Node, WIN_TERMIO *Mode)
 {
 	BOOL bResult = FALSE;
 
@@ -111,7 +111,7 @@ vfs_TIOCDRAIN(WIN_VNODE *Node)
 	return(bResult);
 }
 BOOL 
-vfs_TIOCSETAF(WIN_VNODE *Node, WIN_IOMODE *Mode, BOOL Flush, BOOL Drain)
+vfs_TIOCSETA(WIN_VNODE *Node, WIN_TERMIO *Mode, BOOL Flush, BOOL Drain)
 {
 	BOOL bResult = FALSE;
 
@@ -142,38 +142,39 @@ BOOL
 vfs_TIOCSCTTY(WIN_DEVICE *Device, WIN_TASK *Task)
 {
 	BOOL bResult = FALSE;
-	WIN_TTY *pTerminal;
+	DWORD dwIndex = 1;
+	WIN_TTY *pTerminal = &__Terminals[dwIndex];
 
-	if (Task->Flags & WIN_PS_CONTROLT){
-		SetLastError(ERROR_LOGON_SESSION_EXISTS);
-	}else{
-		pTerminal = TTYCreate(Device);
-		pTerminal->SessionId = Task->SessionId;
-		pTerminal->GroupId = Task->GroupId;
-//VfsDebugTTY(pTerminal, "vfs_TIOCSCTTY");
-		Task->Flags |= WIN_PS_CONTROLT;
-		Task->TerminalId = pTerminal->TerminalId;
-		bResult = TRUE;
-	}
-	return(bResult);
+	while (dwIndex < WIN_TTY_MAX){
+		if (!pTerminal->TerminalId){
+			pTerminal->DeviceId = Device->DeviceId;
+			pTerminal->TerminalId = dwIndex;
+			if (!pdo_TIOCGETA(Device, &pTerminal->Mode)){
+				pTerminal->Mode.Input = ENABLE_PROCESSED_INPUT + ENABLE_ECHO_INPUT + ENABLE_LINE_INPUT;
+				pTerminal->Mode.Output = ENABLE_PROCESSED_OUTPUT + ENABLE_WRAP_AT_EOL_OUTPUT;
+			}
+			if (!pdo_TIOCGWINSZ(Device, &pTerminal->WinSize)){
+				pTerminal->WinSize.Row = 30;
+				pTerminal->WinSize.Column = 80;
+			}
+//			reg_TIOCGETA(Device, ptResult->Mode);
+			/* CR is MSDOS default, but UNIX cooked mode expects NL */
+			pTerminal->Mode.Input |= WIN_ICRNL | ENABLE_WINDOW_INPUT;
+			pTerminal->Mode.Output |= WIN_ONLCR | WIN_OXTABS;
+			pTerminal->ScrollRate = 1;
+			pTerminal->SessionId = Task->SessionId;
+			pTerminal->GroupId = Task->GroupId;
+			Task->Flags |= WIN_PS_CONTROLT;
+			Task->TerminalId = dwIndex;
+			Device->Index = dwIndex;
+			return(TRUE);
+		}
+		dwIndex++;
+		pTerminal++;
+	}	
+	SetLastError(ERROR_NOT_ENOUGH_MEMORY);
+	return(FALSE);
 }
-/* BOOL 
-vfs_PTMGET(WIN_DEVICE *Device, WIN_PTMGET *Result)
-{
-	BOOL bResult = FALSE;
-	WIN_OBJECT_CONTROL wControl;
-	SECURITY_ATTRIBUTES sa = {sizeof(sa), &wControl.Security, TRUE};
-//	HANDLE hEvent = CreateEvent(NULL, FALSE, FALSE, NULL);
-
-	if (!AclCreateControl(WIN_S_IRWX, &wControl)){
-		return(FALSE);
-	}else if (!MailCreateOutput(Device, &sa, __MailEvent, &Result->Master)){
-		return(FALSE);
-	}else if (MailCreateInput(pdo_attach(DEV_TYPE_TTY), &sa, __MailEvent, &Result->Slave)){
-		bResult = mail_PTMGET(Device, Result->Slave.Device);
-	}
-	return(bResult);
-} */
 BOOL 
 vfs_PTMGET(WIN_VNODE *Node, WIN_VNODE *Result)
 {
@@ -187,56 +188,54 @@ vfs_PTMGET(WIN_VNODE *Node, WIN_VNODE *Result)
 	return(bResult);
 }
 BOOL 
-vfs_TIOCSFLAGS(WIN_DEVICE *Device, DWORD Param)
+vfs_TIOCGPGRP(WIN_VNODE *Node, UINT *Result)
 {
-	msvc_printf("WIN_TIOCSFLAGS(%s): 0x%x\n", Device->Name, Param);
+	BOOL bResult = FALSE;
+
+	if (!Node->Index){
+		SetLastError(ERROR_CTX_NOT_CONSOLE);
+	}else{
+		*Result = __Terminals[Node->Index].GroupId;
+		bResult = TRUE;
+	}
+	return(bResult);
 }
 BOOL 
-vfs_TIOCTL(WIN_VNODE *Node, DWORD Operation, PVOID Param)
+vfs_TIOCSPGRP(WIN_VNODE *Node, UINT GroupId)
 {
-	BOOL bResult = TRUE;
+	BOOL bResult = FALSE;
 
-	switch (Operation){
-		case WIN_TIOCFLUSH:
-			bResult = vfs_TIOCFLUSH(Node);
-			break;
-		case WIN_TIOCDRAIN:
-			bResult = vfs_TIOCDRAIN(Node);
-			break;
-		case WIN_TIOCSETA:
-			bResult = vfs_TIOCSETAF(Node, (WIN_IOMODE *)Param, FALSE, FALSE);
-			break;
-		case WIN_TIOCSETAW:
-			bResult = vfs_TIOCSETAF(Node, (WIN_IOMODE *)Param, FALSE, TRUE);
-			break;
-		case WIN_TIOCSETAF:
-			bResult = vfs_TIOCSETAF(Node, (WIN_IOMODE *)Param, TRUE, TRUE);
-			break;
-		case WIN_TIOCGWINSZ:
-			bResult = vfs_TIOCGWINSZ(Node, (WIN_WINSIZE *)Param);
-			break;
-		case WIN_TIOCSWINSZ:
-			__CTTY->WinSize = *(WIN_WINSIZE *)Param;
-			break;
-		case WIN_TIOCSPGRP:
-			__CTTY->GroupId = *(UINT *)Param;
-			break;
-		case WIN_TIOCGPGRP:
-			*(UINT *)Param = __CTTY->GroupId;
-			break;
-		/* line discipline: raw/cooked mode, see ./sys/kern/tty_conf.c */
-		case WIN_TIOCGETD:
-			*(UINT *)Param = (__CTTY->Mode.Input & ENABLE_LINE_INPUT);
-			break;
-		case WIN_TIOCSFLAGS:		/* ttyflags.exe */
-			bResult = vfs_TIOCSFLAGS(DEVICE(Node->DeviceId), *(DWORD *)Param);
-			break;
-		case WIN_TIOCGFLAGS:
-			*(DWORD *)Param = __CTTY->Flags;
-			break;
-		default:
-			SetLastError(ERROR_NOT_SUPPORTED);
-			bResult = FALSE;
+	if (!Node->Index){
+		SetLastError(ERROR_CTX_NOT_CONSOLE);
+	}else{
+		__Terminals[Node->Index].GroupId = GroupId;
+		bResult = TRUE;
+	}
+	return(bResult);
+}
+BOOL 
+vfs_TIOCGFLAGS(WIN_VNODE *Node, UINT *Result)
+{
+	BOOL bResult = FALSE;
+
+	if (!Node->Index){
+		SetLastError(ERROR_CTX_NOT_CONSOLE);
+	}else{
+		*Result = __Terminals[Node->Index].Flags;
+		bResult = TRUE;
+	}
+	return(bResult);
+}
+BOOL 
+vfs_TIOCSFLAGS(WIN_VNODE *Node, UINT Flags)
+{
+	BOOL bResult = FALSE;
+
+	if (!Node->Index){
+		SetLastError(ERROR_CTX_NOT_CONSOLE);
+	}else{
+		__Terminals[Node->Index].Flags = Flags;
+		bResult = TRUE;
 	}
 	return(bResult);
 }

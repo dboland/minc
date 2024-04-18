@@ -189,31 +189,13 @@ vfs_F_SETLK(WIN_VNODE *Node, DWORD Flags, LARGE_INTEGER *Offset, LARGE_INTEGER *
 	}
 	if (Flags == LOCKFILE_UNLOCK){
 		return(TRUE);
-	}
-	if (!LockFileEx(Node->Handle, Flags, 0, Size->LowPart, Size->HighPart, &ovl)){
+	}else if (!LockFileEx(Node->Handle, Flags, 0, Size->LowPart, Size->HighPart, &ovl)){
 		return(FALSE);
 	}else{
 		Node->LockRegion += dwlSegment;
 		Node->LockSize += Size->QuadPart;
 	}
 	return(TRUE);
-}
-BOOL 
-vfs_F_CNTL(WIN_VNODE *Node, DWORD Command, PVOID Param)
-{
-	BOOL bResult = FALSE;
-
-	switch (Command){
-		case WIN_F_DUPFD:
-			bResult = vfs_F_DUPFD(Node, FALSE, (WIN_VNODE *)Param);
-			break;
-		case WIN_F_DUPFD_CLOEXEC:
-			bResult = vfs_F_DUPFD(Node, TRUE, (WIN_VNODE *)Param);
-			break;
-		default:
-			SetLastError(ERROR_NOT_SUPPORTED);
-	}
-	return(bResult);
 }
 
 /****************************************************/

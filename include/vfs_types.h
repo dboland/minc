@@ -212,27 +212,6 @@ typedef struct _WIN_NAMEIDATA {
 #define WIN_STRIPSLASHES	0x100000	/* strip trailing slashes */
 #define WIN_PDIRUNLOCK		0x200000	/* vfs_lookup() unlocked parent dir */
 
-/*
- * vfs_termio.c
- */
-
-/* sys/ttycom.h */
-
-#define WIN_TIOCFLUSH	16
-#define WIN_TIOCSETA	20
-#define WIN_TIOCSETAW	21
-#define WIN_TIOCSETAF	22
-#define WIN_TIOCGETD	26
-#define WIN_TIOCSFLAGS	92
-#define WIN_TIOCGFLAGS	93
-#define WIN_TIOCDRAIN	94
-#define WIN_TIOCSCTTY	97
-#define WIN_TIOCGSID	99
-#define WIN_TIOCSWINSZ	103
-#define WIN_TIOCGWINSZ	104
-#define WIN_TIOCSPGRP	118
-#define WIN_TIOCGPGRP	119
-
 /* sys/termios.h */
 
 #define WIN_ISIG		0x00800000
@@ -256,12 +235,6 @@ typedef struct _WIN_NAMEIDATA {
  */
 
 #define WIN_OPEN_MAX		64
-
-#define WIN_F_DUPFD		0
-#define WIN_F_GETOWN		5
-#define WIN_F_SETOWN		6
-#define WIN_F_DUPFD_CLOEXEC	10
-
 #define WIN_FSIZE_MAX		(DWORDLONG)((MAX_FILESIZE + WIN_S_BLKSIZE - 1) / WIN_S_BLKSIZE)
 
 typedef struct _WIN_FLAGS {
@@ -488,11 +461,11 @@ typedef struct _WIN_WINSIZE {
 	USHORT YPixel;
 } WIN_WINSIZE;
 
-typedef struct _WIN_IOMODE {
+typedef struct _WIN_TERMIO {
 //	DWORD Line;
 	DWORD Input;
 	DWORD Output;
-} WIN_IOMODE;
+} WIN_TERMIO;
 
 typedef struct _WIN_TTY {
 	DWORD TerminalId;
@@ -500,7 +473,7 @@ typedef struct _WIN_TTY {
 	DWORD GroupId;
 	DWORD SessionId;
 	WIN_WINSIZE WinSize;
-	WIN_IOMODE Mode;
+	WIN_TERMIO Mode;
 	BOOL RVideo;
 	DWORD ScrollRate;
 	BOOL NoWait;
@@ -508,12 +481,9 @@ typedef struct _WIN_TTY {
 	BOOL VEdit;
 	COORD Cursor;
 	DWORD Flags;
+//	HANDLE Input;
+//	HANDLE Output;
 } WIN_TTY;
-
-//typedef struct _WIN_PTMGET {
-//	WIN_VNODE Master;
-//	WIN_VNODE Slave;
-//} WIN_PTMGET;
 
 /*
  * vfs_ktrace.c

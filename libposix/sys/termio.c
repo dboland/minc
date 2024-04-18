@@ -68,7 +68,7 @@ termio_debug(struct termios *term, const char *lable)
 	msvc_printf(" remain(0x%x)\n", dwRemain);
 }
 struct termios *
-termio_posix(struct termios *term, WIN_IOMODE *Mode)
+termio_posix(struct termios *term, WIN_TERMIO *Mode)
 {
 	win_bzero(term, sizeof(struct termios));
 	memcpy(term->c_cc, ttydefchars, sizeof(ttydefchars));
@@ -112,8 +112,8 @@ termio_posix(struct termios *term, WIN_IOMODE *Mode)
 //termio_debug(term, "termios_posix");
 	return(term);
 }
-WIN_IOMODE *
-termio_win(WIN_IOMODE *Mode, struct termios *term)
+WIN_TERMIO *
+termio_win(WIN_TERMIO *Mode, struct termios *term)
 {
 	Mode->Input = __CTTY->Mode.Input & ~ENABLE_ALL_INPUT;
 	Mode->Output = __CTTY->Mode.Output & ~ENABLE_ALL_OUTPUT;
@@ -158,10 +158,30 @@ termio_win(WIN_IOMODE *Mode, struct termios *term)
 /****************************************************/
 
 int 
-tty_TIOCGETA(WIN_TASK *Task, WIN_VNODE *Node, WORD Operation, struct termios *term)
+tty_TIOCFLUSH(WIN_VNODE *Node)
 {
 	int result = 0;
-	WIN_IOMODE ioMode = {0};
+
+	if (!vfs_TIOCFLUSH(Node)){
+		result -= errno_posix(GetLastError());
+	}
+	return(result);
+}
+int 
+tty_TIOCDRAIN(WIN_VNODE *Node)
+{
+	int result = 0;
+
+	if (!vfs_TIOCDRAIN(Node)){
+		result -= errno_posix(GetLastError());
+	}
+	return(result);
+}
+int 
+tty_TIOCGETA(WIN_VNODE *Node, struct termios *term)
+{
+	int result = 0;
+	WIN_TERMIO ioMode = {0};
 
 	if (!vfs_TIOCGETA(Node, &ioMode)){
 		result -= errno_posix(GetLastError());
@@ -173,12 +193,20 @@ tty_TIOCGETA(WIN_TASK *Task, WIN_VNODE *Node, WORD Operation, struct termios *te
 	return(result);
 }
 int 
-tty_TIOCSETA(WIN_TASK *Task, WIN_VNODE *Node, WORD Operation, struct termios *term)
+tty_TIOCSETA(WIN_VNODE *Node, unsigned long request, struct termios *term)
 {
 	int result = 0;
-	WIN_IOMODE ioMode = {0};
+	WIN_TERMIO ioMode = {0};
+	BOOL bFlush = FALSE;
+	BOOL bDrain = FALSE;
 
-	if (!vfs_TIOCTL(Node, Operation, termio_win(&ioMode, term))){
+	if (request == TIOCSETAW){
+		bDrain = TRUE;
+	}else if (request == TIOCSETAF){
+		bFlush = TRUE;
+		bDrain = TRUE;
+	}
+	if (!vfs_TIOCSETA(Node, termio_win(&ioMode, term), bFlush, bDrain)){
 		result -= errno_posix(GetLastError());
 	}else{
 		__CTTY->Mode = ioMode;
@@ -186,35 +214,35 @@ tty_TIOCSETA(WIN_TASK *Task, WIN_VNODE *Node, WORD Operation, struct termios *te
 	return(result);
 }
 int 
-tty_TIOCSCTTY(WIN_TASK *Task, WIN_VNODE *Node)
+tty_TIOCGWINSZ(WIN_VNODE *Node, WIN_WINSIZE *WinSize)
 {
 	int result = 0;
 
-	if (!vfs_TIOCSCTTY(Node->Device, Task)){
+	if (!vfs_TIOCGWINSZ(Node, WinSize)){
 		result -= errno_posix(GetLastError());
 	}
 	return(result);
 }
-/* int 
-tty_PTMGET_OLD(WIN_TASK *Task, WIN_VNODE *Node, struct ptmget *ptm)
+int 
+tty_TIOCSWINSZ(WIN_WINSIZE *WinSize)
+{
+	__CTTY->WinSize = *WinSize;
+	return(0);
+}
+int 
+tty_TIOCSCTTY(WIN_VNODE *Node, WIN_TASK *Task)
 {
 	int result = 0;
-	WIN_PTMGET ptmGet = {0};
 
-	if (!vfs_PTMGET(Node->Device, &ptmGet)){
+	if (Task->Flags & PS_CONTROLT){
+		result = -EPERM;
+	}else if (!vfs_TIOCSCTTY(Node->Device, Task)){
 		result -= errno_posix(GetLastError());
-	}else{
-		// controlling terminal (master)
-		ptm->cfd = fd_posix(Task, &ptmGet.Master, 0);
-		win_strncpy(ptm->cn, ptmGet.Master.Device->Name, 16);
-		// raw serial device (slave)
-		ptm->sfd = fd_posix(Task, &ptmGet.Slave, 0);
-		win_strncpy(ptm->sn, ptmGet.Slave.Device->Name, 16);
 	}
 	return(result);
-} */
+}
 int 
-tty_PTMGET(WIN_TASK *Task, WIN_VNODE *Node, struct ptmget *ptm)
+tty_PTMGET(WIN_VNODE *Node, WIN_TASK *Task, struct ptmget *ptm)
 {
 	int result = 0;
 	WIN_VNODE vnResult = {0};
@@ -232,11 +260,47 @@ tty_PTMGET(WIN_TASK *Task, WIN_VNODE *Node, struct ptmget *ptm)
 	return(result);
 }
 int 
-tty_TIOCTL(WIN_TASK *Task, WIN_VNODE *Node, WORD Operation, PVOID Param)
+tty_TIOCSPGRP(WIN_VNODE *Node, UINT *GroupId)
 {
 	int result = 0;
 
-	if (!vfs_TIOCTL(Node, Operation, Param)){
+	if (!vfs_TIOCSPGRP(Node, *GroupId)){
+		result -= errno_posix(GetLastError());
+	}
+	return(result);
+}
+int 
+tty_TIOCGPGRP(WIN_VNODE *Node, UINT *Result)
+{
+	int result = 0;
+
+	if (!vfs_TIOCGPGRP(Node, Result)){
+		result -= errno_posix(GetLastError());
+	}
+	return(result);
+}
+int 
+tty_TIOCGETD(UINT *Result)
+{
+	*Result = (__CTTY->Mode.Input & ENABLE_LINE_INPUT);
+	return(0);
+}
+int 
+tty_TIOCSFLAGS(WIN_VNODE *Node, UINT *Flags)
+{
+	int result = 0;
+
+	if (!vfs_TIOCSFLAGS(Node, *Flags)){
+		result -= errno_posix(GetLastError());
+	}
+	return(result);
+}
+int 
+tty_TIOCGFLAGS(WIN_VNODE *Node, UINT *Result)
+{
+	int result = 0;
+
+	if (!vfs_TIOCGFLAGS(Node, Result)){
 		result -= errno_posix(GetLastError());
 	}
 	return(result);
@@ -249,27 +313,56 @@ tty_ioctl(WIN_TASK *Task, int fd, unsigned long request, va_list args)
 {
 	int result = 0;
 	DWORD wOperation = request & 0xFF;
-	WIN_VNODE *pNode = &Task->Node[fd];
+	WIN_VNODE *pvNode = &Task->Node[fd];
 
-	if (!pNode->Access){
+	/* tty(4)
+	 */
+	if (!pvNode->Access){
 		result = -EBADF;
 	}else switch (request){
+		case TIOCFLUSH:
+			result = tty_TIOCFLUSH(pvNode);
+			break;
+		case TIOCDRAIN:
+			result = tty_TIOCDRAIN(pvNode);
+			break;
 		case PTMGET:
-			result = tty_PTMGET(Task, pNode, va_arg(args, struct ptmget *));
+			result = tty_PTMGET(pvNode, Task, va_arg(args, struct ptmget *));
 			break;
 		case TIOCSCTTY:
-			result = tty_TIOCSCTTY(Task, pNode);
+			result = tty_TIOCSCTTY(pvNode, Task);
 			break;
 		case TIOCGETA:
-			result = tty_TIOCGETA(Task, pNode, wOperation, va_arg(args, struct termios *));
+			result = tty_TIOCGETA(pvNode, va_arg(args, struct termios *));
+			break;
+		case TIOCGWINSZ:
+			result = tty_TIOCGWINSZ(pvNode, va_arg(args, WIN_WINSIZE *));
+			break;
+		case TIOCSWINSZ:
+			result = tty_TIOCSWINSZ(va_arg(args, WIN_WINSIZE *));
 			break;
 		case TIOCSETA:
 		case TIOCSETAW:
 		case TIOCSETAF:
-			result = tty_TIOCSETA(Task, pNode, wOperation, va_arg(args, struct termios *));
+			result = tty_TIOCSETA(pvNode, request, va_arg(args, struct termios *));
+			break;
+		case TIOCSPGRP:
+			result = tty_TIOCSPGRP(pvNode, va_arg(args, UINT *));
+			break;
+		case TIOCGPGRP:
+			result = tty_TIOCGPGRP(pvNode, va_arg(args, UINT *));
+			break;
+		case TIOCGETD:
+			result = tty_TIOCGETD(va_arg(args, UINT *));
+			break;
+		case TIOCSFLAGS:		/* ttyflags.exe */
+			result = tty_TIOCSFLAGS(pvNode, va_arg(args, UINT *));
+			break;
+		case TIOCGFLAGS:
+			result = tty_TIOCGFLAGS(pvNode, va_arg(args, UINT *));
 			break;
 		default:
-			result = tty_TIOCTL(Task, pNode, wOperation, va_arg(args, PVOID));
+			result = -EOPNOTSUPP;
 	}
 	return(result);
 }

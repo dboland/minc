@@ -164,7 +164,7 @@ VfsVolumeFlags(LPSTR Buffer, DWORD Flags, LPCSTR Label)
 	return(psz);
 }
 LPSTR 
-VfsTermFlags(LPSTR Buffer, WIN_IOMODE *Mode, LPCSTR Label)
+VfsTermFlags(LPSTR Buffer, WIN_TERMIO *Mode, LPCSTR Label)
 {
 	LPSTR psz = Buffer;
 	DWORD dwRemain;

@@ -45,7 +45,7 @@ ptm_open(WIN_DEVICE *Device, WIN_FLAGS *Flags, WIN_VNODE *Result)
 			bResult = char_open(Device, Flags, Result);
 			break;
 		default:
-			SetLastError(ERROR_BAD_DEVICE);
+			SetLastError(ERROR_BAD_FILE_TYPE);
 	}
 //vfs_ktrace("ptm_open", STRUCT_DEVICE, Device);
 	return(bResult);

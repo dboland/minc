@@ -75,6 +75,20 @@ BOOL vfs_execve(WIN_TASK *Task, LPSTR Command, PVOID Environ);
 BOOL vfs_setsid(WIN_TASK *Task);
 BOOL vfs_setugid(WIN_TASK *Task);
 
+/* vfs_termios.c */
+
+BOOL vfs_TIOCGWINSZ(WIN_VNODE *Node, WIN_WINSIZE *WinSize);
+BOOL vfs_TIOCFLUSH(WIN_VNODE *Node);
+BOOL vfs_TIOCDRAIN(WIN_VNODE *Node);
+BOOL vfs_TIOCGETA(WIN_VNODE *Node, WIN_TERMIO *Mode);
+BOOL vfs_TIOCSETA(WIN_VNODE *Node, WIN_TERMIO *Mode, BOOL Flush, BOOL Drain);
+BOOL vfs_PTMGET(WIN_VNODE *Node, WIN_VNODE *Result);
+BOOL vfs_TIOCSCTTY(WIN_DEVICE *Device, WIN_TASK *Task);
+BOOL vfs_TIOCGPGRP(WIN_VNODE *Node, UINT *Result);
+BOOL vfs_TIOCSPGRP(WIN_VNODE *Node, UINT GroupId);
+BOOL vfs_TIOCGFLAGS(WIN_VNODE *Node, UINT *Result);
+BOOL vfs_TIOCSFLAGS(WIN_VNODE *Node, UINT Flags);
+
 /* vfs_stat.c */
 
 BOOL vfs_fstat(WIN_VNODE *Node, WIN_VATTR *Result);
@@ -98,18 +112,10 @@ BOOL vfs_kill_SYS(DWORD CallerId, UINT Message, WPARAM WParam, LPARAM LParam);
 /* vfs_fcntl.c */
 
 BOOL vfs_open(WIN_NAMEIDATA *Path, WIN_FLAGS *Flags, WIN_MODE *Mode, WIN_VNODE *Result);
-BOOL vfs_F_CNTL(WIN_VNODE *Node, DWORD Command, PVOID Param);
 BOOL vfs_F_SETFL(WIN_VNODE *Node, WIN_FLAGS *Flags);
 BOOL vfs_F_SETLK(WIN_VNODE *Node, DWORD Flags, LARGE_INTEGER *Offset, LARGE_INTEGER *Size);
 BOOL vfs_F_GETPATH(WIN_VNODE *Node, WIN_NAMEIDATA *Path);
 BOOL vfs_F_DUPFD(WIN_VNODE *Node, BOOL CloseExec, WIN_VNODE *Result);
-
-/* vfs_termios.c */
-
-BOOL vfs_TIOCTL(WIN_VNODE *Node, DWORD Operation, PVOID Param);
-BOOL vfs_TIOCGETA(WIN_VNODE *Node, WIN_IOMODE *Mode);
-BOOL vfs_TIOCSCTTY(WIN_DEVICE *Device, WIN_TASK *Task);
-BOOL vfs_PTMGET(WIN_VNODE *Node, WIN_VNODE *Result);
 
 /* vfs_time.c */
 

@@ -36,6 +36,8 @@ typedef enum _STRUCT_TYPE{
 	STRUCT_DEVICE
 } STRUCT_TYPE;
 
+LPSTR VfsFileAccess(LPSTR Buffer, ACCESS_MASK Access, DWORD Type);
+
 DWORD vfs_VNODE(WIN_VNODE *Node, LPSTR Buffer);
 DWORD vfs_NAMEI(WIN_NAMEIDATA *Path, LPSTR Buffer);
 

@@ -58,9 +58,9 @@ pdo_init(WIN_DEV_CLASS Devices[])
 	config_init("random", FS_TYPE_PDO, WIN_VCHR, DEV_TYPE_RANDOM);
 	config_init("urandom", FS_TYPE_PDO, WIN_VCHR, DEV_TYPE_URANDOM);
 	config_init("route", FS_TYPE_PDO, WIN_VCHR, DEV_TYPE_ROUTE);
-	config_init("stdin", FS_TYPE_PDO, WIN_VCHR, DEV_TYPE_STDIN);
-	config_init("stdout", FS_TYPE_PDO, WIN_VCHR, DEV_TYPE_STDOUT);
-	config_init("stderr", FS_TYPE_PDO, WIN_VCHR, DEV_TYPE_STDERR);
+	config_init("stdin", FS_TYPE_PROCESS, WIN_VCHR, DEV_TYPE_STDIN);
+	config_init("stdout", FS_TYPE_PROCESS, WIN_VCHR, DEV_TYPE_STDOUT);
+	config_init("stderr", FS_TYPE_PROCESS, WIN_VCHR, DEV_TYPE_STDERR);
 	config_init("swap", FS_TYPE_PDO, WIN_VBLK, DEV_TYPE_SWAP);
 
 	config_init("console", FS_TYPE_CHAR, WIN_VCHR, DEV_TYPE_CONSOLE);

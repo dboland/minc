@@ -33,7 +33,7 @@
 /****************************************************/
 
 BOOL CALLBACK 
-ConsoleControlHandler(DWORD CtrlType)
+ConControlHandler(DWORD CtrlType)
 {
 	BOOL bResult = TRUE;
 	DWORD dwGroupId = __CTTY->GroupId;
@@ -69,7 +69,7 @@ con_TIOCGWINSZ(WIN_DEVICE *Device, WIN_WINSIZE *WinSize)
 	return(screen_TIOCGWINSZ(Device->Output, WinSize));
 }
 BOOL 
-con_TIOCGETA(WIN_DEVICE *Device, WIN_IOMODE *Mode)
+con_TIOCGETA(WIN_DEVICE *Device, WIN_TERMIO *Mode)
 {
 	BOOL bResult = FALSE;
 
@@ -83,7 +83,7 @@ con_TIOCGETA(WIN_DEVICE *Device, WIN_IOMODE *Mode)
 	return(bResult);
 }
 BOOL 
-con_TIOCSETA(WIN_DEVICE *Device, WIN_IOMODE *Mode)
+con_TIOCSETA(WIN_DEVICE *Device, WIN_TERMIO *Mode)
 {
 	BOOL bResult = FALSE;
 

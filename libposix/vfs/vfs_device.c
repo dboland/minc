@@ -74,7 +74,8 @@ config_activate(WIN_DEVICE *Device, WIN_VNODE *Result)
 		Device->Handle = win_F_DUPFD(Result->Handle, HANDLE_FLAG_INHERIT);
 		Device->Flags |= WIN_DVF_ACTIVE;
 	}
-//VfsDebugDevice(Device, "config_activate");
+	Result->Index = Device->Index;
+//vfs_ktrace("config_activate", STRUCT_DEVICE, Device);
 	return(TRUE);
 }
 

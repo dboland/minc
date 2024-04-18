@@ -55,16 +55,16 @@ PdoOpenFile(WIN_NAMEIDATA *Path, WIN_FLAGS *Flags, WIN_VNODE *Result)
 		SetLastError(ERROR_BAD_DEVICE);
 	}else{
 		pwDevice = DEVICE(iNode.DeviceId);
-		Result->Handle = hResult;
-		Result->DeviceType = pwDevice->DeviceType;
 		Result->DeviceId = iNode.DeviceId;
 		Result->FileType = iNode.FileType;
+		Result->DeviceType = pwDevice->DeviceType;
+		Result->Handle = hResult;
 		Result->FSType = FS_TYPE_PDO;
 		Result->Attribs = Path->Attribs;
 		Result->CloseExec = Flags->CloseExec;
 		Result->Access = Flags->Access;
-		Result->Flags = win_F_GETFD(hResult);
 		MapGenericMask(&Result->Access, &AccessMap);
+		Result->Flags = win_F_GETFD(hResult);
 		Result->Device = pwDevice;
 		bResult = TRUE;
 	}
