@@ -126,7 +126,8 @@ getty(const char *path)
 	int result = 0;
 	int fd;
 
-	/* ./lib/libutil/login_tty.c */
+	/* ./lib/libutil/login_tty.c
+	 */
 	fd = open(path, O_RDWR);
 	if (fd < 0){
 		fprintf(stderr, "open(%s): %s\n", path, strerror(errno));

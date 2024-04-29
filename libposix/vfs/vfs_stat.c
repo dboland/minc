@@ -38,9 +38,6 @@ vfs_fstat(WIN_VNODE *Node, WIN_VATTR *Result)
 	BOOL bResult = FALSE;
 
 	switch (Node->FSType){
-		case FS_TYPE_DISK:
-			bResult = disk_fstat(Node, Result);
-			break;
 		case FS_TYPE_CHAR:
 			bResult = char_fstat(Node, Result);
 			break;
@@ -53,11 +50,8 @@ vfs_fstat(WIN_VNODE *Node, WIN_VATTR *Result)
 		case FS_TYPE_WINSOCK:
 			bResult = ws2_fstat(Node, Result);
 			break;
-		case FS_TYPE_PDO:
-			bResult = pdo_fstat(Node, Result);
-			break;
 		default:
-			SetLastError(ERROR_BAD_FILE_TYPE);
+			bResult = disk_fstat(Node, Result);
 	}
 	return(bResult);
 }

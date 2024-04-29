@@ -67,17 +67,6 @@ config_found(LPCSTR Name, DWORD FSType, DWORD FileType, WIN_DEVICE *Device)
 //VfsDebugDevice(Device, "config_found");
 	return(TRUE);
 }
-BOOL 
-config_activate(WIN_DEVICE *Device, WIN_VNODE *Result)
-{
-	if (!Device->Handle){
-		Device->Handle = win_F_DUPFD(Result->Handle, HANDLE_FLAG_INHERIT);
-		Device->Flags |= WIN_DVF_ACTIVE;
-	}
-	Result->Index = Device->Index;
-//vfs_ktrace("config_activate", STRUCT_DEVICE, Device);
-	return(TRUE);
-}
 
 /****************************************************/
 

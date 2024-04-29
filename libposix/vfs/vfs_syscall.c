@@ -33,38 +33,6 @@
 /****************************************************/
 
 BOOL 
-SysCloseExec(WIN_VNODE Nodes[])
-{
-	DWORD dwIndex = 0;
-
-	while (dwIndex < WIN_OPEN_MAX){
-		if (Nodes->CloseExec){
-			vfs_close(Nodes);
-		}
-		dwIndex++;
-		Nodes++;
-	}
-	return(TRUE);
-}
-VOID 
-SysInheritChannels(HANDLE Process, WIN_VNODE Result[])
-{
-	DWORD dwIndex = 0;
-
-	while (dwIndex < WIN_OPEN_MAX){
-		if (Result->Access){
-			if (!(Result->Flags & HANDLE_FLAG_INHERIT)){
-				vfs_F_INHERIT(Result, Process);
-			}
-		}
-		Result++;
-		dwIndex++;
-	}
-}
-
-/****************************************************/
-
-BOOL 
 vfs_seteuid(WIN_TASK *Task, SID8 *Sid)
 {
 	HANDLE hToken = NULL;
@@ -178,73 +146,5 @@ vfs_setsid(WIN_TASK *Task)
 //		Task->TerminalId = 0;
 		bResult = TRUE;
 	}
-	return(bResult);
-}
-BOOL 
-vfs_setugid(WIN_TASK *Task)
-{
-	BOOL bResult = TRUE;
-	WCHAR szPath[MAX_PATH];
-	WIN_VATTR wStat = {0};
-
-	if (!GetModuleFileNameW(NULL, szPath, MAX_PATH)){
-		return(FALSE);
-	}else if (!DiskStatFile(szPath, FILE_ATTRIBUTE_NORMAL, &wStat)){
-		return(FALSE);
-	}
-	if (wStat.Mode.Special & WIN_S_ISUID){
-		bResult = vfs_seteuid(Task, &wStat.UserSid);
-	}
-	if (wStat.Mode.Special & WIN_S_ISGID){
-		bResult = vfs_setegid(Task, &wStat.GroupSid);
-	}
-	return(bResult);
-}
-BOOL 
-vfs_execve(WIN_TASK *Task, LPSTR Command, PVOID Environ)
-{
-	BOOL bResult = FALSE;
-	STARTUPINFO si = {0};
-	HANDLE hToken = NULL;
-	PROCESS_INFORMATION pi = {0};
-	DWORD dwAccess = TOKEN_QUERY + TOKEN_DUPLICATE + TOKEN_ASSIGN_PRIMARY;
-	HANDLE hThread;
-	WIN_OBJECT_CONTROL wControl;
-	SECURITY_ATTRIBUTES sa = {sizeof(sa), &wControl.Security, FALSE};
-	DWORD dwFlags = NORMAL_PRIORITY_CLASS;
-
-	si.cb = sizeof(STARTUPINFO);
-	si.lpDesktop = "";		/* Vista */
-	si.dwFlags = STARTF_PS_EXEC;
-	si.dwX = Task->TaskId;
-	SysCloseExec(Task->Node);
-	if (!win_cap_get_proc(dwAccess, TokenPrimary, &hToken)){
-		WIN_ERR("win_cap_get_proc(%s): %s\n", Command, win_strerror(GetLastError()));
-	}else if (!AclCreateControl(WIN_P_IRWX | TOKEN_IMPERSONATE, &wControl)){
-		WIN_ERR("AclCreateControl(%s): %s\n", Command, win_strerror(GetLastError()));
-	}else if (CreateProcessAsUser(hToken, NULL, Command, &sa, NULL, TRUE, dwFlags, Environ, NULL, &si, &pi)){
-		Task->Flags |= WIN_PS_EXEC;
-		Task->ThreadId = pi.dwThreadId;
-		hThread = Task->Handle;
-		if (Task->ProcessId != GetCurrentProcessId()){	/* not forked (ktrace.exe) */
-			Task->Handle = win_F_DISINHERIT(pi.hThread, Task->ProcessId);
-		}else{
-			Task->Handle = pi.hThread;
-		}
-		SysInheritChannels(pi.hProcess, Task->Node);
-		CloseHandle(hThread);
-		CloseHandle(pi.hProcess);
-		/* https://man7.org/linux/man-pages/man2/execve.2.html */
-		ZeroMemory(Task->Action, WIN_NSIG * sizeof(WIN_SIGACTION));
-		/* https://pubs.opengroup.org/onlinepubs/9699919799/functions/atexit.html */
-		ZeroMemory(Task->AtExit, WIN_ATEXIT_MAX * sizeof(WIN_ATEXITPROC));
-		Task->State = WIN_SRUN;
-		bResult = TRUE;
-	}else{
-		WIN_ERR("CreateProcessAsUser(%s): %s\n", Command, win_strerror(GetLastError()));
-	}
-	CloseHandle(hToken);
-	win_free(Command);
-	win_free(Environ);
 	return(bResult);
 }

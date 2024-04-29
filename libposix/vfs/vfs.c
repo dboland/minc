@@ -94,6 +94,7 @@ CHAR		*__Input = __INPUT_BUF;
 CONST CHAR	*__Clipboard;		/* Clipboard buffer */
 
 BOOL vfs_namei(HANDLE Handle, DWORD Index, WIN_VNODE *Result);
+BOOL vfs_F_DUPFD(WIN_VNODE *Node, BOOL CloseExec, WIN_VNODE *Result);
 BOOL proc_poll(VOID);
 
 #include "vfs_acl.c"
@@ -103,22 +104,22 @@ BOOL proc_poll(VOID);
 #include "vfs_libgen.c"
 #include "vfs_device.c"
 #include "vfs_sysctl.c"
+#include "vfs_syscall.c"
 #include "registry/registry.c"
-#include "pipe/pipe.c"
-#include "char/char.c"
 #include "drive/drive.c"
 #include "disk/disk.c"
+#include "pipe/pipe.c"
+#include "char/char.c"
+#include "volume/volume.c"
+#include "process/process.c"
 #include "mailslot/mailslot.c"
 #include "pdo/pdo.c"
-#include "volume/volume.c"
 #include "event/event.c"
 #include "winsock/winsock.c"
+#include "vfs_namei.c"
 #include "vfs_fcntl.c"
 #include "vfs_stdlib.c"
 #include "vfs_unistd.c"
-#include "vfs_syscall.c"
-#include "vfs_namei.c"
-#include "process/process.c"
 #include "vfs_uio.c"
 #include "vfs_filio.c"
 #include "vfs_stat.c"

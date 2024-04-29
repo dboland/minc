@@ -258,6 +258,167 @@ sys_getresgid(call_t call, gid_t *rgid, gid_t *egid, gid_t *sgid)
 /*******************************************************/
 
 int 
+__seteuid(WIN_TASK *Task, uid_t uid)
+{
+	int result = 0;
+	SID8 sidUser;
+
+	if (!uid){
+		uid = WIN_ROOT_UID;
+	}
+	if (uid == rid_posix(&Task->UserSid)){		/* PRIV_START check (ssh.exe) */
+		return(0);
+	}else if (__getuid(Task) && __geteuid(Task)){
+		result = -EPERM;
+	}else if (!vfs_seteuid(Task, rid_win(&sidUser, uid))){
+		result -= errno_posix(GetLastError());
+	}
+	return(result);
+}
+int 
+sys_seteuid(call_t call, uid_t uid)
+{
+	return(__seteuid(call.Task, uid));
+}
+int 
+__setuid(WIN_TASK *Task, uid_t uid)
+{
+	int result = 0;
+
+	if (!uid){
+		uid = WIN_ROOT_UID;
+	}
+	if (uid == Task->RealUid){
+		return(0);
+	}else if (!__seteuid(Task, uid)){
+		Task->RealUid = rid_posix(&Task->UserSid);
+	}else{
+		result = -EPERM;
+	}
+	return(result);
+}
+int 
+sys_setuid(call_t call, uid_t uid)
+{
+	return(__setuid(call.Task, uid));
+}
+int 
+__setreuid(WIN_TASK *Task, uid_t ruid, uid_t euid)
+{
+	int result = 0;
+
+	if (!ruid){
+		ruid = WIN_ROOT_UID;
+	}
+	if (ruid == __getuid(Task)){
+		result = __seteuid(Task, euid);
+	}else{
+		result = __setuid(Task, ruid);
+	}
+	return(result);
+}
+int 
+sys_setreuid(call_t call, uid_t ruid, uid_t euid)
+{
+	return(__setreuid(call.Task, ruid, euid));
+}
+int 
+sys_setresuid(call_t call, uid_t ruid, uid_t euid, uid_t suid)
+{
+	int result = 0;
+
+	if (!suid){
+		suid = WIN_ROOT_UID;
+	}
+	if (!__setreuid(call.Task, ruid, euid)){
+		call.Task->SavedUid = suid;
+	}else{
+		result = -EPERM;
+	}
+	return(result);
+}
+
+/****************************************************/
+
+int 
+__setegid(WIN_TASK *Task, gid_t gid)
+{
+	int result = 0;
+	SID8 sidGroup;
+
+	if (!gid){
+		gid = WIN_ROOT_GID;
+	}
+	if (gid == rid_posix(&Task->GroupSid)){		/* PRIV_START check (ssh.exe) */
+		return(0);
+	}else if (__getuid(Task) && __geteuid(Task)){
+		result = -EPERM;
+	}else if (!vfs_setegid(Task, rid_win(&sidGroup, gid))){
+		result -= errno_posix(GetLastError());
+	}
+	return(result);
+}
+int 
+sys_setegid(call_t call, gid_t gid)
+{
+	return(__setegid(call.Task, gid));
+}
+int 
+__setgid(WIN_TASK *Task, gid_t gid)
+{
+	int result = 0;
+
+	if (!gid){
+		gid = WIN_ROOT_GID;
+	}
+	if (gid == Task->RealGid){
+		result = 0;
+	}else if (__setegid(Task, gid)){
+		result -= errno_posix(GetLastError());
+	}else{
+		Task->RealGid = rid_posix(&Task->GroupSid);
+	}
+	return(result);
+}
+int 
+sys_setgid(call_t call, gid_t gid)
+{
+	return(__setgid(call.Task, gid));
+}
+int 
+__setregid(WIN_TASK *Task, gid_t rgid, gid_t egid)
+{
+	int result = 0;
+
+	if (rgid == Task->RealGid){
+		result = __setegid(Task, egid);
+	}else{
+		result = __setgid(Task, rgid);
+	}
+	return(result);
+}
+int 
+sys_setregid(call_t call, gid_t rgid, gid_t egid)
+{
+	return(__setregid(call.Task, rgid, egid));
+}
+int 
+sys_setresgid(call_t call, gid_t rgid, gid_t egid, gid_t sgid)
+{
+	if (!sgid){
+		sgid = WIN_ROOT_GID;
+	}
+	if (!__setregid(call.Task, rgid, egid)){
+		call.Task->SavedGid = sgid;
+	}else{
+		return(-EPERM);
+	}
+	return(0);
+}
+
+/****************************************************/
+
+int 
 sys_getlogin(call_t call, char *name, size_t namelen)
 {
 	int result = 0;
@@ -381,12 +542,12 @@ sys_lchown(call_t call, const char *path, uid_t owner, gid_t group)
 	return(0);
 }
 int 
-sys_fchownat(call_t call, int dirfd, const char *pathname, uid_t owner, gid_t group, int flags)
+sys_fchownat(call_t call, int dirfd, const char *path, uid_t owner, gid_t group, int flags)
 {
 	int result = 0;
 	SID8 sidUser;
 	SID8 sidGroup;
-	WIN_NAMEIDATA wpePath;
+	WIN_NAMEIDATA wPath;
 
 	if (!owner){
 		owner = WIN_ROOT_UID;
@@ -394,9 +555,9 @@ sys_fchownat(call_t call, int dirfd, const char *pathname, uid_t owner, gid_t gr
 	if (!group){
 		group = WIN_ROOT_GID;
 	}
-	if (!pathname || !pathname[0]){
+	if (!path || !path[0]){
 		result = -EINVAL;
-	}else if (!vfs_chown(pathat_win(&wpePath, dirfd, pathname, flags), rid_win(&sidUser, owner), rid_win(&sidGroup, group))){
+	}else if (!vfs_chown(pathat_win(&wPath, dirfd, path, flags), rid_win(&sidUser, owner), rid_win(&sidGroup, group))){
 		result -= errno_posix(GetLastError());
 	}
 	return(result);
@@ -453,7 +614,7 @@ __exit(WIN_TASK *Task, int status)
 	Task->Status = (status * 0x100);
 	Task->Flags |= WIN_PS_EXITING;
 	if (Task->Flags & WIN_PS_CONTROLT){
-		tty_close(__CTTY);
+//		tty_close(__CTTY);
 	}
 	win_exit(status);
 }

@@ -224,19 +224,21 @@ tty_TIOCGWINSZ(WIN_VNODE *Node, WIN_WINSIZE *WinSize)
 	return(result);
 }
 int 
-tty_TIOCSWINSZ(WIN_WINSIZE *WinSize)
+tty_TIOCSWINSZ(WIN_VNODE *Node, WIN_WINSIZE *WinSize)
 {
-	__CTTY->WinSize = *WinSize;
-	return(0);
+	int result = 0;
+
+	if (!vfs_TIOCSWINSZ(Node, WinSize)){
+		result -= errno_posix(GetLastError());
+	}
+	return(result);
 }
 int 
 tty_TIOCSCTTY(WIN_VNODE *Node, WIN_TASK *Task)
 {
 	int result = 0;
 
-	if (Task->Flags & PS_CONTROLT){
-		result = -EPERM;
-	}else if (!vfs_TIOCSCTTY(Node->Device, Task)){
+	if (!vfs_TIOCSCTTY(Node->Device, Task)){
 		result -= errno_posix(GetLastError());
 	}
 	return(result);
@@ -264,7 +266,7 @@ tty_TIOCSPGRP(WIN_VNODE *Node, UINT *GroupId)
 {
 	int result = 0;
 
-	if (!vfs_TIOCSPGRP(Node, *GroupId)){
+	if (!vfs_TIOCSPGRP(CTTY(Node->Index), *GroupId)){
 		result -= errno_posix(GetLastError());
 	}
 	return(result);
@@ -274,7 +276,7 @@ tty_TIOCGPGRP(WIN_VNODE *Node, UINT *Result)
 {
 	int result = 0;
 
-	if (!vfs_TIOCGPGRP(Node, Result)){
+	if (!vfs_TIOCGPGRP(CTTY(Node->Index), Result)){
 		result -= errno_posix(GetLastError());
 	}
 	return(result);
@@ -290,7 +292,7 @@ tty_TIOCSFLAGS(WIN_VNODE *Node, UINT *Flags)
 {
 	int result = 0;
 
-	if (!vfs_TIOCSFLAGS(Node, *Flags)){
+	if (!vfs_TIOCSFLAGS(CTTY(Node->Index), *Flags)){
 		result -= errno_posix(GetLastError());
 	}
 	return(result);
@@ -300,7 +302,7 @@ tty_TIOCGFLAGS(WIN_VNODE *Node, UINT *Result)
 {
 	int result = 0;
 
-	if (!vfs_TIOCGFLAGS(Node, Result)){
+	if (!vfs_TIOCGFLAGS(CTTY(Node->Index), Result)){
 		result -= errno_posix(GetLastError());
 	}
 	return(result);
@@ -314,6 +316,7 @@ tty_ioctl(WIN_TASK *Task, int fd, unsigned long request, va_list args)
 	int result = 0;
 	DWORD wOperation = request & 0xFF;
 	WIN_VNODE *pvNode = &Task->Node[fd];
+	CHAR szText[MAX_TEXT];
 
 	/* tty(4)
 	 */
@@ -339,7 +342,7 @@ tty_ioctl(WIN_TASK *Task, int fd, unsigned long request, va_list args)
 			result = tty_TIOCGWINSZ(pvNode, va_arg(args, WIN_WINSIZE *));
 			break;
 		case TIOCSWINSZ:
-			result = tty_TIOCSWINSZ(va_arg(args, WIN_WINSIZE *));
+			result = tty_TIOCSWINSZ(pvNode, va_arg(args, WIN_WINSIZE *));
 			break;
 		case TIOCSETA:
 		case TIOCSETAW:
@@ -363,6 +366,9 @@ tty_ioctl(WIN_TASK *Task, int fd, unsigned long request, va_list args)
 			break;
 		default:
 			result = -EOPNOTSUPP;
+	}
+	if (Task->TracePoints & KTRFAC_USER){
+		ktrace_USER(Task, "WIN_VNODE", szText, vfs_VNODE(pvNode, szText));
 	}
 	return(result);
 }

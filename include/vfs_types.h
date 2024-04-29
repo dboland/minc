@@ -79,7 +79,6 @@ typedef enum _WIN_VTAGTYPE {
 } WIN_VTAGTYPE;
 
 #define WIN_UNIT_MAX		64
-#define WIN_TTY_MAX		WIN_UNIT_MAX
 
 /* sys/syslimits.h */
 
@@ -101,7 +100,7 @@ typedef struct _WIN_DEVICE {
 	HANDLE Input;
 	HANDLE Output;
 	DWORD Flags;			/* see below */
-	DWORD Index;
+	DWORD Index;			/* driver-specific software context */
 	WCHAR NtName[MAX_NAME];
 	WCHAR ClassId[MAX_GUID];
 	WCHAR NtPath[MAX_PATH];
@@ -176,8 +175,10 @@ typedef struct _WIN_INODE {
 
 typedef struct _WIN_NAMEIDATA {
 	DWORD MountId;
+	DWORD DeviceId;
 	WIN_VTYPE FileType;
 	WIN_FS_TYPE FSType;
+	WIN_DEVICE *Device;
 	WCHAR Resolved[WIN_PATH_MAX];
 	DWORD Attribs;
 	DWORD Flags;			/* see below */
@@ -229,6 +230,10 @@ typedef struct _WIN_NAMEIDATA {
 #define WIN_ONLCR		0x00020000
 #define WIN_OXTABS		0x00040000
 #define WIN_OCRNL		0x00100000
+
+/* sys/ttycom.h */
+
+#define TIOCFLAG_ACTIVE		0x00010000
 
 /*
  * vfs_fcntl.c
@@ -454,6 +459,8 @@ typedef struct _WIN_POLLFD {
  * vfs_termio.c
  */
 
+#define WIN_TTY_MAX		WIN_UNIT_MAX
+
 typedef struct _WIN_WINSIZE {
 	USHORT Row;
 	USHORT Column;
@@ -481,9 +488,9 @@ typedef struct _WIN_TTY {
 	BOOL VEdit;
 	COORD Cursor;
 	DWORD Flags;
-//	HANDLE Input;
-//	HANDLE Output;
 } WIN_TTY;
+
+#define CTTY(idx)		&__Terminals[idx]
 
 /*
  * vfs_ktrace.c

@@ -36,13 +36,18 @@ BOOL
 char_fstat(WIN_VNODE *Node, WIN_VATTR *Result)
 {
 	BOOL bResult = FALSE;
+	PSECURITY_DESCRIPTOR psd;
 
-	switch (Node->DeviceType){
-		case DEV_TYPE_NULL:
-			bResult = PipeStatFile(Node, Result);
-			break;
-		default:
-			bResult = CharStatFile(DEVICE(Node->DeviceId), Result);
+	if (!win_acl_get_fd(Node->Object, &psd)){
+		return(FALSE);
+	}else if (!GetFileInformationByHandle(Node->Object, (BY_HANDLE_FILE_INFORMATION *)Result)){
+		WIN_ERR("GetFileInformationByHandle(%d): %s\n", Node->Object, win_strerror(GetLastError()));
+	}else if (vfs_acl_stat(psd, Result)){
+		Result->DeviceId = __Mounts->DeviceId;
+		Result->Mode.FileType = Node->FileType;
+		Result->SpecialId = Node->DeviceId;
+		bResult = TRUE;
 	}
+	LocalFree(psd);
 	return(bResult);
 }

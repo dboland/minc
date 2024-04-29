@@ -35,55 +35,26 @@ GENERIC_MAPPING AccessMap = {WIN_S_IREAD, WIN_S_IWRITE, WIN_S_IEXEC, WIN_S_IRWX}
 /****************************************************/
 
 BOOL 
-PdoOpenFile(WIN_NAMEIDATA *Path, WIN_FLAGS *Flags, WIN_VNODE *Result)
+PdoFileOpen(WIN_DEVICE *Device, WIN_FLAGS *Flags, WIN_VNODE *Result)
 {
 	BOOL bResult = FALSE;
-	WIN_INODE iNode;
-	DWORD dwSize = sizeof(WIN_INODE);
-	WIN_DEVICE *pwDevice;
-	HANDLE hResult;
-	SECURITY_ATTRIBUTES sa = {sizeof(sa), NULL, TRUE};
 
-//VfsDebugPath(Path, "PdoOpenFile");
-	hResult = CreateFileW(Path->Resolved, GENERIC_READ, FILE_SHARE_READ, 
-		&sa, OPEN_EXISTING, FILE_ATTRIBUTE_SYSTEM, NULL);
-	if (hResult == INVALID_HANDLE_VALUE){
-		WIN_ERR("PdoOpenFile(%ls): %s\n", Path->Resolved, win_strerror(GetLastError()));
-	}else if (!ReadFile(hResult, &iNode, dwSize, &dwSize, NULL)){
-		WIN_ERR("ReadFile(%ls): %s\n", Path->Resolved, win_strerror(GetLastError()));
-	}else if (iNode.Magic != TypeNameVirtual){
-		SetLastError(ERROR_BAD_DEVICE);
+	if (!Device->Flags){
+		SetLastError(ERROR_DEVICE_NOT_AVAILABLE);
 	}else{
-		pwDevice = DEVICE(iNode.DeviceId);
-		Result->DeviceId = iNode.DeviceId;
-		Result->FileType = iNode.FileType;
-		Result->DeviceType = pwDevice->DeviceType;
-		Result->Handle = hResult;
+		Result->DeviceId = Device->DeviceId;
+		Result->FileType = Device->FileType;
+		Result->DeviceType = Device->DeviceType;
+		Result->Handle = Device->Handle;
 		Result->FSType = FS_TYPE_PDO;
-		Result->Attribs = Path->Attribs;
+		Result->Attribs = FILE_ATTRIBUTE_PDO | FILE_ATTRIBUTE_DEVICE;
 		Result->CloseExec = Flags->CloseExec;
 		Result->Access = Flags->Access;
 		MapGenericMask(&Result->Access, &AccessMap);
-		Result->Flags = win_F_GETFD(hResult);
-		Result->Device = pwDevice;
+		Result->Flags = win_F_GETFD(Device->Handle);
+		Result->Index = Device->Index;
+		Result->Device = Device;
 		bResult = TRUE;
 	}
-	return(bResult);
-}
-BOOL 
-PdoStatFile(HANDLE Handle, WIN_VATTR *Result)
-{
-	BOOL bResult = FALSE;
-	PSECURITY_DESCRIPTOR psd;
-
-	if (!win_acl_get_fd(Handle, &psd)){
-		return(FALSE);
-	}else if (!GetFileInformationByHandle(Handle, (BY_HANDLE_FILE_INFORMATION *)Result)){
-		WIN_ERR("GetFileInformationByHandle(%d): %s\n", Handle, win_strerror(GetLastError()));
-	}else if (vfs_acl_stat(psd, Result)){
-		Result->DeviceId = __Mounts->DeviceId;
-		bResult = TRUE;
-	}
-	LocalFree(psd);
 	return(bResult);
 }

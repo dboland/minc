@@ -33,6 +33,22 @@
 /****************************************************/
 
 BOOL 
+mail_TIOCSCTTY(WIN_TTY *Terminal, WIN_DEVICE *Device, WIN_TASK *Task)
+{
+	BOOL bResult = FALSE;
+
+	if (Task->Flags & WIN_PS_CONTROLT){
+		SetLastError(ERROR_LOGON_SESSION_EXISTS);
+	}else{
+		Terminal->SessionId = Task->SessionId;
+		Terminal->GroupId = Task->GroupId;
+		Task->Flags |= WIN_PS_CONTROLT;
+		Task->TerminalId = Terminal->TerminalId;
+		bResult = TRUE;
+	}
+	return(bResult);
+}
+BOOL 
 mail_PTMGET(WIN_DEVICE *Master, WIN_DEVICE *Slave)
 {
 	BOOL bResult = FALSE;

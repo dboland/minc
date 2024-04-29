@@ -42,9 +42,9 @@ pdo_close(WIN_VNODE *Node)
 	}else if (!CloseHandle(Node->Handle)){
 		WIN_ERR("pdo_close(%d): %s\n", Node->Handle, win_strerror(GetLastError()));
 	}else{
-		ZeroMemory(Node, sizeof(WIN_VNODE));
 		bResult = TRUE;
 	}
+	ZeroMemory(Node, sizeof(WIN_VNODE));
 	return(bResult);
 }
 BOOL 
@@ -58,12 +58,12 @@ pdo_read(WIN_DEVICE *Device, LPSTR Buffer, LONG Size, DWORD *Result)
 			bResult = input_read(Device->Input, Buffer, Size, Result);
 			break;
 		case DEV_TYPE_TTY:
-			bResult = mail_read(Device->Input, Buffer, Size, Result);
+			bResult = tty_read(Device, Buffer, Size, Result);
 			break;
 		case DEV_TYPE_ROUTE:
 			bResult = route_read(Device, Buffer, Size, Result);
 			break;
-		case DEV_TYPE_RANDOM:		/* pwgen.exe */
+		case DEV_TYPE_RANDOM:			/* pwgen.exe */
 		case DEV_TYPE_URANDOM:
 			bResult = rand_read(Buffer, Size, Result);
 			break;
@@ -83,7 +83,7 @@ pdo_write(WIN_DEVICE *Device, LPCSTR Buffer, DWORD Size, DWORD *Result)
 			bResult = screen_write(Device->Output, Buffer, Size, Result);
 			break;
 		case DEV_TYPE_TTY:
-			bResult = mail_write(Device->Output, Buffer, Size, Result);
+			bResult = tty_write(Device, Buffer, Size, Result);
 			break;
 		case DEV_TYPE_ROUTE:
 			bResult = route_write(Device, Buffer, Size, Result);

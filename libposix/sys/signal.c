@@ -37,12 +37,13 @@
 #define BIT_SIGINFO		0x10000000
 #define BIT_SIGKILL		0x00000100
 #define BIT_SIGSTOP		0x00010000
+#define BIT_SIGTSTP		0x00020000
 #define BIT_SIGTTIN		0x00100000
 #define BIT_SIGTTOU		0x00200000
 #define BIT_SIGCONT		0x00040000
 
-#define SIGMASK_TTY	\
-	(BIT_SIGTTIN | BIT_SIGTTOU | BIT_SIGSTOP | BIT_SIGCONT)
+#define SIGMASK_STOP	\
+	(BIT_SIGSTOP | BIT_SIGTSTP | BIT_SIGTTIN | BIT_SIGTTOU | BIT_SIGCONT)
 #define SIGMASK_IGNORE	\
 	(BIT_SIGWINCH | BIT_SIGCHLD | BIT_SIGURG | BIT_SIGINFO)
 
@@ -126,12 +127,10 @@ sigproc_default(WIN_TASK *Task, int signum)
 	sigset_t sigbit = sigmask(signum);
 	sigset_t mask = 0;
 
-	if (sigbit & BIT_SIGSTOP){
+	if (sigbit & SIGMASK_STOP){
 		Task->Status = _WSTOPPED;
 		SetEvent(__Interrupt);
 		__sigsuspend(Task, &mask);
-	}else if (sigbit & SIGMASK_TTY){
-		result = 0;		/* mark as handled (interrupt syscalls) */
 	}else if (sigbit & ~SIGMASK_IGNORE){
 		Task->Status = signum;
 		Task->Flags |= WIN_PS_EXITING;

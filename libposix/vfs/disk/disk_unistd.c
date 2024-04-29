@@ -162,6 +162,8 @@ disk_pread(WIN_VNODE *Node, LPVOID Buffer, DWORD Size, DWORDLONG Offset, DWORD *
 		WIN_ERR("SetFilePointerEx(%d): %s\n", Node->Handle, win_strerror(GetLastError()));
 	}else if (ReadFile(Node->Handle, Buffer, Size, Result, &ovl)){
 		bResult = SetFilePointerEx(Node->Handle, liCurrent, &liCurrent, FILE_BEGIN);
+	}else if (ERROR_HANDLE_EOF == GetLastError()){	/* vi.exe */
+		bResult = TRUE;
 	}
 	return(bResult);
 }

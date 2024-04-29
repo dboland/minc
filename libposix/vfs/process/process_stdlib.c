@@ -71,6 +71,26 @@ ProcInitChannels(WIN_VNODE Result[])
 
 /************************************************************/
 
+BOOL 
+proc_setugid(WIN_TASK *Task)
+{
+	BOOL bResult = TRUE;
+	WCHAR szPath[MAX_PATH];
+	WIN_VATTR wStat = {0};
+
+	if (!GetModuleFileNameW(NULL, szPath, MAX_PATH)){
+		return(FALSE);
+	}else if (!DiskFileStat(szPath, FILE_ATTRIBUTE_NORMAL, &wStat)){
+		return(FALSE);
+	}
+	if (wStat.Mode.Special & WIN_S_ISUID){
+		bResult = vfs_seteuid(Task, &wStat.UserSid);
+	}
+	if (wStat.Mode.Special & WIN_S_ISGID){
+		bResult = vfs_setegid(Task, &wStat.GroupSid);
+	}
+	return(bResult);
+}
 WIN_TASK *
 proc_init(WIN_SIGPROC SignalProc)
 {
@@ -100,7 +120,7 @@ proc_init(WIN_SIGPROC SignalProc)
 		ProcInitLimits(pwTask->Limit);
 		win_chdir(L"\\");	/* make sure CWD is at mount point */
 	}
-//	if (vfs_setugid(pwTask)){
+//	if (proc_setugid(pwTask)){
 //		pwTask->IsSetUGid = 1;
 //	}
 	__TaskId = pwTask->TaskId;

@@ -41,5 +41,6 @@ pty_open(WIN_DEVICE *Device, WIN_FLAGS *Flags, WIN_VNODE *Result)
 	Device->Output = CharOpenFile("CONOUT$", Flags, &sa);
 	Result->Event = Device->Input;
 	Result->Device = Device;
-	return(config_activate(Device, Result));
+//	return(config_activate(Device, Result));
+	return(TRUE);
 }

@@ -38,6 +38,7 @@ pdo_F_DUPFD(WIN_DEVICE *Device, HANDLE Process, DWORD Options, WIN_VNODE *Result
 	BOOL bResult = FALSE;
 	HANDLE hDevice = NULL;
 	HANDLE hResult = NULL;
+	HANDLE hObject;
 
 //vfs_ktrace("pdo_F_DUPFD", STRUCT_DEVICE, Device);
 	if (!Result->FileId){
@@ -48,8 +49,11 @@ pdo_F_DUPFD(WIN_DEVICE *Device, HANDLE Process, DWORD Options, WIN_VNODE *Result
 	if (!hDevice){
 		SetLastError(ERROR_IO_DEVICE);
 	}else if (!DuplicateHandle(GetCurrentProcess(), hDevice, Process, &hResult, 0, TRUE, Options)){
-		WIN_ERR("dev_F_DUPFD(%d): %s\n", hDevice, win_strerror(GetLastError()));
+		WIN_ERR("pdo_F_DUPFD(%d): %s\n", hDevice, win_strerror(GetLastError()));
+	}else if (!DuplicateHandle(GetCurrentProcess(), Result->Handle, Process, &hObject, 0, TRUE, Options)){
+		WIN_ERR("pdo_F_DUPFD(%d): %s\n", Result->Handle, win_strerror(GetLastError()));
 	}else{
+		Result->Object = hObject;
 		Result->Handle = hResult;
 		Result->FSType = Device->FSType;
 		Result->FileType = Device->FileType;
@@ -64,30 +68,19 @@ pdo_F_DUPFD(WIN_DEVICE *Device, HANDLE Process, DWORD Options, WIN_VNODE *Result
 /****************************************************/
 
 BOOL 
-pdo_open(WIN_NAMEIDATA *Path, WIN_FLAGS *Flags, WIN_MODE *Mode, WIN_VNODE *Result)
+pdo_open(WIN_DEVICE *Device, WIN_FLAGS *Flags, WIN_VNODE *Result)
 {
 	BOOL bResult = FALSE;
 
-	if (!PdoOpenFile(Path, Flags, Result)){
+	if (!PdoFileOpen(Device, Flags, Result)){
 		return(FALSE);
-	}else if (!Result->Device->Flags){
-		SetLastError(ERROR_DEVICE_NOT_AVAILABLE);
-	}else switch (Result->DeviceType){
-		case DEV_TYPE_CONSOLE:
-			bResult = config_activate(Result->Device, Result);
-			break;
+	}else switch (Device->DeviceType){
 		case DEV_CLASS_TTY:
 			bResult = tty_open(DEVICE(__CTTY->DeviceId), Flags, Result);
 			break;
 		case DEV_TYPE_NULL:
 			bResult = null_open(Result->Device, Flags, Result);
 			break;
-//		case DEV_TYPE_INPUT:
-//			bResult = char_open("CONIN$", Flags, Result);
-//			break;
-//		case DEV_TYPE_SCREEN:
-//			bResult = char_open("CONOUT$", Flags, Result);
-//			break;
 		case DEV_TYPE_PTM:
 			bResult = ptm_open(pdo_attach(DEV_TYPE_PTY), Flags, Result);
 			break;

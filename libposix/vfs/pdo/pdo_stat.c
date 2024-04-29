@@ -33,28 +33,22 @@
 /****************************************************/
 
 BOOL 
-pdo_fstat(WIN_VNODE *Node, WIN_VATTR *Result)
-{
-	BOOL bResult = FALSE;
-
-	if (PdoStatFile(Node->Handle, Result)){
-		Result->Mode.FileType = Node->FileType;
-		Result->SpecialId = Node->DeviceId;
-		bResult = TRUE;
-	}
-	return(bResult);
-}
-BOOL 
 pdo_stat(WIN_NAMEIDATA *Path, WIN_VATTR *Result)
 {
 	BOOL bResult = FALSE;
-	WIN_FLAGS wFlags = {0};
-	WIN_VNODE vNode;
+	PSECURITY_DESCRIPTOR psd;
+	HANDLE hDevice = Path->Device->Handle;
 
-	if (!PdoOpenFile(Path, &wFlags, &vNode)){
+	if (!win_acl_get_fd(hDevice, &psd)){
 		return(FALSE);
-	}else if (pdo_fstat(&vNode, Result)){
-		bResult = CloseHandle(vNode.Handle);
+	}else if (!GetFileInformationByHandle(hDevice, (BY_HANDLE_FILE_INFORMATION *)Result)){
+		WIN_ERR("GetFileInformationByHandle(%d): %s\n", hDevice, win_strerror(GetLastError()));
+	}else if (vfs_acl_stat(psd, Result)){
+		Result->DeviceId = __Mounts->DeviceId;
+		Result->Mode.FileType = Path->FileType;
+		Result->SpecialId = Path->DeviceId;
+		bResult = CloseHandle(hDevice);
 	}
+	LocalFree(psd);
 	return(bResult);
 }

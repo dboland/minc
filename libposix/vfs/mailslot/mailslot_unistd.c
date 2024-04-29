@@ -72,7 +72,6 @@ mail_read(HANDLE Handle, LPSTR Buffer, DWORD Size, DWORD *Result)
 	}
 	if (!ReadFile(Handle, Buffer, Size, Result, NULL)){
 		vfs_raise(WM_COMMAND, CTRL_ABORT_EVENT, 0);
-//		*Result = -1;
 	}else{
 		bResult = TRUE;
 	}

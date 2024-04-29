@@ -56,16 +56,14 @@ char_open(WIN_DEVICE *Device, WIN_FLAGS *Flags, WIN_VNODE *Result)
 {
 	BOOL bResult = FALSE;
 
+//vfs_ktrace("pdo_open", STRUCT_DEVICE, Device);
 	switch (Device->DeviceType){
 		case DEV_TYPE_PTY:
 			bResult = pty_open(Device, Flags, Result);
 			break;
-		case DEV_TYPE_CONSOLE:
-			bResult = con_open(Device, Flags, Result);
-			break;
-		case DEV_TYPE_NULL:
-			bResult = null_open(Device, Flags, Result);
-			break;
+//		case DEV_TYPE_CONSOLE:
+//			bResult = con_open(Device, Flags, Result);
+//			break;
 		default:
 			SetLastError(ERROR_BAD_DEVICE);
 	}

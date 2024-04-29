@@ -37,7 +37,6 @@ char_TIOCGWINSZ(WIN_VNODE *Node, WIN_WINSIZE *WinSize)
 {
 	BOOL bResult = FALSE;
 
-//VfsDebugNode(Node, "char_TIOCGWINSZ");
 	switch (Node->DeviceType){
 		case DEV_TYPE_CONSOLE:
 		case DEV_TYPE_PTY:
@@ -56,7 +55,6 @@ char_TIOCGETA(WIN_VNODE *Node, WIN_TERMIO *Mode)
 {
 	BOOL bResult = FALSE;
 
-//vfs_ktrace("char_TIOCGETA", STRUCT_VNODE, Node);
 	switch (Node->DeviceType){
 		case DEV_TYPE_CONSOLE:
 		case DEV_TYPE_PTY:
@@ -71,7 +69,6 @@ char_TIOCGETA(WIN_VNODE *Node, WIN_TERMIO *Mode)
 		default:
 			SetLastError(ERROR_BAD_DEVICE);
 	}
-//VfsDebugIoctl(Mode, "char_TIOCGETA");
 	return(bResult);
 }
 BOOL 
@@ -79,7 +76,6 @@ char_TIOCSETA(WIN_VNODE *Node, WIN_TERMIO *Mode)
 {
 	BOOL bResult = FALSE;
 
-//VfsDebugIoctl(Mode, "char_TIOCSETA");
 	switch (Node->DeviceType){
 		case DEV_TYPE_CONSOLE:
 		case DEV_TYPE_PTY:
@@ -121,6 +117,24 @@ char_TIOCDRAIN(WIN_VNODE *Node)
 			break;
 		default:
 			SetLastError(ERROR_BAD_DEVICE);
+	}
+	return(bResult);
+}
+BOOL 
+char_TIOCSCTTY(WIN_TTY *Terminal, WIN_DEVICE *Device, WIN_TASK *Task)
+{
+	BOOL bResult = FALSE;
+
+	if (Task->Flags & WIN_PS_CONTROLT){
+		SetLastError(ERROR_LOGON_SESSION_EXISTS);
+	}else if (con_TIOCGETA(Device, &Terminal->Mode)){
+		Terminal->Mode.Input |= WIN_ICRNL | ENABLE_WINDOW_INPUT;
+		Terminal->Mode.Output |= WIN_ONLCR | WIN_OXTABS;
+		Terminal->SessionId = Task->SessionId;
+		Terminal->GroupId = Task->GroupId;
+		Task->Flags |= WIN_PS_CONTROLT;
+		Task->TerminalId = Terminal->TerminalId;
+		bResult = TRUE;
 	}
 	return(bResult);
 }

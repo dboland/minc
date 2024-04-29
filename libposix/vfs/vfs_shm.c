@@ -62,7 +62,6 @@ vfs_shm_init(LPCSTR Name, HINSTANCE Instance)
 		wsResult = SHMCreate(Name, sizeof(WIN_SESSION));
 		pdo_init(wsResult->Devices);
 		disk_init(wsResult->Mounts, Instance);
-		con_init(DEVICE(DEV_TYPE_CONSOLE));
 		sysctl_init(wsResult->Globals);
 	}else if (!(wsResult = MapViewOfFile(__Shared, FILE_MAP_WRITE, 0, 0, 0))){
 		WIN_ERR("MapViewOfFile(%d): %s\n", __Shared, win_strerror(GetLastError()));

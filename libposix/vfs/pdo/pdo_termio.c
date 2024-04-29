@@ -78,6 +78,7 @@ pdo_TIOCSETA(WIN_DEVICE *Device, WIN_TERMIO *Mode)
 {
 	BOOL bResult = FALSE;
 
+//vfs_ktrace("pdo_TIOCSETA", STRUCT_DEVICE, Device);
 	switch (Device->DeviceType){
 		case DEV_TYPE_PTY:
 		case DEV_TYPE_CONSOLE:

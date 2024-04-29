@@ -32,64 +32,33 @@
 
 /****************************************************/
 
-VOID 
-TTYCarriageReturn(HANDLE Handle, DWORD Mode, OVERLAPPED *ovl)
-{
-	DWORD dwCount = 0;
-
-	if (Mode & WIN_OCRNL){
-		WriteFile(Handle, "\n", 1, &dwCount, ovl);
-	}else{
-		WriteFile(Handle, "\r", 1, &dwCount, ovl);
-	}
-}
-VOID 
-TTYLineFeed(HANDLE Handle, DWORD Mode, OVERLAPPED *ovl)
-{
-	DWORD dwCount = 0;
-
-	if (Mode & WIN_ONLCR){
-		WriteFile(Handle, "\r", 1, &dwCount, ovl);
-	}
-	WriteFile(Handle, "\n", 1, &dwCount, ovl);
-}
-VOID 
-TTYControl(HANDLE Handle, DWORD Mode, CHAR C, OVERLAPPED *ovl)
-{
-	DWORD dwCount = 0;
-
-	switch (C){
-		case '\n':
-			TTYLineFeed(Handle, Mode, ovl);
-			break;
-		case '\r':
-			TTYCarriageReturn(Handle, Mode, ovl);
-			break;
-		default:
-			WriteFile(Handle, &C, 1, &dwCount, ovl);
-	}
-}
-
-/****************************************************/
-
 BOOL 
-tty_write(HANDLE Handle, LPCSTR Buffer, DWORD Size, DWORD *Result)
+pdo_lookup(WIN_NAMEIDATA *Path, DWORD Flags)
 {
-	BOOL bResult = TRUE;
-	LONG lResult = 0;
-	DWORD dwCount = 0;
-	UCHAR C;
-	OVERLAPPED ovl = {0, 0, 0, 0, __MailEvent};
+	BOOL bResult = FALSE;
+	WIN_INODE iNode;
+	DWORD dwSize = sizeof(WIN_INODE);
+	WIN_DEVICE *pwDevice;
+	HANDLE hResult;
+	SECURITY_ATTRIBUTES sa = {sizeof(sa), NULL, TRUE};
 
-	while (lResult < Size){
-		C = *Buffer++;
-		if (C < 32){
-			TTYControl(Handle, __CTTY->Mode[1], C, &ovl);
-		}else{
-			WriteFile(Handle, &C, 1, &dwCount, &ovl);
-		}
-		lResult++;
+	hResult = CreateFileW(Path->Resolved, GENERIC_READ, FILE_SHARE_READ, 
+		&sa, OPEN_EXISTING, FILE_ATTRIBUTE_SYSTEM, NULL);
+	if (hResult == INVALID_HANDLE_VALUE){
+		WIN_ERR("CreateFile(%ls): %s\n", Path->Resolved, win_strerror(GetLastError()));
+	}else if (!ReadFile(hResult, &iNode, dwSize, &dwSize, NULL)){
+		WIN_ERR("ReadFile(%ls): %s\n", Path->Resolved, win_strerror(GetLastError()));
+	}else if (iNode.Magic != TypeNameVirtual){
+		SetLastError(ERROR_BAD_DEVICE);
+	}else{
+		pwDevice = DEVICE(iNode.DeviceId);
+		pwDevice->Handle = hResult;
+		Path->DeviceId = iNode.DeviceId;
+		Path->FileType = iNode.FileType;
+		Path->FSType = FS_TYPE_PDO;
+		Path->Attribs |= FILE_ATTRIBUTE_DEVICE;
+		Path->Device = pwDevice;
+		bResult = TRUE;
 	}
-	*Result = lResult;
 	return(bResult);
 }

@@ -53,8 +53,8 @@ ScreenLineFeed(HANDLE Handle, CONSOLE_SCREEN_BUFFER_INFO *Info)
 	SMALL_RECT sRect = Info->srWindow;
 
 	/* Normally, the controlling TTY handles ONLCR, sending an 
-	 * extra CR. Luckily ncurses clears this bit by default, 
-	 * on top of setting Vertical Editing Mode (VEM).
+	 * extra CR. Luckily ncurses clears this bit by default on top
+	 * of setting Vertical Editing Mode (VEM).
 	 * So we can handle it here until we have a real CTTY.
 	 * With less.exe we're not so lucky. It overrides the ncurses
 	 * defaults. This can be solved by exporting "LESS=-XR". The
@@ -102,7 +102,7 @@ ScreenControl(HANDLE Handle, CHAR C)
 			ScreenLineFeed(Handle, &csbInfo);
 			break;
 		case 12:	/* Formfeed (FF) */
-				/* ignore form-feed, they are intended for paper output! */
+			/* ignore form-feed, they are intended for paper output! */
 			WriteFile(Handle, "\n", 1, &dwCount, NULL);
 			break;
 		case 13:	/* Carriage return (CR) */

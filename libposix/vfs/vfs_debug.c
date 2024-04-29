@@ -345,13 +345,13 @@ VfsSpecificFlags(LPSTR Buffer, ACCESS_MASK Perms, DWORD Type, LPCSTR Label)
 		}
 		if (Type != OB_TYPE_FILE){
 			strcpy(mask, "---");
-			// 0x0200
+			/* 0x0200 */
 			if (TestAccess(Perms, PROCESS_SET_INFORMATION, &dwRemain))
 				mask[1] = 'w';
-			// 0x0400
+			/* 0x0400 */
 			if (TestAccess(Perms, PROCESS_QUERY_INFORMATION, &dwRemain))
 				mask[0] = 'r';
-			// 0x0800
+			/* 0x0800 */
 			if (TestAccess(Perms, PROCESS_SUSPEND_RESUME, &dwRemain))
 				mask[2] = 'x';
 			psz += msvc_sprintf(psz, " process(%s) ", mask);
@@ -361,6 +361,8 @@ VfsSpecificFlags(LPSTR Buffer, ACCESS_MASK Perms, DWORD Type, LPCSTR Label)
 			psz = VfsFlagName(psz, FILE_APPEND_DATA, "APPEND_DATA", dwRemain, &dwRemain);
 			/* 0x0040 */
 			psz = VfsFlagName(psz, FILE_DELETE_CHILD, "DELETE_CHILD", dwRemain, &dwRemain);
+			/* 0x0200 */
+			psz = VfsFlagName(psz, FILE_NO_EA_KNOWLEDGE, "NO_EA_KNOWLEDGE", dwRemain, &dwRemain);
 		}else{
 			/* 0x0004 */
 			psz = VfsFlagName(psz, TOKEN_IMPERSONATE, "IMPERSONATE", dwRemain, &dwRemain);
@@ -481,8 +483,8 @@ vfs_VNODE(WIN_VNODE *Node, LPSTR Buffer)
 {
 	LPSTR psz = Buffer;
 
-	psz += msvc_sprintf(psz, "FileId(%d) Type(%s:%s) Handle(%d) Access(0x%x) CloEx(%d) DevType(0x%x) DevId(0x%x)\n", 
-		Node->FileId, __FSType[Node->FSType], FType(Node->FileType), Node->Handle, Node->Access, Node->CloseExec, Node->DeviceType, Node->DeviceId);
+	psz += msvc_sprintf(psz, "FileId(%d) Type(%s:%s) Handle(%d) Index(%d) Access(0x%x) CloEx(%d) DevType(0x%x) DevId(0x%x)\n", 
+		Node->FileId, __FSType[Node->FSType], FType(Node->FileType), Node->Handle, Node->Index, Node->Access, Node->CloseExec, Node->DeviceType, Node->DeviceId);
 	psz = VfsFileAttribs(psz, Node->Attribs);
 	psz = VfsFileFlags(psz, Node->Flags);
 	psz = VfsFileAccess(psz, Node->Access, OB_TYPE_FILE);
@@ -512,14 +514,23 @@ vfs_DEVICE(WIN_DEVICE *Device, LPSTR Buffer)
 	return(psz - Buffer);
 }
 DWORD 
-vfs_TERMIO(WIN_TTY *Terminal, LPSTR Buffer)
+vfs_TTY(WIN_TTY *Terminal, LPSTR Buffer)
 {
 	LPSTR psz = Buffer;
 
-	psz += msvc_sprintf(psz, "Id(%d) Device(0x%x) Group(%d) Session(%d) Row(%d) Col(%d)\n", 
-		Terminal->TerminalId, Terminal->DeviceId, Terminal->GroupId, Terminal->SessionId, Terminal->WinSize.Row, Terminal->WinSize.Column);
+	psz += msvc_sprintf(psz, "Id(%d) Device(0x%x) Flags(0x%x) Group(%d) Session(%d) Row(%d) Col(%d)\n", 
+		Terminal->TerminalId, Terminal->DeviceId, Terminal->Flags, Terminal->GroupId, Terminal->SessionId, Terminal->WinSize.Row, Terminal->WinSize.Column);
 	psz = VfsTermFlags(psz, &Terminal->Mode, "+ mode");
 //	psz += vfs_ktrace_DEVICE(DEVICE(Terminal->DeviceId), "+ device", psz);
+	return(psz - Buffer);
+}
+DWORD 
+vfs_TERMIO(WIN_TERMIO *Mode, LPSTR Buffer)
+{
+	LPSTR psz = Buffer;
+
+	psz += msvc_sprintf(psz, "\n");
+	psz = VfsTermFlags(psz, Mode, "+ mode");
 	return(psz - Buffer);
 }
 
@@ -541,7 +552,10 @@ vfs_ktrace(LPCSTR Label, STRUCT_TYPE Type, PVOID Data)
 			vfs_DEVICE((WIN_DEVICE *)Data, szText);
 			break;
 		case STRUCT_TTY:
-			vfs_TERMIO((WIN_TTY *)Data, szText);
+			vfs_TTY((WIN_TTY *)Data, szText);
+			break;
+		case STRUCT_TERMIO:
+			vfs_TERMIO((WIN_TERMIO *)Data, szText);
 			break;
 	}
 	msvc_printf("%s: %s", Label, szText);

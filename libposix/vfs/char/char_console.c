@@ -110,7 +110,7 @@ con_init(WIN_DEVICE *Device)
 	Device->Input = CharOpenFile("CONIN$", &wFlags, &sa);
 	Device->Output = CharOpenFile("CONOUT$", &wFlags, &sa);
 }
-BOOL 
+/* BOOL 
 con_open(WIN_DEVICE *Device, WIN_FLAGS *Flags, WIN_VNODE *Result)
 {
 	BOOL bResult = FALSE;
@@ -122,14 +122,10 @@ con_open(WIN_DEVICE *Device, WIN_FLAGS *Flags, WIN_VNODE *Result)
 		WIN_ERR("CreateFile(CON): %s\n", win_strerror(GetLastError()));
 	}else{
 		Result->Handle = hResult;
-//		Result->FSType = FS_TYPE_CHAR;
-		Result->Attribs = Flags->Attribs;
-		Result->Access = win_F_GETFL(hResult);
-		Result->Flags = win_F_GETFD(hResult);
 		bResult = TRUE;
 	}
 	return(bResult);
-}
+} */
 DWORD 
 con_poll(WIN_DEVICE *Device, WIN_POLLFD *Info)
 {

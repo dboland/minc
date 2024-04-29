@@ -35,7 +35,25 @@
 BOOL 
 pipe_fstat(WIN_VNODE *Node, WIN_VATTR *Result)
 {
-	return(PipeStatFile(Node, Result));
+	BOOL bResult = FALSE;
+	PSECURITY_DESCRIPTOR psd;
+	FILETIME ftNow;
+
+	if (!win_acl_get_fd(Node->Handle, &psd)){
+		return(FALSE);
+	}else if (vfs_acl_stat(psd, Result)){
+		GetSystemTimeAsFileTime(&ftNow);
+		Result->CreationTime = ftNow;
+		Result->LastAccessTime = ftNow;
+		Result->LastWriteTime = ftNow;
+		Result->NumberOfLinks = 1;
+		Result->DeviceId = __Mounts->DeviceId;
+		Result->SpecialId = Node->DeviceId;
+		Result->Mode.FileType = Node->FileType;
+		bResult = TRUE;
+	}
+	LocalFree(psd);
+	return(bResult);
 }
 BOOL 
 pipe_mknod(LPWSTR FileName, LPWSTR NtName, WIN_MODE *Mode)

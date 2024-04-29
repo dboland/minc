@@ -537,7 +537,7 @@ AnsiControl(HANDLE Handle, CHAR C, CONSOLE_SCREEN_BUFFER_INFO *Info, SEQUENCE *S
 		case 'X':		/* ECH */
 			bResult = AnsiEraseCharacter(Handle, Info, AnsiStrToInt(Seq->Args));
 			break;
-		case ANSI_REP:	/* REP (nano.exe) */
+		case ANSI_REP:		/* REP (nano.exe) */
 			bResult = AnsiRepeat(Handle, __Char, AnsiStrToInt(Seq->Args));
 			break;
 		case 'c':		/* DA */

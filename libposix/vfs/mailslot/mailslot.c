@@ -28,7 +28,6 @@
  *
  */
 
-//#include "tty/tty_unistd.c"
 #include "mailslot_syscall.c"
 #include "mailslot_fcntl.c"
 #include "mailslot_stat.c"

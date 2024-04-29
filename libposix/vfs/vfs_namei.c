@@ -87,7 +87,7 @@ PathGlob(WIN_NAMEIDATA *Path, DWORD Flags)
 			bResult = disk_lookup(Path, Flags);
 			break;
 		case FILE_ATTRIBUTE_PDO:
-			Path->Attribs |= FILE_ATTRIBUTE_DEVICE;
+			bResult = pdo_lookup(Path, Flags);
 			break;
 		case FILE_ATTRIBUTE_DRIVE:
 			bResult = vol_lookup(Path, Flags);
@@ -117,9 +117,6 @@ PathClose(WIN_NAMEIDATA *Path, DWORD Flags)
 			Path->FileType = WIN_VDIR;
 		}else if (Path->Attribs & FILE_ATTRIBUTE_SYMLINK){
 			Path->FileType = WIN_VLNK;
-		}
-		if (Path->Attribs & FILE_ATTRIBUTE_DEVICE){
-			Path->FSType = FS_TYPE_PDO;
 		}
 	}else if (DiskGlobType(L".exe", Path)){
 		Path->FileType = WIN_VREG;
