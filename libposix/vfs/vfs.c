@@ -96,6 +96,7 @@ CONST CHAR	*__Clipboard;		/* Clipboard buffer */
 BOOL vfs_namei(HANDLE Handle, DWORD Index, WIN_VNODE *Result);
 BOOL vfs_F_DUPFD(WIN_VNODE *Node, BOOL CloseExec, WIN_VNODE *Result);
 BOOL proc_poll(VOID);
+BOOL pdo_revoke(WIN_DEVICE *Device);
 
 #include "vfs_acl.c"
 #include "vfs_debug.c"

@@ -518,10 +518,10 @@ vfs_TTY(WIN_TTY *Terminal, LPSTR Buffer)
 {
 	LPSTR psz = Buffer;
 
-	psz += msvc_sprintf(psz, "Id(%d) Device(0x%x) Flags(0x%x) Group(%d) Session(%d) Row(%d) Col(%d)\n", 
-		Terminal->TerminalId, Terminal->DeviceId, Terminal->Flags, Terminal->GroupId, Terminal->SessionId, Terminal->WinSize.Row, Terminal->WinSize.Column);
+	psz += msvc_sprintf(psz, "Id(%d) Name(%s) Device(0x%x) Flags(0x%x) Group(%d) Session(%d) Row(%d) Col(%d)\n", 
+		Terminal->TerminalId, Terminal->Name, Terminal->DeviceId, Terminal->Flags, Terminal->GroupId, Terminal->SessionId, Terminal->WinSize.Row, Terminal->WinSize.Column);
 	psz = VfsTermFlags(psz, &Terminal->Mode, "+ mode");
-//	psz += vfs_ktrace_DEVICE(DEVICE(Terminal->DeviceId), "+ device", psz);
+	psz += vfs_DEVICE(DEVICE(Terminal->DeviceId), psz);
 	return(psz - Buffer);
 }
 DWORD 

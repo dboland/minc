@@ -44,3 +44,20 @@ pty_open(WIN_DEVICE *Device, WIN_FLAGS *Flags, WIN_VNODE *Result)
 //	return(config_activate(Device, Result));
 	return(TRUE);
 }
+BOOL 
+pty_revoke(WIN_DEVICE *Device)
+{
+	BOOL bResult = FALSE;
+
+	if (!CloseHandle(Device->Input)){
+		WIN_ERR("CloseHandle(%d): %s\n", Device->Input, win_strerror(GetLastError()));
+	}else if (!CloseHandle(Device->Output)){
+		WIN_ERR("CloseHandle(%d): %s\n", Device->Output, win_strerror(GetLastError()));
+//	}else if (!CloseHandle(Device->Handle)){
+//		WIN_ERR("CloseHandle(%d): %s\n", Device->Handle, win_strerror(GetLastError()));
+	}else{
+		ZeroMemory(Device, sizeof(WIN_DEVICE));
+		bResult = TRUE;
+	}
+	return(bResult);
+}

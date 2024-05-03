@@ -46,11 +46,12 @@ PdoFileOpen(WIN_DEVICE *Device, WIN_FLAGS *Flags, WIN_VNODE *Result)
 		Result->FileType = Device->FileType;
 		Result->DeviceType = Device->DeviceType;
 		Result->Handle = Device->Handle;
+		Result->Object = Device->Handle;
 		Result->FSType = FS_TYPE_PDO;
 		Result->Attribs = FILE_ATTRIBUTE_PDO | FILE_ATTRIBUTE_DEVICE;
 		Result->CloseExec = Flags->CloseExec;
 		Result->Access = Flags->Access;
-		MapGenericMask(&Result->Access, &AccessMap);
+//		MapGenericMask(&Result->Access, &AccessMap);
 		Result->Flags = win_F_GETFD(Device->Handle);
 		Result->Index = Device->Index;
 		Result->Device = Device;

@@ -79,7 +79,7 @@ pdo_open(WIN_DEVICE *Device, WIN_FLAGS *Flags, WIN_VNODE *Result)
 			bResult = tty_open(DEVICE(__CTTY->DeviceId), Flags, Result);
 			break;
 		case DEV_TYPE_NULL:
-			bResult = null_open(Result->Device, Flags, Result);
+			bResult = null_open(Device, Flags, Result);
 			break;
 		case DEV_TYPE_PTM:
 			bResult = ptm_open(pdo_attach(DEV_TYPE_PTY), Flags, Result);

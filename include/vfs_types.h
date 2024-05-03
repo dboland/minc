@@ -488,9 +488,12 @@ typedef struct _WIN_TTY {
 	BOOL VEdit;
 	COORD Cursor;
 	DWORD Flags;
+	HANDLE Input;
+	HANDLE Output;
+	CHAR Name[MAX_NAME];
 } WIN_TTY;
 
-#define CTTY(idx)		&__Terminals[idx]
+#define CTTY(idx)		(&__Terminals[idx])
 
 /*
  * vfs_ktrace.c

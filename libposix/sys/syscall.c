@@ -614,7 +614,7 @@ __exit(WIN_TASK *Task, int status)
 	Task->Status = (status * 0x100);
 	Task->Flags |= WIN_PS_EXITING;
 	if (Task->Flags & WIN_PS_CONTROLT){
-//		tty_close(__CTTY);
+		tty_close(__CTTY);
 	}
 	win_exit(status);
 }

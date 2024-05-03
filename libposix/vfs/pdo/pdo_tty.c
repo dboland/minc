@@ -82,7 +82,7 @@ tty_init(VOID)
 		pwDevice++;
 	}
 }
-WIN_TTY * 
+WIN_TTY *
 tty_attach(WIN_DEVICE *Device)
 {
 	DWORD dwIndex = 0;
@@ -90,10 +90,13 @@ tty_attach(WIN_DEVICE *Device)
 
 	while (dwIndex < WIN_TTY_MAX){
 		if (!pwTerminal->Flags){
+//			pwTerminal->Mode.Input = ENABLE_PROCESSED_INPUT + ENABLE_ECHO_INPUT + ENABLE_LINE_INPUT;
+//			pwTerminal->Mode.Output = ENABLE_PROCESSED_OUTPUT + ENABLE_WRAP_AT_EOL_OUTPUT;
 			pwTerminal->Flags = TIOCFLAG_ACTIVE;
 			pwTerminal->DeviceId = Device->DeviceId;
 			pwTerminal->TerminalId = dwIndex;
 			pwTerminal->ScrollRate = 1;
+			win_strcpy(pwTerminal->Name, Device->Name);
 			Device->Index = dwIndex;
 			return(pwTerminal);
 		}
@@ -110,11 +113,10 @@ tty_open(WIN_DEVICE *Device, WIN_FLAGS *Flags, WIN_VNODE *Result)
 	Result->Event = Device->Input;
 	Result->Index = Device->Index;
 	Result->Device = Device;
-//vfs_ktrace("tty_open", STRUCT_VNODE, Result);
-//	return(config_activate(Device, Result));
+//vfs_ktrace("tty_open", STRUCT_DEVICE, Device);
 	return(TRUE);
 }
-/* BOOL 
+BOOL 
 tty_close(WIN_TTY *Terminal)
 {
 	BOOL bResult = FALSE;
@@ -124,7 +126,7 @@ tty_close(WIN_TTY *Terminal)
 		bResult = TRUE;
 	}
 	return(bResult);
-} */
+}
 BOOL 
 tty_write(WIN_DEVICE *Device, LPCSTR Buffer, DWORD Size, DWORD *Result)
 {

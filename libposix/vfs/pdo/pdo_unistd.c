@@ -98,7 +98,6 @@ pdo_fsync(WIN_DEVICE *Device)
 {
 	BOOL bResult = FALSE;
 
-//VfsDebugDevice(Device, "dev_fsync");
 	switch (Device->DeviceType){
 		case DEV_TYPE_PTY:
 		case DEV_TYPE_CONSOLE:		/* less.exe */
@@ -114,9 +113,10 @@ pdo_revoke(WIN_DEVICE *Device)
 {
 	BOOL bResult = FALSE;
 
+//vfs_ktrace("pdo_revoke", STRUCT_DEVICE, Device);
 	switch (Device->DeviceType){
 		case DEV_TYPE_PTY:
-			bResult = ptm_revoke(Device);
+			bResult = pty_revoke(Device);
 			break;
 		case DEV_TYPE_CONSOLE:
 			bResult = TRUE;

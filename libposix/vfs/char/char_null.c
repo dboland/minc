@@ -41,13 +41,11 @@ null_open(WIN_DEVICE *Device, WIN_FLAGS *Flags, WIN_VNODE *Result)
 	hResult = CreateFile("NUL", Flags->Access, Flags->Share, 
 		NULL, Flags->Creation, Flags->Attribs, NULL);
 	if (hResult != INVALID_HANDLE_VALUE){
-		Result->Object = Device->Handle;
 		Result->Handle = hResult;
 		Result->Event = hResult;
 		Result->FSType = FS_TYPE_CHAR;
 		Result->Flags = win_F_GETFD(hResult);
 		Result->Access = win_F_GETFL(hResult);
-		Result->Device = Device;
 		bResult = TRUE;
 	}
 	return(bResult);
