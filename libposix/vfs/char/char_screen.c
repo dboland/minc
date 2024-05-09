@@ -273,7 +273,7 @@ screen_write(HANDLE Handle, LPCSTR Buffer, DWORD Size, DWORD *Result)
 	return(bResult);
 }
 DWORD 
-screen_poll(HANDLE Screen, WIN_POLLFD *Info)
+screen_poll(HANDLE Handle, WIN_POLLFD *Info)
 {
 	DWORD dwResult = 0;
 	SHORT sResult = Info->Result | WIN_POLLOUT;	/* ssh.exe */

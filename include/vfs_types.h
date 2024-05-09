@@ -235,6 +235,11 @@ typedef struct _WIN_NAMEIDATA {
 
 #define TIOCFLAG_ACTIVE		0x00010000
 
+/* sys/ttydefaults.h */
+
+#define WIN_TTYDEF_IFLAG	(WIN_ICRNL | ENABLE_WINDOW_INPUT)
+#define WIN_TTYDEF_OFLAG	(WIN_ONLCR | WIN_OXTABS)
+
 /*
  * vfs_fcntl.c
  */
@@ -275,11 +280,6 @@ typedef struct _WIN_VNODE {
 	BOOL CloseExec;
 	LONG Owner;
 } WIN_VNODE;
-
-typedef struct _WIN_FLOCK {
-	LARGE_INTEGER Offset;
-	LARGE_INTEGER Size;
-} WIN_FLOCK;
 
 #define LOCKFILE_SHARED			0x00000000
 #define LOCKFILE_UNLOCK			0x00000010
@@ -405,7 +405,7 @@ typedef struct _WIN_TASK {
 	DWORD ParentId;
 	DWORD GroupId;
 	DWORD SessionId;
-	DWORD TerminalId;
+	DWORD CTTY;
 	DWORD MountId;			/* where CWD is mounted */
 	DWORD Processor;
 	DWORD Nice;
@@ -469,13 +469,12 @@ typedef struct _WIN_WINSIZE {
 } WIN_WINSIZE;
 
 typedef struct _WIN_TERMIO {
-//	DWORD Line;
 	DWORD Input;
 	DWORD Output;
 } WIN_TERMIO;
 
 typedef struct _WIN_TTY {
-	DWORD TerminalId;
+	DWORD Index;
 	DWORD DeviceId;
 	DWORD GroupId;
 	DWORD SessionId;
@@ -488,9 +487,7 @@ typedef struct _WIN_TTY {
 	BOOL VEdit;
 	COORD Cursor;
 	DWORD Flags;
-	HANDLE Input;
-	HANDLE Output;
-	CHAR Name[MAX_NAME];
+	WCHAR NtName[MAX_NAME];
 } WIN_TTY;
 
 #define CTTY(idx)		(&__Terminals[idx])

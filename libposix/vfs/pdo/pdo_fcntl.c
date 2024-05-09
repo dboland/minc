@@ -40,7 +40,7 @@ pdo_F_DUPFD(WIN_DEVICE *Device, HANDLE Process, DWORD Options, WIN_VNODE *Result
 	HANDLE hResult = NULL;
 	HANDLE hObject;
 
-//vfs_ktrace("pdo_F_DUPFD", STRUCT_DEVICE, Device);
+//vfs_ktrace("pdo_F_DUPFD", STRUCT_VNODE, Result);
 	if (!Result->FileId){
 		hDevice = Device->Input;
 	}else{
@@ -73,7 +73,7 @@ pdo_open(WIN_DEVICE *Device, WIN_FLAGS *Flags, WIN_VNODE *Result)
 	BOOL bResult = FALSE;
 
 	if (!PdoFileOpen(Device, Flags, Result)){
-		return(FALSE);
+		SetLastError(ERROR_DEVICE_NOT_AVAILABLE);
 	}else switch (Device->DeviceType){
 		case DEV_CLASS_TTY:
 			bResult = tty_open(DEVICE(__CTTY->DeviceId), Flags, Result);

@@ -115,8 +115,8 @@ termio_posix(struct termios *term, WIN_TERMIO *Mode)
 WIN_TERMIO *
 termio_win(WIN_TERMIO *Mode, struct termios *term)
 {
-	Mode->Input = __CTTY->Mode.Input & ~ENABLE_ALL_INPUT;
-	Mode->Output = __CTTY->Mode.Output & ~ENABLE_ALL_OUTPUT;
+	Mode->Input &= ~ENABLE_ALL_INPUT;
+	Mode->Output &= ~ENABLE_ALL_OUTPUT;
 
 	if (Mode->Output & ENABLE_VIRTUAL_TERMINAL_PROCESSING){
 		Mode->Output |= DISABLE_NEWLINE_AUTO_RETURN;
@@ -181,32 +181,49 @@ int
 tty_TIOCGETA(WIN_VNODE *Node, struct termios *term)
 {
 	int result = 0;
-	WIN_TERMIO ioMode = {0};
+	WIN_TERMIO ioMode = __CTTY->Mode;
 
 	if (!vfs_TIOCGETA(Node, &ioMode)){
 		result -= errno_posix(GetLastError());
 	}else{
-		ioMode.Input |= (__CTTY->Mode.Input & 0xFFFF0000);
-		ioMode.Output |= (__CTTY->Mode.Output & 0xFFFF0000);
+		__CTTY->Mode = ioMode;
 		termio_posix(term, &ioMode);
 	}
 	return(result);
 }
 int 
-tty_TIOCSETA(WIN_VNODE *Node, unsigned long request, struct termios *term)
+tty_TIOCSETA(WIN_VNODE *Node, struct termios *term)
 {
 	int result = 0;
-	WIN_TERMIO ioMode = {0};
-	BOOL bFlush = FALSE;
-	BOOL bDrain = FALSE;
+	WIN_TERMIO ioMode = __CTTY->Mode;
 
-	if (request == TIOCSETAW){
-		bDrain = TRUE;
-	}else if (request == TIOCSETAF){
-		bFlush = TRUE;
-		bDrain = TRUE;
+	if (!vfs_TIOCSETA(Node, termio_win(&ioMode, term), FALSE, FALSE)){
+		result -= errno_posix(GetLastError());
+	}else{
+		__CTTY->Mode = ioMode;
 	}
-	if (!vfs_TIOCSETA(Node, termio_win(&ioMode, term), bFlush, bDrain)){
+	return(result);
+}
+int 
+tty_TIOCSETAW(WIN_VNODE *Node, struct termios *term)
+{
+	int result = 0;
+	WIN_TERMIO ioMode = __CTTY->Mode;
+
+	if (!vfs_TIOCSETA(Node, termio_win(&ioMode, term), FALSE, TRUE)){
+		result -= errno_posix(GetLastError());
+	}else{
+		__CTTY->Mode = ioMode;
+	}
+	return(result);
+}
+int 
+tty_TIOCSETAF(WIN_VNODE *Node, struct termios *term)
+{
+	int result = 0;
+	WIN_TERMIO ioMode = __CTTY->Mode;
+
+	if (!vfs_TIOCSETA(Node, termio_win(&ioMode, term), TRUE, TRUE)){
 		result -= errno_posix(GetLastError());
 	}else{
 		__CTTY->Mode = ioMode;
@@ -228,7 +245,7 @@ tty_TIOCSWINSZ(WIN_VNODE *Node, WIN_WINSIZE *WinSize)
 {
 	int result = 0;
 
-	if (!vfs_TIOCSWINSZ(Node, WinSize)){
+	if (!vfs_TIOCSWINSZ(CTTY(Node->Index), WinSize)){
 		result -= errno_posix(GetLastError());
 	}
 	return(result);
@@ -238,7 +255,7 @@ tty_TIOCSCTTY(WIN_VNODE *Node, WIN_TASK *Task)
 {
 	int result = 0;
 
-	if (!vfs_TIOCSCTTY(Node->Device, Task)){
+	if (!vfs_TIOCSCTTY(CTTY(Node->Index), Task)){
 		result -= errno_posix(GetLastError());
 	}
 	return(result);
@@ -345,9 +362,13 @@ tty_ioctl(WIN_TASK *Task, int fd, unsigned long request, va_list args)
 			result = tty_TIOCSWINSZ(pvNode, va_arg(args, WIN_WINSIZE *));
 			break;
 		case TIOCSETA:
+			result = tty_TIOCSETA(pvNode, va_arg(args, struct termios *));
+			break;
 		case TIOCSETAW:
+			result = tty_TIOCSETAW(pvNode, va_arg(args, struct termios *));
+			break;
 		case TIOCSETAF:
-			result = tty_TIOCSETA(pvNode, request, va_arg(args, struct termios *));
+			result = tty_TIOCSETAF(pvNode, va_arg(args, struct termios *));
 			break;
 		case TIOCSPGRP:
 			result = tty_TIOCSPGRP(pvNode, va_arg(args, UINT *));

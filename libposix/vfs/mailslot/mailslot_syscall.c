@@ -48,7 +48,7 @@ MailOpenFile(LPCSTR FileName, WIN_FLAGS *Flags, SECURITY_ATTRIBUTES *Security)
 {
 	HANDLE hResult = NULL;
 
-	hResult = CreateFile(FileName, Flags->Access, Flags->Share, 
+	hResult = CreateFile(FileName, GENERIC_WRITE | READ_CONTROL, Flags->Share, 
 		Security, Flags->Creation, Flags->Attribs, NULL);
 	if (hResult == INVALID_HANDLE_VALUE){
 		WIN_ERR("CreateFile(%s): %s\n", FileName, win_strerror(GetLastError()));

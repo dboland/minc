@@ -40,7 +40,7 @@ PdoFileOpen(WIN_DEVICE *Device, WIN_FLAGS *Flags, WIN_VNODE *Result)
 	BOOL bResult = FALSE;
 
 	if (!Device->Flags){
-		SetLastError(ERROR_DEVICE_NOT_AVAILABLE);
+		CloseHandle(Device->Handle);
 	}else{
 		Result->DeviceId = Device->DeviceId;
 		Result->FileType = Device->FileType;

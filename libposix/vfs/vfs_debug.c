@@ -405,8 +405,8 @@ VfsPathFlags(LPSTR Buffer, DWORD Flags, LPCSTR Label)
 VOID 
 VfsDebugTask(WIN_TASK *Task, LPCSTR Label)
 {
-	msvc_printf("%s(%d): Command(%ls) Parent(%d) Flags(0x%x) Status(0x%x) Depth(%d) Process(%d) Thread(%d) Handle(%d) Session(%d) Group(%d) Terminal(%d)\n", 
-		Label, Task->TaskId, __Strings[Task->TaskId].Command, Task->ParentId, Task->Flags, Task->Status, Task->Depth, Task->ProcessId, Task->ThreadId, Task->Handle, Task->SessionId, Task->GroupId, Task->TerminalId);
+	msvc_printf("%s(%d): Command(%ls) Parent(%d) Flags(0x%x) Status(0x%x) Depth(%d) Process(%d) Thread(%d) Handle(%d) Session(%d) Group(%d) CTTY(%d)\n", 
+		Label, Task->TaskId, __Strings[Task->TaskId].Command, Task->ParentId, Task->Flags, Task->Status, Task->Depth, Task->ProcessId, Task->ThreadId, Task->Handle, Task->SessionId, Task->GroupId, Task->CTTY);
 }
 VOID 
 VfsDebugStat(WIN_VATTR *Stat, LPCSTR Label)
@@ -483,8 +483,8 @@ vfs_VNODE(WIN_VNODE *Node, LPSTR Buffer)
 {
 	LPSTR psz = Buffer;
 
-	psz += msvc_sprintf(psz, "FileId(%d) Type(%s:%s) Handle(%d) Index(%d) Access(0x%x) CloEx(%d) DevType(0x%x) DevId(0x%x)\n", 
-		Node->FileId, __FSType[Node->FSType], FType(Node->FileType), Node->Handle, Node->Index, Node->Access, Node->CloseExec, Node->DeviceType, Node->DeviceId);
+	psz += msvc_sprintf(psz, "Type(%s:%s) Handle(%d) Object(%d) Index(%d) Access(0x%x) CloEx(%d) DevType(0x%x) DevId(0x%x)\n", 
+		__FSType[Node->FSType], FType(Node->FileType), Node->Handle, Node->Object, Node->Index, Node->Access, Node->CloseExec, Node->DeviceType, Node->DeviceId);
 	psz = VfsFileAttribs(psz, Node->Attribs);
 	psz = VfsFileFlags(psz, Node->Flags);
 	psz = VfsFileAccess(psz, Node->Access, OB_TYPE_FILE);
@@ -518,10 +518,9 @@ vfs_TTY(WIN_TTY *Terminal, LPSTR Buffer)
 {
 	LPSTR psz = Buffer;
 
-	psz += msvc_sprintf(psz, "Id(%d) Name(%s) Device(0x%x) Flags(0x%x) Group(%d) Session(%d) Row(%d) Col(%d)\n", 
-		Terminal->TerminalId, Terminal->Name, Terminal->DeviceId, Terminal->Flags, Terminal->GroupId, Terminal->SessionId, Terminal->WinSize.Row, Terminal->WinSize.Column);
+	psz += msvc_sprintf(psz, "Index(%d) NtName(%ls) Device(0x%x) Flags(0x%x) Group(%d) Session(%d) Row(%d) Col(%d)\n", 
+		Terminal->Index, Terminal->NtName, Terminal->DeviceId, Terminal->Flags, Terminal->GroupId, Terminal->SessionId, Terminal->WinSize.Row, Terminal->WinSize.Column);
 	psz = VfsTermFlags(psz, &Terminal->Mode, "+ mode");
-	psz += vfs_DEVICE(DEVICE(Terminal->DeviceId), psz);
 	return(psz - Buffer);
 }
 DWORD 

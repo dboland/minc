@@ -42,7 +42,6 @@ char_namei(HANDLE Handle, DWORD Index, WIN_VNODE *Result)
 	if ((DWORD)Handle > 1024){		/* NUL */
 		Result->DeviceType = DEV_TYPE_NULL;
 		Result->DeviceId = DEV_TYPE_NULL;
-//		Result->FSType = FS_TYPE_PDO;
 		Result->Access = win_F_GETFL(Handle);
 	}else if (!Index){
 		Result->DeviceType = DEV_TYPE_INPUT;

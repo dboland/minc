@@ -43,6 +43,12 @@ mail_open(WIN_DEVICE *Device, WIN_FLAGS *Flags, WIN_VNODE *Result)
 	if (AclCreateControl(WIN_S_IRWX, &wControl)){
 		Device->Input = MailCreateFile(win_strcat(szPath, Device->Name), &sa);
 		Device->Output = MailOpenFile(szPath, Flags, &sa);
+		Result->FileType = Device->FileType;
+		Result->DeviceType = Device->DeviceType;
+		Result->DeviceId = Device->DeviceId;
+		Result->Index = Device->Index;
+		Result->Access = win_F_GETFL(Device->Input);
+		Result->Flags = win_F_GETFD(Device->Input);
 		Result->Device = Device;
 		bResult = TRUE;
 	}

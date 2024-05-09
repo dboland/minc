@@ -34,8 +34,8 @@
 #include "pdo_device.c"
 #include "pdo_termio.c"
 #include "pdo_namei.c"
-#include "pdo_tty.c"
 #include "pdo_ptm.c"
+#include "pdo_tty.c"
 #include "pdo_fcntl.c"
 #include "pdo_unistd.c"
 #include "pdo_poll.c"
@@ -69,7 +69,5 @@ pdo_init(WIN_DEV_CLASS Devices[])
 	config_init("ptm", FS_TYPE_PDO, WIN_VCHR, DEV_TYPE_PTM);
 	config_init("input", FS_TYPE_CHAR, WIN_VCHR, DEV_TYPE_INPUT);
 	config_init("screen", FS_TYPE_CHAR, WIN_VCHR, DEV_TYPE_SCREEN);
-
-	con_init(DEVICE(DEV_TYPE_CONSOLE));
 
 }

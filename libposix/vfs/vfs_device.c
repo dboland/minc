@@ -54,7 +54,6 @@ config_init(LPCSTR Name, DWORD FSType, DWORD FileType, DWORD DeviceType)
 	pwDevice->DeviceType = DeviceType;
 	pwDevice->DeviceId = DeviceType;
 	pwDevice->Flags |= WIN_DVF_CONFIG_READY;
-//VfsDebugDevice(pwDevice, "config_init");
 	return(TRUE);
 }
 BOOL 
@@ -64,8 +63,51 @@ config_found(LPCSTR Name, DWORD FSType, DWORD FileType, WIN_DEVICE *Device)
 	Device->FileType = FileType;
 	_itoa(Device->DeviceId - Device->DeviceType, win_stpcpy(Device->Name, Name), 10);
 	Device->Flags |= WIN_DVF_CONFIG_READY;
-//VfsDebugDevice(Device, "config_found");
 	return(TRUE);
+}
+BOOL 
+tty_attach(WIN_DEVICE *Device)
+{
+	DWORD dwIndex = 1;
+	WIN_TTY *pwTerminal = &__Terminals[dwIndex];
+
+	while (dwIndex < WIN_TTY_MAX){
+		if (!pwTerminal->Index){
+			pwTerminal->Index = dwIndex;
+			pwTerminal->Mode.Input = WIN_TTYDEF_IFLAG;
+			pwTerminal->Mode.Output = WIN_TTYDEF_OFLAG;
+			pwTerminal->Flags = TIOCFLAG_ACTIVE;
+			pwTerminal->DeviceId = Device->DeviceId;
+			pwTerminal->ScrollRate = 1;
+			win_wcscpy(pwTerminal->NtName, Device->NtName);
+			Device->Index = dwIndex;
+			return(TRUE);
+		}
+		dwIndex++;
+		pwTerminal++;
+	}	
+	SetLastError(ERROR_NOT_ENOUGH_MEMORY);
+	return(FALSE);
+}
+BOOL 
+pty_attach(WIN_DEVICE *Device)
+{
+	BOOL bResult = FALSE;
+
+	if (tty_attach(Device)){
+		bResult = config_found("pty", FS_TYPE_CHAR, WIN_VCHR, Device);
+	}
+	return(bResult);
+}
+BOOL 
+com_attach(WIN_DEVICE *Device)
+{
+	BOOL bResult = FALSE;
+
+	if (tty_attach(Device)){
+		bResult = config_found("serial", FS_TYPE_PDO, WIN_VCHR, Device);
+	}
+	return(bResult);
 }
 
 /****************************************************/
@@ -210,14 +252,15 @@ serial_attach(WIN_DEVICE *Device)
 			bResult = config_found("tty", FS_TYPE_MAILSLOT, WIN_VCHR, Device);
 			break;
 		case DEV_TYPE_PTY:
-			bResult = config_found("pty", FS_TYPE_CHAR, WIN_VCHR, Device);
+			bResult = pty_attach(Device);
 			break;
 		case DEV_TYPE_COM:
-			bResult = config_found("serial", FS_TYPE_PDO, WIN_VCHR, Device);
+			bResult = com_attach(Device);
 			break;
 		default:
 			bResult = FALSE;
 	}
+//vfs_ktrace("serial_attach", STRUCT_DEVICE, Device);
 	return(bResult);
 }
 BOOL 

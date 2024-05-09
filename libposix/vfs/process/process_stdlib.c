@@ -124,6 +124,6 @@ proc_init(WIN_SIGPROC SignalProc)
 //		pwTask->IsSetUGid = 1;
 //	}
 	__TaskId = pwTask->TaskId;
-	__CTTY = &__Terminals[pwTask->TerminalId];
+	__CTTY = CTTY(pwTask->CTTY);
 	return(pwTask);
 }

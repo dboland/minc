@@ -56,7 +56,6 @@ char_open(WIN_DEVICE *Device, WIN_FLAGS *Flags, WIN_VNODE *Result)
 {
 	BOOL bResult = FALSE;
 
-//vfs_ktrace("pdo_open", STRUCT_DEVICE, Device);
 	switch (Device->DeviceType){
 		case DEV_TYPE_PTY:
 			bResult = pty_open(Device, Flags, Result);

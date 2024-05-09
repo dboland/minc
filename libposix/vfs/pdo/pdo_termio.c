@@ -46,7 +46,6 @@ pdo_TIOCGWINSZ(WIN_DEVICE *Device, WIN_WINSIZE *WinSize)
 			bResult = screen_TIOCGWINSZ(Device->Output, WinSize);
 			break;
 		case DEV_TYPE_TTY:
-			*WinSize = __CTTY->WinSize;
 			bResult = TRUE;
 			break;
 		default:
@@ -65,7 +64,42 @@ pdo_TIOCGETA(WIN_DEVICE *Device, WIN_TERMIO *Mode)
 			bResult = con_TIOCGETA(Device, Mode);
 			break;
 		case DEV_TYPE_TTY:
-			*Mode = __CTTY->Mode;
+			bResult = TRUE;
+			break;
+		default:
+			SetLastError(ERROR_BAD_DEVICE);
+	}
+	return(bResult);
+}
+BOOL 
+pdo_TIOCFLUSH(WIN_DEVICE *Device)
+{
+	BOOL bResult = FALSE;
+
+	switch (Device->DeviceType){
+		case DEV_TYPE_PTY:
+		case DEV_TYPE_CONSOLE:
+			bResult = input_TIOCFLUSH(Device->Input);
+			break;
+		case DEV_TYPE_TTY:
+			bResult = TRUE;
+			break;
+		default:
+			SetLastError(ERROR_BAD_DEVICE);
+	}
+	return(bResult);
+}
+BOOL 
+pdo_TIOCDRAIN(WIN_DEVICE *Device)
+{
+	BOOL bResult = FALSE;
+
+	switch (Device->DeviceType){
+		case DEV_TYPE_PTY:
+		case DEV_TYPE_CONSOLE:
+			bResult = screen_TIOCDRAIN(Device->Output);
+			break;
+		case DEV_TYPE_TTY:
 			bResult = TRUE;
 			break;
 		default:
@@ -85,7 +119,6 @@ pdo_TIOCSETA(WIN_DEVICE *Device, WIN_TERMIO *Mode)
 			bResult = con_TIOCSETA(Device, Mode);
 			break;
 		case DEV_TYPE_TTY:
-			__CTTY->Mode = *Mode;
 			bResult = TRUE;
 			break;
 		default:
@@ -94,36 +127,19 @@ pdo_TIOCSETA(WIN_DEVICE *Device, WIN_TERMIO *Mode)
 	return(bResult);
 }
 BOOL 
-pdo_TIOCFLUSH(WIN_DEVICE *Device)
+pdo_PTMGET(WIN_DEVICE *Master, WIN_DEVICE *Slave)
 {
 	BOOL bResult = FALSE;
+	HANDLE hMaster = Master->Output;
+	HANDLE hSlave = Slave->Output;
 
-	switch (Device->DeviceType){
-		case DEV_TYPE_INPUT:
-			bResult = input_TIOCFLUSH(Device->Input);
-			break;
-		case DEV_TYPE_TTY:
-			bResult = TRUE;
-			break;
-		default:
-			SetLastError(ERROR_BAD_DEVICE);
-	}
-	return(bResult);
-}
-BOOL 
-pdo_TIOCDRAIN(WIN_DEVICE *Device)
-{
-	BOOL bResult = FALSE;
-
-	switch (Device->DeviceType){
-		case DEV_TYPE_SCREEN:
-			bResult = screen_TIOCDRAIN(Device->Output);
-			break;
-		case DEV_TYPE_TTY:
-			bResult = TRUE;
-			break;
-		default:
-			SetLastError(ERROR_BAD_DEVICE);
+	if (Slave->Flags & WIN_DVF_ACTIVE){
+		SetLastError(ERROR_NOT_READY);
+	}else{
+		Master->Output = hSlave;
+		Slave->Output = hMaster;
+		Slave->Flags |= WIN_DVF_ACTIVE;
+		bResult = TRUE;
 	}
 	return(bResult);
 }

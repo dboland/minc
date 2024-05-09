@@ -72,40 +72,14 @@ TTYControl(HANDLE Handle, DWORD Mode, CHAR C, OVERLAPPED *ovl)
 
 /****************************************************/
 VOID 
-tty_init(VOID)
+tty_init(WIN_TTY *Console)
 {
-	DWORD dwIndex = 0;
-	WIN_DEVICE *pwDevice = DEVICE(DEV_TYPE_TTY);
-
-	while (dwIndex < WIN_TTY_MAX){
-		pwDevice->Index = dwIndex++;
-		pwDevice++;
-	}
-}
-WIN_TTY *
-tty_attach(WIN_DEVICE *Device)
-{
-	DWORD dwIndex = 0;
-	WIN_TTY *pwTerminal = &__Terminals[dwIndex];
-
-	while (dwIndex < WIN_TTY_MAX){
-		if (!pwTerminal->Flags){
-//			pwTerminal->Mode.Input = ENABLE_PROCESSED_INPUT + ENABLE_ECHO_INPUT + ENABLE_LINE_INPUT;
-//			pwTerminal->Mode.Output = ENABLE_PROCESSED_OUTPUT + ENABLE_WRAP_AT_EOL_OUTPUT;
-			pwTerminal->Flags = TIOCFLAG_ACTIVE;
-			pwTerminal->DeviceId = Device->DeviceId;
-			pwTerminal->TerminalId = dwIndex;
-			pwTerminal->ScrollRate = 1;
-			win_strcpy(pwTerminal->Name, Device->Name);
-			Device->Index = dwIndex;
-			return(pwTerminal);
-		}
-		dwIndex++;
-		pwTerminal++;
-	}	
-	WIN_ERR("tty_attach(%d): %s\n", dwIndex, win_strerror(ERROR_NOT_ENOUGH_MEMORY));
-	vfs_raise(WM_COMMAND, CTRL_ABORT_EVENT, 0);
-	return(NULL);
+	Console->Mode.Input = WIN_TTYDEF_IFLAG;
+	Console->Mode.Output = WIN_TTYDEF_OFLAG;
+	Console->Flags = TIOCFLAG_ACTIVE;
+	Console->DeviceId = DEV_TYPE_CONSOLE;
+	Console->ScrollRate = 1;
+	win_wcscpy(Console->NtName, L"CON");
 }
 BOOL 
 tty_open(WIN_DEVICE *Device, WIN_FLAGS *Flags, WIN_VNODE *Result)

@@ -68,7 +68,7 @@ proc_dup(WIN_TASK *Parent, WIN_THREAD_STRUCT *Thread)
 	ptResult->Depth = Parent->Depth + 1;
 	ptResult->GroupId = Parent->GroupId;
 	ptResult->SessionId = Parent->SessionId;
-	ptResult->TerminalId = Parent->TerminalId;
+	ptResult->CTTY = Parent->CTTY;
 	ptResult->MountId = Parent->MountId;
 	ptResult->UserSid = Parent->UserSid;
 	ptResult->GroupSid = Parent->GroupSid;

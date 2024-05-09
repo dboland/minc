@@ -375,7 +375,7 @@ AnsiCursorBack(HANDLE Handle, CONSOLE_SCREEN_BUFFER_INFO *Info, UINT Count)
 {
 	COORD cPos = {Info->dwCursorPosition.X - Count, Info->dwCursorPosition.Y};
 
-	/* termcap - bw: automatic left margin (mutt.exe) */
+	/* termcap - bw: automatic left margin (top.exe) */
 	if (cPos.X < 0){
 		cPos.X += Info->srWindow.Right + 1;
 		cPos.Y--;
@@ -543,7 +543,7 @@ AnsiControl(HANDLE Handle, CHAR C, CONSOLE_SCREEN_BUFFER_INFO *Info, SEQUENCE *S
 		case 'c':		/* DA */
 			bResult = AnsiDeviceAttributes(Handle);
 			break;
-		case 'd':		/* VPA (nano) */
+		case 'd':		/* VPA (nano.exe) */
 			bResult = AnsiVerticalPositionAbsolute(Handle, Info, AnsiStrToInt(Seq->Args));
 			break;
 		case 'f':		/* HVP (Horizontal Vertical Position) */
