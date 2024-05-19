@@ -33,22 +33,47 @@
 /****************************************************/
 
 BOOL 
+mail_F_DUPFD(WIN_DEVICE *Device, HANDLE Process, DWORD Options, WIN_VNODE *Result)
+{
+	BOOL bResult = FALSE;
+	HANDLE hDevice = NULL;
+	HANDLE hResult = NULL;
+
+	if (!Result->FileId){
+		hDevice = Device->Input;
+	}else{
+		hDevice = Device->Output;
+	}
+	if (!hDevice){
+		SetLastError(ERROR_IO_DEVICE);
+	}else if (!DuplicateHandle(GetCurrentProcess(), hDevice, Process, &hResult, 0, TRUE, Options)){
+		WIN_ERR("mail_F_DUPFD(%d): %s\n", hDevice, win_strerror(GetLastError()));
+	}else{
+		Result->Handle = hResult;
+		Result->Access = win_F_GETFL(hResult);
+		Result->Device = Device;
+		bResult = TRUE;
+	}
+	return(bResult);
+}
+
+/****************************************************/
+
+BOOL 
 mail_open(WIN_DEVICE *Device, WIN_FLAGS *Flags, WIN_VNODE *Result)
 {
 	BOOL bResult = FALSE;
 	CHAR szPath[MAX_PATH] = "\\\\.\\MAILSLOT\\master\\";
-	WIN_OBJECT_CONTROL wControl;
-	SECURITY_ATTRIBUTES sa = {sizeof(sa), &wControl.Security, TRUE};
+	SECURITY_ATTRIBUTES sa = {sizeof(sa), NULL, TRUE};
 
-	if (AclCreateControl(WIN_S_IRWX, &wControl)){
-		Device->Input = MailCreateFile(win_strcat(szPath, Device->Name), &sa);
-		Device->Output = MailOpenFile(szPath, Flags, &sa);
+	if (MailCreateDevice(win_strcat(szPath, Device->Name), &sa, Device)){
+//		Result->FSType = Device->FSType;
 		Result->FileType = Device->FileType;
 		Result->DeviceType = Device->DeviceType;
 		Result->DeviceId = Device->DeviceId;
-		Result->Index = Device->Index;
 		Result->Access = win_F_GETFL(Device->Input);
 		Result->Flags = win_F_GETFD(Device->Input);
+		Result->Index = Device->Index;
 		Result->Device = Device;
 		bResult = TRUE;
 	}

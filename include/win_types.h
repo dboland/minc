@@ -75,9 +75,6 @@
 
 /* wincon.h */
 
-#define ENABLE_ALL_INPUT		(WIN_INLCR | WIN_ICRNL | ENABLE_PROCESSED_INPUT | ENABLE_ECHO_INPUT | ENABLE_LINE_INPUT)
-#define ENABLE_ALL_OUTPUT		(WIN_ONLCR | WIN_OXTABS)
-
 #define KeyEvent			Event.KeyEvent
 #define MouseEvent			Event.MouseEvent
 #define WindowBufferSizeEvent		Event.WindowBufferSizeEvent
@@ -89,6 +86,8 @@
 #define ENABLE_VIRTUAL_TERMINAL_PROCESSING	0x0004
 #define ENABLE_LVB_GRID_WORLDWIDE		0x0010
 #define DISABLE_NEWLINE_AUTO_RETURN		0x0008
+
+#define WIN_MAX_INPUT		255
 
 /* winternl.h */
 

@@ -141,7 +141,7 @@ BOOL
 vfs_PROCESS_ATTACH(HINSTANCE Instance, LPVOID Reserved)
 {
 	__TlsIndex = TlsAlloc();
-	__Session = vfs_shm_init(OBJECT_NAME("Session"), Instance);
+	__Session = vfs_shminit(OBJECT_NAME("Session"), Instance);
 	__Tasks = __Session->Tasks;
 	__Devices = __Session->Devices;
 	__Terminals = __Session->Terminals;
@@ -158,7 +158,7 @@ vfs_PROCESS_ATTACH(HINSTANCE Instance, LPVOID Reserved)
 BOOL 
 vfs_PROCESS_DETACH(WIN_TASK *Task)
 {
-	vfs_shm_finish(__Session);
+	vfs_shmexit(__Session);
 	TlsFree(__TlsIndex);
 	return(TRUE);
 }

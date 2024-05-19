@@ -46,7 +46,8 @@ static const CHAR *__FSType[] = {
 	"REGISTRY", 
 	"VOLUME", 
 	"NPF",
-	"NDIS"
+	"NDIS",
+	"TERMINAL"
 };
 static const CHAR *__FType[] = {
 	"VNON", 
@@ -163,7 +164,7 @@ VfsVolumeFlags(LPSTR Buffer, DWORD Flags, LPCSTR Label)
 	psz += msvc_sprintf(psz, " remain(0x%x)\n", Flags);
 	return(psz);
 }
-LPSTR 
+/* LPSTR 
 VfsTermFlags(LPSTR Buffer, WIN_TERMIO *Mode, LPCSTR Label)
 {
 	LPSTR psz = Buffer;
@@ -197,7 +198,7 @@ VfsTermFlags(LPSTR Buffer, WIN_TERMIO *Mode, LPCSTR Label)
 	psz = VfsFlagName(psz, ENABLE_LVB_GRID_WORLDWIDE, "LVB_GRID_WORLDWIDE", dwRemain, &dwRemain);
 	psz += msvc_sprintf(psz, " remain(0x%x)\n", dwRemain);
 	return(psz);
-}
+} */
 LPSTR 
 VfsNetFlags(LPSTR Buffer, LONG NetworkEvents, LPCSTR Label)
 {
@@ -518,12 +519,12 @@ vfs_TTY(WIN_TTY *Terminal, LPSTR Buffer)
 {
 	LPSTR psz = Buffer;
 
-	psz += msvc_sprintf(psz, "Index(%d) NtName(%ls) Device(0x%x) Flags(0x%x) Group(%d) Session(%d) Row(%d) Col(%d)\n", 
-		Terminal->Index, Terminal->NtName, Terminal->DeviceId, Terminal->Flags, Terminal->GroupId, Terminal->SessionId, Terminal->WinSize.Row, Terminal->WinSize.Column);
-	psz = VfsTermFlags(psz, &Terminal->Mode, "+ mode");
+	psz += msvc_sprintf(psz, "Index(%d) Name(%s) Device(0x%x) Flags(0x%x) Group(%d) Session(%d) Row(%d) Col(%d)\n", 
+		Terminal->Index, Terminal->Name, Terminal->DeviceId, Terminal->Flags, Terminal->GroupId, Terminal->SessionId, Terminal->WinSize.Row, Terminal->WinSize.Column);
+//	psz = VfsTermFlags(psz, &Terminal->Mode, "+ mode");
 	return(psz - Buffer);
 }
-DWORD 
+/* DWORD 
 vfs_TERMIO(WIN_TERMIO *Mode, LPSTR Buffer)
 {
 	LPSTR psz = Buffer;
@@ -531,7 +532,7 @@ vfs_TERMIO(WIN_TERMIO *Mode, LPSTR Buffer)
 	psz += msvc_sprintf(psz, "\n");
 	psz = VfsTermFlags(psz, Mode, "+ mode");
 	return(psz - Buffer);
-}
+} */
 
 /****************************************************/
 
@@ -553,9 +554,9 @@ vfs_ktrace(LPCSTR Label, STRUCT_TYPE Type, PVOID Data)
 		case STRUCT_TTY:
 			vfs_TTY((WIN_TTY *)Data, szText);
 			break;
-		case STRUCT_TERMIO:
-			vfs_TERMIO((WIN_TERMIO *)Data, szText);
-			break;
+//		case STRUCT_TERMIO:
+//			vfs_TERMIO((WIN_TERMIO *)Data, szText);
+//			break;
 	}
 	msvc_printf("%s: %s", Label, szText);
 }

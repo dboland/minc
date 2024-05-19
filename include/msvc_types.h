@@ -36,3 +36,6 @@ typedef struct {
 	int newmode;
 } _startupinfo;
 
+/* time.h */
+
+typedef __time_t time_t;

@@ -33,217 +33,6 @@
 
 /****************************************************/
 
-void 
-sysctl_debug(const int *name, u_int namelen, void *oldp, size_t *oldlenp, void *newp, size_t newlen)
-{
-	msvc_printf("sysctl(");
-	while (namelen--){
-		msvc_printf("[%d]", *name);
-		name++;
-	}
-	msvc_printf("): oldp(0x%x) oldlen(%d) newp(0x%x) newlen(%d)\n", 
-		oldp, *oldlenp, newp, newlen);
-}
-long 
-ticks_posix(FILETIME *Time)
-{
-	LONGLONG llTime = *(LONGLONG *)Time;
-
-	llTime -= 116444736000000000LL;	/* epoch */
-	llTime *= 0.0000001;		/* milliseconds */
-	return(llTime);
-}
-u_int64_t
-ticks64_posix(LARGE_INTEGER *Time)
-{
-	LONGLONG llTime = Time->QuadPart;
-
-	llTime -= 116444736000000000LL;	/* epoch */
-	llTime *= 0.0000001;		/* milliseconds */
-	return(llTime);
-}
-
-/****************************************************/
-
-int 
-sysctl_KERN_CLOCKRATE(struct clockinfo *info)
-{
-	info->hz = win_KERN_CLOCKRATE();
-	info->tick = 1000000000 / info->hz;
-	info->tickadj = 0;
-	info->stathz = info->hz;
-	info->profhz = info->hz;
-	return(0);
-}
-int 
-sysctl_KERN_HOSTNAME(char *curname, size_t *csize, const char *newname, size_t nsize)
-{
-	int result = 0;
-	size_t size = 0;
-
-	if (csize){
-		size = *csize;
-	}
-	if (!win_KERN_HOSTNAME(curname, newname, size)){
-		result -= errno_posix(GetLastError());
-	}
-	return(result);
-}
-int 
-sysctl_KERN_DOMAINNAME(char *curname, size_t *csize, const char *newname, size_t nsize)
-{
-	int result = 0;
-	size_t size = 0;
-
-	if (csize){
-		size = *csize;
-	}
-	if (!win_KERN_DOMAINNAME(curname, newname, size)){
-		result -= errno_posix(GetLastError());
-	}
-	return(result);
-}
-int 
-sysctl_KERN_PROC(const int *name, void *data, size_t *size)
-{
-	int result = 0;
-	pid_t pid = WIN_PID_INIT;
-	WIN_TASK *pwTask = &__Tasks[pid];
-
-	/* sys/proc.c */
-
-	while (pid < CHILD_MAX){
-		if (pwTask->Flags){
-			if (!data){
-				*size += sizeof(struct kinfo_proc);
-			}else{
-				data = kproc_posix(data, pwTask);
-			}
-		}
-		pid++;
-		pwTask++;
-	}
-	return(result);
-}
-int 
-sysctl_KERN_PROC_NEW(const int *name, void *data, size_t *size)
-{
-	int result = 0;
-	pid_t pid = WIN_PID_INIT;
-	WIN_TASK *pwTask = &__Tasks[pid];
-
-	/* sys/proc.c */
-
-	while (pid < CHILD_MAX){
-		switch (name[2]){
-			case KERN_PROC_KTHREAD:		/* kvm_getprocs(3): user-level plus kernel threads */
-			case KERN_PROC_ALL:
-				data = proc_KERN_PROC_ALL(pwTask, (struct kinfo_proc *)data, size);
-				break;
-			case KERN_PROC_PGRP:
-				data = proc_KERN_PROC_PGRP(pwTask, name[3], (struct kinfo_proc *)data, size);
-				break;
-			case KERN_PROC_UID:
-				data = proc_KERN_PROC_UID(pwTask, name[3], (struct kinfo_proc *)data, size);
-				break;
-			default:
-				return(-EINVAL);
-		}
-		pid++;
-		pwTask++;
-	}
-	return(result);
-}
-int 
-sysctl_KERN_PROC_ARGS(const int *name, void *buf, size_t *size)
-{
-	int result = 0;
-	pid_t pid = name[2];
-
-	/* sys/proc.c */
-
-	switch (name[3]){
-		case KERN_PROC_ARGV:
-			kargv_posix(pid, 1, buf);
-			break;
-		case KERN_PROC_NARGV:
-		case KERN_PROC_ENV:
-		case KERN_PROC_NENV:
-		default:
-			result = -ENOENT;
-	}
-	return(result);
-}
-int 
-sysctl_KERN_CPTIME(long states[CPUSTATES])
-{
-	FILETIME ftIdle, ftKernel, ftUser;
-
-	GetSystemTimes(&ftIdle, &ftKernel, &ftUser);
-	states[CP_USER] = ticks_posix(&ftUser);
-	states[CP_NICE] = 0;
-	states[CP_SYS] = ticks_posix(&ftKernel);
-	states[CP_INTR] = 0;
-	states[CP_IDLE] = ticks_posix(&ftIdle);
-	return(0);
-}
-int 
-sysctl_KERN_CPTIME2(int cpu, u_int64_t states[CPUSTATES])
-{
-	int result = 0;
-	LONG lCount = win_HW_NCPU();
-	ULONG ulSize = sizeof(SYSTEM_PROCESSOR_PERFORMANCE_INFORMATION) * lCount;
-	SYSTEM_PROCESSOR_PERFORMANCE_INFORMATION *psppInfo = win_malloc(ulSize);
-
-	if (cpu < 0 || cpu >= lCount){
-		result = -EINVAL;
-	}else if (!win_KERN_CPTIME2(psppInfo, ulSize)){
-		result -= errno_posix(GetLastError());
-	}else{
-		psppInfo += cpu;
-		states[CP_USER] = ticks64_posix(&psppInfo->UserTime);
-		states[CP_NICE] = ticks64_posix(&psppInfo->DpcTime);
-		states[CP_SYS] = ticks64_posix(&psppInfo->KernelTime);
-		states[CP_INTR] = ticks64_posix(&psppInfo->InterruptTime);
-		states[CP_IDLE] = ticks64_posix(&psppInfo->IdleTime);
-	}
-	win_free(psppInfo);
-	return(result);
-}
-int 
-sysctl_KERN_VERSION(char *buf, size_t bufsize)
-{
-	int size = 0;
-
-	size += msvc_sprintf(buf, "OpenBSD %s (MINC): #%s: ", "6.1", VERSION);
-	size += msvc_strtime(BUILD, buf + size, bufsize - size);
-	return(0);
-}
-int 
-sysctl_KERN_SECURELVL(int *oldvalue, int *newvalue)
-{
-	int result = 0;
-
-	if (oldvalue){
-		*oldvalue = __Globals->SecureLevel;
-	}else if (newvalue){
-		__Globals->SecureLevel = *newvalue;
-	}else{
-		result = -EFAULT;
-	}
-	return(result);
-}
-int 
-sysctl_KERN_ARND(char *buf, size_t size)
-{
-	int result = 0;
-	DWORD dwResult;
-
-	if (!rand_read(buf, size, &dwResult)){
-		result -= errno_posix(GetLastError());
-	}
-	return(result);
-}
 int 
 sysctl_KERN(const int *name, void *oldp, size_t *oldlenp, void *newp, size_t newlen)
 {
@@ -251,7 +40,7 @@ sysctl_KERN(const int *name, void *oldp, size_t *oldlenp, void *newp, size_t new
 
 	switch (name[1]){
 		case KERN_CLOCKRATE:		/* mcount() */
-			result = sysctl_KERN_CLOCKRATE((struct clockinfo *)oldp);
+			result = kern_KERN_CLOCKRATE((struct clockinfo *)oldp);
 			break;
 		case KERN_RAWPARTITION:	/* GNU conftest.exe */
 			*(int *)oldp = 0;
@@ -269,10 +58,10 @@ sysctl_KERN(const int *name, void *oldp, size_t *oldlenp, void *newp, size_t new
 			*(int *)oldp = OPEN_MAX;
 			break;
 		case KERN_HOSTNAME:
-			result = sysctl_KERN_HOSTNAME((char *)oldp, oldlenp, (const char *)newp, newlen);
+			result = kern_KERN_HOSTNAME((char *)oldp, oldlenp, (const char *)newp, newlen);
 			break;
 		case KERN_DOMAINNAME:
-			result = sysctl_KERN_DOMAINNAME((char *)oldp, oldlenp, (const char *)newp, newlen);
+			result = kern_KERN_DOMAINNAME((char *)oldp, oldlenp, (const char *)newp, newlen);
 			break;
 		case KERN_OSTYPE:
 			win_strncpy(oldp, "OpenBSD", *oldlenp);
@@ -293,10 +82,10 @@ sysctl_KERN(const int *name, void *oldp, size_t *oldlenp, void *newp, size_t new
 			result = msgbuf_KERN_MSGBUF((char *)oldp, oldlenp);
 			break;
 		case KERN_PROC:
-			result = sysctl_KERN_PROC(name, oldp, oldlenp);
+			result = kern_KERN_PROC(name, oldp, oldlenp);
 			break;
 		case KERN_PROC_ARGS:
-			result = sysctl_KERN_PROC_ARGS(name, oldp, oldlenp);
+			result = kern_KERN_PROC_ARGS(name, oldp, oldlenp);
 			break;
 		case KERN_FSCALE:	/* The kernel fixed-point scale factor (ps.exe) */
 			*(int *)oldp = FSCALE;
@@ -305,16 +94,16 @@ sysctl_KERN(const int *name, void *oldp, size_t *oldlenp, void *newp, size_t new
 			*(int *)oldp = 1948;
 			break;
 		case KERN_CPTIME:	/* the number of ticks spent by the system (top.exe) */
-			result = sysctl_KERN_CPTIME((long *)oldp);
+			result = kern_KERN_CPTIME((long *)oldp);
 			break;
 		case KERN_CPTIME2:	/* ticks per CPU (top.exe) */
-			result = sysctl_KERN_CPTIME2(name[2], (u_int64_t *)oldp);
+			result = kern_KERN_CPTIME2(name[2], (u_int64_t *)oldp);
 			break;
 		case KERN_VERSION:
-			result = sysctl_KERN_VERSION(oldp, *oldlenp);
+			result = kern_KERN_VERSION(oldp, *oldlenp);
 			break;
 		case KERN_SECURELVL:
-			result = sysctl_KERN_SECURELVL((int *)oldp, (int *)newp);
+			result = kern_KERN_SECURELVL((int *)oldp, (int *)newp);
 			break;
 		case KERN_TTYCOUNT:
 			*(int *)oldp = WIN_TTY_MAX;
@@ -323,7 +112,10 @@ sysctl_KERN(const int *name, void *oldp, size_t *oldlenp, void *newp, size_t new
 			result = file_KERN_FILE(name, oldp, oldlenp);
 			break;
 		case KERN_ARND:		/* makewhatis.exe */
-			result = sysctl_KERN_ARND((char *)oldp, *(size_t *)oldlenp);
+			result = kern_KERN_ARND((char *)oldp, *(size_t *)oldlenp);
+			break;
+		case KERN_BOOTTIME:	/* w.exe */
+			result = kern_KERN_BOOTTIME((struct timeval *)oldp);
 			break;
 		case KERN_HOSTID:	/* alpine.exe */
 		default:

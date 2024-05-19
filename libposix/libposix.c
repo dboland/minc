@@ -88,6 +88,7 @@ WIN_NAMEIDATA *path_win(WIN_NAMEIDATA *Path, const char *pathname, int flags);
 #include "sys/time.c"
 #include "sys/proc.c"
 #include "sys/socket.c"
+#include "sys/tty.c"
 #include "sys/termio.c"
 #include "sys/filio.c"
 #include "sys/dkio.c"
@@ -106,7 +107,6 @@ WIN_NAMEIDATA *path_win(WIN_NAMEIDATA *Path, const char *pathname, int flags);
 #include "sys/sem.c"
 #include "sys/swap.c"
 #include "sys/reboot.c"
-//#include "sys/syscall.c"
 #include "sys/dirent.c"
 #include "dev/wscons/wsconsio.c"
 #include "net/if.c"		/* ifinit() */
@@ -124,6 +124,7 @@ WIN_NAMEIDATA *path_win(WIN_NAMEIDATA *Path, const char *pathname, int flags);
 
 #define _KERNEL
 #include "sys/file.c"
+#include "sys/kernel.c"
 #include "sys/sysctl.c"
 #include "compat.c"
 #include "kern/init_sysent.c"

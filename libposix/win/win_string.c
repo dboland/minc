@@ -28,7 +28,7 @@
  *
  */
 
-#include <ddk/ntddk.h>		// RtlCompareMemory()
+#include <winbase.h>
 
 CHAR _ERR255[255];
 CHAR _STR255[255];

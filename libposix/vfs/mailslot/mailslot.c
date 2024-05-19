@@ -32,4 +32,5 @@
 #include "mailslot_fcntl.c"
 #include "mailslot_stat.c"
 #include "mailslot_poll.c"
+#include "mailslot_tty.c"
 #include "mailslot_unistd.c"

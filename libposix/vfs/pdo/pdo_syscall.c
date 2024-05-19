@@ -35,7 +35,7 @@ GENERIC_MAPPING AccessMap = {WIN_S_IREAD, WIN_S_IWRITE, WIN_S_IEXEC, WIN_S_IRWX}
 /****************************************************/
 
 BOOL 
-PdoFileOpen(WIN_DEVICE *Device, WIN_FLAGS *Flags, WIN_VNODE *Result)
+PdoOpenFile(WIN_DEVICE *Device, WIN_FLAGS *Flags, WIN_VNODE *Result)
 {
 	BOOL bResult = FALSE;
 
@@ -46,7 +46,7 @@ PdoFileOpen(WIN_DEVICE *Device, WIN_FLAGS *Flags, WIN_VNODE *Result)
 		Result->FileType = Device->FileType;
 		Result->DeviceType = Device->DeviceType;
 		Result->Handle = Device->Handle;
-		Result->Object = Device->Handle;
+		Result->Object = win_F_DUPFD(Device->Handle, HANDLE_FLAG_INHERIT);
 		Result->FSType = FS_TYPE_PDO;
 		Result->Attribs = FILE_ATTRIBUTE_PDO | FILE_ATTRIBUTE_DEVICE;
 		Result->CloseExec = Flags->CloseExec;

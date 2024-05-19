@@ -33,53 +33,49 @@
 /****************************************************/
 
 HANDLE 
-MailCreateFile(LPCSTR FileName, SECURITY_ATTRIBUTES *Security)
+MailOpenFile(LPCSTR FileName, SECURITY_ATTRIBUTES *Security)
 {
 	HANDLE hResult = NULL;
 
-	hResult = CreateMailslot(FileName, WIN_MAX_INPUT, MAILSLOT_WAIT_FOREVER, Security);
-	if (hResult == INVALID_HANDLE_VALUE){
-		WIN_ERR("CreateMailslot(%s): %s\n", FileName, win_strerror(GetLastError()));
-	}
-	return(hResult);
-}
-HANDLE 
-MailOpenFile(LPCSTR FileName, WIN_FLAGS *Flags, SECURITY_ATTRIBUTES *Security)
-{
-	HANDLE hResult = NULL;
-
-	hResult = CreateFile(FileName, GENERIC_WRITE | READ_CONTROL, Flags->Share, 
-		Security, Flags->Creation, Flags->Attribs, NULL);
+	hResult = CreateFile(FileName, GENERIC_WRITE | READ_CONTROL, FILE_SHARE_READ, 
+		Security, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, NULL);
 	if (hResult == INVALID_HANDLE_VALUE){
 		WIN_ERR("CreateFile(%s): %s\n", FileName, win_strerror(GetLastError()));
 	}
 	return(hResult);
 }
 BOOL 
-MailCreateSlave(WIN_DEVICE *Device, HANDLE Event, WIN_VNODE *Result)
+MailCreateDevice(LPCSTR FileName, SECURITY_ATTRIBUTES *Security, WIN_DEVICE *Result)
+{
+	BOOL bResult = FALSE;
+	HANDLE hResult = NULL;
+
+	hResult = CreateMailslot(FileName, WIN_MAX_INPUT, MAILSLOT_WAIT_FOREVER, Security);
+	if (hResult == INVALID_HANDLE_VALUE){
+		WIN_ERR("CreateMailslot(%s): %s\n", FileName, win_strerror(GetLastError()));
+	}else{
+		Result->Input = hResult;
+		Result->Output = MailOpenFile(FileName, Security);
+		bResult = TRUE;
+	}
+	return(bResult);
+}
+BOOL 
+MailCreateSlave(WIN_DEVICE *Device, HANDLE Event, SECURITY_ATTRIBUTES *Security, WIN_VNODE *Result)
 {
 	BOOL bResult = FALSE;
 	CHAR szPath[MAX_PATH] = "\\\\.\\MAILSLOT\\slave\\";
 	HANDLE hResult = NULL;
-	WIN_FLAGS wFlags = {GENERIC_WRITE | READ_CONTROL, FILE_SHARE_READ,
-		OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, 0};
-	SECURITY_ATTRIBUTES sa = {sizeof(sa), NULL, TRUE};
 
-	hResult = CreateMailslot(win_strcat(szPath, Device->Name), WIN_MAX_INPUT, 
-		MAILSLOT_WAIT_FOREVER, &sa);
-	if (hResult == INVALID_HANDLE_VALUE){
-		WIN_ERR("CreateMailslot(%s): %s\n", szPath, win_strerror(GetLastError()));
-	}else{
-		Device->Input = hResult;
-		Device->Output = MailOpenFile(szPath, &wFlags, &sa);
+	if (MailCreateDevice(win_strcat(szPath, Device->Name), Security, Device)){
 		Result->Event = Event;
-		Result->FSType = FS_TYPE_PDO;
+		Result->FSType = Device->FSType;
 		Result->FileType = Device->FileType;
 		Result->DeviceType = Device->DeviceType;
 		Result->DeviceId = Device->DeviceId;
-		Result->Attribs = FILE_ATTRIBUTE_NORMAL;
-		Result->Access = win_F_GETFL(hResult);
-		Result->Flags = win_F_GETFD(hResult);
+		Result->Attribs = FILE_ATTRIBUTE_PDO | FILE_ATTRIBUTE_DEVICE;
+		Result->Access = win_F_GETFL(Device->Input);
+		Result->Flags = win_F_GETFD(Device->Input);
 		Result->Device = Device;
 		bResult = TRUE;
 	}

@@ -82,7 +82,6 @@ typedef enum _WIN_VTAGTYPE {
 
 /* sys/syslimits.h */
 
-#define WIN_MAX_INPUT		128
 #define WIN_NAME_MAX		16
 #define WIN_PIPE_BUF		1024
 
@@ -215,30 +214,28 @@ typedef struct _WIN_NAMEIDATA {
 
 /* sys/termios.h */
 
-#define WIN_ISIG		0x00800000
-//#define WIN_ICANON		0x01000000
+/* local */
+
+#define WIN_ECHO		0x00000008
+#define WIN_ISIG		0x00000080
+#define WIN_ICANON		0x00000100
 
 /* line In */
 
-#define WIN_IXON		0x02000000
-#define WIN_IXOFF		0x04000000
-#define WIN_INLCR		0x00400000	/* Ye Olde TTY had separate key for CR */
-#define WIN_ICRNL		0x01000000
+#define WIN_IXON		0x00000200
+#define WIN_IXOFF		0x00000400
+#define WIN_INLCR		0x00000040	/* Ye Olde TTY had separate key for CR */
+#define WIN_ICRNL		0x00000100
 
 /* line Out */
 
-#define WIN_ONLCR		0x00020000
-#define WIN_OXTABS		0x00040000
-#define WIN_OCRNL		0x00100000
+#define WIN_ONLCR		0x00000002
+#define WIN_OXTABS		0x00000004
+#define WIN_OCRNL		0x00000010
 
 /* sys/ttycom.h */
 
 #define TIOCFLAG_ACTIVE		0x00010000
-
-/* sys/ttydefaults.h */
-
-#define WIN_TTYDEF_IFLAG	(WIN_ICRNL | ENABLE_WINDOW_INPUT)
-#define WIN_TTYDEF_OFLAG	(WIN_ONLCR | WIN_OXTABS)
 
 /*
  * vfs_fcntl.c
@@ -460,6 +457,7 @@ typedef struct _WIN_POLLFD {
  */
 
 #define WIN_TTY_MAX		WIN_UNIT_MAX
+#define WIN_NCCS		20
 
 typedef struct _WIN_WINSIZE {
 	USHORT Row;
@@ -469,8 +467,13 @@ typedef struct _WIN_WINSIZE {
 } WIN_WINSIZE;
 
 typedef struct _WIN_TERMIO {
-	DWORD Input;
-	DWORD Output;
+	UINT IFlags;
+	UINT OFlags;
+	UINT CFlags;
+	UINT LFlags;
+	UCHAR Control[WIN_NCCS];
+	UINT ISpeed;
+	UINT OSpeed;
 } WIN_TERMIO;
 
 typedef struct _WIN_TTY {
@@ -487,7 +490,7 @@ typedef struct _WIN_TTY {
 	BOOL VEdit;
 	COORD Cursor;
 	DWORD Flags;
-	WCHAR NtName[MAX_NAME];
+	CHAR Name[MAX_NAME];
 } WIN_TTY;
 
 #define CTTY(idx)		(&__Terminals[idx])

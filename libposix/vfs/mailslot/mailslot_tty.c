@@ -30,40 +30,44 @@
 
 #include <winbase.h>
 
+CHAR __MAIL_INPUT[WIN_MAX_INPUT + 1];
+
+CHAR *__Buffer = __MAIL_INPUT;
+
 /****************************************************/
 
 VOID 
-TTYCarriageReturn(HANDLE Handle, DWORD Mode, OVERLAPPED *ovl)
+TTYCarriageReturn(HANDLE Handle, UINT Flags, OVERLAPPED *ovl)
 {
 	DWORD dwCount = 0;
 
-	if (Mode & WIN_OCRNL){
+	if (Flags & WIN_OCRNL){
 		WriteFile(Handle, "\n", 1, &dwCount, ovl);
 	}else{
 		WriteFile(Handle, "\r", 1, &dwCount, ovl);
 	}
 }
 VOID 
-TTYLineFeed(HANDLE Handle, DWORD Mode, OVERLAPPED *ovl)
+TTYLineFeed(HANDLE Handle, UINT Flags, OVERLAPPED *ovl)
 {
 	DWORD dwCount = 0;
 
-	if (Mode & WIN_ONLCR){
+	if (Flags & WIN_ONLCR){
 		WriteFile(Handle, "\r", 1, &dwCount, ovl);
 	}
 	WriteFile(Handle, "\n", 1, &dwCount, ovl);
 }
 VOID 
-TTYControl(HANDLE Handle, DWORD Mode, CHAR C, OVERLAPPED *ovl)
+TTYControl(HANDLE Handle, UINT Flags, CHAR C, OVERLAPPED *ovl)
 {
 	DWORD dwCount = 0;
 
 	switch (C){
 		case '\n':
-			TTYLineFeed(Handle, Mode, ovl);
+			TTYLineFeed(Handle, Flags, ovl);
 			break;
 		case '\r':
-			TTYCarriageReturn(Handle, Mode, ovl);
+			TTYCarriageReturn(Handle, Flags, ovl);
 			break;
 		default:
 			WriteFile(Handle, &C, 1, &dwCount, ovl);
@@ -71,16 +75,7 @@ TTYControl(HANDLE Handle, DWORD Mode, CHAR C, OVERLAPPED *ovl)
 }
 
 /****************************************************/
-VOID 
-tty_init(WIN_TTY *Console)
-{
-	Console->Mode.Input = WIN_TTYDEF_IFLAG;
-	Console->Mode.Output = WIN_TTYDEF_OFLAG;
-	Console->Flags = TIOCFLAG_ACTIVE;
-	Console->DeviceId = DEV_TYPE_CONSOLE;
-	Console->ScrollRate = 1;
-	win_wcscpy(Console->NtName, L"CON");
-}
+
 BOOL 
 tty_open(WIN_DEVICE *Device, WIN_FLAGS *Flags, WIN_VNODE *Result)
 {
@@ -102,7 +97,7 @@ tty_close(WIN_TTY *Terminal)
 	return(bResult);
 }
 BOOL 
-tty_write(WIN_DEVICE *Device, LPCSTR Buffer, DWORD Size, DWORD *Result)
+tty_write(HANDLE Handle, LPCSTR Buffer, DWORD Size, DWORD *Result)
 {
 	BOOL bResult = TRUE;
 	LONG lResult = 0;
@@ -113,9 +108,9 @@ tty_write(WIN_DEVICE *Device, LPCSTR Buffer, DWORD Size, DWORD *Result)
 	while (lResult < Size){
 		C = *Buffer++;
 		if (C < 32){
-			TTYControl(Device->Output, __CTTY->Mode.Output, C, &ovl);
+			TTYControl(Handle, __CTTY->Mode.OFlags, C, &ovl);
 		}else{
-			WriteFile(Device->Output, &C, 1, &dwCount, &ovl);
+			WriteFile(Handle, &C, 1, &dwCount, &ovl);
 		}
 		lResult++;
 	}
@@ -123,17 +118,29 @@ tty_write(WIN_DEVICE *Device, LPCSTR Buffer, DWORD Size, DWORD *Result)
 	return(bResult);
 }
 BOOL 
-tty_read(WIN_DEVICE *Device, LPSTR Buffer, DWORD Size, DWORD *Result)
+tty_read(HANDLE Handle, LPSTR Buffer, DWORD Size, DWORD *Result)
 {
 	BOOL bResult = FALSE;
+	LONG lSize = Size;
+	DWORD dwResult = 0;
+	DWORD dwCount;
+	CHAR C;
 
-	if (Size > WIN_MAX_INPUT){
-		Size = WIN_MAX_INPUT;
+	while (!bResult){
+		if (lSize < 1){
+			bResult = TRUE;
+		}else if (C = *__Buffer){
+			*Buffer++ = C;
+			__Buffer++;
+			dwResult++;
+			lSize--;
+		}else if (!ReadFile(Handle, __MAIL_INPUT, WIN_MAX_INPUT, &dwCount, NULL)){
+			break;
+		}else{
+			__MAIL_INPUT[dwCount] = 0;
+			__Buffer = __MAIL_INPUT;
+		}
 	}
-	if (!ReadFile(Device->Input, Buffer, Size, Result, NULL)){
-		vfs_raise(WM_COMMAND, CTRL_ABORT_EVENT, 0);
-	}else{
-		bResult = TRUE;
-	}
+	*Result = dwResult;
 	return(bResult);
 }

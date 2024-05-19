@@ -78,12 +78,12 @@ BOOL vfs_setugid(WIN_TASK *Task);
 /* vfs_termios.c */
 
 BOOL vfs_TIOCGWINSZ(WIN_VNODE *Node, WIN_WINSIZE *WinSize);
-BOOL vfs_TIOCSWINSZ(WIN_TTY *Terminal, WIN_WINSIZE *WinSize);
+BOOL vfs_TIOCSWINSZ(WIN_VNODE *Node, WIN_WINSIZE *WinSize);
 BOOL vfs_TIOCFLUSH(WIN_VNODE *Node);
 BOOL vfs_TIOCDRAIN(WIN_VNODE *Node);
 BOOL vfs_TIOCGETA(WIN_VNODE *Node, WIN_TERMIO *Mode);
 BOOL vfs_TIOCSETA(WIN_VNODE *Node, WIN_TERMIO *Mode, BOOL Flush, BOOL Drain);
-BOOL vfs_PTMGET(WIN_VNODE *Node, WIN_VNODE *Result);
+BOOL vfs_PTMGET(WIN_VNODE *Master, WIN_VNODE *Slave);
 BOOL vfs_TIOCSCTTY(WIN_TTY *Terminal, WIN_TASK *Task);
 BOOL vfs_TIOCGPGRP(WIN_TTY *Terminal, UINT *Result);
 BOOL vfs_TIOCSPGRP(WIN_TTY *Terminal, UINT GroupId);
@@ -223,6 +223,7 @@ BOOL pdo_DIOCGDINFO(WIN_DEVICE *Device);
 BOOL pdo_WSKBDIO_GTYPE(UINT *Type, UINT *SubType, UINT *FKeys);
 BOOL tty_close(WIN_TTY *Terminal);
 BOOL rand_read(LPSTR Buffer, DWORD Size, DWORD *Result);
+VOID con_init(WIN_DEVICE *Device);
 
 /* volume.c */
 

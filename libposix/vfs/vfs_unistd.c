@@ -89,7 +89,7 @@ vfs_read(WIN_VNODE *Node, LPVOID Buffer, DWORD Size, DWORD *Result)
 			bResult = pipe_read(Node, Buffer, Size, Result);
 			break;
 		case FS_TYPE_MAILSLOT:
-			bResult = mail_read(Node->Handle, Buffer, Size, Result);
+			bResult = mail_read(Node, Buffer, Size, Result);
 			break;
 		case FS_TYPE_CHAR:
 			bResult = char_read(Node, Buffer, Size, Result);
@@ -118,7 +118,7 @@ vfs_write(WIN_VNODE *Node, LPCVOID Buffer, DWORD Size, DWORD *Result)
 			bResult = pipe_write(Node, Buffer, Size, Result);
 			break;
 		case FS_TYPE_MAILSLOT:
-			bResult = mail_write(Node->Handle, Buffer, Size, Result);
+			bResult = mail_write(Node, Buffer, Size, Result);
 			break;
 		case FS_TYPE_CHAR:
 			bResult = char_write(Node, Buffer, Size, Result);
@@ -314,7 +314,6 @@ vfs_unlink(WIN_NAMEIDATA *Path)
 	BOOL bResult = FALSE;
 
 	switch (Path->FSType){
-		case FS_TYPE_PDO:
 		case FS_TYPE_DISK:
 			bResult = disk_unlink(Path);
 			break;

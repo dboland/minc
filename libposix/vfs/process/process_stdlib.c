@@ -80,7 +80,7 @@ proc_setugid(WIN_TASK *Task)
 
 	if (!GetModuleFileNameW(NULL, szPath, MAX_PATH)){
 		return(FALSE);
-	}else if (!DiskFileStat(szPath, FILE_ATTRIBUTE_NORMAL, &wStat)){
+	}else if (!DiskStatFile(szPath, FILE_ATTRIBUTE_NORMAL, &wStat)){
 		return(FALSE);
 	}
 	if (wStat.Mode.Special & WIN_S_ISUID){

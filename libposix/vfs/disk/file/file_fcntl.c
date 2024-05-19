@@ -38,13 +38,13 @@ file_open(WIN_NAMEIDATA *Path, WIN_FLAGS *Flags, WIN_MODE *Mode, WIN_VNODE *Resu
 	BOOL bResult = FALSE;
 
 	if (Flags->Creation != OPEN_EXISTING){
-		bResult = DiskFileCreate(Path, Flags, Mode, Result);
+		bResult = DiskCreateFile(Path, Flags, Mode, Result);
 	}else if (Path->Attribs == -1){		/* git.exe */
 		return(FALSE);
 	}else if (Path->Flags & WIN_REQUIREDIR){
 		SetLastError(ERROR_DIRECTORY);
 	}else{
-		bResult = DiskFileOpen(Path, Flags, Result);
+		bResult = DiskOpenFile(Path, Flags, Result);
 	}
 	return(bResult);
 }

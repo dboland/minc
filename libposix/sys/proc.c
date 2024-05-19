@@ -126,7 +126,7 @@ kproc_posix(struct kinfo_proc *proc, WIN_TASK *Task)
 		proc->p_sticks = kticks_posix(&kInfo.Kernel);
 
 		rtime *= 0.001;				/* milliseconds */
-		if (rtime){
+		if (rtime > 0){
 			nticks = proc->p_uticks + proc->p_sticks;
 			proc->p_pctcpu = (nticks * 100) / rtime;
 		}

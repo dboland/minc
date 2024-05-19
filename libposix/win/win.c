@@ -35,6 +35,7 @@
 #define NTOSAPI
 
 #include <windows.h>
+#include <ntdef.h>
 
 #include <stdint.h>
 #include <stdlib.h>

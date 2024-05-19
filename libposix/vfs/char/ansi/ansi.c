@@ -447,12 +447,15 @@ AnsiDeviceStatusReport(CONSOLE_SCREEN_BUFFER_INFO *Info, CHAR Parm, CHAR *Result
 	return(bResult);
 }
 BOOL 
-AnsiSetMode(WIN_TTY *Terminal, WORD Arg)
+AnsiSetMode(HANDLE Handle, WIN_TTY *Terminal, WORD Arg)
 {
 	BOOL bResult = TRUE;
+	DWORD dwMode;
 
-	if (Arg == 4){			/* IRM */
-		Terminal->Mode.Input |= ENABLE_INSERT_MODE;
+	if (!GetConsoleMode(Handle, &dwMode)){
+		bResult = FALSE;
+	}else if (Arg == 4){			/* IRM */
+		bResult = SetConsoleMode(Handle, dwMode | ENABLE_INSERT_MODE);
 	}else if (Arg == 7){		/* VEM */
 		Terminal->VEdit = TRUE;
 	}else{
@@ -461,12 +464,15 @@ AnsiSetMode(WIN_TTY *Terminal, WORD Arg)
 	return(bResult);
 }
 BOOL 
-AnsiResetMode(WIN_TTY *Terminal, WORD Arg)
+AnsiResetMode(HANDLE Handle, WIN_TTY *Terminal, WORD Arg)
 {
 	BOOL bResult = TRUE;
+	DWORD dwMode;
 
-	if (Arg == 4){
-		Terminal->Mode.Input &= ~ENABLE_INSERT_MODE;
+	if (!GetConsoleMode(Handle, &dwMode)){
+		bResult = FALSE;
+	}else if (Arg == 4){
+		bResult = SetConsoleMode(Handle, dwMode & ~ENABLE_INSERT_MODE);
 	}else if (Arg == 7){
 		Terminal->VEdit = FALSE;
 	}else{
@@ -550,10 +556,10 @@ AnsiControl(HANDLE Handle, CHAR C, CONSOLE_SCREEN_BUFFER_INFO *Info, SEQUENCE *S
 			bResult = AnsiCursorPosition(Handle, Info, Seq->Arg1, AnsiStrToInt(Seq->Args));
 			break;
 		case 'h':		/* SM */
-			bResult = AnsiSetMode(__CTTY, Seq->Arg1);
+			bResult = AnsiSetMode(Handle, __CTTY, Seq->Arg1);
 			break;
 		case 'l':		/* RM */
-			bResult = AnsiResetMode(__CTTY, Seq->Arg1);
+			bResult = AnsiResetMode(Handle, __CTTY, Seq->Arg1);
 			break;
 		case 'm':		/* SGR */
 			bResult = AnsiSelectGraphicRendition(Handle, Info, Seq->Buf, Size);

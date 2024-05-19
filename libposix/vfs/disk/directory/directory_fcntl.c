@@ -39,7 +39,7 @@ dir_open(WIN_NAMEIDATA *Path, WIN_FLAGS *Flags, WIN_MODE *Mode, WIN_VNODE *Resul
 	HANDLE hResult;
 
 	Flags->Attribs |= FILE_FLAG_BACKUP_SEMANTICS;
-	if (DiskFileOpen(Path, Flags, Result)){
+	if (DiskOpenFile(Path, Flags, Result)){
 		bResult = TRUE;
 	}
 	return(bResult);

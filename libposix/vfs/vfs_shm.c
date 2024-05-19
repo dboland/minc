@@ -54,15 +54,13 @@ SHMCreate(LPCSTR Name, DWORD SizeLow)
 /************************************************************/
 
 WIN_SESSION *
-vfs_shm_init(LPCSTR Name, HINSTANCE Instance)
+vfs_shminit(LPCSTR Name, HINSTANCE Instance)
 {
 	WIN_SESSION *wsResult = NULL;
 
 	if (!(__Shared = OpenFileMapping(FILE_MAP_WRITE, FALSE, Name))){
 		wsResult = SHMCreate(Name, sizeof(WIN_SESSION));
 		pdo_init(wsResult->Devices);
-		con_init(DEVICE(DEV_TYPE_CONSOLE));
-		tty_init(wsResult->Terminals);
 		disk_init(wsResult->Mounts, Instance);
 		sysctl_init(wsResult->Globals);
 	}else if (!(wsResult = MapViewOfFile(__Shared, FILE_MAP_WRITE, 0, 0, 0))){
@@ -71,7 +69,7 @@ vfs_shm_init(LPCSTR Name, HINSTANCE Instance)
 	return(wsResult);
 }
 VOID 
-vfs_shm_finish(WIN_SESSION *Session)
+vfs_shmexit(WIN_SESSION *Session)
 {
 	if (!UnmapViewOfFile(Session)){
 		WIN_ERR("UnmapViewOfFile(%d): %s\n", Session, win_strerror(GetLastError()));

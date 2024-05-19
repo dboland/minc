@@ -32,6 +32,21 @@
 
 /****************************************************/
 
+DWORD 
+InputMode(WIN_TERMIO *Mode)
+{
+	DWORD dwResult = ENABLE_WINDOW_INPUT;
+
+	if (Mode->LFlags & WIN_ECHO){
+		dwResult |= ENABLE_LINE_INPUT | ENABLE_ECHO_INPUT;
+	}else if (Mode->LFlags & WIN_ICANON){
+		dwResult |= ENABLE_LINE_INPUT;
+	}
+	if (Mode->LFlags & WIN_ISIG){
+		dwResult |= ENABLE_PROCESSED_INPUT;
+	}
+	return(dwResult);
+}
 VOID 
 InputChar(CHAR C, DWORD KeyState, CHAR *Result)
 {
@@ -45,7 +60,7 @@ InputChar(CHAR C, DWORD KeyState, CHAR *Result)
 		SetConsoleOutputCP(GetACP());
 	}else if (C == 15){	/* Ctrl-O (SI): shift in */
 		SetConsoleOutputCP(CP_UTF8);
-	}else if (KeyState & LEFT_ALT_PRESSED){
+	}else if (KeyState & LEFT_ALT_PRESSED){		/* nano.exe */
 		*Result++ = '\e';
 	}
 	*Result++ = C;
@@ -54,7 +69,7 @@ InputChar(CHAR C, DWORD KeyState, CHAR *Result)
 VOID 
 InputReturn(DWORD KeyState, CHAR *Result)
 {
-	if (__CTTY->Mode.Input & WIN_ICRNL){
+	if (__CTTY->Mode.IFlags & WIN_ICRNL){
 		InputChar('\n', KeyState, Result);
 	}else{
 		InputChar('\r', KeyState, Result);
@@ -75,7 +90,7 @@ InputInsert(DWORD KeyState, CHAR *Result)
 	BOOL bResult = FALSE;
 
 	if (!(KeyState & SHIFT_PRESSED)){
-		win_strcpy(Result, ANSI_INSERT);
+		win_strcpy(Result, ANSI_CURSOR(VK_INSERT));
 		bResult = TRUE;
 	}else if (!IsClipboardFormatAvailable(CF_TEXT)){
 		*Result = 0;
@@ -89,65 +104,23 @@ InputInsert(DWORD KeyState, CHAR *Result)
 BOOL 
 InputKey(KEY_EVENT_RECORD *Event, CHAR *Result)
 {
-	UCHAR CH = Event->uChar.AsciiChar;
-	WORD VK = Event->wVirtualKeyCode;
 	BOOL bResult = TRUE;
-	DWORD dwCount;
+	CHAR CH = Event->uChar.AsciiChar;
+	WORD VK = Event->wVirtualKeyCode;
 
 	if (!Event->bKeyDown){
 		return(FALSE);
-	}else if (VK == VK_RETURN){
-		InputReturn(Event->dwControlKeyState, Result);
-	}else if (VK == VK_TAB){
-		InputTab(Event->dwControlKeyState, Result);
-	}else if (VK == VK_INSERT){
-		bResult = InputInsert(Event->dwControlKeyState, Result);
 	}else if (CH){
 		InputChar(CH, Event->dwControlKeyState, Result);
-	}else if (VK == VK_PRIOR){
-		win_strcpy(Result, ANSI_PRIOR);
-	}else if (VK == VK_NEXT){
-		win_strcpy(Result, ANSI_NEXT);
-	}else if (VK == VK_END){
-		win_strcpy(Result, ANSI_END);
-	}else if (VK == VK_HOME){
-		win_strcpy(Result, ANSI_HOME);
-	}else if (VK == VK_LEFT){
-		win_strcpy(Result, ANSI_LEFT);
-	}else if (VK == VK_UP){
-		win_strcpy(Result, ANSI_UP);
-	}else if (VK == VK_RIGHT){
-		win_strcpy(Result, ANSI_RIGHT);
-	}else if (VK == VK_DOWN){
-		win_strcpy(Result, ANSI_DOWN);
-	}else if (VK == VK_DELETE){
-		win_strcpy(Result, ANSI_DELETE);
-	}else if (VK == VK_F1){
-		win_strcpy(Result, ANSI_F1);
-	}else if (VK == VK_F2){
-		win_strcpy(Result, ANSI_F2);
-	}else if (VK == VK_F3){
-		win_strcpy(Result, ANSI_F3);
-	}else if (VK == VK_F4){
-		win_strcpy(Result, ANSI_F4);
-	}else if (VK == VK_F5){
-		win_strcpy(Result, ANSI_F5);
-	}else if (VK == VK_F6){
-		win_strcpy(Result, ANSI_F6);
-	}else if (VK == VK_F7){
-		win_strcpy(Result, ANSI_F7);
-	}else if (VK == VK_F8){
-		win_strcpy(Result, ANSI_F8);
-	}else if (VK == VK_F9){
-		win_strcpy(Result, ANSI_F9);
-	}else if (VK == VK_F10){
-		win_strcpy(Result, ANSI_F10);
-	}else if (VK == VK_F11){
-		win_strcpy(Result, ANSI_F11);
-	}else if (VK == VK_F12){
-		win_strcpy(Result, ANSI_F12);
+	}else if (VK == VK_INSERT){
+		bResult = InputInsert(Event->dwControlKeyState, Result);
+	}else if (VK <= VK_MODIFY){
+		bResult = FALSE;
+	}else if (VK <= VK_CURSOR){
+		win_strcpy(Result, ANSI_CURSOR(VK));
+	}else if (VK <= VK_FUNCTION){
+		win_strcpy(Result, ANSI_FUNCTION(VK));
 	}else{
-//__PRINTF("[%d:%d:%d]", CH, Event->wVirtualKeyCode, Event->wVirtualScanCode)
 		bResult = FALSE;
 	}
 	return(bResult);
@@ -160,9 +133,9 @@ InputMouse(MOUSE_EVENT_RECORD *Event, CHAR *Result)
 	if (Event->dwEventFlags != MOUSE_WHEELED){
 		bResult = FALSE;
 	}else if (GET_WHEEL_DELTA_WPARAM(Event->dwButtonState) > 0){
-		win_strcpy(Result, ANSI_UP);
+		win_strcpy(Result, ANSI_CURSOR(VK_UP));
 	}else{
-		win_strcpy(Result, ANSI_DOWN);
+		win_strcpy(Result, ANSI_CURSOR(VK_DOWN));
 	}
 	return(bResult);
 }
@@ -171,7 +144,9 @@ InputWindow(WINDOW_BUFFER_SIZE_RECORD *Event)
 {
 	COORD cSize = Event->dwSize;
 
-//	vfs_raise(WM_SIZE, cSize.X, cSize.Y);
+	__CTTY->WinSize.Column = cSize.X;
+	__CTTY->WinSize.Row = cSize.Y;
+	vfs_raise(WM_SIZE, cSize.X, cSize.Y);
 	return(FALSE);
 }
 BOOL 
@@ -204,7 +179,6 @@ InputReadEvent(HANDLE Handle, CHAR *Buffer)
 
 	*Buffer = 0;
 	if (!ReadConsoleInput(Handle, &iRecord, 1, &dwCount)){
-//		WIN_ERR("ReadConsoleInput(%d): %s\n", Handle, win_strerror(GetLastError()));
 		vfs_raise(WM_COMMAND, CTRL_ABORT_EVENT, 0);
 	}else{
 		bResult = InputEvent(&iRecord, Buffer);
@@ -220,14 +194,13 @@ InputReadLine(HANDLE Handle, DWORD Mode, CHAR *Buffer)
 
 	*Buffer = 0;
 	if (!ReadFile(Handle, Buffer, WIN_MAX_INPUT, &lCount, NULL)){
-//		WIN_ERR("InputReadLine(%d): %s\n", Handle, win_strerror(GetLastError()));
 		vfs_raise(WM_COMMAND, CTRL_ABORT_EVENT, 0);
 	}else if (lCount > 0){
 		lCount--;
 		if (Mode & ENABLE_PROCESSED_INPUT){
 			Buffer[lCount--] = 0;		/* remove NL, leave CR */
 		}
-		if (Mode & WIN_ICRNL){
+		if (__CTTY->Mode.IFlags & WIN_ICRNL){
 			Buffer[lCount] = '\n';		/* replace CR (ftp.exe) */
 		}
 		bResult = TRUE;
@@ -258,6 +231,47 @@ InputReadClipboard(CHAR *Buffer)
 	*Buffer = 0;
 	return(bResult);
 }
+BOOL 
+InputIsAnsi(KEY_EVENT_RECORD *Event)
+{
+	BOOL bResult = FALSE;
+	UCHAR CH = Event->uChar.AsciiChar;
+	WORD VK = Event->wVirtualKeyCode;
+
+	if (!Event->bKeyDown){
+		return(FALSE);
+	}else if (CH){
+		bResult = TRUE;
+	}else if (VK <= VK_MODIFY){
+		bResult = FALSE;
+	}else if (VK <= VK_CURSOR){
+		bResult = *ANSI_CURSOR(VK);
+	}else if (VK <= VK_FUNCTION){
+		bResult = *ANSI_FUNCTION(VK);
+	}
+	return(bResult);
+}
+BOOL 
+InputIsEvent(INPUT_RECORD *Record)
+{
+	BOOL bResult = FALSE;
+
+	switch (Record->EventType){
+		case KEY_EVENT:
+			bResult = InputIsAnsi(&Record->KeyEvent);
+			break;
+		case WINDOW_BUFFER_SIZE_EVENT:
+			bResult = InputWindow(&Record->WindowBufferSizeEvent);
+			break;
+		case MOUSE_EVENT:
+		case FOCUS_EVENT:
+		case MENU_EVENT:
+			break;
+		default:
+			__PRINTF("{%d}", Record->EventType)
+	}
+	return(bResult);
+}
 
 /****************************************************/
 
@@ -267,7 +281,7 @@ input_read(HANDLE Handle, LPSTR Buffer, DWORD Size, DWORD *Result)
 	CHAR C = 0;
 	BOOL bResult = FALSE;
 	DWORD dwResult = 0;
-	DWORD dwMode = __CTTY->Mode.Input;
+	DWORD dwMode = InputMode(&__CTTY->Mode);
 	LONG lSize = Size;
 
 	if (dwMode & ENABLE_VIRTUAL_TERMINAL_INPUT){
@@ -299,19 +313,19 @@ input_poll(HANDLE Handle, WIN_POLLFD *Info)
 	DWORD dwResult = 0;
 	DWORD dwCount = 0;
 	INPUT_RECORD iRecord;
-	SHORT sResult = WIN_POLLERR;
+	SHORT sResult = 0;
 	SHORT sMask = Info->Events | WIN_POLLIGNORE;
 
 	if (*__Input || __Clipboard){		/* vim.exe */
 		sResult = WIN_POLLIN;
 	}else if (!PeekConsoleInput(Handle, &iRecord, 1, &dwCount)){
-		WIN_ERR("PeekConsoleInput(%d): %s\n", Handle, win_strerror(GetLastError()));
+		sResult = WIN_POLLERR;
 	}else if (!dwCount){
 		sResult = 0;
-	}else if (InputReadEvent(Handle, __INPUT_BUF)){
-		sResult = WIN_POLLIN;
+	}else if (!InputIsEvent(&iRecord)){
+		ReadConsoleInput(Handle, &iRecord, 1, &dwCount);
 	}else{
-		sResult = 0;
+		sResult = WIN_POLLIN;
 	}
 	if (Info->Result = sResult & sMask){
 		dwResult++;

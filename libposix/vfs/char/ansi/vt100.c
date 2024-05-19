@@ -48,12 +48,15 @@ DECSetMode(HANDLE Handle, WIN_TTY *Terminal, WORD Arg)
 {
 	BOOL bResult = TRUE;
 	CONSOLE_CURSOR_INFO ciNorm = {100, TRUE};
+	DWORD dwMode;
 
-	if (Arg == 4){			// DECSCLM scroll mode, smooth
+	if (!GetConsoleMode(Handle, &dwMode)){
+		bResult = FALSE;
+	}else if (Arg == 4){			// DECSCLM scroll mode, smooth
 		Terminal->ScrollRate = 1;
 //	}else if (Arg == 6){		// DECOM origin mode, line 1 is relative to margin
 	}else if (Arg == 7){		// DECAWM autowrap
-		Terminal->Mode.Output |= ENABLE_WRAP_AT_EOL_OUTPUT;
+		bResult = SetConsoleMode(Handle, dwMode | ENABLE_WRAP_AT_EOL_OUTPUT);
 	}else if (Arg == 25){		// show cursor
 		bResult = SetConsoleCursorInfo(Handle, &ciNorm);
 //	}else if (Arg == 47){		// xterm alternate screen
@@ -71,12 +74,15 @@ DECResetMode(HANDLE Handle, WIN_TTY *Terminal, WORD Arg)
 	BOOL bResult = TRUE;
 	CONSOLE_CURSOR_INFO ciHide = {100, FALSE};
 	CONSOLE_CURSOR_INFO ciNorm = {100, TRUE};
+	DWORD dwMode;
 
-	if (Arg == 4){			// DECSCLM scroll mode, jump
+	if (!GetConsoleMode(Handle, &dwMode)){
+		bResult = FALSE;
+	}else if (Arg == 4){			// DECSCLM scroll mode, jump
 		Terminal->ScrollRate = 6;
 //	}else if (Arg == 1){		// DECCKM ANSI cursor, needs DECKPAM (ESC =)
 	}else if (Arg == 7){		// DECAWM autowrap mode
-		Terminal->Mode.Output &= ~ENABLE_WRAP_AT_EOL_OUTPUT;
+		bResult = SetConsoleMode(Handle, dwMode & ~ENABLE_WRAP_AT_EOL_OUTPUT);
 	}else if (Arg == 12){		// xterm cnorm/cursor_normal
 		bResult = SetConsoleCursorInfo(Handle, &ciNorm);
 	}else if (Arg == 25){		// hide cursor

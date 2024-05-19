@@ -38,7 +38,6 @@
 #include <sys/syscall.h>
 #include <sys/sysctl.h>
 #include <sys/param.h>
-#include <sys/tty.h>
 
 #include <netdb.h>
 

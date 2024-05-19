@@ -54,12 +54,14 @@ pdo_read(WIN_DEVICE *Device, LPSTR Buffer, LONG Size, DWORD *Result)
 
 	switch (Device->DeviceType){
 		case DEV_TYPE_PTY:
+			bResult = ReadFile(Device->Input, Buffer, Size, Result, NULL);
+			break;
 		case DEV_TYPE_CONSOLE:
 			bResult = input_read(Device->Input, Buffer, Size, Result);
 			break;
-		case DEV_TYPE_TTY:
-			bResult = tty_read(Device, Buffer, Size, Result);
-			break;
+//		case DEV_TYPE_TTY:
+//			bResult = tty_read(Device->Input, Buffer, Size, Result);
+//			break;
 		case DEV_TYPE_ROUTE:
 			bResult = route_read(Device, Buffer, Size, Result);
 			break;
@@ -76,15 +78,18 @@ BOOL
 pdo_write(WIN_DEVICE *Device, LPCSTR Buffer, DWORD Size, DWORD *Result)
 {
 	BOOL bResult = FALSE;
+	OVERLAPPED ovl = {0, 0, 0, 0, __MailEvent};
 
 	switch (Device->DeviceType){
 		case DEV_TYPE_PTY:
+			bResult = WriteFile(Device->Output, Buffer, Size, Result, &ovl);
+			break;
 		case DEV_TYPE_CONSOLE:
 			bResult = screen_write(Device->Output, Buffer, Size, Result);
 			break;
-		case DEV_TYPE_TTY:
-			bResult = tty_write(Device, Buffer, Size, Result);
-			break;
+//		case DEV_TYPE_TTY:
+//			bResult = tty_write(Device->Output, Buffer, Size, Result);
+//			break;
 		case DEV_TYPE_ROUTE:
 			bResult = route_write(Device, Buffer, Size, Result);
 			break;
@@ -113,7 +118,6 @@ pdo_revoke(WIN_DEVICE *Device)
 {
 	BOOL bResult = FALSE;
 
-//vfs_ktrace("pdo_revoke", STRUCT_DEVICE, Device);
 	switch (Device->DeviceType){
 		case DEV_TYPE_PTY:
 			bResult = pty_revoke(Device);

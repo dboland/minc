@@ -33,7 +33,7 @@
 /****************************************************/
 
 BOOL 
-DiskFileCreate(WIN_NAMEIDATA *Path, WIN_FLAGS *Flags, WIN_MODE *Mode, WIN_VNODE *Result)
+DiskCreateFile(WIN_NAMEIDATA *Path, WIN_FLAGS *Flags, WIN_MODE *Mode, WIN_VNODE *Result)
 {
 	BOOL bResult = FALSE;
 	PSECURITY_DESCRIPTOR psd;
@@ -67,7 +67,7 @@ DiskFileCreate(WIN_NAMEIDATA *Path, WIN_FLAGS *Flags, WIN_MODE *Mode, WIN_VNODE 
 	return(bResult);
 }
 BOOL 
-DiskFileOpen(WIN_NAMEIDATA *Path, WIN_FLAGS *Flags, WIN_VNODE *Result)
+DiskOpenFile(WIN_NAMEIDATA *Path, WIN_FLAGS *Flags, WIN_VNODE *Result)
 {
 	HANDLE hResult;
 	BOOL bResult = FALSE;
@@ -89,7 +89,7 @@ DiskFileOpen(WIN_NAMEIDATA *Path, WIN_FLAGS *Flags, WIN_VNODE *Result)
 	return(bResult);
 }
 BOOL 
-DiskFileStat(LPCWSTR FileName, DWORD Attribs, WIN_VATTR *Result)
+DiskStatFile(LPCWSTR FileName, DWORD Attribs, WIN_VATTR *Result)
 {
 	BOOL bResult = FALSE;
 	PSECURITY_DESCRIPTOR psd;

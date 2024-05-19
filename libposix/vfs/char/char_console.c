@@ -37,7 +37,7 @@ ConControlHandler(DWORD CtrlType)
 {
 	BOOL bResult = TRUE;
 	DWORD dwGroupId = __CTTY->GroupId;
-	DWORD dwMode = __CTTY->Mode.Input;
+	DWORD dwMode = InputMode(&__CTTY->Mode);
 	WIN_TASK *pwTask = &__Tasks[__TaskId];
 
 	/* To deliver signals, Windows (CSRSS.EXE) actually forks!
@@ -69,27 +69,18 @@ con_TIOCGWINSZ(WIN_DEVICE *Device, WIN_WINSIZE *WinSize)
 	return(screen_TIOCGWINSZ(Device->Output, WinSize));
 }
 BOOL 
-con_TIOCGETA(WIN_DEVICE *Device, WIN_TERMIO *Mode)
+con_TIOCSWINSZ(WIN_DEVICE *Device, WIN_WINSIZE *WinSize)
 {
-	BOOL bResult = FALSE;
-
-	if (!GetConsoleMode(Device->Input, &Mode->Input)){
-		WIN_ERR("GetConsoleMode(%d): %s\n", Device->Input, win_strerror(GetLastError()));
-	}else if (!GetConsoleMode(Device->Output, &Mode->Output)){
-		WIN_ERR("GetConsoleMode(%d): %s\n", Device->Output, win_strerror(GetLastError()));
-	}else{
-		bResult = TRUE;
-	}
-	return(bResult);
+	return(screen_TIOCSWINSZ(Device->Output, WinSize));
 }
 BOOL 
 con_TIOCSETA(WIN_DEVICE *Device, WIN_TERMIO *Mode)
 {
 	BOOL bResult = FALSE;
 
-	if (!SetConsoleMode(Device->Input, Mode->Input & 0xFFFF)){
+	if (!SetConsoleMode(Device->Input, InputMode(Mode))){
 		WIN_ERR("SetConsoleMode(%d): %s\n", Device->Input, win_strerror(GetLastError()));
-	}else if (!SetConsoleMode(Device->Output, Mode->Output & 0xFFFF)){
+	}else if (!SetConsoleMode(Device->Output, ScreenMode(Mode))){
 		WIN_ERR("SetConsoleMode(%d): %s\n", Device->Output, win_strerror(GetLastError()));
 	}else{
 		bResult = TRUE;
@@ -106,9 +97,12 @@ con_init(WIN_DEVICE *Device)
 		FILE_SHARE_READ | FILE_SHARE_WRITE, 
 		OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, 0};
 	SECURITY_ATTRIBUTES sa = {sizeof(sa), NULL, TRUE};
+	WIN_TERMIO ioMode;
 
-	Device->Input = CharOpenFile("CONIN$", &wFlags, &sa);
-	Device->Output = CharOpenFile("CONOUT$", &wFlags, &sa);
+	if (tty_attach(Device)){
+		Device->Input = CharOpenFile("CONIN$", &wFlags, &sa);
+		Device->Output = CharOpenFile("CONOUT$", &wFlags, &sa);
+	}
 }
 DWORD 
 con_poll(WIN_DEVICE *Device, WIN_POLLFD *Info)

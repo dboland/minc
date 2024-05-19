@@ -54,15 +54,23 @@ vfs_TIOCGWINSZ(WIN_VNODE *Node, WIN_WINSIZE *WinSize)
 	return(bResult);
 }
 BOOL 
-vfs_TIOCSWINSZ(WIN_TTY *Terminal, WIN_WINSIZE *WinSize)
+vfs_TIOCSWINSZ(WIN_VNODE *Node, WIN_WINSIZE *WinSize)
 {
 	BOOL bResult = FALSE;
 
-	if (!Terminal->Flags){
-		SetLastError(ERROR_CTX_NOT_CONSOLE);
-	}else{
-		Terminal->WinSize = *WinSize;
-		bResult = TRUE;
+	switch (Node->FSType){
+		case FS_TYPE_PDO:
+			bResult = pdo_TIOCSWINSZ(Node->Device, WinSize);
+			break;
+		case FS_TYPE_CHAR:
+			bResult = char_TIOCSWINSZ(Node, WinSize);
+			break;
+		case FS_TYPE_MAILSLOT:
+			__CTTY->WinSize = *WinSize;
+			bResult = TRUE;
+			break;
+		default:
+			SetLastError(ERROR_BAD_FILE_TYPE);
 	}
 	return(bResult);
 }
@@ -70,24 +78,20 @@ BOOL
 vfs_TIOCGETA(WIN_VNODE *Node, WIN_TERMIO *Mode)
 {
 	BOOL bResult = FALSE;
-	DWORD dwInput = Mode->Input & 0xFFFF0000;
-	DWORD dwOutput = Mode->Output & 0xFFFF0000;
 
-	switch (Node->FSType){
-		case FS_TYPE_PDO:
-			bResult = pdo_TIOCGETA(Node->Device, Mode);
-			break;
-		case FS_TYPE_CHAR:			/* nano.exe */
-			bResult = char_TIOCGETA(Node, Mode);
-			break;
-		case FS_TYPE_MAILSLOT:
+	switch (Node->DeviceType){
+		case DEV_TYPE_PTY:
+		case DEV_TYPE_CONSOLE:
+		case DEV_TYPE_TTY:
+		case DEV_CLASS_TTY:
+		case DEV_TYPE_INPUT:
+		case DEV_TYPE_SCREEN:
+		case DEV_TYPE_COM:
 			bResult = TRUE;
 			break;
 		default:
 			SetLastError(ERROR_BAD_FILE_TYPE);
 	}
-	Mode->Input |= dwInput;
-	Mode->Output |= dwOutput;
 	return(bResult);
 }
 BOOL 
@@ -140,6 +144,7 @@ vfs_TIOCSETA(WIN_VNODE *Node, WIN_TERMIO *Mode, BOOL Flush, BOOL Drain)
 			bResult = char_TIOCSETA(Node, Mode);
 			break;
 		case FS_TYPE_MAILSLOT:
+//vfs_ktrace("vfs_TIOCSETA", STRUCT_VNODE, Node);
 			bResult = TRUE;
 			break;
 		default:
@@ -155,7 +160,6 @@ vfs_TIOCSCTTY(WIN_TTY *Terminal, WIN_TASK *Task)
 {
 	BOOL bResult = FALSE;
 
-//vfs_ktrace("vfs_TIOCSCTTY", STRUCT_TTY, Terminal);
 	if (Task->Flags & WIN_PS_CONTROLT){
 		SetLastError(ERROR_LOGON_SESSION_EXISTS);
 	}else{
@@ -165,18 +169,20 @@ vfs_TIOCSCTTY(WIN_TTY *Terminal, WIN_TASK *Task)
 		Task->CTTY = Terminal->Index;
 		bResult = TRUE;
 	}
+//vfs_ktrace("vfs_TIOCSCTTY", STRUCT_TTY, Terminal);
 	return(bResult);
 }
 BOOL 
-vfs_PTMGET(WIN_VNODE *Node, WIN_VNODE *Result)
+vfs_PTMGET(WIN_VNODE *Master, WIN_VNODE *Slave)
 {
 	BOOL bResult = FALSE;
 //	HANDLE hEvent = CreateEvent(NULL, FALSE, FALSE, NULL);
+	SECURITY_ATTRIBUTES sa = {sizeof(sa), NULL, TRUE};
 
-	if (MailCreateSlave(pdo_attach(DEV_TYPE_TTY), __MailEvent, Result)){
-		Node->Event = __MailEvent;
-		Result->Index = Node->Index;
-		bResult = pdo_PTMGET(Node->Device, Result->Device);
+	if (MailCreateSlave(pdo_attach(DEV_TYPE_TTY), __MailEvent, &sa, Slave)){
+		Master->Event = __MailEvent;
+		Slave->Index = Master->Index;
+		bResult = pdo_PTMGET(Master->Device, Slave->Device);
 	}
 	return(bResult);
 }

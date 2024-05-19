@@ -46,7 +46,7 @@ sys_ioctl(call_t call, int fd, unsigned long request, ...)
 			result = disk_ioctl(call.Task, fd, request, args);
 			break;
 		case 't':
-			result = tty_ioctl(call.Task, fd, request, args);
+			result = term_ioctl(call.Task, fd, request, args);
 			break;
 		case 's':
 		case 'i':

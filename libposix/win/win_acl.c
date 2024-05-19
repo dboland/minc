@@ -74,8 +74,8 @@ win_acl_get_fd(HANDLE Handle, PSECURITY_DESCRIPTOR *Result)
 	if (lSize > 0){
 		*Result = LocalAlloc(LMEM_FIXED, lSize);
 		bResult = GetUserObjectSecurity(Handle, &siType, *Result, lSize, &lSize);
-//	}else{
-//		WIN_ERR("GetUserObjectSecurity(%d): %s\n", Handle, win_strerror(GetLastError()));
+	}else{
+		WIN_ERR("GetUserObjectSecurity(%d): %s\n", Handle, win_strerror(GetLastError()));
 	}
 	return(bResult);
 }

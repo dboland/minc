@@ -53,8 +53,6 @@ pty_revoke(WIN_DEVICE *Device)
 		WIN_ERR("CloseHandle(%d): %s\n", Device->Input, win_strerror(GetLastError()));
 	}else if (!CloseHandle(Device->Output)){
 		WIN_ERR("CloseHandle(%d): %s\n", Device->Output, win_strerror(GetLastError()));
-//	}else if (!CloseHandle(Device->Handle)){
-//		WIN_ERR("CloseHandle(%d): %s\n", Device->Handle, win_strerror(GetLastError()));
 	}else{
 		ZeroMemory(Device, sizeof(WIN_DEVICE));
 		bResult = TRUE;

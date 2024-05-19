@@ -68,18 +68,15 @@ config_found(LPCSTR Name, DWORD FSType, DWORD FileType, WIN_DEVICE *Device)
 BOOL 
 tty_attach(WIN_DEVICE *Device)
 {
-	DWORD dwIndex = 1;
-	WIN_TTY *pwTerminal = &__Terminals[dwIndex];
+	DWORD dwIndex = 0;
+	WIN_TTY *pwTerminal = __Terminals;
 
 	while (dwIndex < WIN_TTY_MAX){
-		if (!pwTerminal->Index){
-			pwTerminal->Index = dwIndex;
-			pwTerminal->Mode.Input = WIN_TTYDEF_IFLAG;
-			pwTerminal->Mode.Output = WIN_TTYDEF_OFLAG;
+		if (!pwTerminal->Flags){
 			pwTerminal->Flags = TIOCFLAG_ACTIVE;
+			pwTerminal->Index = dwIndex;
 			pwTerminal->DeviceId = Device->DeviceId;
-			pwTerminal->ScrollRate = 1;
-			win_wcscpy(pwTerminal->NtName, Device->NtName);
+			win_strcpy(pwTerminal->Name, Device->Name);
 			Device->Index = dwIndex;
 			return(TRUE);
 		}
@@ -92,17 +89,17 @@ tty_attach(WIN_DEVICE *Device)
 BOOL 
 pty_attach(WIN_DEVICE *Device)
 {
-	BOOL bResult = FALSE;
+	BOOL bResult = TRUE;
 
 	if (tty_attach(Device)){
-		bResult = config_found("pty", FS_TYPE_CHAR, WIN_VCHR, Device);
+		bResult = config_found("pty", FS_TYPE_MAILSLOT, WIN_VCHR, Device);
 	}
 	return(bResult);
 }
 BOOL 
 com_attach(WIN_DEVICE *Device)
 {
-	BOOL bResult = FALSE;
+	BOOL bResult = TRUE;
 
 	if (tty_attach(Device)){
 		bResult = config_found("serial", FS_TYPE_PDO, WIN_VCHR, Device);
@@ -245,7 +242,7 @@ serial_attach(WIN_DEVICE *Device)
 	BOOL bResult = TRUE;
 
 	switch (Device->DeviceType){
-		case DEV_TYPE_LOG:
+		case DEV_TYPE_LOG:		/* Vista */
 			bResult = config_init("printk", FS_TYPE_DISK, WIN_VCHR, DEV_TYPE_LOG);
 			break;
 		case DEV_TYPE_TTY:

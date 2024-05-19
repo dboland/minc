@@ -146,3 +146,21 @@ win_KERN_CPTIME2(SYSTEM_PROCESSOR_PERFORMANCE_INFORMATION Buffer[], ULONG Size)
 	}
 	return(bResult);
 }
+BOOL 
+win_KERN_BOOTTIME(FILETIME *Result)
+{
+	BOOL bResult = FALSE;
+	SYSTEM_TIMEOFDAY_INFORMATION todInfo;
+	ULONG ulSize = sizeof(SYSTEM_TIMEOFDAY_INFORMATION);
+	NTSTATUS ntStatus;
+
+	ntStatus = NtQuerySystemInformation(SystemTimeOfDayInformation, &todInfo, ulSize, &ulSize);
+	if (!NT_SUCCESS(ntStatus)){
+		WIN_ERR("NtQuerySystemInformation(SystemTimeOfDayInformation): %s\n", nt_strerror(ntStatus));
+	}else{
+		Result->dwLowDateTime = todInfo.BootTime.LowPart;
+		Result->dwHighDateTime = todInfo.BootTime.HighPart;
+		bResult = TRUE;
+	}
+	return(bResult);
+}

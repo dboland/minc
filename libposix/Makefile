@@ -25,14 +25,16 @@ msvc_posix.o: msvc/msvc.c
 	gcc -c ${CFLAGS} -I${MINGW}/include -o $@ $<
 
 vfs_posix.o: vfs/vfs.c
-	gcc -c ${CFLAGS} -I${MINGW}/include -I. -o $@ $<
+	gcc -c ${CFLAGS} -I${MINGW}/include -o $@ $<
 
 libposix.o: libposix.c
-	gcc -c ${CFLAGS} -DTTYDEFCHARS -I../openbsd/include -I../openbsd/sys \
-	-DLIBPOSIX_IMPORT= -DKTRACE -DSYSVSEM $<
+	gcc -c ${CFLAGS} -I../openbsd/include -I../openbsd/sys -DTTYDEFCHARS -DKTRACE -DSYSVSEM $<
 
 version.o: version.rc
 	windres -DVERSION=\\\"${VERSION}\\\" -DRELEASE=\\\"${RELEASE}\\\" $< $@
+
+libposix.a: win_posix.o msvc_posix.o
+	ar cru $@ $^
 
 arch.d:
 	@${MAKE} -C arch CFLAGS="-I../../openbsd/include -I../../include"

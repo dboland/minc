@@ -54,16 +54,20 @@ pdo_TIOCGWINSZ(WIN_DEVICE *Device, WIN_WINSIZE *WinSize)
 	return(bResult);
 }
 BOOL 
-pdo_TIOCGETA(WIN_DEVICE *Device, WIN_TERMIO *Mode)
+pdo_TIOCSWINSZ(WIN_DEVICE *Device, WIN_WINSIZE *WinSize)
 {
 	BOOL bResult = FALSE;
 
 	switch (Device->DeviceType){
 		case DEV_TYPE_PTY:
 		case DEV_TYPE_CONSOLE:
-			bResult = con_TIOCGETA(Device, Mode);
+			bResult = con_TIOCSWINSZ(Device, WinSize);
+			break;
+		case DEV_TYPE_SCREEN:
+			bResult = screen_TIOCSWINSZ(Device->Output, WinSize);
 			break;
 		case DEV_TYPE_TTY:
+			__CTTY->WinSize = *WinSize;
 			bResult = TRUE;
 			break;
 		default:
@@ -112,7 +116,6 @@ pdo_TIOCSETA(WIN_DEVICE *Device, WIN_TERMIO *Mode)
 {
 	BOOL bResult = FALSE;
 
-//vfs_ktrace("pdo_TIOCSETA", STRUCT_DEVICE, Device);
 	switch (Device->DeviceType){
 		case DEV_TYPE_PTY:
 		case DEV_TYPE_CONSOLE:
@@ -139,6 +142,7 @@ pdo_PTMGET(WIN_DEVICE *Master, WIN_DEVICE *Slave)
 		Master->Output = hSlave;
 		Slave->Output = hMaster;
 		Slave->Flags |= WIN_DVF_ACTIVE;
+		Slave->Index = Master->Index;
 		bResult = TRUE;
 	}
 	return(bResult);

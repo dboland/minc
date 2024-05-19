@@ -55,12 +55,11 @@ vfs_F_DUPFD(WIN_VNODE *Node, BOOL CloseExec, WIN_VNODE *Result)
 			bResult = disk_F_DUPFD(Node, hProcess, dwOptions, Result);
 			break;
 		case FS_TYPE_PDO:
-		case FS_TYPE_MAILSLOT:
 			bResult = pdo_F_DUPFD(Node->Device, hProcess, dwOptions, Result);
 			break;
-//		case FS_TYPE_MAILSLOT:
-//			bResult = pdo_F_DUPFD(DEVICE(Node->DeviceId), hProcess, dwOptions, Result);
-//			break;
+		case FS_TYPE_MAILSLOT:
+			bResult = mail_F_DUPFD(Node->Device, hProcess, dwOptions, Result);
+			break;
 		default:
 			SetLastError(ERROR_BAD_FILE_TYPE);
 	}
@@ -84,12 +83,11 @@ vfs_F_INHERIT(WIN_VNODE *Node, HANDLE Process)
 			bResult = disk_F_DUPFD(Node, Process, dwOptions, Node);
 			break;
 		case FS_TYPE_PDO:
-		case FS_TYPE_MAILSLOT:
 			bResult = pdo_F_DUPFD(Node->Device, Process, dwOptions, Node);
 			break;
-//		case FS_TYPE_MAILSLOT:
-//			bResult = pdo_F_DUPFD(DEVICE(Node->DeviceId), Process, dwOptions, Node);
-//			break;
+		case FS_TYPE_MAILSLOT:
+			bResult = mail_F_DUPFD(Node->Device, Process, dwOptions, Node);
+			break;
 		default:
 			SetLastError(ERROR_BAD_FILE_TYPE);
 	}

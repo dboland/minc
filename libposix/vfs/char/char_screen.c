@@ -32,12 +32,22 @@
 
 /****************************************************/
 
+DWORD 
+ScreenMode(WIN_TERMIO *Mode)
+{
+	DWORD dwResult = ENABLE_PROCESSED_OUTPUT | ENABLE_WRAP_AT_EOL_OUTPUT;
+
+	if (!(Mode->OFlags & WIN_ONLCR)){		/* Vista xterm */
+//		dwResult |= DISABLE_NEWLINE_AUTO_RETURN;
+	}
+	return(dwResult);
+}
 BOOL 
 ScreenCarriageReturn(HANDLE Handle, CONSOLE_SCREEN_BUFFER_INFO *Info)
 {
 	COORD cPos = Info->dwCursorPosition;
 
-	if (__CTTY->Mode.Output & WIN_OCRNL){
+	if (__CTTY->Mode.OFlags & WIN_OCRNL){
 		cPos.Y++;
 	}else{
 		cPos.X = 0;
@@ -62,7 +72,7 @@ ScreenLineFeed(HANDLE Handle, CONSOLE_SCREEN_BUFFER_INFO *Info)
 	 */
 	if (__CTTY->VEdit){
 		sBottom = Info->srWindow.Bottom;
-	}else if (__CTTY->Mode.Output & WIN_ONLCR){
+	}else if (__CTTY->Mode.OFlags & WIN_ONLCR){
 		cPos.X = 0;
 	}
 	if (cPos.Y == sBottom){
@@ -230,6 +240,22 @@ screen_TIOCGWINSZ(HANDLE Handle, WIN_WINSIZE *Result)
 	return(bResult);
 }
 BOOL 
+screen_TIOCSWINSZ(HANDLE Handle, WIN_WINSIZE *WinSize)
+{
+	BOOL bResult = FALSE;
+	COORD cSize = {WinSize->Column, WinSize->Row};
+	SMALL_RECT sRect = {0, 0, cSize.X - 1, cSize.Y - 1};
+
+	if (!SetConsoleScreenBufferSize(Handle, cSize)){
+		WIN_ERR("SetConsoleScreenBufferSize(%d): %s\n", Handle, win_strerror(GetLastError()));
+	}else if (!SetConsoleWindowInfo(Handle, TRUE, &sRect)){
+		WIN_ERR("SetConsoleWindowInfo(%d): %s\n", Handle, win_strerror(GetLastError()));
+	}else{
+		bResult = TRUE;
+	}
+	return(bResult);
+}
+BOOL 
 screen_TIOCDRAIN(HANDLE Handle)
 {
 	return(TRUE);		/* CONOUT$ not buffered */
@@ -243,7 +269,7 @@ screen_write(HANDLE Handle, LPCSTR Buffer, DWORD Size, DWORD *Result)
 	DWORD dwCount;
 	BOOL bResult = TRUE;
 	DWORD dwResult = 0;
-	DWORD dwMode = __CTTY->Mode.Output;
+	DWORD dwMode = ScreenMode(&__CTTY->Mode);
 	UINT uiCodePage = GetConsoleOutputCP();
 
 	if (dwMode & ENABLE_VIRTUAL_TERMINAL_PROCESSING){

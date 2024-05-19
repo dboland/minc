@@ -28,35 +28,25 @@
  *
  */
 
-#include <winbase.h>
+#include <sys/tty.h>
 
 /****************************************************/
 
-BOOL 
-mail_read(WIN_VNODE *Node, LPSTR Buffer, LONG Size, DWORD *Result)
+void 
+tty_init(void)
 {
-	BOOL bResult = FALSE;
+	WIN_TTY *pwTerminal = __Terminals;
+	DWORD dwIndex = 0;
+	struct termios attr = {
+		TTYDEF_IFLAG, TTYDEF_OFLAG, TTYDEF_CFLAG, TTYDEF_LFLAG, 
+		{0}, TTYDEF_SPEED, TTYDEF_SPEED
+	};
 
-	switch (Node->DeviceType){
-		case DEV_TYPE_TTY:
-			bResult = tty_read(Node->Handle, Buffer, Size, Result);
-			break;
-		default:
-			SetLastError(ERROR_BAD_DEVICE);
+	win_memcpy(attr.c_cc, ttydefchars, sizeof(ttydefchars));
+	while (dwIndex < WIN_TTY_MAX){
+		win_memcpy(&pwTerminal->Mode, &attr, sizeof(WIN_TERMIO));
+		pwTerminal->ScrollRate = 1;
+		pwTerminal++;
+		dwIndex++;
 	}
-	return(bResult);
-}
-BOOL 
-mail_write(WIN_VNODE *Node, LPCSTR Buffer, DWORD Size, DWORD *Result)
-{
-	BOOL bResult = FALSE;
-
-	switch (Node->DeviceType){
-		case DEV_TYPE_TTY:
-			bResult = tty_write(Node->Handle, Buffer, Size, Result);
-			break;
-		default:
-			SetLastError(ERROR_BAD_DEVICE);
-	}
-	return(bResult);
 }

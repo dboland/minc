@@ -3,11 +3,11 @@ include ../Makefile.inc
 RELEASE=6.1.0
 SBINDIR=/sbin
 
-LDFLAGS= -s -Wl,--disable-auto-import -L../libposix
+LDFLAGS= -s -Wl,--disable-auto-import -Wl,--enable-stdcall-fixup
 GCCLIB=/lib/gcc/mingw32/4.8.1
 WINLIB=/C/WINDOWS/system32
 PROGS=wrc mkent
-LIBS=-lposix
+WINDIR=/C/WINDOWS/system32
 
 .SUFFIXES:
 .DEFAULT:
@@ -15,7 +15,7 @@ LIBS=-lposix
 all: ${PROGS} bsd.exe
 
 %.o: %.c
-	gcc -c ${CFLAGS} -I../openbsd/include -I../include -I../openbsd/sys -o $@ $<
+	gcc -c ${CFLAGS} -I../include -I../openbsd/sys -o $@ $<
 
 %.exe: %.o
 	gcc ${LDFLAGS} -o $@ $< ${LIBS}
@@ -30,8 +30,14 @@ version.o: bsd.rc
 mkent: mkent.o
 	gcc ${LDFLAGS} -o $@ $< ${MINGW}/lib/libiphlpapi.a ${LIBS}
 
+libconsole.o: console/libconsole.c
+	gcc -c ${CFLAGS} -I${MINGW}/include -I../include -o $@ $<
+
 bsd.exe: bsd.o version.o
-	gcc ${LDFLAGS} -o $@ $^ ${LIBS}
+	gcc ${LDFLAGS} -o $@ $^
+
+console.exe: console.o libconsole.o
+	gcc ${LDFLAGS} -L${WINDIR} -o $@ console.o libconsole.o -lutil
 
 wrc: wrc.exe
 

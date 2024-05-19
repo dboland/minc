@@ -30,28 +30,73 @@
 
 #include <wincon.h>
 
-#define ANSI_PRIOR	"\e[S"	/* kP */
-#define ANSI_NEXT	"\e[T"	/* kN */
-#define ANSI_END	"\e[F"
-#define ANSI_HOME	"\e[H"	/* kh */
-#define ANSI_LEFT	"\e[D"	/* kl */
-#define ANSI_UP		"\e[A"	/* ku */
-#define ANSI_RIGHT	"\e[C"	/* Kr */
-#define ANSI_DOWN	"\e[B"	/* kF */
-#define ANSI_INSERT	"\e[L"	/* kI */
-#define ANSI_DELETE	"\177"	/* kD was: ^[[M */
-#define ANSI_F1		"\eF1"
-#define ANSI_F2		"\eF2"
-#define ANSI_F3		"\eF3"
-#define ANSI_F4		"\eF4"
-#define ANSI_F5		"\eF5"
-#define ANSI_F6		"\eF6"
-#define ANSI_F7		"\eF7"
-#define ANSI_F8		"\eF8"
-#define ANSI_F9		"\eF9"
-#define ANSI_F10	"\eFA"
-#define ANSI_F11	"\eFB"
-#define ANSI_F12	"\eFC"
+#define VK_MODIFY	0x1F
+
+/* 0x1F - 0x00 */
+
+#define VK_CURSOR		0x2F
+#define ANSI_CURSOR(k)		__ANSI_CURSOR[VK_CURSOR - k]
+
+/* 0x2F - 0x20 */
+
+static LPCSTR __ANSI_CURSOR[] = {
+	"",		/* VK_HELP */
+	"\177",		/* VK_DELETE: previously \e[M */
+	"\e[L",		/* VK_INSERT */
+	"",		/* VK_SNAPSHOT */
+	"",		/* VK_EXECUTE */
+	"",		/* VK_PRINT */
+	"",		/* VK_SELECT */
+	"\e[B",		/* VK_DOWN */
+	"\e[C",		/* VK_RIGHT */
+	"\e[A",		/* VK_UP */
+	"\e[D",		/* VK_LEFT */
+	"\e[H",		/* VK_HOME */
+	"\e[F",		/* VK_END */
+	"\e[T",		/* VK_NEXT */
+	"\e[S",		/* VK_PRIOR */
+	""		/* VK_SPACE */
+};
+
+#define VK_FUNCTION		0x8F
+#define ANSI_FUNCTION(k)	__ANSI_FUNCTION[VK_FUNCTION - k]
+
+/* 0x8F - 0x70 */
+
+static LPCSTR __ANSI_FUNCTION[] = {
+	"",		/* Reserved */
+	"",		/* Reserved */
+	"",		/* Reserved */
+	"",		/* Reserved */
+	"",		/* Reserved */
+	"",		/* Reserved */
+	"",		/* Reserved */
+	"",		/* Reserved */
+	"\eF24",
+	"\eF23",
+	"\eF22",
+	"\eF21",
+	"\eF20",
+	"\eF19",
+	"\eF18",
+	"\eF17",
+	"\eF16",
+	"\eF15",
+	"\eF14",
+	"\eF13",
+	"\eF12",
+	"\eF11",
+	"\eF10",
+	"\eF9",
+	"\eF8",
+	"\eF7",
+	"\eF6",
+	"\eF5",
+	"\eF4",
+	"\eF3",
+	"\eF2",
+	"\eF1"
+};
 
 /* Constants for ScreenAnsi() */
 

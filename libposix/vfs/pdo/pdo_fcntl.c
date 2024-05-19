@@ -38,7 +38,6 @@ pdo_F_DUPFD(WIN_DEVICE *Device, HANDLE Process, DWORD Options, WIN_VNODE *Result
 	BOOL bResult = FALSE;
 	HANDLE hDevice = NULL;
 	HANDLE hResult = NULL;
-	HANDLE hObject;
 
 //vfs_ktrace("pdo_F_DUPFD", STRUCT_VNODE, Result);
 	if (!Result->FileId){
@@ -50,10 +49,7 @@ pdo_F_DUPFD(WIN_DEVICE *Device, HANDLE Process, DWORD Options, WIN_VNODE *Result
 		SetLastError(ERROR_IO_DEVICE);
 	}else if (!DuplicateHandle(GetCurrentProcess(), hDevice, Process, &hResult, 0, TRUE, Options)){
 		WIN_ERR("pdo_F_DUPFD(%d): %s\n", hDevice, win_strerror(GetLastError()));
-	}else if (!DuplicateHandle(GetCurrentProcess(), Result->Handle, Process, &hObject, 0, TRUE, Options)){
-		WIN_ERR("pdo_F_DUPFD(%d): %s\n", Result->Handle, win_strerror(GetLastError()));
 	}else{
-		Result->Object = hObject;
 		Result->Handle = hResult;
 		Result->FSType = Device->FSType;
 		Result->FileType = Device->FileType;
@@ -72,7 +68,7 @@ pdo_open(WIN_DEVICE *Device, WIN_FLAGS *Flags, WIN_VNODE *Result)
 {
 	BOOL bResult = FALSE;
 
-	if (!PdoFileOpen(Device, Flags, Result)){
+	if (!PdoOpenFile(Device, Flags, Result)){
 		SetLastError(ERROR_DEVICE_NOT_AVAILABLE);
 	}else switch (Device->DeviceType){
 		case DEV_CLASS_TTY:

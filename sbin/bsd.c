@@ -53,9 +53,9 @@
 #include <sys/uio.h>
 #include <sys/ktrace.h>
 #include <sys/reboot.h>
-#include <sys/tty.h>
 #include <sys/systm.h>
 #include <sys/socket.h>
+#include <sys/tty.h>
 
 #define _KERNEL
 
@@ -69,6 +69,7 @@ unsigned char		_boot;
 
 /* src/sys/netinet/ip_input.c */
 //void ip_init(void);
+void tty_init(void);
 
 /************************************************************/
 
@@ -125,12 +126,15 @@ getty(const char *path)
 {
 	int result = 0;
 	int fd;
+	struct winsize ws = {48, 120, 0};
 
 	/* ./lib/libutil/login_tty.c
 	 */
 	fd = open(path, O_RDWR);
 	if (fd < 0){
 		fprintf(stderr, "open(%s): %s\n", path, strerror(errno));
+//	}else if (ioctl(fd, TIOCSWINSZ, &ws) < 0){
+//		fprintf(stderr, "ioctl(TIOCSWINSZ): %s\n", strerror(errno));
 	}else if (ioctl(fd, TIOCSCTTY, NULL) < 0){
 		fprintf(stderr, "ioctl(TIOCSCTTY): %s\n", strerror(errno));
 	}else{
@@ -185,8 +189,10 @@ boot(void)
 {
 	char *args[] = {"/sbin/init", NULL};
 
-	cpu_configure();
+	consinit();
+	tty_init();
 	ifinit();
+	cpu_configure();
 	unmount_fs();		// fsck.exe operation?
 	execve(*args, args, environ);
 	fprintf(stderr, "execve(%s): %s\n", *args, strerror(errno));
@@ -198,8 +204,10 @@ single(void)
 	int level = 1;
 	char *args[] = {"/bin/ksh", "-l", NULL};
 
-	cpu_configure();
+	consinit();
+	tty_init();
 	ifinit();
+	cpu_configure();
 	unmount_fs();
 	mount_fs();
 	sysctl(mib, 2, NULL, NULL, &level, sizeof(int));

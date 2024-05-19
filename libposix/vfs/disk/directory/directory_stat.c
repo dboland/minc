@@ -50,7 +50,7 @@ dir_stat(WIN_NAMEIDATA *Path, WIN_VATTR *Result)
 {
 	BOOL bResult = FALSE;
 
-	if (DiskFileStat(Path->Resolved, FILE_FLAG_BACKUP_SEMANTICS, Result)){
+	if (DiskStatFile(Path->Resolved, FILE_FLAG_BACKUP_SEMANTICS, Result)){
 		Result->DeviceId = __Mounts[Path->MountId].DeviceId;
 		Result->Mode.FileType = Path->FileType;
 		Result->FileSizeLow += WIN_S_BLKSIZE;

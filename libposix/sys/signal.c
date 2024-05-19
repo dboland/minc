@@ -390,26 +390,20 @@ sys_kill(call_t call, pid_t pid, int sig)
 
 	if (sig >= NSIG){
 		result = -EINVAL;
-
 	}else if (pid == -1){
 		result = kill_SYS(pwTask, sig);
-
 	}else if (pid < 0){
 		result = kill_GRP(pwTask, -pid, sig);
-
 	}else if (!sig){
 		if (pid_win(pid) == 0){
 			result = -ESRCH;
 		}
 	}else if (!pid){
 		result = kill_GRP(pwTask, pwTask->GroupId, sig);
-
 	}else if (pid == pwTask->TaskId){
 		result = sigproc_posix(pwTask, sig, &ucontext);
-
 	}else if (pid >= CHILD_MAX){
 		result = -EINVAL;
-
 	}else if (!vfs_kill_PID(pid_win(pid), WM_COMMAND, __SIG_WIN[sig], pwTask->TaskId)){
 		result -= errno_posix(GetLastError());
 
