@@ -454,12 +454,13 @@ sys_dup2(call_t call, int oldfd, int newfd)
 {
 	int result = 0;
 	WIN_TASK *pwTask = call.Task;
+	WIN_VNODE *pvNodes = pwTask->Node;
 
 	if (oldfd < 0 || oldfd >= OPEN_MAX){
 		result = -EBADF;
 	}else if (newfd < 0 || newfd >= OPEN_MAX){
 		result = -EINVAL;
-	}else if (!vfs_dup2(&pwTask->Node[oldfd], &pwTask->Node[newfd])){
+	}else if (!vfs_dup2(&pvNodes[oldfd], &pvNodes[newfd])){
 		result -= errno_posix(GetLastError());
 	}else{
 		result = newfd;

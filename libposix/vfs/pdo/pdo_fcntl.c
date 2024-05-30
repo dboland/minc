@@ -39,7 +39,6 @@ pdo_F_DUPFD(WIN_DEVICE *Device, HANDLE Process, DWORD Options, WIN_VNODE *Result
 	HANDLE hDevice = NULL;
 	HANDLE hResult = NULL;
 
-//vfs_ktrace("pdo_F_DUPFD", STRUCT_VNODE, Result);
 	if (!Result->FileId){
 		hDevice = Device->Input;
 	}else{
@@ -51,11 +50,8 @@ pdo_F_DUPFD(WIN_DEVICE *Device, HANDLE Process, DWORD Options, WIN_VNODE *Result
 		WIN_ERR("pdo_F_DUPFD(%d): %s\n", hDevice, win_strerror(GetLastError()));
 	}else{
 		Result->Handle = hResult;
+		Result->Event = Device->Event;
 		Result->FSType = Device->FSType;
-		Result->FileType = Device->FileType;
-		Result->DeviceType = Device->DeviceType;
-		Result->DeviceId = Device->DeviceId;
-		Result->Device = Device;
 		bResult = TRUE;
 	}
 	return(bResult);
@@ -64,18 +60,18 @@ pdo_F_DUPFD(WIN_DEVICE *Device, HANDLE Process, DWORD Options, WIN_VNODE *Result
 /****************************************************/
 
 BOOL 
-pdo_open(WIN_DEVICE *Device, WIN_FLAGS *Flags, WIN_VNODE *Result)
+pdo_open(WIN_NAMEIDATA *Path, WIN_FLAGS *Flags, WIN_VNODE *Result)
 {
 	BOOL bResult = FALSE;
 
-	if (!PdoOpenFile(Device, Flags, Result)){
+	if (!PdoOpenFile(Path, Flags, Result)){
 		SetLastError(ERROR_DEVICE_NOT_AVAILABLE);
-	}else switch (Device->DeviceType){
+	}else switch (Result->DeviceType){
 		case DEV_CLASS_TTY:
-			bResult = tty_open(DEVICE(__CTTY->DeviceId), Flags, Result);
+			bResult = tty_open(__CTTY, Flags, Result);
 			break;
 		case DEV_TYPE_NULL:
-			bResult = null_open(Device, Flags, Result);
+			bResult = null_open(Flags, Result);
 			break;
 		case DEV_TYPE_PTM:
 			bResult = ptm_open(pdo_attach(DEV_TYPE_PTY), Flags, Result);

@@ -57,6 +57,9 @@ pipe_read(WIN_VNODE *Node, LPSTR Buffer, DWORD Size, DWORD *Result)
 	BOOL bResult = FALSE;
 
 	switch (Node->FileType){
+		case WIN_VCHR:
+			bResult = ReadFile(Node->Handle, Buffer, Size, Result, NULL);
+			break;
 		case WIN_VSOCK:
 			bResult = sock_read(Node, Buffer, Size, Result);
 			break;
@@ -72,8 +75,12 @@ BOOL
 pipe_write(WIN_VNODE *Node, LPCSTR Buffer, DWORD Size, DWORD *Result)
 {
 	BOOL bResult = FALSE;
+	OVERLAPPED ovl = {0, 0, 0, 0, Node->Event};
 
 	switch (Node->FileType){
+		case WIN_VCHR:
+			bResult = WriteFile(Node->Handle, Buffer, Size, Result, &ovl);
+			break;
 		case WIN_VSOCK:
 			bResult = sock_write(Node, Buffer, Size, Result);
 			break;

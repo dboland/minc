@@ -51,14 +51,17 @@ pdo_lookup(WIN_NAMEIDATA *Path, DWORD Flags)
 	}else if (iNode.Magic != TypeNameVirtual){
 		SetLastError(ERROR_BAD_DEVICE);
 	}else{
-		pwDevice = DEVICE(iNode.DeviceId);
-		pwDevice->Handle = hResult;
 		Path->DeviceId = iNode.DeviceId;
 		Path->FileType = iNode.FileType;
 		Path->FSType = FS_TYPE_PDO;
 		Path->Attribs |= FILE_ATTRIBUTE_DEVICE;
-		Path->Device = pwDevice;
+		if (Flags & WIN_KEEPOBJECT){
+			Path->Object = hResult;
+		}else{
+			CloseHandle(hResult);
+		}
 		bResult = TRUE;
+//vfs_ktrace("pdo_lookup", STRUCT_NAMEI, Path);
 	}
 	return(bResult);
 }

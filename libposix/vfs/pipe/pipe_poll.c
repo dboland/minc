@@ -39,6 +39,7 @@ pipe_poll(WIN_VNODE *Node, WIN_POLLFD *Info)
 
 	switch (Node->FileType){
 		case WIN_VSOCK:
+		case WIN_VCHR:
 			dwResult = sock_poll(Node, Info);
 			break;
 		case WIN_VFIFO:

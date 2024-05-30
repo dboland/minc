@@ -51,7 +51,6 @@ mail_F_DUPFD(WIN_DEVICE *Device, HANDLE Process, DWORD Options, WIN_VNODE *Resul
 	}else{
 		Result->Handle = hResult;
 		Result->Access = win_F_GETFL(hResult);
-		Result->Device = Device;
 		bResult = TRUE;
 	}
 	return(bResult);
@@ -66,7 +65,7 @@ mail_open(WIN_DEVICE *Device, WIN_FLAGS *Flags, WIN_VNODE *Result)
 	CHAR szPath[MAX_PATH] = "\\\\.\\MAILSLOT\\master\\";
 	SECURITY_ATTRIBUTES sa = {sizeof(sa), NULL, TRUE};
 
-	if (MailCreateDevice(win_strcat(szPath, Device->Name), &sa, Device)){
+	if (MailCreateDevice(win_strcat(szPath, Device->Name), Device)){
 //		Result->FSType = Device->FSType;
 		Result->FileType = Device->FileType;
 		Result->DeviceType = Device->DeviceType;
@@ -74,7 +73,6 @@ mail_open(WIN_DEVICE *Device, WIN_FLAGS *Flags, WIN_VNODE *Result)
 		Result->Access = win_F_GETFL(Device->Input);
 		Result->Flags = win_F_GETFD(Device->Input);
 		Result->Index = Device->Index;
-		Result->Device = Device;
 		bResult = TRUE;
 	}
 	return(bResult);

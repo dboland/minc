@@ -87,3 +87,16 @@ pipe_F_SETFL(WIN_VNODE *Node, WIN_FLAGS *Flags)
 		bResult = TRUE;
 	}
 }
+
+/****************************************************/
+
+BOOL 
+pipe_open(WIN_DEVICE *Device, WIN_FLAGS *Flags, WIN_VNODE *Result)
+{
+//	Device->Event = CreateEvent(NULL, FALSE, FALSE, NULL);
+	Result->DeviceType = Device->DeviceType;
+	Result->DeviceId = Device->DeviceId;
+	Result->Event = Device->Event;
+	Result->Index = Device->Index;
+	return(TRUE);
+}

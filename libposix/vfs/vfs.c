@@ -73,7 +73,6 @@ WIN_SIGPROC	__SignalProc;
 HANDLE		__Interrupt;
 HANDLE		__PipeEvent;
 HANDLE		__MailEvent;
-DWORD		__TaskId;
 SEQUENCE 	__ANSI_BUF;
 CHAR		__INPUT_BUF[WIN_MAX_INPUT + 2];
 UCHAR 		__Char;
@@ -92,20 +91,21 @@ WIN_TTY 	*__CTTY;
 CHAR 		*__Escape;
 CHAR		*__Input = __INPUT_BUF;
 CONST CHAR	*__Clipboard;		/* Clipboard buffer */
+WIN_TASK	*__Process;
 
 BOOL vfs_namei(HANDLE Handle, DWORD Index, WIN_VNODE *Result);
 BOOL vfs_F_DUPFD(WIN_VNODE *Node, BOOL CloseExec, WIN_VNODE *Result);
 BOOL proc_poll(VOID);
-BOOL pdo_revoke(WIN_DEVICE *Device);
+BOOL tty_open(WIN_TTY *Terminal, WIN_FLAGS *Flags, WIN_VNODE *Result);
 
 #include "vfs_acl.c"
 #include "vfs_debug.c"
 #include "vfs_signal.c"
 #include "vfs_statvfs.c"
 #include "vfs_libgen.c"
-#include "vfs_device.c"
 #include "vfs_sysctl.c"
 #include "vfs_syscall.c"
+#include "vfs_device.c"
 #include "registry/registry.c"
 #include "drive/drive.c"
 #include "disk/disk.c"
@@ -115,8 +115,8 @@ BOOL pdo_revoke(WIN_DEVICE *Device);
 #include "process/process.c"
 #include "mailslot/mailslot.c"
 #include "pdo/pdo.c"
-#include "event/event.c"
 #include "winsock/winsock.c"
+#include "vfs_tty.c"
 #include "vfs_namei.c"
 #include "vfs_fcntl.c"
 #include "vfs_stdlib.c"
@@ -133,6 +133,7 @@ BOOL pdo_revoke(WIN_DEVICE *Device);
 #include "vfs_wait.c"
 #include "vfs_ktrace.c"
 #include "vfs_resource.c"
+#include "vfs_event.c"
 //#include "vfs_ldt.c"
 
 /****************************************************/

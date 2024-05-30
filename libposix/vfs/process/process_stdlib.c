@@ -95,7 +95,6 @@ WIN_TASK *
 proc_init(WIN_SIGPROC SignalProc)
 {
 	STARTUPINFO si = {0};
-	WIN_TASK *pwTask = NULL;
 
 	__SignalProc = SignalProc;
 	SetUnhandledExceptionFilter(SigExceptionProc);
@@ -103,27 +102,26 @@ proc_init(WIN_SIGPROC SignalProc)
 	SetLastError(ERROR_SUCCESS);
 	GetStartupInfo(&si);
 	if (si.dwFlags & STARTF_PS_EXEC){
-		pwTask = &__Tasks[si.dwX];
-		ProcInitStreams(pwTask->Node);
-		pwTask->Flags |= WIN_PS_INEXEC;
+		__Process = &__Tasks[si.dwX];
+		ProcInitStreams(__Process->Node);
+		__Process->Flags |= WIN_PS_INEXEC;
 	}else{
-		pwTask = ProcCreateTask(0);
-		pwTask->Flags |= WIN_PS_SYSTEM;
-		vfs_namei(GetStdHandle(STD_INPUT_HANDLE), 0, &pwTask->Node[0]);
-		vfs_namei(GetStdHandle(STD_OUTPUT_HANDLE), 1, &pwTask->Node[1]);
-		vfs_namei(GetStdHandle(STD_ERROR_HANDLE), 2, &pwTask->Node[2]);
-		win_getcwd(PSTRING(pwTask).Path);
-		win_geteuid(&pwTask->UserSid);
-		win_getegid(&pwTask->GroupSid);
-		pwTask->FileMask = 0022;
-		ProcInitChannels(pwTask->Node);
-		ProcInitLimits(pwTask->Limit);
+		__Process = ProcCreateTask(0);
+		__Process->Flags |= WIN_PS_SYSTEM;
+		vfs_namei(GetStdHandle(STD_INPUT_HANDLE), 0, &__Process->Node[0]);
+		vfs_namei(GetStdHandle(STD_OUTPUT_HANDLE), 1, &__Process->Node[1]);
+		vfs_namei(GetStdHandle(STD_ERROR_HANDLE), 2, &__Process->Node[2]);
+		win_getcwd(PSTRING(__Process).Path);
+		win_geteuid(&__Process->UserSid);
+		win_getegid(&__Process->GroupSid);
+		__Process->FileMask = 0022;
+		ProcInitChannels(__Process->Node);
+		ProcInitLimits(__Process->Limit);
 		win_chdir(L"\\");	/* make sure CWD is at mount point */
 	}
-//	if (proc_setugid(pwTask)){
-//		pwTask->IsSetUGid = 1;
+//	if (proc_setugid(__Process)){
+//		__Process->IsSetUGid = 1;
 //	}
-	__TaskId = pwTask->TaskId;
-	__CTTY = CTTY(pwTask->CTTY);
-	return(pwTask);
+	__CTTY = &__Terminals[__Process->CTTY];
+	return(__Process);
 }

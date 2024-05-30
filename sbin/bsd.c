@@ -189,7 +189,6 @@ boot(void)
 {
 	char *args[] = {"/sbin/init", NULL};
 
-	consinit();
 	tty_init();
 	ifinit();
 	cpu_configure();
@@ -204,7 +203,6 @@ single(void)
 	int level = 1;
 	char *args[] = {"/bin/ksh", "-l", NULL};
 
-	consinit();
 	tty_init();
 	ifinit();
 	cpu_configure();

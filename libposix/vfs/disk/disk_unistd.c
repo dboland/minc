@@ -108,7 +108,6 @@ disk_unlink(WIN_NAMEIDATA *Path)
 {
 	BOOL bResult = FALSE;
 
-//VfsDebugPath(Path, "disk_unlink");
 	if (Path->FileType == WIN_VDIR){
 		bResult = disk_rmdir(Path);
 	}else if (*Path->Last == '\\'){		/* GNU conftest.exe */

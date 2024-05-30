@@ -39,8 +39,7 @@ tty_init(void)
 	DWORD dwIndex = 0;
 	struct termios attr = {
 		TTYDEF_IFLAG, TTYDEF_OFLAG, TTYDEF_CFLAG, TTYDEF_LFLAG, 
-		{0}, TTYDEF_SPEED, TTYDEF_SPEED
-	};
+		{0}, TTYDEF_SPEED, TTYDEF_SPEED};
 
 	win_memcpy(attr.c_cc, ttydefchars, sizeof(ttydefchars));
 	while (dwIndex < WIN_TTY_MAX){
@@ -49,4 +48,5 @@ tty_init(void)
 		pwTerminal++;
 		dwIndex++;
 	}
+	tty_attach(DEVICE(DEV_TYPE_CONSOLE));
 }

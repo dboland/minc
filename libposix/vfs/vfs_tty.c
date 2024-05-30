@@ -30,87 +30,70 @@
 
 #include <winbase.h>
 
-CHAR __MAIL_INPUT[WIN_MAX_INPUT + 1];
-
-CHAR *__Buffer = __MAIL_INPUT;
-
 /****************************************************/
 
-VOID 
-TTYCarriageReturn(HANDLE Handle, UINT Flags, OVERLAPPED *ovl)
+DWORD 
+TTYCarriageReturn(LPSTR Buffer, UINT Flags)
 {
 	DWORD dwCount = 0;
 
 	if (Flags & WIN_OCRNL){
-		WriteFile(Handle, "\n", 1, &dwCount, ovl);
+		Buffer[dwCount++] = '\n';
 	}else{
-		WriteFile(Handle, "\r", 1, &dwCount, ovl);
+		Buffer[dwCount++] = '\r';
 	}
+	return(dwCount);
 }
-VOID 
-TTYLineFeed(HANDLE Handle, UINT Flags, OVERLAPPED *ovl)
+DWORD 
+TTYLineFeed(LPSTR Buffer, UINT Flags)
 {
 	DWORD dwCount = 0;
 
 	if (Flags & WIN_ONLCR){
-		WriteFile(Handle, "\r", 1, &dwCount, ovl);
+		Buffer[dwCount++] = '\r';
 	}
-	WriteFile(Handle, "\n", 1, &dwCount, ovl);
-}
-VOID 
-TTYControl(HANDLE Handle, UINT Flags, CHAR C, OVERLAPPED *ovl)
-{
-	DWORD dwCount = 0;
-
-	switch (C){
-		case '\n':
-			TTYLineFeed(Handle, Flags, ovl);
-			break;
-		case '\r':
-			TTYCarriageReturn(Handle, Flags, ovl);
-			break;
-		default:
-			WriteFile(Handle, &C, 1, &dwCount, ovl);
-	}
+	Buffer[dwCount++] = '\n';
+	return(dwCount);
 }
 
 /****************************************************/
 
 BOOL 
-tty_open(WIN_DEVICE *Device, WIN_FLAGS *Flags, WIN_VNODE *Result)
+tty_open(WIN_TTY *Terminal, WIN_FLAGS *Flags, WIN_VNODE *Result)
 {
-	Result->Event = Device->Input;
-	Result->Index = Device->Index;
-	Result->Device = Device;
-//vfs_ktrace("tty_open", STRUCT_DEVICE, Device);
+//	Result->FSType = FS_TYPE_TERMINAL;
+	Result->DeviceType = Terminal->DeviceType;
+	Result->DeviceId = Terminal->DeviceId;
+	Result->Index = Terminal->Index;
+//vfs_ktrace("tty_open", STRUCT_VNODE, Result);
 	return(TRUE);
 }
 BOOL 
-tty_close(WIN_TTY *Terminal)
-{
-	BOOL bResult = FALSE;
-
-	if (pdo_revoke(DEVICE(Terminal->DeviceId))){
-		ZeroMemory(Terminal, sizeof(WIN_TTY));
-		bResult = TRUE;
-	}
-	return(bResult);
-}
-BOOL 
-tty_write(HANDLE Handle, LPCSTR Buffer, DWORD Size, DWORD *Result)
+tty_write(WIN_TTY *Terminal, LPCSTR Buffer, DWORD Size, DWORD *Result)
 {
 	BOOL bResult = TRUE;
 	LONG lResult = 0;
-	DWORD dwCount = 0;
+	DWORD dwCount;
+	UINT uiFlags = Terminal->Mode.OFlags;
+	WIN_DEVICE *pwDevice = DEVICE(Terminal->DeviceId);
+	CHAR szBuffer[4];
 	UCHAR C;
-	OVERLAPPED ovl = {0, 0, 0, 0, __MailEvent};
 
 	while (lResult < Size){
 		C = *Buffer++;
-		if (C < 32){
-			TTYControl(Handle, __CTTY->Mode.OFlags, C, &ovl);
-		}else{
-			WriteFile(Handle, &C, 1, &dwCount, &ovl);
+		dwCount = 1;
+		switch (C){
+			case '\n':
+				dwCount = TTYLineFeed(szBuffer, uiFlags);
+				break;
+			case '\r':
+				dwCount = TTYCarriageReturn(szBuffer, uiFlags);
+				break;
+			default:
+				*szBuffer = C;
+		}
+		if (!pdo_write(pwDevice, szBuffer, dwCount, &dwCount)){
+			break;
 		}
 		lResult++;
 	}
@@ -118,29 +101,35 @@ tty_write(HANDLE Handle, LPCSTR Buffer, DWORD Size, DWORD *Result)
 	return(bResult);
 }
 BOOL 
-tty_read(HANDLE Handle, LPSTR Buffer, DWORD Size, DWORD *Result)
+tty_read(WIN_TTY *Terminal, LPSTR Buffer, DWORD Size, DWORD *Result)
 {
 	BOOL bResult = FALSE;
 	LONG lSize = Size;
 	DWORD dwResult = 0;
 	DWORD dwCount;
-	CHAR C;
+	WIN_DEVICE *pwDevice = DEVICE(Terminal->DeviceId);
+	DWORD dwOffset = Terminal->Offset;
+	CHAR *pszBuffer = Terminal->Buffer + dwOffset;
+	UCHAR C;
 
 	while (!bResult){
 		if (lSize < 1){
 			bResult = TRUE;
-		}else if (C = *__Buffer){
+		}else if (C = *pszBuffer){
 			*Buffer++ = C;
-			__Buffer++;
+			pszBuffer++;
 			dwResult++;
 			lSize--;
-		}else if (!ReadFile(Handle, __MAIL_INPUT, WIN_MAX_INPUT, &dwCount, NULL)){
-			break;
+			dwOffset++;
+		}else if (pdo_read(pwDevice, Terminal->Buffer, WIN_MAX_INPUT, &dwCount)){
+			pszBuffer = Terminal->Buffer;
+			pszBuffer[dwCount] = 0;
+			dwOffset = 0;
 		}else{
-			__MAIL_INPUT[dwCount] = 0;
-			__Buffer = __MAIL_INPUT;
+			break;
 		}
 	}
+	Terminal->Offset = dwOffset;
 	*Result = dwResult;
 	return(bResult);
 }

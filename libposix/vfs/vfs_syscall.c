@@ -30,6 +30,27 @@
 
 #include <winbase.h>
 
+typedef UCHAR *RPC_CSTR;
+
+/****************************************************/
+
+LPWSTR 
+VfsCreateName(LPWSTR Result)
+{
+	UUID guid;
+	RPC_CSTR pszGuid;
+
+	if (RPC_S_OK != UuidCreate(&guid)){
+		WIN_ERR("UuidCreate(): %s\n", win_strerror(GetLastError()));
+	}else if (RPC_S_OK != UuidToString(&guid, &pszGuid)){
+		WIN_ERR("UuidToString(): %s\n", win_strerror(GetLastError()));
+	}else{
+		win_mbstowcs(Result, pszGuid, MAX_GUID);
+		RpcStringFree(&pszGuid);
+	}
+	return(Result);
+}
+
 /****************************************************/
 
 BOOL 

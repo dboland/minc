@@ -54,6 +54,7 @@ PollNoWait(WIN_VNODE *Nodes[], WIN_POLLFD *Info[])
 	while (pNode = *Nodes++){
 		pInfo = *Info++;
 		switch (pNode->FSType){
+			case FS_TYPE_TERMINAL:
 			case FS_TYPE_CHAR:
 				dwResult += char_poll(pNode, pInfo);
 				break;
@@ -61,7 +62,7 @@ PollNoWait(WIN_VNODE *Nodes[], WIN_POLLFD *Info[])
 				dwResult += pipe_poll(pNode, pInfo);
 				break;
 			case FS_TYPE_PDO:
-				dwResult += pdo_poll(pNode->Device, pInfo);
+				dwResult += pdo_poll(DEVICE(pNode->DeviceId), pInfo);
 				break;
 			case FS_TYPE_MAILSLOT:
 				dwResult += mail_poll(pNode->Handle, pInfo);
@@ -96,7 +97,7 @@ PollWait(WIN_VNODE *Nodes[], DWORD *TimeOut)
 	dwStatus = WSAWaitForMultipleEvents(dwCount, hObjects, FALSE, dwTimeOut, TRUE);
 	if (dwStatus == WSA_WAIT_FAILED){
 		WIN_ERR("WSAWaitForMultipleEvents(%s): %s\n", win_strobj(hObjects, dwCount), win_strerror(WSAGetLastError()));
-		vfs_raise(WM_COMMAND, CTRL_ABORT_EVENT, 0);
+//		vfs_raise(WM_COMMAND, CTRL_ABORT_EVENT, 0);
 //	}else if (!dwStatus){
 //		SetLastError(ERROR_SIGNAL_PENDING);
 	}else{

@@ -58,6 +58,10 @@ static LPCSTR __ANSI_CURSOR[] = {
 	""		/* VK_SPACE */
 };
 
+#define VK_WINDOWS	0x5F
+
+/* 0x5F - 0x50 */
+
 #define VK_FUNCTION		0x8F
 #define ANSI_FUNCTION(k)	__ANSI_FUNCTION[VK_FUNCTION - k]
 

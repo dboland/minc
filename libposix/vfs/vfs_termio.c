@@ -39,13 +39,14 @@ vfs_TIOCGWINSZ(WIN_VNODE *Node, WIN_WINSIZE *WinSize)
 
 	switch (Node->FSType){
 		case FS_TYPE_PDO:
-			bResult = pdo_TIOCGWINSZ(Node->Device, WinSize);
+			bResult = pdo_TIOCGWINSZ(DEVICE(Node->DeviceId), WinSize);
 			break;
+		case FS_TYPE_TERMINAL:
 		case FS_TYPE_CHAR:			/* stty.exe */
 			bResult = char_TIOCGWINSZ(Node, WinSize);
 			break;
-		case FS_TYPE_MAILSLOT:
-			*WinSize = __CTTY->WinSize;
+		case FS_TYPE_PIPE:
+			*WinSize = __Terminals[Node->Index].WinSize;
 			bResult = TRUE;
 			break;
 		default:
@@ -60,13 +61,14 @@ vfs_TIOCSWINSZ(WIN_VNODE *Node, WIN_WINSIZE *WinSize)
 
 	switch (Node->FSType){
 		case FS_TYPE_PDO:
-			bResult = pdo_TIOCSWINSZ(Node->Device, WinSize);
+			bResult = pdo_TIOCSWINSZ(DEVICE(Node->DeviceId), WinSize);
 			break;
 		case FS_TYPE_CHAR:
 			bResult = char_TIOCSWINSZ(Node, WinSize);
 			break;
-		case FS_TYPE_MAILSLOT:
-			__CTTY->WinSize = *WinSize;
+		case FS_TYPE_TERMINAL:
+		case FS_TYPE_PIPE:
+			__Terminals[Node->Index].WinSize = *WinSize;
 			bResult = TRUE;
 			break;
 		default:
@@ -79,14 +81,10 @@ vfs_TIOCGETA(WIN_VNODE *Node, WIN_TERMIO *Mode)
 {
 	BOOL bResult = FALSE;
 
-	switch (Node->DeviceType){
-		case DEV_TYPE_PTY:
-		case DEV_TYPE_CONSOLE:
-		case DEV_TYPE_TTY:
-		case DEV_CLASS_TTY:
-		case DEV_TYPE_INPUT:
-		case DEV_TYPE_SCREEN:
-		case DEV_TYPE_COM:
+	switch (Node->FSType){
+		case FS_TYPE_PDO:
+		case FS_TYPE_CHAR:
+		case FS_TYPE_TERMINAL:
 			bResult = TRUE;
 			break;
 		default:
@@ -101,7 +99,7 @@ vfs_TIOCFLUSH(WIN_VNODE *Node)
 
 	switch (Node->FSType){
 		case FS_TYPE_PDO:
-			bResult = pdo_TIOCFLUSH(Node->Device);
+			bResult = pdo_TIOCFLUSH(DEVICE(Node->DeviceId));
 			break;
 		case FS_TYPE_CHAR:
 			bResult = char_TIOCFLUSH(Node);
@@ -118,7 +116,7 @@ vfs_TIOCDRAIN(WIN_VNODE *Node)
 
 	switch (Node->FSType){
 		case FS_TYPE_PDO:
-			bResult = pdo_TIOCDRAIN(Node->Device);
+			bResult = pdo_TIOCDRAIN(DEVICE(Node->DeviceId));
 			break;
 		case FS_TYPE_CHAR:
 			bResult = char_TIOCDRAIN(Node);
@@ -138,13 +136,13 @@ vfs_TIOCSETA(WIN_VNODE *Node, WIN_TERMIO *Mode, BOOL Flush, BOOL Drain)
 	}
 	switch (Node->FSType){
 		case FS_TYPE_PDO:
-			bResult = pdo_TIOCSETA(Node->Device, Mode);
+			bResult = pdo_TIOCSETA(DEVICE(Node->DeviceId), Mode);
 			break;
 		case FS_TYPE_CHAR:			/* nano.exe */
 			bResult = char_TIOCSETA(Node, Mode);
 			break;
-		case FS_TYPE_MAILSLOT:
-//vfs_ktrace("vfs_TIOCSETA", STRUCT_VNODE, Node);
+		case FS_TYPE_TERMINAL:
+		case FS_TYPE_PIPE:
 			bResult = TRUE;
 			break;
 		default:
@@ -156,59 +154,75 @@ vfs_TIOCSETA(WIN_VNODE *Node, WIN_TERMIO *Mode, BOOL Flush, BOOL Drain)
 	return(bResult);
 }
 BOOL 
-vfs_TIOCSCTTY(WIN_TTY *Terminal, WIN_TASK *Task)
+vfs_TIOCSCTTY(WIN_VNODE *Node, WIN_TASK *Task)
 {
 	BOOL bResult = FALSE;
+	WIN_TTY *pwTerminal = &__Terminals[Node->Index];
 
 	if (Task->Flags & WIN_PS_CONTROLT){
 		SetLastError(ERROR_LOGON_SESSION_EXISTS);
-	}else{
-		Terminal->SessionId = Task->SessionId;
-		Terminal->GroupId = Task->GroupId;
+	}else if (pdo_TIOCSCTTY(DEVICE(Node->DeviceId), Task)){
+		pwTerminal->SessionId = Task->SessionId;
+		pwTerminal->GroupId = Task->GroupId;
 		Task->Flags |= WIN_PS_CONTROLT;
-		Task->CTTY = Terminal->Index;
+		Task->CTTY = pwTerminal->Index;
 		bResult = TRUE;
 	}
-//vfs_ktrace("vfs_TIOCSCTTY", STRUCT_TTY, Terminal);
 	return(bResult);
 }
 BOOL 
-vfs_PTMGET(WIN_VNODE *Master, WIN_VNODE *Slave)
+vfs_PTMGET(WIN_VNODE *Node, WIN_VNODE *Master, WIN_VNODE *Slave)
 {
 	BOOL bResult = FALSE;
 //	HANDLE hEvent = CreateEvent(NULL, FALSE, FALSE, NULL);
-	SECURITY_ATTRIBUTES sa = {sizeof(sa), NULL, TRUE};
+	WCHAR szName[MAX_NAME];
 
-	if (MailCreateSlave(pdo_attach(DEV_TYPE_TTY), __MailEvent, &sa, Slave)){
-		Master->Event = __MailEvent;
-		Slave->Index = Master->Index;
-		bResult = pdo_PTMGET(Master->Device, Slave->Device);
-	}
-	return(bResult);
-}
-BOOL 
-vfs_TIOCGPGRP(WIN_TTY *Terminal, UINT *Result)
-{
-	BOOL bResult = FALSE;
-
-	if (!Terminal->Flags){
-		SetLastError(ERROR_CTX_NOT_CONSOLE);
-	}else{
-		*Result = Terminal->GroupId;
+	if (!PipeCreateFile(VfsCreateName(szName), PIPE_READMODE_BYTE, Node->Event, Master)){
+		return(FALSE);
+	}else if (PipeOpenFile(szName, Node->Event, Slave)){
+		Slave->Index = Node->Index;
+		Slave->FileType = Node->FileType;
+		Slave->DeviceType = Node->DeviceType;
+		Slave->DeviceId = Node->DeviceId;
+		Master->Index = Node->Index;
+		Master->FileType = Node->FileType;
+		Master->DeviceType = Node->DeviceType;
+		Master->DeviceId = Node->DeviceId;
 		bResult = TRUE;
 	}
 	return(bResult);
 }
 BOOL 
-vfs_TIOCSPGRP(WIN_TTY *Terminal, UINT GroupId)
+vfs_TIOCGPGRP(WIN_VNODE *Node, UINT *Result)
 {
 	BOOL bResult = FALSE;
 
-	if (!Terminal->Flags){
-		SetLastError(ERROR_CTX_NOT_CONSOLE);
-	}else{
-		Terminal->GroupId = GroupId;
-		bResult = TRUE;
+	switch (Node->FSType){
+		case FS_TYPE_PDO:
+		case FS_TYPE_CHAR:
+		case FS_TYPE_TERMINAL:
+			*Result = __Terminals[Node->Index].GroupId;
+			bResult = TRUE;
+			break;
+		default:
+			SetLastError(ERROR_CTX_NOT_CONSOLE);
+	}
+	return(bResult);
+}
+BOOL 
+vfs_TIOCSPGRP(WIN_VNODE *Node, UINT GroupId)
+{
+	BOOL bResult = FALSE;
+
+	switch (Node->FSType){
+		case FS_TYPE_PDO:
+		case FS_TYPE_CHAR:
+		case FS_TYPE_TERMINAL:
+			__Terminals[Node->Index].GroupId = GroupId;
+			bResult = TRUE;
+			break;
+		default:
+			SetLastError(ERROR_CTX_NOT_CONSOLE);
 	}
 	return(bResult);
 }

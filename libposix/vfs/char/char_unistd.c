@@ -70,3 +70,19 @@ char_write(WIN_VNODE *Node, LPCSTR Buffer, DWORD Size, DWORD *Result)
 	}
 	return(bResult);
 }
+BOOL 
+char_revoke(WIN_DEVICE *Device)
+{
+	BOOL bResult = FALSE;
+
+	if (!CloseHandle(Device->Input)){
+		WIN_ERR("CloseHandle(%d): %s\n", Device->Input, win_strerror(GetLastError()));
+	}else if (!CloseHandle(Device->Output)){
+		WIN_ERR("CloseHandle(%d): %s\n", Device->Output, win_strerror(GetLastError()));
+	}else{
+		Device->Flags = 0;
+		__Terminals[Device->Index].Flags = 0;
+		bResult = TRUE;
+	}
+	return(bResult);
+}

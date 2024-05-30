@@ -30,7 +30,7 @@ version.o: bsd.rc
 mkent: mkent.o
 	gcc ${LDFLAGS} -o $@ $< ${MINGW}/lib/libiphlpapi.a ${LIBS}
 
-libconsole.o: console/libconsole.c
+libconsole.o: libconsole.c
 	gcc -c ${CFLAGS} -I${MINGW}/include -I../include -o $@ $<
 
 bsd.exe: bsd.o version.o

@@ -454,7 +454,7 @@ AnsiSetMode(HANDLE Handle, WIN_TTY *Terminal, WORD Arg)
 
 	if (!GetConsoleMode(Handle, &dwMode)){
 		bResult = FALSE;
-	}else if (Arg == 4){			/* IRM */
+	}else if (Arg == 4){		/* IRM */
 		bResult = SetConsoleMode(Handle, dwMode | ENABLE_INSERT_MODE);
 	}else if (Arg == 7){		/* VEM */
 		Terminal->VEdit = TRUE;

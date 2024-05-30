@@ -37,6 +37,7 @@ pdo_close(WIN_VNODE *Node)
 {
 	BOOL bResult = FALSE;
 
+//vfs_ktrace("pdo_close", STRUCT_VNODE, Node);
 	if (Node->Handle == INVALID_HANDLE_VALUE){	/* DEV_TYPE_ROUTE (route.exe) */
 		bResult = TRUE;
 	}else if (!CloseHandle(Node->Handle)){
@@ -54,14 +55,9 @@ pdo_read(WIN_DEVICE *Device, LPSTR Buffer, LONG Size, DWORD *Result)
 
 	switch (Device->DeviceType){
 		case DEV_TYPE_PTY:
-			bResult = ReadFile(Device->Input, Buffer, Size, Result, NULL);
-			break;
 		case DEV_TYPE_CONSOLE:
 			bResult = input_read(Device->Input, Buffer, Size, Result);
 			break;
-//		case DEV_TYPE_TTY:
-//			bResult = tty_read(Device->Input, Buffer, Size, Result);
-//			break;
 		case DEV_TYPE_ROUTE:
 			bResult = route_read(Device, Buffer, Size, Result);
 			break;
@@ -82,14 +78,9 @@ pdo_write(WIN_DEVICE *Device, LPCSTR Buffer, DWORD Size, DWORD *Result)
 
 	switch (Device->DeviceType){
 		case DEV_TYPE_PTY:
-			bResult = WriteFile(Device->Output, Buffer, Size, Result, &ovl);
-			break;
 		case DEV_TYPE_CONSOLE:
 			bResult = screen_write(Device->Output, Buffer, Size, Result);
 			break;
-//		case DEV_TYPE_TTY:
-//			bResult = tty_write(Device->Output, Buffer, Size, Result);
-//			break;
 		case DEV_TYPE_ROUTE:
 			bResult = route_write(Device, Buffer, Size, Result);
 			break;
@@ -120,13 +111,25 @@ pdo_revoke(WIN_DEVICE *Device)
 
 	switch (Device->DeviceType){
 		case DEV_TYPE_PTY:
-			bResult = pty_revoke(Device);
+			bResult = char_revoke(Device);
 			break;
 		case DEV_TYPE_CONSOLE:
 			bResult = TRUE;
 			break;
 		default:
 			SetLastError(ERROR_BAD_DEVICE);
+	}
+	return(bResult);
+}
+BOOL 
+pdo_unlink(WIN_NAMEIDATA *Path)
+{
+	BOOL bResult = FALSE;
+
+	if (*Path->Last == '\\'){		/* GNU conftest.exe */
+		SetLastError(ERROR_BAD_PATHNAME);
+	}else{
+		bResult = DeleteFileW(Path->Resolved);
 	}
 	return(bResult);
 }

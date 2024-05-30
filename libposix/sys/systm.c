@@ -33,11 +33,6 @@
 /****************************************************/
 
 void 
-consinit(void)
-{
-	con_init(DEVICE(DEV_TYPE_CONSOLE));
-}
-void 
 cpu_configure(void)
 {
 	WIN_CFDATA cfData;

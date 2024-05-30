@@ -38,22 +38,21 @@ ConControlHandler(DWORD CtrlType)
 	BOOL bResult = TRUE;
 	DWORD dwGroupId = __CTTY->GroupId;
 	DWORD dwMode = InputMode(&__CTTY->Mode);
-	WIN_TASK *pwTask = &__Tasks[__TaskId];
 
 	/* To deliver signals, Windows (CSRSS.EXE) actually forks!
 	 * Copying the call stack to a new thread and executing
 	 * our code. Let's make sure it uses our Task struct too:
 	 */
-	TlsSetValue(__TlsIndex, (PVOID)__TaskId);
+	TlsSetValue(__TlsIndex, (PVOID)__Process->TaskId);
 	if (dwMode & ENABLE_PROCESSED_INPUT){
-		if (pwTask->GroupId == dwGroupId){
+		if (__Process->GroupId == dwGroupId){
 			if (!vfs_raise(WM_COMMAND, CtrlType, 0)){
-				pwTask->Flags |= WIN_PS_EXITING;
+				__Process->Flags |= WIN_PS_EXITING;
 				/* causes ExitProcess() */
 				bResult = FALSE;
 			}else{
 				/* syslogd.exe -d */
-				vfs_kill_ANY(pwTask->TaskId, WM_COMMAND, CtrlType, 0);
+//				vfs_kill_ANY(__Task->TaskId, WM_COMMAND, CtrlType, 0);
 				SetEvent(__Interrupt);
 			}
 		}
@@ -90,20 +89,6 @@ con_TIOCSETA(WIN_DEVICE *Device, WIN_TERMIO *Mode)
 
 /****************************************************/
 
-VOID 
-con_init(WIN_DEVICE *Device)
-{
-	WIN_FLAGS wFlags = {GENERIC_READ | GENERIC_WRITE, 
-		FILE_SHARE_READ | FILE_SHARE_WRITE, 
-		OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, 0};
-	SECURITY_ATTRIBUTES sa = {sizeof(sa), NULL, TRUE};
-	WIN_TERMIO ioMode;
-
-	if (tty_attach(Device)){
-		Device->Input = CharOpenFile("CONIN$", &wFlags, &sa);
-		Device->Output = CharOpenFile("CONOUT$", &wFlags, &sa);
-	}
-}
 DWORD 
 con_poll(WIN_DEVICE *Device, WIN_POLLFD *Info)
 {

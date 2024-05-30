@@ -75,7 +75,7 @@ kticks_posix(FILETIME *Time)
 struct kinfo_proc *
 kproc_posix(struct kinfo_proc *proc, WIN_TASK *Task)
 {
-	WIN_TTY *pTerminal = CTTY(Task->CTTY);
+	WIN_TTY *pTerminal = &__Terminals[Task->CTTY];
 	wchar_t *command = win_basename(PSTRING(Task).Command);
 	struct timeval tv;
 	WIN_KINFO_PROC kInfo = {0};
@@ -118,7 +118,7 @@ kproc_posix(struct kinfo_proc *proc, WIN_TASK *Task)
 		proc->p_ustart_sec = tv.tv_sec;
 		proc->p_ustart_usec = tv.tv_usec;
 
-		rtime = ktime_posix(&kInfo.Created);
+		rtime = ktime_posix(&kInfo.Created);	/* microseconds */
 		proc->p_rtime_sec = rtime * 0.000001;
 		proc->p_rtime_usec = rtime - (proc->p_rtime_sec * 1000000);
 

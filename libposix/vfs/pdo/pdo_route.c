@@ -69,7 +69,6 @@ route_socket(INT Family, INT Type, INT Protocol, WIN_VNODE *Result)
 	Result->DeviceType = DEV_TYPE_ROUTE;
 	Result->DeviceId = DEV_TYPE_ROUTE;
 	Result->Access = GENERIC_READ + GENERIC_WRITE;
-	Result->Device = DEVICE(DEV_TYPE_ROUTE);
 	return(TRUE);
 }
 BOOL 

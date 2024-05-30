@@ -117,3 +117,16 @@ char_TIOCDRAIN(WIN_VNODE *Node)
 	}
 	return(bResult);
 }
+BOOL 
+char_TIOCSCTTY(WIN_DEVICE *Device, WIN_TASK *Task)
+{
+	WIN_FLAGS wFlags = {GENERIC_READ | GENERIC_WRITE, 
+		FILE_SHARE_READ | FILE_SHARE_WRITE, 
+		OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, 0};
+	SECURITY_ATTRIBUTES sa = {sizeof(sa), NULL, TRUE};
+
+	Device->Input = CharOpenFile("CONIN$", &wFlags, &sa);
+	Device->Output = CharOpenFile("CONOUT$", &wFlags, &sa);
+	Device->Event = Device->Input;
+	return(TRUE);
+}

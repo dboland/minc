@@ -33,7 +33,7 @@
 /****************************************************/
 
 BOOL 
-null_open(WIN_DEVICE *Device, WIN_FLAGS *Flags, WIN_VNODE *Result)
+null_open(WIN_FLAGS *Flags, WIN_VNODE *Result)
 {
 	BOOL bResult = FALSE;
 	HANDLE hResult = NULL;

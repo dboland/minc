@@ -83,10 +83,10 @@ BOOL vfs_TIOCFLUSH(WIN_VNODE *Node);
 BOOL vfs_TIOCDRAIN(WIN_VNODE *Node);
 BOOL vfs_TIOCGETA(WIN_VNODE *Node, WIN_TERMIO *Mode);
 BOOL vfs_TIOCSETA(WIN_VNODE *Node, WIN_TERMIO *Mode, BOOL Flush, BOOL Drain);
-BOOL vfs_PTMGET(WIN_VNODE *Master, WIN_VNODE *Slave);
-BOOL vfs_TIOCSCTTY(WIN_TTY *Terminal, WIN_TASK *Task);
-BOOL vfs_TIOCGPGRP(WIN_TTY *Terminal, UINT *Result);
-BOOL vfs_TIOCSPGRP(WIN_TTY *Terminal, UINT GroupId);
+BOOL vfs_PTMGET(WIN_VNODE *Node, WIN_VNODE *Master, WIN_VNODE *Slave);
+BOOL vfs_TIOCSCTTY(WIN_VNODE *Node, WIN_TASK *Task);
+BOOL vfs_TIOCGPGRP(WIN_VNODE *Node, UINT *Result);
+BOOL vfs_TIOCSPGRP(WIN_VNODE *Node, UINT GroupId);
 BOOL vfs_TIOCGFLAGS(WIN_TTY *Terminal, UINT *Result);
 BOOL vfs_TIOCSFLAGS(WIN_TTY *Terminal, UINT Flags);
 
@@ -118,16 +118,16 @@ BOOL vfs_F_SETLK(WIN_VNODE *Node, DWORD Flags, LARGE_INTEGER *Offset, LARGE_INTE
 BOOL vfs_F_GETPATH(WIN_VNODE *Node, WIN_NAMEIDATA *Path);
 BOOL vfs_F_DUPFD(WIN_VNODE *Node, BOOL CloseExec, WIN_VNODE *Result);
 
-/* vfs_time.c */
-
-BOOL vfs_setitimer(WIN_TASK *Task, LONG *Interval, DWORDLONG *TimeOut);
-BOOL vfs_nanosleep(DWORDLONG *TimeOut, DWORDLONG *Remain);
-
 /* vfs_statvfs.c */
 
 BOOL vfs_setvfs(WIN_CFDATA *Config, DWORD Flags);
 VOID vfs_endvfs(WIN_CFDATA *Config);
 BOOL vfs_getvfs(WIN_CFDATA *Config, DWORD Flags);
+
+/* vfs_time.c */
+
+BOOL vfs_setitimer(WIN_TASK *Task, LONG *Interval, DWORDLONG *TimeOut);
+BOOL vfs_nanosleep(DWORDLONG *TimeOut, DWORDLONG *Remain);
 
 /* vfs_stdlib.c */
 
@@ -154,6 +154,11 @@ BOOL vfs_namei(HANDLE Handle, DWORD Index, WIN_VNODE *Result);
 BOOL vfs_writev(WIN_VNODE *Node, const WIN_IOVEC Data[], LONG Count, ULONG *Result);
 BOOL vfs_readv(WIN_VNODE *Node, const WIN_IOVEC Data[], LONG Count, ULONG *Result);
 
+/* vfs_resource.c */
+
+BOOL vfs_getrusage_SELF(DWORD ThreadId, WIN_RUSAGE *Result);
+BOOL vfs_getrusage_CHILDREN(DWORD ParentId, WIN_RUSAGE *Result);
+
 /* vfs_dirent.c */
 
 BOOL vfs_getdents(WIN_VNODE *Node, WIN_DIRENT Entity[], DWORD Count, DWORD *Result);
@@ -174,10 +179,9 @@ BOOL vfs_utimes(WIN_NAMEIDATA *Path, FILETIME FileTime[2]);
 
 BOOL vfs_wait4(WIN_TASK *Task, WIN_TASK *Children[], BOOL NoHang, DWORD Status, WIN_USAGE *Result);
 
-/* vfs_resource.c */
+/* vfs_tty.c */
 
-BOOL vfs_getrusage_SELF(DWORD ThreadId, WIN_RUSAGE *Result);
-BOOL vfs_getrusage_CHILDREN(DWORD ParentId, WIN_RUSAGE *Result);
+BOOL tty_attach(WIN_DEVICE *Device);
 
 /****************************************************/
 
@@ -194,7 +198,7 @@ DWORD proc_VM_LOADAVG(WIN_TASK Tasks[], WIN_LOADAVG *Load);
 BOOL drive_statvfs(WIN_CFDATA *Config, DWORD Flags, WIN_CFDRIVER *Result);
 BOOL drive_getfsstat(WIN_MOUNT *Mount, DWORD Flags, WIN_STATFS *Result);
 BOOL drive_statfs(WIN_NAMEIDATA *Path, WIN_STATFS *Result);
-BOOL drive_mount(WIN_NAMEIDATA *Path, WIN_VNODE *Node, WIN_MODE *Mode);
+BOOL drive_mount(WIN_NAMEIDATA *Path, WIN_DEVICE *Device, WIN_MODE *Mode);
 BOOL drive_unmount(WIN_NAMEIDATA *Path);
 BOOL drive_match(LPCWSTR NtName, DWORD DeviceType, WIN_CFDRIVER *Driver);
 
@@ -202,8 +206,6 @@ BOOL drive_match(LPCWSTR NtName, DWORD DeviceType, WIN_CFDRIVER *Driver);
 
 BOOL disk_chflags(WIN_NAMEIDATA *Path, DWORD Attributes);
 BOOL disk_futimes(WIN_VNODE *Node, FILETIME FileTime[2]);
-BOOL disk_open(WIN_NAMEIDATA *Path, WIN_FLAGS *Flags, WIN_MODE *Mode, WIN_VNODE *Result);
-BOOL disk_close(WIN_VNODE *Node);
 BOOL disk_readlink(WIN_NAMEIDATA *Path, BOOL MakeReal);
 BOOL disk_symlink(WIN_NAMEIDATA *Path, WIN_NAMEIDATA *Result);
 BOOL disk_HW_DISKNAMES(WIN_DEVICE *Device, LPSTR Result);
@@ -221,9 +223,8 @@ DWORD pdo_statvfs(WIN_CFDATA *Config, DWORD Flags, WIN_CFDRIVER *Result);
 BOOL pdo_match(LPCWSTR NtName, DWORD DeviceType, WIN_CFDRIVER *Driver);
 BOOL pdo_DIOCGDINFO(WIN_DEVICE *Device);
 BOOL pdo_WSKBDIO_GTYPE(UINT *Type, UINT *SubType, UINT *FKeys);
-BOOL tty_close(WIN_TTY *Terminal);
 BOOL rand_read(LPSTR Buffer, DWORD Size, DWORD *Result);
-VOID con_init(WIN_DEVICE *Device);
+BOOL pdo_revoke(WIN_DEVICE *Device);
 
 /* volume.c */
 
@@ -234,4 +235,3 @@ BOOL vol_stat(LPCWSTR Path, LPSTR Result);
 
 UINT ws2_nametoindex(LPCSTR Name);
 UINT ws2_indextoname(DWORD Index, LPSTR Result);
-

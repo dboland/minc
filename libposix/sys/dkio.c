@@ -38,7 +38,7 @@ disk_DIOCGDINFO(WIN_VNODE *Node, struct disklabel *label)
 {
 	int result = 0;
 
-	if (!pdo_DIOCGDINFO(Node->Device)){
+	if (!pdo_DIOCGDINFO(DEVICE(Node->DeviceId))){
 		result = -EOPNOTSUPP;
 	}
 	return(result);

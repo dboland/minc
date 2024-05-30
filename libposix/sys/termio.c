@@ -70,6 +70,26 @@ termio_debug(struct termios *term, const char *lable)
 /****************************************************/
 
 int 
+term_TIOCGWINSZ(WIN_VNODE *Node, WIN_WINSIZE *WinSize)
+{
+	int result = 0;
+
+	if (!vfs_TIOCGWINSZ(Node, WinSize)){
+		result -= errno_posix(GetLastError());
+	}
+	return(result);
+}
+int 
+term_TIOCSWINSZ(WIN_VNODE *Node, WIN_WINSIZE *WinSize)
+{
+	int result = 0;
+
+	if (!vfs_TIOCSWINSZ(Node, WinSize)){
+		result -= errno_posix(GetLastError());
+	}
+	return(result);
+}
+int 
 term_TIOCFLUSH(WIN_VNODE *Node)
 {
 	int result = 0;
@@ -97,7 +117,7 @@ term_TIOCGETA(WIN_VNODE *Node, WIN_TERMIO *Mode)
 	if (!vfs_TIOCGETA(Node, Mode)){
 		result -= errno_posix(GetLastError());
 	}else{
-		*Mode = __CTTY->Mode;
+		*Mode = __Terminals[Node->Index].Mode;
 	}
 	return(result);
 }
@@ -109,7 +129,7 @@ term_TIOCSETA(WIN_VNODE *Node, WIN_TERMIO *Mode)
 	if (!vfs_TIOCSETA(Node, Mode, FALSE, FALSE)){
 		result -= errno_posix(GetLastError());
 	}else{
-		__CTTY->Mode = *Mode;
+		__Terminals[Node->Index].Mode = *Mode;
 	}
 	return(result);
 }
@@ -121,7 +141,7 @@ term_TIOCSETAW(WIN_VNODE *Node, WIN_TERMIO *Mode)
 	if (!vfs_TIOCSETA(Node, Mode, FALSE, TRUE)){
 		result -= errno_posix(GetLastError());
 	}else{
-		__CTTY->Mode = *Mode;
+		__Terminals[Node->Index].Mode = *Mode;
 	}
 	return(result);
 }
@@ -133,27 +153,7 @@ term_TIOCSETAF(WIN_VNODE *Node, WIN_TERMIO *Mode)
 	if (!vfs_TIOCSETA(Node, Mode, TRUE, TRUE)){
 		result -= errno_posix(GetLastError());
 	}else{
-		__CTTY->Mode = *Mode;
-	}
-	return(result);
-}
-int 
-term_TIOCGWINSZ(WIN_VNODE *Node, WIN_WINSIZE *WinSize)
-{
-	int result = 0;
-
-	if (!vfs_TIOCGWINSZ(Node, WinSize)){
-		result -= errno_posix(GetLastError());
-	}
-	return(result);
-}
-int 
-term_TIOCSWINSZ(WIN_VNODE *Node, WIN_WINSIZE *WinSize)
-{
-	int result = 0;
-
-	if (!vfs_TIOCSWINSZ(Node, WinSize)){
-		result -= errno_posix(GetLastError());
+		__Terminals[Node->Index].Mode = *Mode;
 	}
 	return(result);
 }
@@ -162,7 +162,7 @@ term_TIOCSCTTY(WIN_VNODE *Node, WIN_TASK *Task)
 {
 	int result = 0;
 
-	if (!vfs_TIOCSCTTY(CTTY(Node->Index), Task)){
+	if (!vfs_TIOCSCTTY(Node, Task)){
 		result -= errno_posix(GetLastError());
 	}
 	return(result);
@@ -171,17 +171,18 @@ int
 term_PTMGET(WIN_VNODE *Node, WIN_TASK *Task, struct ptmget *ptm)
 {
 	int result = 0;
-	WIN_VNODE vnResult = {0};
+	WIN_VNODE vnMaster = {0};
+	WIN_VNODE vnSlave = {0};
 
-	if (!vfs_PTMGET(Node, &vnResult)){
+	if (!vfs_PTMGET(Node, &vnMaster, &vnSlave)){
 		result -= errno_posix(GetLastError());
 	}else{
 		/* controlling terminal (master) */
-		ptm->cfd = fd_posix(Task, Node, 0);
-		win_strncpy(ptm->cn, Node->Device->Name, 16);
+		ptm->cfd = fd_posix(Task, &vnMaster, 0);
+		win_strncpy(ptm->cn, DEVICE(vnMaster.DeviceId)->Name, 16);
 		/* raw serial device (slave) */
-		ptm->sfd = fd_posix(Task, &vnResult, 0);
-		win_strncpy(ptm->sn, vnResult.Device->Name, 16);
+		ptm->sfd = fd_posix(Task, &vnSlave, 0);
+		win_strncpy(ptm->sn, DEVICE(vnSlave.DeviceId)->Name, 16);
 	}
 	return(result);
 }
@@ -190,7 +191,7 @@ term_TIOCSPGRP(WIN_VNODE *Node, UINT *GroupId)
 {
 	int result = 0;
 
-	if (!vfs_TIOCSPGRP(CTTY(Node->Index), *GroupId)){
+	if (!vfs_TIOCSPGRP(Node, *GroupId)){
 		result -= errno_posix(GetLastError());
 	}
 	return(result);
@@ -200,7 +201,7 @@ term_TIOCGPGRP(WIN_VNODE *Node, UINT *Result)
 {
 	int result = 0;
 
-	if (!vfs_TIOCGPGRP(CTTY(Node->Index), Result)){
+	if (!vfs_TIOCGPGRP(Node, Result)){
 		result -= errno_posix(GetLastError());
 	}
 	return(result);
@@ -216,7 +217,7 @@ term_TIOCSFLAGS(WIN_VNODE *Node, UINT *Flags)
 {
 	int result = 0;
 
-	if (!vfs_TIOCSFLAGS(CTTY(Node->Index), *Flags)){
+	if (!vfs_TIOCSFLAGS(&__Terminals[Node->Index], *Flags)){
 		result -= errno_posix(GetLastError());
 	}
 	return(result);
@@ -226,7 +227,7 @@ term_TIOCGFLAGS(WIN_VNODE *Node, UINT *Result)
 {
 	int result = 0;
 
-	if (!vfs_TIOCGFLAGS(CTTY(Node->Index), Result)){
+	if (!vfs_TIOCGFLAGS(&__Terminals[Node->Index], Result)){
 		result -= errno_posix(GetLastError());
 	}
 	return(result);

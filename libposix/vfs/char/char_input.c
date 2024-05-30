@@ -118,6 +118,8 @@ InputKey(KEY_EVENT_RECORD *Event, CHAR *Result)
 		bResult = FALSE;
 	}else if (VK <= VK_CURSOR){
 		win_strcpy(Result, ANSI_CURSOR(VK));
+	}else if (VK <= VK_WINDOWS){
+		bResult = FALSE;
 	}else if (VK <= VK_FUNCTION){
 		win_strcpy(Result, ANSI_FUNCTION(VK));
 	}else{
@@ -246,6 +248,8 @@ InputIsAnsi(KEY_EVENT_RECORD *Event)
 		bResult = FALSE;
 	}else if (VK <= VK_CURSOR){
 		bResult = *ANSI_CURSOR(VK);
+	}else if (VK <= VK_WINDOWS){
+		bResult = FALSE;
 	}else if (VK <= VK_FUNCTION){
 		bResult = *ANSI_FUNCTION(VK);
 	}

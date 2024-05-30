@@ -46,6 +46,7 @@ pdo_TIOCGWINSZ(WIN_DEVICE *Device, WIN_WINSIZE *WinSize)
 			bResult = screen_TIOCGWINSZ(Device->Output, WinSize);
 			break;
 		case DEV_TYPE_TTY:
+			*WinSize = __Terminals[Device->Index].WinSize;
 			bResult = TRUE;
 			break;
 		default:
@@ -67,7 +68,7 @@ pdo_TIOCSWINSZ(WIN_DEVICE *Device, WIN_WINSIZE *WinSize)
 			bResult = screen_TIOCSWINSZ(Device->Output, WinSize);
 			break;
 		case DEV_TYPE_TTY:
-			__CTTY->WinSize = *WinSize;
+			*WinSize = __Terminals[Device->Index].WinSize;
 			bResult = TRUE;
 			break;
 		default:
@@ -144,6 +145,20 @@ pdo_PTMGET(WIN_DEVICE *Master, WIN_DEVICE *Slave)
 		Slave->Flags |= WIN_DVF_ACTIVE;
 		Slave->Index = Master->Index;
 		bResult = TRUE;
+	}
+	return(bResult);
+}
+BOOL 
+pdo_TIOCSCTTY(WIN_DEVICE *Device, WIN_TASK *Task)
+{
+	BOOL bResult = FALSE;
+
+	switch (Device->FSType){
+		case FS_TYPE_CHAR:
+			bResult = char_TIOCSCTTY(Device, Task);
+			break;
+		default:
+			SetLastError(ERROR_CTX_NOT_CONSOLE);
 	}
 	return(bResult);
 }

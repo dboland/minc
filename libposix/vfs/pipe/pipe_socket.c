@@ -99,7 +99,7 @@ pipe_bind(WIN_VNODE *Node, LPSOCKADDR Name, INT Length)
 	WCHAR szName[MAX_NAME] = {0};
 	DWORD dwAttribs = FILE_FLAG_OVERLAPPED + PIPE_READMODE_MESSAGE;
 
-	if (!PipeCreateFile(PipeCreateName(szName), dwAttribs, __PipeEvent, Node)){
+	if (!PipeCreateFile(VfsCreateName(szName), dwAttribs, __PipeEvent, Node)){
 		return(FALSE);
 	}else if (pipe_mknod((LPWSTR)Name->sa_data, szName, &wMode)){
 		bResult = TRUE;
@@ -134,7 +134,7 @@ pipe_socketpair(INT Domain, INT Mode, INT Protocol, WIN_VNODE Result[2])
 	WCHAR szName[MAX_GUID];
 	HANDLE hEvent = CreateEvent(NULL, FALSE, FALSE, NULL);
 
-	if (!PipeCreateFile(PipeCreateName(szName), Mode, hEvent, &Result[0])){
+	if (!PipeCreateFile(VfsCreateName(szName), Mode, hEvent, &Result[0])){
 		return(FALSE);
 	}else if (PipeOpenFile(szName, hEvent, &Result[1])){
 		Result[0].FileType = WIN_VSOCK;

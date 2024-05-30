@@ -75,6 +75,7 @@ tty_attach(WIN_DEVICE *Device)
 		if (!pwTerminal->Flags){
 			pwTerminal->Flags = TIOCFLAG_ACTIVE;
 			pwTerminal->Index = dwIndex;
+			pwTerminal->DeviceType = Device->DeviceType;
 			pwTerminal->DeviceId = Device->DeviceId;
 			win_strcpy(pwTerminal->Name, Device->Name);
 			Device->Index = dwIndex;
@@ -92,7 +93,7 @@ pty_attach(WIN_DEVICE *Device)
 	BOOL bResult = TRUE;
 
 	if (tty_attach(Device)){
-		bResult = config_found("pty", FS_TYPE_MAILSLOT, WIN_VCHR, Device);
+		bResult = config_found("pty", FS_TYPE_CHAR, WIN_VCHR, Device);
 	}
 	return(bResult);
 }
@@ -246,7 +247,7 @@ serial_attach(WIN_DEVICE *Device)
 			bResult = config_init("printk", FS_TYPE_DISK, WIN_VCHR, DEV_TYPE_LOG);
 			break;
 		case DEV_TYPE_TTY:
-			bResult = config_found("tty", FS_TYPE_MAILSLOT, WIN_VCHR, Device);
+			bResult = config_found("tty", FS_TYPE_PIPE, WIN_VCHR, Device);
 			break;
 		case DEV_TYPE_PTY:
 			bResult = pty_attach(Device);

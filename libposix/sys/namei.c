@@ -164,6 +164,9 @@ pathat_win(WIN_NAMEIDATA *Result, int dirfd, const char *path, int atflags)
 	if (atflags & AT_REMOVEDIR){
 		dwFlags |= WIN_REQUIREDIR;
 	}
+	if (atflags & AT_DEVICE){
+		dwFlags |= WIN_KEEPOBJECT;
+	}
 
 	return(vfs_lookup(Result, szSource, dwFlags));
 
@@ -181,6 +184,9 @@ path_win(WIN_NAMEIDATA *Result, const char *path, int flags)
 	}
 	if (flags & O_DIRECTORY){
 		atflags |= AT_REMOVEDIR;
+	}
+	if (flags & O_DEVICE){
+		atflags |= AT_DEVICE;
 	}
 	return(pathat_win(Result, AT_FDCWD, path, atflags));
 }

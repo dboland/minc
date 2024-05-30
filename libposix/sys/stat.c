@@ -291,7 +291,7 @@ __fstatat(WIN_TASK *Task, int dirfd, const char *path, struct stat *buf, int fla
 		result = -EFAULT;
 	}else if (!*path){
 		result = -ENOENT;
-	}else if (!vfs_stat(pathat_win(&wPath, dirfd, path, flags), &wStat)){
+	}else if (!vfs_stat(pathat_win(&wPath, dirfd, path, flags | AT_DEVICE), &wStat)){
 		result -= errno_posix(GetLastError());
 	}else{
 		stat_posix(Task, buf, &wStat);

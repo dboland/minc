@@ -33,42 +33,43 @@
 /****************************************************/
 
 HANDLE 
-MailOpenFile(LPCSTR FileName, SECURITY_ATTRIBUTES *Security)
+MailOpenFile(LPCSTR FileName)
 {
 	HANDLE hResult = NULL;
+	SECURITY_ATTRIBUTES sa = {sizeof(sa), NULL, TRUE};
 
 	hResult = CreateFile(FileName, GENERIC_WRITE | READ_CONTROL, FILE_SHARE_READ, 
-		Security, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, NULL);
+		&sa, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, NULL);
 	if (hResult == INVALID_HANDLE_VALUE){
 		WIN_ERR("CreateFile(%s): %s\n", FileName, win_strerror(GetLastError()));
 	}
 	return(hResult);
 }
 BOOL 
-MailCreateDevice(LPCSTR FileName, SECURITY_ATTRIBUTES *Security, WIN_DEVICE *Result)
+MailCreateDevice(LPCSTR FileName, WIN_DEVICE *Result)
 {
 	BOOL bResult = FALSE;
 	HANDLE hResult = NULL;
+	SECURITY_ATTRIBUTES sa = {sizeof(sa), NULL, TRUE};
 
-	hResult = CreateMailslot(FileName, WIN_MAX_INPUT, MAILSLOT_WAIT_FOREVER, Security);
+	hResult = CreateMailslot(FileName, WIN_MAX_INPUT, MAILSLOT_WAIT_FOREVER, &sa);
 	if (hResult == INVALID_HANDLE_VALUE){
 		WIN_ERR("CreateMailslot(%s): %s\n", FileName, win_strerror(GetLastError()));
 	}else{
 		Result->Input = hResult;
-		Result->Output = MailOpenFile(FileName, Security);
+		Result->Output = MailOpenFile(FileName);
 		bResult = TRUE;
 	}
 	return(bResult);
 }
 BOOL 
-MailCreateSlave(WIN_DEVICE *Device, HANDLE Event, SECURITY_ATTRIBUTES *Security, WIN_VNODE *Result)
+MailCreateSlave(WIN_DEVICE *Device, WIN_VNODE *Result)
 {
 	BOOL bResult = FALSE;
 	CHAR szPath[MAX_PATH] = "\\\\.\\MAILSLOT\\slave\\";
 	HANDLE hResult = NULL;
 
-	if (MailCreateDevice(win_strcat(szPath, Device->Name), Security, Device)){
-		Result->Event = Event;
+	if (MailCreateDevice(win_strcat(szPath, Device->Name), Device)){
 		Result->FSType = Device->FSType;
 		Result->FileType = Device->FileType;
 		Result->DeviceType = Device->DeviceType;
@@ -76,7 +77,7 @@ MailCreateSlave(WIN_DEVICE *Device, HANDLE Event, SECURITY_ATTRIBUTES *Security,
 		Result->Attribs = FILE_ATTRIBUTE_PDO | FILE_ATTRIBUTE_DEVICE;
 		Result->Access = win_F_GETFL(Device->Input);
 		Result->Flags = win_F_GETFD(Device->Input);
-		Result->Device = Device;
+		Result->Event = __MailEvent;
 		bResult = TRUE;
 	}
 	return(bResult);

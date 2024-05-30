@@ -33,16 +33,12 @@
 /****************************************************/
 
 BOOL 
-mail_read(WIN_VNODE *Node, LPSTR Buffer, LONG Size, DWORD *Result)
+mail_read(WIN_VNODE *Node, LPSTR Buffer, DWORD Size, DWORD *Result)
 {
 	BOOL bResult = FALSE;
 
-	switch (Node->DeviceType){
-		case DEV_TYPE_TTY:
-			bResult = tty_read(Node->Handle, Buffer, Size, Result);
-			break;
-		default:
-			SetLastError(ERROR_BAD_DEVICE);
+	if (ReadFile(Node->Handle, Buffer, Size, Result, NULL)){
+		bResult = TRUE;
 	}
 	return(bResult);
 }
@@ -50,13 +46,10 @@ BOOL
 mail_write(WIN_VNODE *Node, LPCSTR Buffer, DWORD Size, DWORD *Result)
 {
 	BOOL bResult = FALSE;
+	OVERLAPPED ovl = {0, 0, 0, 0, Node->Event};
 
-	switch (Node->DeviceType){
-		case DEV_TYPE_TTY:
-			bResult = tty_write(Node->Handle, Buffer, Size, Result);
-			break;
-		default:
-			SetLastError(ERROR_BAD_DEVICE);
+	if (WriteFile(Node->Handle, Buffer, Size, Result, &ovl)){
+		bResult = TRUE;
 	}
 	return(bResult);
 }

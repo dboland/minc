@@ -43,6 +43,7 @@ typedef enum _WIN_FS_TYPE {
 	FS_TYPE_NPF,
 	FS_TYPE_LINK,
 	FS_TYPE_NDIS,
+	FS_TYPE_TERMINAL,
 	FS_TYPE_MAX
 } WIN_FS_TYPE;
 
@@ -95,7 +96,7 @@ typedef struct _WIN_DEVICE {
 	DWORD DeviceId;
 	WIN_FS_TYPE FSType;		/* file system Handles are from */
 	CHAR Name[MAX_NAME];
-	HANDLE Handle;
+	HANDLE Event;
 	HANDLE Input;
 	HANDLE Output;
 	DWORD Flags;			/* see below */
@@ -177,7 +178,7 @@ typedef struct _WIN_NAMEIDATA {
 	DWORD DeviceId;
 	WIN_VTYPE FileType;
 	WIN_FS_TYPE FSType;
-	WIN_DEVICE *Device;
+	HANDLE Object;
 	WCHAR Resolved[WIN_PATH_MAX];
 	DWORD Attribs;
 	DWORD Flags;			/* see below */
@@ -187,7 +188,8 @@ typedef struct _WIN_NAMEIDATA {
 	WCHAR *S;			/* current WCHAR in source path buffer */
 } WIN_NAMEIDATA;
 
-#define WIN_PATHCOPY		0x800000
+#define WIN_PATHCOPY		0x400000
+#define WIN_KEEPOBJECT		0x800000
 
 /* sys/namei.h */
 
@@ -214,7 +216,7 @@ typedef struct _WIN_NAMEIDATA {
 
 /* sys/termios.h */
 
-/* local */
+/* Local */
 
 #define WIN_ECHO		0x00000008
 #define WIN_ISIG		0x00000080
@@ -269,7 +271,6 @@ typedef struct _WIN_VNODE {
 		UINT Socket;
 		HKEY Key;
 	};
-	WIN_DEVICE *Device;
 	DWORDLONG LockRegion;
 	DWORDLONG LockSize;
 	HANDLE Object;
@@ -442,7 +443,7 @@ typedef struct _WIN_POLLFD {
 } WIN_POLLFD;
 
 #define WIN_POLLIN		0x0001
-#define WIN_POLLPRI		0x0002
+#define WIN_POLLPRI		0x0002		/* Pty slave state change detected */
 #define WIN_POLLOUT		0x0004
 #define WIN_POLLERR		0x0008
 #define WIN_POLLHUP		0x0010
@@ -478,6 +479,7 @@ typedef struct _WIN_TERMIO {
 
 typedef struct _WIN_TTY {
 	DWORD Index;
+	DWORD DeviceType;
 	DWORD DeviceId;
 	DWORD GroupId;
 	DWORD SessionId;
@@ -490,10 +492,10 @@ typedef struct _WIN_TTY {
 	BOOL VEdit;
 	COORD Cursor;
 	DWORD Flags;
+	DWORD Offset;
 	CHAR Name[MAX_NAME];
+	CHAR Buffer[WIN_MAX_INPUT + 1];
 } WIN_TTY;
-
-#define CTTY(idx)		(&__Terminals[idx])
 
 /*
  * vfs_ktrace.c

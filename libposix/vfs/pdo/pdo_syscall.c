@@ -35,26 +35,26 @@ GENERIC_MAPPING AccessMap = {WIN_S_IREAD, WIN_S_IWRITE, WIN_S_IEXEC, WIN_S_IRWX}
 /****************************************************/
 
 BOOL 
-PdoOpenFile(WIN_DEVICE *Device, WIN_FLAGS *Flags, WIN_VNODE *Result)
+PdoOpenFile(WIN_NAMEIDATA *Path, WIN_FLAGS *Flags, WIN_VNODE *Result)
 {
 	BOOL bResult = FALSE;
+	WIN_DEVICE *pwDevice = DEVICE(Path->DeviceId);
 
-	if (!Device->Flags){
-		CloseHandle(Device->Handle);
+	if (!pwDevice->Flags){
+		CloseHandle(Path->Object);
 	}else{
-		Result->DeviceId = Device->DeviceId;
-		Result->FileType = Device->FileType;
-		Result->DeviceType = Device->DeviceType;
-		Result->Handle = Device->Handle;
-		Result->Object = win_F_DUPFD(Device->Handle, HANDLE_FLAG_INHERIT);
+		Result->DeviceType = pwDevice->DeviceType;
 		Result->FSType = FS_TYPE_PDO;
-		Result->Attribs = FILE_ATTRIBUTE_PDO | FILE_ATTRIBUTE_DEVICE;
+		Result->Index = pwDevice->Index;
+		Result->DeviceId = Path->DeviceId;
+		Result->FileType = Path->FileType;
+		Result->Object = Path->Object;
+		Result->Attribs = Path->Attribs;
+		Result->Handle = INVALID_HANDLE_VALUE;
 		Result->CloseExec = Flags->CloseExec;
 		Result->Access = Flags->Access;
 //		MapGenericMask(&Result->Access, &AccessMap);
-		Result->Flags = win_F_GETFD(Device->Handle);
-		Result->Index = Device->Index;
-		Result->Device = Device;
+		Result->Flags = HANDLE_FLAG_INHERIT;
 		bResult = TRUE;
 	}
 	return(bResult);

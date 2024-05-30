@@ -55,10 +55,13 @@ vfs_F_DUPFD(WIN_VNODE *Node, BOOL CloseExec, WIN_VNODE *Result)
 			bResult = disk_F_DUPFD(Node, hProcess, dwOptions, Result);
 			break;
 		case FS_TYPE_PDO:
-			bResult = pdo_F_DUPFD(Node->Device, hProcess, dwOptions, Result);
+			bResult = pdo_F_DUPFD(DEVICE(Node->DeviceId), hProcess, dwOptions, Result);
 			break;
 		case FS_TYPE_MAILSLOT:
-			bResult = mail_F_DUPFD(Node->Device, hProcess, dwOptions, Result);
+			bResult = mail_F_DUPFD(DEVICE(Node->DeviceId), hProcess, dwOptions, Result);
+			break;
+		case FS_TYPE_TERMINAL:
+			bResult = TRUE;
 			break;
 		default:
 			SetLastError(ERROR_BAD_FILE_TYPE);
@@ -83,10 +86,13 @@ vfs_F_INHERIT(WIN_VNODE *Node, HANDLE Process)
 			bResult = disk_F_DUPFD(Node, Process, dwOptions, Node);
 			break;
 		case FS_TYPE_PDO:
-			bResult = pdo_F_DUPFD(Node->Device, Process, dwOptions, Node);
+			bResult = pdo_F_DUPFD(DEVICE(Node->DeviceId), Process, dwOptions, Node);
 			break;
 		case FS_TYPE_MAILSLOT:
-			bResult = mail_F_DUPFD(Node->Device, Process, dwOptions, Node);
+			bResult = mail_F_DUPFD(DEVICE(Node->DeviceId), Process, dwOptions, Node);
+			break;
+		case FS_TYPE_TERMINAL:
+			bResult = TRUE;
 			break;
 		default:
 			SetLastError(ERROR_BAD_FILE_TYPE);
@@ -205,7 +211,7 @@ vfs_open(WIN_NAMEIDATA *Path, WIN_FLAGS *Flags, WIN_MODE *Mode, WIN_VNODE *Resul
 
 	switch (Path->FSType){
 		case FS_TYPE_PDO:
-			bResult = pdo_open(Path->Device, Flags, Result);
+			bResult = pdo_open(Path, Flags, Result);
 			break;
 		case FS_TYPE_DISK:
 			bResult = disk_open(Path, Flags, Mode, Result);

@@ -92,13 +92,13 @@ drive_statfs(WIN_NAMEIDATA *Path, WIN_STATFS *Result)
 	return(DriveStatVolume(win_volname(szVolume, Path->Resolved), Result));
 }
 BOOL 
-drive_mount(WIN_NAMEIDATA *Path, WIN_VNODE *Node, WIN_MODE *Mode)
+drive_mount(WIN_NAMEIDATA *Path, WIN_DEVICE *Device, WIN_MODE *Mode)
 {
 	BOOL bResult = FALSE;
 	WIN_MOUNT *pwMount;
 	LONG lMountId = MOUNTID(Path->Base[0]);
 
-//VfsDebugPath(Path, "drive_mount");
+//vfs_ktrace("drive_mount", STRUCT_NAMEI, Path);
 	if (Path->Attribs == -1){
 		return(FALSE);
 	}else if (Path->FileType != WIN_VDIR){
@@ -115,14 +115,15 @@ drive_mount(WIN_NAMEIDATA *Path, WIN_VNODE *Node, WIN_MODE *Mode)
 		pwMount->Drive[1] = ':';
 		pwMount->Drive[2] = 0;
 		pwMount->MountId = lMountId;
-		pwMount->DeviceId = Node->DeviceId;
-		pwMount->DeviceType = Node->DeviceType;
-		pwMount->FileType = Node->FileType;
-		win_wcscpy(win_wcpcpy(pwMount->Path, L"\\\\.\\GLOBALROOT"), Node->Device->NtPath);
+		pwMount->DeviceId = Device->DeviceId;
+		pwMount->DeviceType = Device->DeviceType;
+		pwMount->FileType = Device->FileType;
+		win_wcscpy(win_wcpcpy(pwMount->Path, L"\\\\.\\GLOBALROOT"), Device->NtPath);
 		GetSystemTimeAsFileTime(&pwMount->Time);
 //VfsDebugMount(pwMount, "drive_mount");
 //VfsDebugDevice(Node->Device, "drive_mount");
-		bResult = CloseHandle(Node->Handle);
+//		bResult = CloseHandle(Node->Handle);
+		bResult = TRUE;
 	}
 	return(bResult);
 }

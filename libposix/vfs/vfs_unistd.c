@@ -48,6 +48,7 @@ vfs_close(WIN_VNODE *Node)
 			bResult = ws2_close(Node);
 			break;
 		case FS_TYPE_PDO:
+		case FS_TYPE_TERMINAL:
 			bResult = pdo_close(Node);
 			break;
 		default:
@@ -95,7 +96,10 @@ vfs_read(WIN_VNODE *Node, LPVOID Buffer, DWORD Size, DWORD *Result)
 			bResult = char_read(Node, Buffer, Size, Result);
 			break;
 		case FS_TYPE_PDO:
-			bResult = pdo_read(Node->Device, Buffer, Size, Result);
+			bResult = pdo_read(DEVICE(Node->DeviceId), Buffer, Size, Result);
+			break;
+		case FS_TYPE_TERMINAL:
+			bResult = tty_read(&__Terminals[Node->Index], Buffer, Size, Result);
 			break;
 		default:
 			SetLastError(ERROR_BAD_FILE_TYPE);
@@ -124,7 +128,10 @@ vfs_write(WIN_VNODE *Node, LPCVOID Buffer, DWORD Size, DWORD *Result)
 			bResult = char_write(Node, Buffer, Size, Result);
 			break;
 		case FS_TYPE_PDO:
-			bResult = pdo_write(Node->Device, Buffer, Size, Result);
+			bResult = pdo_write(DEVICE(Node->DeviceId), Buffer, Size, Result);
+			break;
+		case FS_TYPE_TERMINAL:
+			bResult = tty_write(&__Terminals[Node->Index], Buffer, Size, Result);
 			break;
 		default:
 			SetLastError(ERROR_BAD_FILE_TYPE);
@@ -145,7 +152,7 @@ vfs_pwrite(WIN_VNODE *Node, LPCVOID Buffer, DWORD Size, DWORDLONG Offset, DWORD 
 			SetLastError(ERROR_PIPE_CONNECTED);
 			break;
 		case FS_TYPE_PDO:
-			bResult = pdo_write(Node->Device, Buffer, Size, Result);
+			bResult = pdo_write(DEVICE(Node->DeviceId), Buffer, Size, Result);
 			break;
 		default:
 			SetLastError(ERROR_BAD_FILE_TYPE);
@@ -166,7 +173,7 @@ vfs_pread(WIN_VNODE *Node, LPVOID Buffer, DWORD Size, DWORDLONG Offset, DWORD *R
 			SetLastError(ERROR_PIPE_CONNECTED);
 			break;
 		case FS_TYPE_PDO:
-			bResult = pdo_read(Node->Device, Buffer, Size, Result);
+			bResult = pdo_read(DEVICE(Node->DeviceId), Buffer, Size, Result);
 			break;
 		default:
 			SetLastError(ERROR_BAD_FILE_TYPE);
@@ -190,11 +197,7 @@ vfs_dup2(WIN_VNODE *Node, WIN_VNODE *Result)
 	BOOL bResult = FALSE;
 	WIN_VNODE vnCurrent = *Result;
 
-	if (!Node->Handle){
-		SetLastError(ERROR_INVALID_HANDLE);
-//	}else if (Node->Handle == Result->Handle){
-//		bResult = TRUE;
-	}else if (vfs_F_DUPFD(Node, FALSE, Result)){
+	if (vfs_F_DUPFD(Node, FALSE, Result)){
 		bResult = vfs_close(&vnCurrent);
 	}
 	return(bResult);
@@ -282,7 +285,7 @@ vfs_truncate(WIN_NAMEIDATA *Path, LARGE_INTEGER *Size)
 		OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, FALSE};
 	WIN_MODE wMode = {0};
 
-	if (!vfs_open(Path, &wFlags, &wMode, &vNode)){
+	if (!disk_open(Path, &wFlags, &wMode, &vNode)){
 		return(FALSE);
 	}else if (vfs_ftruncate(&vNode, Size)){
 		bResult = CloseHandle(vNode.Handle);
@@ -316,6 +319,9 @@ vfs_unlink(WIN_NAMEIDATA *Path)
 	switch (Path->FSType){
 		case FS_TYPE_DISK:
 			bResult = disk_unlink(Path);
+			break;
+		case FS_TYPE_PDO:
+			bResult = pdo_unlink(Path);
 			break;
 		default:
 			SetLastError(ERROR_BAD_FILE_TYPE);
@@ -384,7 +390,7 @@ vfs_fsync(WIN_VNODE *Node)
 			bResult = FlushFileBuffers(Node->Handle);
 			break;
 		case FS_TYPE_PDO:
-			bResult = pdo_fsync(Node->Device);
+			bResult = pdo_fsync(DEVICE(Node->DeviceId));
 			break;
 		default:
 			SetLastError(ERROR_BAD_FILE_TYPE);
@@ -413,7 +419,7 @@ vfs_revoke(WIN_VNODE *Node)
 
 	switch (Node->FSType){
 		case FS_TYPE_PDO:
-			bResult = pdo_revoke(Node->Device);
+			bResult = pdo_revoke(DEVICE(Node->DeviceId));
 			break;
 		default:
 			SetLastError(ERROR_BAD_FILE_TYPE);

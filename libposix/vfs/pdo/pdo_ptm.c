@@ -35,17 +35,8 @@
 BOOL 
 ptm_open(WIN_DEVICE *Device, WIN_FLAGS *Flags, WIN_VNODE *Result)
 {
-	BOOL bResult = FALSE;
-
-	switch (Device->FSType){
-		case FS_TYPE_MAILSLOT:
-			bResult = mail_open(Device, Flags, Result);
-			break;
-		case FS_TYPE_CHAR:
-			bResult = char_open(Device, Flags, Result);
-			break;
-		default:
-			SetLastError(ERROR_BAD_FILE_TYPE);
-	}
-	return(bResult);
+	Result->DeviceType = Device->DeviceType;
+	Result->DeviceId = Device->DeviceId;
+	Result->Index = Device->Index;
+	return(TRUE);
 }

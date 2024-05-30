@@ -158,7 +158,7 @@ shebang_win(WIN_VNODE *Node, WIN_NAMEIDATA *Path, const char *filename, LPSTR Re
 		Result = win_stpcpy(win_stpcpy(Result, " "), filename);
 		bResult = TRUE;
 	}
-	disk_close(Node);
+	vfs_close(Node);
 	return(bResult);
 }
 
@@ -597,7 +597,7 @@ sys_execve(call_t call, const char *path, char *const argv[], char *const envp[]
 
 	if (!path || !envp){
 		result = -EFAULT;
-	}else if (!disk_open(path_win(&wPath, path, 0), &wFlags, mode_win(&wMode, 0666), &vNode)){
+	}else if (!vfs_open(path_win(&wPath, path, 0), &wFlags, mode_win(&wMode, 0666), &vNode)){
 		result -= errno_posix(GetLastError());
 	}else if (!shebang_win(&vNode, &wPath, path, szCommand)){
 		result -= errno_posix(GetLastError());
@@ -614,7 +614,7 @@ __exit(WIN_TASK *Task, int status)
 	Task->Status = (status * 0x100);
 	Task->Flags |= WIN_PS_EXITING;
 	if (Task->Flags & WIN_PS_CONTROLT){
-		tty_close(__CTTY);
+		pdo_revoke(DEVICE(__CTTY->DeviceId));
 	}
 	win_exit(status);
 }
