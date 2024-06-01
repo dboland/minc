@@ -36,25 +36,20 @@ BOOL CALLBACK
 ConControlHandler(DWORD CtrlType)
 {
 	BOOL bResult = TRUE;
-	DWORD dwGroupId = __CTTY->GroupId;
-	DWORD dwMode = InputMode(&__CTTY->Mode);
 
 	/* To deliver signals, Windows (CSRSS.EXE) actually forks!
 	 * Copying the call stack to a new thread and executing
 	 * our code. Let's make sure it uses our Task struct too:
 	 */
 	TlsSetValue(__TlsIndex, (PVOID)__Process->TaskId);
-	if (dwMode & ENABLE_PROCESSED_INPUT){
-		if (__Process->GroupId == dwGroupId){
-			if (!vfs_raise(WM_COMMAND, CtrlType, 0)){
-				__Process->Flags |= WIN_PS_EXITING;
-				/* causes ExitProcess() */
-				bResult = FALSE;
-			}else{
-				/* syslogd.exe -d */
-//				vfs_kill_ANY(__Task->TaskId, WM_COMMAND, CtrlType, 0);
-				SetEvent(__Interrupt);
-			}
+	if (__Process->GroupId == __CTTY->GroupId){
+		if (!vfs_raise(WM_COMMAND, CtrlType, 0)){
+			__Process->Flags |= WIN_PS_EXITING;
+			/* causes ExitProcess() */
+			bResult = FALSE;
+		}else{
+			/* syslogd.exe -d */
+			SetEvent(__Interrupt);
 		}
 	}
 	return(bResult);

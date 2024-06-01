@@ -32,36 +32,9 @@
 
 /****************************************************/
 
-DWORD 
-TTYCarriageReturn(LPSTR Buffer, UINT Flags)
-{
-	DWORD dwCount = 0;
-
-	if (Flags & WIN_OCRNL){
-		Buffer[dwCount++] = '\n';
-	}else{
-		Buffer[dwCount++] = '\r';
-	}
-	return(dwCount);
-}
-DWORD 
-TTYLineFeed(LPSTR Buffer, UINT Flags)
-{
-	DWORD dwCount = 0;
-
-	if (Flags & WIN_ONLCR){
-		Buffer[dwCount++] = '\r';
-	}
-	Buffer[dwCount++] = '\n';
-	return(dwCount);
-}
-
-/****************************************************/
-
 BOOL 
 tty_open(WIN_TTY *Terminal, WIN_FLAGS *Flags, WIN_VNODE *Result)
 {
-//	Result->FSType = FS_TYPE_TERMINAL;
 	Result->DeviceType = Terminal->DeviceType;
 	Result->DeviceId = Terminal->DeviceId;
 	Result->Index = Terminal->Index;
@@ -69,67 +42,24 @@ tty_open(WIN_TTY *Terminal, WIN_FLAGS *Flags, WIN_VNODE *Result)
 	return(TRUE);
 }
 BOOL 
-tty_write(WIN_TTY *Terminal, LPCSTR Buffer, DWORD Size, DWORD *Result)
+tty_attach(WIN_DEVICE *Device)
 {
-	BOOL bResult = TRUE;
-	LONG lResult = 0;
-	DWORD dwCount;
-	UINT uiFlags = Terminal->Mode.OFlags;
-	WIN_DEVICE *pwDevice = DEVICE(Terminal->DeviceId);
-	CHAR szBuffer[4];
-	UCHAR C;
+	DWORD dwIndex = 0;
+	WIN_TTY *pwTerminal = __Terminals;
 
-	while (lResult < Size){
-		C = *Buffer++;
-		dwCount = 1;
-		switch (C){
-			case '\n':
-				dwCount = TTYLineFeed(szBuffer, uiFlags);
-				break;
-			case '\r':
-				dwCount = TTYCarriageReturn(szBuffer, uiFlags);
-				break;
-			default:
-				*szBuffer = C;
+	while (dwIndex < WIN_TTY_MAX){
+		if (!pwTerminal->Flags){
+			pwTerminal->Flags = TIOCFLAG_ACTIVE;
+			pwTerminal->Index = dwIndex;
+			pwTerminal->DeviceType = Device->DeviceType;
+			pwTerminal->DeviceId = Device->DeviceId;
+			win_strcpy(pwTerminal->Name, Device->Name);
+			Device->Index = dwIndex;
+			return(TRUE);
 		}
-		if (!pdo_write(pwDevice, szBuffer, dwCount, &dwCount)){
-			break;
-		}
-		lResult++;
-	}
-	*Result = lResult;
-	return(bResult);
-}
-BOOL 
-tty_read(WIN_TTY *Terminal, LPSTR Buffer, DWORD Size, DWORD *Result)
-{
-	BOOL bResult = FALSE;
-	LONG lSize = Size;
-	DWORD dwResult = 0;
-	DWORD dwCount;
-	WIN_DEVICE *pwDevice = DEVICE(Terminal->DeviceId);
-	DWORD dwOffset = Terminal->Offset;
-	CHAR *pszBuffer = Terminal->Buffer + dwOffset;
-	UCHAR C;
-
-	while (!bResult){
-		if (lSize < 1){
-			bResult = TRUE;
-		}else if (C = *pszBuffer){
-			*Buffer++ = C;
-			pszBuffer++;
-			dwResult++;
-			lSize--;
-			dwOffset++;
-		}else if (pdo_read(pwDevice, Terminal->Buffer, WIN_MAX_INPUT, &dwCount)){
-			pszBuffer = Terminal->Buffer;
-			pszBuffer[dwCount] = 0;
-			dwOffset = 0;
-		}else{
-			break;
-		}
-	}
-	Terminal->Offset = dwOffset;
-	*Result = dwResult;
-	return(bResult);
+		dwIndex++;
+		pwTerminal++;
+	}	
+	SetLastError(ERROR_NOT_ENOUGH_MEMORY);
+	return(FALSE);
 }

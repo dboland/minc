@@ -406,7 +406,6 @@ sys_kill(call_t call, pid_t pid, int sig)
 		result = -EINVAL;
 	}else if (!vfs_kill_PID(pid_win(pid), WM_COMMAND, __SIG_WIN[sig], pwTask->TaskId)){
 		result -= errno_posix(GetLastError());
-
 	}
 	return(result);
 }

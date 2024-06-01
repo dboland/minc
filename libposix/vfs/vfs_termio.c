@@ -41,7 +41,6 @@ vfs_TIOCGWINSZ(WIN_VNODE *Node, WIN_WINSIZE *WinSize)
 		case FS_TYPE_PDO:
 			bResult = pdo_TIOCGWINSZ(DEVICE(Node->DeviceId), WinSize);
 			break;
-		case FS_TYPE_TERMINAL:
 		case FS_TYPE_CHAR:			/* stty.exe */
 			bResult = char_TIOCGWINSZ(Node, WinSize);
 			break;
@@ -66,7 +65,6 @@ vfs_TIOCSWINSZ(WIN_VNODE *Node, WIN_WINSIZE *WinSize)
 		case FS_TYPE_CHAR:
 			bResult = char_TIOCSWINSZ(Node, WinSize);
 			break;
-		case FS_TYPE_TERMINAL:
 		case FS_TYPE_PIPE:
 			__Terminals[Node->Index].WinSize = *WinSize;
 			bResult = TRUE;
@@ -84,7 +82,6 @@ vfs_TIOCGETA(WIN_VNODE *Node, WIN_TERMIO *Mode)
 	switch (Node->FSType){
 		case FS_TYPE_PDO:
 		case FS_TYPE_CHAR:
-		case FS_TYPE_TERMINAL:
 			bResult = TRUE;
 			break;
 		default:
@@ -141,7 +138,6 @@ vfs_TIOCSETA(WIN_VNODE *Node, WIN_TERMIO *Mode, BOOL Flush, BOOL Drain)
 		case FS_TYPE_CHAR:			/* nano.exe */
 			bResult = char_TIOCSETA(Node, Mode);
 			break;
-		case FS_TYPE_TERMINAL:
 		case FS_TYPE_PIPE:
 			bResult = TRUE;
 			break;
@@ -200,7 +196,6 @@ vfs_TIOCGPGRP(WIN_VNODE *Node, UINT *Result)
 	switch (Node->FSType){
 		case FS_TYPE_PDO:
 		case FS_TYPE_CHAR:
-		case FS_TYPE_TERMINAL:
 			*Result = __Terminals[Node->Index].GroupId;
 			bResult = TRUE;
 			break;
@@ -217,7 +212,6 @@ vfs_TIOCSPGRP(WIN_VNODE *Node, UINT GroupId)
 	switch (Node->FSType){
 		case FS_TYPE_PDO:
 		case FS_TYPE_CHAR:
-		case FS_TYPE_TERMINAL:
 			__Terminals[Node->Index].GroupId = GroupId;
 			bResult = TRUE;
 			break;

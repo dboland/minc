@@ -48,7 +48,6 @@ vfs_close(WIN_VNODE *Node)
 			bResult = ws2_close(Node);
 			break;
 		case FS_TYPE_PDO:
-		case FS_TYPE_TERMINAL:
 			bResult = pdo_close(Node);
 			break;
 		default:
@@ -98,9 +97,6 @@ vfs_read(WIN_VNODE *Node, LPVOID Buffer, DWORD Size, DWORD *Result)
 		case FS_TYPE_PDO:
 			bResult = pdo_read(DEVICE(Node->DeviceId), Buffer, Size, Result);
 			break;
-		case FS_TYPE_TERMINAL:
-			bResult = tty_read(&__Terminals[Node->Index], Buffer, Size, Result);
-			break;
 		default:
 			SetLastError(ERROR_BAD_FILE_TYPE);
 	}
@@ -129,9 +125,6 @@ vfs_write(WIN_VNODE *Node, LPCVOID Buffer, DWORD Size, DWORD *Result)
 			break;
 		case FS_TYPE_PDO:
 			bResult = pdo_write(DEVICE(Node->DeviceId), Buffer, Size, Result);
-			break;
-		case FS_TYPE_TERMINAL:
-			bResult = tty_write(&__Terminals[Node->Index], Buffer, Size, Result);
 			break;
 		default:
 			SetLastError(ERROR_BAD_FILE_TYPE);

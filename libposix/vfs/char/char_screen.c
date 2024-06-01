@@ -35,19 +35,23 @@
 DWORD 
 ScreenMode(WIN_TERMIO *Mode)
 {
-	DWORD dwResult = ENABLE_PROCESSED_OUTPUT | ENABLE_WRAP_AT_EOL_OUTPUT;
+	DWORD dwResult = ENABLE_WRAP_AT_EOL_OUTPUT;
 
 	if (!(Mode->OFlags & WIN_ONLCR)){		/* Vista xterm */
 //		dwResult |= DISABLE_NEWLINE_AUTO_RETURN;
 	}
+	if (Mode->OFlags & WIN_OPOST){
+		dwResult |= ENABLE_PROCESSED_OUTPUT;
+	}
 	return(dwResult);
 }
 BOOL 
-ScreenCarriageReturn(HANDLE Handle, CONSOLE_SCREEN_BUFFER_INFO *Info)
+ScreenCarriageReturn(HANDLE Handle, DWORD Flags, CONSOLE_SCREEN_BUFFER_INFO *Info)
 {
 	COORD cPos = Info->dwCursorPosition;
+	DWORD dwFlags = WIN_OPOST | WIN_OCRNL;
 
-	if (__CTTY->Mode.OFlags & WIN_OCRNL){
+	if ((Flags & dwFlags) == dwFlags){
 		cPos.Y++;
 	}else{
 		cPos.X = 0;
@@ -55,24 +59,16 @@ ScreenCarriageReturn(HANDLE Handle, CONSOLE_SCREEN_BUFFER_INFO *Info)
 	return(SetConsoleCursorPosition(Handle, cPos));
 }
 BOOL 
-ScreenLineFeed(HANDLE Handle, CONSOLE_SCREEN_BUFFER_INFO *Info)
+ScreenLineFeed(HANDLE Handle, DWORD Flags, CONSOLE_SCREEN_BUFFER_INFO *Info)
 {
 	BOOL bResult = TRUE;
 	COORD cPos = Info->dwCursorPosition;
 	SHORT sBottom = Info->dwSize.Y - 1;
 	SMALL_RECT sRect = Info->srWindow;
 
-	/* Normally, the controlling TTY handles ONLCR, sending an 
-	 * extra CR. Luckily ncurses clears this bit by default on top
-	 * of setting Vertical Editing Mode (VEM).
-	 * So we can handle it here until we have a real CTTY.
-	 * With less.exe we're not so lucky. It overrides the ncurses
-	 * defaults. This can be solved by exporting "LESS=-XR". The
-	 * "R" option is for git.exe, which emits ansi sequences.
-	 */
-	if (__CTTY->VEdit){
+	if (!(Flags & WIN_OPOST)){		/* ssh.exe */
 		sBottom = Info->srWindow.Bottom;
-	}else if (__CTTY->Mode.OFlags & WIN_ONLCR){
+	}else if (Flags & WIN_ONLCR){
 		cPos.X = 0;
 	}
 	if (cPos.Y == sBottom){
@@ -84,7 +80,7 @@ ScreenLineFeed(HANDLE Handle, CONSOLE_SCREEN_BUFFER_INFO *Info)
 	return(SetConsoleCursorPosition(Handle, cPos));
 }
 VOID 
-ScreenControl(HANDLE Handle, CHAR C)
+ScreenControl(HANDLE Handle, DWORD Flags, CHAR C)
 {
 	DWORD dwCount;
 	CONSOLE_SCREEN_BUFFER_INFO csbInfo;
@@ -109,14 +105,14 @@ ScreenControl(HANDLE Handle, CHAR C)
 			AnsiCursorBack(Handle, &csbInfo, 1);
 			break;
 		case 10:	/* Linefeed (LF) */
-			ScreenLineFeed(Handle, &csbInfo);
+			ScreenLineFeed(Handle, Flags, &csbInfo);
 			break;
 		case 12:	/* Formfeed (FF) */
 			/* ignore form-feed, they are intended for paper output! */
 			WriteFile(Handle, "\n", 1, &dwCount, NULL);
 			break;
 		case 13:	/* Carriage return (CR) */
-			ScreenCarriageReturn(Handle, &csbInfo);
+			ScreenCarriageReturn(Handle, Flags, &csbInfo);
 			break;
 		case 14:	/* Shift-Out (SO): red tape (Switch to an alternative character set) */
 			SetConsoleOutputCP(GetOEMCP());
@@ -271,6 +267,7 @@ screen_write(HANDLE Handle, LPCSTR Buffer, DWORD Size, DWORD *Result)
 	DWORD dwResult = 0;
 	DWORD dwMode = ScreenMode(&__CTTY->Mode);
 	UINT uiCodePage = GetConsoleOutputCP();
+	DWORD Flags = __CTTY->Mode.OFlags;
 
 	if (dwMode & ENABLE_VIRTUAL_TERMINAL_PROCESSING){
 		bResult = WriteFile(Handle, Buffer, Size, &dwResult, NULL);
@@ -286,7 +283,7 @@ screen_write(HANDLE Handle, LPCSTR Buffer, DWORD Size, DWORD *Result)
 			__ANSI_BUF.CSI = 0;
 			__ANSI_BUF.Args = __Escape;
 		}else if (__Char < 32){			/* Space (SP) */
-			ScreenControl(Handle, __Char);
+			ScreenControl(Handle, Flags, __Char);
 		}else if (uiCodePage == CP_UTF8){
 			ScreenMultiByte(Handle, Buffer, &dwCount);
 		}else{

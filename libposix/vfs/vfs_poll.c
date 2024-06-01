@@ -54,7 +54,6 @@ PollNoWait(WIN_VNODE *Nodes[], WIN_POLLFD *Info[])
 	while (pNode = *Nodes++){
 		pInfo = *Info++;
 		switch (pNode->FSType){
-			case FS_TYPE_TERMINAL:
 			case FS_TYPE_CHAR:
 				dwResult += char_poll(pNode, pInfo);
 				break;

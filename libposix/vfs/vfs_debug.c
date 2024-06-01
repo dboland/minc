@@ -47,8 +47,7 @@ static const CHAR *__FSType[] = {
 	"VOLUME", 
 	"NPF",
 	"LINK",
-	"NDIS",
-	"TERM"
+	"NDIS"
 };
 static const CHAR *__FType[] = {
 	"VNON", 
@@ -165,16 +164,13 @@ VfsVolumeFlags(LPSTR Buffer, DWORD Flags, LPCSTR Label)
 	psz += msvc_sprintf(psz, " remain(0x%x)\n", Flags);
 	return(psz);
 }
-/* LPSTR 
-VfsTermFlags(LPSTR Buffer, WIN_TERMIO *Mode, LPCSTR Label)
+LPSTR 
+VfsInputMode(LPSTR Buffer, DWORD Mode, LPCSTR Label)
 {
 	LPSTR psz = Buffer;
-	DWORD dwRemain;
+	DWORD dwRemain = Mode;
 
-	dwRemain = Mode->Input;
-	psz += msvc_sprintf(psz, "%s(0): 0x%x: ", Label, dwRemain);
-	psz = VfsFlagName(psz, WIN_INLCR, "WIN_INLCR", dwRemain, &dwRemain);
-	psz = VfsFlagName(psz, WIN_ICRNL, "WIN_ICRNL", dwRemain, &dwRemain);
+	psz += msvc_sprintf(psz, "%s(input): 0x%x: ", Label, dwRemain);
 	psz = VfsFlagName(psz, ENABLE_ECHO_INPUT, "ECHO_INPUT", dwRemain, &dwRemain);
 	psz = VfsFlagName(psz, ENABLE_INSERT_MODE, "INSERT_MODE", dwRemain, &dwRemain);
 	psz = VfsFlagName(psz, ENABLE_LINE_INPUT, "LINE_INPUT", dwRemain, &dwRemain);
@@ -186,12 +182,15 @@ VfsTermFlags(LPSTR Buffer, WIN_TERMIO *Mode, LPCSTR Label)
 	psz = VfsFlagName(psz, ENABLE_EXTENDED_FLAGS, "EXTENDED_FLAGS", dwRemain, &dwRemain);
 	psz = VfsFlagName(psz, ENABLE_AUTO_POSITION, "AUTO_POSITION", dwRemain, &dwRemain);
 	psz += msvc_sprintf(psz, " remain(0x%x)\n", dwRemain);
+	return(psz);
+}
+LPSTR 
+VfsScreenMode(LPSTR Buffer, DWORD Mode, LPCSTR Label)
+{
+	LPSTR psz = Buffer;
+	DWORD dwRemain = Mode;
 
-	dwRemain = Mode->Output;
-	psz += msvc_sprintf(psz, "%s(1): 0x%x: ", Label, dwRemain);
-	psz = VfsFlagName(psz, WIN_ONLCR, "WIN_ONLCR", dwRemain, &dwRemain);
-	psz = VfsFlagName(psz, WIN_OCRNL, "WIN_OCRNL", dwRemain, &dwRemain);
-	psz = VfsFlagName(psz, WIN_OXTABS, "WIN_OXTABS", dwRemain, &dwRemain);
+	psz += msvc_sprintf(psz, "%s(screen): 0x%x: ", Label, dwRemain);
 	psz = VfsFlagName(psz, ENABLE_PROCESSED_OUTPUT, "PROCESSED_OUTPUT", dwRemain, &dwRemain);
 	psz = VfsFlagName(psz, ENABLE_WRAP_AT_EOL_OUTPUT, "WRAP_AT_EOL_OUTPUT", dwRemain, &dwRemain);
 	psz = VfsFlagName(psz, ENABLE_VIRTUAL_TERMINAL_PROCESSING, "VIRTUAL_TERMINAL_PROCESSING", dwRemain, &dwRemain);
@@ -199,7 +198,7 @@ VfsTermFlags(LPSTR Buffer, WIN_TERMIO *Mode, LPCSTR Label)
 	psz = VfsFlagName(psz, ENABLE_LVB_GRID_WORLDWIDE, "LVB_GRID_WORLDWIDE", dwRemain, &dwRemain);
 	psz += msvc_sprintf(psz, " remain(0x%x)\n", dwRemain);
 	return(psz);
-} */
+}
 LPSTR 
 VfsNetFlags(LPSTR Buffer, LONG NetworkEvents, LPCSTR Label)
 {

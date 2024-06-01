@@ -43,7 +43,6 @@ typedef enum _WIN_FS_TYPE {
 	FS_TYPE_NPF,
 	FS_TYPE_LINK,
 	FS_TYPE_NDIS,
-	FS_TYPE_TERMINAL,
 	FS_TYPE_MAX
 } WIN_FS_TYPE;
 
@@ -231,6 +230,7 @@ typedef struct _WIN_NAMEIDATA {
 
 /* line Out */
 
+#define WIN_OPOST		0x00000001
 #define WIN_ONLCR		0x00000002
 #define WIN_OXTABS		0x00000004
 #define WIN_OCRNL		0x00000010
@@ -303,7 +303,7 @@ typedef struct _WIN_PSTRING {
 	WCHAR Path[WIN_PATH_MAX];
 } WIN_PSTRING;
 
-#define PSTRING(TASK)	__Strings[TASK->TaskId]
+#define PSTRING(TASK)	(__Strings[TASK->TaskId])
 
 /*
  * vfs_mount.c
@@ -354,7 +354,8 @@ typedef struct _WIN_STATFS {
 #define WIN_MNT_SOFTDEP		0x04000000	/* soft dependencies being done */
 #define WIN_MNT_DOOMED		0x08000000	/* device behind filesystem is gone */
 
-#define WIN_MNT_VFSFLAGS	WIN_MNT_NOWAIT | WIN_MNT_REVERSED
+//#define WIN_MNT_VFSFLAGS	WIN_MNT_NOWAIT | WIN_MNT_REVERSED
+#define WIN_MNT_VFSFLAGS	WIN_MNT_NOWAIT
 
 /*
  * vfs_stat.c

@@ -60,9 +60,6 @@ vfs_F_DUPFD(WIN_VNODE *Node, BOOL CloseExec, WIN_VNODE *Result)
 		case FS_TYPE_MAILSLOT:
 			bResult = mail_F_DUPFD(DEVICE(Node->DeviceId), hProcess, dwOptions, Result);
 			break;
-		case FS_TYPE_TERMINAL:
-			bResult = TRUE;
-			break;
 		default:
 			SetLastError(ERROR_BAD_FILE_TYPE);
 	}
@@ -90,9 +87,6 @@ vfs_F_INHERIT(WIN_VNODE *Node, HANDLE Process)
 			break;
 		case FS_TYPE_MAILSLOT:
 			bResult = mail_F_DUPFD(DEVICE(Node->DeviceId), Process, dwOptions, Node);
-			break;
-		case FS_TYPE_TERMINAL:
-			bResult = TRUE;
 			break;
 		default:
 			SetLastError(ERROR_BAD_FILE_TYPE);

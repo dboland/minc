@@ -66,28 +66,6 @@ config_found(LPCSTR Name, DWORD FSType, DWORD FileType, WIN_DEVICE *Device)
 	return(TRUE);
 }
 BOOL 
-tty_attach(WIN_DEVICE *Device)
-{
-	DWORD dwIndex = 0;
-	WIN_TTY *pwTerminal = __Terminals;
-
-	while (dwIndex < WIN_TTY_MAX){
-		if (!pwTerminal->Flags){
-			pwTerminal->Flags = TIOCFLAG_ACTIVE;
-			pwTerminal->Index = dwIndex;
-			pwTerminal->DeviceType = Device->DeviceType;
-			pwTerminal->DeviceId = Device->DeviceId;
-			win_strcpy(pwTerminal->Name, Device->Name);
-			Device->Index = dwIndex;
-			return(TRUE);
-		}
-		dwIndex++;
-		pwTerminal++;
-	}	
-	SetLastError(ERROR_NOT_ENOUGH_MEMORY);
-	return(FALSE);
-}
-BOOL 
 pty_attach(WIN_DEVICE *Device)
 {
 	BOOL bResult = TRUE;

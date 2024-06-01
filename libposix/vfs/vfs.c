@@ -96,7 +96,6 @@ WIN_TASK	*__Process;
 BOOL vfs_namei(HANDLE Handle, DWORD Index, WIN_VNODE *Result);
 BOOL vfs_F_DUPFD(WIN_VNODE *Node, BOOL CloseExec, WIN_VNODE *Result);
 BOOL proc_poll(VOID);
-BOOL tty_open(WIN_TTY *Terminal, WIN_FLAGS *Flags, WIN_VNODE *Result);
 
 #include "vfs_acl.c"
 #include "vfs_debug.c"
@@ -105,6 +104,7 @@ BOOL tty_open(WIN_TTY *Terminal, WIN_FLAGS *Flags, WIN_VNODE *Result);
 #include "vfs_libgen.c"
 #include "vfs_sysctl.c"
 #include "vfs_syscall.c"
+#include "vfs_tty.c"
 #include "vfs_device.c"
 #include "registry/registry.c"
 #include "drive/drive.c"
@@ -116,7 +116,6 @@ BOOL tty_open(WIN_TTY *Terminal, WIN_FLAGS *Flags, WIN_VNODE *Result);
 #include "mailslot/mailslot.c"
 #include "pdo/pdo.c"
 #include "winsock/winsock.c"
-#include "vfs_tty.c"
 #include "vfs_namei.c"
 #include "vfs_fcntl.c"
 #include "vfs_stdlib.c"

@@ -40,7 +40,6 @@ vfs_fstat(WIN_VNODE *Node, WIN_VATTR *Result)
 	switch (Node->FSType){
 		case FS_TYPE_CHAR:
 		case FS_TYPE_PDO:
-		case FS_TYPE_TERMINAL:
 			bResult = char_fstat(Node, Result);
 			break;
 		case FS_TYPE_PIPE:
