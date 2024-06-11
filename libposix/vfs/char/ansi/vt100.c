@@ -33,17 +33,6 @@
 /****************************************************/
 
 BOOL 
-DECSetBottomMargin(HANDLE Handle, CONSOLE_SCREEN_BUFFER_INFO *Info, WORD Top, WORD Bottom)
-{
-	WORD wHeight;
-	COORD cPos = {Info->srWindow.Left, Info->srWindow.Top};
-
-	wHeight = Info->srWindow.Bottom - Info->srWindow.Top;
-//	__CTTY->Margin.Top = Top - 1;
-//	__CTTY->Margin.Bottom = wHeight - (Bottom - 1);
-	return(SetConsoleCursorPosition(Handle, cPos));
-}
-BOOL 
 DECSetMode(HANDLE Handle, WIN_TTY *Terminal, WORD Arg)
 {
 	BOOL bResult = TRUE;
@@ -51,7 +40,7 @@ DECSetMode(HANDLE Handle, WIN_TTY *Terminal, WORD Arg)
 	DWORD dwMode;
 
 	if (!GetConsoleMode(Handle, &dwMode)){
-		bResult = FALSE;
+		return(FALSE);
 	}else if (Arg == 4){			// DECSCLM scroll mode, smooth
 		Terminal->ScrollRate = 1;
 //	}else if (Arg == 6){		// DECOM origin mode, line 1 is relative to margin
@@ -78,7 +67,7 @@ DECResetMode(HANDLE Handle, WIN_TTY *Terminal, WORD Arg)
 
 	if (!GetConsoleMode(Handle, &dwMode)){
 		bResult = FALSE;
-	}else if (Arg == 4){			// DECSCLM scroll mode, jump
+	}else if (Arg == 4){		// DECSCLM scroll mode, jump
 		Terminal->ScrollRate = 6;
 //	}else if (Arg == 1){		// DECCKM ANSI cursor, needs DECKPAM (ESC =)
 	}else if (Arg == 7){		// DECAWM autowrap mode
@@ -136,26 +125,4 @@ DECResetCharacterSet(HANDLE Handle, CHAR Char)
 		bResult = FALSE;
 	}
 	return(bResult);
-}
-BOOL 
-DECSaveCursor(CONSOLE_SCREEN_BUFFER_INFO *Info)
-{
-	COORD cPos = Info->dwCursorPosition;
-
-	__CTTY->Cursor.X = cPos.X;
-	__CTTY->Cursor.Y = cPos.Y - Info->srWindow.Top;
-	return(TRUE);
-}
-BOOL 
-DECRestoreCursor(HANDLE Handle, CONSOLE_SCREEN_BUFFER_INFO *Info)
-{
-	COORD cPos = __CTTY->Cursor;
-
-	cPos.Y += Info->srWindow.Top;
-	return(SetConsoleCursorPosition(Handle, cPos));
-}
-BOOL 
-DECResetInitialState(HANDLE Handle)
-{
-	return(TRUE);
 }

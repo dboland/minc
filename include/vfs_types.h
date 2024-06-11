@@ -341,6 +341,17 @@ typedef struct _WIN_STATFS {
 	WCHAR Drive[MAX_LABEL];
 } WIN_STATFS;
 
+#define WIN_MNT_REVERSED	0x00200000	/* load reversed file system table */
+
+/* sys/mount.h */
+
+#define WIN_MNT_RDONLY		0x00000001      /* read only filesystem */
+#define WIN_MNT_SYNCHRONOUS	0x00000002      /* file system written synchronously */
+#define WIN_MNT_NOEXEC		0x00000004      /* can't exec from filesystem */
+#define WIN_MNT_NOSUID		0x00000008      /* don't honor setuid bits on fs */
+#define WIN_MNT_NODEV		0x00000010      /* don't interpret special files */
+#define WIN_MNT_ASYNC		0x00000040      /* file system written asynchronously */
+
 /* Control flags for getfsstat() */
 
 #define WIN_MNT_UPDATE		0x00010000	/* not a real mount, just an update */
@@ -348,7 +359,6 @@ typedef struct _WIN_STATFS {
 #define WIN_MNT_RELOAD		0x00040000	/* reload filesystem data */
 #define WIN_MNT_FORCE		0x00080000	/* force unmount or readonly change */
 #define WIN_MNT_NOWAIT		0x00100000
-#define WIN_MNT_REVERSED	0x00200000	/* load reversed file system table */
 #define WIN_MNT_DEBUG		0x00400000
 #define WIN_MNT_WANTRDWR	0x02000000	/* want upgrade to read/write */
 #define WIN_MNT_SOFTDEP		0x04000000	/* soft dependencies being done */
@@ -492,6 +502,7 @@ typedef struct _WIN_TTY {
 	DWORD AltFont;
 	BOOL VEdit;
 	COORD Cursor;
+	SMALL_RECT Margin;
 	DWORD Flags;
 	DWORD Offset;
 	CHAR Name[MAX_NAME];

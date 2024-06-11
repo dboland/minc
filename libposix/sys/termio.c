@@ -249,7 +249,6 @@ term_ioctl(WIN_TASK *Task, int fd, unsigned long request, va_list args)
 	int result = 0;
 	DWORD wOperation = request & 0xFF;
 	WIN_VNODE *pvNode = &Task->Node[fd];
-	CHAR szText[MAX_TEXT];
 
 	/* tty(4)
 	 */
@@ -303,9 +302,6 @@ term_ioctl(WIN_TASK *Task, int fd, unsigned long request, va_list args)
 			break;
 		default:
 			result = -EOPNOTSUPP;
-	}
-	if (Task->TracePoints & KTRFAC_USER){
-		ktrace_USER(Task, "WIN_VNODE", szText, vfs_VNODE(pvNode, szText));
 	}
 	return(result);
 }

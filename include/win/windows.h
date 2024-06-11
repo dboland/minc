@@ -90,7 +90,6 @@ typedef struct tagMSG {
 #define ENABLE_INSERT_MODE		0x0020
 #define ENABLE_QUICK_EDIT_MODE		0x0040
 #define ENABLE_EXTENDED_FLAGS  		0x0080
-//#define ENABLE_AUTO_POSITION		0x0100
 
 #define ENABLE_PROCESSED_OUTPUT		0x0001
 #define ENABLE_WRAP_AT_EOL_OUTPUT	0x0002
@@ -99,6 +98,13 @@ typedef struct _COORD {
         SHORT X;
         SHORT Y;
 } COORD, *PCOORD;
+
+typedef struct _SMALL_RECT {
+	SHORT Left; 
+	SHORT Top; 
+	SHORT Right; 
+	SHORT Bottom; 
+} SMALL_RECT; 
 
 /*
  * wincrypt.h

@@ -536,7 +536,6 @@ sys_read(call_t call, int fd, void *buf, size_t count)
 	DWORD dwResult = -1;		/* WinNT EOF on ReadFile() */
 	DWORD dwCount = count;
 	WIN_TASK *pwTask = call.Task;
-	CHAR szText[MAX_TEXT];
 
 	if (fd < 0 || fd >= OPEN_MAX){
 		return(-EBADF);
@@ -550,9 +549,6 @@ sys_read(call_t call, int fd, void *buf, size_t count)
 			ktrace_GENIO(pwTask, fd, UIO_READ, buf, result);
 		}
 	}
-	if (pwTask->TracePoints & KTRFAC_USER){
-		ktrace_USER(pwTask, "WIN_VNODE", szText, vfs_VNODE(&pwTask->Node[fd], szText));
-	}
 	return(result);
 }
 ssize_t 
@@ -561,7 +557,6 @@ sys_write(call_t call, int fd, const void *buf, size_t nbytes)
 	ssize_t result = 0;
 	DWORD dwResult = 0;		/* WinNT EOF on WriteFile() */
 	WIN_TASK *pwTask = call.Task;
-	CHAR szText[MAX_TEXT];
 
 	if (pwTask->TracePoints & KTRFAC_GENIO){
 		ktrace_GENIO(pwTask, fd, UIO_WRITE, buf, nbytes);
@@ -574,9 +569,6 @@ sys_write(call_t call, int fd, const void *buf, size_t nbytes)
 		pwTask->Error = errno_posix(GetLastError());
 	}else{
 		result = dwResult;
-	}
-	if (pwTask->TracePoints & KTRFAC_USER){
-		ktrace_USER(pwTask, "WIN_VNODE", szText, vfs_VNODE(&pwTask->Node[fd], szText));
 	}
 	return(result);
 }

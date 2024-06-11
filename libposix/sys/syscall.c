@@ -657,7 +657,7 @@ syscall_enter(call_t call)
 	if (pwTask->TracePoints & KTRFAC_SYSCALL){
 		ktrace_SYSCALL(pwTask, code, ent->sy_argsize, &call.Base + 1);
 	}
-	if (pwTask->Timer){
+	if (pwTask->Timer){		/* ftp.exe */
 		WaitForSingleObjectEx(__Interrupt, 0, TRUE);
 	}
 	if (proc_poll()){

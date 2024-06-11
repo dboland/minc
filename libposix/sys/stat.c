@@ -266,7 +266,6 @@ sys_fstat(call_t call, int fd, struct stat *buf)
 	int result = 0;
 	WIN_VATTR wStat = {0};
 	WIN_TASK *pwTask = call.Task;
-	CHAR szMessage[MAX_MESSAGE];
 
 	if (fd < 0 || fd >= OPEN_MAX){
 		return(-EBADF);
@@ -274,9 +273,6 @@ sys_fstat(call_t call, int fd, struct stat *buf)
 		result -= errno_posix(GetLastError());
 	}else{
 		stat_posix(pwTask, buf, &wStat);
-	}
-	if (pwTask->TracePoints & KTRFAC_USER){
-		ktrace_USER(pwTask, "WIN_VNODE", szMessage, vfs_VNODE(&pwTask->Node[fd], szMessage));
 	}
 	return(result);
 }

@@ -35,7 +35,7 @@
 /* 0x1F - 0x00 */
 
 #define VK_CURSOR		0x2F
-#define ANSI_CURSOR(k)		__ANSI_CURSOR[VK_CURSOR - k]
+#define ANSI_CURSOR(vk)		__ANSI_CURSOR[VK_CURSOR - vk]
 
 /* 0x2F - 0x20 */
 
@@ -63,7 +63,7 @@ static LPCSTR __ANSI_CURSOR[] = {
 /* 0x5F - 0x50 */
 
 #define VK_FUNCTION		0x8F
-#define ANSI_FUNCTION(k)	__ANSI_FUNCTION[VK_FUNCTION - k]
+#define ANSI_FUNCTION(vk)	__ANSI_FUNCTION[VK_FUNCTION - vk]
 
 /* 0x8F - 0x70 */
 
@@ -76,30 +76,30 @@ static LPCSTR __ANSI_FUNCTION[] = {
 	"",		/* Reserved */
 	"",		/* Reserved */
 	"",		/* Reserved */
-	"\eF24",
-	"\eF23",
-	"\eF22",
-	"\eF21",
-	"\eF20",
-	"\eF19",
-	"\eF18",
-	"\eF17",
-	"\eF16",
-	"\eF15",
-	"\eF14",
-	"\eF13",
-	"\eF12",
-	"\eF11",
-	"\eF10",
-	"\eF9",
-	"\eF8",
-	"\eF7",
-	"\eF6",
-	"\eF5",
-	"\eF4",
-	"\eF3",
-	"\eF2",
-	"\eF1"
+	"\eFO",		/* F24 */
+	"\eFN",		/* F23 */
+	"\eFM",		/* F22 */
+	"\eFL",		/* F21 */
+	"\eFK",		/* F20 */
+	"\eFJ",		/* F19 */
+	"\eFI",		/* F18 */
+	"\eFH",		/* F17 */
+	"\eFG",		/* F16 */
+	"\eFF",		/* F15 */
+	"\eFE",		/* F14 */
+	"\eFD",		/* F13 */
+	"\eFC",		/* F12 */
+	"\eFB",		/* F11 */
+	"\eFA",		/* F10 */
+	"\eF9",		/* F9 */
+	"\eF8",		/* F8 */
+	"\eF7",		/* F7 */
+	"\eF6",		/* F6 */
+	"\eF5",		/* F5 */
+	"\eF4",		/* F4 */
+	"\eF3",		/* F3 */
+	"\eF2",		/* F2 */
+	"\eF1"		/* F1 */
 };
 
 /* Constants for ScreenAnsi() */
@@ -139,11 +139,12 @@ AnsiRepeat(HANDLE Handle, CHAR C, SHORT Count)
 	return(TRUE);
 }
 BOOL 
-AnsiVerticalEditingMode(HANDLE Handle, SHORT Parm)
+AnsiVerticalEditingMode(HANDLE Handle, SMALL_RECT *Rect, SHORT Parm)
 {
 	BOOL bResult = TRUE;
 
 	if (Parm == 1){
+		__CTTY->Margin = *Rect;
 		__CTTY->VEdit = TRUE;
 	}else if (Parm == 2){
 		__CTTY->VEdit = FALSE;

@@ -60,15 +60,6 @@ AnsiStrToInt(LPCSTR String)
 	return(lResult);
 }
 BOOL 
-AnsiEraseRect(HANDLE Handle, SMALL_RECT Rect, WORD Attributes)
-{
-	COORD cPos = {Rect.Left, Rect.Top};
-	DWORD dwCount = ((Rect.Bottom - Rect.Top) + 1) * ((Rect.Right - Rect.Left) + 1);
-
-	FillConsoleOutputAttribute(Handle, Attributes, dwCount, cPos, &dwCount);
-	return(FillConsoleOutputCharacter(Handle, ' ', dwCount, cPos, &dwCount));
-}
-BOOL 
 AnsiScrollHorizontal(HANDLE Handle, CONSOLE_SCREEN_BUFFER_INFO *Info, WORD DeltaLeft, WORD DeltaRight)
 {
 	DWORD dwCount;
@@ -84,6 +75,28 @@ AnsiScrollHorizontal(HANDLE Handle, CONSOLE_SCREEN_BUFFER_INFO *Info, WORD Delta
 	cInfo.Char.AsciiChar = ' ';
 	cInfo.Attributes = Info->wAttributes;
 	return(ScrollConsoleScreenBuffer(Handle, &sRect, NULL, cPos, &cInfo));
+}
+BOOL 
+AnsiScrollVertical(HANDLE Handle, SMALL_RECT *Rect, WORD Attribs, WORD Delta)
+{
+	CHAR_INFO cInfo;
+	COORD cPos;
+
+	/* ScrollConsoleScreenBuffer() adds one line to the rectangle
+	 * when scrolling up.
+	 */
+	cPos.X = Rect->Left;
+	cPos.Y = Rect->Top;
+	if (Delta > 0){
+		cPos.Y += Delta;
+		Rect->Bottom -= Delta;
+	}else{
+		Rect->Top -= Delta;
+		Rect->Bottom--;
+	}
+	cInfo.Char.AsciiChar = ' ';
+	cInfo.Attributes = Attribs;
+	return(ScrollConsoleScreenBuffer(Handle, Rect, NULL, cPos, &cInfo));
 }
 WORD 
 AnsiInvertAttrib(CONSOLE_SCREEN_BUFFER_INFO *Info)
@@ -127,7 +140,7 @@ AnsiRenderForeground(CONSOLE_SCREEN_BUFFER_INFO *Info, CHAR Char2)
 		wAttrib |= FOREGROUND_CYAN;
 	}else if (Char2 == '7'){
 		wAttrib |= FOREGROUND_WHITE;
-//	}else if (Char2 == '8'){ 	/* RGB color follows (journalctl in Debian) */
+//	}else if (Char2 == '8'){ 	/* CSI for RGB color (journalctl in Debian) */
 	}else if (Char2 == '9'){	/* default (ANSI v.2.53) */
 		wAttrib |= FOREGROUND_DEFAULT;
 	}else{
@@ -158,7 +171,7 @@ AnsiRenderBackground(CONSOLE_SCREEN_BUFFER_INFO *Info, CHAR Char2)
 		wAttrib |= BACKGROUND_CYAN;
 	}else if (Char2 == '7'){
 		wAttrib |= BACKGROUND_WHITE;
-//	}else if (Char2 == '8'){ 	/* RGB color follows */
+//	}else if (Char2 == '8'){ 	/* CSI for RGB color */
 	}else if (Char2 == '9'){	/* default (ANSI v.2.53) */
 		wAttrib |= BACKGROUND_DEFAULT;
 	}else{
@@ -249,7 +262,6 @@ AnsiSelectGraphicRendition(HANDLE Handle, CONSOLE_SCREEN_BUFFER_INFO *Info, LPST
 			continue;
 		}else if (C == ';' || !Size){
 			if (!AnsiRender(Info, Char1, Char2, Char3)){
-//				msvc_printf("{%s}", psz);
 				return(TRUE);	/* ignore */
 			}
 			Char1 = Char2 = Char3 = 0;
@@ -271,67 +283,37 @@ AnsiSelectGraphicRendition(HANDLE Handle, CONSOLE_SCREEN_BUFFER_INFO *Info, LPST
 /****************************************************/
 
 BOOL 
-AnsiScrollVertical(HANDLE Handle, SMALL_RECT *Rect, WORD Attribs, WORD Delta)
-{
-	CHAR_INFO cInfo;
-	COORD cPos;
-
-	cPos.X = Rect->Left;
-	cPos.Y = Rect->Top;
-	if (Delta > 0){
-		cPos.Y += Delta;
-		Rect->Bottom -= Delta;
-	}else{
-		Rect->Top -= Delta;
-	}
-	cInfo.Char.AsciiChar = ' ';
-	cInfo.Attributes = Attribs;
-	return(ScrollConsoleScreenBuffer(Handle, Rect, NULL, cPos, &cInfo));
-}
-BOOL 
 AnsiScrollDown(HANDLE Handle, CONSOLE_SCREEN_BUFFER_INFO *Info, WORD Delta)
 {
-	CHAR_INFO cInfo;
-	COORD cPos;
-	SMALL_RECT sRect = Info->srWindow;
-
-	cPos.X = sRect.Left;
-	cPos.Y = sRect.Top;
-	if (Delta > 0){
-		cPos.Y += Delta;
-		sRect.Bottom -= Delta;
-	}else{
-		sRect.Top -= Delta;
-	}
-	cInfo.Char.AsciiChar = ' ';
-	cInfo.Attributes = Info->wAttributes;
-	return(ScrollConsoleScreenBuffer(Handle, &sRect, NULL, cPos, &cInfo));
+	return(AnsiScrollVertical(Handle, &Info->srWindow, Info->wAttributes, Delta));
 }
 BOOL 
-AnsiDeleteCharacter(HANDLE Handle, CONSOLE_SCREEN_BUFFER_INFO *Info, UINT Count)
+AnsiDeleteCharacter(HANDLE Handle, CONSOLE_SCREEN_BUFFER_INFO *Info, WORD Count)
 {
 	return(AnsiScrollHorizontal(Handle, Info, Count, 0));
 }
 BOOL 
-AnsiInsertCharacter(HANDLE Handle, CONSOLE_SCREEN_BUFFER_INFO *Info, UINT Count)
+AnsiInsertCharacter(HANDLE Handle, CONSOLE_SCREEN_BUFFER_INFO *Info, WORD Count)
 {
 	return(AnsiScrollHorizontal(Handle, Info, 0, Count));
 }
 BOOL 
-AnsiInsertLine(HANDLE Handle, CONSOLE_SCREEN_BUFFER_INFO *Info, UINT Count)
+AnsiInsertLine(HANDLE Handle, CONSOLE_SCREEN_BUFFER_INFO *Info, WORD Count)
 {
 	SMALL_RECT sRect = Info->srWindow;
-	BOOL bResult = FALSE;
+	COORD cPos = {0, Info->dwCursorPosition.Y + Count};
+	CHAR_INFO cInfo;
 
-	sRect.Top = sRect.Bottom - (Count - 1);
-	if (AnsiEraseRect(Handle, sRect, Info->wAttributes)){
-		Info->srWindow.Top = Info->dwCursorPosition.Y;
-		bResult = AnsiScrollDown(Handle, Info, Count);
-	}
-	return(bResult);
+	/* When crolling down, clip excessive lines from scrolling 
+	 * rectangle (vim.exe set termcap).
+	 */
+	sRect.Top = Info->dwCursorPosition.Y;
+	cInfo.Char.AsciiChar = ' ';
+	cInfo.Attributes = Info->wAttributes;
+	return(ScrollConsoleScreenBuffer(Handle, &sRect, &Info->srWindow, cPos, &cInfo));
 }
 BOOL 
-AnsiDeleteLine(HANDLE Handle, CONSOLE_SCREEN_BUFFER_INFO *Info, UINT Count)
+AnsiDeleteLine(HANDLE Handle, CONSOLE_SCREEN_BUFFER_INFO *Info, WORD Count)
 {
 	CHAR_INFO cInfo;
 	COORD cPos = {0, Info->dwCursorPosition.Y};
@@ -340,7 +322,7 @@ AnsiDeleteLine(HANDLE Handle, CONSOLE_SCREEN_BUFFER_INFO *Info, UINT Count)
 	sRect.Top = Info->dwCursorPosition.Y + Count;
 	cInfo.Char.AsciiChar = ' ';
 	cInfo.Attributes = Info->wAttributes;
-	return(ScrollConsoleScreenBuffer(Handle, &sRect, NULL, cPos, &cInfo));
+	return(ScrollConsoleScreenBuffer(Handle, &sRect, &Info->srWindow, cPos, &cInfo));
 }
 BOOL 
 AnsiEraseInLine(HANDLE Handle, CONSOLE_SCREEN_BUFFER_INFO *Info, CHAR Char)
@@ -409,19 +391,13 @@ AnsiCursorHorizontalAbsolute(HANDLE Handle, CONSOLE_SCREEN_BUFFER_INFO *Info, SH
 BOOL 
 AnsiSaveCursor(CONSOLE_SCREEN_BUFFER_INFO *Info)
 {
-	COORD cPos = Info->dwCursorPosition;
-
-	__CTTY->Cursor.X = cPos.X;
-	__CTTY->Cursor.Y = cPos.Y - Info->srWindow.Top;
+	__CTTY->Cursor = Info->dwCursorPosition;
 	return(TRUE);
 }
 BOOL 
 AnsiRestoreCursor(HANDLE Handle, CONSOLE_SCREEN_BUFFER_INFO *Info)
 {
-	COORD cPos = __CTTY->Cursor;
-
-	cPos.Y += Info->srWindow.Top;
-	return(SetConsoleCursorPosition(Handle, cPos));
+	return(SetConsoleCursorPosition(Handle, __CTTY->Cursor));
 }
 BOOL 
 AnsiVerticalPositionAbsolute(HANDLE Handle, CONSOLE_SCREEN_BUFFER_INFO *Info, SHORT Y)
@@ -567,6 +543,13 @@ AnsiControl(HANDLE Handle, CHAR C, CONSOLE_SCREEN_BUFFER_INFO *Info, SEQUENCE *S
 		case 'n':		/* DSR */
 			bResult = AnsiDeviceStatusReport(Info, Seq->Char1, __INPUT_BUF);
 			break;
+		case 'r':		/* DECSTBM (apt-get) */
+			/* Margins will not work without disabling the 'am' capability
+			 * (ENABLE_WRAP_AT_EOL_OUTPUT), so long lines can be scrolled
+			 * as one.
+			 */
+			bResult = TRUE;
+			break;
 		case 's':		/* SC */
 			bResult = AnsiSaveCursor(Info);
 			break;
@@ -575,7 +558,7 @@ AnsiControl(HANDLE Handle, CHAR C, CONSOLE_SCREEN_BUFFER_INFO *Info, SEQUENCE *S
 			bResult = TRUE;
 			break;
 		case ANSI_VEM:		/* VEM */
-			bResult = AnsiVerticalEditingMode(Handle, AnsiStrToInt(Seq->Args));
+			bResult = AnsiVerticalEditingMode(Handle, &Info->srWindow, AnsiStrToInt(Seq->Args));
 			break;
 	}
 	return(bResult);

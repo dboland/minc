@@ -100,7 +100,7 @@ statfs_posix(struct statfs *buf, WIN_STATFS *Stat)
 /****************************************************/
 
 int
-mount_NTFS(WIN_NAMEIDATA *Path, struct ntfs_args *args)
+mount_NTFS(WIN_NAMEIDATA *Path, int flags, struct ntfs_args *args)
 {
 	int result = 0;
 	WIN_NAMEIDATA wdPath;
@@ -110,13 +110,13 @@ mount_NTFS(WIN_NAMEIDATA *Path, struct ntfs_args *args)
 
 	if (!vfs_open(path_win(&wdPath, args->fspec, O_NOFOLLOW), &wFlags, &wMode, &vNode)){
 		result -= errno_posix(GetLastError());
-	}else if (!drive_mount(Path, DEVICE(vNode.DeviceId), mode_win(&wMode, args->mode))){
+	}else if (!drive_mount(Path, DEVICE(vNode.DeviceId), flags, mode_win(&wMode, args->mode))){
 		result -= errno_posix(GetLastError());
 	}
 	return(result);
 }
 int
-mount_MSDOS(WIN_NAMEIDATA *Path, struct msdosfs_args *args)
+mount_MSDOS(WIN_NAMEIDATA *Path, int flags, struct msdosfs_args *args)
 {
 	int result = 0;
 	WIN_NAMEIDATA wdPath;
@@ -126,13 +126,13 @@ mount_MSDOS(WIN_NAMEIDATA *Path, struct msdosfs_args *args)
 
 	if (!vfs_open(path_win(&wdPath, args->fspec, O_NOFOLLOW), &wFlags, &wMode, &vNode)){
 		result -= errno_posix(GetLastError());
-	}else if (!drive_mount(Path, DEVICE(vNode.DeviceId), mode_win(&wMode, args->mask))){
+	}else if (!drive_mount(Path, DEVICE(vNode.DeviceId), flags, mode_win(&wMode, args->mask))){
 		result -= errno_posix(GetLastError());
 	}
 	return(result);
 }
 int
-mount_CD9660(WIN_NAMEIDATA *Path, struct iso_args *args)
+mount_CD9660(WIN_NAMEIDATA *Path, int flags, struct iso_args *args)
 {
 	int result = 0;
 	WIN_NAMEIDATA wdPath;
@@ -142,13 +142,13 @@ mount_CD9660(WIN_NAMEIDATA *Path, struct iso_args *args)
 
 	if (!vfs_open(path_win(&wdPath, args->fspec, O_NOFOLLOW), &wFlags, &wMode, &vNode)){
 		result -= errno_posix(GetLastError());
-	}else if (!drive_mount(Path, DEVICE(vNode.DeviceId), mode_win(&wMode, 0666))){
+	}else if (!drive_mount(Path, DEVICE(vNode.DeviceId), flags, mode_win(&wMode, 0666))){
 		result -= errno_posix(GetLastError());
 	}
 	return(result);
 }
 int
-mount_UFS(WIN_NAMEIDATA *Path, struct ufs_args *args)
+mount_UFS(WIN_NAMEIDATA *Path, int flags, struct ufs_args *args)
 {
 	int result = 0;
 	WIN_NAMEIDATA wdPath;
@@ -158,7 +158,7 @@ mount_UFS(WIN_NAMEIDATA *Path, struct ufs_args *args)
 
 	if (!vfs_open(path_win(&wdPath, args->fspec, O_NOFOLLOW), &wFlags, &wMode, &vNode)){
 		result -= errno_posix(GetLastError());
-	}else if (!drive_mount(Path, DEVICE(vNode.DeviceId), mode_win(&wMode, 0666))){
+	}else if (!drive_mount(Path, DEVICE(vNode.DeviceId), flags, mode_win(&wMode, 0666))){
 		result -= errno_posix(GetLastError());
 	}
 	return(result);
@@ -175,16 +175,16 @@ sys_mount(call_t call, const char *type, const char *dir, int flags, void *data)
 	/* mount(2)
 	 */
 	if (!win_strcmp(type, MOUNT_NTFS)){
-		result = mount_NTFS(path_win(&wPath, dir, 0), (struct ntfs_args *)data);
+		result = mount_NTFS(path_win(&wPath, dir, 0), flags, (struct ntfs_args *)data);
 
 	}else if (!win_strcmp(type, MOUNT_MSDOS)){
-		result = mount_MSDOS(path_win(&wPath, dir, 0), (struct msdosfs_args *)data);
+		result = mount_MSDOS(path_win(&wPath, dir, 0), flags, (struct msdosfs_args *)data);
 
 	}else if (!win_strcmp(type, MOUNT_CD9660)){
-		result = mount_CD9660(path_win(&wPath, dir, 0), (struct iso_args *)data);
+		result = mount_CD9660(path_win(&wPath, dir, 0), flags, (struct iso_args *)data);
 
 	}else if (!win_strcmp(type, MOUNT_UFS)){
-		result = mount_UFS(path_win(&wPath, dir, 0), (struct ufs_args *)data);
+		result = mount_UFS(path_win(&wPath, dir, 0), flags, (struct ufs_args *)data);
 
 	}else{
 		result = -EOPNOTSUPP;
@@ -210,15 +210,11 @@ sys_statfs(call_t call, const char *path, struct statfs *buf)
 	WIN_STATFS fsInfo = {0};
 	WIN_NAMEIDATA wPath;
 	WIN_TASK *pwTask = call.Task;
-	CHAR szText[MAX_TEXT];
 
 	if (!drive_statfs(path_win(&wPath, path, 0), &fsInfo)){
 		result -= errno_posix(GetLastError());
 	}else{
 		statfs_posix(buf, &fsInfo);
-	}
-	if (pwTask->TracePoints & KTRFAC_USER){
-		ktrace_USER(pwTask, "WIN_NAMEIDATA", szText, vfs_NAMEI(&wPath, szText));
 	}
 	return(result);
 }

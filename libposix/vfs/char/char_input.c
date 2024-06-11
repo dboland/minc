@@ -35,7 +35,8 @@
 DWORD 
 InputMode(WIN_TERMIO *Mode)
 {
-	DWORD dwResult = ENABLE_WINDOW_INPUT | ENABLE_EXTENDED_FLAGS;
+	DWORD dwResult = ENABLE_WINDOW_INPUT | ENABLE_EXTENDED_FLAGS | 
+		ENABLE_INSERT_MODE | ENABLE_QUICK_EDIT_MODE | ENABLE_MOUSE_INPUT;
 
 	if (Mode->LFlags & WIN_ECHO){
 		dwResult |= ENABLE_LINE_INPUT | ENABLE_ECHO_INPUT;
@@ -54,7 +55,7 @@ InputChar(CHAR C, DWORD KeyState, CHAR *Result)
 	UINT uiMessage;
 
 	/* On Schift Out (SO), switch to alternative character set,
-	 * instead of graphical one (for file names on remote systems).
+	 * for file names on remote systems.
 	 */
 	if (C == 14){		/* Ctrl-N (SO): shift out */
 		SetConsoleOutputCP(GetACP());
@@ -67,9 +68,9 @@ InputChar(CHAR C, DWORD KeyState, CHAR *Result)
 	*Result = 0;
 }
 VOID 
-InputReturn(DWORD KeyState, CHAR *Result)
+InputReturn(DWORD KeyState, WIN_TERMIO *Mode, CHAR *Result)
 {
-	if (__CTTY->Mode.IFlags & WIN_ICRNL){
+	if (Mode->IFlags & WIN_ICRNL){
 		InputChar('\n', KeyState, Result);
 	}else{
 		InputChar('\r', KeyState, Result);
@@ -102,7 +103,7 @@ InputInsert(DWORD KeyState, CHAR *Result)
 	return(bResult);
 }
 BOOL 
-InputKey(KEY_EVENT_RECORD *Event, CHAR *Result)
+InputKey(KEY_EVENT_RECORD *Event, WIN_TERMIO *Mode, CHAR *Result)
 {
 	BOOL bResult = TRUE;
 	CHAR CH = Event->uChar.AsciiChar;
@@ -110,6 +111,8 @@ InputKey(KEY_EVENT_RECORD *Event, CHAR *Result)
 
 	if (!Event->bKeyDown){
 		return(FALSE);
+	}else if (VK == VK_RETURN){
+		InputReturn(Event->dwControlKeyState, Mode, Result);
 	}else if (CH){
 		InputChar(CH, Event->dwControlKeyState, Result);
 	}else if (VK == VK_INSERT){
@@ -152,13 +155,13 @@ InputWindow(WINDOW_BUFFER_SIZE_RECORD *Event)
 	return(FALSE);
 }
 BOOL 
-InputEvent(INPUT_RECORD *Record, LPSTR Buffer)
+InputEvent(INPUT_RECORD *Record, WIN_TERMIO *Mode, LPSTR Buffer)
 {
 	BOOL bResult = FALSE;
 
 	switch (Record->EventType){
 		case KEY_EVENT:
-			bResult = InputKey(&Record->KeyEvent, Buffer);
+			bResult = InputKey(&Record->KeyEvent, Mode, Buffer);
 			break;
 		case WINDOW_BUFFER_SIZE_EVENT:
 			bResult = InputWindow(&Record->WindowBufferSizeEvent);
@@ -173,7 +176,7 @@ InputEvent(INPUT_RECORD *Record, LPSTR Buffer)
 	return(bResult);
 }
 BOOL 
-InputReadEvent(HANDLE Handle, CHAR *Buffer)
+InputReadEvent(HANDLE Handle, WIN_TERMIO *Mode, CHAR *Buffer)
 {
 	BOOL bResult = FALSE;
 	INPUT_RECORD iRecord;
@@ -183,13 +186,13 @@ InputReadEvent(HANDLE Handle, CHAR *Buffer)
 	if (!ReadConsoleInput(Handle, &iRecord, 1, &dwCount)){
 		vfs_raise(WM_COMMAND, CTRL_ABORT_EVENT, 0);
 	}else{
-		bResult = InputEvent(&iRecord, Buffer);
+		bResult = InputEvent(&iRecord, Mode, Buffer);
 	}
 	__Input = Buffer;
 	return(bResult);
 }
 BOOL 
-InputReadLine(HANDLE Handle, DWORD Mode, CHAR *Buffer)
+InputReadLine(HANDLE Handle, WIN_TERMIO *Mode, CHAR *Buffer)
 {
 	BOOL bResult = FALSE;
 	LONG lCount = 0;
@@ -199,10 +202,10 @@ InputReadLine(HANDLE Handle, DWORD Mode, CHAR *Buffer)
 		vfs_raise(WM_COMMAND, CTRL_ABORT_EVENT, 0);
 	}else if (lCount > 0){
 		lCount--;
-		if (Mode & ENABLE_PROCESSED_INPUT){
+		if (Mode->LFlags & WIN_ISIG){		/* ENABLE_PROCESSED_INPUT */
 			Buffer[lCount--] = 0;		/* remove NL, leave CR */
 		}
-		if (__CTTY->Mode.IFlags & WIN_ICRNL){
+		if (Mode->IFlags & WIN_ICRNL){
 			Buffer[lCount] = '\n';		/* replace CR (ftp.exe) */
 		}
 		bResult = TRUE;
@@ -280,6 +283,23 @@ InputIsEvent(INPUT_RECORD *Record)
 /****************************************************/
 
 BOOL 
+input_TIOCFLUSH(HANDLE Handle)
+{
+	BOOL bResult = FALSE;
+
+	/* "Handle is invalid" if CONIN$ buffer empty
+	 */
+	if (!FlushConsoleInputBuffer(Handle)){
+		WIN_ERR("FlushConsoleInputBuffer(%d): %s\n", Handle, win_strerror(GetLastError()));
+	}else{
+		bResult = TRUE;
+	}
+	return(bResult);
+}
+
+/****************************************************/
+
+BOOL 
 input_read(HANDLE Handle, LPSTR Buffer, DWORD Size, DWORD *Result)
 {
 	CHAR C = 0;
@@ -303,9 +323,9 @@ input_read(HANDLE Handle, LPSTR Buffer, DWORD Size, DWORD *Result)
 		}else if (__Clipboard){
 			InputReadClipboard(__INPUT_BUF);
 		}else if (dwMode & ENABLE_LINE_INPUT){
-			InputReadLine(Handle, dwMode, __INPUT_BUF);
+			InputReadLine(Handle, &__CTTY->Mode, __INPUT_BUF);
 		}else{
-			InputReadEvent(Handle, __INPUT_BUF);
+			InputReadEvent(Handle, &__CTTY->Mode, __INPUT_BUF);
 		}
 	}
 	*Result = dwResult;
@@ -335,20 +355,4 @@ input_poll(HANDLE Handle, WIN_POLLFD *Info)
 		dwResult++;
 	}
 	return(dwResult);
-}
-
-/****************************************************/
-
-BOOL 
-input_TIOCFLUSH(HANDLE Handle)
-{
-	BOOL bResult = FALSE;
-
-	/* "Handle is invalid" if CONIN$ buffer empty */
-	if (!FlushConsoleInputBuffer(Handle)){
-		WIN_ERR("FlushConsoleInputBuffer(%d): %s\n", Handle, win_strerror(GetLastError()));
-	}else{
-		bResult = TRUE;
-	}
-	return(bResult);
 }

@@ -48,7 +48,7 @@ ConControlHandler(DWORD CtrlType)
 			/* causes ExitProcess() */
 			bResult = FALSE;
 		}else{
-			/* syslogd.exe -d */
+			/* ping.exe */
 			SetEvent(__Interrupt);
 		}
 	}

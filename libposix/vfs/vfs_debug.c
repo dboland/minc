@@ -165,12 +165,12 @@ VfsVolumeFlags(LPSTR Buffer, DWORD Flags, LPCSTR Label)
 	return(psz);
 }
 LPSTR 
-VfsInputMode(LPSTR Buffer, DWORD Mode, LPCSTR Label)
+VfsInputMode(LPSTR Buffer, LPCSTR Label, DWORD Mode)
 {
 	LPSTR psz = Buffer;
 	DWORD dwRemain = Mode;
 
-	psz += msvc_sprintf(psz, "%s(input): 0x%x: ", Label, dwRemain);
+	psz += msvc_sprintf(psz, "%s(input): [0x%x]", Label, dwRemain);
 	psz = VfsFlagName(psz, ENABLE_ECHO_INPUT, "ECHO_INPUT", dwRemain, &dwRemain);
 	psz = VfsFlagName(psz, ENABLE_INSERT_MODE, "INSERT_MODE", dwRemain, &dwRemain);
 	psz = VfsFlagName(psz, ENABLE_LINE_INPUT, "LINE_INPUT", dwRemain, &dwRemain);
@@ -181,11 +181,11 @@ VfsInputMode(LPSTR Buffer, DWORD Mode, LPCSTR Label)
 	psz = VfsFlagName(psz, ENABLE_VIRTUAL_TERMINAL_INPUT, "VIRTUAL_TERMINAL_INPUT", dwRemain, &dwRemain);
 	psz = VfsFlagName(psz, ENABLE_EXTENDED_FLAGS, "EXTENDED_FLAGS", dwRemain, &dwRemain);
 	psz = VfsFlagName(psz, ENABLE_AUTO_POSITION, "AUTO_POSITION", dwRemain, &dwRemain);
-	psz += msvc_sprintf(psz, " remain(0x%x)\n", dwRemain);
+	psz += msvc_sprintf(psz, "[0x%x]\n", dwRemain);
 	return(psz);
 }
 LPSTR 
-VfsScreenMode(LPSTR Buffer, DWORD Mode, LPCSTR Label)
+VfsScreenMode(LPSTR Buffer, LPCSTR Label, DWORD Mode)
 {
 	LPSTR psz = Buffer;
 	DWORD dwRemain = Mode;
@@ -295,7 +295,7 @@ VfsSpecificFlags(LPSTR Buffer, ACCESS_MASK Perms, DWORD Type, LPCSTR Label)
 	if (dwRemain){
 		psz += msvc_sprintf(psz, "%s(0x%08lx): ", Label, dwRemain);
 		if (Type == OB_TYPE_FILE){
-			strcpy(mask, "---");
+			win_strcpy(mask, "---");
 			// 0x0001
 			if (TestAccess(Perms, FILE_READ_DATA, &dwRemain))
 				mask[0] = 'r';
@@ -311,7 +311,7 @@ VfsSpecificFlags(LPSTR Buffer, ACCESS_MASK Perms, DWORD Type, LPCSTR Label)
 			psz = VfsFlagName(psz, PROCESS_CREATE_THREAD, "CREATE_THREAD", dwRemain, &dwRemain);
 		}
 		if (Type == OB_TYPE_FILE){
-			strcpy(mask, "---");
+			win_strcpy(mask, "---");
 			// 0x0080
 			if (TestAccess(Perms, FILE_READ_ATTRIBUTES, &dwRemain))
 				mask[0] = 'r';
@@ -345,7 +345,7 @@ VfsSpecificFlags(LPSTR Buffer, ACCESS_MASK Perms, DWORD Type, LPCSTR Label)
 			psz += msvc_sprintf(psz, " vm(%s)", mask);
 		}
 		if (Type != OB_TYPE_FILE){
-			strcpy(mask, "---");
+			win_strcpy(mask, "---");
 			/* 0x0200 */
 			if (TestAccess(Perms, PROCESS_SET_INFORMATION, &dwRemain))
 				mask[1] = 'w';
@@ -387,7 +387,7 @@ VfsFileAccess(LPSTR Buffer, ACCESS_MASK Access, DWORD Type)
 	return(psz);
 }
 LPSTR 
-VfsPathFlags(LPSTR Buffer, DWORD Flags, LPCSTR Label)
+VfsPathFlags(LPSTR Buffer, LPCSTR Label, DWORD Flags)
 {
 	LPSTR psz = Buffer;
 
@@ -399,6 +399,31 @@ VfsPathFlags(LPSTR Buffer, DWORD Flags, LPCSTR Label)
 	psz = VfsFlagName(psz, WIN_PATHCOPY, "PATHCOPY", Flags, &Flags);
 	psz = VfsFlagName(psz, WIN_KEEPOBJECT, "KEEPOBJECT", Flags, &Flags);
 	psz += msvc_sprintf(psz, " remain(0x%x)\n", Flags);
+	return(psz);
+}
+LPSTR 
+VfsMountFlags(LPSTR Buffer, LPCSTR Label, DWORD Flags)
+{
+	LPSTR psz = Buffer;
+
+	psz += msvc_sprintf(psz, "%s([0x%x]", Label, Flags);
+	psz = VfsFlagName(psz, WIN_MNT_RDONLY, "MNT_RDONLY", Flags, &Flags);
+	psz = VfsFlagName(psz, WIN_MNT_SYNCHRONOUS, "MNT_SYNCHRONOUS", Flags, &Flags);
+	psz = VfsFlagName(psz, WIN_MNT_NOEXEC, "MNT_NOEXEC", Flags, &Flags);
+	psz = VfsFlagName(psz, WIN_MNT_NOSUID, "MNT_NOSUID", Flags, &Flags);
+	psz = VfsFlagName(psz, WIN_MNT_NODEV, "MNT_NODEV", Flags, &Flags);
+	psz = VfsFlagName(psz, WIN_MNT_ASYNC, "MNT_ASYNC", Flags, &Flags);
+
+	psz = VfsFlagName(psz, WIN_MNT_UPDATE, "MNT_UPDATE", Flags, &Flags);
+	psz = VfsFlagName(psz, WIN_MNT_DELEXPORT, "MNT_DELEXPORT", Flags, &Flags);
+	psz = VfsFlagName(psz, WIN_MNT_RELOAD, "MNT_RELOAD", Flags, &Flags);
+	psz = VfsFlagName(psz, WIN_MNT_FORCE, "MNT_FORCE", Flags, &Flags);
+	psz = VfsFlagName(psz, WIN_MNT_NOWAIT, "MNT_NOWAIT", Flags, &Flags);
+	psz = VfsFlagName(psz, WIN_MNT_DEBUG, "MNT_DEBUG", Flags, &Flags);
+	psz = VfsFlagName(psz, WIN_MNT_WANTRDWR, "MNT_WANTRDWR", Flags, &Flags);
+	psz = VfsFlagName(psz, WIN_MNT_SOFTDEP, "MNT_SOFTDEP", Flags, &Flags);
+	psz = VfsFlagName(psz, WIN_MNT_DOOMED, "MNT_DOOMED", Flags, &Flags);
+	psz += msvc_sprintf(psz, "[0x%x])\n", Flags);
 	return(psz);
 }
 
@@ -415,14 +440,6 @@ VfsDebugStat(WIN_VATTR *Stat, LPCSTR Label)
 {
 	msvc_printf("%s(%d): Device(0x%x) Attribs(0x%x) Special(0x%x) Links(%d) Size(%d) Type(%s)\n", 
 		Label, Stat->VolumeSerialNumber, Stat->DeviceId, Stat->Attributes, Stat->SpecialId, Stat->NumberOfLinks, Stat->FileSizeLow, __FType[Stat->Mode.FileType]);
-}
-VOID 
-VfsDebugMount(WIN_MOUNT *Mount, LPCSTR Label)
-{
-	msvc_printf("%s(%d): Flags(0x%x) Serial(%lu) DevType(0x%x) DevId(0x%x)\n", 
-		Label, Mount->MountId, Mount->Flags, Mount->VolumeSerial, Mount->DeviceType, Mount->DeviceId);
-	msvc_printf("+ Path: %ls\n", Mount->Path);
-	msvc_printf("+ Drive: %ls\n", Mount->Drive);
 }
 VOID 
 VfsDebugPoll(WIN_VNODE *Node, WIN_POLLFD *Info, LPCSTR Label)
@@ -500,7 +517,7 @@ vfs_NAMEI(WIN_NAMEIDATA *Path, LPSTR Buffer)
 
 	psz += msvc_sprintf(psz, "Resolved(%ls): MountId(%d) Type(%s:%s)\n", 
 		Path->Resolved, Path->MountId, FSType(Path->FSType), FType(Path->FileType));
-	psz = VfsPathFlags(psz, Path->Flags, "+ Flags");
+	psz = VfsPathFlags(psz, "+ Flags", Path->Flags);
 	psz = VfsFileAttribs(psz, Path->Attribs);
 	return(psz - Buffer);
 }
@@ -526,15 +543,27 @@ vfs_TTY(WIN_TTY *Terminal, LPSTR Buffer)
 //	psz = VfsTermFlags(psz, &Terminal->Mode, "+ mode");
 	return(psz - Buffer);
 }
-/* DWORD 
-vfs_TERMIO(WIN_TERMIO *Mode, LPSTR Buffer)
+DWORD 
+vfs_CONIN(DWORD Mode, LPSTR Buffer)
 {
 	LPSTR psz = Buffer;
 
 	psz += msvc_sprintf(psz, "\n");
-	psz = VfsTermFlags(psz, Mode, "+ mode");
+	psz = VfsInputMode(psz, "+ mode", Mode);
 	return(psz - Buffer);
-} */
+}
+DWORD 
+vfs_MOUNT(WIN_MOUNT *Mount, LPSTR Buffer)
+{
+	LPSTR psz = Buffer;
+
+	psz += msvc_sprintf(psz, "MountId(%d): Serial(%lu) DevType(0x%x) DevId(0x%x)\n", 
+		Mount->MountId, Mount->VolumeSerial, Mount->DeviceType, Mount->DeviceId);
+	psz += msvc_sprintf(psz, "+ Path: %ls\n", Mount->Path);
+	psz += msvc_sprintf(psz, "+ Drive: %ls\n", Mount->Drive);
+	psz = VfsMountFlags(psz, "+ Flags", Mount->Flags);
+	return(psz - Buffer);
+}
 
 /****************************************************/
 
@@ -556,9 +585,12 @@ vfs_ktrace(LPCSTR Label, STRUCT_TYPE Type, PVOID Data)
 		case STRUCT_TTY:
 			vfs_TTY((WIN_TTY *)Data, szText);
 			break;
-//		case STRUCT_TERMIO:
-//			vfs_TERMIO((WIN_TERMIO *)Data, szText);
-//			break;
+		case STRUCT_MOUNT:
+			vfs_MOUNT((WIN_MOUNT *)Data, szText);
+			break;
+		case DWORD_CONIN:
+			vfs_CONIN(*(DWORD *)Data, szText);
+			break;
 	}
 	msvc_printf("%s: %s", Label, szText);
 }

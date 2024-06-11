@@ -29,14 +29,13 @@
  */
 
 #include "char_syscall.c"
-#include "ansi/vt100.c"
 #include "ansi/interix.c"
+#include "ansi/vt100.c"
 #include "ansi/ansi.c"
 #include "char_null.c"
 #include "char_input.c"
 #include "char_screen.c"
 #include "char_console.c"
-//#include "char_pty.c"
 #include "char_fcntl.c"
 #include "char_unistd.c"
 #include "char_namei.c"

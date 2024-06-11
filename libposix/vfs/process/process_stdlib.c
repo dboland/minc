@@ -119,9 +119,9 @@ proc_init(WIN_SIGPROC SignalProc)
 		ProcInitLimits(__Process->Limit);
 		win_chdir(L"\\");	/* make sure CWD is at mount point */
 	}
-	if (proc_setugid(__Process)){
-		__Process->IsSetUGid = 1;
-	}
+//	if (proc_setugid(__Process)){
+//		__Process->IsSetUGid = 1;
+//	}
 	__CTTY = &__Terminals[__Process->CTTY];
 	return(__Process);
 }

@@ -35,23 +35,20 @@
 DWORD 
 ScreenMode(WIN_TERMIO *Mode)
 {
-	DWORD dwResult = ENABLE_WRAP_AT_EOL_OUTPUT;
+	DWORD dwResult = ENABLE_WRAP_AT_EOL_OUTPUT | ENABLE_PROCESSED_OUTPUT;
 
 	if (!(Mode->OFlags & WIN_ONLCR)){		/* Vista xterm */
 //		dwResult |= DISABLE_NEWLINE_AUTO_RETURN;
 	}
-	if (Mode->OFlags & WIN_OPOST){
-		dwResult |= ENABLE_PROCESSED_OUTPUT;
-	}
 	return(dwResult);
 }
 BOOL 
-ScreenCarriageReturn(HANDLE Handle, DWORD Flags, CONSOLE_SCREEN_BUFFER_INFO *Info)
+ScreenCarriageReturn(HANDLE Handle, UINT Flags, CONSOLE_SCREEN_BUFFER_INFO *Info)
 {
 	COORD cPos = Info->dwCursorPosition;
-	DWORD dwFlags = WIN_OPOST | WIN_OCRNL;
+	UINT uiFlags = WIN_OPOST | WIN_OCRNL;
 
-	if ((Flags & dwFlags) == dwFlags){
+	if ((Flags & uiFlags) == uiFlags){
 		cPos.Y++;
 	}else{
 		cPos.X = 0;
@@ -59,20 +56,22 @@ ScreenCarriageReturn(HANDLE Handle, DWORD Flags, CONSOLE_SCREEN_BUFFER_INFO *Inf
 	return(SetConsoleCursorPosition(Handle, cPos));
 }
 BOOL 
-ScreenLineFeed(HANDLE Handle, DWORD Flags, CONSOLE_SCREEN_BUFFER_INFO *Info)
+ScreenLineFeed(HANDLE Handle, UINT Flags, CONSOLE_SCREEN_BUFFER_INFO *Info)
 {
-	BOOL bResult = TRUE;
 	COORD cPos = Info->dwCursorPosition;
-	SHORT sBottom = Info->dwSize.Y - 1;
 	SMALL_RECT sRect = Info->srWindow;
+	UINT uiFlags = WIN_OPOST | WIN_ONLCR;
 
-	if (!(Flags & WIN_OPOST)){		/* ssh.exe */
-		sBottom = Info->srWindow.Bottom;
-	}else if (Flags & WIN_ONLCR){
+	if (__CTTY->VEdit){
+		sRect = __CTTY->Margin;
+	}else{
+		sRect.Top = 0;
+		sRect.Bottom = Info->dwSize.Y - 1;
+	}
+	if ((Flags & uiFlags) == uiFlags){		/* ssh.exe */
 		cPos.X = 0;
 	}
-	if (cPos.Y == sBottom){
-		sRect.Top = 0;
+	if (cPos.Y == sRect.Bottom){
 		AnsiScrollVertical(Handle, &sRect, Info->wAttributes, -1);
 	}else{
 		cPos.Y++;
@@ -80,7 +79,7 @@ ScreenLineFeed(HANDLE Handle, DWORD Flags, CONSOLE_SCREEN_BUFFER_INFO *Info)
 	return(SetConsoleCursorPosition(Handle, cPos));
 }
 VOID 
-ScreenControl(HANDLE Handle, DWORD Flags, CHAR C)
+ScreenControl(HANDLE Handle, UINT Flags, CHAR C)
 {
 	DWORD dwCount;
 	CONSOLE_SCREEN_BUFFER_INFO csbInfo;
@@ -131,42 +130,33 @@ ScreenAnsi(HANDLE Handle, CHAR C, SEQUENCE *Seq)
 	CONSOLE_SCREEN_BUFFER_INFO csbInfo;
 	DWORD dwSize = __Escape - Seq->Buf;
 
-	GetConsoleScreenBufferInfo(Handle, &csbInfo);
-
-	if (Seq->CSI == '['){
+	if (!GetConsoleScreenBufferInfo(Handle, &csbInfo)){
+		__PRINTF("[%d]", C)
+	}else if (Seq->CSI == '['){
 		bResult = AnsiControl(Handle, C, &csbInfo, Seq, dwSize);
-
 	}else if (Seq->CSI == '?'){		/* DEC private */
 		if (C == 'h'){			/* DECSM */
 			bResult = DECSetMode(Handle, __CTTY, AnsiStrToInt(Seq->Args));
 		}else if (C == 'l'){		/* DECRM */
 			bResult = DECResetMode(Handle, __CTTY, AnsiStrToInt(Seq->Args));
 		}
-
 	}else if (!Seq->CSI){			/* DEC private (ANSI allowed) */
-		if (C == '7'){			/* DECSC */
-			bResult = DECSaveCursor(&csbInfo);
-		}else if (C == '8'){		/* DECRC */
-			bResult = DECRestoreCursor(Handle, &csbInfo);
-//		}else if (C == 'r'){		/* DECSTBM */
-		}else if (C == 'c'){		/* RIS */
-			bResult = DECResetInitialState(Handle);
+		if (C == '7'){			/* DECSC (apt-get) */
+			bResult = AnsiSaveCursor(&csbInfo);
+		}else if (C == '8'){		/* DECRC (apt-get) */
+			bResult = AnsiRestoreCursor(Handle, &csbInfo);
+		}else{
+			bResult = TRUE;		/* ignore everything else */
 		}
-
 	}else if (Seq->CSI == '('){		/* DEC SCS (Shift-In) */
 		bResult = DECSelectCharacterSet(Handle, C);
-
-
 	}else if (Seq->CSI == ')'){		/* DEC SCS (Shift-Out) */
 		bResult = DECResetCharacterSet(Handle, C);
-
 	}
-
 	if (!bResult){
 		Seq->Buf[dwSize] = 0;
 		msvc_printf("\e%s", Seq->Buf);
 	}
-
 	__Escape = NULL;
 	return(bResult);
 }
@@ -188,7 +178,7 @@ ScreenEscape(HANDLE Handle, CHAR C, SEQUENCE *Seq)
 		Seq->CSI = C;
 	}else if (IsCharAlpha(C)){
 		ScreenAnsi(Handle, C, Seq);
-	}else if (!Seq->CSI){		/* XTERM/DEC private (apt-get on Linux) */
+	}else if (!Seq->CSI){		/* apt-get */
 		ScreenAnsi(Handle, C, Seq);
 	}else if (!Seq->Char1){
 		Seq->Char1 = C;
@@ -267,7 +257,7 @@ screen_write(HANDLE Handle, LPCSTR Buffer, DWORD Size, DWORD *Result)
 	DWORD dwResult = 0;
 	DWORD dwMode = ScreenMode(&__CTTY->Mode);
 	UINT uiCodePage = GetConsoleOutputCP();
-	DWORD Flags = __CTTY->Mode.OFlags;
+	UINT uiFlags = __CTTY->Mode.OFlags;
 
 	if (dwMode & ENABLE_VIRTUAL_TERMINAL_PROCESSING){
 		bResult = WriteFile(Handle, Buffer, Size, &dwResult, NULL);
@@ -283,7 +273,7 @@ screen_write(HANDLE Handle, LPCSTR Buffer, DWORD Size, DWORD *Result)
 			__ANSI_BUF.CSI = 0;
 			__ANSI_BUF.Args = __Escape;
 		}else if (__Char < 32){			/* Space (SP) */
-			ScreenControl(Handle, Flags, __Char);
+			ScreenControl(Handle, uiFlags, __Char);
 		}else if (uiCodePage == CP_UTF8){
 			ScreenMultiByte(Handle, Buffer, &dwCount);
 		}else{
