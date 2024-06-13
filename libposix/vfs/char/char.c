@@ -29,9 +29,9 @@
  */
 
 #include "char_syscall.c"
-#include "ansi/interix.c"
-#include "ansi/vt100.c"
-#include "ansi/ansi.c"
+#include "char_interix.c"
+#include "char_vt100.c"
+#include "char_ansi.c"
 #include "char_null.c"
 #include "char_input.c"
 #include "char_screen.c"

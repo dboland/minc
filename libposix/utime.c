@@ -68,7 +68,11 @@ sys_utime(call_t call, const char *path, const struct utimbuf *times)
 	WIN_NAMEIDATA wPath;
 	FILETIME fTime[2];
 
-	if (!vfs_utimes(path_win(&wPath, path, 0), utimbuf_win(fTime, times))){
+	if (!path){
+		result = -EFAULT;
+	}else if (!*path){
+		result = -ENOENT;
+	}else if (!vfs_utimes(path_win(&wPath, path, 0), utimbuf_win(fTime, times))){
 		result -= errno_posix(GetLastError());
 	}
 	return(result);

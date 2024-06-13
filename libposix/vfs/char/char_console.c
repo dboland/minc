@@ -48,7 +48,6 @@ ConControlHandler(DWORD CtrlType)
 			/* causes ExitProcess() */
 			bResult = FALSE;
 		}else{
-			/* ping.exe */
 			SetEvent(__Interrupt);
 		}
 	}
