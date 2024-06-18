@@ -67,13 +67,13 @@ con_TIOCSWINSZ(WIN_DEVICE *Device, WIN_WINSIZE *WinSize)
 	return(screen_TIOCSWINSZ(Device->Output, WinSize));
 }
 BOOL 
-con_TIOCSETA(WIN_DEVICE *Device, WIN_TERMIO *Mode)
+con_TIOCSETA(WIN_DEVICE *Device, WIN_TERMIO *Attribs)
 {
 	BOOL bResult = FALSE;
 
-	if (!SetConsoleMode(Device->Input, InputMode(Mode))){
+	if (!SetConsoleMode(Device->Input, InputMode(Attribs))){
 		WIN_ERR("SetConsoleMode(%d): %s\n", Device->Input, win_strerror(GetLastError()));
-	}else if (!SetConsoleMode(Device->Output, ScreenMode(Mode))){
+	}else if (!SetConsoleMode(Device->Output, ScreenMode(Attribs))){
 		WIN_ERR("SetConsoleMode(%d): %s\n", Device->Output, win_strerror(GetLastError()));
 	}else{
 		bResult = TRUE;

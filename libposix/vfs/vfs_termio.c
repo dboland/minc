@@ -75,7 +75,7 @@ vfs_TIOCSWINSZ(WIN_VNODE *Node, WIN_WINSIZE *WinSize)
 	return(bResult);
 }
 BOOL 
-vfs_TIOCGETA(WIN_VNODE *Node, WIN_TERMIO *Mode)
+vfs_TIOCGETA(WIN_VNODE *Node, WIN_TERMIO *Attribs)
 {
 	BOOL bResult = FALSE;
 
@@ -124,7 +124,7 @@ vfs_TIOCDRAIN(WIN_VNODE *Node)
 	return(bResult);
 }
 BOOL 
-vfs_TIOCSETA(WIN_VNODE *Node, WIN_TERMIO *Mode, BOOL Flush, BOOL Drain)
+vfs_TIOCSETA(WIN_VNODE *Node, WIN_TERMIO *Attribs, BOOL Flush, BOOL Drain)
 {
 	BOOL bResult = FALSE;
 
@@ -133,10 +133,10 @@ vfs_TIOCSETA(WIN_VNODE *Node, WIN_TERMIO *Mode, BOOL Flush, BOOL Drain)
 	}
 	switch (Node->FSType){
 		case FS_TYPE_PDO:
-			bResult = pdo_TIOCSETA(DEVICE(Node->DeviceId), Mode);
+			bResult = pdo_TIOCSETA(DEVICE(Node->DeviceId), Attribs);
 			break;
 		case FS_TYPE_CHAR:			/* nano.exe */
-			bResult = char_TIOCSETA(Node, Mode);
+			bResult = char_TIOCSETA(Node, Attribs);
 			break;
 		case FS_TYPE_PIPE:
 			bResult = TRUE;
@@ -157,7 +157,7 @@ vfs_TIOCSCTTY(WIN_VNODE *Node, WIN_TASK *Task)
 
 	if (Task->Flags & WIN_PS_CONTROLT){
 		SetLastError(ERROR_LOGON_SESSION_EXISTS);
-	}else if (pdo_TIOCSCTTY(DEVICE(Node->DeviceId), Task)){
+	}else if (pdo_TIOCSCTTY(DEVICE(Node->DeviceId), pwTerminal)){
 		pwTerminal->SessionId = Task->SessionId;
 		pwTerminal->GroupId = Task->GroupId;
 		Task->Flags |= WIN_PS_CONTROLT;

@@ -33,11 +33,12 @@
 /****************************************************/
 
 DWORD 
-ScreenMode(WIN_TERMIO *Mode)
+ScreenMode(WIN_TERMIO *Attribs)
 {
-	DWORD dwResult = ENABLE_WRAP_AT_EOL_OUTPUT | ENABLE_PROCESSED_OUTPUT;
+	DWORD dwResult = ENABLE_PROCESSED_OUTPUT | ENABLE_WRAP_AT_EOL_OUTPUT;
+	UINT uiFlags = WIN_OPOST | WIN_ONLCR;
 
-	if (!(Mode->OFlags & WIN_ONLCR)){		/* Vista xterm */
+	if ((Attribs->OFlags & uiFlags) != uiFlags){		/* Vista xterm */
 //		dwResult |= DISABLE_NEWLINE_AUTO_RETURN;
 	}
 	return(dwResult);
@@ -53,6 +54,7 @@ ScreenCarriageReturn(HANDLE Handle, UINT Flags, CONSOLE_SCREEN_BUFFER_INFO *Info
 	}else{
 		cPos.X = 0;
 	}
+	Info->dwCursorPosition = cPos;
 	return(SetConsoleCursorPosition(Handle, cPos));
 }
 BOOL 
@@ -76,6 +78,7 @@ ScreenLineFeed(HANDLE Handle, UINT Flags, CONSOLE_SCREEN_BUFFER_INFO *Info)
 	}else{
 		cPos.Y++;
 	}
+	Info->dwCursorPosition = cPos;
 	return(SetConsoleCursorPosition(Handle, cPos));
 }
 VOID 
@@ -205,6 +208,20 @@ ScreenMultiByte(HANDLE Handle, LPCSTR Buffer, DWORD *Result)
 	}
 	return(bResult);
 }
+VOID 
+ScreenPutChar(HANDLE Handle, UINT Flags, CONSOLE_SCREEN_BUFFER_INFO *Info)
+{
+	DWORD dwCount;
+
+	if (Info->wAttributes & COMMON_LVB_AUTOWRAP){
+		Info->wAttributes &= ~COMMON_LVB_AUTOWRAP;
+		ScreenLineFeed(Handle, Flags, Info);
+	}else if (Info->dwCursorPosition.X == Info->srWindow.Right){
+		Info->wAttributes |= COMMON_LVB_AUTOWRAP;
+	}
+	Info->dwCursorPosition.X++;
+	WriteFile(Handle, &__Char, 1, &dwCount, NULL);
+}
 
 /****************************************************/
 
@@ -255,9 +272,10 @@ screen_write(HANDLE Handle, LPCSTR Buffer, DWORD Size, DWORD *Result)
 	DWORD dwCount;
 	BOOL bResult = TRUE;
 	DWORD dwResult = 0;
-	DWORD dwMode = ScreenMode(&__CTTY->Mode);
+	DWORD dwMode = ScreenMode(&__CTTY->Attribs);
 	UINT uiCodePage = GetConsoleOutputCP();
-	UINT uiFlags = __CTTY->Mode.OFlags;
+	UINT uiFlags = __CTTY->Attribs.OFlags;
+	CONSOLE_SCREEN_BUFFER_INFO sbInfo;
 
 	if (dwMode & ENABLE_VIRTUAL_TERMINAL_PROCESSING){
 		bResult = WriteFile(Handle, Buffer, Size, &dwResult, NULL);

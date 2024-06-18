@@ -33,17 +33,17 @@
 /****************************************************/
 
 DWORD 
-InputMode(WIN_TERMIO *Mode)
+InputMode(WIN_TERMIO *Attribs)
 {
 	DWORD dwResult = ENABLE_WINDOW_INPUT | ENABLE_EXTENDED_FLAGS | 
 		ENABLE_INSERT_MODE | ENABLE_QUICK_EDIT_MODE | ENABLE_MOUSE_INPUT;
 
-	if (Mode->LFlags & WIN_ECHO){
+	if (Attribs->LFlags & WIN_ECHO){
 		dwResult |= ENABLE_LINE_INPUT | ENABLE_ECHO_INPUT;
-	}else if (Mode->LFlags & WIN_ICANON){
+	}else if (Attribs->LFlags & WIN_ICANON){
 		dwResult |= ENABLE_LINE_INPUT;
 	}
-	if (Mode->LFlags & WIN_ISIG){
+	if (Attribs->LFlags & WIN_ISIG){
 		dwResult |= ENABLE_PROCESSED_INPUT;
 	}
 	return(dwResult);
@@ -68,9 +68,9 @@ InputChar(CHAR C, DWORD KeyState, CHAR *Result)
 	*Result = 0;
 }
 VOID 
-InputReturn(DWORD KeyState, WIN_TERMIO *Mode, CHAR *Result)
+InputReturn(DWORD KeyState, WIN_TERMIO *Attribs, CHAR *Result)
 {
-	if (Mode->IFlags & WIN_ICRNL){
+	if (Attribs->IFlags & WIN_ICRNL){
 		InputChar('\n', KeyState, Result);
 	}else{
 		InputChar('\r', KeyState, Result);
@@ -103,7 +103,7 @@ InputInsert(DWORD KeyState, CHAR *Result)
 	return(bResult);
 }
 BOOL 
-InputKey(KEY_EVENT_RECORD *Event, WIN_TERMIO *Mode, CHAR *Result)
+InputKey(KEY_EVENT_RECORD *Event, WIN_TERMIO *Attribs, CHAR *Result)
 {
 	BOOL bResult = TRUE;
 	CHAR CH = Event->uChar.AsciiChar;
@@ -112,7 +112,7 @@ InputKey(KEY_EVENT_RECORD *Event, WIN_TERMIO *Mode, CHAR *Result)
 	if (!Event->bKeyDown){
 		return(FALSE);
 	}else if (VK == VK_RETURN){
-		InputReturn(Event->dwControlKeyState, Mode, Result);
+		InputReturn(Event->dwControlKeyState, Attribs, Result);
 	}else if (CH){
 		InputChar(CH, Event->dwControlKeyState, Result);
 	}else if (VK == VK_INSERT){
@@ -155,13 +155,13 @@ InputWindow(WINDOW_BUFFER_SIZE_RECORD *Event)
 	return(FALSE);
 }
 BOOL 
-InputEvent(INPUT_RECORD *Record, WIN_TERMIO *Mode, LPSTR Buffer)
+InputEvent(INPUT_RECORD *Record, WIN_TERMIO *Attribs, LPSTR Buffer)
 {
 	BOOL bResult = FALSE;
 
 	switch (Record->EventType){
 		case KEY_EVENT:
-			bResult = InputKey(&Record->KeyEvent, Mode, Buffer);
+			bResult = InputKey(&Record->KeyEvent, Attribs, Buffer);
 			break;
 		case WINDOW_BUFFER_SIZE_EVENT:
 			bResult = InputWindow(&Record->WindowBufferSizeEvent);
@@ -176,7 +176,7 @@ InputEvent(INPUT_RECORD *Record, WIN_TERMIO *Mode, LPSTR Buffer)
 	return(bResult);
 }
 BOOL 
-InputReadEvent(HANDLE Handle, WIN_TERMIO *Mode, CHAR *Buffer)
+InputReadEvent(HANDLE Handle, WIN_TERMIO *Attribs, CHAR *Buffer)
 {
 	BOOL bResult = FALSE;
 	INPUT_RECORD iRecord;
@@ -186,13 +186,13 @@ InputReadEvent(HANDLE Handle, WIN_TERMIO *Mode, CHAR *Buffer)
 	if (!ReadConsoleInput(Handle, &iRecord, 1, &dwCount)){
 		vfs_raise(WM_COMMAND, CTRL_ABORT_EVENT, 0);
 	}else{
-		bResult = InputEvent(&iRecord, Mode, Buffer);
+		bResult = InputEvent(&iRecord, Attribs, Buffer);
 	}
 	__Input = Buffer;
 	return(bResult);
 }
 BOOL 
-InputReadLine(HANDLE Handle, WIN_TERMIO *Mode, CHAR *Buffer)
+InputReadLine(HANDLE Handle, WIN_TERMIO *Attribs, CHAR *Buffer)
 {
 	BOOL bResult = FALSE;
 	LONG lCount = 0;
@@ -202,10 +202,10 @@ InputReadLine(HANDLE Handle, WIN_TERMIO *Mode, CHAR *Buffer)
 		vfs_raise(WM_COMMAND, CTRL_ABORT_EVENT, 0);
 	}else if (lCount > 0){
 		lCount--;
-		if (Mode->LFlags & WIN_ISIG){		/* ENABLE_PROCESSED_INPUT */
+		if (Attribs->LFlags & WIN_ISIG){		/* ENABLE_PROCESSED_INPUT */
 			Buffer[lCount--] = 0;		/* remove NL, leave CR */
 		}
-		if (Mode->IFlags & WIN_ICRNL){
+		if (Attribs->IFlags & WIN_ICRNL){
 			Buffer[lCount] = '\n';		/* replace CR (ftp.exe) */
 		}
 		bResult = TRUE;
@@ -305,7 +305,7 @@ input_read(HANDLE Handle, LPSTR Buffer, DWORD Size, DWORD *Result)
 	CHAR C = 0;
 	BOOL bResult = FALSE;
 	DWORD dwResult = 0;
-	DWORD dwMode = InputMode(&__CTTY->Mode);
+	DWORD dwMode = InputMode(&__CTTY->Attribs);
 	LONG lSize = Size;
 
 	if (dwMode & ENABLE_VIRTUAL_TERMINAL_INPUT){
@@ -323,9 +323,9 @@ input_read(HANDLE Handle, LPSTR Buffer, DWORD Size, DWORD *Result)
 		}else if (__Clipboard){
 			InputReadClipboard(__INPUT_BUF);
 		}else if (dwMode & ENABLE_LINE_INPUT){
-			InputReadLine(Handle, &__CTTY->Mode, __INPUT_BUF);
+			InputReadLine(Handle, &__CTTY->Attribs, __INPUT_BUF);
 		}else{
-			InputReadEvent(Handle, &__CTTY->Mode, __INPUT_BUF);
+			InputReadEvent(Handle, &__CTTY->Attribs, __INPUT_BUF);
 		}
 	}
 	*Result = dwResult;

@@ -30,6 +30,7 @@
 #include "winnt.h"
 #include "basetsd.h"
 #include "winbase.h"
+#include "wincon.h"
 
 typedef HANDLE HWND;
 
@@ -77,34 +78,6 @@ typedef struct tagMSG {
         DWORD time;
         POINT pt;
 } MSG,*LPMSG,*PMSG;
-
-/*
- * wincon.h
- */
-
-#define ENABLE_PROCESSED_INPUT		0x0001
-#define ENABLE_LINE_INPUT		0x0002
-#define ENABLE_ECHO_INPUT		0x0004
-#define ENABLE_WINDOW_INPUT		0x0008
-#define ENABLE_MOUSE_INPUT		0x0010
-#define ENABLE_INSERT_MODE		0x0020
-#define ENABLE_QUICK_EDIT_MODE		0x0040
-#define ENABLE_EXTENDED_FLAGS  		0x0080
-
-#define ENABLE_PROCESSED_OUTPUT		0x0001
-#define ENABLE_WRAP_AT_EOL_OUTPUT	0x0002
-
-typedef struct _COORD {
-        SHORT X;
-        SHORT Y;
-} COORD, *PCOORD;
-
-typedef struct _SMALL_RECT {
-	SHORT Left; 
-	SHORT Top; 
-	SHORT Right; 
-	SHORT Bottom; 
-} SMALL_RECT; 
 
 /*
  * wincrypt.h

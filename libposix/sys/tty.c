@@ -43,7 +43,7 @@ tty_init(void)
 
 	win_memcpy(attr.c_cc, ttydefchars, sizeof(ttydefchars));
 	while (dwIndex < WIN_TTY_MAX){
-		win_memcpy(&pwTerminal->Mode, &attr, sizeof(WIN_TERMIO));
+		win_memcpy(&pwTerminal->Attribs, &attr, sizeof(WIN_TERMIO));
 		pwTerminal->ScrollRate = 1;
 		pwTerminal++;
 		dwIndex++;

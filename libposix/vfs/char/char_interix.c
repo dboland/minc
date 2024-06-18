@@ -153,3 +153,33 @@ AnsiVerticalEditingMode(HANDLE Handle, SMALL_RECT *Rect, SHORT Parm)
 	}
 	return(bResult);
 }
+BOOL 
+AnsiEqualRect(SMALL_RECT *Rect1, SMALL_RECT *Rect2)
+{
+	DWORD dwSum1 = Rect1->Left + Rect1->Right + Rect1->Top + Rect1->Bottom;
+	DWORD dwSum2 = Rect2->Left + Rect2->Right + Rect2->Top + Rect2->Bottom;
+
+	if (dwSum1 != dwSum2){
+		return(FALSE);
+	}
+	return(TRUE);
+}
+BOOL 
+AnsiSetTopBottomMargin(HANDLE Handle, CONSOLE_SCREEN_BUFFER_INFO *Info, WORD Top, WORD Bottom)
+{
+	SMALL_RECT sRect = Info->srWindow;
+	COORD cPos = {sRect.Left, sRect.Top + (Top - 1)};
+
+	/* Margins will not work without disabling the 'am' capability
+	 * (ENABLE_WRAP_AT_EOL_OUTPUT), so long lines can be scrolled
+	 * as one.
+	 */
+	sRect.Bottom = sRect.Top + Bottom - 1;
+	sRect.Top += Top - 1;
+	if (AnsiEqualRect(&Info->srWindow, &sRect)){
+		AnsiVerticalEditingMode(Handle, &sRect, 2);
+	}else{
+		AnsiVerticalEditingMode(Handle, &sRect, 1);
+	}
+	return(SetConsoleCursorPosition(Handle, cPos));
+}

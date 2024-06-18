@@ -80,31 +80,29 @@ BOOL
 AnsiScrollVertical(HANDLE Handle, SMALL_RECT *Rect, WORD Attribs, WORD Delta)
 {
 	CHAR_INFO cInfo;
-	COORD cPos;
+	COORD cPos = {Rect->Left, Rect->Top};
 
-	/* ScrollConsoleScreenBuffer() adds one line to the rectangle
-	 * when scrolling up.
-	 */
-	cPos.X = Rect->Left;
-	cPos.Y = Rect->Top;
 	if (Delta > 0){
 		cPos.Y += Delta;
 		Rect->Bottom -= Delta;
 	}else{
 		Rect->Top -= Delta;
-		Rect->Bottom--;
 	}
+	/* ScrollConsoleScreenBuffer() seems to add one line to the rectangle.
+	 */
+	Rect->Bottom--;
 	cInfo.Char.AsciiChar = ' ';
 	cInfo.Attributes = Attribs;
-	return(ScrollConsoleScreenBuffer(Handle, Rect, NULL, cPos, &cInfo));
+	return(ScrollConsoleScreenBuffer(Handle, Rect, Rect, cPos, &cInfo));
 }
 WORD 
-AnsiInvertAttrib(CONSOLE_SCREEN_BUFFER_INFO *Info)
+AnsiInvertAttribs(CONSOLE_SCREEN_BUFFER_INFO *Info)
 {
-	WORD wBackGround = (Info->wAttributes & 0xF0) / 0x10;
-	WORD wForeGround = (Info->wAttributes & 0x0F) * 0x10;
+	WORD wAttribs = Info->wAttributes & 0xFF00;
+	BYTE bBackGround = (Info->wAttributes & 0xF0) / 0x10;
+	BYTE bForeGround = (Info->wAttributes & 0x0F) * 0x10;
 
-	return(wBackGround | wForeGround);
+	return(wAttribs | bBackGround | bForeGround);
 }
 BOOL 
 AnsiCursorMove(HANDLE Handle, CONSOLE_SCREEN_BUFFER_INFO *Info, WORD DeltaY, WORD DeltaX)
@@ -140,8 +138,8 @@ AnsiRenderForeground(CONSOLE_SCREEN_BUFFER_INFO *Info, CHAR Char2)
 		wAttrib |= FOREGROUND_CYAN;
 	}else if (Char2 == '7'){
 		wAttrib |= FOREGROUND_WHITE;
-//	}else if (Char2 == '8'){ 	/* CSI for RGB color (journalctl in Debian) */
-	}else if (Char2 == '9'){	/* default (ANSI v.2.53) */
+//	}else if (Char2 == '8'){ 		/* CSI for RGB color (journalctl in Debian) */
+	}else if (Char2 == '9'){		/* default (ANSI v.2.53) */
 		wAttrib |= FOREGROUND_DEFAULT;
 	}else{
 		bResult = FALSE;
@@ -171,8 +169,8 @@ AnsiRenderBackground(CONSOLE_SCREEN_BUFFER_INFO *Info, CHAR Char2)
 		wAttrib |= BACKGROUND_CYAN;
 	}else if (Char2 == '7'){
 		wAttrib |= BACKGROUND_WHITE;
-//	}else if (Char2 == '8'){ 	/* CSI for RGB color */
-	}else if (Char2 == '9'){	/* default (ANSI v.2.53) */
+//	}else if (Char2 == '8'){ 		/* CSI for RGB color */
+	}else if (Char2 == '9'){		/* default (ANSI v.2.53) */
 		wAttrib |= BACKGROUND_DEFAULT;
 	}else{
 		bResult = FALSE;
@@ -275,7 +273,7 @@ AnsiSelectGraphicRendition(HANDLE Handle, CONSOLE_SCREEN_BUFFER_INFO *Info, LPST
 		}
 	}
 	if (__CTTY->RVideo){
-		Info->wAttributes = AnsiInvertAttrib(Info);
+		Info->wAttributes = AnsiInvertAttribs(Info);
 	}
 	return(SetConsoleTextAttribute(Handle, Info->wAttributes));
 }
@@ -304,8 +302,7 @@ AnsiInsertLine(HANDLE Handle, CONSOLE_SCREEN_BUFFER_INFO *Info, WORD Count)
 	COORD cPos = {0, Info->dwCursorPosition.Y + Count};
 	CHAR_INFO cInfo;
 
-	/* When scrolling down, clip excessive lines from 
-	 * rectangle (vim.exe set termcap).
+	/* Clip excess lines at bottom (vim.exe set termcap).
 	 */
 	sRect.Top = Info->dwCursorPosition.Y;
 	cInfo.Char.AsciiChar = ' ';
@@ -544,11 +541,7 @@ AnsiControl(HANDLE Handle, CHAR C, CONSOLE_SCREEN_BUFFER_INFO *Info, SEQUENCE *S
 			bResult = AnsiDeviceStatusReport(Info, Seq->Char1, __INPUT_BUF);
 			break;
 		case 'r':		/* DECSTBM (apt-get) */
-			/* Margins will not work without disabling the 'am' capability
-			 * (ENABLE_WRAP_AT_EOL_OUTPUT), so long lines can be scrolled
-			 * as one.
-			 */
-			bResult = TRUE;
+			bResult = AnsiSetTopBottomMargin(Handle, Info, Seq->Arg1, AnsiStrToInt(Seq->Args));
 			break;
 		case 's':		/* SC */
 			bResult = AnsiSaveCursor(Info);

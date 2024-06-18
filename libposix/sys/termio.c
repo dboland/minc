@@ -115,53 +115,53 @@ term_TIOCDRAIN(WIN_VNODE *Node)
 	return(result);
 }
 int 
-term_TIOCGETA(WIN_VNODE *Node, WIN_TERMIO *Mode)
+term_TIOCGETA(WIN_VNODE *Node, WIN_TERMIO *Attribs)
 {
 	int result = 0;
 
-	if (!vfs_TIOCGETA(Node, Mode)){
+	if (!vfs_TIOCGETA(Node, Attribs)){
 		result -= errno_posix(GetLastError());
 	}else{
-		*Mode = __Terminals[Node->Index].Mode;
+		*Attribs = __Terminals[Node->Index].Attribs;
 	}
 	return(result);
 }
 int 
-term_TIOCSETA(WIN_VNODE *Node, WIN_TERMIO *Mode)
+term_TIOCSETA(WIN_VNODE *Node, WIN_TERMIO *Attribs)
 {
 	int result = 0;
 
 //termio_debug(Mode, "term_TIOCSETA");
-	if (!vfs_TIOCSETA(Node, Mode, FALSE, FALSE)){
+	if (!vfs_TIOCSETA(Node, Attribs, FALSE, FALSE)){
 		result -= errno_posix(GetLastError());
 	}else{
-		__Terminals[Node->Index].Mode = *Mode;
+		__Terminals[Node->Index].Attribs = *Attribs;
 	}
 	return(result);
 }
 int 
-term_TIOCSETAW(WIN_VNODE *Node, WIN_TERMIO *Mode)
+term_TIOCSETAW(WIN_VNODE *Node, WIN_TERMIO *Attribs)
 {
 	int result = 0;
 
 //termio_debug(Mode, "term_TIOCSETAW");
-	if (!vfs_TIOCSETA(Node, Mode, FALSE, TRUE)){
+	if (!vfs_TIOCSETA(Node, Attribs, FALSE, TRUE)){
 		result -= errno_posix(GetLastError());
 	}else{
-		__Terminals[Node->Index].Mode = *Mode;
+		__Terminals[Node->Index].Attribs = *Attribs;
 	}
 	return(result);
 }
 int 
-term_TIOCSETAF(WIN_VNODE *Node, WIN_TERMIO *Mode)
+term_TIOCSETAF(WIN_VNODE *Node, WIN_TERMIO *Attribs)
 {
 	int result = 0;
 
 //termio_debug(Mode, "term_TIOCSETAF");
-	if (!vfs_TIOCSETA(Node, Mode, TRUE, TRUE)){
+	if (!vfs_TIOCSETA(Node, Attribs, TRUE, TRUE)){
 		result -= errno_posix(GetLastError());
 	}else{
-		__Terminals[Node->Index].Mode = *Mode;
+		__Terminals[Node->Index].Attribs = *Attribs;
 	}
 	return(result);
 }

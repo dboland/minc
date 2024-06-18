@@ -113,14 +113,14 @@ pdo_TIOCDRAIN(WIN_DEVICE *Device)
 	return(bResult);
 }
 BOOL 
-pdo_TIOCSETA(WIN_DEVICE *Device, WIN_TERMIO *Mode)
+pdo_TIOCSETA(WIN_DEVICE *Device, WIN_TERMIO *Attribs)
 {
 	BOOL bResult = FALSE;
 
 	switch (Device->DeviceType){
 		case DEV_TYPE_PTY:
 		case DEV_TYPE_CONSOLE:
-			bResult = con_TIOCSETA(Device, Mode);
+			bResult = con_TIOCSETA(Device, Attribs);
 			break;
 		case DEV_TYPE_TTY:
 			bResult = TRUE;
@@ -149,13 +149,13 @@ pdo_PTMGET(WIN_DEVICE *Master, WIN_DEVICE *Slave)
 	return(bResult);
 }
 BOOL 
-pdo_TIOCSCTTY(WIN_DEVICE *Device, WIN_TASK *Task)
+pdo_TIOCSCTTY(WIN_DEVICE *Device, WIN_TTY *Terminal)
 {
 	BOOL bResult = FALSE;
 
 	switch (Device->FSType){
 		case FS_TYPE_CHAR:
-			bResult = char_TIOCSCTTY(Device, Task);
+			bResult = char_TIOCSCTTY(Device, Terminal);
 			break;
 		default:
 			SetLastError(ERROR_CTX_NOT_CONSOLE);
