@@ -28,6 +28,10 @@
  *
  */
 
+/* Warning! Do NOT optimize this code by refactoring shared
+ * function calls. Debugging becomes almost impossible.
+ */
+
 #include <wincon.h>
 
 #define FOREGROUND_WHITE	(FOREGROUND_RED | FOREGROUND_GREEN | FOREGROUND_BLUE)
@@ -62,9 +66,8 @@ AnsiStrToInt(LPCSTR String)
 BOOL 
 AnsiScrollHorizontal(HANDLE Handle, CONSOLE_SCREEN_BUFFER_INFO *Info, WORD DeltaLeft, WORD DeltaRight)
 {
-	DWORD dwCount;
 	SMALL_RECT sRect;
-	CHAR_INFO cInfo;
+	CHAR_INFO cInfo = {' ', Info->wAttributes & 0xFF};
 	COORD cPos = Info->dwCursorPosition;
 
 	cPos.X += DeltaRight;
@@ -72,46 +75,15 @@ AnsiScrollHorizontal(HANDLE Handle, CONSOLE_SCREEN_BUFFER_INFO *Info, WORD Delta
 	sRect.Right = Info->dwSize.X - DeltaRight;
 	sRect.Top = Info->dwCursorPosition.Y;
 	sRect.Bottom = Info->dwCursorPosition.Y;
-	cInfo.Char.AsciiChar = ' ';
-	cInfo.Attributes = Info->wAttributes;
 	return(ScrollConsoleScreenBuffer(Handle, &sRect, NULL, cPos, &cInfo));
-}
-BOOL 
-AnsiScrollVertical(HANDLE Handle, SMALL_RECT *Rect, WORD Attribs, WORD Delta)
-{
-	CHAR_INFO cInfo;
-	COORD cPos = {Rect->Left, Rect->Top};
-
-	if (Delta > 0){
-		cPos.Y += Delta;
-		Rect->Bottom -= Delta;
-	}else{
-		Rect->Top -= Delta;
-	}
-	/* ScrollConsoleScreenBuffer() seems to add one line to the rectangle.
-	 */
-	Rect->Bottom--;
-	cInfo.Char.AsciiChar = ' ';
-	cInfo.Attributes = Attribs;
-	return(ScrollConsoleScreenBuffer(Handle, Rect, Rect, cPos, &cInfo));
 }
 WORD 
 AnsiInvertAttribs(CONSOLE_SCREEN_BUFFER_INFO *Info)
 {
-	WORD wAttribs = Info->wAttributes & 0xFF00;
-	BYTE bBackGround = (Info->wAttributes & 0xF0) / 0x10;
-	BYTE bForeGround = (Info->wAttributes & 0x0F) * 0x10;
+	WORD wBackGround = (Info->wAttributes & 0xF0) / 0x10;
+	WORD wForeGround = (Info->wAttributes & 0x0F) * 0x10;
 
-	return(wAttribs | bBackGround | bForeGround);
-}
-BOOL 
-AnsiCursorMove(HANDLE Handle, CONSOLE_SCREEN_BUFFER_INFO *Info, WORD DeltaY, WORD DeltaX)
-{
-	COORD cPos = Info->dwCursorPosition;
-
-	cPos.Y += DeltaY;
-	cPos.X += DeltaX;
-	return(SetConsoleCursorPosition(Handle, cPos));
+	return(wBackGround | wForeGround);
 }
 
 /****************************************************/
@@ -120,7 +92,7 @@ BOOL
 AnsiRenderForeground(CONSOLE_SCREEN_BUFFER_INFO *Info, CHAR Char2)
 {
 	BOOL bResult = TRUE;
-	WORD wAttrib = Info->wAttributes & 0xF8;
+	WORD wAttrib = Info->wAttributes & 0xFFF8;
 
 	if (Char2 == '0'){
 		wAttrib |= FOREGROUND_BLACK;
@@ -151,7 +123,7 @@ BOOL
 AnsiRenderBackground(CONSOLE_SCREEN_BUFFER_INFO *Info, CHAR Char2)
 {
 	BOOL bResult = TRUE;
-	WORD wAttrib = Info->wAttributes & 0x8F;
+	WORD wAttrib = Info->wAttributes & 0xFF8F;
 
 	if (Char2 == '0'){
 		wAttrib |= BACKGROUND_BLACK;
@@ -182,11 +154,9 @@ BOOL
 AnsiRenderFont(CONSOLE_SCREEN_BUFFER_INFO *Info, CHAR Char2)
 {
 	BOOL bResult = TRUE;
-	WORD wIntensity = Info->wAttributes & BACKGROUND_INTENSITY;
 
 	if (!Char2 || Char2 == '0'){		/* Clear all attributes */
 		Info->wAttributes = BACKGROUND_DEFAULT | FOREGROUND_DEFAULT;
-		__CTTY->RVideo = FALSE;		/* GNU less.exe */
 	}else if (Char2 == '1'){		/* bold */
 		Info->wAttributes |= FOREGROUND_INTENSITY;
 	}else if (Char2 == '2'){		/* dim or secondary (journalctl on Debian) */
@@ -196,10 +166,10 @@ AnsiRenderFont(CONSOLE_SCREEN_BUFFER_INFO *Info, CHAR Char2)
 	}else if (Char2 == '4'){		/* underscore (man.exe) */
 		Info->wAttributes |= FOREGROUND_UNDERLINE;
 	}else if (Char2 == '5'){		/* slow blink (vim.exe) */
-		__CTTY->RVideo = TRUE;
+		Info->wAttributes |= COMMON_LVB_REVERSE_VIDEO;
 //	}else if (Char2 == '6'){		/* fast blink */
 	}else if (Char2 == '7'){		/* invert (smso: enter standout mode) */
-		__CTTY->RVideo = TRUE;
+		Info->wAttributes |= COMMON_LVB_REVERSE_VIDEO;
 	}else{
 		bResult = FALSE;
 	}
@@ -215,9 +185,9 @@ AnsiRenderClear(CONSOLE_SCREEN_BUFFER_INFO *Info, CHAR Char2)
 	}else if (Char2 == '4'){	/* underline */
 		Info->wAttributes &= ~FOREGROUND_UNDERLINE;
 	}else if (Char2 == '5'){	/* slow blink (bitchx.exe "dumb" mode) */
-		__CTTY->RVideo = FALSE;
+		Info->wAttributes &= ~COMMON_LVB_REVERSE_VIDEO;
 	}else if (Char2 == '7'){	/* inversion */
-		__CTTY->RVideo = FALSE;
+		Info->wAttributes &= ~COMMON_LVB_REVERSE_VIDEO;
 	}else{
 		bResult = FALSE;
 	}
@@ -248,11 +218,12 @@ AnsiRender(CONSOLE_SCREEN_BUFFER_INFO *Info, CHAR Char1, CHAR Char2, CHAR Char3)
 BOOL 
 AnsiSelectGraphicRendition(HANDLE Handle, CONSOLE_SCREEN_BUFFER_INFO *Info, LPSTR Buffer, LONG Size)
 {
+	CHAR C;
 	CHAR Char1 = 0;
 	CHAR Char2 = 0;
 	CHAR Char3 = 0;				/* 8-bit color mode (alpine.exe) */
-	CHAR C;
 	LPSTR psz = Buffer;
+	WORD wAttribs;
 
 	while (Size--){
 		C = *Buffer++;
@@ -272,18 +243,95 @@ AnsiSelectGraphicRendition(HANDLE Handle, CONSOLE_SCREEN_BUFFER_INFO *Info, LPST
 			Char3 = C;
 		}
 	}
-	if (__CTTY->RVideo){
-		Info->wAttributes = AnsiInvertAttribs(Info);
+	if (Info->wAttributes & COMMON_LVB_REVERSE_VIDEO){
+		wAttribs = AnsiInvertAttribs(Info);
+	}else{
+		wAttribs = Info->wAttributes & 0xFF;
 	}
-	return(SetConsoleTextAttribute(Handle, Info->wAttributes));
+	return(SetConsoleTextAttribute(Handle, wAttribs));
 }
 
 /****************************************************/
 
 BOOL 
-AnsiScrollDown(HANDLE Handle, CONSOLE_SCREEN_BUFFER_INFO *Info, WORD Delta)
+AnsiCursorUp(HANDLE Handle, CONSOLE_SCREEN_BUFFER_INFO *Info, WORD Count)
 {
-	return(AnsiScrollVertical(Handle, &Info->srWindow, Info->wAttributes, Delta));
+	COORD cPos = Info->dwCursorPosition;
+
+	/* Nano assumes cursor movement after last char
+	 */
+	if (cPos.X > Info->srWindow.Right){
+//		cPos.X -= Info->srWindow.Right + 1;
+		cPos.Y++;
+		cPos.X = 0;
+	}
+	cPos.Y -= Count;
+	Info->dwCursorPosition = cPos;
+	return(SetConsoleCursorPosition(Handle, cPos));
+}
+BOOL 
+AnsiCursorDown(HANDLE Handle, CONSOLE_SCREEN_BUFFER_INFO *Info, WORD Count)
+{
+	COORD cPos = Info->dwCursorPosition;
+
+	if (cPos.X > Info->srWindow.Right){
+//		cPos.X -= Info->srWindow.Right + 1;
+		cPos.Y++;
+		cPos.X = 0;
+	}
+	cPos.Y += Count;
+	Info->dwCursorPosition = cPos;
+	return(SetConsoleCursorPosition(Handle, cPos));
+}
+BOOL 
+AnsiCursorForward(HANDLE Handle, CONSOLE_SCREEN_BUFFER_INFO *Info, WORD Count)
+{
+	COORD cPos = Info->dwCursorPosition;
+
+	/* terminfo(5) - am: automatic right margin (mutt.exe)
+	 */
+	cPos.X += Count;
+	if (cPos.X > Info->srWindow.Right){
+		cPos.X -= Info->srWindow.Right + 1;
+		cPos.Y++;
+	}
+	Info->dwCursorPosition = cPos;
+	return(SetConsoleCursorPosition(Handle, cPos));
+}
+BOOL 
+AnsiCursorBack(HANDLE Handle, CONSOLE_SCREEN_BUFFER_INFO *Info, WORD Count)
+{
+	COORD cPos = Info->dwCursorPosition;
+
+	/* terminfo(5) - bw: automatic left margin (top.exe)
+	 */
+	cPos.X -= Count;
+	if (cPos.X < 0){
+		cPos.X += Info->srWindow.Right + 1;
+		cPos.Y--;
+	}
+	Info->dwCursorPosition = cPos;
+	return(SetConsoleCursorPosition(Handle, cPos));
+}
+BOOL 
+AnsiScrollDown(HANDLE Handle, CONSOLE_SCREEN_BUFFER_INFO *Info, WORD Count)
+{
+	SMALL_RECT sRect = Info->srWindow;
+	COORD cPos = {sRect.Left, sRect.Top};
+	CHAR_INFO cInfo = {' ', Info->wAttributes & 0xFF};
+
+	cPos.Y += Count;
+	return(ScrollConsoleScreenBuffer(Handle, &sRect, &Info->srWindow, cPos, &cInfo));
+}
+BOOL 
+AnsiScrollUp(HANDLE Handle, CONSOLE_SCREEN_BUFFER_INFO *Info, WORD Count)
+{
+	SMALL_RECT sRect = Info->srWindow;
+	COORD cPos = {sRect.Left, sRect.Top};
+	CHAR_INFO cInfo = {' ', Info->wAttributes & 0xFF};
+
+	sRect.Top += Count;
+	return(ScrollConsoleScreenBuffer(Handle, &sRect, &Info->srWindow, cPos, &cInfo));
 }
 BOOL 
 AnsiDeleteCharacter(HANDLE Handle, CONSOLE_SCREEN_BUFFER_INFO *Info, WORD Count)
@@ -299,26 +347,23 @@ BOOL
 AnsiInsertLine(HANDLE Handle, CONSOLE_SCREEN_BUFFER_INFO *Info, WORD Count)
 {
 	SMALL_RECT sRect = Info->srWindow;
-	COORD cPos = {0, Info->dwCursorPosition.Y + Count};
-	CHAR_INFO cInfo;
+	COORD cPos = {0, Info->dwCursorPosition.Y};
+	CHAR_INFO cInfo = {' ', Info->wAttributes & 0xFF};
 
-	/* Clip excess lines at bottom (vim.exe set termcap).
+	/* Clip excess lines at bottom.
 	 */
-	sRect.Top = Info->dwCursorPosition.Y;
-	cInfo.Char.AsciiChar = ' ';
-	cInfo.Attributes = Info->wAttributes;
+	sRect.Top = cPos.Y;
+	cPos.Y += Count;
 	return(ScrollConsoleScreenBuffer(Handle, &sRect, &Info->srWindow, cPos, &cInfo));
 }
 BOOL 
 AnsiDeleteLine(HANDLE Handle, CONSOLE_SCREEN_BUFFER_INFO *Info, WORD Count)
 {
-	CHAR_INFO cInfo;
-	COORD cPos = {0, Info->dwCursorPosition.Y};
 	SMALL_RECT sRect = Info->srWindow;
+	COORD cPos = {0, Info->dwCursorPosition.Y};
+	CHAR_INFO cInfo = {' ', Info->wAttributes & 0xFF};
 
-	sRect.Top = Info->dwCursorPosition.Y + Count;
-	cInfo.Char.AsciiChar = ' ';
-	cInfo.Attributes = Info->wAttributes;
+	sRect.Top = cPos.Y + Count;
 	return(ScrollConsoleScreenBuffer(Handle, &sRect, &Info->srWindow, cPos, &cInfo));
 }
 BOOL 
@@ -344,22 +389,12 @@ AnsiEraseInLine(HANDLE Handle, CONSOLE_SCREEN_BUFFER_INFO *Info, CHAR Char)
 BOOL 
 AnsiEraseCharacter(HANDLE Handle, CONSOLE_SCREEN_BUFFER_INFO *Info, DWORD Size)
 {
+	COORD cPos = Info->dwCursorPosition;
+	WORD wAttribs = Info->wAttributes & 0xFF;
 	DWORD dwCount;
 
-	FillConsoleOutputAttribute(Handle, Info->wAttributes, Size, Info->dwCursorPosition, &dwCount);
-	return(FillConsoleOutputCharacter(Handle, ' ', Size, Info->dwCursorPosition, &dwCount));
-}
-BOOL 
-AnsiCursorBack(HANDLE Handle, CONSOLE_SCREEN_BUFFER_INFO *Info, UINT Count)
-{
-	COORD cPos = {Info->dwCursorPosition.X - Count, Info->dwCursorPosition.Y};
-
-	/* termcap - bw: automatic left margin (top.exe) */
-	if (cPos.X < 0){
-		cPos.X += Info->srWindow.Right + 1;
-		cPos.Y--;
-	}
-	return(SetConsoleCursorPosition(Handle, cPos));
+	FillConsoleOutputAttribute(Handle, wAttribs, Size, cPos, &dwCount);
+	return(FillConsoleOutputCharacter(Handle, ' ', Size, cPos, &dwCount));
 }
 BOOL 
 AnsiCursorPosition(HANDLE Handle, CONSOLE_SCREEN_BUFFER_INFO *Info, WORD Y, WORD X)
@@ -367,15 +402,17 @@ AnsiCursorPosition(HANDLE Handle, CONSOLE_SCREEN_BUFFER_INFO *Info, WORD Y, WORD
 	COORD cPos = {X - 1, Y - 1};
 
 	cPos.Y += Info->srWindow.Top;
+	Info->dwCursorPosition = cPos;
 	return(SetConsoleCursorPosition(Handle, cPos));
 }
 BOOL 
-AnsiNextPage(HANDLE Handle, CONSOLE_SCREEN_BUFFER_INFO *Info, UINT Count)
+AnsiNextPage(HANDLE Handle, CONSOLE_SCREEN_BUFFER_INFO *Info, WORD Count)
 {
 	COORD cPos = {Info->srWindow.Left, Info->srWindow.Top};
 	SHORT sSize = Info->srWindow.Bottom - Info->srWindow.Top;
 
 	cPos.Y += sSize * Count;
+	Info->dwCursorPosition = cPos;
 	return(SetConsoleCursorPosition(Handle, cPos));
 }
 BOOL 
@@ -383,6 +420,16 @@ AnsiCursorHorizontalAbsolute(HANDLE Handle, CONSOLE_SCREEN_BUFFER_INFO *Info, SH
 {
 	COORD cPos = {X - 1, Info->dwCursorPosition.Y};
 
+	Info->dwCursorPosition = cPos;
+	return(SetConsoleCursorPosition(Handle, cPos));
+}
+BOOL 
+AnsiVerticalPositionAbsolute(HANDLE Handle, CONSOLE_SCREEN_BUFFER_INFO *Info, SHORT Y)
+{
+	COORD cPos = {Info->dwCursorPosition.X, Y - 1};
+
+	cPos.Y += Info->srWindow.Top;
+	Info->dwCursorPosition = cPos;
 	return(SetConsoleCursorPosition(Handle, cPos));
 }
 BOOL 
@@ -394,26 +441,20 @@ AnsiSaveCursor(CONSOLE_SCREEN_BUFFER_INFO *Info)
 BOOL 
 AnsiRestoreCursor(HANDLE Handle, CONSOLE_SCREEN_BUFFER_INFO *Info)
 {
-	return(SetConsoleCursorPosition(Handle, __CTTY->Cursor));
-}
-BOOL 
-AnsiVerticalPositionAbsolute(HANDLE Handle, CONSOLE_SCREEN_BUFFER_INFO *Info, SHORT Y)
-{
-	COORD cPos = {Info->dwCursorPosition.X, Y - 1};
+	COORD cPos = __CTTY->Cursor;
 
-	cPos.Y += Info->srWindow.Top;
+	Info->dwCursorPosition = cPos;
 	return(SetConsoleCursorPosition(Handle, cPos));
 }
 BOOL 
 AnsiDeviceStatusReport(CONSOLE_SCREEN_BUFFER_INFO *Info, CHAR Parm, CHAR *Result)
 {
+	COORD cPos = Info->dwCursorPosition;
 	BOOL bResult = TRUE;
 	DWORD dwCount;
-	COORD cPos = Info->dwCursorPosition;
 
-	if (Parm == '6'){	/* CPR (cursor position: vim.exe sends this at start) */
+	if (Parm == '6'){		/* CPR - cursor position (vim.exe) */
 		msvc_sprintf(Result, "\e[%d;%dR", (cPos.Y - Info->srWindow.Top) + 1, cPos.X + 1);
-//		SetEvent(__Event);
 	}else{
 		bResult = FALSE;
 	}
@@ -427,7 +468,7 @@ AnsiSetMode(HANDLE Handle, WIN_TTY *Terminal, WORD Arg)
 
 	if (!GetConsoleMode(Handle, &dwMode)){
 		bResult = FALSE;
-	}else if (Arg == 4){		/* IRM */
+	}else if (Arg == 4){		/* IRM (Insert/Replace mode) */
 		bResult = SetConsoleMode(Handle, dwMode | ENABLE_INSERT_MODE);
 	}else if (Arg == 7){		/* VEM */
 		Terminal->VEdit = TRUE;
@@ -458,6 +499,12 @@ AnsiDeviceAttributes(HANDLE Handle)
 {
 	msvc_sprintf(__INPUT_BUF, "\e[?64;22c");
 	__Input = __INPUT_BUF;
+	return(FALSE);
+}
+BOOL 
+AnsiResetToInitalState(HANDLE Handle, CONSOLE_SCREEN_BUFFER_INFO *Info)
+{
+	return(GetConsoleScreenBufferInfo(Handle, Info));
 }
 
 /****************************************************/
@@ -472,13 +519,13 @@ AnsiControl(HANDLE Handle, CHAR C, CONSOLE_SCREEN_BUFFER_INFO *Info, SEQUENCE *S
 			bResult = AnsiInsertCharacter(Handle, Info, AnsiStrToInt(Seq->Args));
 			break;
 		case 'A':		/* CUU */
-			bResult = AnsiCursorMove(Handle, Info, -AnsiStrToInt(Seq->Args), 0);
+			bResult = AnsiCursorUp(Handle, Info, AnsiStrToInt(Seq->Args));
 			break;
 		case 'B':		/* CUD */
-			bResult = AnsiCursorMove(Handle, Info, AnsiStrToInt(Seq->Args), 0);
+			bResult = AnsiCursorDown(Handle, Info, AnsiStrToInt(Seq->Args));
 			break;
 		case 'C':		/* CUF */
-			bResult = AnsiCursorMove(Handle, Info, 0, AnsiStrToInt(Seq->Args));
+			bResult = AnsiCursorForward(Handle, Info, AnsiStrToInt(Seq->Args));
 			break;
 		case 'D':		/* CUB */
 			bResult = AnsiCursorBack(Handle, Info, AnsiStrToInt(Seq->Args));
@@ -504,11 +551,11 @@ AnsiControl(HANDLE Handle, CHAR C, CONSOLE_SCREEN_BUFFER_INFO *Info, SEQUENCE *S
 		case 'P':		/* DCH */
 			bResult = AnsiDeleteCharacter(Handle, Info, AnsiStrToInt(Seq->Args));
 			break;
-		case 'S':		/* SU */
-			bResult = AnsiScrollDown(Handle, Info, -1);
+		case 'S':		/* SU (Pan down) */
+			bResult = AnsiScrollUp(Handle, Info, AnsiStrToInt(Seq->Args));
 			break;
-		case 'T':		/* SD */
-			bResult = AnsiScrollDown(Handle, Info, 1);
+		case 'T':		/* SD (Pan up ) */
+			bResult = AnsiScrollDown(Handle, Info, AnsiStrToInt(Seq->Args));
 			break;
 		case 'U':		/* NP */
 			bResult = AnsiNextPage(Handle, Info, AnsiStrToInt(Seq->Args));
@@ -516,8 +563,8 @@ AnsiControl(HANDLE Handle, CHAR C, CONSOLE_SCREEN_BUFFER_INFO *Info, SEQUENCE *S
 		case 'X':		/* ECH */
 			bResult = AnsiEraseCharacter(Handle, Info, AnsiStrToInt(Seq->Args));
 			break;
-		case ANSI_REP:		/* REP (nano.exe) */
-			bResult = AnsiRepeat(Handle, __Char, AnsiStrToInt(Seq->Args));
+		case 'b':		/* VEM */
+			bResult = AnsiVerticalEditingMode(Handle, Info, AnsiStrToInt(Seq->Args));
 			break;
 		case 'c':		/* DA */
 			bResult = AnsiDeviceAttributes(Handle);
@@ -549,9 +596,6 @@ AnsiControl(HANDLE Handle, CHAR C, CONSOLE_SCREEN_BUFFER_INFO *Info, SEQUENCE *S
 		case 'u':		/* RC */
 //			bResult = AnsiRestoreCursor(Handle, Info);
 			bResult = TRUE;
-			break;
-		case ANSI_VEM:		/* VEM */
-			bResult = AnsiVerticalEditingMode(Handle, &Info->srWindow, AnsiStrToInt(Seq->Args));
 			break;
 	}
 	return(bResult);

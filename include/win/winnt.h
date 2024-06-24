@@ -108,8 +108,8 @@
 #define PROCESS_VM_OPERATION    8
 #define PROCESS_VM_READ 16
 #define PROCESS_VM_WRITE        32
-#define PROCESS_DUP_HANDLE      64	/* DuplicateHandle() */
-#define PROCESS_CREATE_PROCESS  128	/* CreateProcess() */
+#define PROCESS_DUP_HANDLE      64		/* DuplicateHandle() */
+#define PROCESS_CREATE_PROCESS  128		/* CreateProcess() */
 #define PROCESS_SET_QUOTA       256
 #define PROCESS_SUSPEND_RESUME 0x0800
 #define PROCESS_SET_INFORMATION 512
@@ -131,28 +131,11 @@
 #define PAGE_NOCACHE            0x0200
 #define PAGE_WRITECOMBINE 0x0400
 
-#define SEC_BASED       0x00200000
-#define SEC_NO_CHANGE   0x00400000
-#define SEC_FILE        0x00800000
-#define SEC_IMAGE       0x01000000
-#define SEC_VLM         0x02000000
-#define SEC_RESERVE     0x04000000
-#define SEC_COMMIT      0x08000000
-#define SEC_NOCACHE     0x10000000
-
-#define EXCEPTION_MAXIMUM_PARAMETERS 15
-
 #define FILE_SHARE_READ                 0x00000001
 #define FILE_SHARE_WRITE                0x00000002
 #define FILE_SHARE_DELETE               0x00000004
 
-#define THREAD_QUERY_INFORMATION        64
-
 #define NTAPI __stdcall
-
-#define DUPLICATE_CLOSE_SOURCE          0x00000001
-#define DUPLICATE_SAME_ACCESS           0x00000002
-#define DUPLICATE_SAME_ATTRIBUTES       0x00000004
 
 #define MEM_COMMIT           0x1000
 #define MEM_RESERVE          0x2000
@@ -173,7 +156,6 @@ typedef short SHORT;
 typedef long LONG;
 typedef unsigned long ULONG;
 typedef __wchar_t WCHAR;
-//typedef void *HANDLE;
 typedef __int64_t LONGLONG;
 typedef __uint64_t DWORDLONG;
 typedef void *PVOID, *LPVOID;
@@ -296,17 +278,6 @@ typedef struct _GUID {
         unsigned char  Data4[8];
 } GUID, *REFGUID, *LPGUID;
 
-typedef VOID (NTAPI *PIMAGE_TLS_CALLBACK)(PVOID,DWORD,PVOID);
-
-typedef struct _IMAGE_TLS_DIRECTORY {
-	PVOID StartAddressOfRawData;
-	PVOID EndAddressOfRawData;
-	PVOID AddressOfIndex;
-	PVOID AddressOfCallBacks;
-	DWORD SizeOfZeroFill;
-	DWORD Characteristics;
-} IMAGE_TLS_DIRECTORY, *PIMAGE_TLS_DIRECTORY;
-
 typedef struct _MEMORY_BASIC_INFORMATION {
         PVOID BaseAddress;
         PVOID AllocationBase;
@@ -379,14 +350,3 @@ typedef LONG NTSTATUS, *PNTSTATUS;
 #define FILE_SUPPORTS_OPEN_BY_FILE_ID   0x01000000
 #define FILE_SUPPORTS_USN_JOURNAL       0x02000000
 
-/* 
- * ddk/ntapi.h
- */
-
-#define DRIVE_UNKNOWN                     0
-#define DRIVE_NO_ROOT_DIR                 1
-#define DRIVE_REMOVABLE                   2
-#define DRIVE_FIXED                       3
-#define DRIVE_REMOTE                      4
-#define DRIVE_CDROM                       5
-#define DRIVE_RAMDISK                     6

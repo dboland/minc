@@ -102,11 +102,6 @@ static LPCSTR __ANSI_FUNCTION[] = {
 	"\eF1"		/* F1 */
 };
 
-/* Constants for ScreenAnsi() */
-
-#define ANSI_REP		'_'
-#define ANSI_VEM		'b'
-
 /****************************************************/
 
 BOOL 
@@ -117,34 +112,31 @@ AnsiEraseInDisplay(HANDLE Handle, CONSOLE_SCREEN_BUFFER_INFO *Info, CHAR Parm)
 	DWORD dwOffset = 0;
 	SMALL_RECT sRect = Info->srWindow;
 	COORD cPos = {sRect.Left, sRect.Top};
+	SHORT sWidth = sRect.Right - sRect.Left + 1;
+	WORD wAttribs = Info->wAttributes & 0xFF;
 
 	if (!Parm || Parm == '0'){
 		cPos = Info->dwCursorPosition;
 		dwOffset = sRect.Right - cPos.X;
 	}else if (Parm == '1'){
-		dwOffset = (sRect.Bottom - Info->dwCursorPosition.Y) * ((sRect.Right - sRect.Left) + 1);
+		dwOffset = (sRect.Bottom - Info->dwCursorPosition.Y) * sWidth;
 		dwOffset += Info->dwCursorPosition.X;
 	}else if (Parm == '2'){
+		Info->dwCursorPosition = cPos;
 		SetConsoleCursorPosition(Handle, cPos);
 	}else{
 		return(FALSE);
 	}
-	dwScreen = ((sRect.Bottom - sRect.Top) + 1) * ((sRect.Right - sRect.Left) + 1);
-	FillConsoleOutputAttribute(Handle, Info->wAttributes, dwScreen - dwOffset, cPos, &dwCount);
+	dwScreen = ((sRect.Bottom - sRect.Top) + 1) * sWidth;
+	FillConsoleOutputAttribute(Handle, wAttribs, dwScreen - dwOffset, cPos, &dwCount);
 	return(FillConsoleOutputCharacter(Handle, ' ', dwScreen - dwOffset, cPos, &dwCount));
 }
 BOOL 
-AnsiRepeat(HANDLE Handle, CHAR C, SHORT Count)
-{
-	return(TRUE);
-}
-BOOL 
-AnsiVerticalEditingMode(HANDLE Handle, SMALL_RECT *Rect, SHORT Parm)
+AnsiVerticalEditingMode(HANDLE Handle, CONSOLE_SCREEN_BUFFER_INFO *Info, SHORT Parm)
 {
 	BOOL bResult = TRUE;
 
 	if (Parm == 1){
-		__CTTY->Margin = *Rect;
 		__CTTY->VEdit = TRUE;
 	}else if (Parm == 2){
 		__CTTY->VEdit = FALSE;
@@ -156,30 +148,44 @@ AnsiVerticalEditingMode(HANDLE Handle, SMALL_RECT *Rect, SHORT Parm)
 BOOL 
 AnsiEqualRect(SMALL_RECT *Rect1, SMALL_RECT *Rect2)
 {
-	DWORD dwSum1 = Rect1->Left + Rect1->Right + Rect1->Top + Rect1->Bottom;
-	DWORD dwSum2 = Rect2->Left + Rect2->Right + Rect2->Top + Rect2->Bottom;
+	DWORDLONG dwlRect1 = *(DWORDLONG *)Rect1;
+	DWORDLONG dwlRect2 = *(DWORDLONG *)Rect2;
 
-	if (dwSum1 != dwSum2){
+	if (dwlRect1 != dwlRect2){
 		return(FALSE);
 	}
 	return(TRUE);
 }
 BOOL 
+AnsiSetRect(HANDLE Handle, WORD Top, WORD Bottom, SMALL_RECT *Result)
+{
+	BOOL bResult = FALSE;
+	CONSOLE_SCREEN_BUFFER_INFO csbInfo;
+
+	if (!GetConsoleScreenBufferInfo(Handle, &csbInfo)){
+		WIN_ERR("GetConsoleScreenBufferInfo(%d): %s\n", Handle, win_strerror(GetLastError()));
+	}else{
+		*Result = csbInfo.srWindow;
+		Result->Bottom = Result->Top + Bottom - 1;
+		Result->Top += Top - 1;
+		bResult = !AnsiEqualRect(Result, &csbInfo.srWindow);
+	}
+	return(bResult);
+}
+BOOL 
 AnsiSetTopBottomMargin(HANDLE Handle, CONSOLE_SCREEN_BUFFER_INFO *Info, WORD Top, WORD Bottom)
 {
 	SMALL_RECT sRect = Info->srWindow;
-	COORD cPos = {sRect.Left, sRect.Top + (Top - 1)};
+	COORD cPos;
 
-	/* Margins will not work without disabling the 'am' capability
-	 * (ENABLE_WRAP_AT_EOL_OUTPUT), so long lines can be scrolled
-	 * as one.
-	 */
-	sRect.Bottom = sRect.Top + Bottom - 1;
-	sRect.Top += Top - 1;
-	if (AnsiEqualRect(&Info->srWindow, &sRect)){
-		AnsiVerticalEditingMode(Handle, &sRect, 2);
+	if (AnsiSetRect(Handle, Top, Bottom, &sRect)){
+		AnsiVerticalEditingMode(Handle, Info, 1);
 	}else{
-		AnsiVerticalEditingMode(Handle, &sRect, 1);
+		AnsiVerticalEditingMode(Handle, Info, 2);
 	}
+	cPos.X = sRect.Left;
+	cPos.Y = sRect.Top;
+	Info->srWindow = sRect;
+	Info->dwCursorPosition = cPos;
 	return(SetConsoleCursorPosition(Handle, cPos));
 }

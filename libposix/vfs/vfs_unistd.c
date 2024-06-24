@@ -231,7 +231,7 @@ vfs_chdir(WIN_TASK *Task, WIN_NAMEIDATA *Path)
 		SetLastError(ERROR_DIRECTORY);
 	}else if (!vfs_access(Path, WIN_S_IRX)){
 		return(FALSE);
-	}else if (win_realpath(Path->Resolved, WIN_PATH_MAX, PSTRING(Task).Path)){
+	}else if (win_realpath(Path->Resolved, WIN_PATH_MAX, __Strings[Task->TaskId].Path)){
 		Task->MountId = Path->MountId;
 		bResult = TRUE;
 	}

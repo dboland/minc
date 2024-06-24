@@ -40,7 +40,7 @@ kfile_posix(struct kinfo_file *buf, WIN_TASK *Task, WIN_VNODE *Node)
 	WIN_VNODE vNode;
 	WCHAR szBuffer[MAX_PATH];
 	HANDLE hResult = NULL;
-	wchar_t *command = win_basename(PSTRING(Task).Command);
+	wchar_t *command = win_basename(__Strings[Task->TaskId].Command);
 
 	win_bzero(buf, sizeof(struct kinfo_file));
 	win_memcpy(&vNode, Node, sizeof(WIN_VNODE));

@@ -77,13 +77,16 @@ pdo_open(WIN_NAMEIDATA *Path, WIN_FLAGS *Flags, WIN_VNODE *Result)
 			bResult = ptm_open(pdo_attach(DEV_TYPE_PTY), Flags, Result);
 			break;
 		case DEV_TYPE_STDIN:		/* sort.exe */
-			bResult = vfs_namei(GetStdHandle(STD_INPUT_HANDLE), 0, Result);
+			win_memcpy(Result, &__Process->Node[0], sizeof(WIN_VNODE));
+			bResult = TRUE;
 			break;
 		case DEV_TYPE_STDOUT:
-			bResult = vfs_namei(GetStdHandle(STD_OUTPUT_HANDLE), 1, Result);
+			win_memcpy(Result, &__Process->Node[1], sizeof(WIN_VNODE));
+			bResult = TRUE;
 			break;
 		case DEV_TYPE_STDERR:
-			bResult = vfs_namei(GetStdHandle(STD_ERROR_HANDLE), 2, Result);
+			win_memcpy(Result, &__Process->Node[2], sizeof(WIN_VNODE));
+			bResult = TRUE;
 			break;
 		default:
 			bResult = TRUE;

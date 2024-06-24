@@ -105,7 +105,7 @@ PathOpen(WIN_NAMEIDATA *Path, LPWSTR Source, DWORD Flags)
 	Path->S = Source;
 	Path->Flags = Flags;
 	Path->Base = Path->R;
-
+	Path->FileType = WIN_VREG;
 }
 VOID 
 PathClose(WIN_NAMEIDATA *Path, DWORD Flags)
@@ -121,7 +121,7 @@ PathClose(WIN_NAMEIDATA *Path, DWORD Flags)
 	}else if (DiskGlobType(L".exe", Path)){
 		Path->FileType = WIN_VREG;
 //	}else{
-//		VfsDebugPath(Path, "PathClose");
+//		vfs_ktrace("PathClose", STRUCT_NAMEI, Path);
 	}
 	Path->Last = Path->R - 1;
 }

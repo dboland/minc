@@ -303,8 +303,6 @@ typedef struct _WIN_PSTRING {
 	WCHAR Path[WIN_PATH_MAX];
 } WIN_PSTRING;
 
-#define PSTRING(TASK)	(__Strings[TASK->TaskId])
-
 /*
  * vfs_mount.c
  */
@@ -496,13 +494,9 @@ typedef struct _WIN_TTY {
 	DWORD SessionId;
 	WIN_WINSIZE WinSize;
 	WIN_TERMIO Attribs;
-	BOOL RVideo;
 	DWORD ScrollRate;
-	BOOL NoWait;
-	DWORD AltFont;
 	BOOL VEdit;
 	COORD Cursor;
-	SMALL_RECT Margin;
 	CONSOLE_SCREEN_BUFFER_INFO Info;
 	DWORD Flags;
 	DWORD Offset;				/* offset into output buffer */
@@ -515,7 +509,7 @@ typedef struct _WIN_TTY {
 #define COMMON_LVB_GRID_HORIZONTAL	0x0400
 #define COMMON_LVB_GRID_LVERTICAL	0x0800
 #define COMMON_LVB_GRID_RVERTICAL	0x1000
-#define COMMON_LVB_AUTOWRAP		0x2000	/* autowrap pending */
+#define COMMON_LVB_AUTOWRAP		0x2000
 #define COMMON_LVB_REVERSE_VIDEO	0x4000
 #define COMMON_LVB_UNDERSCORE		0x8000
 

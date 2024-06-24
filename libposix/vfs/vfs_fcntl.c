@@ -116,9 +116,9 @@ vfs_F_SETFL(WIN_VNODE *Node, WIN_FLAGS *Flags)
 BOOL 
 vfs_F_GETPATH(WIN_VNODE *Node, WIN_NAMEIDATA *Result)
 {
+	BOOL bResult = FALSE;
 	NTSTATUS ntStatus;
 	PUNICODE_STRING puString;
-	BOOL bResult = FALSE;
 	ULONG ulSize = WIN_PATH_MAX * sizeof(WCHAR);
 	LPWSTR psz;
 
@@ -140,7 +140,6 @@ vfs_F_GETPATH(WIN_VNODE *Node, WIN_NAMEIDATA *Result)
 		Result->S = NULL;
 		bResult = TRUE;
 	}
-//VfsDebugPath(Result, "vfs_F_GETPATH");
 	LocalFree(puString);
 	return(bResult);
 }

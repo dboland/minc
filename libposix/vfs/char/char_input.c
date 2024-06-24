@@ -152,6 +152,7 @@ InputWindow(WINDOW_BUFFER_SIZE_RECORD *Event)
 	__CTTY->WinSize.Column = cSize.X;
 	__CTTY->WinSize.Row = cSize.Y;
 	vfs_raise(WM_SIZE, cSize.X, cSize.Y);
+//	SetEvent(__Interrupt);
 	return(FALSE);
 }
 BOOL 

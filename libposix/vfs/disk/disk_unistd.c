@@ -108,6 +108,7 @@ disk_unlink(WIN_NAMEIDATA *Path)
 {
 	BOOL bResult = FALSE;
 
+//vfs_ktrace("disk_unlink", STRUCT_NAMEI, Path);
 	if (Path->FileType == WIN_VDIR){
 		bResult = disk_rmdir(Path);
 	}else if (*Path->Last == '\\'){		/* GNU conftest.exe */
@@ -122,7 +123,6 @@ disk_rename(WIN_NAMEIDATA *Path, WIN_NAMEIDATA *Result)
 {
 	BOOL bResult = FALSE;
 
-//VfsDebugPath(Path, "disk_rename");
 	switch (Path->FileType){
 		case WIN_VDIR:
 			bResult = dir_rename(Path, Result);

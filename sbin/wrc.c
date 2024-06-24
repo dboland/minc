@@ -32,6 +32,7 @@
 #include <stdlib.h>
 #include <errno.h>
 #include <string.h>
+#include <unistd.h>
 
 #include "win/windows.h"
 #include "win_types.h"
@@ -50,6 +51,7 @@ main(int argc, char *argv[], char *env[])
 	int result = -1;
 	char *prog = *argv++;
 
+	write(1, "\e[?7h", 5);		/* set autowrap */
 	if (argc == 1){
 		usage(prog);
 	}else if (runcmd(argv) < 0){
@@ -57,5 +59,6 @@ main(int argc, char *argv[], char *env[])
 	}else{
 		result = 0;
 	}
+	write(1, "\e[?7l\ec", 7);	/* unset autowrap, reset cursor info */
 	return(result);
 }

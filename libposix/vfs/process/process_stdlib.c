@@ -103,7 +103,7 @@ proc_init(WIN_SIGPROC SignalProc)
 	GetStartupInfo(&si);
 	if (si.dwFlags & STARTF_PS_EXEC){
 		__Process = &__Tasks[si.dwX];
-		ProcInitStreams(__Process->Node);
+//		ProcInitStreams(__Process->Node);
 		__Process->Flags |= WIN_PS_INEXEC;
 	}else{
 		__Process = ProcCreateTask(0);
@@ -111,7 +111,7 @@ proc_init(WIN_SIGPROC SignalProc)
 		vfs_namei(GetStdHandle(STD_INPUT_HANDLE), 0, &__Process->Node[0]);
 		vfs_namei(GetStdHandle(STD_OUTPUT_HANDLE), 1, &__Process->Node[1]);
 		vfs_namei(GetStdHandle(STD_ERROR_HANDLE), 2, &__Process->Node[2]);
-		win_getcwd(PSTRING(__Process).Path);
+		win_getcwd(__Strings[__Process->TaskId].Path);
 		win_geteuid(&__Process->UserSid);
 		win_getegid(&__Process->GroupSid);
 		__Process->FileMask = 0022;

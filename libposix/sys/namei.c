@@ -127,7 +127,6 @@ pathat_win(WIN_NAMEIDATA *Result, int dirfd, const char *path, int atflags)
 	}
 
 	Result->MountId = 0;
-	Result->FileType = WIN_VREG;
 	Result->FSType = FS_TYPE_DISK;
 	Result->R = Result->Resolved;
 
@@ -145,7 +144,7 @@ pathat_win(WIN_NAMEIDATA *Result, int dirfd, const char *path, int atflags)
 
 	}else if (dirfd == AT_FDCWD){
 		Result->MountId = pwTask->MountId;
-		Result->R = win_wcpcpy(Result->Resolved, PSTRING(pwTask).Path);
+		Result->R = win_wcpcpy(Result->Resolved, __Strings[pwTask->TaskId].Path);
 
 	}else{
 		dwFlags = WIN_PATHCOPY;
