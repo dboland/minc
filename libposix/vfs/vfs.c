@@ -65,7 +65,7 @@ typedef struct _SEQUENCE {
 	LONG Arg1;
 	CHAR Char1;
 	CHAR CSI;
-	CHAR Buf[64];
+	CHAR Buf[128];
 } SEQUENCE;
 
 HANDLE 		__Shared;
@@ -95,7 +95,6 @@ WIN_TASK	*__Process;
 
 BOOL vfs_namei(HANDLE Handle, DWORD Index, WIN_VNODE *Result);
 BOOL vfs_F_DUPFD(WIN_VNODE *Node, BOOL CloseExec, WIN_VNODE *Result);
-BOOL proc_poll(VOID);
 
 #include "vfs_acl.c"
 #include "vfs_debug.c"
@@ -109,10 +108,10 @@ BOOL proc_poll(VOID);
 #include "registry/registry.c"
 #include "drive/drive.c"
 #include "disk/disk.c"
-#include "pipe/pipe.c"
 #include "char/char.c"
-#include "volume/volume.c"
 #include "process/process.c"
+#include "pipe/pipe.c"
+#include "volume/volume.c"
 #include "mailslot/mailslot.c"
 #include "pdo/pdo.c"
 #include "winsock/winsock.c"

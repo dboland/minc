@@ -261,9 +261,8 @@ AnsiCursorUp(HANDLE Handle, CONSOLE_SCREEN_BUFFER_INFO *Info, WORD Count)
 	/* Nano assumes cursor movement after last char
 	 */
 	if (cPos.X > Info->srWindow.Right){
-//		cPos.X -= Info->srWindow.Right + 1;
+		cPos.X -= Info->srWindow.Right + 1;
 		cPos.Y++;
-		cPos.X = 0;
 	}
 	cPos.Y -= Count;
 	Info->dwCursorPosition = cPos;
@@ -275,9 +274,8 @@ AnsiCursorDown(HANDLE Handle, CONSOLE_SCREEN_BUFFER_INFO *Info, WORD Count)
 	COORD cPos = Info->dwCursorPosition;
 
 	if (cPos.X > Info->srWindow.Right){
-//		cPos.X -= Info->srWindow.Right + 1;
+		cPos.X -= Info->srWindow.Right + 1;
 		cPos.Y++;
-		cPos.X = 0;
 	}
 	cPos.Y += Count;
 	Info->dwCursorPosition = cPos;
@@ -500,11 +498,6 @@ AnsiDeviceAttributes(HANDLE Handle)
 	msvc_sprintf(__INPUT_BUF, "\e[?64;22c");
 	__Input = __INPUT_BUF;
 	return(FALSE);
-}
-BOOL 
-AnsiResetToInitalState(HANDLE Handle, CONSOLE_SCREEN_BUFFER_INFO *Info)
-{
-	return(GetConsoleScreenBufferInfo(Handle, Info));
 }
 
 /****************************************************/

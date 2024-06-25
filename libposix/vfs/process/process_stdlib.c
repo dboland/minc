@@ -33,19 +33,6 @@
 /************************************************************/
 
 VOID 
-ProcInitStreams(WIN_VNODE Node[])
-{
-	LONG lIndex = 0;
-
-	/* standard stream pseudo devices (sort.exe)
-	 */
-	while (lIndex < 3){
-		SetStdHandle(STD_INPUT_HANDLE - lIndex, Node->Handle);
-		Node++;
-		lIndex++;
-	}
-}
-VOID 
 ProcInitLimits(DWORDLONG Limits[])
 {
 	Limits[WIN_RLIMIT_CPU] = WIN_RLIM_INFINITY;
@@ -103,7 +90,6 @@ proc_init(WIN_SIGPROC SignalProc)
 	GetStartupInfo(&si);
 	if (si.dwFlags & STARTF_PS_EXEC){
 		__Process = &__Tasks[si.dwX];
-//		ProcInitStreams(__Process->Node);
 		__Process->Flags |= WIN_PS_INEXEC;
 	}else{
 		__Process = ProcCreateTask(0);

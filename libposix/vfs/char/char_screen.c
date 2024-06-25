@@ -149,6 +149,8 @@ ScreenAnsi(HANDLE Handle, CHAR C, SEQUENCE *Seq, CONSOLE_SCREEN_BUFFER_INFO *Inf
 			bResult = DECSetMode(Handle, AnsiStrToInt(Seq->Args));
 		}else if (C == 'l'){		/* DECRM */
 			bResult = DECResetMode(Handle, AnsiStrToInt(Seq->Args));
+		}else if (C == 'u'){		/* DECRSPS */
+			bResult = DECRestorePresentationState(Handle, Info, AnsiStrToInt(Seq->Args));
 		}
 
 	}else if (!Seq->CSI){			/* DEC private (ANSI allowed) */
@@ -156,10 +158,8 @@ ScreenAnsi(HANDLE Handle, CHAR C, SEQUENCE *Seq, CONSOLE_SCREEN_BUFFER_INFO *Inf
 			bResult = AnsiSaveCursor(Info);
 		}else if (C == '8'){		/* DECRC (apt-get) */
 			bResult = AnsiRestoreCursor(Handle, Info);
-		}else if (C == 'c'){		/* RIS */
-			bResult = AnsiResetToInitalState(Handle, Info);
-//		}else{
-//			bResult = TRUE;		/* ignore everything else */
+//		}else if (C == 'c'){		/* RIS */
+//			bResult = AnsiResetToInitalState(Handle, Info);
 		}
 
 	}else if (Seq->CSI == '('){		/* DEC SCS (Shift-In) */
@@ -181,10 +181,12 @@ ScreenEscape(HANDLE Handle, CHAR C, SEQUENCE *Seq, CONSOLE_SCREEN_BUFFER_INFO *I
 {
 	*__Escape++ = C;
 
-	if (C == '\a'){
-		__Escape = NULL;	/* end of hyperlink */
+	if (C == '\a'){			/* end of hyperlink */
+		__Escape = NULL;
 	}else if (C == '@' || C == '>'){
 		ScreenAnsi(Handle, C, Seq, Info);
+	}else if (Seq->CSI == ']'){	/* hyperlinks (systemctl) */
+		return;			/* ignore */
 	}else if (C == ';'){
 		Seq->Arg1 = AnsiStrToInt(Seq->Args);
 		Seq->Char1 = 0;

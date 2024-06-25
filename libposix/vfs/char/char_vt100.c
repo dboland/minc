@@ -126,3 +126,16 @@ DECResetCharacterSet(HANDLE Handle, CHAR Char)
 	}
 	return(bResult);
 }
+BOOL 
+DECRestorePresentationState(HANDLE Handle, CONSOLE_SCREEN_BUFFER_INFO *Info, WORD Arg)
+{
+	BOOL bResult = TRUE;
+
+	if (Arg == 1){			/* Cursor state (DECCIR) */
+		bResult = GetConsoleScreenBufferInfo(Handle, Info);
+//	}else if (Arg == 2){		/* Tab state (DECTABSR) */
+	}else{
+		bResult = FALSE;
+	}
+	return(bResult);
+}
