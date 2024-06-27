@@ -126,15 +126,12 @@ getty(const char *path)
 {
 	int result = 0;
 	int fd;
-	struct winsize ws = {48, 120, 0};
 
 	/* ./lib/libutil/login_tty.c
 	 */
 	fd = open(path, O_RDWR);
 	if (fd < 0){
 		fprintf(stderr, "open(%s): %s\n", path, strerror(errno));
-//	}else if (ioctl(fd, TIOCSWINSZ, &ws) < 0){
-//		fprintf(stderr, "ioctl(TIOCSWINSZ): %s\n", strerror(errno));
 	}else if (ioctl(fd, TIOCSCTTY, NULL) < 0){
 		fprintf(stderr, "ioctl(TIOCSCTTY): %s\n", strerror(errno));
 	}else{

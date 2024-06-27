@@ -33,6 +33,10 @@ mkent: mkent.o
 libconsole.o: libconsole.c
 	gcc -c ${CFLAGS} -I${MINGW}/include -I../include -o $@ $<
 
+#
+# use  -mwindows -L${WINDIR} for a Windows app
+#
+
 bsd.exe: bsd.o version.o
 	gcc ${LDFLAGS} -o $@ $^
 

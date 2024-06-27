@@ -69,7 +69,7 @@ char_TIOCSWINSZ(WIN_VNODE *Node, WIN_WINSIZE *WinSize)
 	return(bResult);
 }
 BOOL 
-char_TIOCSETA(WIN_VNODE *Node, WIN_TERMIO *Mode)
+char_TIOCSETA(WIN_VNODE *Node, WIN_TERMIO *Attribs)
 {
 	BOOL bResult = FALSE;
 
@@ -77,13 +77,13 @@ char_TIOCSETA(WIN_VNODE *Node, WIN_TERMIO *Mode)
 	switch (Node->DeviceType){
 		case DEV_TYPE_CONSOLE:
 		case DEV_TYPE_PTY:
-			bResult = con_TIOCSETA(DEVICE(Node->DeviceId), Mode);
+			bResult = con_TIOCSETA(DEVICE(Node->DeviceId), Attribs);
 			break;
 		case DEV_TYPE_INPUT:
-			bResult = SetConsoleMode(Node->Handle, InputMode(Mode));
+			bResult = SetConsoleMode(Node->Handle, InputMode(Attribs));
 			break;
 		case DEV_TYPE_SCREEN:
-			bResult = SetConsoleMode(Node->Handle, ScreenMode(Mode));
+			bResult = SetConsoleMode(Node->Handle, ScreenMode(Attribs));
 			break;
 		default:
 			SetLastError(ERROR_BAD_DEVICE);

@@ -49,7 +49,7 @@ vfs_TIOCGWINSZ(WIN_VNODE *Node, WIN_WINSIZE *WinSize)
 			bResult = TRUE;
 			break;
 		default:
-			SetLastError(ERROR_BAD_FILE_TYPE);
+			SetLastError(ERROR_CTX_NOT_CONSOLE);
 	}
 	return(bResult);
 }
@@ -70,7 +70,7 @@ vfs_TIOCSWINSZ(WIN_VNODE *Node, WIN_WINSIZE *WinSize)
 			bResult = TRUE;
 			break;
 		default:
-			SetLastError(ERROR_BAD_FILE_TYPE);
+			SetLastError(ERROR_CTX_NOT_CONSOLE);
 	}
 	return(bResult);
 }
@@ -85,7 +85,7 @@ vfs_TIOCGETA(WIN_VNODE *Node, WIN_TERMIO *Attribs)
 			bResult = TRUE;
 			break;
 		default:
-			SetLastError(ERROR_BAD_FILE_TYPE);
+			SetLastError(ERROR_CTX_NOT_CONSOLE);
 	}
 	return(bResult);
 }
@@ -102,7 +102,7 @@ vfs_TIOCFLUSH(WIN_VNODE *Node)
 			bResult = char_TIOCFLUSH(Node);
 			break;
 		default:
-			SetLastError(ERROR_BAD_FILE_TYPE);
+			SetLastError(ERROR_CTX_NOT_CONSOLE);
 	}
 	return(bResult);
 }
@@ -119,7 +119,7 @@ vfs_TIOCDRAIN(WIN_VNODE *Node)
 			bResult = char_TIOCDRAIN(Node);
 			break;
 		default:
-			SetLastError(ERROR_BAD_FILE_TYPE);
+			SetLastError(ERROR_CTX_NOT_CONSOLE);
 	}
 	return(bResult);
 }
@@ -138,11 +138,8 @@ vfs_TIOCSETA(WIN_VNODE *Node, WIN_TERMIO *Attribs, BOOL Flush, BOOL Drain)
 		case FS_TYPE_CHAR:			/* nano.exe */
 			bResult = char_TIOCSETA(Node, Attribs);
 			break;
-		case FS_TYPE_PIPE:
-			bResult = TRUE;
-			break;
 		default:
-			SetLastError(ERROR_BAD_FILE_TYPE);
+			SetLastError(ERROR_CTX_NOT_CONSOLE);
 	}
 	if (Flush){
 		vfs_TIOCFLUSH(Node);

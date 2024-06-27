@@ -33,13 +33,13 @@
 /****************************************************/
 
 void 
-termio_debug(WIN_TERMIO *Mode, const char *lable)
+termio_debug(WIN_TERMIO *Attribs, const char *lable)
 {
 	DWORD dwRemain;
 
 	msvc_printf("%s:\n", lable);
 
-	dwRemain = Mode->LFlags;
+	dwRemain = Attribs->LFlags;
 	msvc_printf("+ local([0x%x]", dwRemain);
 	win_flagname(ECHOKE, "ECHOKE", dwRemain, &dwRemain);
 	win_flagname(ECHOE, "ECHOE", dwRemain, &dwRemain);
@@ -51,7 +51,7 @@ termio_debug(WIN_TERMIO *Mode, const char *lable)
 	win_flagname(NOKERNINFO, "NOKERNINFO", dwRemain, &dwRemain);
 	msvc_printf("[0x%x])\n", dwRemain);
 
-	dwRemain = Mode->IFlags;
+	dwRemain = Attribs->IFlags;
 	msvc_printf("+ input([0x%x]", dwRemain);
 	win_flagname(INLCR, "INLCR", dwRemain, &dwRemain);
 	win_flagname(ICRNL, "ICRNL", dwRemain, &dwRemain);
@@ -63,7 +63,7 @@ termio_debug(WIN_TERMIO *Mode, const char *lable)
 	win_flagname(IMAXBEL, "IMAXBEL", dwRemain, &dwRemain);
 	msvc_printf("[0x%x])\n", dwRemain);
 
-	dwRemain = Mode->OFlags;
+	dwRemain = Attribs->OFlags;
 	msvc_printf("+ output([0x%x]", dwRemain);
 	win_flagname(OPOST, "OPOST", dwRemain, &dwRemain);
 	win_flagname(OXTABS, "OXTABS", dwRemain, &dwRemain);
@@ -131,7 +131,7 @@ term_TIOCSETA(WIN_VNODE *Node, WIN_TERMIO *Attribs)
 {
 	int result = 0;
 
-//termio_debug(Mode, "term_TIOCSETA");
+//termio_debug(Attribs, "term_TIOCSETA");
 	if (!vfs_TIOCSETA(Node, Attribs, FALSE, FALSE)){
 		result -= errno_posix(GetLastError());
 	}else{
@@ -144,7 +144,7 @@ term_TIOCSETAW(WIN_VNODE *Node, WIN_TERMIO *Attribs)
 {
 	int result = 0;
 
-//termio_debug(Mode, "term_TIOCSETAW");
+//termio_debug(Attribs, "term_TIOCSETAW");
 	if (!vfs_TIOCSETA(Node, Attribs, FALSE, TRUE)){
 		result -= errno_posix(GetLastError());
 	}else{
@@ -157,7 +157,7 @@ term_TIOCSETAF(WIN_VNODE *Node, WIN_TERMIO *Attribs)
 {
 	int result = 0;
 
-//termio_debug(Mode, "term_TIOCSETAF");
+//termio_debug(Attribs, "term_TIOCSETAF");
 	if (!vfs_TIOCSETA(Node, Attribs, TRUE, TRUE)){
 		result -= errno_posix(GetLastError());
 	}else{

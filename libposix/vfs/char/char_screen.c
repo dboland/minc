@@ -38,8 +38,11 @@ ScreenMode(WIN_TERMIO *Attribs)
 	DWORD dwResult = ENABLE_PROCESSED_OUTPUT; // | ENABLE_WRAP_AT_EOL_OUTPUT;
 	UINT uiFlags = WIN_OPOST | WIN_ONLCR;
 
-	if ((Attribs->OFlags & uiFlags) != uiFlags){		/* Vista xterm */
-//		dwResult |= DISABLE_NEWLINE_AUTO_RETURN;
+	if ((Attribs->OFlags & uiFlags) != uiFlags){
+//		dwResult |= DISABLE_NEWLINE_AUTO_RETURN;	/* Vista xterm */
+	}
+	if (!Attribs->OFlags){
+		dwResult |= ENABLE_WRAP_AT_EOL_OUTPUT;		/* nano */
 	}
 	return(dwResult);
 }
@@ -66,7 +69,7 @@ ScreenScrollUp(HANDLE Handle, CONSOLE_SCREEN_BUFFER_INFO *Info)
 
 	sRect.Top = 1;
 	sRect.Bottom = Info->dwSize.Y - 1;
-	return(ScrollConsoleScreenBuffer(Handle, &sRect, NULL, cPos, &cInfo));
+	return(ScrollConsoleScreenBuffer(Handle, &sRect, &Info->srWindow, cPos, &cInfo));
 }
 BOOL 
 ScreenLineFeed(HANDLE Handle, UINT Flags, CONSOLE_SCREEN_BUFFER_INFO *Info)
@@ -140,6 +143,7 @@ ScreenAnsi(HANDLE Handle, CHAR C, SEQUENCE *Seq, CONSOLE_SCREEN_BUFFER_INFO *Inf
 {
 	BOOL bResult = FALSE;
 	DWORD dwSize = __Escape - Seq->Buf;
+	COORD cPos = Info->dwCursorPosition;
 
 	if (Seq->CSI == '['){
 		bResult = AnsiControl(Handle, C, Info, Seq, dwSize);
@@ -208,7 +212,7 @@ ScreenPutChar(HANDLE Handle, LPCSTR Buffer, UINT Flags, UINT CodePage, CONSOLE_S
 	DWORD dwWidth, dwCount = 1;
 
 	if (Info->dwCursorPosition.X > Info->srWindow.Right){
-		Info->dwCursorPosition.X = 0;
+		Info->dwCursorPosition.X = 0;		/* mutt */
 		ScreenLineFeed(Handle, Flags, Info);
 	}
 	if (CodePage == CP_UTF8){

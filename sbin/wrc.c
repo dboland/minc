@@ -51,14 +51,15 @@ main(int argc, char *argv[], char *env[])
 	int result = -1;
 	char *prog = *argv++;
 
-	write(1, "\e[?7h", 5);		/* set autowrap */
-	if (argc == 1){
+	if (isatty(1))
+		write(1, "\e[?7h", 5);		/* set autowrap */
+	if (argc == 1)
 		usage(prog);
-	}else if (runcmd(argv) < 0){
+	else if (runcmd(argv) < 0)
 		fprintf(stderr, "%s: %s: %s\n", prog, *argv, strerror(errno));
-	}else{
+	else
 		result = 0;
-	}
-	write(1, "\e[?7l\e[?1u", 10);	/* unset autowrap, reset cursor info */
+	if (isatty(1))
+		write(1, "\e[?7l\e[?1u", 10);	/* unset autowrap, reset cursor info */
 	return(result);
 }

@@ -85,9 +85,47 @@ AnsiInvertAttribs(CONSOLE_SCREEN_BUFFER_INFO *Info)
 
 	return(wBackGround | wForeGround);
 }
+BOOL 
+AnsiEqualRect(SMALL_RECT *Rect1, SMALL_RECT *Rect2)
+{
+	DWORDLONG dwlRect1 = *(DWORDLONG *)Rect1;
+	DWORDLONG dwlRect2 = *(DWORDLONG *)Rect2;
+
+	if (dwlRect1 != dwlRect2){
+		return(FALSE);
+	}
+	return(TRUE);
+}
+BOOL 
+AnsiSetRect(HANDLE Handle, WORD Top, WORD Bottom, SMALL_RECT *Result)
+{
+	BOOL bResult = FALSE;
+	CONSOLE_SCREEN_BUFFER_INFO csbInfo;
+
+	if (!GetConsoleScreenBufferInfo(Handle, &csbInfo)){
+		WIN_ERR("GetConsoleScreenBufferInfo(%d): %s\n", Handle, win_strerror(GetLastError()));
+	}else{
+		*Result = csbInfo.srWindow;
+		Result->Bottom = Result->Top + Bottom - 1;
+		Result->Top += Top - 1;
+		bResult = !AnsiEqualRect(Result, &csbInfo.srWindow);
+	}
+	return(bResult);
+}
 
 /****************************************************/
 
+COORD 
+AnsiRenderCursor(CONSOLE_SCREEN_BUFFER_INFO *Info)
+{
+	COORD cPos = Info->dwCursorPosition;
+
+	if (cPos.X > Info->srWindow.Right){
+		cPos.X -= Info->srWindow.Right + 1;
+		cPos.Y++;
+	}
+	return(cPos);
+}
 BOOL 
 AnsiRenderForeground(CONSOLE_SCREEN_BUFFER_INFO *Info, CHAR Char2)
 {
@@ -256,14 +294,8 @@ AnsiSelectGraphicRendition(HANDLE Handle, CONSOLE_SCREEN_BUFFER_INFO *Info, LPST
 BOOL 
 AnsiCursorUp(HANDLE Handle, CONSOLE_SCREEN_BUFFER_INFO *Info, WORD Count)
 {
-	COORD cPos = Info->dwCursorPosition;
+	COORD cPos = AnsiRenderCursor(Info);
 
-	/* Nano assumes cursor movement after last char
-	 */
-	if (cPos.X > Info->srWindow.Right){
-		cPos.X -= Info->srWindow.Right + 1;
-		cPos.Y++;
-	}
 	cPos.Y -= Count;
 	Info->dwCursorPosition = cPos;
 	return(SetConsoleCursorPosition(Handle, cPos));
@@ -271,12 +303,8 @@ AnsiCursorUp(HANDLE Handle, CONSOLE_SCREEN_BUFFER_INFO *Info, WORD Count)
 BOOL 
 AnsiCursorDown(HANDLE Handle, CONSOLE_SCREEN_BUFFER_INFO *Info, WORD Count)
 {
-	COORD cPos = Info->dwCursorPosition;
+	COORD cPos = AnsiRenderCursor(Info);
 
-	if (cPos.X > Info->srWindow.Right){
-		cPos.X -= Info->srWindow.Right + 1;
-		cPos.Y++;
-	}
 	cPos.Y += Count;
 	Info->dwCursorPosition = cPos;
 	return(SetConsoleCursorPosition(Handle, cPos));
@@ -368,15 +396,16 @@ BOOL
 AnsiEraseInLine(HANDLE Handle, CONSOLE_SCREEN_BUFFER_INFO *Info, CHAR Char)
 {
 	DWORD dwCount;
-	COORD cPos = {0, Info->dwCursorPosition.Y};
+	COORD cPos = AnsiRenderCursor(Info);
 	DWORD dwSize = 0;
 
 	if (!Char || Char == '0'){
-		cPos.X = Info->dwCursorPosition.X;
 		dwSize = (Info->srWindow.Right - cPos.X) + 1;
 	}else if (Char == '1'){
+		cPos.X = 0;
 		dwSize = Info->dwCursorPosition.X + 1;
 	}else if (Char == '2'){
+		cPos.X = 0;
 		dwSize = Info->srWindow.Right + 1;
 	}else{
 		return(FALSE);
@@ -387,7 +416,8 @@ AnsiEraseInLine(HANDLE Handle, CONSOLE_SCREEN_BUFFER_INFO *Info, CHAR Char)
 BOOL 
 AnsiEraseCharacter(HANDLE Handle, CONSOLE_SCREEN_BUFFER_INFO *Info, DWORD Size)
 {
-	COORD cPos = Info->dwCursorPosition;
+//	COORD cPos = Info->dwCursorPosition;
+	COORD cPos = AnsiRenderCursor(Info);
 	WORD wAttribs = Info->wAttributes & 0xFF;
 	DWORD dwCount;
 
@@ -416,24 +446,29 @@ AnsiNextPage(HANDLE Handle, CONSOLE_SCREEN_BUFFER_INFO *Info, WORD Count)
 BOOL 
 AnsiCursorHorizontalAbsolute(HANDLE Handle, CONSOLE_SCREEN_BUFFER_INFO *Info, SHORT X)
 {
-	COORD cPos = {X - 1, Info->dwCursorPosition.Y};
+//	COORD cPos = {X - 1, Info->dwCursorPosition.Y};
+	COORD cPos = AnsiRenderCursor(Info);
 
+	cPos.X = X - 1;
 	Info->dwCursorPosition = cPos;
 	return(SetConsoleCursorPosition(Handle, cPos));
 }
 BOOL 
 AnsiVerticalPositionAbsolute(HANDLE Handle, CONSOLE_SCREEN_BUFFER_INFO *Info, SHORT Y)
 {
-	COORD cPos = {Info->dwCursorPosition.X, Y - 1};
+//	COORD cPos = {Info->dwCursorPosition.X, Y - 1};
+	COORD cPos = AnsiRenderCursor(Info);
 
-	cPos.Y += Info->srWindow.Top;
+//	cPos.Y += Info->srWindow.Top;
+	cPos.Y -= Y;
 	Info->dwCursorPosition = cPos;
 	return(SetConsoleCursorPosition(Handle, cPos));
 }
 BOOL 
 AnsiSaveCursor(CONSOLE_SCREEN_BUFFER_INFO *Info)
 {
-	__CTTY->Cursor = Info->dwCursorPosition;
+//	__CTTY->Cursor = Info->dwCursorPosition;
+	__CTTY->Cursor = AnsiRenderCursor(Info);
 	return(TRUE);
 }
 BOOL 
@@ -447,7 +482,8 @@ AnsiRestoreCursor(HANDLE Handle, CONSOLE_SCREEN_BUFFER_INFO *Info)
 BOOL 
 AnsiDeviceStatusReport(CONSOLE_SCREEN_BUFFER_INFO *Info, CHAR Parm, CHAR *Result)
 {
-	COORD cPos = Info->dwCursorPosition;
+//	COORD cPos = Info->dwCursorPosition;
+	COORD cPos = AnsiRenderCursor(Info);
 	BOOL bResult = TRUE;
 	DWORD dwCount;
 
@@ -498,6 +534,37 @@ AnsiDeviceAttributes(HANDLE Handle)
 	msvc_sprintf(__INPUT_BUF, "\e[?64;22c");
 	__Input = __INPUT_BUF;
 	return(FALSE);
+}
+BOOL 
+AnsiVerticalEditingMode(HANDLE Handle, CONSOLE_SCREEN_BUFFER_INFO *Info, SHORT Parm)
+{
+	BOOL bResult = TRUE;
+
+	if (Parm == 1){
+		__CTTY->VEdit = TRUE;
+	}else if (Parm == 2){
+		__CTTY->VEdit = FALSE;
+	}else{
+		bResult = FALSE;
+	}
+	return(bResult);
+}
+BOOL 
+AnsiSetTopBottomMargin(HANDLE Handle, CONSOLE_SCREEN_BUFFER_INFO *Info, WORD Top, WORD Bottom)
+{
+	SMALL_RECT sRect = Info->srWindow;
+	COORD cPos;
+
+	if (AnsiSetRect(Handle, Top, Bottom, &sRect)){
+		AnsiVerticalEditingMode(Handle, Info, 1);
+	}else{
+		AnsiVerticalEditingMode(Handle, Info, 2);
+	}
+	cPos.X = sRect.Left;
+	cPos.Y = sRect.Top;
+	Info->srWindow = sRect;
+	Info->dwCursorPosition = cPos;
+	return(SetConsoleCursorPosition(Handle, cPos));
 }
 
 /****************************************************/
