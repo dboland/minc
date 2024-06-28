@@ -35,8 +35,8 @@
 DWORD 
 InputMode(WIN_TERMIO *Attribs)
 {
-	DWORD dwResult = ENABLE_WINDOW_INPUT | ENABLE_EXTENDED_FLAGS | 
-		ENABLE_INSERT_MODE | ENABLE_QUICK_EDIT_MODE | ENABLE_MOUSE_INPUT;
+	DWORD dwResult = ENABLE_WINDOW_INPUT | ENABLE_INSERT_MODE | 
+		ENABLE_QUICK_EDIT_MODE | ENABLE_EXTENDED_FLAGS | ENABLE_MOUSE_INPUT;
 
 	if (Attribs->LFlags & WIN_ECHO){
 		dwResult |= ENABLE_LINE_INPUT | ENABLE_ECHO_INPUT;
@@ -77,7 +77,7 @@ InputReturn(DWORD KeyState, WIN_TERMIO *Attribs, CHAR *Result)
 	}
 }
 VOID 
-InputTab(DWORD KeyState, CHAR *Result)
+InputTabulator(DWORD KeyState, CHAR *Result)
 {
 	if (KeyState & SHIFT_PRESSED){
 		win_strcpy(Result, "\e[Z");
@@ -185,7 +185,8 @@ InputReadEvent(HANDLE Handle, WIN_TERMIO *Attribs, CHAR *Buffer)
 
 	*Buffer = 0;
 	if (!ReadConsoleInput(Handle, &iRecord, 1, &dwCount)){
-		vfs_raise(WM_COMMAND, CTRL_ABORT_EVENT, 0);
+//		vfs_raise(WM_COMMAND, CTRL_ABORT_EVENT, 0);
+		WIN_ERR("ReadConsoleInput(%d): %s\n", Handle, win_strerror(GetLastError()));
 	}else{
 		bResult = InputEvent(&iRecord, Attribs, Buffer);
 	}

@@ -37,25 +37,23 @@
 #define VK_CURSOR		0x2F
 #define ANSI_CURSOR(vk)		__ANSI_CURSOR[VK_CURSOR - vk]
 
-/* 0x2F - 0x20 */
-
 static LPCSTR __ANSI_CURSOR[] = {
-	"",		/* VK_HELP */
-	"\177",		/* VK_DELETE: previously \e[M */
-	"\e[L",		/* VK_INSERT */
-	"",		/* VK_SNAPSHOT */
-	"",		/* VK_EXECUTE */
-	"",		/* VK_PRINT */
-	"",		/* VK_SELECT */
-	"\e[B",		/* VK_DOWN */
-	"\e[C",		/* VK_RIGHT */
-	"\e[A",		/* VK_UP */
-	"\e[D",		/* VK_LEFT */
-	"\e[H",		/* VK_HOME */
-	"\e[F",		/* VK_END */
-	"\e[T",		/* VK_NEXT */
-	"\e[S",		/* VK_PRIOR */
-	""		/* VK_SPACE */
+	"",		/* 0x2F: VK_HELP */
+	"\177",		/* 0x2E: VK_DELETE: previously \e[M */
+	"\e[L",		/* 0x2D: VK_INSERT */
+	"",		/* 0x2C: VK_SNAPSHOT */
+	"",		/* 0x2B: VK_EXECUTE */
+	"",		/* 0x2A: VK_PRINT */
+	"",		/* 0x29: VK_SELECT */
+	"\e[B",		/* 0x28: VK_DOWN */
+	"\e[C",		/* 0x27: VK_RIGHT */
+	"\e[A",		/* 0x26: VK_UP */
+	"\e[D",		/* 0x25: VK_LEFT */
+	"\e[H",		/* 0x24: VK_HOME */
+	"\e[F",		/* 0x23: VK_END */
+	"\e[T",		/* 0x22: VK_NEXT */
+	"\e[S",		/* 0x21: VK_PRIOR */
+	""		/* 0x20: VK_SPACE */
 };
 
 #define VK_WINDOWS	0x5F
@@ -65,69 +63,37 @@ static LPCSTR __ANSI_CURSOR[] = {
 #define VK_FUNCTION		0x8F
 #define ANSI_FUNCTION(vk)	__ANSI_FUNCTION[VK_FUNCTION - vk]
 
-/* 0x8F - 0x70 */
-
 static LPCSTR __ANSI_FUNCTION[] = {
-	"",		/* Reserved */
-	"",		/* Reserved */
-	"",		/* Reserved */
-	"",		/* Reserved */
-	"",		/* Reserved */
-	"",		/* Reserved */
-	"",		/* Reserved */
-	"",		/* Reserved */
-	"\eFO",		/* F24 */
-	"\eFN",		/* F23 */
-	"\eFM",		/* F22 */
-	"\eFL",		/* F21 */
-	"\eFK",		/* F20 */
-	"\eFJ",		/* F19 */
-	"\eFI",		/* F18 */
-	"\eFH",		/* F17 */
-	"\eFG",		/* F16 */
-	"\eFF",		/* F15 */
-	"\eFE",		/* F14 */
-	"\eFD",		/* F13 */
-	"\eFC",		/* F12 */
-	"\eFB",		/* F11 */
-	"\eFA",		/* F10 */
-	"\eF9",		/* F9 */
-	"\eF8",		/* F8 */
-	"\eF7",		/* F7 */
-	"\eF6",		/* F6 */
-	"\eF5",		/* F5 */
-	"\eF4",		/* F4 */
-	"\eF3",		/* F3 */
-	"\eF2",		/* F2 */
-	"\eF1"		/* F1 */
+	"",		/* 0x8F: Reserved */
+	"",		/* 0x8E: Reserved */
+	"",		/* 0x8D: Reserved */
+	"",		/* 0x8C: Reserved */
+	"",		/* 0x8B: Reserved */
+	"",		/* 0x8A: Reserved */
+	"",		/* 0x89: Reserved */
+	"",		/* 0x88: Reserved */
+	"\eFO",		/* 0x87: VK_F24 */
+	"\eFN",		/* 0x86: VK_F23 */
+	"\eFM",		/* 0x85: VK_F22 */
+	"\eFL",		/* 0x84: VK_F21 */
+	"\eFK",		/* 0x83: VK_F20 */
+	"\eFJ",		/* 0x82: VK_F19 */
+	"\eFI",		/* 0x81: VK_F18 */
+	"\eFH",		/* 0x80: VK_F17 */
+	"\eFG",		/* 0x7F: VK_F16 */
+	"\eFF",		/* 0x7E: VK_F15 */
+	"\eFE",		/* 0x7D: VK_F14 */
+	"\eFD",		/* 0x7C: VK_F13 */
+	"\eFC",		/* 0x7B: VK_F12 */
+	"\eFB",		/* 0x7A: VK_F11 */
+	"\eFA",		/* 0x79: VK_F10 */
+	"\eF9",		/* 0x78: VK_F9 */
+	"\eF8",		/* 0x77: VK_F8 */
+	"\eF7",		/* 0x76: VK_F7 */
+	"\eF6",		/* 0x75: VK_F6 */
+	"\eF5",		/* 0x74: VK_F5 */
+	"\eF4",		/* 0x73: VK_F4 */
+	"\eF3",		/* 0x72: VK_F3 */
+	"\eF2",		/* 0x71: VK_F2 */
+	"\eF1"		/* 0x70: VK_F1 */
 };
-
-/****************************************************/
-
-BOOL 
-AnsiEraseInDisplay(HANDLE Handle, CONSOLE_SCREEN_BUFFER_INFO *Info, CHAR Parm)
-{
-	DWORD dwScreen;
-	DWORD dwCount;
-	DWORD dwOffset = 0;
-	SMALL_RECT sRect = Info->srWindow;
-	COORD cPos = {sRect.Left, sRect.Top};
-	SHORT sWidth = sRect.Right - sRect.Left + 1;
-	WORD wAttribs = Info->wAttributes & 0xFF;
-
-	if (!Parm || Parm == '0'){
-		cPos = Info->dwCursorPosition;
-		dwOffset = sRect.Right - cPos.X;
-	}else if (Parm == '1'){
-		dwOffset = (sRect.Bottom - Info->dwCursorPosition.Y) * sWidth;
-		dwOffset += Info->dwCursorPosition.X;
-	}else if (Parm == '2'){
-		Info->dwCursorPosition = cPos;
-		SetConsoleCursorPosition(Handle, cPos);
-	}else{
-		return(FALSE);
-	}
-	dwScreen = ((sRect.Bottom - sRect.Top) + 1) * sWidth;
-	FillConsoleOutputAttribute(Handle, wAttribs, dwScreen - dwOffset, cPos, &dwCount);
-	return(FillConsoleOutputCharacter(Handle, ' ', dwScreen - dwOffset, cPos, &dwCount));
-}

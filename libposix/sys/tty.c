@@ -37,9 +37,8 @@ tty_init(void)
 {
 	WIN_TTY *pwTerminal = __Terminals;
 	DWORD dwIndex = 0;
-	struct termios attr = {
-		TTYDEF_IFLAG, TTYDEF_OFLAG, TTYDEF_CFLAG, TTYDEF_LFLAG, 
-		{0}, TTYDEF_SPEED, TTYDEF_SPEED};
+	struct termios attr = {TTYDEF_IFLAG, TTYDEF_OFLAG, TTYDEF_CFLAG, 
+		TTYDEF_LFLAG, {0}, TTYDEF_SPEED, TTYDEF_SPEED};
 
 	win_memcpy(attr.c_cc, ttydefchars, sizeof(ttydefchars));
 	while (dwIndex < WIN_TTY_MAX){

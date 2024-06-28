@@ -96,6 +96,18 @@ ScreenLineFeed(HANDLE Handle, UINT Flags, CONSOLE_SCREEN_BUFFER_INFO *Info)
 	Info->dwCursorPosition = cPos;
 	return(SetConsoleCursorPosition(Handle, cPos));
 }
+BOOL 
+ScreenTabulator(HANDLE Handle, UINT Flags, CONSOLE_SCREEN_BUFFER_INFO *Info)
+{
+	DWORD dwCount;
+	CONSOLE_SCREEN_BUFFER_INFO csbInfo;
+
+	if (!WriteFile(Handle, "\t", 1, &dwCount, NULL)){
+		return(FALSE);
+	}else if (GetConsoleScreenBufferInfo(Handle, &csbInfo)){
+		Info->dwCursorPosition = csbInfo.dwCursorPosition;
+	}
+}
 VOID 
 ScreenControl(HANDLE Handle, UINT Flags, CONSOLE_SCREEN_BUFFER_INFO *Info)
 {
@@ -117,6 +129,9 @@ ScreenControl(HANDLE Handle, UINT Flags, CONSOLE_SCREEN_BUFFER_INFO *Info)
 			break;
 		case 8:		/* Backspace (BS) */
 			AnsiCursorBack(Handle, Info, 1);
+			break;
+		case 9:		/* Tabulator (TAB) */
+			ScreenTabulator(Handle, Flags, Info);
 			break;
 		case 10:	/* Linefeed (LF) */
 			ScreenLineFeed(Handle, Flags, Info);

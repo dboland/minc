@@ -89,7 +89,7 @@ DECSelectCharacterSet(HANDLE Handle, CHAR Char)
 {
 	BOOL bResult = TRUE;
 
-	if (Char == 'A'){	/* UKASCII pound sign */
+	if (Char == 'A'){		/* UKASCII pound sign */
 		bResult = SetConsoleOutputCP(850);
 	}else if (Char == 'B'){		/* USASCII dollar sign (bitchx.exe ["Latin-1"]) */
 		bResult = SetConsoleOutputCP(437);

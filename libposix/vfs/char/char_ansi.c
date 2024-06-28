@@ -41,7 +41,7 @@
 #define FOREGROUND_BLACK	(0x0)
 #define FOREGROUND_DEFAULT	(FOREGROUND_WHITE)
 #define FOREGROUND_UNDERLINE	(FOREGROUND_CYAN)
-#define FOREGROUND_RGB		(FOREGROUND_YELLOW)
+//#define FOREGROUND_RGB		(FOREGROUND_YELLOW)
 
 #define BACKGROUND_WHITE	(BACKGROUND_RED | BACKGROUND_GREEN | BACKGROUND_BLUE)
 #define BACKGROUND_YELLOW	(BACKGROUND_RED | BACKGROUND_GREEN)
@@ -49,7 +49,7 @@
 #define BACKGROUND_CYAN		(BACKGROUND_BLUE | BACKGROUND_GREEN)
 #define BACKGROUND_BLACK	(0x0)
 #define BACKGROUND_DEFAULT	(BACKGROUND_BLACK)
-#define BACKGROUND_RGB		(BACKGROUND_YELLOW)
+//#define BACKGROUND_RGB		(BACKGROUND_YELLOW)
 
 /****************************************************/
 
@@ -96,8 +96,11 @@ AnsiEqualRect(SMALL_RECT *Rect1, SMALL_RECT *Rect2)
 	}
 	return(TRUE);
 }
+
+/****************************************************/
+
 BOOL 
-AnsiSetRect(HANDLE Handle, WORD Top, WORD Bottom, SMALL_RECT *Result)
+AnsiRenderMargin(HANDLE Handle, WORD Top, WORD Bottom, SMALL_RECT *Result)
 {
 	BOOL bResult = FALSE;
 	CONSOLE_SCREEN_BUFFER_INFO csbInfo;
@@ -112,9 +115,6 @@ AnsiSetRect(HANDLE Handle, WORD Top, WORD Bottom, SMALL_RECT *Result)
 	}
 	return(bResult);
 }
-
-/****************************************************/
-
 COORD 
 AnsiRenderCursor(CONSOLE_SCREEN_BUFFER_INFO *Info)
 {
@@ -393,6 +393,53 @@ AnsiDeleteLine(HANDLE Handle, CONSOLE_SCREEN_BUFFER_INFO *Info, WORD Count)
 	return(ScrollConsoleScreenBuffer(Handle, &sRect, &Info->srWindow, cPos, &cInfo));
 }
 BOOL 
+AnsiEraseCharacter(HANDLE Handle, CONSOLE_SCREEN_BUFFER_INFO *Info, DWORD Size)
+{
+//	COORD cPos = Info->dwCursorPosition;
+	COORD cPos = AnsiRenderCursor(Info);
+	WORD wAttribs = Info->wAttributes & 0xFF;
+	DWORD dwCount;
+
+	FillConsoleOutputAttribute(Handle, wAttribs, Size, cPos, &dwCount);
+	return(FillConsoleOutputCharacter(Handle, ' ', Size, cPos, &dwCount));
+}
+BOOL 
+AnsiCursorPosition(HANDLE Handle, CONSOLE_SCREEN_BUFFER_INFO *Info, WORD Y, WORD X)
+{
+	COORD cPos = {X - 1, Y - 1};
+
+	cPos.Y += Info->srWindow.Top;
+	Info->dwCursorPosition = cPos;
+	return(SetConsoleCursorPosition(Handle, cPos));
+}
+BOOL 
+AnsiEraseInDisplay(HANDLE Handle, CONSOLE_SCREEN_BUFFER_INFO *Info, CHAR Parm)
+{
+	DWORD dwCount;
+	DWORD dwOffset = 0;
+	SMALL_RECT sRect = Info->srWindow;
+	COORD cPos = {sRect.Left, sRect.Top};
+	SHORT sWidth = sRect.Right - sRect.Left + 1;
+	WORD wAttribs = Info->wAttributes & 0xFF;
+	DWORD dwScreen = ((sRect.Bottom - sRect.Top) + 1) * sWidth;
+
+	if (!Parm || Parm == '0'){			/* nano.exe */
+		cPos = AnsiRenderCursor(Info);
+		dwOffset = ((cPos.Y - sRect.Top) + 1) * sWidth;
+		dwOffset -= sWidth - cPos.X;
+	}else if (Parm == '1'){
+		dwOffset = (sRect.Bottom - Info->dwCursorPosition.Y) * sWidth;
+		dwOffset += Info->dwCursorPosition.X;
+	}else if (Parm == '2'){				/* vim.exe */
+		Info->dwCursorPosition = cPos;
+		SetConsoleCursorPosition(Handle, cPos);
+	}else{
+		return(FALSE);
+	}
+	FillConsoleOutputAttribute(Handle, wAttribs, dwScreen - dwOffset, cPos, &dwCount);
+	return(FillConsoleOutputCharacter(Handle, ' ', dwScreen - dwOffset, cPos, &dwCount));
+}
+BOOL 
 AnsiEraseInLine(HANDLE Handle, CONSOLE_SCREEN_BUFFER_INFO *Info, CHAR Char)
 {
 	DWORD dwCount;
@@ -412,26 +459,6 @@ AnsiEraseInLine(HANDLE Handle, CONSOLE_SCREEN_BUFFER_INFO *Info, CHAR Char)
 	}
 	FillConsoleOutputAttribute(Handle, Info->wAttributes, dwSize, cPos, &dwCount);
 	return(FillConsoleOutputCharacter(Handle, ' ', dwSize, cPos, &dwCount));
-}
-BOOL 
-AnsiEraseCharacter(HANDLE Handle, CONSOLE_SCREEN_BUFFER_INFO *Info, DWORD Size)
-{
-//	COORD cPos = Info->dwCursorPosition;
-	COORD cPos = AnsiRenderCursor(Info);
-	WORD wAttribs = Info->wAttributes & 0xFF;
-	DWORD dwCount;
-
-	FillConsoleOutputAttribute(Handle, wAttribs, Size, cPos, &dwCount);
-	return(FillConsoleOutputCharacter(Handle, ' ', Size, cPos, &dwCount));
-}
-BOOL 
-AnsiCursorPosition(HANDLE Handle, CONSOLE_SCREEN_BUFFER_INFO *Info, WORD Y, WORD X)
-{
-	COORD cPos = {X - 1, Y - 1};
-
-	cPos.Y += Info->srWindow.Top;
-	Info->dwCursorPosition = cPos;
-	return(SetConsoleCursorPosition(Handle, cPos));
 }
 BOOL 
 AnsiNextPage(HANDLE Handle, CONSOLE_SCREEN_BUFFER_INFO *Info, WORD Count)
@@ -555,7 +582,7 @@ AnsiSetTopBottomMargin(HANDLE Handle, CONSOLE_SCREEN_BUFFER_INFO *Info, WORD Top
 	SMALL_RECT sRect = Info->srWindow;
 	COORD cPos;
 
-	if (AnsiSetRect(Handle, Top, Bottom, &sRect)){
+	if (AnsiRenderMargin(Handle, Top, Bottom, &sRect)){
 		AnsiVerticalEditingMode(Handle, Info, 1);
 	}else{
 		AnsiVerticalEditingMode(Handle, Info, 2);
