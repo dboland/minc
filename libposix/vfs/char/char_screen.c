@@ -47,6 +47,21 @@ ScreenMode(WIN_TERMIO *Attribs)
 	return(dwResult);
 }
 BOOL 
+ScreenGetWindow(HANDLE Handle, CONSOLE_SCREEN_BUFFER_INFO *Info)
+{
+	BOOL bResult = TRUE;
+	SMALL_RECT sRect = Info->srWindow;
+
+	if (!GetConsoleScreenBufferInfo(Handle, Info)){
+		bResult = FALSE;
+	}else if (__CTTY->VEdit){
+		Info->srWindow = sRect;
+	}else if (!AnsiEqualRect(&sRect, &Info->srWindow)){
+		vfs_raise(WM_SIZE, Info->srWindow.Right, Info->srWindow.Bottom);
+	}
+	return(bResult);
+}
+BOOL 
 ScreenCarriageReturn(HANDLE Handle, UINT Flags, CONSOLE_SCREEN_BUFFER_INFO *Info)
 {
 	COORD cPos = Info->dwCursorPosition;
@@ -69,7 +84,7 @@ ScreenScrollUp(HANDLE Handle, CONSOLE_SCREEN_BUFFER_INFO *Info)
 
 	sRect.Top = 1;
 	sRect.Bottom = Info->dwSize.Y - 1;
-	return(ScrollConsoleScreenBuffer(Handle, &sRect, &Info->srWindow, cPos, &cInfo));
+	return(ScrollConsoleScreenBuffer(Handle, &sRect, NULL, cPos, &cInfo));
 }
 BOOL 
 ScreenLineFeed(HANDLE Handle, UINT Flags, CONSOLE_SCREEN_BUFFER_INFO *Info)
@@ -262,6 +277,8 @@ screen_write(HANDLE Handle, LPCSTR Buffer, DWORD Size, DWORD *Result)
 
 	if (dwMode & ENABLE_VIRTUAL_TERMINAL_PROCESSING){
 		bResult = WriteFile(Handle, Buffer, Size, &dwResult, NULL);
+	}else if (!ScreenGetWindow(Handle, psbInfo)){
+		bResult = FALSE;
 	}else while (dwResult < Size){
 		__Char = *Buffer;
 		dwCount = 1;

@@ -60,6 +60,6 @@ main(int argc, char *argv[], char *env[])
 	else
 		result = 0;
 	if (isatty(1))
-		write(1, "\e[?7l\e[?1u", 10);	/* unset autowrap, reset cursor info */
+		write(1, "\e[?7l", 5);		/* unset autowrap */
 	return(result);
 }

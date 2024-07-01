@@ -88,15 +88,15 @@ InputTabulator(DWORD KeyState, CHAR *Result)
 BOOL 
 InputInsert(DWORD KeyState, CHAR *Result)
 {
-	BOOL bResult = FALSE;
+	BOOL bResult = TRUE;
 
 	if (!(KeyState & SHIFT_PRESSED)){
 		win_strcpy(Result, ANSI_CURSOR(VK_INSERT));
-		bResult = TRUE;
 	}else if (!IsClipboardFormatAvailable(CF_TEXT)){
 		*Result = 0;
 	}else if (!OpenClipboard(NULL)){
 		WIN_ERR("OpenClipboard(): %s\n", win_strerror(GetLastError()));
+		bResult = FALSE;
 	}else if (__Lock = GetClipboardData(CF_TEXT)){
 		__Clipboard = GlobalLock(__Lock);
 	}
@@ -145,17 +145,6 @@ InputMouse(MOUSE_EVENT_RECORD *Event, CHAR *Result)
 	return(bResult);
 }
 BOOL 
-InputWindow(WINDOW_BUFFER_SIZE_RECORD *Event)
-{
-	COORD cSize = Event->dwSize;
-
-	__CTTY->WinSize.Column = cSize.X;
-	__CTTY->WinSize.Row = cSize.Y;
-	vfs_raise(WM_SIZE, cSize.X, cSize.Y);
-//	SetEvent(__Interrupt);
-	return(FALSE);
-}
-BOOL 
 InputEvent(INPUT_RECORD *Record, WIN_TERMIO *Attribs, LPSTR Buffer)
 {
 	BOOL bResult = FALSE;
@@ -165,14 +154,12 @@ InputEvent(INPUT_RECORD *Record, WIN_TERMIO *Attribs, LPSTR Buffer)
 			bResult = InputKey(&Record->KeyEvent, Attribs, Buffer);
 			break;
 		case WINDOW_BUFFER_SIZE_EVENT:
-			bResult = InputWindow(&Record->WindowBufferSizeEvent);
-			break;
-		case MOUSE_EVENT:
 		case FOCUS_EVENT:
 		case MENU_EVENT:
+		case MOUSE_EVENT:
 			break;
 		default:
-			__PRINTF("{%d}", Record->EventType)
+			SetLastError(ERROR_IO_DEVICE);
 	}
 	return(bResult);
 }
@@ -185,7 +172,6 @@ InputReadEvent(HANDLE Handle, WIN_TERMIO *Attribs, CHAR *Buffer)
 
 	*Buffer = 0;
 	if (!ReadConsoleInput(Handle, &iRecord, 1, &dwCount)){
-//		vfs_raise(WM_COMMAND, CTRL_ABORT_EVENT, 0);
 		WIN_ERR("ReadConsoleInput(%d): %s\n", Handle, win_strerror(GetLastError()));
 	}else{
 		bResult = InputEvent(&iRecord, Attribs, Buffer);
@@ -270,31 +256,12 @@ InputIsEvent(INPUT_RECORD *Record)
 			bResult = InputIsAnsi(&Record->KeyEvent);
 			break;
 		case WINDOW_BUFFER_SIZE_EVENT:
-			bResult = InputWindow(&Record->WindowBufferSizeEvent);
-			break;
 		case MOUSE_EVENT:
 		case FOCUS_EVENT:
 		case MENU_EVENT:
 			break;
 		default:
-			__PRINTF("{%d}", Record->EventType)
-	}
-	return(bResult);
-}
-
-/****************************************************/
-
-BOOL 
-input_TIOCFLUSH(HANDLE Handle)
-{
-	BOOL bResult = FALSE;
-
-	/* "Handle is invalid" if CONIN$ buffer empty
-	 */
-	if (!FlushConsoleInputBuffer(Handle)){
-		WIN_ERR("FlushConsoleInputBuffer(%d): %s\n", Handle, win_strerror(GetLastError()));
-	}else{
-		bResult = TRUE;
+			SetLastError(ERROR_IO_DEVICE);
 	}
 	return(bResult);
 }
@@ -357,4 +324,21 @@ input_poll(HANDLE Handle, WIN_POLLFD *Info)
 		dwResult++;
 	}
 	return(dwResult);
+}
+
+/****************************************************/
+
+BOOL 
+input_TIOCFLUSH(HANDLE Handle)
+{
+	BOOL bResult = FALSE;
+
+	/* "Handle is invalid" if CONIN$ buffer empty
+	 */
+	if (!FlushConsoleInputBuffer(Handle)){
+		WIN_ERR("FlushConsoleInputBuffer(%d): %s\n", Handle, win_strerror(GetLastError()));
+	}else{
+		bResult = TRUE;
+	}
+	return(bResult);
 }
