@@ -65,6 +65,9 @@
 #define WAIT_ABANDONED 128
 #define WAIT_FAILED ((DWORD)0xFFFFFFFF)
 
+#define __AW__(AW, AW_) AW ## AW_
+#define __AW(AW) __AW__(AW, A)
+
 typedef struct _FILETIME {
         DWORD dwLowDateTime;
         DWORD dwHighDateTime;
@@ -132,6 +135,49 @@ typedef union _LARGE_INTEGER {
 } LARGE_INTEGER,*LPLARGE_INTEGER;
 
 typedef DWORD (WINAPI *LPTHREAD_START_ROUTINE)(LPVOID);
+
+typedef struct _STARTUPINFOA {
+        DWORD   cb;
+        LPSTR   lpReserved;
+        LPSTR   lpDesktop;
+        LPSTR   lpTitle;
+        DWORD   dwX;
+        DWORD   dwY;
+        DWORD   dwXSize;
+        DWORD   dwYSize;
+        DWORD   dwXCountChars;
+        DWORD   dwYCountChars;
+        DWORD   dwFillAttribute;
+        DWORD   dwFlags;
+        WORD    wShowWindow;
+        WORD    cbReserved2;
+        PBYTE   lpReserved2;
+        HANDLE  hStdInput;
+        HANDLE  hStdOutput;
+        HANDLE  hStdError;
+} STARTUPINFOA,*LPSTARTUPINFOA;
+typedef struct _STARTUPINFOW {
+        DWORD   cb;
+        LPWSTR  lpReserved;
+        LPWSTR  lpDesktop;
+        LPWSTR  lpTitle;
+        DWORD   dwX;
+        DWORD   dwY;
+        DWORD   dwXSize;
+        DWORD   dwYSize;
+        DWORD   dwXCountChars;
+        DWORD   dwYCountChars;
+        DWORD   dwFillAttribute;
+        DWORD   dwFlags;
+        WORD    wShowWindow;
+        WORD    cbReserved2;
+        PBYTE   lpReserved2;
+        HANDLE  hStdInput;
+        HANDLE  hStdOutput;
+        HANDLE  hStdError;
+} STARTUPINFOW,*LPSTARTUPINFOW;
+
+typedef __AW(STARTUPINFO) STARTUPINFO,*LPSTARTUPINFO;
 
 WINBASEAPI DWORD WINAPI GetLastError(VOID);
 WINBASEAPI VOID WINAPI SetLastError(DWORD);

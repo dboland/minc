@@ -42,19 +42,19 @@ win_exit(DWORD ExitCode)
 	}
 }
 BOOL 
-win_execve(LPSTR Command, LPCSTR Path)
+win_execve(LPSTR Command, LPCSTR Path, STARTUPINFO *Info)
 {
 	BOOL bResult = FALSE;
 	PROCESS_INFORMATION pi = {0};
-	STARTUPINFO si = {0};
 
-	win_F_SETFD(GetStdHandle(STD_INPUT_HANDLE), HANDLE_FLAG_INHERIT);
-	win_F_SETFD(GetStdHandle(STD_OUTPUT_HANDLE), HANDLE_FLAG_INHERIT);
-	win_F_SETFD(GetStdHandle(STD_ERROR_HANDLE), HANDLE_FLAG_INHERIT);
-	si.cb = sizeof(STARTUPINFO);
-	si.lpDesktop = "";			/* Vista */
-	if (CreateProcess(NULL, Command, NULL, NULL, TRUE, NORMAL_PRIORITY_CLASS, NULL, Path, &si, &pi)){
+	Info->cb = sizeof(STARTUPINFO);
+	Info->lpDesktop = "";			/* Vista */
+	Info->dwFlags = STARTF_USESTDHANDLES;
+	if (CreateProcess(NULL, Command, NULL, NULL, TRUE, NORMAL_PRIORITY_CLASS, NULL, Path, Info, &pi)){
 		CloseHandle(pi.hThread);
+		CloseHandle(Info->hStdInput);
+		CloseHandle(Info->hStdOutput);
+		CloseHandle(Info->hStdError);
 		WaitForSingleObject(pi.hProcess, INFINITE);
 		CloseHandle(pi.hProcess);
 		bResult = TRUE;

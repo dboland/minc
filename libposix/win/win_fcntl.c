@@ -52,18 +52,17 @@ win_F_DUPFD(HANDLE Handle, DWORD Flags)
 	}
 	return(hResult);
 }
-BOOL 
+HANDLE 
 win_F_SETFD(HANDLE Handle, DWORD Info)
 {
-	BOOL bResult = FALSE;
-	DWORD dwInfo = Info & 0xFFFF;
+	HANDLE hResult = NULL;
 
-	if (!SetHandleInformation(Handle, dwInfo, dwInfo)){
+	if (!SetHandleInformation(Handle, Info, Info)){
 		WIN_ERR("win_F_SETFD(%d): %s\n", Handle, win_strerror(GetLastError()));
 	}else{
-		bResult = TRUE;
+		hResult = Handle;
 	}
-	return(bResult);
+	return(hResult);
 }
 DWORD 
 win_F_GETFD(HANDLE Handle)

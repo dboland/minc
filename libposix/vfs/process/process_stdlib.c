@@ -103,7 +103,7 @@ proc_init(WIN_SIGPROC SignalProc)
 	GetStartupInfo(&si);
 	if (si.dwFlags & STARTF_PS_EXEC){
 		__Process = &__Tasks[si.dwX];
-		ProcInitStreams(__Process->Node);
+//		ProcInitStreams(__Process->Node);
 		__Process->Flags |= WIN_PS_INEXEC;
 	}else{
 		__Process = ProcCreateTask(0);

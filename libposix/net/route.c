@@ -38,30 +38,6 @@
 /****************************************************/
 
 void *
-ifamsg_posix_OLD(void *buf, MIB_IFROW *Interface, MIB_IPADDRROW *Address)
-{
-	struct ifa_msghdr *hdr = buf;
-	struct sockaddr_in *addr;
-	DWORD dwBroadcast = Address->dwAddr | ~Address->dwMask;
-
-	hdr->ifam_msglen = IFAMSGLEN;
-	hdr->ifam_version = RTM_VERSION;
-	hdr->ifam_type = RTM_NEWADDR;
-	hdr->ifam_hdrlen = sizeof(struct ifa_msghdr);
-	hdr->ifam_index = Address->dwIndex;
-//	hdr->ifam_tableid
-	/* records added below need to be announced here */
-	hdr->ifam_addrs = RTA_NETMASK | RTA_IFA | RTA_BRD;
-	hdr->ifam_flags = ifflags_posix(Interface);
-//	hdr->ifam_metric
-	addr = buf + hdr->ifam_hdrlen;
-	/* order is important */
-	inaddr_posix(addr++, 0, (BYTE *)&Address->dwMask);
-	inaddr_posix(addr++, 0, (BYTE *)&Address->dwAddr);
-	inaddr_posix(addr++, 0, (BYTE *)&dwBroadcast);
-	return(addr);
-}
-void *
 ifamsg_posix(WIN_TASK *Task, void *buf, WIN_IFENT *Adapter, PSOCKET_ADDRESS Address)
 {
 	struct ifa_msghdr *hdr = buf;

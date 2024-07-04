@@ -36,9 +36,14 @@ runcmd(char *argv[])
 	int result = -1;
 	CHAR szPath[PATH_MAX];
 	WIN_TASK *pwTask = &__Tasks[CURRENT];
+	WIN_VNODE *Nodes = pwTask->Node;
+	STARTUPINFO si = {0};
 
+	si.hStdInput = win_F_SETFD(Nodes[0].Handle, HANDLE_FLAG_INHERIT);
+	si.hStdOutput = win_F_SETFD(Nodes[1].Handle, HANDLE_FLAG_INHERIT);
+	si.hStdError = win_F_SETFD(Nodes[2].Handle, HANDLE_FLAG_INHERIT);
 	win_wcstombs(szPath, __Strings[pwTask->TaskId].Path, PATH_MAX);
-	if (!win_execve(argv_win(pwTask, *argv, argv), szPath)){
+	if (!win_execve(argv_win(pwTask, *argv, argv), szPath, &si)){
 		pwTask->Error = errno_posix(GetLastError());
 	}else{
 		result = 0;

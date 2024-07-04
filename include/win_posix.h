@@ -142,7 +142,7 @@ BOOL win_getgrouplist(WIN_PWENT *Passwd, SID8 *Primary, SID8 *Result[], DWORD *C
 /* win_fcntl.c */
 
 HANDLE win_F_DUPFD(HANDLE Handle, DWORD Flags);
-BOOL win_F_SETFD(HANDLE Handle, DWORD Info);
+HANDLE win_F_SETFD(HANDLE Handle, DWORD Info);
 LPWSTR win_F_GETPATH(HANDLE Handle, LPWSTR Buffer);
 ACCESS_MASK win_F_GETFL(HANDLE Handle);
 DWORD win_F_GETFD(HANDLE Handle);
@@ -173,7 +173,7 @@ BOOL win_dladdr(LPCVOID Address, MEMORY_BASIC_INFORMATION *Info, LPWSTR FileName
 /* win_syscall.c */
 
 DECLSPEC_NORETURN VOID win_exit(DWORD ExitCode);
-BOOL win_execve(LPSTR Command, LPCSTR Path);
+BOOL win_execve(LPSTR Command, LPCSTR Path, STARTUPINFO *Info);
 
 /* win_resource.c */
 

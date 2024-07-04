@@ -51,6 +51,7 @@ ScreenGetWindow(HANDLE Handle, CONSOLE_SCREEN_BUFFER_INFO *Info)
 {
 	BOOL bResult = TRUE;
 	SMALL_RECT sRect = Info->srWindow;
+	COORD cPos = Info->dwCursorPosition;
 
 	if (!GetConsoleScreenBufferInfo(Handle, Info)){
 		bResult = FALSE;
@@ -58,6 +59,8 @@ ScreenGetWindow(HANDLE Handle, CONSOLE_SCREEN_BUFFER_INFO *Info)
 		Info->srWindow = sRect;
 	}else if (!AnsiEqualRect(&sRect, &Info->srWindow)){
 		vfs_raise(WM_SIZE, Info->srWindow.Right, Info->srWindow.Bottom);
+	}else{
+		Info->dwCursorPosition = cPos;
 	}
 	return(bResult);
 }
