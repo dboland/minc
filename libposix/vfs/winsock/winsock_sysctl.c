@@ -81,6 +81,7 @@ ws2_NET_RT_OACTIVE(PMIB_IPNETTABLE *Table, PMIB_IPNETROW *Row, DWORD *Count)
 	PMIB_IPNETTABLE pinTable;
 	LONG lSize = 0;
 	DWORD dwStatus;
+	DWORD dwCount = 0;
 
 	dwStatus = GetIpNetTable(NULL, &lSize, FALSE);
 	if (lSize > 0){
@@ -88,11 +89,14 @@ ws2_NET_RT_OACTIVE(PMIB_IPNETTABLE *Table, PMIB_IPNETROW *Row, DWORD *Count)
 		GetIpNetTable(pinTable, &lSize, FALSE);
 		*Table = pinTable;
 		*Row = pinTable->table;
-		*Count = pinTable->dwNumEntries;
+		dwCount = pinTable->dwNumEntries;
+		bResult = TRUE;
+	}else if (dwStatus == ERROR_NO_DATA){		/* not an error */
 		bResult = TRUE;
 	}else{
-		WIN_ERR("GetIpNetTable(): %s\n", win_strerror(dwStatus));
+		SetLastError(dwStatus);
 	}
+	*Count = dwCount;
 	return(bResult);
 }
 BOOL 

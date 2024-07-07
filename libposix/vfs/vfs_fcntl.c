@@ -138,6 +138,7 @@ vfs_F_GETPATH(WIN_VNODE *Node, WIN_NAMEIDATA *Result)
 		Result->Flags = 0;
 		Result->Base = Result->R;
 		Result->S = NULL;
+//vfs_ktrace("vfs_F_GETPATH", STRUCT_NAMEI, Result);
 		bResult = TRUE;
 	}
 	LocalFree(puString);

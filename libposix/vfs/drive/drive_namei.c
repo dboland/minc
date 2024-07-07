@@ -35,11 +35,18 @@
 BOOL 
 drive_lookup(WIN_NAMEIDATA *Path, DWORD Flags)
 {
-	WIN_MOUNT *pwMount = &__Mounts[Path->MountId];
+	LONG lMountId = MOUNTID(Path->Base[0]);
+	WIN_MOUNT *pwMount = &__Mounts[lMountId];
 
-	if (!pwMount->DeviceId){
+//vfs_ktrace("vol_lookup", STRUCT_NAMEI, Path);
+	if (lMountId < 0 || lMountId >= WIN_MOUNT_MAX){
+		SetLastError(ERROR_BAD_ARGUMENTS);
+	}else if (Flags & WIN_NOCROSSMOUNT){	/* vfs_unmount() */
+		Path->MountId = lMountId;
+	}else if (!pwMount->DeviceId){
 		SetLastError(ERROR_DEVICE_NOT_AVAILABLE);
 	}else{
+		Path->MountId = pwMount->MountId;
 		if (Flags & WIN_REQUIREDIR){
 			Path->R = win_wcpcpy(Path->Resolved, pwMount->Path);
 		}else{
@@ -47,6 +54,5 @@ drive_lookup(WIN_NAMEIDATA *Path, DWORD Flags)
 		}
 		Path->Base = Path->R;
 	}
-//VfsDebugPath(Path, "drive_lookup");
 	return(TRUE);
 }

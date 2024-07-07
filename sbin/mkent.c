@@ -254,9 +254,9 @@ mk_vfsent(WIN_FS_TYPE Type)
 	}else while (vfs_getvfs(&fsEnum, 0)){
 		if (fsEnum.FSType == Type){
 			if (_verbose){
-				printf("%ls: %s\n", fsEnum.DosPath, path_posix(buf, fsEnum.NtPath));
+				printf("%ls: %ls\n", fsEnum.DosPath, fsEnum.NtPath);
 			}else{
-				printf("%ls: %s\n", fsEnum.BusName, path_posix(buf, fsEnum.NtPath));
+				printf("%ls: %ls\n", fsEnum.BusName, fsEnum.NtPath);
 			}
 		}
 	}

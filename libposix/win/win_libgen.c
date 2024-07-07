@@ -101,11 +101,12 @@ win_drivename(LPWSTR Result, LPCWSTR FileName)
 	WCHAR C;
 
 	while (C = *FileName++){
-		*R++ = C;
 		if (C == ':'){
 			break;
 		}
+		*R++ = C;
 	}
+	*R++ = ':';
 	*R = 0;
 	return(Result);
 }

@@ -226,7 +226,7 @@ vfs_chdir(WIN_TASK *Task, WIN_NAMEIDATA *Path)
 
 	/* perl.exe creates really weird paths.
 	 */
-//VfsDebugPath(Path, "vfs_chdir");
+//vfs_ktrace("vfs_chdir", STRUCT_NAMEI, Path);
 	if (Path->FileType != WIN_VDIR){
 		SetLastError(ERROR_DIRECTORY);
 	}else if (!vfs_access(Path, WIN_S_IRX)){

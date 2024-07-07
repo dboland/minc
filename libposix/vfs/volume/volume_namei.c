@@ -35,17 +35,11 @@
 BOOL 
 vol_lookup(WIN_NAMEIDATA *Path, DWORD Flags)
 {
-	LONG lMountId = MOUNTID(Path->Base[0]);
-	WIN_MOUNT *pwMount = &__Mounts[lMountId];
+	WIN_MOUNT *pwMount = &__Mounts[Path->MountId];
 
-	if (lMountId < 0 || lMountId >= WIN_MOUNT_MAX){
-		SetLastError(ERROR_BAD_ARGUMENTS);
-	}else if (Flags & WIN_NOCROSSMOUNT){	/* vfs_unmount() */
-		Path->MountId = lMountId;
-	}else if (!pwMount->DeviceId){
+	if (!pwMount->DeviceId){
 		SetLastError(ERROR_DEVICE_NOT_AVAILABLE);
 	}else{
-		Path->MountId = pwMount->MountId;
 		if (Flags & WIN_REQUIREDIR){
 			Path->R = win_wcpcpy(Path->Resolved, pwMount->Path);
 		}else{
@@ -53,6 +47,5 @@ vol_lookup(WIN_NAMEIDATA *Path, DWORD Flags)
 		}
 		Path->Base = Path->R;
 	}
-//VfsDebugPath(Path, "vol_lookup");
 	return(TRUE);
 }

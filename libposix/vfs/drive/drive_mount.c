@@ -107,7 +107,7 @@ drive_mount(WIN_NAMEIDATA *Path, WIN_DEVICE *Device, DWORD Flags, WIN_MODE *Mode
 		SetLastError(ERROR_NOT_READY);
 	}else if (Path->Base[1]){			/* not a drive letter */
 		SetLastError(ERROR_BAD_ARGUMENTS);
-	}else if (!SetFileAttributesW(Path->Resolved, FILE_ATTRIBUTE_SYSTEM)){
+	}else if (!SetFileAttributesW(Path->Resolved, FILE_ATTRIBUTE_DRIVE)){
 		WIN_ERR("SetFileAttributes(%ls): %s\n", Path->Resolved, win_strerror(GetLastError()));
 	}else{
 		pwMount = &__Mounts[lMountId];

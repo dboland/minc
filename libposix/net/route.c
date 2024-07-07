@@ -150,7 +150,6 @@ void *
 inmsg_posix(void *buf, MIB_IPNETROW *Address)
 {
 	struct ifa_msghdr *hdr = buf;
-//	WIN_IFENT ifInfo = {0};
 
 	hdr->ifam_msglen = INMSGLEN;
 	hdr->ifam_version = RTM_VERSION;
@@ -158,7 +157,8 @@ inmsg_posix(void *buf, MIB_IPNETROW *Address)
 	hdr->ifam_hdrlen = sizeof(struct ifa_msghdr);
 	hdr->ifam_index = Address->dwIndex;
 //	hdr->ifam_tableid
-	hdr->ifam_addrs = RTA_IFP | RTA_IFA | RTA_DST;
+//	hdr->ifam_addrs = RTA_IFP | RTA_IFA | RTA_DST;
+	hdr->ifam_addrs = RTA_IFA | RTA_DST;
 	if (Address->dwType == MIB_IPNET_TYPE_DYNAMIC){
 		hdr->ifam_flags = IFA_ROUTE;
 	}

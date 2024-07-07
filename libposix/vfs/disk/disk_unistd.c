@@ -205,8 +205,8 @@ disk_readlink(WIN_NAMEIDATA *Path, BOOL MakeReal)
 		if (slHead.LinkFlags & HasLinkInfo){
 			LinkReadInfo(hFile, szBuffer);
 		}
-		if (szBuffer[1] == ':'){	/* nano.exe */
-			Path->MountId = MOUNTID(szBuffer[0]);
+		if (szBuffer[1] == ':'){
+			Path->MountId = MOUNTID(szBuffer[0]);	/* nano.exe */
 		}else if (MakeReal){
 			pszBase = Path->Base;
 		}

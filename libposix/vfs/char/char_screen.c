@@ -58,7 +58,7 @@ ScreenGetWindow(HANDLE Handle, CONSOLE_SCREEN_BUFFER_INFO *Info)
 	}else if (__CTTY->VEdit){
 		Info->srWindow = sRect;
 	}else if (!AnsiEqualRect(&sRect, &Info->srWindow)){
-		vfs_raise(WM_SIZE, Info->srWindow.Right, Info->srWindow.Bottom);
+		vfs_raise(WM_SIZE, Info->srWindow.Right + 1, Info->srWindow.Bottom + 1);
 	}else{
 		Info->dwCursorPosition = cPos;
 	}

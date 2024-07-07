@@ -58,8 +58,8 @@ disk_init(WIN_MOUNT *Mount, HINSTANCE Instance)
 	Mount->DeviceType = DEV_TYPE_ROOT;
 	Mount->DeviceId = DEV_TYPE_ROOT;
 //VfsDebugMount(Root, "disk_init");
-//	DefineDosDeviceW(DDD_REMOVE_DEFINITION, Mount->Drive, NULL);
-//	if (!DefineDosDeviceW(DDD_RAW_TARGET_PATH, Mount->Drive, Mount->Path)){
-//		WIN_ERR("DefineDosDevice(%ls): %s\n", Mount->Path, win_strerror(GetLastError()));
-//	}
+	DefineDosDeviceW(DDD_REMOVE_DEFINITION, Mount->Drive, NULL);
+	if (!DefineDosDeviceW(DDD_RAW_TARGET_PATH, Mount->Drive, Mount->Path)){
+		WIN_ERR("DefineDosDevice(%ls): %s\n", Mount->Path, win_strerror(GetLastError()));
+	}
 }
