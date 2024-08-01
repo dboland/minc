@@ -33,19 +33,66 @@
 /****************************************************/
 
 BOOL 
-disk_HW_DISKNAMES(WIN_DEVICE *Device, LPSTR Result)
+vfs_getfsstat(WIN_CFDATA *Config, WIN_CFDRIVER *Driver, WIN_STATFS *Result)
 {
-	BOOL bResult = TRUE;
 	WIN_MOUNT wMount = {0};
 
-	switch (Device->DeviceType){
-		case DEV_TYPE_FIXED:
-		case DEV_TYPE_REMOTE:
-			bResult = DriveStatVolume(Device->NtPath, &wMount);
-			msvc_sprintf(Result, "%s:%lu", Device->Name, wMount.Serial);
+	switch (Config->DeviceType){
+		case DEV_TYPE_CDROM:
+			win_wcscpy(wMount.TypeName, L"ISO9660");
+			wMount.Flags = FILE_VOLUME_MNT_DOOMED;
 			break;
 		default:
-			win_strcpy(Result, Device->Name);
+			win_wcscpy(wMount.TypeName, L"FAT");
+	}
+	if (Config->DeviceType == DEV_TYPE_FLOPPY){
+		wMount.Flags |= FILE_VOLUME_MNT_DOOMED;
+	}else if (DriveStatVolume(Config->DosPath, &wMount)){
+		Result->MaxPath = wMount.MaxPath;
+	}else if (ERROR_NOT_READY != GetLastError()){
+		return(FALSE);
+	}
+	if (Config->DeviceType == DEV_TYPE_REMOTE){
+		wMount.Flags |= FILE_VOLUME_MNT_DOOMED;
+	}
+	win_wcscpy(Result->Path, Config->DosPath);
+	win_wcscpy(Result->TypeName, wMount.TypeName);
+	Result->Flags = wMount.Flags;
+	Result->DeviceId = Driver->DeviceId;
+	return(TRUE);
+}
+
+/****************************************************/
+
+BOOL 
+vfs_statfs(WIN_NAMEIDATA *Path, WIN_STATFS *Result)
+{
+	return(drive_statfs(&__Mounts[Path->MountId], Result));
+}
+BOOL 
+vfs_mount(WIN_VNODE *Node, WIN_NAMEIDATA *Path, DWORD Flags, WIN_MODE *Mode)
+{
+	BOOL bResult = FALSE;
+	WIN_DEVICE *pwDevice = DEVICE(Node->DeviceId);
+
+//vfs_ktrace("vfs_mount", STRUCT_NAMEI, Path);
+	if (Path->Attribs == -1){
+		return(FALSE);
+	}else if (Path->FileType != WIN_VDIR){
+		SetLastError(ERROR_DIRECTORY);
+//	}else if (Flags & FILE_VOLUME_MNT_UPDATE){	/* Flags should be updated */
+//		bResult = TRUE;
+	}else if (Path->Attribs & FILE_ATTRIBUTE_SYSTEM){
+		SetLastError(ERROR_NOT_READY);
+	}else switch (pwDevice->FSType){
+		case FS_TYPE_DRIVE:
+			bResult = drive_mount(pwDevice, Path, Flags, Mode);
+			break;
+		case FS_TYPE_PDO:
+			bResult = pdo_mount(pwDevice, Path, Flags, Mode);
+			break;
+		default:
+			SetLastError(ERROR_BAD_FILE_TYPE);
 	}
 	return(bResult);
 }

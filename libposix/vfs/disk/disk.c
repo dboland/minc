@@ -28,9 +28,9 @@
  *
  */
 
-#include "disk_sysctl.c"
 #include "disk_dirent.c"
 #include "disk_syscall.c"
+#include "disk_sysctl.c"
 #include "link/link.c"
 #include "file/file.c"
 #include "directory/directory.c"
@@ -40,26 +40,3 @@
 #include "disk_stat.c"
 #include "disk_time.c"
 #include "disk_poll.c"
-
-/****************************************************/
-
-void 
-disk_init(WIN_MOUNT *Mount, HINSTANCE Instance)
-{
-	__Mounts = Mount;
-
-	/* Configure root/swap device. Originally done by
-	 * diskconf() in OpenBSD.
-	 */
-	GetModuleFileNameW(Instance, Mount->Path, MAX_PATH);
-	win_dirname(win_dirname(Mount->Path));
-	win_wcscpy(Mount->Drive, L"ROOT:");
-	Mount->FileType = WIN_VDIR;
-	Mount->DeviceType = DEV_TYPE_ROOT;
-	Mount->DeviceId = DEV_TYPE_ROOT;
-//VfsDebugMount(Root, "disk_init");
-	DefineDosDeviceW(DDD_REMOVE_DEFINITION, Mount->Drive, NULL);
-	if (!DefineDosDeviceW(DDD_RAW_TARGET_PATH, Mount->Drive, Mount->Path)){
-		WIN_ERR("DefineDosDevice(%ls): %s\n", Mount->Path, win_strerror(GetLastError()));
-	}
-}

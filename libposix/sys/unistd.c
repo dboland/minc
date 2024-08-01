@@ -163,7 +163,7 @@ int
 sys_rmdir(call_t call, const char *pathname)
 {
 	int result = 0;
-	WIN_NAMEIDATA wPath;
+	WIN_NAMEIDATA wPath = {0};
 
 	if (!vfs_rmdir(path_win(&wPath, pathname, O_NOFOLLOW))){
 		result -= errno_posix(GetLastError());
@@ -174,7 +174,7 @@ int
 __linkat(WIN_NAMEIDATA *Path, int fd2, const char *name2, int flag)
 {
 	int result = 0;
-	WIN_NAMEIDATA wpNew;
+	WIN_NAMEIDATA wpNew = {0};
 
 	if (!vfs_link(Path, pathat_win(&wpNew, fd2, name2, flag))){
 		result -= errno_posix(GetLastError());
@@ -184,22 +184,22 @@ __linkat(WIN_NAMEIDATA *Path, int fd2, const char *name2, int flag)
 int 
 sys_link(call_t call, const char *name1, const char *name2)
 {
-	WIN_NAMEIDATA wpOld;
+	WIN_NAMEIDATA wPath = {0};
 
-	return(__linkat(path_win(&wpOld, name1, 0), AT_FDCWD, name2, AT_SYMLINK_FOLLOW));
+	return(__linkat(path_win(&wPath, name1, 0), AT_FDCWD, name2, AT_SYMLINK_FOLLOW));
 }
 int 
 sys_linkat(call_t call, int fd1, const char *name1, int fd2, const char *name2, int flag)
 {
-	WIN_NAMEIDATA wpOld;
+	WIN_NAMEIDATA wPath = {0};
 
-	return(__linkat(pathat_win(&wpOld, fd1, name1, flag), fd2, name2, flag));
+	return(__linkat(pathat_win(&wPath, fd1, name1, flag), fd2, name2, flag));
 }
 int 
 __unlinkat(WIN_TASK *Task, int fd, const char *path, int flag)
 {
 	int result = 0;
-	WIN_NAMEIDATA wPath;
+	WIN_NAMEIDATA wPath = {0};
 	BOOL bResult = FALSE;
 
 	if (!path){
@@ -267,7 +267,7 @@ int
 sys_fchdir(call_t call, int fildes)
 {
 	int result = 0;
-	WIN_NAMEIDATA wPath;
+	WIN_NAMEIDATA wPath = {0};
 	WIN_TASK *pwTask = call.Task;
 
 	if (!vfs_chdir(pwTask, pathat_win(&wPath, fildes, "", 0))){
@@ -279,7 +279,7 @@ int
 sys_chdir(call_t call, const char *path)
 {
 	int result = 0;
-	WIN_NAMEIDATA wPath;
+	WIN_NAMEIDATA wPath = {0};
 	WIN_TASK *pwTask = call.Task;
 
 	if (!vfs_chdir(pwTask, path_win(&wPath, path, 0))){
@@ -291,9 +291,13 @@ int
 sys_chroot(call_t call, const char *path)
 {
 	int result = 0;
-	WIN_NAMEIDATA wPath;
+	WIN_NAMEIDATA wPath = {0};
 
-	if (!vfs_chroot(path_win(&wPath, path, 0))){
+	if (!path){
+		result = -EFAULT;
+	}else if (!*path){
+		result = -ENOENT;
+	}else if (!vfs_chroot(path_win(&wPath, path, 0))){
 		result -= errno_posix(GetLastError());
 	}
 	return(result);
@@ -302,7 +306,7 @@ ssize_t
 __readlinkat(WIN_TASK *Task, int dirfd, const char *pathname, char *buf, size_t bufsiz)
 {
 	ssize_t result = 0;
-	WIN_NAMEIDATA wPath;
+	WIN_NAMEIDATA wPath = {0};
 
 	if (!disk_readlink(pathat_win(&wPath, dirfd, pathname, AT_SYMLINK_NOFOLLOW), FALSE)){
 		result -= errno_posix(GetLastError());
@@ -325,9 +329,13 @@ int
 __symlinkat(WIN_NAMEIDATA *Target, int fd, const char *path)
 {
 	int result = 0;
-	WIN_NAMEIDATA wnPath;
+	WIN_NAMEIDATA wPath = {0};
 
-	if (!disk_symlink(Target, pathat_win(&wnPath, fd, path, AT_SYMLINK_NOFOLLOW))){
+	if (!path){
+		result = -EFAULT;
+	}else if (!*path){
+		result = -ENOENT;
+	}else if (!disk_symlink(Target, pathat_win(&wPath, fd, path, AT_SYMLINK_NOFOLLOW))){
 		result -= errno_posix(GetLastError());
 	}
 	return(result);
@@ -335,22 +343,22 @@ __symlinkat(WIN_NAMEIDATA *Target, int fd, const char *path)
 int 
 sys_symlinkat(call_t call, const char *name1, int fd, const char *name2)
 {
-	WIN_NAMEIDATA wnTarget;
+	WIN_NAMEIDATA wPath = {0};
 
-	return(__symlinkat(pathat_win(&wnTarget, 0, name1, 0), fd, name2));
+	return(__symlinkat(pathat_win(&wPath, 0, name1, 0), fd, name2));
 }
 int 
 sys_symlink(call_t call, const char *name1, const char *name2)
 {
-	WIN_NAMEIDATA wnTarget;
+	WIN_NAMEIDATA wPath = {0};
 
-	return(__symlinkat(pathat_win(&wnTarget, 0, name1, 0), AT_FDCWD, name2));
+	return(__symlinkat(pathat_win(&wPath, 0, name1, 0), AT_FDCWD, name2));
 }
 int 
 __faccessat(int dirfd, const char *path, int mode, int flags)
 {
 	int result = 0;
-	WIN_NAMEIDATA wPath;
+	WIN_NAMEIDATA wPath = {0};
 	ACCESS_MASK amDesired = 0;
 
 	if (mode & R_OK){
@@ -381,7 +389,7 @@ int
 __renameat(WIN_NAMEIDATA *Path, int newdirfd, const char *newpath)
 {
 	int result = 0;
-	WIN_NAMEIDATA wpNew;
+	WIN_NAMEIDATA wpNew = {0};
 
 	if (Path->Attribs == -1){
 		result -= errno_posix(GetLastError());
@@ -393,14 +401,14 @@ __renameat(WIN_NAMEIDATA *Path, int newdirfd, const char *newpath)
 int 
 sys_renameat(call_t call, int dirfd, const char *path, int newdirfd, const char *newpath)
 {
-	WIN_NAMEIDATA wpOld;
+	WIN_NAMEIDATA wpOld = {0};
 
 	return(__renameat(pathat_win(&wpOld, dirfd, path, AT_SYMLINK_NOFOLLOW), newdirfd, newpath));
 }
 int 
 sys_rename(call_t call, const char *path, const char *newpath)
 {
-	WIN_NAMEIDATA wpOld;
+	WIN_NAMEIDATA wpOld = {0};
 
 	return(__renameat(path_win(&wpOld, path, O_NOFOLLOW), AT_FDCWD, newpath));
 }
@@ -422,7 +430,7 @@ int
 sys_truncate(call_t call, const char *path, off_t length)
 {
 	int result = 0;
-	WIN_NAMEIDATA wPath;
+	WIN_NAMEIDATA wPath = {0};
 	LARGE_INTEGER liOffset = {length & 0xFFFFFFFF, length >> 32};
 
 	if (!vfs_truncate(path_win(&wPath, path, 0), &liOffset)){
@@ -667,7 +675,7 @@ int
 sys_revoke(call_t call, const char *path)
 {
 	int result = 0;
-	WIN_NAMEIDATA wPath;
+	WIN_NAMEIDATA wPath = {0};
 	WIN_FLAGS wFlags = {GENERIC_READ + GENERIC_WRITE, 
 		FILE_SHARE_READ, OPEN_EXISTING, 
 		FILE_ATTRIBUTE_NORMAL, 0};

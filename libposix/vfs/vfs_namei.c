@@ -92,8 +92,8 @@ PathGlob(WIN_NAMEIDATA *Path, DWORD Flags)
 		case FILE_ATTRIBUTE_DRIVE:
 			bResult = drive_lookup(Path, Flags);
 			break;
-		case FILE_ATTRIBUTE_VOLUME:
-			bResult = vol_lookup(Path, Flags);
+		case FILE_ATTRIBUTE_ROOT:
+//vfs_ktrace("PathGlob", STRUCT_NAMEI, Path);
 			break;
 	}
 	return(bResult);
@@ -104,7 +104,6 @@ PathOpen(WIN_NAMEIDATA *Path, LPWSTR Source, DWORD Flags)
 	Path->Attribs = -1;
 	Path->S = Source;
 	Path->Flags = Flags;
-	Path->Base = Path->R;
 	Path->FileType = WIN_VREG;
 }
 VOID 
@@ -143,6 +142,7 @@ vfs_lookup(WIN_NAMEIDATA *Path, LPWSTR Source, DWORD Flags)
 		}
 	}
 	PathClose(Path, Flags);
+//vfs_ktrace("vfs_lookup", STRUCT_NAMEI, Path);
 	return(Path);
 }
 BOOL 

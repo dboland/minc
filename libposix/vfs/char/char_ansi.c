@@ -295,6 +295,9 @@ AnsiCursorUp(HANDLE Handle, CONSOLE_SCREEN_BUFFER_INFO *Info, WORD Count)
 	COORD cPos = AnsiRenderCursor(Info);
 
 	cPos.Y -= Count;
+	if (cPos.Y < Info->srWindow.Top){	/* stop at top (apt [jessie]) */
+		cPos.Y = Info->srWindow.Top;
+	}
 	Info->dwCursorPosition = cPos;
 	return(SetConsoleCursorPosition(Handle, cPos));
 }
@@ -492,24 +495,29 @@ AnsiVerticalPositionAbsolute(HANDLE Handle, CONSOLE_SCREEN_BUFFER_INFO *Info, SH
 BOOL 
 AnsiSaveCursor(CONSOLE_SCREEN_BUFFER_INFO *Info)
 {
-//	__CTTY->Cursor = Info->dwCursorPosition;
 	__CTTY->Cursor = AnsiRenderCursor(Info);
 	return(TRUE);
 }
 BOOL 
 AnsiRestoreCursor(HANDLE Handle, CONSOLE_SCREEN_BUFFER_INFO *Info)
 {
+	BOOL bResult = TRUE;
 	COORD cPos = __CTTY->Cursor;
 
-	Info->dwCursorPosition = cPos;
-	return(SetConsoleCursorPosition(Handle, cPos));
+	/* We don't have an alternate screen buffer (ALTBUF).
+	 */
+	if (__CTTY->VEdit){
+		Info->dwCursorPosition = cPos;
+		bResult = SetConsoleCursorPosition(Handle, cPos);
+	}
+	return(bResult);
 }
 BOOL 
 AnsiDeviceStatusReport(CONSOLE_SCREEN_BUFFER_INFO *Info, CHAR Parm, CHAR *Result)
 {
+	BOOL bResult = TRUE;
 //	COORD cPos = Info->dwCursorPosition;
 	COORD cPos = AnsiRenderCursor(Info);
-	BOOL bResult = TRUE;
 	DWORD dwCount;
 
 	if (Parm == '6'){		/* CPR - cursor position (vim.exe) */
@@ -565,6 +573,8 @@ AnsiVerticalEditingMode(HANDLE Handle, CONSOLE_SCREEN_BUFFER_INFO *Info, SHORT P
 {
 	BOOL bResult = TRUE;
 
+	/* termcap(5) - ti: begin programs that use termcap
+	 */
 	if (Parm == 1){
 		__CTTY->VEdit = TRUE;
 	}else if (Parm == 2){
@@ -672,15 +682,14 @@ AnsiControl(HANDLE Handle, CHAR C, CONSOLE_SCREEN_BUFFER_INFO *Info, SEQUENCE *S
 		case 'n':		/* DSR */
 			bResult = AnsiDeviceStatusReport(Info, Seq->Char1, __INPUT_BUF);
 			break;
-		case 'r':		/* DECSTBM (apt-get) */
+		case 'r':		/* DECSTBM (apt) */
 			bResult = AnsiSetTopBottomMargin(Handle, Info, Seq->Arg1, AnsiStrToInt(Seq->Args));
 			break;
 		case 's':		/* SC */
 			bResult = AnsiSaveCursor(Info);
 			break;
 		case 'u':		/* RC */
-//			bResult = AnsiRestoreCursor(Handle, Info);
-			bResult = TRUE;
+			bResult = AnsiRestoreCursor(Handle, Info);
 			break;
 	}
 	return(bResult);

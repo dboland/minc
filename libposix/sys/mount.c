@@ -32,6 +32,23 @@
 
 /****************************************************/
 
+void 
+fsflags_debug(u_int32_t flags, const char *lable)
+{
+	DWORD dwFlags = flags;
+
+	msvc_printf("%s([0x%x]", lable, dwFlags);
+	win_flagname(MNT_RDONLY, "RDONLY", dwFlags, &dwFlags);
+	win_flagname(MNT_NOATIME, "NOATIME", dwFlags, &dwFlags);
+	win_flagname(MNT_NOEXEC, "NOEXEC", dwFlags, &dwFlags);
+	win_flagname(MNT_NOSUID, "NOSUID", dwFlags, &dwFlags);
+	win_flagname(MNT_NODEV, "NODEV", dwFlags, &dwFlags);
+	win_flagname(MNT_SYNCHRONOUS, "SYNCHRONOUS", dwFlags, &dwFlags);
+	win_flagname(MNT_ASYNC, "ASYNC", dwFlags, &dwFlags);
+	win_flagname(MNT_SOFTDEP, "SOFTDEP", dwFlags, &dwFlags);
+	win_flagname(MNT_UPDATE, "UPDATE", dwFlags, &dwFlags);
+	msvc_printf("[0x%x])\n", dwFlags);
+}
 char *
 fstype_posix(char *type, void *options, LPWSTR TypeName)
 {
@@ -62,7 +79,36 @@ fsflags_posix(DWORD Flags)
 	if (Flags & FILE_VOLUME_QUOTAS){
 		result |= MNT_QUOTA;
 	}
+	if (Flags & FILE_VOLUME_MNT_DOOMED){
+		result |= MNT_DOOMED;
+	}
+	if (Flags & FILE_VOLUME_MNT_UPDATE){
+		result |= MNT_UPDATE;
+	}
 	return(result);
+}
+DWORD 
+fsflags_win(u_int32_t flags)
+{
+	DWORD dwResult = 0;
+
+//fsflags_debug(flags, "fsflags_win");
+	if (flags & MNT_RDONLY){
+		dwResult |= FILE_READ_ONLY_VOLUME;
+	}
+	if (!(flags & MNT_NOSUID)){
+		dwResult |= FILE_PERSISTENT_ACLS;
+	}
+	if (flags & MNT_QUOTA){
+		dwResult |= FILE_VOLUME_QUOTAS;
+	}
+	if (flags & MNT_DOOMED){
+		dwResult |= FILE_VOLUME_MNT_DOOMED;
+	}
+	if (flags & MNT_UPDATE){
+		dwResult |= FILE_VOLUME_MNT_UPDATE;
+	}
+	return(dwResult);
 }
 struct statfs *
 statfs_posix(struct statfs *buf, WIN_STATFS *Stat)
@@ -86,7 +132,7 @@ statfs_posix(struct statfs *buf, WIN_STATFS *Stat)
 	fstype_posix(buf->f_fstypename, &buf->mount_info, Stat->TypeName);
 
 	/* directory on which mounted */
-	pathn_posix(buf->f_mntonname, win_wcslcase((LPWSTR)Stat->Drive), MNAMELEN);
+	pathn_posix(buf->f_mntonname, win_wcslcase(Stat->Path), MNAMELEN);
 
 	/* mounted file system */
 	win_strncpy(win_stpcpy(buf->f_mntfromname, "/dev/"), pwDevice->Name, MNAMELEN - 5);
@@ -100,65 +146,65 @@ statfs_posix(struct statfs *buf, WIN_STATFS *Stat)
 /****************************************************/
 
 int
-mount_NTFS(WIN_NAMEIDATA *Path, int flags, struct ntfs_args *args)
+mount_NTFS(WIN_NAMEIDATA *Path, DWORD Flags, struct ntfs_args *args)
 {
 	int result = 0;
-	WIN_NAMEIDATA wdPath;
+	WIN_NAMEIDATA wdPath = {0};
 	WIN_MODE wMode = {0};
 	WIN_FLAGS wFlags = {0};
 	WIN_VNODE vNode;
 
 	if (!vfs_open(path_win(&wdPath, args->fspec, O_NOFOLLOW), &wFlags, &wMode, &vNode)){
 		result -= errno_posix(GetLastError());
-	}else if (!drive_mount(Path, DEVICE(vNode.DeviceId), flags, mode_win(&wMode, args->mode))){
+	}else if (!vfs_mount(&vNode, Path, Flags, mode_win(&wMode, args->mode))){
 		result -= errno_posix(GetLastError());
 	}
 	return(result);
 }
 int
-mount_MSDOS(WIN_NAMEIDATA *Path, int flags, struct msdosfs_args *args)
+mount_MSDOS(WIN_NAMEIDATA *Path, DWORD Flags, struct msdosfs_args *args)
 {
 	int result = 0;
-	WIN_NAMEIDATA wdPath;
+	WIN_NAMEIDATA wdPath = {0};
 	WIN_MODE wMode = {0};
 	WIN_FLAGS wFlags = {0};
 	WIN_VNODE vNode;
 
 	if (!vfs_open(path_win(&wdPath, args->fspec, O_NOFOLLOW), &wFlags, &wMode, &vNode)){
 		result -= errno_posix(GetLastError());
-	}else if (!drive_mount(Path, DEVICE(vNode.DeviceId), flags, mode_win(&wMode, args->mask))){
+	}else if (!vfs_mount(&vNode, Path, Flags, mode_win(&wMode, args->mask))){
 		result -= errno_posix(GetLastError());
 	}
 	return(result);
 }
 int
-mount_CD9660(WIN_NAMEIDATA *Path, int flags, struct iso_args *args)
+mount_CD9660(WIN_NAMEIDATA *Path, DWORD Flags, struct iso_args *args)
 {
 	int result = 0;
-	WIN_NAMEIDATA wdPath;
+	WIN_NAMEIDATA wdPath = {0};
 	WIN_MODE wMode = {0};
 	WIN_FLAGS wFlags = {0};
 	WIN_VNODE vNode;
 
 	if (!vfs_open(path_win(&wdPath, args->fspec, O_NOFOLLOW), &wFlags, &wMode, &vNode)){
 		result -= errno_posix(GetLastError());
-	}else if (!drive_mount(Path, DEVICE(vNode.DeviceId), flags, mode_win(&wMode, 0666))){
+	}else if (!vfs_mount(&vNode, Path, Flags, mode_win(&wMode, 0666))){
 		result -= errno_posix(GetLastError());
 	}
 	return(result);
 }
 int
-mount_UFS(WIN_NAMEIDATA *Path, int flags, struct ufs_args *args)
+mount_UFS(WIN_NAMEIDATA *Path, DWORD Flags, struct ufs_args *args)
 {
 	int result = 0;
-	WIN_NAMEIDATA wdPath;
+	WIN_NAMEIDATA wdPath = {0};
 	WIN_MODE wMode = {0};
 	WIN_FLAGS wFlags = {0};
 	WIN_VNODE vNode;
 
 	if (!vfs_open(path_win(&wdPath, args->fspec, O_NOFOLLOW), &wFlags, &wMode, &vNode)){
 		result -= errno_posix(GetLastError());
-	}else if (!drive_mount(Path, DEVICE(vNode.DeviceId), flags, mode_win(&wMode, 0666))){
+	}else if (!vfs_mount(&vNode, Path, Flags, mode_win(&wMode, 0666))){
 		result -= errno_posix(GetLastError());
 	}
 	return(result);
@@ -170,21 +216,22 @@ int
 sys_mount(call_t call, const char *type, const char *dir, int flags, void *data)
 {
 	int result = 0;
-	WIN_NAMEIDATA wPath;
+	WIN_NAMEIDATA wPath = {0};
+	DWORD dwFlags = fsflags_win(flags);
 
 	/* mount(2)
 	 */
 	if (!win_strcmp(type, MOUNT_NTFS)){
-		result = mount_NTFS(path_win(&wPath, dir, 0), flags, (struct ntfs_args *)data);
+		result = mount_NTFS(path_win(&wPath, dir, O_NOCROSS), dwFlags, (struct ntfs_args *)data);
 
 	}else if (!win_strcmp(type, MOUNT_MSDOS)){
-		result = mount_MSDOS(path_win(&wPath, dir, 0), flags, (struct msdosfs_args *)data);
+		result = mount_MSDOS(path_win(&wPath, dir, O_NOCROSS), dwFlags, (struct msdosfs_args *)data);
 
 	}else if (!win_strcmp(type, MOUNT_CD9660)){
-		result = mount_CD9660(path_win(&wPath, dir, 0), flags, (struct iso_args *)data);
+		result = mount_CD9660(path_win(&wPath, dir, O_NOCROSS), dwFlags, (struct iso_args *)data);
 
 	}else if (!win_strcmp(type, MOUNT_UFS)){
-		result = mount_UFS(path_win(&wPath, dir, 0), flags, (struct ufs_args *)data);
+		result = mount_UFS(path_win(&wPath, dir, O_NOCROSS), dwFlags, (struct ufs_args *)data);
 
 	}else{
 		result = -EOPNOTSUPP;
@@ -196,7 +243,7 @@ int
 sys_unmount(call_t call, const char *dir, int flags)
 {
 	int result = 0;
-	WIN_NAMEIDATA wPath;
+	WIN_NAMEIDATA wPath = {0};
 
 	if (!drive_unmount(path_win(&wPath, dir, O_NOCROSS))){
 		result -= errno_posix(GetLastError());
@@ -208,10 +255,10 @@ sys_statfs(call_t call, const char *path, struct statfs *buf)
 {
 	int result = 0;
 	WIN_STATFS fsInfo = {0};
-	WIN_NAMEIDATA wPath;
+	WIN_NAMEIDATA wPath = {0};
 	WIN_TASK *pwTask = call.Task;
 
-	if (!drive_statfs(path_win(&wPath, path, 0), &fsInfo)){
+	if (!vfs_statfs(path_win(&wPath, path, 0), &fsInfo)){
 		result -= errno_posix(GetLastError());
 	}else{
 		statfs_posix(buf, &fsInfo);
@@ -223,10 +270,10 @@ sys_fstatfs(call_t call, int fd, struct statfs *buf)
 {
 	int result = 0;
 	WIN_STATFS fsInfo = {0};
-	WIN_NAMEIDATA wPath;
+	WIN_NAMEIDATA wPath = {0};
 	WIN_TASK *pwTask = call.Task;
 
-	if (!drive_statfs(pathat_win(&wPath, fd, "", AT_SYMLINK_FOLLOW), &fsInfo)){
+	if (!vfs_statfs(pathat_win(&wPath, fd, "", AT_SYMLINK_FOLLOW), &fsInfo)){
 		result -= errno_posix(GetLastError());
 	}else{
 		statfs_posix(buf, &fsInfo);
@@ -238,17 +285,14 @@ sys_getfsstat(call_t call, struct statfs *buf, size_t bufsize, int flags)
 {
 	int result = 0;
 	WIN_STATFS fsInfo;
-	DWORD dwFlags = 0;
-	DWORD dwIndex = 1;
-	WIN_MOUNT *pwMount = &__Mounts[dwIndex];
+	DWORD dwFlags = flags;
+	DWORD dwIndex = 0;
+	WIN_MOUNT *pwMount = __Mounts;
 
-	if (flags == MNT_NOWAIT){
-		dwFlags |= WIN_MNT_NOWAIT;
-	}
 	while (dwIndex < WIN_MOUNT_MAX){
-		if (pwMount->DeviceId){
+		if (pwMount->Flags){
 			if (buf){
-				drive_getfsstat(pwMount, dwFlags, &fsInfo);
+				drive_statfs(pwMount, &fsInfo);
 				buf = statfs_posix(buf, &fsInfo);
 			}
 			result++;

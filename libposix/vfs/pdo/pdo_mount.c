@@ -30,22 +30,19 @@
 
 #include <winbase.h>
 
-/****************************************************/
+/************************************************************/
 
 BOOL 
-disk_HW_DISKNAMES(WIN_DEVICE *Device, LPSTR Result)
+pdo_mount(WIN_DEVICE *Device, WIN_NAMEIDATA *Path, DWORD Flags, WIN_MODE *Mode)
 {
-	BOOL bResult = TRUE;
-	WIN_MOUNT wMount = {0};
+	BOOL bResult = FALSE;
 
 	switch (Device->DeviceType){
-		case DEV_TYPE_FIXED:
-		case DEV_TYPE_REMOTE:
-			bResult = DriveStatVolume(Device->NtPath, &wMount);
-			msvc_sprintf(Result, "%s:%lu", Device->Name, wMount.Serial);
+		case DEV_TYPE_ROOT:
+			bResult = root_mount(Device, Path, Flags, Mode);
 			break;
 		default:
-			win_strcpy(Result, Device->Name);
+			SetLastError(ERROR_BAD_DEVICE);
 	}
 	return(bResult);
 }

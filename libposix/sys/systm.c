@@ -37,9 +37,11 @@ cpu_configure(void)
 {
 	WIN_CFDATA cfData;
 	WIN_CFDRIVER cfDriver;
-	DWORD dwFlags = WIN_MNT_VFSFLAGS;
+	DWORD dwFlags = WIN_MNT_NOWAIT;
 	CHAR szMessage[MAX_MESSAGE];
 
+	/* Determine i/o configuration for a machine.
+	 */
 	if (!vfs_setvfs(&cfData, dwFlags)){
 		return;
 	}else while (vfs_getvfs(&cfData, dwFlags)){

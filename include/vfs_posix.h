@@ -118,6 +118,12 @@ BOOL vfs_F_SETLK(WIN_VNODE *Node, DWORD Flags, LARGE_INTEGER *Offset, LARGE_INTE
 BOOL vfs_F_GETPATH(WIN_VNODE *Node, WIN_NAMEIDATA *Path);
 BOOL vfs_F_DUPFD(WIN_VNODE *Node, BOOL CloseExec, WIN_VNODE *Result);
 
+/* vfs_mount.c */
+
+BOOL vfs_statfs(WIN_NAMEIDATA *Path, WIN_STATFS *Result);
+BOOL vfs_mount(WIN_VNODE *Node, WIN_NAMEIDATA *Path, DWORD Flags, WIN_MODE *Mode);
+BOOL vfs_getfsstat(WIN_CFDATA *Config, WIN_CFDRIVER *Driver, WIN_STATFS *Result);
+
 /* vfs_statvfs.c */
 
 BOOL vfs_setvfs(WIN_CFDATA *Config, DWORD Flags);
@@ -196,11 +202,9 @@ DWORD proc_VM_LOADAVG(WIN_TASK Tasks[], WIN_LOADAVG *Load);
 /* drive.c */
 
 BOOL drive_statvfs(WIN_CFDATA *Config, DWORD Flags, WIN_CFDRIVER *Result);
-BOOL drive_getfsstat(WIN_MOUNT *Mount, DWORD Flags, WIN_STATFS *Result);
-BOOL drive_statfs(WIN_NAMEIDATA *Path, WIN_STATFS *Result);
-BOOL drive_mount(WIN_NAMEIDATA *Path, WIN_DEVICE *Device, DWORD Flags, WIN_MODE *Mode);
-BOOL drive_unmount(WIN_NAMEIDATA *Path);
 BOOL drive_match(LPCWSTR NtName, DWORD DeviceType, WIN_CFDRIVER *Driver);
+BOOL drive_unmount(WIN_NAMEIDATA *Path);
+BOOL drive_statfs(WIN_MOUNT *Mount, WIN_STATFS *Result);
 
 /* disk.c */
 

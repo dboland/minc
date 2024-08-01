@@ -68,7 +68,7 @@ int _paths;
 /****************************************************/
 
 void 
-print_fsent(DWORD DeviceType, struct statfs *info)
+print_fsent(WIN_CFDATA *Config, struct statfs *info)
 {
 	char line[255], *l = line;
 	mode_t mode;
@@ -85,11 +85,8 @@ print_fsent(DWORD DeviceType, struct statfs *info)
 	if (info->f_flags & MNT_NOSUID){
 		l += sprintf(l, ",nosuid");
 	}
-	switch (DeviceType){
-		case DEV_TYPE_FLOPPY:
-		case DEV_TYPE_CDROM:
-		case DEV_TYPE_REMOTE:
-			l += sprintf(l, ",noauto");
+	if (info->f_flags & MNT_DOOMED){
+		l += sprintf(l, ",noauto");
 	}
 
 	printf("%s\t0\t0\n", line);	/* frequency, passno (1=root, 2=other) */
@@ -203,14 +200,9 @@ int
 mk_fsent(WIN_CFDATA *Config, WIN_CFDRIVER *Driver, struct statfs *info)
 {
 	int result = 0;
-	WIN_MOUNT wMount = {0};
-	WIN_STATFS fsInfo;
+	WIN_STATFS fsInfo = {0};
 
-	wMount.DeviceType = Config->DeviceType;
-	wMount.DeviceId = Driver->DeviceId;
-	win_wcscpy(wMount.Drive, Config->DosPath);
-	win_wcscpy(win_wcpcpy(wMount.Path, Config->DosPath), L"\\");
-	if (drive_getfsstat(&wMount, WIN_MNT_VFSFLAGS, &fsInfo)){
+	if (vfs_getfsstat(Config, Driver, &fsInfo)){
 		statfs_posix(info, &fsInfo);
 	}else{
 		result = -1;
@@ -222,10 +214,11 @@ mk_fstab(FILE *stream)
 {
 	int result = 0;
 	WIN_CFDATA cfData;
-	DWORD dwFlags = WIN_MNT_VFSFLAGS;
+	DWORD dwFlags = WIN_MNT_NOWAIT;
 	WIN_CFDRIVER cfDriver;
 	struct statfs info;
 
+	printf("/dev/root\t/\tffs\trw\t0\t0\n");
 	if (!vfs_setvfs(&cfData, dwFlags)){
 		fprintf(stderr, "vfs_setvfs(): %s\n", win_strerror(errno_win()));
 	}else while (vfs_getvfs(&cfData, dwFlags)){
@@ -233,7 +226,7 @@ mk_fstab(FILE *stream)
 			drive_statvfs(&cfData, dwFlags, &cfDriver);
 			drive_match(cfData.NtName, cfData.DeviceType, &cfDriver);
 			if (!mk_fsent(&cfData, &cfDriver, &info)){
-				print_fsent(cfData.DeviceType, &info);
+				print_fsent(&cfData, &info);
 			}
 		}else if (cfData.FSType == FS_TYPE_PDO){
 			pdo_statvfs(&cfData, dwFlags, &cfDriver);

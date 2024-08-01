@@ -117,7 +117,6 @@ proc_init(WIN_SIGPROC SignalProc)
 		__Process->FileMask = 0022;
 		ProcInitChannels(__Process->Node);
 		ProcInitLimits(__Process->Limit);
-		win_chdir(L"\\");	/* make sure CWD is at mount point */
 	}
 //	if (proc_setugid(__Process)){
 //		__Process->IsSetUGid = 1;

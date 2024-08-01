@@ -97,7 +97,7 @@ BOOL
 vfs_fchmod(WIN_VNODE *Node, WIN_MODE *Mode)
 {
 	BOOL bResult = FALSE;
-	WIN_NAMEIDATA wPath;
+	WIN_NAMEIDATA wPath = {0};
 
 	if (Node->Access & WRITE_DAC){
 		bResult = disk_fchmod(Node, Mode);
@@ -158,7 +158,7 @@ vfs_mkdir(WIN_NAMEIDATA *Path, WIN_MODE *Mode)
 	if (*Path->Last == '\\'){	/* git.exe */
 		*Path->Last = 0;
 	}
-	if (!win_acl_get_file(win_dirname_r(Path->Resolved, szParent), &psd)){
+	if (!win_acl_get_file(win_dirname(szParent, Path->Resolved), &psd)){
 		return(FALSE);
 	}else if (!win_acl_init(Mode, &wControl)){
 		WIN_ERR("win_acl_init(%s): %s\n", szParent, win_strerror(GetLastError()));

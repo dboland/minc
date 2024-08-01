@@ -45,12 +45,12 @@ drive_match(LPCWSTR NtName, DWORD DeviceType, WIN_CFDRIVER *Driver)
 			if (!win_wcscmp(pwDevice->ClassId, Driver->ClassId)){
 				bResult = TRUE;
 			}
-			win_wcscpy(pwDevice->NtPath, Driver->Location);
+			win_wcscpy(pwDevice->NtPath, Driver->NtPath);
 			break;
 		}else if (!pwDevice->Flags){
 			pwDevice->Flags = WIN_DVF_DRIVE_READY;
 			win_wcscpy(pwDevice->NtName, NtName);
-			win_wcscpy(pwDevice->NtPath, Driver->Location);
+			win_wcscpy(pwDevice->NtPath, Driver->NtPath);
 			win_wcscpy(pwDevice->ClassId, Driver->ClassId);
 			pwDevice->DeviceType = DeviceType;
 			pwDevice->DeviceId = sClass + sUnit;
@@ -63,6 +63,6 @@ drive_match(LPCWSTR NtName, DWORD DeviceType, WIN_CFDRIVER *Driver)
 	win_strcpy(Driver->Name, pwDevice->Name);
 	Driver->DeviceId = pwDevice->DeviceId;
 	Driver->Flags = pwDevice->Flags;
-//VfsDebugDevice(pwDevice, "drive_match");
+//vfs_ktrace("drive_match", STRUCT_DEVICE, pwDevice);
 	return(bResult);
 }

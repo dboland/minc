@@ -232,6 +232,7 @@ vfs_chdir(WIN_TASK *Task, WIN_NAMEIDATA *Path)
 	}else if (!vfs_access(Path, WIN_S_IRX)){
 		return(FALSE);
 	}else if (win_realpath(Path->Resolved, WIN_PATH_MAX, __Strings[Task->TaskId].Path)){
+		win_wcscpy(__Strings[Task->TaskId].Path, Path->Resolved);
 		Task->MountId = Path->MountId;
 		bResult = TRUE;
 	}
@@ -400,7 +401,7 @@ vfs_chroot(WIN_NAMEIDATA *Path)
 	}else if (!win_group_member(&SidAdmins)){
 		SetLastError(ERROR_PRIVILEGE_NOT_HELD);
 	}else{
-//		win_strcpy(_WIN_ROOT, Path->Resolved);
+//		bResult = win_chroot(Path->Resolved);
 		bResult = TRUE;
 	}
 	return(bResult);
@@ -488,11 +489,11 @@ vfs_execve(WIN_TASK *Task, LPSTR Command, PVOID Environ)
 		VfsInheritChannels(pi.hProcess, Task->Node);
 		CloseHandle(hThread);
 		CloseHandle(pi.hProcess);
+		Task->State = WIN_SRUN;
 		/* https://man7.org/linux/man-pages/man2/execve.2.html */
 		ZeroMemory(Task->Action, WIN_NSIG * sizeof(WIN_SIGACTION));
-		/* https://pubs.opengroup.org/onlinepubs/9699919799/functions/atexit.html */
+		Task->Timer = NULL;
 		ZeroMemory(Task->AtExit, WIN_ATEXIT_MAX * sizeof(WIN_ATEXITPROC));
-		Task->State = WIN_SRUN;
 		bResult = TRUE;
 	}else{
 		WIN_ERR("CreateProcessAsUser(%s): %s\n", Command, win_strerror(GetLastError()));

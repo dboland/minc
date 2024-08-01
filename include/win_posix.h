@@ -83,8 +83,7 @@ BOOL win_KERN_BOOTTIME(FILETIME *Result);
 
 /* win_libgen.c */
 
-LPWSTR win_dirname(LPWSTR FileName);
-LPWSTR win_dirname_r(LPCWSTR FileName, LPWSTR DirName);
+LPWSTR win_dirname(LPWSTR Result, LPCWSTR FileName);
 LPWSTR win_basename(LPCWSTR FileName);
 LPWSTR win_typename(LPCWSTR FileName);
 LPWSTR win_volname(LPWSTR Result, LPCWSTR FileName);
@@ -103,7 +102,7 @@ BOOL win_group_member(PSID Group);
 BOOL win_getgroups(SID8 **Groups, DWORD *Count);
 BOOL win_setgroups(SID8 Groups[], DWORD Count);
 BOOL win___tfork_thread(WIN___TFORK *Params, SIZE_T Size, LPTHREAD_START_ROUTINE *Start, PVOID Data, DWORD *Result);
-BOOL win_chdir(LPCWSTR Path);
+BOOL win_chroot(LPCWSTR Path);
 
 /* win_stdlib.c */
 

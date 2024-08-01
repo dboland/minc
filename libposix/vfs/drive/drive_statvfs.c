@@ -44,7 +44,7 @@ DriveLookupClass(LPCWSTR ClassName)
 		dwResult |= DEV_BUS_FDC;
 
 //	}else if (!win_wcsncmp(ClassName, L"Harddisk", 8)){
-//		dwResult |= DEV_BUS_HDC;
+//		dwResult |= DEV_BUS_USB;
 
 	}else if (!win_wcscmp(ClassName, L"Ide")){
 		dwResult |= DEV_BUS_IDE;
@@ -57,7 +57,7 @@ DriveLookupBus(LPCWSTR BusName)
 {
 	DWORD dwResult = DEV_CLASS_DISK;
 
-	if (!win_wcsncmp(BusName, L"ROOT", 4)){
+	if (!win_wcscmp(BusName, L"ROOT")){
 		dwResult = DEV_TYPE_ROOT;
 
 	}else if (!win_wcsncmp(BusName, L"SCSI", 4)){
@@ -106,7 +106,8 @@ drive_statvfs(WIN_CFDATA *Config, DWORD Flags, WIN_CFDRIVER *Result)
 			bResult = FALSE;
 	}
 	win_wcscpy(Result->NtClass, L"drive");
-	win_wcscpy(win_wcpcpy(Result->Location, Config->NtPath), L"\\");
-//	win_wcscpy(Result->Location, Config->NtPath);
+//	win_wcscpy(win_wcpcpy(Result->NtPath, L"\\\\.\\GLOBALROOT"), Config->NtPath);
+	win_volname(Result->NtPath, Config->DosPath);
+//vfs_ktrace("drive_statvfs", STRUCT_CFDATA, Config);
 	return(bResult);
 }

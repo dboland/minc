@@ -65,26 +65,6 @@ config_found(LPCSTR Name, DWORD FSType, DWORD FileType, WIN_DEVICE *Device)
 	Device->Flags |= WIN_DVF_CONFIG_READY;
 	return(TRUE);
 }
-BOOL 
-pty_attach(WIN_DEVICE *Device)
-{
-	BOOL bResult = TRUE;
-
-	if (tty_attach(Device)){
-		bResult = config_found("pty", FS_TYPE_CHAR, WIN_VCHR, Device);
-	}
-	return(bResult);
-}
-BOOL 
-com_attach(WIN_DEVICE *Device)
-{
-	BOOL bResult = TRUE;
-
-	if (tty_attach(Device)){
-		bResult = config_found("serial", FS_TYPE_PDO, WIN_VCHR, Device);
-	}
-	return(bResult);
-}
 
 /****************************************************/
 
@@ -137,9 +117,6 @@ disk_attach(WIN_DEVICE *Device)
 	BOOL bResult = TRUE;
 
 	switch (Device->DeviceType){
-		case DEV_TYPE_ROOT:
-			bResult = config_init("root", FS_TYPE_PDO, WIN_VBLK, DEV_TYPE_ROOT);
-			break;
 		case DEV_TYPE_HDC:
 			bResult = config_found("wdc", FS_TYPE_PDO, WIN_VBLK, Device);
 			break;
@@ -212,6 +189,26 @@ media_attach(WIN_DEVICE *Device)
 			break;
 		default:
 			bResult = FALSE;
+	}
+	return(bResult);
+}
+BOOL 
+pty_attach(WIN_DEVICE *Device)
+{
+	BOOL bResult = FALSE;
+
+	if (tty_attach(Device)){
+		bResult = config_found("pty", FS_TYPE_CHAR, WIN_VCHR, Device);
+	}
+	return(bResult);
+}
+BOOL 
+com_attach(WIN_DEVICE *Device)
+{
+	BOOL bResult = FALSE;
+
+	if (tty_attach(Device)){
+		bResult = config_found("serial", FS_TYPE_PDO, WIN_VCHR, Device);
 	}
 	return(bResult);
 }
@@ -323,7 +320,7 @@ storage_attach(WIN_DEVICE *Device)
 
 	switch (Device->DeviceType){
 		case DEV_TYPE_FIXED:
-			bResult = config_found("vol", FS_TYPE_PDO, WIN_VBLK, Device);
+			bResult = config_found("vol", FS_TYPE_DRIVE, WIN_VBLK, Device);
 			break;
 		case DEV_TYPE_HARDDISK:
 			bResult = config_found("wd", FS_TYPE_DRIVE, WIN_VBLK, Device);

@@ -79,52 +79,56 @@ LinkCreateVolumeInfo(LPCWSTR RealName)
 	VOLUME_ID *Info;
 	DWORD dwSize = sizeof(VOLUME_ID);
 	BYTE *Data;
-	WCHAR szBuffer[MAX_NAME];
-	WCHAR szLabel[MAX_NAME];
-	DWORD dwSerial;
+	WCHAR szDrive[MAX_NAME];
+	WIN_MOUNT wMount = {0};
 
-	DiskStatVolume(win_volname(szBuffer, RealName), TRUE, szLabel, &dwSerial);
-	dwSize += win_wcslen(szLabel) + 1;
+	if (RealName[1] == '\\'){
+		RealName = L"ROOT:";
+	}
+	DriveStatVolume(win_drivename(szDrive, RealName), &wMount);
+	dwSize += win_wcslen(wMount.Label) + 1;
 	Info = LocalAlloc(LPTR, dwSize);
 	Data = (BYTE *)Info;
 	Info->VolumeIDSize = dwSize;
-	Info->DriveType = GetDriveTypeW(win_drivename(szBuffer, RealName));
-	Info->DriveSerialNumber = dwSerial;
+	Info->DriveType = GetDriveTypeW(szDrive);
+	Info->DriveSerialNumber = wMount.Serial;
 	Info->VolumeLabelOffset = sizeof(VOLUME_ID);
-	win_wcstombs(&Data[Info->VolumeLabelOffset], szLabel, MAX_NAME);
+	win_wcstombs(&Data[Info->VolumeLabelOffset], wMount.Label, MAX_NAME);
 	return(Info);
 }
 VOID 
-LinkCreateInfo(HANDLE Handle, LPCWSTR FileName, LPCWSTR RealName)
+LinkCreateInfo(HANDLE Handle, LPCWSTR Target, LPCWSTR RealName)
 {
 	LINK_INFO lInfo = {0};
-	VOLUME_ID *vInfo = LinkCreateVolumeInfo(RealName);
+	VOLUME_ID *pvInfo = LinkCreateVolumeInfo(RealName);
 	CHAR szTarget[MAX_PATH];
-	DWORD dwSize = win_wcstombs(szTarget, FileName, MAX_PATH);
+	DWORD dwSize = win_wcstombs(szTarget, Target, MAX_PATH);
 	DWORD dwResult;
 
-	lInfo.LinkInfoSize = sizeof(LINK_INFO) + vInfo->VolumeIDSize + dwSize + 1;
+//__PRINTF("szTarget: %s\n", szTarget);
+	lInfo.LinkInfoSize = sizeof(LINK_INFO) + pvInfo->VolumeIDSize + dwSize + 1;
 	lInfo.LinkInfoHeaderSize = sizeof(LINK_INFO);
 	lInfo.LinkInfoFlags = VolumeIDAndLocalBasePath;
 	lInfo.VolumeIDOffset = sizeof(LINK_INFO);
-	lInfo.LocalBasePathOffset = lInfo.VolumeIDOffset + vInfo->VolumeIDSize;
+	lInfo.LocalBasePathOffset = lInfo.VolumeIDOffset + pvInfo->VolumeIDSize;
 	WriteFile(Handle, &lInfo, sizeof(LINK_INFO), &dwResult, NULL);
-	WriteFile(Handle, vInfo, vInfo->VolumeIDSize, &dwResult, NULL);
+	WriteFile(Handle, pvInfo, pvInfo->VolumeIDSize, &dwResult, NULL);
 	WriteFile(Handle, szTarget, dwSize + 1, &dwResult, NULL);
-	LocalFree(vInfo);
+	LocalFree(pvInfo);
 }
 VOID 
-LinkCreateFile(HANDLE Handle, LPCWSTR FileName, LPCWSTR PathName)
+LinkCreateFile(HANDLE Handle, WIN_NAMEIDATA *Target, LPCWSTR PathName)
 {
-	WIN32_FILE_ATTRIBUTE_DATA faData;
+	WIN32_FILE_ATTRIBUTE_DATA faData = {0};
 	WCHAR szRealName[MAX_PATH], *pszRealName = szRealName;
 	SHELL_LINK_HEADER slHeader;
 	DWORD dwSize = sizeof(SHELL_LINK_HEADER);
 
-	if (FileName[1] != ':'){
+	if (Target->Attribs == -1){
 		pszRealName = win_basename(win_wcscpy(szRealName, PathName));
 	}
-	win_wcscpy(pszRealName, FileName);
+	win_wcscpy(pszRealName, Target->Resolved);
+//__PRINTF("szRealName: %ls\n", szRealName);
 	slHeader.HeaderSize = sizeof(SHELL_LINK_HEADER);
 	slHeader.LinkCLSID = CLSID_ShellLink;
 	slHeader.LinkFlags = HasLinkInfo;
@@ -134,9 +138,9 @@ LinkCreateFile(HANDLE Handle, LPCWSTR FileName, LPCWSTR PathName)
 		slHeader.AccessTime = faData.ftLastAccessTime;
 		slHeader.WriteTime = faData.ftLastWriteTime;
 		slHeader.FileSize = faData.nFileSizeLow;
-//	}else{
-//		WIN_ERR("GetFileAttributesEx(%ls): %s\n", szRealName, win_strerror(GetLastError()));
+	}else{
+		WIN_ERR("GetFileAttributesEx(%ls): %s\n", szRealName, win_strerror(GetLastError()));
 	}
 	WriteFile(Handle, &slHeader, dwSize, &dwSize, NULL);
-	LinkCreateInfo(Handle, FileName, szRealName);
+	LinkCreateInfo(Handle, Target->Resolved, szRealName);
 }

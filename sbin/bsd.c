@@ -89,7 +89,7 @@ sig(int signum)
 	printf("%s: %s\n", __progname, strsignal(signum));
 }
 int 
-mount_fs(void)
+fs_mount(void)
 {
 	int result = 0;
 	struct fstab *tab;
@@ -110,7 +110,7 @@ mount_fs(void)
 	return(result);
 }
 int 
-unmount_fs(void)
+fs_unmount(void)
 {
 	int result = 0;
 	struct fstab *tab;
@@ -189,7 +189,7 @@ boot(void)
 	tty_init();
 	ifinit();
 	cpu_configure();
-	unmount_fs();		// fsck.exe operation?
+	fs_unmount();		// fsck.exe operation?
 	execve(*args, args, environ);
 	fprintf(stderr, "execve(%s): %s\n", *args, strerror(errno));
 }
@@ -203,8 +203,8 @@ single(void)
 	tty_init();
 	ifinit();
 	cpu_configure();
-	unmount_fs();
-	mount_fs();
+	fs_unmount();
+	fs_mount();
 	sysctl(mib, 2, NULL, NULL, &level, sizeof(int));
 //	close(0);
 //	close(1);

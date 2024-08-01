@@ -38,7 +38,7 @@ DiskGetEntity(WIN32_FIND_DATAW *Data, DWORD Index, WIN_DIRENT *Result)
 	BOOL bResult = FALSE;
 	LPWSTR pszType;
 
-	if (!(Data->dwFileAttributes & FILE_ATTRIBUTE_HIDDEN)){	/* Vista */
+	if (!(Data->dwFileAttributes & FILE_ATTRIBUTE_HIDDEN)){
 		Result->Index = Index;
 		Result->FileType = WIN_VREG;
 		win_wcscpy(Result->FileName, Data->cFileName);
@@ -69,7 +69,7 @@ disk_rewinddir(WIN_VNODE *Node, WIN32_FIND_DATAW *Data)
 {
 	BOOL bResult = FALSE;
 	HANDLE hResult = NULL;
-	WCHAR szPattern[WIN_PATH_MAX] = L"";
+	WCHAR szPattern[WIN_PATH_MAX];
 
 	hResult = FindFirstFileW(DiskGetPattern(Node, szPattern), Data);
 	if (hResult == INVALID_HANDLE_VALUE){

@@ -85,8 +85,8 @@ route_write(WIN_DEVICE *Device, LPCSTR Buffer, DWORD Size, DWORD *Result)
 	DWORD dwResult = Size;
 	BOOL bResult = FALSE;
 
-__PRINTF("route_write(%s): Size(%d) Offset(%d) Index(%d) TableId(%d)\n", 
-	__Message[Message->Type], Message->Size, Message->Offset, Message->Index, Message->TableId)
+//__PRINTF("route_write(%s): Size(%d) Offset(%d) Index(%d) TableId(%d)\n", 
+//	__Message[Message->Type], Message->Size, Message->Offset, Message->Index, Message->TableId)
 	if (Message->Type == WIN_RTM_GET){
 		dwResult = 0;
 	}

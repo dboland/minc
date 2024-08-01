@@ -95,7 +95,7 @@ win_F_GETPATH(HANDLE Handle, LPWSTR Buffer)
 {
 	NTSTATUS ntStatus;
 	LPWSTR pszResult = NULL;
-	ULONG ulSize = WIN_PATH_MAX * sizeof(WCHAR);
+	ULONG ulSize = MAX_PATH * sizeof(WCHAR);
 	PUNICODE_STRING puString = LocalAlloc(LMEM_FIXED, ulSize);
 
 	ntStatus = NtQueryObject(Handle, ObjectNameInformation, puString, ulSize, &ulSize);

@@ -47,36 +47,20 @@ win_basename(LPCWSTR FileName)
 	return(Base);
 }
 LPWSTR 
-win_dirname(LPWSTR FileName)
+win_dirname(LPWSTR Result, LPCWSTR FileName)
 {
-	LPWSTR Base = FileName;
-	LPWSTR F = FileName;
-	WCHAR C;
-
-	while (C = *F){
-		if (C == '\\'){
-			Base = F;
-		}
-		F++;
-	}
-	*Base = 0;
-	return(FileName);
-}
-LPWSTR 
-win_dirname_r(LPCWSTR FileName, LPWSTR DirName)
-{
-	LPWSTR Base = DirName;
-	LPWSTR D = DirName;
+	LPWSTR Base = Result;
+	LPWSTR R = Result;
 	WCHAR C;
 
 	while (C = *FileName++){
 		if (C == '\\'){
-			Base = D;
+			Base = R;
 		}
-		*D++ = C;
+		*R++ = C;
 	}
 	*Base = 0;
-	return(DirName);
+	return(Result);
 }
 LPWSTR 
 win_volname(LPWSTR Result, LPCWSTR FileName)
@@ -84,7 +68,10 @@ win_volname(LPWSTR Result, LPCWSTR FileName)
 	LPWSTR R = Result;
 	WCHAR C;
 
-	while (C = *FileName++){
+	if (!win_wcscmp(FileName, L"ROOT:")){
+		*R++ = '.';
+		Result = NULL;
+	}else while (C = *FileName++){
 		*R++ = C;
 		if (C == ':'){
 			break;
@@ -100,6 +87,9 @@ win_drivename(LPWSTR Result, LPCWSTR FileName)
 	LPWSTR R = Result;
 	WCHAR C;
 
+	if (!*FileName){
+		FileName = L"ROOT";
+	}
 	while (C = *FileName++){
 		if (C == ':'){
 			break;

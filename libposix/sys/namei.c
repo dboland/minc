@@ -38,30 +38,24 @@ char *
 pathnp_posix(char *dest, LPCWSTR Source, LONG Size, BOOL EndPtr)
 {
 	char *result = dest;
-	LPWSTR Root = __Mounts->Path;
-	int len = win_wcslen(Root);
 	char *type = NULL;
 	char c;
-	DWORD dwType = 0;
 	char buf[PATH_MAX], *src = buf;
+	DWORD dwType = 0;
 
 	if (!win_wcsncmp(Source, PROCESS_ROOT, 14)){
 		Source += 14;
 	}
 	win_wcstombs(src, Source, Size);
-	if (!win_wcsncmp(Source, Root, len)){
-		src += len;
-		Size--;
-	}else if (!win_wcscmp(Source, L"root:")){
-		*dest++ = '/';
-		src += 5;
-	}else if (*src && src[1] == ':'){		/* MinGW ld.exe */
+	if (src[1] == ':'){		/* MinGW ld.exe */
 		dest = win_stpcpy(dest, "/mnt/");
 		*dest++ = *src++;
 		src++;
 		Size -= 5;
-	}else if (*src == '\\'){
+	}else if (src[0] == '\\'){
 		dest = win_stpcpy(dest, "/proc");
+	}else if (src[1] == '\\'){
+		src++;
 	}
 	while (c = *src++){
 		Size--;
@@ -109,7 +103,7 @@ root_win(WIN_NAMEIDATA *Result, const char *path)
 		Result->R = win_wcpcpy(Result->Resolved, PROCESS_ROOT);
 		path += 6;
 	}else{
-		Result->R = win_wcpcpy(Result->Resolved, __Mounts->Path);
+		Result->R = win_wcpcpy(Result->Resolved, L".");
 		path++;
 	}
 	return(path);
@@ -129,6 +123,7 @@ pathat_win(WIN_NAMEIDATA *Result, int dirfd, const char *path, int atflags)
 	Result->MountId = 0;
 	Result->FSType = FS_TYPE_DISK;
 	Result->R = Result->Resolved;
+	Result->Base = Result->R;
 
 	if (dirfd > 0 && dirfd < OPEN_MAX){
 		vfs_F_GETPATH(&pwTask->Node[dirfd], Result);

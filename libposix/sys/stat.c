@@ -291,9 +291,6 @@ __fstatat(WIN_TASK *Task, int dirfd, const char *path, struct stat *buf, int fla
 	}else if (!vfs_stat(pathat_win(&wPath, dirfd, path, flags | AT_DEVICE), &wStat)){
 		result -= errno_posix(GetLastError());
 	}else{
-		if (Task->TracePoints & KTRFAC_USER){
-			ktrace_USER(Task, "WIN_NAMEIDATA", szMessage, vfs_NAMEI(&wPath, szMessage));
-		}
 		stat_posix(Task, buf, &wStat);
 	}
 	return(result);
@@ -321,7 +318,7 @@ __fchmodat(WIN_TASK *Task, int fd, const char *path, mode_t mode, int flag)
 {
 	int result = 0;
 	WIN_MODE wMode;
-	WIN_NAMEIDATA wPath;
+	WIN_NAMEIDATA wPath = {0};
 
 	if (!path){
 		result = -EFAULT;
@@ -363,7 +360,7 @@ int
 __chflagsat(int fd, const char *path, unsigned int flags, int atflag)
 {
 	int result = 0;
-	WIN_NAMEIDATA wPath;
+	WIN_NAMEIDATA wPath = {0};
 
 	if (!disk_chflags(pathat_win(&wPath, fd, path, atflag), attr_win(flags))){
 		result -= errno_posix(GetLastError());
@@ -397,7 +394,7 @@ int
 __mknodat(WIN_TASK *Task, int fd, const char *path, mode_t mode, dev_t dev)
 {
 	int result = 0;
-	WIN_NAMEIDATA wPath;
+	WIN_NAMEIDATA wPath = {0};
 	WIN_MODE wMode;
 
 	if (!vfs_mknod(pathat_win(&wPath, fd, path, AT_SYMLINK_NOFOLLOW), mode_win(&wMode, mode), dev)){
@@ -420,7 +417,7 @@ __mkdirat(WIN_TASK *Task, int dirfd, const char *pathname, mode_t mode)
 {
 	int result = 0;
 	WIN_MODE wMode;
-	WIN_NAMEIDATA wPath;
+	WIN_NAMEIDATA wPath = {0};
 
 	mode &= (~Task->FileMask & 00777);
 	if (!vfs_mkdir(pathat_win(&wPath, dirfd, pathname, AT_SYMLINK_NOFOLLOW), mode_win(&wMode, mode))){
@@ -443,7 +440,7 @@ sys_mkfifoat(call_t call, int dirfd, const char *pathname, mode_t mode)
 {
 	int result = 0;
 	WIN_MODE wMode;
-	WIN_NAMEIDATA wPath;
+	WIN_NAMEIDATA wPath = {0};
 	WIN_VNODE vNode = {0};
 
 	if (!vfs_mkfifo(pathat_win(&wPath, dirfd, pathname, AT_SYMLINK_NOFOLLOW), mode_win(&wMode, mode), &vNode)){

@@ -88,12 +88,15 @@ win_getegid(SID8 *Sid)
 /************************************************************/
 
 BOOL 
-win_chdir(LPCWSTR Path)
+win_chroot(LPCWSTR Path)
 {
 	BOOL bResult = FALSE;
+	WCHAR szPath[MAX_PATH];
 
-	if (!SetCurrentDirectoryW(Path)){
-		WIN_ERR("SetCurrentDirectory(%ls): %s\n", Path, win_strerror(GetLastError()));
+	if (!win_realpath(Path, MAX_PATH, szPath)){
+		return(FALSE);
+	}else if (!SetCurrentDirectoryW(szPath)){
+		WIN_ERR("SetCurrentDirectory(%ls): %s\n", szPath, win_strerror(GetLastError()));
 	}else{
 		bResult = TRUE;
 	}

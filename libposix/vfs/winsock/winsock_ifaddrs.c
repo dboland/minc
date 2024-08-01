@@ -75,8 +75,8 @@ ws2_setifaddrs(ULONG Family, WIN_IFENUM *Result)
 		Result->Table = pTable;
 		Result->Next = pTable;
 		bResult = TRUE;
-	}else{
-		WIN_ERR("GetAdaptersAddresses(%d): %s", Family, win_strerror(ulStatus));
+//	}else{
+//		WIN_ERR("GetAdaptersAddresses(%d): %s", Family, win_strerror(ulStatus));
 	}
 	return(bResult);
 }

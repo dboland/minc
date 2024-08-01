@@ -77,8 +77,9 @@ msgbuf_DRIVE(WIN_CFDATA *Config, WIN_CFDRIVER *Driver, LPSTR Result)
 	}else{
 		psz += msvc_sprintf(psz, "+ not configured: ");
 	}
-	psz += msvc_sprintf(psz, "%ls at %ls", Config->NtName, Config->BusName);
-	psz += msvc_sprintf(psz, " %ls", Driver->NtClass);
+//	psz += msvc_sprintf(psz, "%ls at %ls", Config->NtName, Config->BusName);
+	psz += msvc_sprintf(psz, "%ls %ls", Config->BusName, Driver->NtClass);
+	psz += msvc_sprintf(psz, " at %ls", Config->NtName);
 	psz += msvc_sprintf(psz, ", type 0x%x", Config->DeviceType);
 	psz += msvc_sprintf(psz, ", flags 0x%x", Driver->Flags);
 	*psz++ = '\n';
@@ -112,7 +113,7 @@ msgbuf_KERN_MSGBUFSIZE(int *data, size_t *len)
 {
 	WIN_CFDATA cfData;
 	WIN_CFDRIVER cfDriver;
-	DWORD dwFlags = WIN_MNT_VFSFLAGS;
+	DWORD dwFlags = WIN_MNT_NOWAIT;
 	char *msgbuf = win_malloc(MSGBUFSIZE);
 	size_t bufsize = 0;
 	char *buf = msgbuf;

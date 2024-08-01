@@ -64,7 +64,7 @@ pipe_mknod(LPWSTR FileName, LPWSTR NtName, WIN_MODE *Mode)
 	HANDLE hResult;
 
 	win_wcscpy(iNode.NtName, NtName);
-__PRINTF("  pipe_mknod(%ls): %ls\n", FileName, NtName)
+//__PRINTF("  pipe_mknod(%ls): %ls\n", FileName, NtName)
 	hResult = CreateFileW(FileName, GENERIC_WRITE, FILE_SHARE_READ, NULL, 
 		CREATE_ALWAYS, FILE_ATTRIBUTE_SYSTEM, NULL);
 	if (hResult == INVALID_HANDLE_VALUE){

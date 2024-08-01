@@ -121,7 +121,6 @@ char_TIOCDRAIN(WIN_VNODE *Node)
 BOOL 
 char_TIOCSCTTY(WIN_DEVICE *Device, WIN_TTY *Terminal)
 {
-	BOOL bResult = FALSE;
 	WIN_FLAGS wFlags = {GENERIC_READ | GENERIC_WRITE, 
 		FILE_SHARE_READ | FILE_SHARE_WRITE, 
 		OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, 0};
@@ -130,10 +129,5 @@ char_TIOCSCTTY(WIN_DEVICE *Device, WIN_TTY *Terminal)
 	Device->Input = CharOpenFile("CONIN$", &wFlags, &sa);
 	Device->Output = CharOpenFile("CONOUT$", &wFlags, &sa);
 	Device->Event = Device->Input;
-	if (!GetConsoleScreenBufferInfo(Device->Output, &Terminal->Info)){
-		WIN_ERR("char_TIOCSCTTY(%d): %s\n", Device->Output, win_strerror(GetLastError()));
-	}else{
-		bResult = TRUE;
-	}
-	return(bResult);
+	return(TRUE);
 }

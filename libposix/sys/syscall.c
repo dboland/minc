@@ -135,7 +135,7 @@ shebang_win(WIN_VNODE *Node, WIN_NAMEIDATA *Path, const char *filename, LPSTR Re
 {
 	BOOL bResult = FALSE;
 	DWORD dwRead;
-	WIN_NAMEIDATA wPath;
+	WIN_NAMEIDATA wPath = {0};
 	char *argv[MAXDEPTH + 1], **token = argv;
 	char line[MAXLINE];
 
@@ -486,7 +486,7 @@ sys_chown(call_t call, const char *path, uid_t owner, gid_t group)
 	int result = 0;
 	SID8 sidUser;
 	SID8 sidGroup;
-	WIN_NAMEIDATA wpePath;
+	WIN_NAMEIDATA wpePath = {0};
 
 	if (!owner){
 		owner = WIN_ROOT_UID;
@@ -526,7 +526,7 @@ sys_lchown(call_t call, const char *path, uid_t owner, gid_t group)
 	int result = 0;
 	SID8 sidUser;
 	SID8 sidGroup;
-	WIN_NAMEIDATA wpePath;
+	WIN_NAMEIDATA wpePath = {0};
 
 	if (!owner){
 		owner = WIN_ROOT_UID;
@@ -547,7 +547,7 @@ sys_fchownat(call_t call, int dirfd, const char *path, uid_t owner, gid_t group,
 	int result = 0;
 	SID8 sidUser;
 	SID8 sidGroup;
-	WIN_NAMEIDATA wPath;
+	WIN_NAMEIDATA wPath = {0};
 
 	if (!owner){
 		owner = WIN_ROOT_UID;
@@ -586,7 +586,7 @@ int
 sys_execve(call_t call, const char *path, char *const argv[], char *const envp[])
 {
 	int result = 0;
-	WIN_NAMEIDATA wPath;
+	WIN_NAMEIDATA wPath = {0};
 	WIN_TASK *pwTask = call.Task;
 	WIN_MODE wMode;
 	WIN_FLAGS wFlags = {GENERIC_READ + GENERIC_EXECUTE, 

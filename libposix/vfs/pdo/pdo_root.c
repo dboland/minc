@@ -30,22 +30,29 @@
 
 #include <winbase.h>
 
-/****************************************************/
+/************************************************************/
 
 BOOL 
-vol_lookup(WIN_NAMEIDATA *Path, DWORD Flags)
+root_mount(WIN_DEVICE *Device, WIN_NAMEIDATA *Path, DWORD Flags, WIN_MODE *Mode)
 {
-	WIN_MOUNT *pwMount = &__Mounts[Path->MountId];
+	BOOL bResult = FALSE;
+	WIN_MOUNT *pwMount = __Mounts;
+	WCHAR szDrive[MAX_NAME];
 
-	if (!pwMount->DeviceId){
-		SetLastError(ERROR_DEVICE_NOT_AVAILABLE);
+	if (!DriveStatVolume(win_drivename(szDrive, Path->Base), pwMount)){
+		return(FALSE);
+	}else if (!SetFileAttributesW(Path->Resolved, FILE_ATTRIBUTE_ROOT)){
+		WIN_ERR("SetFileAttributes(%ls): %s\n", Path->Resolved, win_strerror(GetLastError()));
 	}else{
-		if (Flags & WIN_REQUIREDIR){
-			Path->R = win_wcpcpy(Path->Resolved, pwMount->Path);
-		}else{
-			Path->R = win_wcpcpy(Path->Resolved, pwMount->Drive);
-		}
-		Path->Base = Path->R;
+		win_wcscpy(pwMount->Path, Path->Resolved);
+		win_wcscpy(pwMount->TypeName, L"FFS");
+		pwMount->MountId = 0;
+		pwMount->DeviceId = Device->DeviceId;
+		pwMount->DeviceType = Device->DeviceType;
+//		pwMount->Flags |= FILE_VOLUME_MNT_ROOTFS;
+		GetSystemTimeAsFileTime(&pwMount->Time);
+//vfs_ktrace("root_mount", STRUCT_MOUNT, pwMount);
+		bResult = TRUE;
 	}
-	return(TRUE);
+	return(bResult);
 }

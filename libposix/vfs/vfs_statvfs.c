@@ -113,20 +113,20 @@ VfsClassName(LPCWSTR NtPath, LPWSTR Result)
 	*Result = 0;
 	return(dwDepth);
 }
-LPCWSTR 
-VfsPrevious(LPCWSTR Origin, LPCWSTR String)
+BOOL 
+VfsQueryDosDevice(LPCWSTR DosPath, LPWSTR Result)
 {
-	LPCWSTR psz = String - 1;
-
-	do {
-		String = psz--;
-		if (String == Origin){
-			break;
-		}else if (String < Origin){
-			return(NULL);
-		}
-	} while (*psz);
-	return(String);
+	/* Kaspersky Total Security creates a random FDO device,
+	 * named XXXXCtrl.
+	 */
+	if (QueryDosDeviceW(DosPath, Result, MAX_TEXT)){
+		return(TRUE);
+	}else if (ERROR_ACCESS_DENIED == GetLastError()){
+		win_wcscpy(win_wcpcpy(Result, L"\\Device\\"), DosPath);
+	}else{
+		WIN_ERR("QueryDosDevice(%ls): %s\n", DosPath, win_strerror(GetLastError()));
+	}
+	return(TRUE);
 }
 
 /************************************************************/
@@ -149,12 +149,8 @@ vfs_setvfs(WIN_CFDATA *Config, DWORD Flags)
 			return(FALSE);
 		}
 	}
-	if (Flags & WIN_MNT_REVERSED){
-		Config->Next = VfsPrevious(pszBuffer, pszBuffer + dwSize - 1);
-	}else{
-		Config->Next = pszBuffer;
-	}
 	Config->Strings = pszBuffer;
+	Config->Next = pszBuffer;
 	return(TRUE);
 }
 VOID 
@@ -168,21 +164,16 @@ vfs_getvfs(WIN_CFDATA *Config, DWORD Flags)
 	BOOL bResult = FALSE;
 	LPCWSTR pszNext = Config->Next;
 
-	if (!pszNext || !*pszNext){
+//	if (!pszNext || !*pszNext){
+	if (!*pszNext){
 		SetLastError(ERROR_NO_MORE_ITEMS);
-	}else if (!QueryDosDeviceW(pszNext, Config->NtPath, MAX_TEXT)){
-		WIN_ERR("QueryDosDevice(%ls): %s\n", pszNext, win_strerror(GetLastError()));
-	}else{
+	}else if (VfsQueryDosDevice(pszNext, Config->NtPath)){
 		Config->FSType = VfsBusName(pszNext, Config->BusName);
 		Config->Depth = VfsClassName(Config->NtPath, Config->ClassName);
 		win_wcsucase(Config->BusName);
 		Config->NtName = win_basename(Config->NtPath);
 		Config->DosPath = pszNext;
-		if (Flags & WIN_MNT_REVERSED){
-			Config->Next = VfsPrevious(Config->Strings, pszNext);
-		}else{
-			Config->Next += win_wcslen(pszNext) + 1;
-		}
+		Config->Next += win_wcslen(pszNext) + 1;
 		bResult = TRUE;
 	}
 	return(bResult);

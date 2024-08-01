@@ -43,7 +43,7 @@ DiskCreateFile(WIN_NAMEIDATA *Path, WIN_FLAGS *Flags, WIN_MODE *Mode, WIN_VNODE 
 	SECURITY_ATTRIBUTES sa = {sizeof(sa), &wControl.Security, FALSE};
 
 	Flags->Access |= WRITE_DAC | WRITE_OWNER;		/* disk_fchown() */
-	if (!win_acl_get_file(win_dirname_r(Path->Resolved, szDirName), &psd)){
+	if (!win_acl_get_file(win_dirname(szDirName, Path->Resolved), &psd)){
 		return(FALSE);
 	}else if (!win_acl_init(Mode, &wControl)){
 		WIN_ERR("win_acl_init(%s): %s\n", szDirName, win_strerror(GetLastError()));

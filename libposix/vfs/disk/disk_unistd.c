@@ -207,34 +207,37 @@ disk_readlink(WIN_NAMEIDATA *Path, BOOL MakeReal)
 		}
 		if (szBuffer[1] == ':'){
 			Path->MountId = MOUNTID(szBuffer[0]);	/* nano.exe */
+		}else if (szBuffer[1] == '\\'){
+			Path->MountId = 0;
 		}else if (MakeReal){
 			pszBase = Path->Base;
 		}
 		Path->R = win_mbstowcp(pszBase, szBuffer, MAX_PATH);
 		Path->Last = Path->R - 1;
 		Path->Attribs = slHead.FileAttributes;
-//VfsDebugPath(Path, "disk_readlink");
+//vfs_ktrace("disk_readlink", STRUCT_NAMEI, Path);
 		bResult = TRUE;
 	}
 	CloseHandle(hFile);
 	return(bResult);
 }
 BOOL 
-disk_symlink(WIN_NAMEIDATA *Path, WIN_NAMEIDATA *Result)
+disk_symlink(WIN_NAMEIDATA *Target, WIN_NAMEIDATA *Result)
 {
 	BOOL bResult = FALSE;
 	DWORD dwTerminalBlock = 0;
 	DWORD dwSize = sizeof(DWORD);
 	HANDLE hFile;
 
-	if (*Path->Last == '\\'){	/* GNU conftest.exe */
-		*Path->Last = 0;
+	if (*Target->Last == '\\'){	/* GNU conftest.exe */
+		*Target->Last = 0;
 	}
 	Result->R = win_wcpcpy(Result->R, L".lnk");
+//vfs_ktrace("disk_symlink", STRUCT_NAMEI, Result);
 	hFile = CreateFileW(Result->Resolved, GENERIC_WRITE, FILE_SHARE_READ, 
 		NULL, CREATE_NEW, FILE_ATTRIBUTE_NORMAL, NULL);
 	if (hFile != INVALID_HANDLE_VALUE){
-		LinkCreateFile(hFile, Path->Resolved, Result->Resolved);
+		LinkCreateFile(hFile, Target, Result->Resolved);
 		WriteFile(hFile, &dwTerminalBlock, dwSize, &dwSize, NULL);
 		bResult = CloseHandle(hFile);
 	}

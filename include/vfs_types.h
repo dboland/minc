@@ -83,6 +83,7 @@ typedef enum _WIN_VTAGTYPE {
 /* sys/syslimits.h */
 
 #define WIN_NAME_MAX		16
+#define WIN_PATH_MAX		1024
 #define WIN_PIPE_BUF		1024
 
 /*
@@ -127,8 +128,9 @@ typedef struct _WIN_CFDRIVER {
 	WCHAR ClassId[MAX_GUID];
 	WCHAR NtClass[MAX_NAME];
 	WCHAR Service[MAX_NAME];
-	WCHAR Location[MAX_PATH];
+	WCHAR Location[MAX_COMMENT];
 	WCHAR Comment[MAX_COMMENT];
+	WCHAR NtPath[MAX_PATH];
 } WIN_CFDRIVER;
 
 typedef struct _WIN_CFDATA {
@@ -158,9 +160,8 @@ typedef WIN_DEVICE WIN_DEV_CLASS[WIN_UNIT_MAX];
 
 #define FILE_ATTRIBUTE_SYMLINK		0x00000008
 #define FILE_ATTRIBUTE_PDO		(FILE_ATTRIBUTE_ARCHIVE | FILE_ATTRIBUTE_SYSTEM)
-#define FILE_ATTRIBUTE_DRIVE		(FILE_ATTRIBUTE_DIRECTORY | FILE_ATTRIBUTE_SYSTEM)
-#define FILE_ATTRIBUTE_VOLUME		(FILE_ATTRIBUTE_HIDDEN | FILE_ATTRIBUTE_DIRECTORY | FILE_ATTRIBUTE_SYSTEM)
-#define FILE_ATTRIBUTE_ROOT		(FILE_ATTRIBUTE_READONLY | FILE_ATTRIBUTE_DIRECTORY | FILE_ATTRIBUTE_SYSTEM)
+#define FILE_ATTRIBUTE_DRIVE		(FILE_ATTRIBUTE_READONLY | FILE_ATTRIBUTE_DIRECTORY | FILE_ATTRIBUTE_SYSTEM)
+#define FILE_ATTRIBUTE_ROOT		(FILE_ATTRIBUTE_HIDDEN | FILE_ATTRIBUTE_DIRECTORY | FILE_ATTRIBUTE_SYSTEM)
 
 #define WIN_SYMLOOP_MAX			8
 
@@ -180,7 +181,6 @@ typedef struct _WIN_NAMEIDATA {
 	WIN_FS_TYPE FSType;
 	HANDLE Object;
 	WCHAR Resolved[WIN_PATH_MAX];
-	DWORD DriveType;
 	DWORD Attribs;
 	DWORD Flags;			/* see below */
 	WCHAR *Base;
@@ -312,22 +312,23 @@ typedef struct _WIN_PSTRING {
 #define WIN_DRIVE_MAX	26
 #define WIN_MOUNT_MAX	(WIN_DRIVE_MAX + 1)
 
-#define MOUNTID(ch)	(DWORD)(1 + msvc_tolower(ch) - 'a')
+#define MOUNTID(ch)	(DWORD)(ch ? 1 + msvc_tolower(ch) - 'a' : 0)
 
 typedef struct _WIN_MOUNT {
 	DWORD MountId;
-	WIN_VTYPE FileType;
 	DWORD DeviceType;
 	DWORD DeviceId;
-	DWORD VolumeSerial;
+	DWORD Serial;
+	DWORD MaxPath;
 	DWORD Flags;
 	FILETIME Time;
-	WCHAR Drive[MAX_LABEL];
+	WCHAR Volume[MAX_LABEL];
+	WCHAR Label[MAX_LABEL];
+	WCHAR TypeName[MAX_LABEL];
 	WCHAR Path[MAX_PATH];
 } WIN_MOUNT;
 
 typedef struct _WIN_STATFS {
-	DWORD Serial;
 	DWORD MaxPath;
 	DWORD Flags;
 	DWORD DeviceId;
@@ -337,35 +338,17 @@ typedef struct _WIN_STATFS {
 	DWORD ClustersTotal;
 	FILETIME MountTime;
 	WCHAR TypeName[MAX_LABEL];
-	WCHAR Label[MAX_LABEL];
-	WCHAR Drive[MAX_LABEL];
+	WCHAR Path[MAX_PATH];
 } WIN_STATFS;
 
-#define WIN_MNT_REVERSED	0x00200000	/* load reversed file system table */
+#define FILE_VOLUME_MNT_DOOMED	0x00000800
+#define FILE_VOLUME_MNT_UPDATE	0x80000000
 
-/* sys/mount.h */
+/* waitfor flags to vfs_sync() and getfsstat() */
 
-#define WIN_MNT_RDONLY		0x00000001      /* read only filesystem */
-#define WIN_MNT_SYNCHRONOUS	0x00000002      /* file system written synchronously */
-#define WIN_MNT_NOEXEC		0x00000004      /* can't exec from filesystem */
-#define WIN_MNT_NOSUID		0x00000008      /* don't honor setuid bits on fs */
-#define WIN_MNT_NODEV		0x00000010      /* don't interpret special files */
-#define WIN_MNT_ASYNC		0x00000040      /* file system written asynchronously */
-
-/* Control flags for getfsstat() */
-
-#define WIN_MNT_UPDATE		0x00010000	/* not a real mount, just an update */
-#define WIN_MNT_DELEXPORT	0x00020000	/* delete export host lists */
-#define WIN_MNT_RELOAD		0x00040000	/* reload filesystem data */
-#define WIN_MNT_FORCE		0x00080000	/* force unmount or readonly change */
-#define WIN_MNT_NOWAIT		0x00100000
-#define WIN_MNT_DEBUG		0x00400000
-#define WIN_MNT_WANTRDWR	0x02000000	/* want upgrade to read/write */
-#define WIN_MNT_SOFTDEP		0x04000000	/* soft dependencies being done */
-#define WIN_MNT_DOOMED		0x08000000	/* device behind filesystem is gone */
-
-//#define WIN_MNT_VFSFLAGS	WIN_MNT_NOWAIT | WIN_MNT_REVERSED
-#define WIN_MNT_VFSFLAGS	WIN_MNT_NOWAIT
+#define WIN_MNT_WAIT        1       /* synchronously wait for I/O to complete */
+#define WIN_MNT_NOWAIT      2       /* start all I/O, but do not wait for it */
+#define WIN_MNT_LAZY        3       /* push data not written by filesystem syncer */
 
 /*
  * vfs_stat.c
