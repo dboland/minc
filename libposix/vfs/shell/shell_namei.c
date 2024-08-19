@@ -33,26 +33,52 @@
 /****************************************************/
 
 BOOL 
-file_fstat(WIN_VNODE *Node, WIN_VATTR *Result)
+SHGlobType(LPCWSTR TypeName, WIN_NAMEIDATA *Path)
 {
 	BOOL bResult = FALSE;
+	DWORD dwAttribs;
 
-	if (VfsStatHandle(Node->Handle, Result)){
-		Result->DeviceId = __Mounts[Node->MountId].DeviceId;
-		Result->Mode.FileType = Node->FileType;
+	win_wcscpy(Path->R, TypeName);
+	dwAttribs = GetFileAttributesW(Path->Resolved);
+	if (dwAttribs == -1){
+		*Path->R = 0;		/* undo extension probe */
+	}else{
+		Path->Attribs = dwAttribs;
 		bResult = TRUE;
 	}
 	return(bResult);
 }
 BOOL 
-file_stat(WIN_NAMEIDATA *Path, WIN_VATTR *Result)
+SHGlobLink(WIN_NAMEIDATA *Path, LONG Depth)
 {
 	BOOL bResult = FALSE;
 
-	if (VfsStatFile(Path->Resolved, FILE_ATTRIBUTE_NORMAL, Result)){
-		Result->DeviceId = __Mounts[Path->MountId].DeviceId;
-		Result->Mode.FileType = Path->FileType;
-		bResult = TRUE;
+	if (shell_readlink(Path, TRUE)){
+		if (!SHGlobType(L".lnk", Path)){
+			bResult = TRUE;
+		}else if (Depth >= WIN_SYMLOOP_MAX){
+			SetLastError(ERROR_TOO_MANY_LINKS);
+		}else{
+			bResult = SHGlobLink(Path, Depth + 1);
+		}
+	}
+	return(bResult);
+}
+
+/****************************************************/
+
+BOOL 
+shell_lookup(WIN_NAMEIDATA *Path, DWORD Flags)
+{
+	BOOL bResult = TRUE;
+
+	if (!SHGlobType(L".lnk", Path)){
+		bResult = FALSE;
+	}else if (Flags & WIN_FOLLOW){
+		bResult = SHGlobLink(Path, 0);
+	}else{
+		Path->FSType = FS_TYPE_SHELL;
+		Path->Attribs |= FILE_ATTRIBUTE_SYMLINK;
 	}
 	return(bResult);
 }

@@ -135,9 +135,9 @@
 
 #define DEV_TYPE_FIXED		(DEV_CLASS_STORAGE)
 #define DEV_TYPE_CDROM		(DEV_CLASS_STORAGE + DEV_BUS_SCSI)	/* CDROM storage */
-#define DEV_TYPE_HARDDISK	(DEV_CLASS_STORAGE + DEV_BUS_HDC)	/* Hard Disk storage */
+#define DEV_TYPE_REMOVABLE	(DEV_CLASS_STORAGE + DEV_BUS_HDC)	/* Hard Disk storage */
 #define DEV_TYPE_FLOPPY		(DEV_CLASS_STORAGE + DEV_BUS_FDC)	/* Floppy Disk storage */
-#define DEV_TYPE_USBSTOR	(DEV_CLASS_STORAGE + DEV_BUS_USB)	/* USB Mass Storage */
+//#define DEV_TYPE_USBSTOR	(DEV_CLASS_STORAGE + DEV_BUS_USB)	/* USB Mass Storage */
 #define DEV_TYPE_REMOTE		(DEV_CLASS_STORAGE + DEV_BUS_CPU)	/* Server Message Block storage */
 
 #define DEV_TYPE_HID		(DEV_CLASS_USB)

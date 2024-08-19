@@ -56,23 +56,36 @@ pipe_fstat(WIN_VNODE *Node, WIN_VATTR *Result)
 	return(bResult);
 }
 BOOL 
+pipe_stat(WIN_NAMEIDATA *Path, WIN_VATTR *Result)
+{
+	BOOL bResult = FALSE;
+
+	if (VfsStatHandle(Path->Object, Result)){
+		Result->DeviceId = __Mounts->DeviceId;
+		Result->Mode.FileType = Path->FileType;
+		Result->SpecialId = Path->DeviceId;
+		bResult = CloseHandle(Path->Object);
+	}
+	return(bResult);
+}
+BOOL 
 pipe_mknod(LPWSTR FileName, LPWSTR NtName, WIN_MODE *Mode)
 {
 	BOOL bResult = FALSE;
-	DWORD dwSize = sizeof(WIN_INODE);
-	WIN_INODE iNode = {TypeNameVirtual, Mode->FileType, DEV_CLASS_CPU, 0, FS_TYPE_PIPE, 0};
-	HANDLE hResult;
+	DWORD dwResult;
+	WIN_INODE iNode = {TypeNameVirtual, DEV_CLASS_CPU, Mode->FileType, 
+		FS_TYPE_PIPE, INAMESIZE(NtName), 0};
+	HANDLE hNode;
 
-	win_wcscpy(iNode.NtName, NtName);
 //__PRINTF("  pipe_mknod(%ls): %ls\n", FileName, NtName)
-	hResult = CreateFileW(FileName, GENERIC_WRITE, FILE_SHARE_READ, NULL, 
-		CREATE_ALWAYS, FILE_ATTRIBUTE_SYSTEM, NULL);
-	if (hResult == INVALID_HANDLE_VALUE){
+	hNode = CreateFileW(FileName, GENERIC_WRITE, FILE_SHARE_READ, 
+		NULL, CREATE_ALWAYS, FILE_CLASS_INODE, NULL);
+	if (hNode == INVALID_HANDLE_VALUE){
 		WIN_ERR("CreateFile(%ls): %s\n", FileName, win_strerror(GetLastError()));
-	}else if (!WriteFile(hResult, &iNode, dwSize, &dwSize, NULL)){
+	}else if (!WriteFile(hNode, &iNode, sizeof(WIN_INODE), &dwResult, NULL)){
 		WIN_ERR("WriteFile(%ls): %s\n", FileName, win_strerror(GetLastError()));
-	}else{
-		bResult = CloseHandle(hResult);
+	}else if (WriteFile(hNode, NtName, iNode.NameSize, &dwResult, NULL)){
+		bResult = CloseHandle(hNode);
 	}
 	return(bResult);
 }

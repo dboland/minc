@@ -124,8 +124,6 @@ ws2_bind(WIN_VNODE *Node, LPSOCKADDR Address, INT Length)
 
 	if (SOCKET_ERROR != bind(Node->Socket, Address, Length)){
 		bResult = TRUE;
-//	}else{
-//		WIN_ERR("bind(%d): %s\n", Node->Socket, win_strerror(WSAGetLastError()));
 	}
 	return(bResult);
 }
@@ -166,8 +164,6 @@ ws2_sendmsg(WIN_VNODE *Node, WSAMSG *Msg, DWORD Flags, LPDWORD Result)
 
 	if (SOCKET_ERROR != WSASendTo(Node->Socket, Msg->lpBuffers, Msg->dwBufferCount, Result, Flags, Msg->name, Msg->namelen, NULL, NULL)){
 		bResult = TRUE;
-	}else{
-		WIN_ERR("WSASendTo(%d): %s\n", Node->Socket, win_strerror(WSAGetLastError()));
 	}
 	return(bResult);
 }

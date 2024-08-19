@@ -3,7 +3,8 @@ include ../../Makefile.inc
 CRT0=crt0.o
 OBJECTS=${CRT0} crt1.o crtbegin.o crtend.o gcrt0.o
 LIBS=libgcc.a libgcc_s.a libgcc_eh.a
-GCCOBJ=_chkstk.o _chkstk_ms.o _mulsc3.o _muldc3.o _mulxc3.o _ctzdi2.o \
+#_chkstk.o _chkstk_ms.o 
+GCCOBJ=_mulsc3.o _muldc3.o _mulxc3.o _ctzdi2.o \
 	_ffsdi2.o _popcountdi2.o _popcountsi2.o _popcount_tab.o _udivdi3.o \
 	_divdi3.o _clrsbdi2.o _clrsbsi2.o
 GCCINC=/lib/gcc/mingw32/${GCCVER}/include
@@ -18,9 +19,10 @@ all: ${OBJECTS} ${LIBS}
 # btw: there is a chkstk() in ntdll.dll
 #
 
-libgcc.a: emutls.o wintls.o mempcpy.o gnu_mntent.o futimesat.o
+libgcc.a: emutls.o mempcpy.o gnu_mntent.o futimesat.o
 	ar xv ${MINGW}/lib/gcc/mingw32/${GCCVER}/libgcc.a ${GCCOBJ}
 	ar cru $@ ${GCCOBJ} $^
+# wintls.o
 
 libgcc_s.a: libgcc_s.def
 	dlltool -d $< -l $@ -k

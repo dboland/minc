@@ -84,15 +84,15 @@ PathGlob(WIN_NAMEIDATA *Path, DWORD Flags)
 
 	switch (Path->Attribs){
 		case -1:
+			bResult = shell_lookup(Path, Flags);
+			break;
+		case FILE_CLASS_INODE:
 			bResult = disk_lookup(Path, Flags);
 			break;
-		case FILE_ATTRIBUTE_PDO:
-			bResult = pdo_lookup(Path, Flags);
-			break;
-		case FILE_ATTRIBUTE_DRIVE:
+		case FILE_CLASS_MOUNT:
 			bResult = drive_lookup(Path, Flags);
 			break;
-		case FILE_ATTRIBUTE_ROOT:
+		case FILE_CLASS_ROOT:
 //vfs_ktrace("PathGlob", STRUCT_NAMEI, Path);
 			break;
 	}
@@ -111,15 +111,14 @@ PathClose(WIN_NAMEIDATA *Path, DWORD Flags)
 {
 	BOOL bResult = TRUE;
 
+	Path->FileType = WIN_VREG;
 	if (PathGlob(Path, Flags)){
 		if (Path->Attribs & FILE_ATTRIBUTE_DIRECTORY){
 			Path->FileType = WIN_VDIR;
 		}else if (Path->Attribs & FILE_ATTRIBUTE_SYMLINK){
 			Path->FileType = WIN_VLNK;
 		}
-	}else if (DiskGlobType(L".exe", Path)){
-		Path->FileType = WIN_VREG;
-//	}else{
+	}else if (!SHGlobType(L".exe", Path)){
 //		vfs_ktrace("PathClose", STRUCT_NAMEI, Path);
 	}
 	Path->Last = Path->R - 1;

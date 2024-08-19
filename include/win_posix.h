@@ -103,6 +103,7 @@ BOOL win_getgroups(SID8 **Groups, DWORD *Count);
 BOOL win_setgroups(SID8 Groups[], DWORD Count);
 BOOL win___tfork_thread(WIN___TFORK *Params, SIZE_T Size, LPTHREAD_START_ROUTINE *Start, PVOID Data, DWORD *Result);
 BOOL win_chroot(LPCWSTR Path);
+BOOL win_execve(LPSTR Command, LPCSTR Path, STARTUPINFO *Info);
 
 /* win_stdlib.c */
 
@@ -171,8 +172,8 @@ BOOL win_dladdr(LPCVOID Address, MEMORY_BASIC_INFORMATION *Info, LPWSTR FileName
 
 /* win_syscall.c */
 
-DECLSPEC_NORETURN VOID win_exit(DWORD ExitCode);
-BOOL win_execve(LPSTR Command, LPCSTR Path, STARTUPINFO *Info);
+BOOL win_readlink(LPCWSTR Path, SHELL_LINK_HEADER *Header, LPWSTR Target);
+BOOL win_symlink(LPCWSTR Path, LPCWSTR Target);
 
 /* win_resource.c */
 

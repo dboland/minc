@@ -44,7 +44,7 @@ DriveLookupClass(LPCWSTR ClassName)
 		dwResult |= DEV_BUS_FDC;
 
 //	}else if (!win_wcsncmp(ClassName, L"Harddisk", 8)){
-//		dwResult |= DEV_BUS_USB;
+//		dwResult |= DEV_BUS_HDC;
 
 	}else if (!win_wcscmp(ClassName, L"Ide")){
 		dwResult |= DEV_BUS_IDE;

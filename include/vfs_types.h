@@ -43,6 +43,7 @@ typedef enum _WIN_FS_TYPE {
 	FS_TYPE_NPF,
 	FS_TYPE_LINK,
 	FS_TYPE_NDIS,
+	FS_TYPE_SHELL,
 	FS_TYPE_MAX
 } WIN_FS_TYPE;
 
@@ -78,8 +79,6 @@ typedef enum _WIN_VTAGTYPE {
 	WIN_VT_TMPFS
 } WIN_VTAGTYPE;
 
-#define WIN_UNIT_MAX		64
-
 /* sys/syslimits.h */
 
 #define WIN_NAME_MAX		16
@@ -89,6 +88,8 @@ typedef enum _WIN_VTAGTYPE {
 /*
  * vfs_device.c
  */
+
+#define WIN_UNIT_MAX		64
 
 typedef struct _WIN_DEVICE {
 	WIN_VTYPE FileType;
@@ -148,31 +149,35 @@ typedef struct _WIN_CFDATA {
 
 typedef WIN_DEVICE WIN_DEV_CLASS[WIN_UNIT_MAX];
 
-#define DEVICE(rid)	(&__Devices[rid >> 8][rid & 0xFF])
+#define DEVICE(rid)		(&__Devices[rid >> 8][rid & 0xFF])
 
 /* 
  * vfs_namei.c
  */
 
-#define TypeNameLink			0x6B6E6C2E	/* ".lnk" */
-#define TypeNameExe			0x6578652E	/* ".exe" */
-#define TypeNameVirtual			0x7366762E	/* ".vfs" */
+#define TypeNameLink		0x6B6E6C2E	/* ".lnk" */
+#define TypeNameExe		0x6578652E	/* ".exe" */
+#define TypeNameVirtual		0x7366762E	/* ".vfs" */
 
-#define FILE_ATTRIBUTE_SYMLINK		0x00000008
-#define FILE_ATTRIBUTE_PDO		(FILE_ATTRIBUTE_ARCHIVE | FILE_ATTRIBUTE_SYSTEM)
-#define FILE_ATTRIBUTE_DRIVE		(FILE_ATTRIBUTE_READONLY | FILE_ATTRIBUTE_DIRECTORY | FILE_ATTRIBUTE_SYSTEM)
-#define FILE_ATTRIBUTE_ROOT		(FILE_ATTRIBUTE_HIDDEN | FILE_ATTRIBUTE_DIRECTORY | FILE_ATTRIBUTE_SYSTEM)
+#define FILE_ATTRIBUTE_SYMLINK	0x00000008
 
-#define WIN_SYMLOOP_MAX			8
+#define FILE_CLASS_INODE	(FILE_ATTRIBUTE_ARCHIVE | FILE_ATTRIBUTE_SYSTEM)
+#define FILE_CLASS_MOUNT	(FILE_ATTRIBUTE_READONLY | FILE_ATTRIBUTE_DIRECTORY | FILE_ATTRIBUTE_SYSTEM)
+#define FILE_CLASS_ROOT		(FILE_ATTRIBUTE_HIDDEN | FILE_ATTRIBUTE_DIRECTORY | FILE_ATTRIBUTE_SYSTEM)
+
+#define WIN_SYMLOOP_MAX		8
 
 typedef struct _WIN_INODE {
-	DWORD Magic;			/* file signature/mount identifier */
-	WIN_VTYPE FileType;		/* in userland, everything is a file */
-	DWORD DeviceType;		/* in kernelland, everything is a device */
-	DWORD DeviceId;			/* device inode is on */
-	WIN_FS_TYPE FSType;		/* file system Handle is from */
-	WCHAR NtName[MAX_PATH];
+	DWORD Magic;		/* file signature */
+	DWORD DeviceId;		/* in kernelland, everything is a device */
+	WIN_VTYPE FileType;	/* in userland, everything is a file */
+	WIN_FS_TYPE FSType;
+	DWORD NameSize;
+	DWORD Index;
 } WIN_INODE;
+
+#define MAXINODE		(sizeof(WIN_INODE) + sizeof(WCHAR) * 255)
+#define INAMESIZE(wcs)		((win_wcslen(wcs) + 1) * sizeof(WCHAR))
 
 typedef struct _WIN_NAMEIDATA {
 	DWORD MountId;
@@ -180,66 +185,51 @@ typedef struct _WIN_NAMEIDATA {
 	WIN_VTYPE FileType;
 	WIN_FS_TYPE FSType;
 	HANDLE Object;
-	WCHAR Resolved[WIN_PATH_MAX];
 	DWORD Attribs;
+	DWORD Size;
 	DWORD Flags;			/* see below */
 	WCHAR *Base;
 	WCHAR *Last;
 	WCHAR *R;			/* current WCHAR in resolved path buffer */
 	WCHAR *S;			/* current WCHAR in source path buffer */
+	WCHAR Resolved[WIN_PATH_MAX];
 } WIN_NAMEIDATA;
 
-#define WIN_PATHCOPY		0x400000
-#define WIN_KEEPOBJECT		0x800000
+#define WIN_PATHCOPY		0x00400000
+#define WIN_KEEPOBJECT		0x00800000
 
 /* sys/namei.h */
 
-#define WIN_LOCKLEAF		0x000004	/* lock inode on return */
-#define WIN_LOCKPARENT		0x000008	/* want parent vnode returned locked */
-#define WIN_WANTPARENT		0x000010	/* want parent vnode returned unlocked */
-#define WIN_NOCACHE		0x000020	/* name must not be left in cache */
-#define WIN_FOLLOW		0x000040	/* follow symbolic links */
-#define WIN_NOFOLLOW		0x000000	/* do not follow symbolic links (pseudo) */
-#define WIN_MODMASK		0x0000fc	/* mask of operational modifiers */
+#define WIN_LOCKLEAF		0x00000004	/* lock inode on return */
+#define WIN_LOCKPARENT		0x00000008	/* want parent vnode returned locked */
+#define WIN_WANTPARENT		0x00000010	/* want parent vnode returned unlocked */
+#define WIN_NOCACHE		0x00000020	/* name must not be left in cache */
+#define WIN_FOLLOW		0x00000040	/* follow symbolic links */
+#define WIN_NOFOLLOW		0x00000000	/* do not follow symbolic links (pseudo) */
+#define WIN_MODMASK		0x000000fc	/* mask of operational modifiers */
 
-#define WIN_NOCROSSMOUNT	0x000100	/* do not cross mount points */
-#define WIN_RDONLY		0x000200	/* lookup with read-only semantics */
-#define WIN_HASBUF		0x000400	/* has allocated pathname buffer */
-#define WIN_SAVENAME		0x000800	/* save pathname buffer */
-#define WIN_SAVESTART		0x001000	/* save starting directory */
-#define WIN_ISDOTDOT		0x002000	/* current component name is .. */
-#define WIN_MAKEENTRY		0x004000	/* entry is to be added to name cache */
-#define WIN_ISLASTCN		0x008000	/* this is last component of pathname */
-#define WIN_ISSYMLINK		0x010000	/* symlink needs interpretation */
-#define WIN_REQUIREDIR		0x080000	/* must be a directory */
-#define WIN_STRIPSLASHES	0x100000	/* strip trailing slashes */
-#define WIN_PDIRUNLOCK		0x200000	/* vfs_lookup() unlocked parent dir */
+#define WIN_NOCROSSMOUNT	0x00000100	/* do not cross mount points */
+#define WIN_RDONLY		0x00000200	/* lookup with read-only semantics */
+#define WIN_HASBUF		0x00000400	/* has allocated pathname buffer */
+#define WIN_SAVENAME		0x00000800	/* save pathname buffer */
+#define WIN_SAVESTART		0x00001000	/* save starting directory */
+#define WIN_ISDOTDOT		0x00002000	/* current component name is .. */
+#define WIN_MAKEENTRY		0x00004000	/* entry is to be added to name cache */
+#define WIN_ISLASTCN		0x00008000	/* this is last component of pathname */
+#define WIN_ISSYMLINK		0x00010000	/* symlink needs interpretation */
+#define WIN_REQUIREDIR		0x00080000	/* must be a directory */
+#define WIN_STRIPSLASHES	0x00100000	/* strip trailing slashes */
+#define WIN_PDIRUNLOCK		0x00200000	/* vfs_lookup() unlocked parent dir */
 
-/* sys/termios.h */
+/*
+ * vfs_dirent.c
+ */
 
-/* Local */
-
-#define WIN_ECHO		0x00000008
-#define WIN_ISIG		0x00000080
-#define WIN_ICANON		0x00000100
-
-/* line In */
-
-#define WIN_IXON		0x00000200
-#define WIN_IXOFF		0x00000400
-#define WIN_INLCR		0x00000040	/* Ye Olde TTY had separate key for CR */
-#define WIN_ICRNL		0x00000100
-
-/* line Out */
-
-#define WIN_OPOST		0x00000001
-#define WIN_ONLCR		0x00000002
-#define WIN_OXTABS		0x00000004
-#define WIN_OCRNL		0x00000010
-
-/* sys/ttycom.h */
-
-#define TIOCFLAG_ACTIVE		0x00010000
+typedef struct _WIN_DIRENT {
+	WIN_VTYPE FileType;
+	DWORD Index;
+	WCHAR FileName[MAX_PATH];
+} WIN_DIRENT;
 
 /*
  * vfs_fcntl.c
@@ -281,18 +271,8 @@ typedef struct _WIN_VNODE {
 	LONG Owner;
 } WIN_VNODE;
 
-#define LOCKFILE_SHARED			0x00000000
-#define LOCKFILE_UNLOCK			0x00000010
-
-/*
- * vfs_dirent.c
- */
-
-typedef struct _WIN_DIRENT {
-	WIN_VTYPE FileType;
-	DWORD Index;
-	WCHAR FileName[MAX_PATH];
-} WIN_DIRENT;
+#define LOCKFILE_SHARED		0x00000000
+#define LOCKFILE_UNLOCK		0x00000010
 
 /*
  * vfs_proc.c
@@ -311,8 +291,6 @@ typedef struct _WIN_PSTRING {
 
 #define WIN_DRIVE_MAX	26
 #define WIN_MOUNT_MAX	(WIN_DRIVE_MAX + 1)
-
-#define MOUNTID(ch)	(DWORD)(ch ? 1 + msvc_tolower(ch) - 'a' : 0)
 
 typedef struct _WIN_MOUNT {
 	DWORD MountId;
@@ -342,13 +320,15 @@ typedef struct _WIN_STATFS {
 } WIN_STATFS;
 
 #define FILE_VOLUME_MNT_DOOMED	0x00000800
-#define FILE_VOLUME_MNT_UPDATE	0x80000000
+#define FILE_VOLUME_MNT_ROOTFS	0x80000000
 
 /* waitfor flags to vfs_sync() and getfsstat() */
 
 #define WIN_MNT_WAIT        1       /* synchronously wait for I/O to complete */
 #define WIN_MNT_NOWAIT      2       /* start all I/O, but do not wait for it */
 #define WIN_MNT_LAZY        3       /* push data not written by filesystem syncer */
+
+#define MOUNTID(ch)	(DWORD)(ch ? 1 + msvc_tolower(ch) - 'a' : 0)
 
 /*
  * vfs_stat.c
@@ -497,6 +477,32 @@ typedef struct _WIN_TTY {
 #define COMMON_LVB_AUTOWRAP		0x2000
 #define COMMON_LVB_REVERSE_VIDEO	0x4000
 #define COMMON_LVB_UNDERSCORE		0x8000
+
+/* sys/termios.h */
+
+/* Local */
+
+#define WIN_ECHO		0x00000008
+#define WIN_ISIG		0x00000080
+#define WIN_ICANON		0x00000100
+
+/* line In */
+
+#define WIN_IXON		0x00000200
+#define WIN_IXOFF		0x00000400
+#define WIN_INLCR		0x00000040	/* Ye Olde TTY had separate key for CR */
+#define WIN_ICRNL		0x00000100
+
+/* line Out */
+
+#define WIN_OPOST		0x00000001
+#define WIN_ONLCR		0x00000002
+#define WIN_OXTABS		0x00000004
+#define WIN_OCRNL		0x00000010
+
+/* sys/ttycom.h */
+
+#define TIOCFLAG_ACTIVE		0x00010000
 
 /*
  * vfs_ktrace.c

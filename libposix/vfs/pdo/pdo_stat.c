@@ -36,18 +36,12 @@ BOOL
 pdo_stat(WIN_NAMEIDATA *Path, WIN_VATTR *Result)
 {
 	BOOL bResult = FALSE;
-	PSECURITY_DESCRIPTOR psd;
 
-	if (!win_acl_get_fd(Path->Object, &psd)){
-		return(FALSE);
-	}else if (!GetFileInformationByHandle(Path->Object, (BY_HANDLE_FILE_INFORMATION *)Result)){
-		WIN_ERR("GetFileInformationByHandle(%d): %s\n", Path->Object, win_strerror(GetLastError()));
-	}else if (vfs_acl_stat(psd, Result)){
+	if (VfsStatHandle(Path->Object, Result)){
 		Result->DeviceId = __Mounts->DeviceId;
 		Result->Mode.FileType = Path->FileType;
 		Result->SpecialId = Path->DeviceId;
 		bResult = CloseHandle(Path->Object);
 	}
-	LocalFree(psd);
 	return(bResult);
 }

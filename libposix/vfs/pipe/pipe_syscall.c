@@ -53,8 +53,8 @@ PipeCreateFile(LPCWSTR Name, DWORD Attribs, HANDLE Event, WIN_VNODE *Result)
 		Result->Access = win_F_GETFL(hResult);
 		Result->Flags = win_F_GETFD(hResult);
 		bResult = TRUE;
-	}else{
-		WIN_ERR("CreateNamedPipe(%ls): %s\n", szPath, win_strerror(GetLastError()));
+//	}else{
+//		WIN_ERR("CreateNamedPipe(%ls): %s\n", szPath, win_strerror(GetLastError()));
 	}
 	return(bResult);
 }
@@ -81,58 +81,5 @@ PipeOpenFile(LPCWSTR Name, HANDLE Event, WIN_VNODE *Result)
 //	}else{
 //		WIN_ERR("PipeOpenFile(%ls): %s\n", szPath, win_strerror(GetLastError()));
 	}
-	return(bResult);
-}
-BOOL 
-PipeCreateDevice(LPCWSTR Name, DWORD Attribs, WIN_DEVICE *Result)
-{
-	BOOL bResult = FALSE;
-	ACCESS_MASK aMask = GENERIC_READ + GENERIC_WRITE;
-	DWORD dwOpenMode = (Attribs & 0xFFFF0000) + PIPE_ACCESS_DUPLEX;
-	DWORD dwPipeMode = (Attribs & 0x0000FFFF) + PIPE_TYPE_MESSAGE + PIPE_WAIT;
-	CHAR szPath[MAX_PATH] = "\\\\.\\PIPE\\";
-	DWORD dwMax = PIPE_UNLIMITED_INSTANCES;
-	HANDLE hResult;
-
-	hResult = CreateNamedPipe(win_strcat(szPath, Result->Name), dwOpenMode, dwPipeMode, 
-		dwMax, WIN_PIPE_BUF, WIN_PIPE_BUF, NMPWAIT_USE_DEFAULT_WAIT, NULL);
-	if (hResult != INVALID_HANDLE_VALUE){
-		Result->Input = hResult;
-//		Result->Output = PipeOpenFile(szPath);
-		Result->Event = CreateEvent(NULL, FALSE, FALSE, NULL);
-		bResult = TRUE;
-	}else{
-		WIN_ERR("CreateNamedPipe(%ls): %s\n", szPath, win_strerror(GetLastError()));
-	}
-	return(bResult);
-}
-BOOL 
-PipeCreateMaster(WIN_DEVICE *Device, WIN_VNODE *Result)
-{
-	BOOL bResult = FALSE;
-
-	Result->Handle = Device->Input;
-	Result->Event = Device->Event;
-	Result->FSType = Device->FSType;
-	Result->FileType = Device->FileType;
-	Result->DeviceType = Device->DeviceType;
-	Result->DeviceId = Device->DeviceId;
-	Result->Index = Device->Index;
-	bResult = TRUE;
-	return(bResult);
-}
-BOOL 
-PipeCreateSlave(WIN_DEVICE *Device, WIN_VNODE *Result)
-{
-	BOOL bResult = FALSE;
-
-	Result->Handle = Device->Output;
-	Result->Event = Device->Event;
-	Result->FSType = Device->FSType;
-	Result->FileType = Device->FileType;
-	Result->DeviceType = Device->DeviceType;
-	Result->DeviceId = Device->DeviceId;
-	Result->Index = Device->Index;
-	bResult = TRUE;
 	return(bResult);
 }

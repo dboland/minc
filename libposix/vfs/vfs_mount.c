@@ -37,10 +37,13 @@ vfs_getfsstat(WIN_CFDATA *Config, WIN_CFDRIVER *Driver, WIN_STATFS *Result)
 {
 	WIN_MOUNT wMount = {0};
 
+	/* This function simulates the mount() process and is used 
+	 * by the mkent program only.
+	 */
 	switch (Config->DeviceType){
 		case DEV_TYPE_CDROM:
 			win_wcscpy(wMount.TypeName, L"ISO9660");
-			wMount.Flags = FILE_VOLUME_MNT_DOOMED;
+			wMount.Flags = FILE_READ_ONLY_VOLUME | FILE_VOLUME_MNT_DOOMED;
 			break;
 		default:
 			win_wcscpy(wMount.TypeName, L"FAT");
@@ -80,10 +83,6 @@ vfs_mount(WIN_VNODE *Node, WIN_NAMEIDATA *Path, DWORD Flags, WIN_MODE *Mode)
 		return(FALSE);
 	}else if (Path->FileType != WIN_VDIR){
 		SetLastError(ERROR_DIRECTORY);
-//	}else if (Flags & FILE_VOLUME_MNT_UPDATE){	/* Flags should be updated */
-//		bResult = TRUE;
-	}else if (Path->Attribs & FILE_ATTRIBUTE_SYSTEM){
-		SetLastError(ERROR_NOT_READY);
 	}else switch (pwDevice->FSType){
 		case FS_TYPE_DRIVE:
 			bResult = drive_mount(pwDevice, Path, Flags, Mode);

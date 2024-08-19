@@ -61,6 +61,8 @@ BOOL vfs_write(WIN_VNODE *Node, LPCVOID Buffer, DWORD Size, DWORD *Result);
 BOOL vfs_pwrite(WIN_VNODE *Node, LPCVOID Buffer, DWORD Size, DWORDLONG Offset, DWORD *Result);
 BOOL vfs_pread(WIN_VNODE *Node, LPVOID Buffer, DWORD Size, DWORDLONG Offset, DWORD *Result);
 VOID vfs_closefrom(WIN_VNODE Nodes[]);
+BOOL vfs_readlink(WIN_NAMEIDATA *Path, BOOL MakeReal);
+BOOL vfs_symlink(WIN_NAMEIDATA *Path, WIN_NAMEIDATA *Target);
 
 /* vfs_syscall.c */
 
@@ -71,7 +73,6 @@ BOOL vfs_getlogin(WIN_TASK *Task, LPSTR Name, DWORD Size);
 BOOL vfs_chown(WIN_NAMEIDATA *Path, PSID NewUser, PSID NewGroup);
 BOOL vfs_pipe(WIN_VNODE Result[2]);
 BOOL vfs_fchown(WIN_VNODE *Node, PSID NewUser, PSID NewGroup);
-BOOL vfs_execve(WIN_TASK *Task, LPSTR Command, PVOID Environ);
 BOOL vfs_setsid(WIN_TASK *Task);
 BOOL vfs_setugid(WIN_TASK *Task);
 
@@ -198,6 +199,8 @@ WIN_TASK *proc_dup(WIN_TASK *Parent, WIN_THREAD_STRUCT *Thread);
 BOOL proc_close(WIN_TASK *Task);
 BOOL proc_poll(VOID);
 DWORD proc_VM_LOADAVG(WIN_TASK Tasks[], WIN_LOADAVG *Load);
+DECLSPEC_NORETURN VOID proc_exit(DWORD ExitCode);
+BOOL proc_execve(WIN_TASK *Task, LPSTR Command, PVOID Environ);
 
 /* drive.c */
 
@@ -210,8 +213,8 @@ BOOL drive_statfs(WIN_MOUNT *Mount, WIN_STATFS *Result);
 
 BOOL disk_chflags(WIN_NAMEIDATA *Path, DWORD Attributes);
 BOOL disk_futimes(WIN_VNODE *Node, FILETIME FileTime[2]);
-BOOL disk_readlink(WIN_NAMEIDATA *Path, BOOL MakeReal);
-BOOL disk_symlink(WIN_NAMEIDATA *Path, WIN_NAMEIDATA *Result);
+//BOOL disk_readlink(WIN_NAMEIDATA *Path, BOOL MakeReal);
+//BOOL disk_symlink(WIN_NAMEIDATA *Path, WIN_NAMEIDATA *Target);
 BOOL disk_HW_DISKNAMES(WIN_DEVICE *Device, LPSTR Result);
 
 /* registry.c */

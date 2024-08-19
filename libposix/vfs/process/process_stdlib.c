@@ -33,19 +33,6 @@
 /************************************************************/
 
 VOID 
-ProcInitStreams(WIN_VNODE Node[])
-{
-	LONG lIndex = 0;
-
-	/* standard stream pseudo devices (wrc.exe)
-	 */
-	while (lIndex < 3){
-		SetStdHandle(STD_INPUT_HANDLE - lIndex, Node->Handle);
-		Node++;
-		lIndex++;
-	}
-}
-VOID 
 ProcInitLimits(DWORDLONG Limits[])
 {
 	Limits[WIN_RLIMIT_CPU] = WIN_RLIM_INFINITY;
@@ -80,7 +67,7 @@ proc_setugid(WIN_TASK *Task)
 
 	if (!GetModuleFileNameW(NULL, szPath, MAX_PATH)){
 		return(FALSE);
-	}else if (!DiskStatFile(szPath, FILE_ATTRIBUTE_NORMAL, &wStat)){
+	}else if (!VfsStatFile(szPath, FILE_ATTRIBUTE_NORMAL, &wStat)){
 		return(FALSE);
 	}
 	if (wStat.Mode.Special & WIN_S_ISUID){
@@ -103,7 +90,6 @@ proc_init(WIN_SIGPROC SignalProc)
 	GetStartupInfo(&si);
 	if (si.dwFlags & STARTF_PS_EXEC){
 		__Process = &__Tasks[si.dwX];
-//		ProcInitStreams(__Process->Node);
 		__Process->Flags |= WIN_PS_INEXEC;
 	}else{
 		__Process = ProcCreateTask(0);
@@ -123,4 +109,13 @@ proc_init(WIN_SIGPROC SignalProc)
 //	}
 	__CTTY = &__Terminals[__Process->CTTY];
 	return(__Process);
+}
+DECLSPEC_NORETURN VOID 
+proc_exit(DWORD ExitCode)
+{
+	if (__ThreadCount--){
+		ExitThread(ExitCode);
+	}else{
+		ExitProcess(ExitCode);
+	}
 }

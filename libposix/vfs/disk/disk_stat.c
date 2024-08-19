@@ -55,8 +55,14 @@ disk_stat(WIN_NAMEIDATA *Path, WIN_VATTR *Result)
 		case WIN_VDIR:
 			bResult = dir_stat(Path, Result);
 			break;
-		default:
+		case WIN_VREG:
 			bResult = file_stat(Path, Result);
+			break;
+		case WIN_VLNK:
+			bResult = link_stat(Path, Result);
+			break;
+		default:
+			SetLastError(ERROR_BAD_FILE_TYPE);
 	}
 	return(bResult);
 }

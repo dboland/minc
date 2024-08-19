@@ -135,11 +135,10 @@ BOOL
 vfs_setvfs(WIN_CFDATA *Config, DWORD Flags)
 {
 	DWORD dwCount = MIN_BUFSIZE * 4;
-	DWORD dwSize = 0;
 	LPWSTR pszBuffer = win_malloc(dwCount * sizeof(WCHAR));
 
 	ZeroMemory(Config, sizeof(WIN_CFDATA));
-	while (!(dwSize = QueryDosDeviceW(NULL, pszBuffer, dwCount))){
+	while (!QueryDosDeviceW(NULL, pszBuffer, dwCount)){
 		if (ERROR_INSUFFICIENT_BUFFER == GetLastError()){
 			dwCount += MIN_BUFSIZE;
 			pszBuffer = win_realloc(pszBuffer, dwCount * sizeof(WCHAR));
@@ -164,7 +163,6 @@ vfs_getvfs(WIN_CFDATA *Config, DWORD Flags)
 	BOOL bResult = FALSE;
 	LPCWSTR pszNext = Config->Next;
 
-//	if (!pszNext || !*pszNext){
 	if (!*pszNext){
 		SetLastError(ERROR_NO_MORE_ITEMS);
 	}else if (VfsQueryDosDevice(pszNext, Config->NtPath)){

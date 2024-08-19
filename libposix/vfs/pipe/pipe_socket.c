@@ -96,7 +96,7 @@ pipe_bind(WIN_VNODE *Node, LPSOCKADDR Name, INT Length)
 {
 	BOOL bResult = FALSE;
 	WIN_MODE wMode = {WIN_VSOCK, WIN_S_IRW, WIN_S_IRW, WIN_S_IRW, 0};
-	WCHAR szName[MAX_NAME] = {0};
+	WCHAR szName[MAX_NAME];
 	DWORD dwAttribs = FILE_FLAG_OVERLAPPED + PIPE_READMODE_MESSAGE;
 
 	if (!PipeCreateFile(VfsCreateName(szName), dwAttribs, __PipeEvent, Node)){
@@ -109,23 +109,7 @@ pipe_bind(WIN_VNODE *Node, LPSOCKADDR Name, INT Length)
 BOOL 
 pipe_connect(WIN_VNODE *Node, CONST LPSOCKADDR Name, INT Length)
 {
-	BOOL bResult = FALSE;
-	HANDLE hResult;
-	WIN_INODE iNode;
-	DWORD dwSize = sizeof(WIN_INODE);
-
-	hResult = CreateFileW((LPWSTR)Name->sa_data, GENERIC_READ, FILE_SHARE_READ, 
-		NULL, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, NULL);
-	if (hResult == INVALID_HANDLE_VALUE){
-		return(FALSE);
-	}else if (!ReadFile(hResult, &iNode, dwSize, &dwSize, NULL)){
-		WIN_ERR("ReadFile(%s): %s\n", Name->sa_data, win_strerror(GetLastError()));
-	}else if (!CloseHandle(hResult)){
-		WIN_ERR("CloseHandle(%d): %s\n", hResult, win_strerror(GetLastError()));
-	}else if (PipeOpenFile(iNode.NtName, __PipeEvent, Node)){
-		bResult = TRUE;
-	}
-	return(bResult);
+	return(PipeOpenFile((LPWSTR)Name->sa_data, __PipeEvent, Node));
 }
 BOOL 
 pipe_socketpair(INT Domain, INT Mode, INT Protocol, WIN_VNODE Result[2])

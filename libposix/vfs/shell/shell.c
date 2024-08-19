@@ -28,40 +28,6 @@
  *
  */
 
-#define _KERNEL
-#include <machine/cpu.h>
-#include <machine/biosvar.h>
-#include <machine/param.h>
-#undef _KERNEL
-
-#include <sys/syslimits.h>
-#include <sys/syscall.h>
-#include <sys/sysctl.h>
-#include <sys/param.h>
-
-#include <netdb.h>
-
-/* sys/fcntl.c */
-
-#define O_NOCROSS		0x1000
-#define O_DEVICE		0x2000
-
-#define AT_NOCROSS		0x10
-#define AT_DEVICE		0x20
-
-/* sys/signal.c */
-
-typedef void (*atexit_t)(void);
-typedef void (*action_t)(int, siginfo_t *, void *);
-
-typedef struct {
-	int c_dx;
-	int c_ax;
-	int c_di;
-	int c_si;
-	int c_bx;
-	int c_cx;
-	WIN_TASK *Task;
-	ULONG Code;
-	ULONG Base;	/* return address */
-} call_t;
+#include "shell_unistd.c"
+#include "shell_namei.c"
+#include "shell_stat.c"

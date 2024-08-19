@@ -41,7 +41,7 @@ root_mount(WIN_DEVICE *Device, WIN_NAMEIDATA *Path, DWORD Flags, WIN_MODE *Mode)
 
 	if (!DriveStatVolume(win_drivename(szDrive, Path->Base), pwMount)){
 		return(FALSE);
-	}else if (!SetFileAttributesW(Path->Resolved, FILE_ATTRIBUTE_ROOT)){
+	}else if (!SetFileAttributesW(Path->Resolved, FILE_CLASS_ROOT)){
 		WIN_ERR("SetFileAttributes(%ls): %s\n", Path->Resolved, win_strerror(GetLastError()));
 	}else{
 		win_wcscpy(pwMount->Path, Path->Resolved);
@@ -49,7 +49,7 @@ root_mount(WIN_DEVICE *Device, WIN_NAMEIDATA *Path, DWORD Flags, WIN_MODE *Mode)
 		pwMount->MountId = 0;
 		pwMount->DeviceId = Device->DeviceId;
 		pwMount->DeviceType = Device->DeviceType;
-//		pwMount->Flags |= FILE_VOLUME_MNT_ROOTFS;
+		pwMount->Flags |= FILE_VOLUME_MNT_ROOTFS;
 		GetSystemTimeAsFileTime(&pwMount->Time);
 //vfs_ktrace("root_mount", STRUCT_MOUNT, pwMount);
 		bResult = TRUE;

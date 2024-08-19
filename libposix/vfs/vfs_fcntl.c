@@ -135,6 +135,7 @@ vfs_F_GETPATH(WIN_VNODE *Node, WIN_NAMEIDATA *Result)
 		Result->Attribs = Node->Attribs;
 		Result->FileType = Node->FileType;
 		Result->MountId = Node->MountId;
+		Result->Object = Node->Object;
 		Result->Flags = 0;
 		Result->Base = Result->R;
 		Result->S = NULL;

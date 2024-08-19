@@ -46,7 +46,7 @@ dest   = 20
 
 _fork_enter:
 	push %fs:0x2c			# NT_TIB.ThreadLocalStoragePointer
-	call _win_fork_enter		# create WIN_THREAD_STRUCT
+	call _proc_fork_enter		# create WIN_THREAD_STRUCT
 	add $8,%esp
 	# set up WIN_THREAD_STRUCT with parent data
 	pop %ecx			# save return addr, thereby aligning stack
@@ -64,7 +64,7 @@ _fork_enter:
 	# pass WIN_THREAD_STRUCT to child
 	push %eax
 	push $_fork_leave
-	call _win_fork
+	call _proc_fork
 	add $8,%esp
 	leave
 	ret
@@ -84,7 +84,7 @@ _fork_leave:
 	add offset(%ecx),%ebp
 	push return(%ecx)
 	push %ecx
-	call _win_fork_leave		# destroy WIN_THREAD_STRUCT
+	call _proc_fork_leave		# destroy WIN_THREAD_STRUCT
 	add $4,%esp
 	mov $0,%eax
 	ret

@@ -190,7 +190,7 @@ InputReadLine(HANDLE Handle, WIN_TERMIO *Attribs, CHAR *Buffer)
 		vfs_raise(WM_COMMAND, CTRL_ABORT_EVENT, 0);
 	}else if (lCount > 0){
 		lCount--;
-		if (Attribs->LFlags & WIN_ISIG){		/* ENABLE_PROCESSED_INPUT */
+		if (Attribs->LFlags & WIN_ISIG){	/* ENABLE_PROCESSED_INPUT */
 			Buffer[lCount--] = 0;		/* remove NL, leave CR */
 		}
 		if (Attribs->IFlags & WIN_ICRNL){

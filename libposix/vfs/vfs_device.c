@@ -322,8 +322,8 @@ storage_attach(WIN_DEVICE *Device)
 		case DEV_TYPE_FIXED:
 			bResult = config_found("vol", FS_TYPE_DRIVE, WIN_VBLK, Device);
 			break;
-		case DEV_TYPE_HARDDISK:
-			bResult = config_found("wd", FS_TYPE_DRIVE, WIN_VBLK, Device);
+		case DEV_TYPE_REMOVABLE:
+			bResult = config_found("sd", FS_TYPE_DRIVE, WIN_VBLK, Device);
 			break;
 		case DEV_TYPE_CDROM:
 			bResult = config_found("cd", FS_TYPE_DRIVE, WIN_VBLK, Device);
@@ -331,9 +331,9 @@ storage_attach(WIN_DEVICE *Device)
 		case DEV_TYPE_FLOPPY:
 			bResult = config_found("fd", FS_TYPE_DRIVE, WIN_VBLK, Device);
 			break;
-		case DEV_TYPE_USBSTOR:
-			bResult = config_found("sd", FS_TYPE_DRIVE, WIN_VBLK, Device);
-			break;
+//		case DEV_TYPE_USBSTOR:
+//			bResult = config_found("sd", FS_TYPE_DRIVE, WIN_VBLK, Device);
+//			break;
 		case DEV_TYPE_REMOTE:
 			bResult = config_found("smb", FS_TYPE_DRIVE, WIN_VBLK, Device);
 			break;

@@ -132,7 +132,7 @@ sigproc_default(WIN_TASK *Task, int signum)
 	}else if (sigbit & ~SIGMASK_IGNORE){
 		Task->Status = signum;
 		Task->Flags |= WIN_PS_EXITING;
-		win_exit(127);
+		proc_exit(127);
 	}
 	return(result);
 }

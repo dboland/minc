@@ -287,7 +287,7 @@ vfs_truncate(WIN_NAMEIDATA *Path, LARGE_INTEGER *Size)
 	return(bResult);
 }
 BOOL 
-vfs_link(WIN_NAMEIDATA *Path, WIN_NAMEIDATA *Result)
+vfs_link(WIN_NAMEIDATA *Path, WIN_NAMEIDATA *Target)
 {
 	BOOL bResult = FALSE;
 
@@ -296,12 +296,12 @@ vfs_link(WIN_NAMEIDATA *Path, WIN_NAMEIDATA *Result)
 	 */
 	if (Path->Attribs == -1){
 		return(FALSE);
-	}else if (Result->Attribs != -1){
+	}else if (Target->Attribs != -1){
 		SetLastError(ERROR_FILE_EXISTS);
-	}else if (CreateHardLinkW(Result->Resolved, Path->Resolved, NULL)){
+	}else if (CreateHardLinkW(Target->Resolved, Path->Resolved, NULL)){
 		bResult = TRUE;
 //	}else{
-//		WIN_ERR("CreateHardLink(%ls): %s\n", Result->Resolved, win_strerror(GetLastError()));
+//		WIN_ERR("CreateHardLink(%ls): %s\n", Target->Resolved, win_strerror(GetLastError()));
 	}
 	return(bResult);
 }
@@ -317,6 +317,12 @@ vfs_unlink(WIN_NAMEIDATA *Path)
 		case FS_TYPE_PDO:
 			bResult = pdo_unlink(Path);
 			break;
+		case FS_TYPE_SHELL:
+			bResult = shell_unlink(Path);
+			break;
+		case FS_TYPE_PIPE:
+			bResult = pipe_unlink(Path);
+			break;
 		default:
 			SetLastError(ERROR_BAD_FILE_TYPE);
 	}
@@ -330,6 +336,9 @@ vfs_rename(WIN_NAMEIDATA *Path, WIN_NAMEIDATA *Result)
 	switch (Path->FSType){
 		case FS_TYPE_DISK:
 			bResult = disk_rename(Path, Result);
+			break;
+		case FS_TYPE_SHELL:
+			bResult = shell_rename(Path, Result);
 			break;
 		default:
 			SetLastError(ERROR_BAD_FILE_TYPE);
@@ -420,86 +429,44 @@ vfs_revoke(WIN_VNODE *Node)
 	}
 	return(bResult);
 }
-
-/****************************************************/
-
 BOOL 
-VfsCloseExec(WIN_VNODE Nodes[])
-{
-	DWORD dwIndex = 0;
-
-	while (dwIndex < WIN_OPEN_MAX){
-		if (Nodes->CloseExec){
-			vfs_close(Nodes);
-		}
-		dwIndex++;
-		Nodes++;
-	}
-	return(TRUE);
-}
-VOID 
-VfsInheritChannels(HANDLE Process, WIN_VNODE Result[])
-{
-	DWORD dwIndex = 0;
-
-	while (dwIndex < WIN_OPEN_MAX){
-		if (Result->Access){
-			if (!(Result->Flags & HANDLE_FLAG_INHERIT)){
-				vfs_F_INHERIT(Result, Process);
-			}
-		}
-		Result++;
-		dwIndex++;
-	}
-}
-
-/****************************************************/
-
-BOOL 
-vfs_execve(WIN_TASK *Task, LPSTR Command, PVOID Environ)
+vfs_symlink(WIN_NAMEIDATA *Path, WIN_NAMEIDATA *Target)
 {
 	BOOL bResult = FALSE;
-	STARTUPINFO si = {0};
-	HANDLE hToken = NULL;
-	PROCESS_INFORMATION pi = {0};
-	DWORD dwAccess = TOKEN_QUERY + TOKEN_DUPLICATE + TOKEN_ASSIGN_PRIMARY;
-	HANDLE hThread;
-	WIN_OBJECT_CONTROL wControl;
-	SECURITY_ATTRIBUTES sa = {sizeof(sa), &wControl.Security, FALSE};
-	DWORD dwFlags = NORMAL_PRIORITY_CLASS;
+	DWORD dwResult;
+	WIN_INODE iNode = {TypeNameVirtual, Path->DeviceId, WIN_VLNK, 
+		FS_TYPE_DISK, INAMESIZE(Target->Resolved), 0};
+	HANDLE hNode;
 
-	si.cb = sizeof(STARTUPINFO);
-	si.lpDesktop = "";		/* Vista */
-	si.dwFlags = STARTF_PS_EXEC;
-	si.dwX = Task->TaskId;
-	VfsCloseExec(Task->Node);
-	if (!win_cap_get_proc(dwAccess, TokenPrimary, &hToken)){
-		WIN_ERR("win_cap_get_proc(%s): %s\n", Command, win_strerror(GetLastError()));
-	}else if (!AclCreateControl(WIN_P_IRWX | TOKEN_IMPERSONATE, &wControl)){
-		WIN_ERR("AclCreateControl(%s): %s\n", Command, win_strerror(GetLastError()));
-	}else if (CreateProcessAsUser(hToken, NULL, Command, &sa, NULL, TRUE, dwFlags, Environ, NULL, &si, &pi)){
-		Task->Flags |= WIN_PS_EXEC;
-		Task->ThreadId = pi.dwThreadId;
-		hThread = Task->Handle;
-		if (Task->ProcessId != GetCurrentProcessId()){	/* not forked (ktrace.exe) */
-			Task->Handle = win_F_DISINHERIT(pi.hThread, Task->ProcessId);
-		}else{
-			Task->Handle = pi.hThread;
-		}
-		VfsInheritChannels(pi.hProcess, Task->Node);
-		CloseHandle(hThread);
-		CloseHandle(pi.hProcess);
-		Task->State = WIN_SRUN;
-		/* https://man7.org/linux/man-pages/man2/execve.2.html */
-		ZeroMemory(Task->Action, WIN_NSIG * sizeof(WIN_SIGACTION));
-		Task->Timer = NULL;
-		ZeroMemory(Task->AtExit, WIN_ATEXIT_MAX * sizeof(WIN_ATEXITPROC));
-		bResult = TRUE;
-	}else{
-		WIN_ERR("CreateProcessAsUser(%s): %s\n", Command, win_strerror(GetLastError()));
+//vfs_ktrace("vfs_symlink", STRUCT_NAMEI, Target);
+//	if (*Target->Last == '\\'){	/* GNU conftest.exe */
+//		*Target->Last = 0;
+//	}
+	hNode = CreateFileW(Path->Resolved, GENERIC_WRITE, FILE_SHARE_READ, 
+		NULL, CREATE_NEW, FILE_CLASS_INODE, NULL);
+	if (hNode == INVALID_HANDLE_VALUE){
+		return(FALSE);
+	}else if (!WriteFile(hNode, &iNode, sizeof(WIN_INODE), &dwResult, NULL)){
+		WIN_ERR("WriteFile(%d): %s\n", hNode, win_strerror(GetLastError()));
+	}else if (WriteFile(hNode, Target->Resolved, iNode.NameSize, &dwResult, NULL)){
+		bResult = CloseHandle(hNode);
 	}
-	CloseHandle(hToken);
-	win_free(Command);
-	win_free(Environ);
+	return(bResult);
+}
+BOOL 
+vfs_readlink(WIN_NAMEIDATA *Path, BOOL MakeReal)
+{
+	BOOL bResult = FALSE;
+
+	switch (Path->FSType){
+		case FS_TYPE_DISK:
+			bResult = disk_readlink(Path, MakeReal);
+			break;
+		case FS_TYPE_SHELL:
+			bResult = shell_readlink(Path, MakeReal);
+			break;
+		default:
+			SetLastError(ERROR_BAD_FILE_TYPE);
+	}
 	return(bResult);
 }

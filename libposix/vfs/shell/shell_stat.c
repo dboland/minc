@@ -28,37 +28,19 @@
  *
  */
 
-#include "minc_types.h"
+#include <winbase.h>
 
-/* mount.c */
+/****************************************************/
 
-struct statfs *statfs_posix(struct statfs *buf, WIN_STATFS *Stat);
+BOOL 
+shell_stat(WIN_NAMEIDATA *Path, WIN_VATTR *Result)
+{
+	BOOL bResult = FALSE;
 
-/* unistd.c */
-
-int group_member(gid_t gid);
-
-/* compat.c */
-
-int runcmd(char *argv[]);
-
-/* grp.c */
-
-char *group_posix(char *buf, size_t buflen, WIN_GRENT *Group);
-
-/* pwd.c */
-
-char *passwd_posix(char *buf, size_t buflen, WIN_PWENT *WinPwd);
-
-/* syscall.S */
-
-__dead void __threxit(pid_t *pid);
-
-/* namei.c */
-
-WIN_NAMEIDATA *path_win(WIN_NAMEIDATA *Path, const char *pathname, int flags);
-
-/* syscall.S */
-
-int sys_fork(call_t call);
-int sys_vfork(call_t call);
+	if (VfsStatFile(Path->Resolved, FILE_ATTRIBUTE_NORMAL, Result)){
+		Result->DeviceId = __Mounts[Path->MountId].DeviceId;
+		Result->Mode.FileType = Path->FileType;
+		bResult = TRUE;
+	}
+	return(bResult);
+}

@@ -114,13 +114,27 @@ pathat_win(WIN_NAMEIDATA *Result, int dirfd, const char *path, int atflags)
 	WCHAR szSource[WIN_PATH_MAX];
 	size_t size;
 	WIN_TASK *pwTask = &__Tasks[CURRENT];
-	DWORD dwFlags = WIN_NOFOLLOW;
+	DWORD dwFlags = WIN_FOLLOW;
 
 	if (pwTask->TracePoints & KTRFAC_NAMEI){
 		ktrace_NAMEI(pwTask, path, win_strlen(path));
 	}
 
+	if (atflags & AT_SYMLINK_NOFOLLOW){
+		dwFlags = WIN_NOFOLLOW;
+	}
+	if (atflags & AT_NOCROSS){
+		dwFlags |= WIN_NOCROSSMOUNT;
+	}
+	if (atflags & AT_REMOVEDIR){
+		dwFlags |= WIN_REQUIREDIR;
+	}
+	if (atflags & AT_OBJECT){
+		dwFlags |= WIN_KEEPOBJECT;
+	}
+
 	Result->MountId = 0;
+	Result->DeviceId = DEV_TYPE_ROOT;
 	Result->FSType = FS_TYPE_DISK;
 	Result->R = Result->Resolved;
 	Result->Base = Result->R;
@@ -128,7 +142,7 @@ pathat_win(WIN_NAMEIDATA *Result, int dirfd, const char *path, int atflags)
 	if (dirfd > 0 && dirfd < OPEN_MAX){
 		vfs_F_GETPATH(&pwTask->Node[dirfd], Result);
 
-	}else if (*path == '/'){
+	}else if (path[0] == '/'){
 		path = root_win(Result, path);
 
 	}else if (path[1] == ':'){		/* MSYS sh.exe */
@@ -139,28 +153,15 @@ pathat_win(WIN_NAMEIDATA *Result, int dirfd, const char *path, int atflags)
 
 	}else if (dirfd == AT_FDCWD){
 		Result->MountId = pwTask->MountId;
-		Result->R = win_wcpcpy(Result->Resolved, __Strings[pwTask->TaskId].Path);
+		Result->R = win_wcpcpy(Result->R, __Strings[pwTask->TaskId].Path);
 
 	}else{
-		dwFlags = WIN_PATHCOPY;
+		dwFlags |= WIN_PATHCOPY;
 
 	}
 
 	size = WIN_PATH_MAX - (Result->R - Result->Resolved);
 	win_mbstowcs(szSource, path, size);
-
-	if (!(atflags & AT_SYMLINK_NOFOLLOW)){
-		dwFlags |= WIN_FOLLOW;
-	}
-	if (atflags & AT_NOCROSS){
-		dwFlags |= WIN_NOCROSSMOUNT;
-	}
-	if (atflags & AT_REMOVEDIR){
-		dwFlags |= WIN_REQUIREDIR;
-	}
-	if (atflags & AT_DEVICE){
-		dwFlags |= WIN_KEEPOBJECT;
-	}
 
 	return(vfs_lookup(Result, szSource, dwFlags));
 
@@ -179,8 +180,8 @@ path_win(WIN_NAMEIDATA *Result, const char *path, int flags)
 	if (flags & O_DIRECTORY){
 		atflags |= AT_REMOVEDIR;
 	}
-	if (flags & O_DEVICE){
-		atflags |= AT_DEVICE;
+	if (flags & O_OBJECT){
+		atflags |= AT_OBJECT;
 	}
 	return(pathat_win(Result, AT_FDCWD, path, atflags));
 }

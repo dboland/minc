@@ -31,7 +31,7 @@
 #include "win/windows.h"
 #include "win_posix.h"
 #include "vfs_posix.h"
-#include "minc_posix.h"
+#include "bsd_posix.h"
 #include "arch_posix.h"
 
 extern __import WIN_TASK 	*__Tasks;

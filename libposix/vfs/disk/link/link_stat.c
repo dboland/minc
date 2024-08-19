@@ -33,35 +33,15 @@
 /****************************************************/
 
 BOOL 
-pdo_lookup(WIN_NAMEIDATA *Path, DWORD Flags)
+link_stat(WIN_NAMEIDATA *Path, WIN_VATTR *Result)
 {
 	BOOL bResult = FALSE;
-	WIN_INODE iNode;
-	DWORD dwSize = sizeof(WIN_INODE);
-	WIN_DEVICE *pwDevice;
-	HANDLE hResult;
-	SECURITY_ATTRIBUTES sa = {sizeof(sa), NULL, TRUE};
 
-	hResult = CreateFileW(Path->Resolved, GENERIC_READ, FILE_SHARE_READ, 
-		&sa, OPEN_EXISTING, FILE_ATTRIBUTE_SYSTEM, NULL);
-	if (hResult == INVALID_HANDLE_VALUE){
-		WIN_ERR("CreateFile(%ls): %s\n", Path->Resolved, win_strerror(GetLastError()));
-	}else if (!ReadFile(hResult, &iNode, dwSize, &dwSize, NULL)){
-		WIN_ERR("ReadFile(%ls): %s\n", Path->Resolved, win_strerror(GetLastError()));
-	}else if (iNode.Magic != TypeNameVirtual){
-		SetLastError(ERROR_BAD_DEVICE);
-	}else{
-		Path->DeviceId = iNode.DeviceId;
-		Path->FileType = iNode.FileType;
-		Path->FSType = FS_TYPE_PDO;
-		Path->Attribs |= FILE_ATTRIBUTE_DEVICE;
-		if (Flags & WIN_KEEPOBJECT){
-			Path->Object = hResult;
-		}else{
-			CloseHandle(hResult);
-		}
-		bResult = TRUE;
-//vfs_ktrace("pdo_lookup", STRUCT_NAMEI, Path);
+	if (VfsStatHandle(Path->Object, Result)){
+		Result->DeviceId = __Mounts->DeviceId;
+		Result->Mode.FileType = Path->FileType;
+		Result->SpecialId = Path->DeviceId;
+		bResult = CloseHandle(Path->Object);
 	}
 	return(bResult);
 }

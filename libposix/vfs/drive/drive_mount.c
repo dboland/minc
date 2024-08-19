@@ -56,18 +56,17 @@ drive_statfs(WIN_MOUNT *Mount, WIN_STATFS *Result)
 
 	/* mount.exe -a
 	 */
-	if (!GetDiskFreeSpaceW(Mount->Volume, &Result->SectorsPerCluster, 
+	if (GetDiskFreeSpaceW(Mount->Volume, &Result->SectorsPerCluster, 
 		&Result->BytesPerSector, &Result->FreeClusters, &Result->ClustersTotal)){
-		WIN_ERR("GetDiskFreeSpace(%ls): %s\n", Mount->Volume, win_strerror(GetLastError()));
-	}else{
 		win_wcscpy(Result->Path, Mount->Path);
 		win_wcscpy(Result->TypeName, Mount->TypeName);
 		Result->DeviceId = Mount->DeviceId;
 		Result->MountTime = Mount->Time;
 		Result->Flags = Mount->Flags;
 		Result->MaxPath = Mount->MaxPath;
-//vfs_ktrace("drive_statfs", STRUCT_STATFS, Result);
 		bResult = TRUE;
+	}else{
+		Result->Flags |= FILE_VOLUME_MNT_DOOMED;
 	}
 	return(bResult);
 }
@@ -79,9 +78,11 @@ drive_mount(WIN_DEVICE *Device, WIN_NAMEIDATA *Path, DWORD Flags, WIN_MODE *Mode
 	WIN_MOUNT *pwMount = &__Mounts[lMountId];
 	WCHAR szDrive[MAX_NAME];
 
-	if (!DriveStatVolume(win_drivename(szDrive, Path->Base), pwMount)){
+	if (Path->Attribs & FILE_ATTRIBUTE_SYSTEM){
+		SetLastError(ERROR_NOT_READY);
+	}else if (!DriveStatVolume(win_drivename(szDrive, Path->Base), pwMount)){
 		return(FALSE);
-	}else if (!SetFileAttributesW(Path->Resolved, FILE_ATTRIBUTE_DRIVE)){
+	}else if (!SetFileAttributesW(Path->Resolved, FILE_CLASS_MOUNT)){
 		WIN_ERR("SetFileAttributes(%ls): %s\n", Path->Resolved, win_strerror(GetLastError()));
 	}else{
 		win_wcscpy(pwMount->Path, Path->Resolved);

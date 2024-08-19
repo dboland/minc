@@ -128,8 +128,6 @@ disk_rename(WIN_NAMEIDATA *Path, WIN_NAMEIDATA *Result)
 			bResult = dir_rename(Path, Result);
 			break;
 		case WIN_VLNK:
-			bResult = link_rename(Path, Result);
-			break;
 		case WIN_VREG:
 			bResult = file_rename(Path, Result);
 			break;
@@ -184,27 +182,11 @@ BOOL
 disk_readlink(WIN_NAMEIDATA *Path, BOOL MakeReal)
 {
 	BOOL bResult = FALSE;
-	SHELL_LINK_HEADER slHead;
-	DWORD dwSize = sizeof(SHELL_LINK_HEADER);
-	CHAR szBuffer[MAX_PATH] = "";
-	HANDLE hFile;
+	WCHAR szBuffer[MAX_PATH];
+	DWORD dwResult;
 	LPWSTR pszBase = Path->Resolved;
 
-	hFile = CreateFileW(Path->Resolved, FILE_READ_DATA, FILE_SHARE_READ, 
-		NULL, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, NULL);
-	if (hFile == INVALID_HANDLE_VALUE){
-		return(FALSE);
-	}else if (!ReadFile(hFile, &slHead, dwSize, &dwSize, NULL)){
-		WIN_ERR("ReadFile(%s): %s\n", Path->Resolved, win_strerror(GetLastError()));
-	}else if (!IsEqualGUID(&slHead.LinkCLSID, &CLSID_ShellLink)){
-		SetLastError(ERROR_BAD_ARGUMENTS);
-	}else{
-		if (slHead.LinkFlags & HasLinkTargetIDList){
-			LinkReadTarget(hFile);
-		}
-		if (slHead.LinkFlags & HasLinkInfo){
-			LinkReadInfo(hFile, szBuffer);
-		}
+	if (ReadFile(Path->Object, szBuffer, Path->Size, &dwResult, NULL)){
 		if (szBuffer[1] == ':'){
 			Path->MountId = MOUNTID(szBuffer[0]);	/* nano.exe */
 		}else if (szBuffer[1] == '\\'){
@@ -212,34 +194,12 @@ disk_readlink(WIN_NAMEIDATA *Path, BOOL MakeReal)
 		}else if (MakeReal){
 			pszBase = Path->Base;
 		}
-		Path->R = win_mbstowcp(pszBase, szBuffer, MAX_PATH);
+		Path->R = win_wcpcpy(pszBase, szBuffer);
 		Path->Last = Path->R - 1;
-		Path->Attribs = slHead.FileAttributes;
-//vfs_ktrace("disk_readlink", STRUCT_NAMEI, Path);
-		bResult = TRUE;
-	}
-	CloseHandle(hFile);
-	return(bResult);
-}
-BOOL 
-disk_symlink(WIN_NAMEIDATA *Target, WIN_NAMEIDATA *Result)
-{
-	BOOL bResult = FALSE;
-	DWORD dwTerminalBlock = 0;
-	DWORD dwSize = sizeof(DWORD);
-	HANDLE hFile;
-
-	if (*Target->Last == '\\'){	/* GNU conftest.exe */
-		*Target->Last = 0;
-	}
-	Result->R = win_wcpcpy(Result->R, L".lnk");
-//vfs_ktrace("disk_symlink", STRUCT_NAMEI, Result);
-	hFile = CreateFileW(Result->Resolved, GENERIC_WRITE, FILE_SHARE_READ, 
-		NULL, CREATE_NEW, FILE_ATTRIBUTE_NORMAL, NULL);
-	if (hFile != INVALID_HANDLE_VALUE){
-		LinkCreateFile(hFile, Target, Result->Resolved);
-		WriteFile(hFile, &dwTerminalBlock, dwSize, &dwSize, NULL);
-		bResult = CloseHandle(hFile);
+		Path->Attribs = GetFileAttributesW(Path->Resolved);
+		bResult = CloseHandle(Path->Object);
+//	}else{
+//		WIN_ERR("ReadFile(%d): %s\n", Path->Object, win_strerror(GetLastError()));
 	}
 	return(bResult);
 }

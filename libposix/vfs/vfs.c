@@ -43,14 +43,11 @@
 #include "win_posix.h"
 #include "msvc_posix.h"
 #include "ws2_types.h"
-#include "ole_types.h"
 #include "dev_types.h"
 #include "vfs_types.h"
 
 #define WIN_ERR			msvc_printf
 #define OBJECT_NAME(name)	"Local\\MinC_" VERSION "_" name
-
-extern DWORD 	__TlsIndex;
 
 extern SID8 SidSystem;
 extern SID8 SidAdmins;
@@ -77,6 +74,8 @@ SEQUENCE 	__ANSI_BUF;
 CHAR		__INPUT_BUF[WIN_MAX_INPUT + 2];
 UCHAR 		__Char;
 HGLOBAL		__Lock;			/* Clipboard lock */
+DWORD		__ThreadCount;
+DWORD 		__TlsIndex;
 
 WIN_SESSION	*__Session;
 WIN_TASK	*__Tasks;
@@ -93,8 +92,7 @@ CHAR		*__Input = __INPUT_BUF;
 CONST CHAR	*__Clipboard;		/* Clipboard buffer */
 WIN_TASK	*__Process;
 
-BOOL vfs_namei(HANDLE Handle, DWORD Index, WIN_VNODE *Result);
-BOOL vfs_F_DUPFD(WIN_VNODE *Node, BOOL CloseExec, WIN_VNODE *Result);
+BOOL proc_poll(VOID);
 
 #include "vfs_acl.c"
 #include "vfs_debug.c"
@@ -107,18 +105,19 @@ BOOL vfs_F_DUPFD(WIN_VNODE *Node, BOOL CloseExec, WIN_VNODE *Result);
 #include "vfs_device.c"
 #include "registry/registry.c"
 #include "drive/drive.c"
+#include "pipe/pipe.c"
 #include "disk/disk.c"
 #include "char/char.c"
-#include "process/process.c"
-#include "pipe/pipe.c"
 #include "volume/volume.c"
 #include "mailslot/mailslot.c"
 #include "pdo/pdo.c"
 #include "winsock/winsock.c"
+#include "shell/shell.c"
 #include "vfs_namei.c"
 #include "vfs_fcntl.c"
 #include "vfs_stdlib.c"
 #include "vfs_unistd.c"
+#include "process/process.c"
 #include "vfs_uio.c"
 #include "vfs_filio.c"
 #include "vfs_mount.c"

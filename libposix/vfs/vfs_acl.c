@@ -51,8 +51,8 @@ BOOL
 AclLookup(LPCSTR Name, SID8 *Sid, DWORD *Size)
 {
 	BOOL bResult = FALSE;
+	CHAR szDomain[MAX_NAME];
 	DWORD dwSize = MAX_NAME;
-	CHAR szDomain[dwSize];
 	SID_NAME_USE snType = 0;
 
 	if (!*Name){			/* inetd.exe */
@@ -67,11 +67,11 @@ AclLookup(LPCSTR Name, SID8 *Sid, DWORD *Size)
 VOID 
 AclInit(SID8 *SidMachine, SID8 *SidNone)
 {
-	DWORD namLen = MAX_NAME;
-	CHAR szName[namLen];
+	CHAR szName[MAX_NAME];
+	DWORD dwSize = MAX_NAME;
 	DWORD sidLen = sizeof(SID8);
 
-	if (!GetComputerName(szName, &namLen)){
+	if (!GetComputerName(szName, &dwSize)){
 		WIN_ERR("GetComputerName(): %s\n", win_strerror(GetLastError()));
 	}else if (AclLookup(szName, SidMachine, &sidLen)){
 		SidMachine->SubAuthorityCount++;

@@ -73,6 +73,12 @@ vfs_stat(WIN_NAMEIDATA *Path, WIN_VATTR *Result)
 		case FS_TYPE_PDO:
 			bResult = pdo_stat(Path, Result);
 			break;
+		case FS_TYPE_SHELL:
+			bResult = shell_stat(Path, Result);
+			break;
+		case FS_TYPE_PIPE:
+			bResult = pipe_stat(Path, Result);
+			break;
 		default:
 			SetLastError(ERROR_BAD_FILE_TYPE);
 	}
@@ -84,8 +90,9 @@ vfs_chmod(WIN_NAMEIDATA *Path, WIN_MODE *Mode)
 	BOOL bResult = FALSE;
 
 	switch (Path->FSType){
-		case FS_TYPE_DISK:
+		case FS_TYPE_PIPE:
 		case FS_TYPE_PDO:
+		case FS_TYPE_DISK:
 			bResult = disk_chmod(Path, Mode);
 			break;
 		default:
@@ -110,19 +117,19 @@ BOOL
 vfs_mknod(WIN_NAMEIDATA *Path, WIN_MODE *Mode, DWORD DeviceId)
 {
 	BOOL bResult = FALSE;
-	WIN_INODE iNode = {TypeNameVirtual, Mode->FileType, 0, 
-		DeviceId, FS_TYPE_PDO, 0};
-	DWORD dwSize = sizeof(WIN_INODE);
-	HANDLE hFile;
+	WIN_INODE iNode = {TypeNameVirtual, DeviceId, Mode->FileType, 
+		FS_TYPE_PDO, 0, 0};
+	DWORD dwResult;
+	HANDLE hNode;
 
-	hFile = CreateFileW(Path->Resolved, GENERIC_WRITE, FILE_SHARE_READ, 
-		NULL, CREATE_ALWAYS, FILE_ATTRIBUTE_SYSTEM, NULL);
-	if (hFile == INVALID_HANDLE_VALUE){
+	hNode = CreateFileW(Path->Resolved, GENERIC_WRITE, FILE_SHARE_READ, 
+		NULL, CREATE_ALWAYS, FILE_CLASS_INODE, NULL);
+	if (hNode == INVALID_HANDLE_VALUE){
 		return(FALSE);
-	}else if (!WriteFile(hFile, &iNode, dwSize, &dwSize, NULL)){
+	}else if (!WriteFile(hNode, &iNode, sizeof(WIN_INODE), &dwResult, NULL)){
 		WIN_ERR("WriteFile(%ls): %s\n", Path->Resolved, win_strerror(GetLastError()));
 	}else{
-		bResult = CloseHandle(hFile);
+		bResult = CloseHandle(hNode);
 	}
 	return(bResult);
 }

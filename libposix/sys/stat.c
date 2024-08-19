@@ -282,17 +282,20 @@ __fstatat(WIN_TASK *Task, int dirfd, const char *path, struct stat *buf, int fla
 	int result = 0;
 	WIN_NAMEIDATA wPath = {0};
 	WIN_VATTR wStat = {0};
-	CHAR szMessage[MAX_MESSAGE];
+//	CHAR szText[MAX_TEXT];
 
 	if (!path){
 		result = -EFAULT;
-	}else if (!*path){
+	}else if (!path[0]){
 		result = -ENOENT;
-	}else if (!vfs_stat(pathat_win(&wPath, dirfd, path, flags | AT_DEVICE), &wStat)){
+	}else if (!vfs_stat(pathat_win(&wPath, dirfd, path, flags | AT_OBJECT), &wStat)){
 		result -= errno_posix(GetLastError());
 	}else{
 		stat_posix(Task, buf, &wStat);
 	}
+//	if (Task->TracePoints & KTRFAC_USER){
+//		ktrace_USER(Task, "NAMEI", szText, vfs_NAMEI(&wPath, szText));
+//	}
 	return(result);
 }
 int 

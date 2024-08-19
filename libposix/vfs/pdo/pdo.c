@@ -37,7 +37,7 @@
 #include "pdo_wsconsio.c"
 #include "pdo_ptm.c"
 #include "pdo_root.c"
-#include "pdo_namei.c"
+//#include "pdo_namei.c"
 #include "pdo_fcntl.c"
 #include "pdo_unistd.c"
 #include "pdo_poll.c"

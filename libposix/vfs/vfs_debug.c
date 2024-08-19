@@ -47,7 +47,8 @@ static const CHAR *__FSType[] = {
 	"VOLUME", 
 	"NPF",
 	"LINK",
-	"NDIS"
+	"NDIS",
+	"SHELL"
 };
 static const CHAR *__FType[] = {
 	"VNON", 
@@ -130,6 +131,9 @@ VfsFileAttribs(LPSTR Buffer, DWORD Attribs)
 		psz = VfsFlagName(psz, FILE_ATTRIBUTE_REPARSE_POINT, "REPARSE_POINT", Attribs, &Attribs);
 		psz = VfsFlagName(psz, FILE_ATTRIBUTE_COMPRESSED, "COMPRESSED", Attribs, &Attribs);
 		psz = VfsFlagName(psz, FILE_ATTRIBUTE_OFFLINE, "OFFLINE", Attribs, &Attribs);
+		psz = VfsFlagName(psz, FILE_ATTRIBUTE_NOT_CONTENT_INDEXED, "NOT_CONTENT_INDEXED", Attribs, &Attribs);
+		psz = VfsFlagName(psz, FILE_ATTRIBUTE_ENCRYPTED, "ENCRYPTED", Attribs, &Attribs);
+		psz = VfsFlagName(psz, FILE_ATTRIBUTE_VIRTUAL, "VIRTUAL", Attribs, &Attribs);
 	}
 	psz += msvc_sprintf(psz, "[0x%x])\r\n", Attribs);
 	return(psz);
@@ -162,7 +166,7 @@ VfsVolumeFlags(LPSTR Buffer, LPCSTR Label, DWORD Flags)
 	psz = VfsFlagName(psz, FILE_SUPPORTS_OPEN_BY_FILE_ID, "OPEN_BY_FILE_ID", Flags, &Flags);
 	psz = VfsFlagName(psz, FILE_SUPPORTS_USN_JOURNAL, "USN_JOURNAL", Flags, &Flags);
 	psz = VfsFlagName(psz, FILE_VOLUME_MNT_DOOMED, "VOLUME_MNT_DOOMED", Flags, &Flags);
-	psz = VfsFlagName(psz, FILE_VOLUME_MNT_UPDATE, "VOLUME_MNT_UPDATE", Flags, &Flags);
+	psz = VfsFlagName(psz, FILE_VOLUME_MNT_ROOTFS, "VOLUME_MNT_ROOTFS", Flags, &Flags);
 	psz += msvc_sprintf(psz, "[0x%x])\r\n", Flags);
 	return(psz);
 }
@@ -450,13 +454,27 @@ VfsDebugLink(LINK_INFO *Info, LPSTR Label)
 	msvc_printf("+ LocalBasePathOffset(%d)\r\n", Info->LocalBasePathOffset);
 	msvc_printf("+ CommonNetworkRelativeLinkOffset(%d)\r\n", Info->CommonNetworkRelativeLinkOffset);
 	msvc_printf("+ CommonPathSuffixOffset(%d)\r\n", Info->CommonPathSuffixOffset);
-//	msvc_printf("+ LocalBasePathOffsetUnicode(%d)\r\n", Info->LocalBasePathOffsetUnicode);
 }
 VOID 
 VfsDebugThread(WIN_THREAD_STRUCT *Thread, LPSTR Label)
 {
 	msvc_printf("%s: return(0x%lx) origin(0x%lx) size(0x%lx) source(0x%lx) dest(0x%lx) offset(0x%lx) Token(%lu) Flags(0x%x)\r\n", 
 		Label, Thread->raddr, Thread->origin, Thread->size, Thread->source, Thread->dest, Thread->offset, Thread->Token, Thread->Flags);
+}
+VOID 
+VfsDebugLinkFlags(DWORD Flags)
+{
+	msvc_printf("+ Flags([0x%x]", Flags);
+	win_flagname(HasLinkTargetIDList, "HasLinkTargetIDList", Flags, &Flags);
+	win_flagname(HasLinkInfo, "HasLinkInfo", Flags, &Flags);
+	win_flagname(HasName, "HasName", Flags, &Flags);
+	win_flagname(HasRelativePath, "HasRelativePath", Flags, &Flags);
+	win_flagname(HasWorkingDir, "HasWorkingDir", Flags, &Flags);
+	win_flagname(HasArguments, "HasArguments", Flags, &Flags);
+	win_flagname(HasIconLocation, "HasIconLocation", Flags, &Flags);
+	win_flagname(IsUnicode, "IsUnicode", Flags, &Flags);
+	win_flagname(ForceNoLinkInfo, "ForceNoLinkInfo", Flags, &Flags);
+	msvc_printf("[0x%x])\n", Flags);
 }
 
 /****************************************************/
@@ -479,8 +497,8 @@ vfs_NAMEI(WIN_NAMEIDATA *Path, LPSTR Buffer)
 {
 	LPSTR psz = Buffer;
 
-	psz += msvc_sprintf(psz, "Resolved(%ls): MountId(%d) Object(%d) Type(%s:%s) DeviceId(0x%x)\r\n", 
-		Path->Resolved, Path->MountId, Path->Object, FSType(Path->FSType), FType(Path->FileType), Path->DeviceId);
+	psz += msvc_sprintf(psz, "Resolved(%ls): MountId(%d) Object(%d) Size(%d) Type(%s:%s) DeviceId(0x%x)\r\n", 
+		Path->Resolved, Path->MountId, Path->Object, Path->Size, FSType(Path->FSType), FType(Path->FileType), Path->DeviceId);
 	psz = VfsPathFlags(psz, "+ Flags", Path->Flags);
 	psz = VfsFileAttribs(psz, Path->Attribs);
 	psz += msvc_sprintf(psz, "+ Base: %ls\r\n", Path->Base);

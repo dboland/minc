@@ -77,9 +77,8 @@ msgbuf_DRIVE(WIN_CFDATA *Config, WIN_CFDRIVER *Driver, LPSTR Result)
 	}else{
 		psz += msvc_sprintf(psz, "+ not configured: ");
 	}
-//	psz += msvc_sprintf(psz, "%ls at %ls", Config->NtName, Config->BusName);
-	psz += msvc_sprintf(psz, "%ls %ls", Config->BusName, Driver->NtClass);
-	psz += msvc_sprintf(psz, " at %ls", Config->NtName);
+	psz += msvc_sprintf(psz, "%ls at %ls", Config->NtName, Config->BusName);
+	psz += msvc_sprintf(psz, " at %ls", Driver->NtClass);
 	psz += msvc_sprintf(psz, ", type 0x%x", Config->DeviceType);
 	psz += msvc_sprintf(psz, ", flags 0x%x", Driver->Flags);
 	*psz++ = '\n';

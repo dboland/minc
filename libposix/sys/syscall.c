@@ -601,10 +601,10 @@ sys_execve(call_t call, const char *path, char *const argv[], char *const envp[]
 		result -= errno_posix(GetLastError());
 	}else if (!shebang_win(&vNode, &wPath, path, szCommand)){
 		result -= errno_posix(GetLastError());
-	}else if (!vfs_execve(pwTask, argv_win(pwTask, szCommand, argv), env_win(envp))){
+	}else if (!proc_execve(pwTask, argv_win(pwTask, szCommand, argv), env_win(envp))){
 		result -= errno_posix(GetLastError());
 	}else{
-		win_exit(0);
+		proc_exit(0);
 	}
 	return(result);
 }
@@ -616,7 +616,7 @@ __exit(WIN_TASK *Task, int status)
 	if (Task->Flags & WIN_PS_CONTROLT){
 		pdo_revoke(DEVICE(__CTTY->DeviceId));
 	}
-	win_exit(status);
+	proc_exit(status);
 }
 __dead void 
 sys_exit(call_t call, int status)

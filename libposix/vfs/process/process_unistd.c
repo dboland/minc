@@ -48,6 +48,35 @@ ProcDupChannels(WIN_VNODE Nodes[], WIN_VNODE Result[])
 		Result++;
 	}
 }
+BOOL 
+ProcCloseExec(WIN_VNODE Nodes[])
+{
+	DWORD dwIndex = 0;
+
+	while (dwIndex < WIN_OPEN_MAX){
+		if (Nodes->CloseExec){
+			vfs_close(Nodes);
+		}
+		dwIndex++;
+		Nodes++;
+	}
+	return(TRUE);
+}
+VOID 
+ProcInheritChannels(HANDLE Process, WIN_VNODE Result[])
+{
+	DWORD dwIndex = 0;
+
+	while (dwIndex < WIN_OPEN_MAX){
+		if (Result->Access){
+			if (!(Result->Flags & HANDLE_FLAG_INHERIT)){
+				vfs_F_INHERIT(Result, Process);
+			}
+		}
+		Result++;
+		dwIndex++;
+	}
+}
 
 /****************************************************/
 
@@ -103,5 +132,53 @@ proc_close(WIN_TASK *Task)
 		WIN_ERR("proc_close(%d): %s\n", Task->Handle, win_strerror(GetLastError()));
 	}
 	Task->Flags |= WIN_PS_NOZOMBIE;	/* ready to be reclaimed */
+	return(bResult);
+}
+BOOL 
+proc_execve(WIN_TASK *Task, LPSTR Command, PVOID Environ)
+{
+	BOOL bResult = FALSE;
+	STARTUPINFO si = {0};
+	HANDLE hToken = NULL;
+	PROCESS_INFORMATION pi = {0};
+	DWORD dwAccess = TOKEN_QUERY + TOKEN_DUPLICATE + TOKEN_ASSIGN_PRIMARY;
+	HANDLE hThread;
+	WIN_OBJECT_CONTROL wControl;
+	SECURITY_ATTRIBUTES sa = {sizeof(sa), &wControl.Security, FALSE};
+	DWORD dwFlags = NORMAL_PRIORITY_CLASS;
+
+	si.cb = sizeof(STARTUPINFO);
+	si.lpDesktop = "";		/* Vista */
+	si.dwFlags = STARTF_PS_EXEC;
+	si.dwX = Task->TaskId;
+	ProcCloseExec(Task->Node);
+	if (!win_cap_get_proc(dwAccess, TokenPrimary, &hToken)){
+		WIN_ERR("win_cap_get_proc(%s): %s\n", Command, win_strerror(GetLastError()));
+	}else if (!AclCreateControl(WIN_P_IRWX | TOKEN_IMPERSONATE, &wControl)){
+		WIN_ERR("AclCreateControl(%s): %s\n", Command, win_strerror(GetLastError()));
+	}else if (CreateProcessAsUser(hToken, NULL, Command, &sa, NULL, TRUE, dwFlags, Environ, NULL, &si, &pi)){
+		Task->Flags |= WIN_PS_EXEC;
+		Task->ThreadId = pi.dwThreadId;
+		hThread = Task->Handle;
+		if (Task->ProcessId != GetCurrentProcessId()){	/* not forked (ktrace.exe) */
+			Task->Handle = win_F_DISINHERIT(pi.hThread, Task->ProcessId);
+		}else{
+			Task->Handle = pi.hThread;
+		}
+		ProcInheritChannels(pi.hProcess, Task->Node);
+		CloseHandle(hThread);
+		CloseHandle(pi.hProcess);
+		Task->State = WIN_SRUN;
+		/* https://man7.org/linux/man-pages/man2/execve.2.html */
+		ZeroMemory(Task->Action, WIN_NSIG * sizeof(WIN_SIGACTION));
+		Task->Timer = NULL;
+		ZeroMemory(Task->AtExit, WIN_ATEXIT_MAX * sizeof(WIN_ATEXITPROC));
+		bResult = TRUE;
+	}else{
+		WIN_ERR("CreateProcessAsUser(%s): %s\n", Command, win_strerror(GetLastError()));
+	}
+	CloseHandle(hToken);
+	win_free(Command);
+	win_free(Environ);
 	return(bResult);
 }

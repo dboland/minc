@@ -30,7 +30,7 @@
 
 #include <wincon.h>
 
-#define VK_MODIFY	0x1F
+#define VK_MODIFY		0x1F
 
 /* 0x1F - 0x00 */
 
@@ -56,7 +56,7 @@ static LPCSTR __ANSI_CURSOR[] = {
 	""		/* 0x20: VK_SPACE */
 };
 
-#define VK_WINDOWS	0x5F
+#define VK_WINDOWS		0x5F
 
 /* 0x5F - 0x50 */
 

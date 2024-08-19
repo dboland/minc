@@ -39,11 +39,39 @@ typedef struct _SHELL_LINK_HEADER {
 	DWORD FileSize;
 	DWORD IconIndex;
 	DWORD ShowCommand;
-	WORD HotKey;
-	WORD Reserved1;
+	USHORT HotKey;
+	USHORT Reserved1;
 	DWORD Reserved2;
 	DWORD Reserved3;
 } SHELL_LINK_HEADER;
+
+/* LinkFlags */
+
+#define HasLinkTargetIDList		0x00000001
+#define HasLinkInfo			0x00000002
+#define HasName				0x00000004
+#define HasRelativePath			0x00000008
+#define HasWorkingDir			0x00000010
+#define HasArguments			0x00000020
+#define HasIconLocation			0x00000040
+#define IsUnicode			0x00000080
+#define ForceNoLinkInfo			0x00000100
+#define HasExpString			0x00000200
+#define RunInSeparateProcess		0x00000400
+#define HasDarwinID			0x00001000
+#define RunAsUser			0x00002000
+#define HasExpIcon			0x00004000
+#define NoPidlAlias			0x00008000
+#define RunWithShimLayer		0x00020000
+#define ForceNoLinkTrack		0x00040000
+#define EnableTargetMetadata		0x00080000
+#define DisableLinkPathTracking		0x00100000
+#define DisableKnownFolderTracking	0x00200000
+#define DisableKnownFolderAlias		0x00400000
+#define AllowLinkToLink			0x00800000
+#define UnaliasOnSave			0x01000000
+#define PreferEnvironmentPath		0x02000000
+#define KeepLocalIDListForUNCTarget	0x04000000
 
 typedef struct _LINK_INFO {
 	DWORD LinkInfoSize;
@@ -54,6 +82,11 @@ typedef struct _LINK_INFO {
 	DWORD CommonNetworkRelativeLinkOffset;
 	DWORD CommonPathSuffixOffset;
 } LINK_INFO;
+
+/* LinkInfoFlags */
+
+#define VolumeIDAndLocalBasePath		0x1
+#define CommonNetworkRelativeLinkAndPathSuffix	0x2
 
 typedef struct _VOLUME_ID {
 	DWORD VolumeIDSize;
@@ -70,17 +103,6 @@ typedef struct _COMMON_NETWORK_RELATIVE_LINK {
 	DWORD NetworkProviderType;
 } COMMON_NETWORK_RELATIVE_LINK;
 
-/* LinkFlags */
+/* CommonNetworkRelativeLinkFlags */
 
-#define HasLinkTargetIDList		0x00000001
-#define HasLinkInfo			0x00000002
-#define HasName				0x00000004
-#define IsUnicode			0x00000080
-
-/* LinkInfoFlags */
-
-#define VolumeIDAndLocalBasePath		0x1
-#define CommonNetworkRelativeLinkAndPathSuffix	0x2
-
-GUID CLSID_ShellLink = {0x00021401, 0, 0, {0xc0, 0, 0, 0, 0, 0, 0, 0x46}};
-
+#define ValidDevice	0x1#define ValidNetType	0x2

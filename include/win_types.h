@@ -29,6 +29,7 @@
  */
 
 #include "arch_types.h"
+#include "ole_types.h"
 
 /* winerror.h */
 

@@ -33,28 +33,43 @@
 /****************************************************/
 
 BOOL 
-DiskGlobType(LPCWSTR TypeName, WIN_NAMEIDATA *Path)
+DiskGlobNode(WIN_NAMEIDATA *Path, DWORD Flags)
 {
 	BOOL bResult = FALSE;
-	DWORD dwAttribs;
+	WIN_INODE iNode;
+	DWORD dwResult;
+	HANDLE hNode;
+	SECURITY_ATTRIBUTES sa = {sizeof(sa), NULL, TRUE};
 
-	win_wcscpy(Path->R, TypeName);
-	dwAttribs = GetFileAttributesW(Path->Resolved);
-	if (dwAttribs == -1){
-		*Path->R = 0;		/* undo extension probe */
+	hNode = CreateFileW(Path->Resolved, GENERIC_READ, FILE_SHARE_READ, 
+		&sa, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, NULL);
+	if (hNode == INVALID_HANDLE_VALUE){
+		WIN_ERR("CreateFile(%ls): %s\n", Path->Resolved, win_strerror(GetLastError()));
+	}else if (!ReadFile(hNode, &iNode, sizeof(WIN_INODE), &dwResult, NULL)){
+		WIN_ERR("ReadFile(%ls): %s\n", Path->Resolved, win_strerror(GetLastError()));
+	}else if (iNode.Magic != TypeNameVirtual){
+		SetLastError(ERROR_BAD_ARGUMENTS);
 	}else{
-		Path->Attribs = dwAttribs;
 		bResult = TRUE;
+		Path->DeviceId = iNode.DeviceId;
+		Path->FileType = iNode.FileType;
+		Path->FSType = iNode.FSType;
+		Path->Size = iNode.NameSize;
+		if (Flags & WIN_KEEPOBJECT){
+			Path->Object = hNode;
+		}else{
+			bResult = CloseHandle(hNode);
+		}
 	}
 	return(bResult);
 }
-BOOL 
+/* BOOL 
 DiskGlobLink(WIN_NAMEIDATA *Path, LONG Depth)
 {
 	BOOL bResult = FALSE;
 
 	if (disk_readlink(Path, TRUE)){
-		if (!DiskGlobType(L".lnk", Path)){
+		if (Path->FileType != WIN_VLNK){
 			bResult = TRUE;
 		}else if (Depth >= WIN_SYMLOOP_MAX){
 			SetLastError(ERROR_TOO_MANY_LINKS);
@@ -63,21 +78,28 @@ DiskGlobLink(WIN_NAMEIDATA *Path, LONG Depth)
 		}
 	}
 	return(bResult);
-}
+} */
 
 /****************************************************/
 
 BOOL 
 disk_lookup(WIN_NAMEIDATA *Path, DWORD Flags)
 {
-	BOOL bResult = TRUE;
+	BOOL bResult = FALSE;
 
-	if (!DiskGlobType(L".lnk", Path)){
-		bResult = FALSE;
-	}else if (Flags & WIN_FOLLOW){
-		bResult = DiskGlobLink(Path, 0);
-	}else{
-		Path->Attribs |= FILE_ATTRIBUTE_SYMLINK;
+	if (!DiskGlobNode(Path, Flags)){
+		return(FALSE);
+	}else if (!(Flags & WIN_FOLLOW)){
+		bResult = TRUE;
+	}else switch (Path->FileType){
+		case WIN_VLNK:
+			bResult = disk_readlink(Path, TRUE);
+			break;
+		case WIN_VSOCK:
+			bResult = sock_readlink(Path, TRUE);
+			break;
+		default:
+			SetLastError(ERROR_BAD_FILE_TYPE);
 	}
 	return(bResult);
 }

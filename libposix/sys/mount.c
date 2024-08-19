@@ -47,6 +47,7 @@ fsflags_debug(u_int32_t flags, const char *lable)
 	win_flagname(MNT_ASYNC, "ASYNC", dwFlags, &dwFlags);
 	win_flagname(MNT_SOFTDEP, "SOFTDEP", dwFlags, &dwFlags);
 	win_flagname(MNT_UPDATE, "UPDATE", dwFlags, &dwFlags);
+	win_flagname(MNT_ROOTFS, "ROOTFS", dwFlags, &dwFlags);
 	msvc_printf("[0x%x])\n", dwFlags);
 }
 char *
@@ -82,8 +83,8 @@ fsflags_posix(DWORD Flags)
 	if (Flags & FILE_VOLUME_MNT_DOOMED){
 		result |= MNT_DOOMED;
 	}
-	if (Flags & FILE_VOLUME_MNT_UPDATE){
-		result |= MNT_UPDATE;
+	if (Flags & FILE_VOLUME_MNT_ROOTFS){
+		result |= MNT_ROOTFS;
 	}
 	return(result);
 }
@@ -105,8 +106,8 @@ fsflags_win(u_int32_t flags)
 	if (flags & MNT_DOOMED){
 		dwResult |= FILE_VOLUME_MNT_DOOMED;
 	}
-	if (flags & MNT_UPDATE){
-		dwResult |= FILE_VOLUME_MNT_UPDATE;
+	if (flags & MNT_ROOTFS){
+		dwResult |= FILE_VOLUME_MNT_ROOTFS;
 	}
 	return(dwResult);
 }

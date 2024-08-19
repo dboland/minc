@@ -28,6 +28,9 @@
  *
  */
 
+/* shlobj.h */
+#define _WIN32_WINNT	_WIN32_WINNT_WINXP
+
 /* exclude msvcrt.dll headers */
 #define WIN32_LEAN_AND_MEAN
 
@@ -35,7 +38,7 @@
 #define NTOSAPI
 
 #include <windows.h>
-#include <ntdef.h>
+#include <ddk/ntapi.h>
 
 #include <stdint.h>
 #include <stdlib.h>
@@ -46,8 +49,7 @@
 
 #define WIN_ERR			msvc_printf
 
-DWORD				__ThreadCount;
-DWORD 				__TlsIndex;
+const GUID CLSID_ShellLink = {0x00021401, 0, 0, {0xc0, 0, 0, 0, 0, 0, 0, 0x46}};
 
 SID8 SidNull			= {1, 1, {0, 0, 0, 0, 0, 0}, 0};
 SID8 SidEveryone		= {1, 1, {0, 0, 0, 0, 0, 1}, 0};
@@ -94,13 +96,12 @@ SID8 SidIntegritySystem		= {1, 1, {0, 0, 0, 0, 0, 16}, 0x4000};
 #include "win_libgen.c"
 #include "win_stdlib.c"
 #include "win_capability.c"
-#include "win_unistd.c"
+#include "win_syscall.c"
 #include "win_acl.c"
 #include "win_pwd.c"
 #include "win_fcntl.c"
-#include "win_syscall.c"
+#include "win_unistd.c"
 #include "win_grp.c"
-#include "win_sched.c"
 #include "win_mman.c"
 #include "win_resource.c"
 #include "win_uio.c"

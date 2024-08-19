@@ -74,7 +74,7 @@ MailCreateSlave(WIN_DEVICE *Device, WIN_VNODE *Result)
 		Result->FileType = Device->FileType;
 		Result->DeviceType = Device->DeviceType;
 		Result->DeviceId = Device->DeviceId;
-		Result->Attribs = FILE_ATTRIBUTE_PDO | FILE_ATTRIBUTE_DEVICE;
+//		Result->Attribs = FILE_ATTRIBUTE_PDO | FILE_ATTRIBUTE_DEVICE;
 		Result->Access = win_F_GETFL(Device->Input);
 		Result->Flags = win_F_GETFD(Device->Input);
 		Result->Event = __MailEvent;

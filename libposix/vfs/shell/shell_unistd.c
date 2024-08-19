@@ -28,43 +28,47 @@
  *
  */
 
-#include <winbase.h>
+#include <shlobj.h>
 
-/************************************************************/
+/****************************************************/
 
-WIN_THREAD_STRUCT *
-win_fork_enter(PVOID Data[], DWORD Flags)
+BOOL 
+shell_readlink(WIN_NAMEIDATA *Path, BOOL MakeReal)
 {
-	WIN_THREAD_STRUCT *ptsResult;
+	BOOL bResult = FALSE;
+	SHELL_LINK_HEADER slHead;
+	WCHAR szBuffer[MAX_PATH];
+	WCHAR *pszBase = Path->Resolved;
 
-	ptsResult = LocalAlloc(LMEM_FIXED + LMEM_ZEROINIT, sizeof(WIN_THREAD_STRUCT));
-	ptsResult->TaskId = CURRENT;
-	ptsResult->ThreadId = GetCurrentThreadId();
-	ptsResult->Flags = Flags;
-	OpenThreadToken(GetCurrentThread(), TOKEN_ALL_ACCESS, TRUE, &ptsResult->Token);
-	return(ptsResult);
-}
-DWORD 
-win_fork(LPTHREAD_START_ROUTINE StartAddress, WIN_THREAD_STRUCT *Thread)
-{
-	MSG msg = {0};
-	DWORD dwThreadId = 0;
-
-	__ThreadCount++;
-	Thread->Handle = CreateThread(NULL, WIN_STACKSIZE, StartAddress, Thread, 0, &dwThreadId);
-	/* wait for child to send TaskId */
-	GetMessage(&msg, NULL, WM_USER, WM_USER);
-	return(msg.wParam);
-}
-VOID 
-win_fork_leave(WIN_THREAD_STRUCT *Thread)
-{
-	if (Thread->Token){
-		SetThreadToken(NULL, Thread->Token);
-		CloseHandle(Thread->Token);
+	if (win_readlink(Path->Resolved, &slHead, szBuffer)){
+		if (szBuffer[1] == ':'){
+			Path->MountId = MOUNTID(szBuffer[0]);
+		}else if (MakeReal){
+			pszBase = Path->Base;
+		}
+		Path->R = win_wcpcpy(pszBase, szBuffer);
+		Path->Last = Path->R - 1;
+		Path->Attribs = slHead.FileAttributes;
+		bResult = TRUE;
 	}
-	if (!(Thread->Flags & WIN_PS_PPWAIT)){
-		PostThreadMessage(Thread->ThreadId, WM_USER, Thread->Result, 0);
+	return(bResult);
+}
+shell_rename(WIN_NAMEIDATA *Path, WIN_NAMEIDATA *Result)
+{
+	BOOL bResult = FALSE;
+
+	win_wcscpy(Result->R, L".lnk");
+	if (Result->Attribs == -1){
+		bResult = MoveFileW(Path->Resolved, Result->Resolved);
+	}else if (Result->FileType != WIN_VLNK){
+		SetLastError(ERROR_FILE_EXISTS);
+	}else if (DeleteFileW(Result->Resolved)){
+		bResult = MoveFileExW(Path->Resolved, Result->Resolved, MOVEFILE_COPY_ALLOWED);
 	}
-	LocalFree(Thread);
+	return(bResult);
+}
+BOOL 
+shell_unlink(WIN_NAMEIDATA *Path)
+{
+	return(DeleteFileW(Path->Resolved));
 }
