@@ -32,27 +32,6 @@
 
 /****************************************************/
 
-BOOL 
-shell_readlink(WIN_NAMEIDATA *Path, BOOL MakeReal)
-{
-	BOOL bResult = FALSE;
-	SHELL_LINK_HEADER slHead;
-	WCHAR szBuffer[MAX_PATH];
-	WCHAR *pszBase = Path->Resolved;
-
-	if (win_readlink(Path->Resolved, &slHead, szBuffer)){
-		if (szBuffer[1] == ':'){
-			Path->MountId = MOUNTID(szBuffer[0]);
-		}else if (MakeReal){
-			pszBase = Path->Base;
-		}
-		Path->R = win_wcpcpy(pszBase, szBuffer);
-		Path->Last = Path->R - 1;
-		Path->Attribs = slHead.FileAttributes;
-		bResult = TRUE;
-	}
-	return(bResult);
-}
 shell_rename(WIN_NAMEIDATA *Path, WIN_NAMEIDATA *Result)
 {
 	BOOL bResult = FALSE;

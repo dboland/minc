@@ -295,7 +295,7 @@ sys_chroot(call_t call, const char *path)
 
 	if (!path){
 		result = -EFAULT;
-	}else if (!*path){
+	}else if (!path[0]){
 		result = -ENOENT;
 	}else if (!vfs_chroot(path_win(&wPath, path, 0))){
 		result -= errno_posix(GetLastError());
@@ -303,12 +303,16 @@ sys_chroot(call_t call, const char *path)
 	return(result);
 }
 ssize_t 
-__readlinkat(WIN_TASK *Task, int dirfd, const char *pathname, char *buf, size_t bufsiz)
+__readlinkat(WIN_TASK *Task, int dirfd, const char *path, char *buf, size_t bufsiz)
 {
 	ssize_t result = 0;
 	WIN_NAMEIDATA wPath = {0};
 
-	if (!vfs_readlink(pathat_win(&wPath, dirfd, pathname, AT_SYMLINK_NOFOLLOW | AT_OBJECT), FALSE)){
+	if (!path){
+		result = -EFAULT;
+	}else if (!path[0]){
+		result = -ENOENT;
+	}else if (!vfs_readlink(pathat_win(&wPath, dirfd, path, AT_SYMLINK_NOFOLLOW))){
 		result -= errno_posix(GetLastError());
 	}else{
 		result = pathnp_posix(buf, wPath.Resolved, bufsiz, TRUE) - buf;
@@ -329,13 +333,14 @@ int
 __symlinkat(WIN_NAMEIDATA *Target, int fd, const char *path)
 {
 	int result = 0;
+	int atflags = AT_SYMLINK_NOFOLLOW;
 	WIN_NAMEIDATA wPath = {0};
 
 	if (!path){
 		result = -EFAULT;
 	}else if (!path[0]){
 		result = -ENOENT;
-	}else if (!vfs_symlink(pathat_win(&wPath, fd, path, AT_SYMLINK_NOFOLLOW), Target)){
+	}else if (!vfs_symlink(pathat_win(&wPath, fd, path, atflags), Target)){
 		result -= errno_posix(GetLastError());
 	}
 	return(result);
@@ -345,14 +350,14 @@ sys_symlinkat(call_t call, const char *name1, int fd, const char *name2)
 {
 	WIN_NAMEIDATA wPath = {0};
 
-	return(__symlinkat(pathat_win(&wPath, 0, name1, 0), fd, name2));
+	return(__symlinkat(pathat_win(&wPath, 0, name1, AT_NOSLASH), fd, name2));
 }
 int 
 sys_symlink(call_t call, const char *name1, const char *name2)
 {
 	WIN_NAMEIDATA wPath = {0};
 
-	return(__symlinkat(pathat_win(&wPath, 0, name1, 0), AT_FDCWD, name2));
+	return(__symlinkat(pathat_win(&wPath, 0, name1, AT_NOSLASH), AT_FDCWD, name2));
 }
 int 
 __faccessat(int dirfd, const char *path, int mode, int flags)
@@ -383,17 +388,17 @@ sys_faccessat(call_t call, int dirfd, const char *path, int mode, int flags)
 int 
 sys_access(call_t call, const char *path, int mode)
 {
-	return(__faccessat(AT_FDCWD, path, mode, AT_SYMLINK_FOLLOW));
+	return(__faccessat(AT_FDCWD, path, mode, 0));
 }
 int 
 __renameat(WIN_NAMEIDATA *Path, int tofd, const char *to)
 {
 	int result = 0;
-	WIN_NAMEIDATA wpNew = {0};
+	WIN_NAMEIDATA wPath = {0};
 
 	if (Path->Attribs == -1){
 		result -= errno_posix(GetLastError());
-	}else if (!vfs_rename(Path, pathat_win(&wpNew, tofd, to, AT_SYMLINK_NOFOLLOW))){
+	}else if (!vfs_rename(Path, pathat_win(&wPath, tofd, to, AT_SYMLINK_NOFOLLOW))){
 		result -= errno_posix(GetLastError());
 	}
 	return(result);
@@ -401,16 +406,18 @@ __renameat(WIN_NAMEIDATA *Path, int tofd, const char *to)
 int 
 sys_renameat(call_t call, int fromfd, const char *from, int tofd, const char *to)
 {
+	int atflags = AT_SYMLINK_NOFOLLOW;
 	WIN_NAMEIDATA wPath = {0};
 
-	return(__renameat(pathat_win(&wPath, fromfd, from, AT_SYMLINK_NOFOLLOW), tofd, to));
+	return(__renameat(pathat_win(&wPath, fromfd, from, atflags), tofd, to));
 }
 int 
 sys_rename(call_t call, const char *from, const char *to)
 {
+	int atflags = AT_SYMLINK_NOFOLLOW;
 	WIN_NAMEIDATA wPath = {0};
 
-	return(__renameat(path_win(&wPath, from, O_NOFOLLOW), AT_FDCWD, to));
+	return(__renameat(pathat_win(&wPath, AT_FDCWD, from, atflags), AT_FDCWD, to));
 }
 int 
 sys_ftruncate(call_t call, int fd, off_t length)

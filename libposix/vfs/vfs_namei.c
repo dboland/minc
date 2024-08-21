@@ -33,7 +33,7 @@
 /****************************************************/
 
 WCHAR 
-PathRead(WIN_NAMEIDATA *Path)
+PathRead(WIN_NAMEIDATA *Path, DWORD Flags)
 {
 	WCHAR *S = Path->S;
 	WCHAR *R = Path->R;
@@ -53,7 +53,10 @@ PathRead(WIN_NAMEIDATA *Path)
 	*R = 0;
 	Path->S = S;
 	Path->R = R;
-	return(C);	/* Note: use *S to skip slash at end (umount.exe) */
+	if (Flags & WIN_STRIPSLASHES){
+		C = *S;
+	}
+	return(C);
 }
 VOID 
 PathCopy(WIN_NAMEIDATA *Path)
@@ -102,23 +105,24 @@ VOID
 PathOpen(WIN_NAMEIDATA *Path, LPWSTR Source, DWORD Flags)
 {
 	Path->Attribs = -1;
+	Path->FileType = WIN_VREG;
 	Path->S = Source;
 	Path->Flags = Flags;
-	Path->FileType = WIN_VREG;
 }
 VOID 
 PathClose(WIN_NAMEIDATA *Path, DWORD Flags)
 {
 	BOOL bResult = TRUE;
 
-	Path->FileType = WIN_VREG;
 	if (PathGlob(Path, Flags)){
 		if (Path->Attribs & FILE_ATTRIBUTE_DIRECTORY){
 			Path->FileType = WIN_VDIR;
 		}else if (Path->Attribs & FILE_ATTRIBUTE_SYMLINK){
 			Path->FileType = WIN_VLNK;
 		}
-	}else if (!SHGlobType(L".exe", Path)){
+	}else if (SHGlobType(L".exe", Path)){
+		Path->FileType = WIN_VREG;
+//	}else{
 //		vfs_ktrace("PathClose", STRUCT_NAMEI, Path);
 	}
 	Path->Last = Path->R - 1;
@@ -132,8 +136,8 @@ vfs_lookup(WIN_NAMEIDATA *Path, LPWSTR Source, DWORD Flags)
 	PathOpen(Path, Source, Flags);
 	if (Flags & WIN_PATHCOPY){
 		PathCopy(Path);
-	}else while (PathRead(Path)){
-		if (!PathGlob(Path, Flags | WIN_FOLLOW)){
+	}else while (PathRead(Path, Flags)){
+		if (!PathGlob(Path, WIN_FOLLOW)){
 			*Path->R++ = '\\';
 			PathCopy(Path);
 			Path->Last = Path->R - 1;

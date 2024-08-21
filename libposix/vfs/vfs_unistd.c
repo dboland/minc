@@ -454,16 +454,16 @@ vfs_symlink(WIN_NAMEIDATA *Path, WIN_NAMEIDATA *Target)
 	return(bResult);
 }
 BOOL 
-vfs_readlink(WIN_NAMEIDATA *Path, BOOL MakeReal)
+vfs_readlink(WIN_NAMEIDATA *Path)
 {
 	BOOL bResult = FALSE;
 
 	switch (Path->FSType){
 		case FS_TYPE_DISK:
-			bResult = disk_readlink(Path, MakeReal);
+			bResult = disk_F_LOOKUP(Path, 0);
 			break;
 		case FS_TYPE_SHELL:
-			bResult = shell_readlink(Path, MakeReal);
+			bResult = shell_F_LOOKUP(Path, 0);
 			break;
 		default:
 			SetLastError(ERROR_BAD_FILE_TYPE);

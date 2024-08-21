@@ -32,37 +32,6 @@
 
 /****************************************************/
 
-BOOL 
-DiskGlobNode(WIN_NAMEIDATA *Path, DWORD Flags)
-{
-	BOOL bResult = FALSE;
-	WIN_INODE iNode;
-	DWORD dwResult;
-	HANDLE hNode;
-	SECURITY_ATTRIBUTES sa = {sizeof(sa), NULL, TRUE};
-
-	hNode = CreateFileW(Path->Resolved, GENERIC_READ, FILE_SHARE_READ, 
-		&sa, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, NULL);
-	if (hNode == INVALID_HANDLE_VALUE){
-		WIN_ERR("CreateFile(%ls): %s\n", Path->Resolved, win_strerror(GetLastError()));
-	}else if (!ReadFile(hNode, &iNode, sizeof(WIN_INODE), &dwResult, NULL)){
-		WIN_ERR("ReadFile(%ls): %s\n", Path->Resolved, win_strerror(GetLastError()));
-	}else if (iNode.Magic != TypeNameVirtual){
-		SetLastError(ERROR_BAD_ARGUMENTS);
-	}else{
-		bResult = TRUE;
-		Path->DeviceId = iNode.DeviceId;
-		Path->FileType = iNode.FileType;
-		Path->FSType = iNode.FSType;
-		Path->Size = iNode.NameSize;
-		if (Flags & WIN_KEEPOBJECT){
-			Path->Object = hNode;
-		}else{
-			bResult = CloseHandle(hNode);
-		}
-	}
-	return(bResult);
-}
 /* BOOL 
 DiskGlobLink(WIN_NAMEIDATA *Path, LONG Depth)
 {
@@ -87,16 +56,19 @@ disk_lookup(WIN_NAMEIDATA *Path, DWORD Flags)
 {
 	BOOL bResult = FALSE;
 
-	if (!DiskGlobNode(Path, Flags)){
+	if (!VfsStatNode(Path, Flags)){
 		return(FALSE);
 	}else if (!(Flags & WIN_FOLLOW)){
 		bResult = TRUE;
-	}else switch (Path->FileType){
-		case WIN_VLNK:
-			bResult = disk_readlink(Path, TRUE);
+	}else switch (Path->FSType){
+		case FS_TYPE_DISK:
+			bResult = disk_F_LOOKUP(Path, WIN_ISSYMLINK);
 			break;
-		case WIN_VSOCK:
-			bResult = sock_readlink(Path, TRUE);
+		case FS_TYPE_PIPE:
+			bResult = pipe_F_LOOKUP(Path, Flags);
+			break;
+		case FS_TYPE_PDO:
+			bResult = pdo_F_LOOKUP(Path, DEVICE(Path->DeviceId));
 			break;
 		default:
 			SetLastError(ERROR_BAD_FILE_TYPE);

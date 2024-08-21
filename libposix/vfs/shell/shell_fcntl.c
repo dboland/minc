@@ -28,5 +28,30 @@
  *
  */
 
-#include "link_stat.c"
-#include "link_unistd.c"
+#include <shlobj.h>
+
+/****************************************************/
+
+BOOL 
+shell_F_LOOKUP(WIN_NAMEIDATA *Path, DWORD Flags)
+{
+	BOOL bResult = FALSE;
+	SHELL_LINK_HEADER slHead;
+	WCHAR szBuffer[MAX_PATH];
+	WCHAR *pszBase = Path->Resolved;
+
+	if (win_readlink(Path->Resolved, &slHead, szBuffer)){
+		if (szBuffer[1] == ':'){
+			Path->MountId = MOUNTID(szBuffer[0]);
+		}else if (szBuffer[1] == '\\'){		/* legacy links */
+			Path->MountId = 0;
+		}else if (Flags & WIN_ISSYMLINK){	/* legacy links */
+			pszBase = Path->Base;
+		}
+		Path->R = win_wcpcpy(pszBase, szBuffer);
+		Path->Last = Path->R - 1;
+		Path->Attribs = slHead.FileAttributes;
+		bResult = TRUE;
+	}
+	return(bResult);
+}

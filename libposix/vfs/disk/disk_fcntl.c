@@ -47,6 +47,32 @@ disk_F_DUPFD(WIN_VNODE *Node, HANDLE Process, DWORD Options, WIN_VNODE *Result)
 	}
 	return(bResult);
 }
+BOOL 
+disk_F_LOOKUP(WIN_NAMEIDATA *Path, DWORD Flags)
+{
+	BOOL bResult = FALSE;
+	WCHAR szBuffer[MAX_PATH];
+	DWORD dwResult;
+	LPWSTR pszBase = Path->Resolved;
+
+	if (ReadFile(Path->Object, szBuffer, Path->Size, &dwResult, NULL)){
+		if (szBuffer[1] == ':'){
+			Path->MountId = MOUNTID(szBuffer[0]);	/* nano.exe */
+		}else if (szBuffer[1] == '\\'){
+			Path->MountId = 0;
+		}else if (Flags & WIN_ISSYMLINK){
+			pszBase = Path->Base;
+		}
+		Path->R = win_wcpcpy(pszBase, szBuffer);
+		Path->Last = Path->R - 1;
+		Path->Attribs = GetFileAttributesW(Path->Resolved);
+		Path->FileType = WIN_VREG;
+		bResult = CloseHandle(Path->Object);
+//	}else{
+//		WIN_ERR("disk_F_LOOKUP(%d): %s\n", Path->Object, win_strerror(GetLastError()));
+	}
+	return(bResult);
+}
 
 /****************************************************/
 

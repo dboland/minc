@@ -35,15 +35,15 @@ char __DL_PATH_BUF[PATH_MAX];
 /**************************************************************/
 
 void *
-dlopen(const char *filename, int flag)
+dlopen(const char *path, int mode)
 {
 	void *result = NULL;
 	WIN_NAMEIDATA wPath;
 	WIN_TASK *pwTask = &__Tasks[CURRENT];
 
-	if (!filename){
+	if (!path){
 		result = win_dlopen(NULL);
-	}else if (!(result = win_dlopen(path_win(&wPath, filename, 0)->Resolved))){
+	}else if (!(result = win_dlopen(path_win(&wPath, path, 0)->Resolved))){
 		pwTask->Error = errno_posix(errno_win());
 	}
 	return(result);

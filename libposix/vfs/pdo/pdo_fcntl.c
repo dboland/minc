@@ -56,6 +56,22 @@ pdo_F_DUPFD(WIN_DEVICE *Device, HANDLE Process, DWORD Options, WIN_VNODE *Result
 	}
 	return(bResult);
 }
+BOOL 
+pdo_F_LOOKUP(WIN_NAMEIDATA *Path, WIN_DEVICE *Device)
+{
+	BOOL bResult = FALSE;
+
+//vfs_ktrace("pdo_F_LOOKUP", STRUCT_NAMEI, Path);
+	switch (Device->DeviceType){
+		case DEV_TYPE_PTM:
+		case DEV_TYPE_CONSOLE:
+			bResult = TRUE;
+			break;
+		default:
+			bResult = CloseHandle(Path->Object);
+	}
+	return(bResult);
+}
 
 /****************************************************/
 

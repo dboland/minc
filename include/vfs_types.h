@@ -174,9 +174,9 @@ typedef struct _WIN_INODE {
 	WIN_FS_TYPE FSType;
 	DWORD NameSize;
 	DWORD Index;
+	DWORD Reserved;
 } WIN_INODE;
 
-#define MAXINODE		(sizeof(WIN_INODE) + sizeof(WCHAR) * 255)
 #define INAMESIZE(wcs)		((win_wcslen(wcs) + 1) * sizeof(WCHAR))
 
 typedef struct _WIN_NAMEIDATA {
@@ -196,7 +196,6 @@ typedef struct _WIN_NAMEIDATA {
 } WIN_NAMEIDATA;
 
 #define WIN_PATHCOPY		0x00400000
-#define WIN_KEEPOBJECT		0x00800000
 
 /* sys/namei.h */
 

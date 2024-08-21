@@ -95,5 +95,12 @@ pipe_write(WIN_VNODE *Node, LPCSTR Buffer, DWORD Size, DWORD *Result)
 BOOL 
 pipe_unlink(WIN_NAMEIDATA *Path)
 {
-	return(DeleteFileW(Path->Resolved));
+	BOOL bResult = FALSE;
+
+	if (!CloseHandle(Path->Object)){
+		WIN_ERR("CloseHandle(%d): %s\n", Path->Object, win_strerror(GetLastError()));
+	}else{
+		bResult = DeleteFileW(Path->Resolved);
+	}
+	return(bResult);
 }

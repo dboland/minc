@@ -108,13 +108,18 @@ disk_unlink(WIN_NAMEIDATA *Path)
 {
 	BOOL bResult = FALSE;
 
-//vfs_ktrace("disk_unlink", STRUCT_NAMEI, Path);
-	if (Path->FileType == WIN_VDIR){
-		bResult = disk_rmdir(Path);
-	}else if (*Path->Last == '\\'){		/* GNU conftest.exe */
-		SetLastError(ERROR_BAD_PATHNAME);
-	}else{
-		bResult = DeleteFileW(Path->Resolved);
+	switch (Path->FileType){
+		case WIN_VDIR:
+			bResult = disk_rmdir(Path);
+			break;
+		case WIN_VREG:
+			bResult = file_unlink(Path);
+			break;
+		case WIN_VLNK:
+			bResult = link_unlink(Path);
+			break;
+		default:
+			SetLastError(ERROR_BAD_FILE_TYPE);
 	}
 	return(bResult);
 }
@@ -128,6 +133,8 @@ disk_rename(WIN_NAMEIDATA *Path, WIN_NAMEIDATA *Result)
 			bResult = dir_rename(Path, Result);
 			break;
 		case WIN_VLNK:
+			bResult = link_rename(Path, Result);
+			break;
 		case WIN_VREG:
 			bResult = file_rename(Path, Result);
 			break;
@@ -175,31 +182,6 @@ disk_pwrite(WIN_VNODE *Node, LPCVOID Buffer, DWORD Size, DWORDLONG Offset, DWORD
 		WIN_ERR("SetFilePointerEx(%d): %s\n", Node->Handle, win_strerror(GetLastError()));
 	}else if (WriteFile(Node->Handle, Buffer, Size, Result, &ovl)){
 		bResult = SetFilePointerEx(Node->Handle, liCurrent, &liCurrent, FILE_BEGIN);
-	}
-	return(bResult);
-}
-BOOL 
-disk_readlink(WIN_NAMEIDATA *Path, BOOL MakeReal)
-{
-	BOOL bResult = FALSE;
-	WCHAR szBuffer[MAX_PATH];
-	DWORD dwResult;
-	LPWSTR pszBase = Path->Resolved;
-
-	if (ReadFile(Path->Object, szBuffer, Path->Size, &dwResult, NULL)){
-		if (szBuffer[1] == ':'){
-			Path->MountId = MOUNTID(szBuffer[0]);	/* nano.exe */
-		}else if (szBuffer[1] == '\\'){
-			Path->MountId = 0;
-		}else if (MakeReal){
-			pszBase = Path->Base;
-		}
-		Path->R = win_wcpcpy(pszBase, szBuffer);
-		Path->Last = Path->R - 1;
-		Path->Attribs = GetFileAttributesW(Path->Resolved);
-		bResult = CloseHandle(Path->Object);
-//	}else{
-//		WIN_ERR("ReadFile(%d): %s\n", Path->Object, win_strerror(GetLastError()));
 	}
 	return(bResult);
 }

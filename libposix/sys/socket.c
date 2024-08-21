@@ -46,18 +46,18 @@ sflags_debug(int flags, const char *lable)
 	msvc_printf(" remain(0x%x)\n", dwRemain);
 }
 void 
-addr_debug(const struct sockaddr *addr, socklen_t addrlen, const char *label)
+saddr_debug(const struct sockaddr *addr, socklen_t addrlen, const char *label)
 {
 	int i = 0;
-	int len = 14;	/* default for struct sockaddr */
+//	int len = 14;	/* default for struct sockaddr */
 
 	if (!addr){
 		return;
 	}
-	msvc_printf("%s(): addrlen(%02d) sa_family(%d) sa_len(%02d) sa_data(", 
+	msvc_printf("%s(): addrlen(%d) sa_family(%d) sa_len(%d) sa_data(", 
 		label, addrlen, addr->sa_family, addr->sa_len);
-	while (i < len){
-		msvc_printf("[%d]", (unsigned char)addr->sa_data[i++]);
+	while (i < addrlen){
+		msvc_printf("[%d]", addr->sa_data[i++]);
 	}
 	msvc_printf(")\n");
 }
@@ -127,7 +127,7 @@ saddr_win(WIN_TASK *Task, SOCKADDR *Result, const struct sockaddr *addr)
 	}
 	Result->sa_family = af_win(addr->sa_family);
 	if (addr->sa_family == AF_LOCAL){
-		path_win(&wPath, addr->sa_data, O_OBJECT);
+		path_win(&wPath, addr->sa_data, 0);
 		win_wcsncpy((LPWSTR)Result->sa_data, wPath.Resolved, MAX_PATH);
 	}else{
 		win_memcpy(Result->sa_data, addr->sa_data, len - 2);

@@ -43,7 +43,9 @@ DiskGetEntity(WIN32_FIND_DATAW *Data, DWORD Index, WIN_DIRENT *Result)
 		Result->FileType = WIN_VREG;
 		win_wcscpy(Result->FileName, Data->cFileName);
 		pszType = win_typename(Result->FileName);
-		if (Data->dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY){
+		if (Data->dwFileAttributes == FILE_CLASS_INODE){
+			Result->FileType = WIN_VLNK;
+		}else if (Data->dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY){
 			Result->FileType = WIN_VDIR;
 		}else if (!win_wcscmp(pszType, L".lnk")){
 			Result->FileType = WIN_VLNK;

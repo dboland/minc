@@ -139,7 +139,8 @@ vfs_mkfifo(WIN_NAMEIDATA *Path, WIN_MODE *Mode, WIN_VNODE *Result)
 	HANDLE hResult;
 	BOOL bResult = FALSE;
 
-	hResult = CreateNamedPipeW(Path->Resolved, PIPE_ACCESS_DUPLEX, PIPE_TYPE_BYTE, 1, 255, 255, 100, NULL);
+	hResult = CreateNamedPipeW(Path->Resolved, PIPE_ACCESS_DUPLEX, PIPE_TYPE_BYTE, 
+		PIPE_UNLIMITED_INSTANCES, WIN_PIPE_BUF, WIN_PIPE_BUF, NMPWAIT_USE_DEFAULT_WAIT, NULL);
 	if (hResult == INVALID_HANDLE_VALUE){
 		WIN_ERR("CreateNamedPipe(%ls): %s\n", Path->Resolved, win_strerror(GetLastError()));
 	}else{

@@ -28,5 +28,32 @@
  *
  */
 
-#include "link_stat.c"
-#include "link_unistd.c"
+#include <winbase.h>
+
+/****************************************************/
+
+link_rename(WIN_NAMEIDATA *Path, WIN_NAMEIDATA *Result)
+{
+	BOOL bResult = FALSE;
+
+	if (Result->Attribs == -1){
+		bResult = MoveFileW(Path->Resolved, Result->Resolved);
+	}else if (Result->FileType != WIN_VLNK){
+		SetLastError(ERROR_FILE_EXISTS);
+	}else if (DeleteFileW(Result->Resolved)){
+		bResult = MoveFileExW(Path->Resolved, Result->Resolved, MOVEFILE_COPY_ALLOWED);
+	}
+	return(bResult);
+}
+BOOL 
+link_unlink(WIN_NAMEIDATA *Path)
+{
+	BOOL bResult = FALSE;
+
+	if (!CloseHandle(Path->Object)){
+		WIN_ERR("CloseHandle(%d): %s\n", Path->Object, win_strerror(GetLastError()));
+	}else{
+		bResult = DeleteFileW(Path->Resolved);
+	}
+	return(bResult);
+}

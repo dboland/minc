@@ -81,17 +81,3 @@ sock_write(WIN_VNODE *Node, LPCSTR Buffer, DWORD Size, DWORD *Result)
 	*Result = dwResult;
 	return(bResult);
 }
-BOOL 
-sock_readlink(WIN_NAMEIDATA *Path, BOOL MakeReal)
-{
-	BOOL bResult = FALSE;
-	DWORD dwResult;
-
-	if (ReadFile(Path->Object, Path->Resolved, Path->Size, &dwResult, NULL)){
-		Path->Last = Path->R - 1;
-		bResult = CloseHandle(Path->Object);
-//	}else{
-//		WIN_ERR("ReadFile(%d): %s\n", Path->Object, win_strerror(GetLastError()));
-	}
-	return(bResult);
-}

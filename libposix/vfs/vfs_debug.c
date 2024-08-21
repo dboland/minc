@@ -107,7 +107,7 @@ VfsFileFlags(LPSTR Buffer, DWORD Flags)
 	psz += msvc_sprintf(psz, "+ Flags([0x%x]", Flags);
 	psz = VfsFlagName(psz, HANDLE_FLAG_INHERIT, "INHERIT", Flags, &Flags);
 	psz = VfsFlagName(psz, HANDLE_FLAG_PROTECT_FROM_CLOSE, "PROTECT_FROM_CLOSE", Flags, &Flags);
-	psz += msvc_sprintf(psz, "[0x%x])\r\n", Flags);
+	psz += msvc_sprintf(psz, "[0x%x])\n", Flags);
 	return(psz);
 }
 LPSTR 
@@ -135,7 +135,7 @@ VfsFileAttribs(LPSTR Buffer, DWORD Attribs)
 		psz = VfsFlagName(psz, FILE_ATTRIBUTE_ENCRYPTED, "ENCRYPTED", Attribs, &Attribs);
 		psz = VfsFlagName(psz, FILE_ATTRIBUTE_VIRTUAL, "VIRTUAL", Attribs, &Attribs);
 	}
-	psz += msvc_sprintf(psz, "[0x%x])\r\n", Attribs);
+	psz += msvc_sprintf(psz, "[0x%x])\n", Attribs);
 	return(psz);
 }
 LPSTR 
@@ -167,7 +167,7 @@ VfsVolumeFlags(LPSTR Buffer, LPCSTR Label, DWORD Flags)
 	psz = VfsFlagName(psz, FILE_SUPPORTS_USN_JOURNAL, "USN_JOURNAL", Flags, &Flags);
 	psz = VfsFlagName(psz, FILE_VOLUME_MNT_DOOMED, "VOLUME_MNT_DOOMED", Flags, &Flags);
 	psz = VfsFlagName(psz, FILE_VOLUME_MNT_ROOTFS, "VOLUME_MNT_ROOTFS", Flags, &Flags);
-	psz += msvc_sprintf(psz, "[0x%x])\r\n", Flags);
+	psz += msvc_sprintf(psz, "[0x%x])\n", Flags);
 	return(psz);
 }
 LPSTR 
@@ -187,7 +187,7 @@ VfsInputMode(LPSTR Buffer, LPCSTR Label, DWORD Mode)
 	psz = VfsFlagName(psz, ENABLE_VIRTUAL_TERMINAL_INPUT, "VIRTUAL_TERMINAL_INPUT", dwRemain, &dwRemain);
 	psz = VfsFlagName(psz, ENABLE_EXTENDED_FLAGS, "EXTENDED_FLAGS", dwRemain, &dwRemain);
 	psz = VfsFlagName(psz, ENABLE_AUTO_POSITION, "AUTO_POSITION", dwRemain, &dwRemain);
-	psz += msvc_sprintf(psz, "[0x%x]\r\n", dwRemain);
+	psz += msvc_sprintf(psz, "[0x%x]\n", dwRemain);
 	return(psz);
 }
 LPSTR 
@@ -202,7 +202,7 @@ VfsScreenMode(LPSTR Buffer, LPCSTR Label, DWORD Mode)
 	psz = VfsFlagName(psz, ENABLE_VIRTUAL_TERMINAL_PROCESSING, "VIRTUAL_TERMINAL_PROCESSING", dwRemain, &dwRemain);
 	psz = VfsFlagName(psz, DISABLE_NEWLINE_AUTO_RETURN, "DISABLE_NEWLINE_AUTO_RETURN", dwRemain, &dwRemain);
 	psz = VfsFlagName(psz, ENABLE_LVB_GRID_WORLDWIDE, "LVB_GRID_WORLDWIDE", dwRemain, &dwRemain);
-	psz += msvc_sprintf(psz, " remain(0x%x)\r\n", dwRemain);
+	psz += msvc_sprintf(psz, " remain(0x%x)\n", dwRemain);
 	return(psz);
 }
 LPSTR 
@@ -222,7 +222,7 @@ VfsNetFlags(LPSTR Buffer, LONG NetworkEvents, LPCSTR Label)
 	psz = VfsFlagName(psz, FD_GROUP_QOS, "GROUP_QOS", dwRemain, &dwRemain);
 	psz = VfsFlagName(psz, FD_ROUTING_INTERFACE_CHANGE, "ROUTING_INTERFACE_CHANGE", dwRemain, &dwRemain);
 	psz = VfsFlagName(psz, FD_ADDRESS_LIST_CHANGE, "ADDRESS_LIST_CHANGE", dwRemain, &dwRemain);
-	psz += msvc_sprintf(psz, " remain(0x%x)\r\n", dwRemain);
+	psz += msvc_sprintf(psz, " remain(0x%x)\n", dwRemain);
 	return(psz);
 }
 BOOL 
@@ -252,9 +252,9 @@ VfsGenericFlags(LPSTR Buffer, ACCESS_MASK Access, DWORD Type, LPCSTR Label)
 			if (Access & GENERIC_EXECUTE) mask[2] = 'x';	// 0x20000000
 		}
 		if (Type == OB_TYPE_FILE){
-			psz += msvc_sprintf(psz, "%s(0x%08lx): file(%s)\r\n", Label, dwGeneric, mask);
+			psz += msvc_sprintf(psz, "%s(0x%08lx): file(%s)\n", Label, dwGeneric, mask);
 		}else{
-			psz += msvc_sprintf(psz, "%s(0x%08lx): process(%s)\r\n", Label, dwGeneric, mask);
+			psz += msvc_sprintf(psz, "%s(0x%08lx): process(%s)\n", Label, dwGeneric, mask);
 		}
 	}
 	return(psz);
@@ -268,7 +268,7 @@ VfsReservedFlags(LPSTR Buffer, ACCESS_MASK Access, DWORD Type, LPCSTR Label)
 	if (dwRemain){
 		psz += msvc_sprintf(psz, "%s(0x%08lx):", Label, dwRemain);
 		psz = VfsFlagName(psz, ACCESS_SYSTEM_SECURITY, "SYSTEM_SECURITY", dwRemain, &dwRemain);
-		psz += msvc_sprintf(psz, " remain(0x%x)\r\n", dwRemain);
+		psz += msvc_sprintf(psz, " remain(0x%x)\n", dwRemain);
 	}
 	return(psz);
 }
@@ -285,7 +285,7 @@ VfsStandardFlags(LPSTR Buffer, ACCESS_MASK Access, DWORD Type, LPCSTR Label)
 		psz = VfsFlagName(psz, WRITE_DAC, "WRITE_DAC", dwRemain, &dwRemain);
 		psz = VfsFlagName(psz, WRITE_OWNER, "WRITE_OWNER", dwRemain, &dwRemain);
 		psz = VfsFlagName(psz, SYNCHRONIZE, "SYNCHRONIZE", dwRemain, &dwRemain);
-		psz += msvc_sprintf(psz, " remain(0x%x)\r\n", dwRemain);
+		psz += msvc_sprintf(psz, " remain(0x%x)\n", dwRemain);
 	}
 	return(psz);
 }
@@ -377,7 +377,7 @@ VfsSpecificFlags(LPSTR Buffer, ACCESS_MASK Perms, DWORD Type, LPCSTR Label)
 			psz = VfsFlagName(psz, PROCESS_DUP_HANDLE, "DUP_HANDLE", dwRemain, &dwRemain);
 		}
 		psz = VfsFlagName(psz, PROCESS_QUERY_LIMITED_INFORMATION, "QUERY_LIMITED", dwRemain, &dwRemain);
-		psz += msvc_sprintf(psz, " remain(0x%x)\r\n", dwRemain);
+		psz += msvc_sprintf(psz, " remain(0x%x)\n", dwRemain);
 	}
 	return(psz);
 }
@@ -403,8 +403,8 @@ VfsPathFlags(LPSTR Buffer, LPCSTR Label, DWORD Flags)
 	psz = VfsFlagName(psz, WIN_ISSYMLINK, "ISSYMLINK", Flags, &Flags);
 	psz = VfsFlagName(psz, WIN_REQUIREDIR, "REQUIREDIR", Flags, &Flags);
 	psz = VfsFlagName(psz, WIN_PATHCOPY, "PATHCOPY", Flags, &Flags);
-	psz = VfsFlagName(psz, WIN_KEEPOBJECT, "KEEPOBJECT", Flags, &Flags);
-	psz += msvc_sprintf(psz, "[0x%x])\r\n", Flags);
+	psz = VfsFlagName(psz, WIN_STRIPSLASHES, "STRIPSLASHES", Flags, &Flags);
+	psz += msvc_sprintf(psz, "[0x%x])\n", Flags);
 	return(psz);
 }
 
@@ -413,52 +413,52 @@ VfsPathFlags(LPSTR Buffer, LPCSTR Label, DWORD Flags)
 VOID 
 VfsDebugTask(WIN_TASK *Task, LPCSTR Label)
 {
-	msvc_printf("%s(%d): Command(%ls) Parent(%d) Flags(0x%x) Status(0x%x) Depth(%d) Process(%d) Thread(%d) Handle(%d) Session(%d) Group(%d) CTTY(%d)\r\n", 
+	msvc_printf("%s(%d): Command(%ls) Parent(%d) Flags(0x%x) Status(0x%x) Depth(%d) Process(%d) Thread(%d) Handle(%d) Session(%d) Group(%d) CTTY(%d)\n", 
 		Label, Task->TaskId, __Strings[Task->TaskId].Command, Task->ParentId, Task->Flags, Task->Status, Task->Depth, Task->ProcessId, Task->ThreadId, Task->Handle, Task->SessionId, Task->GroupId, Task->CTTY);
 }
 VOID 
 VfsDebugStat(WIN_VATTR *Stat, LPCSTR Label)
 {
-	msvc_printf("%s(%d): Device(0x%x) Attribs(0x%x) Special(0x%x) Links(%d) Size(%d) Type(%s)\r\n", 
+	msvc_printf("%s(%d): Device(0x%x) Attribs(0x%x) Special(0x%x) Links(%d) Size(%d) Type(%s)\n", 
 		Label, Stat->VolumeSerialNumber, Stat->DeviceId, Stat->Attributes, Stat->SpecialId, Stat->NumberOfLinks, Stat->FileSizeLow, __FType[Stat->Mode.FileType]);
 }
 VOID 
 VfsDebugPoll(WIN_VNODE *Node, WIN_POLLFD *Info, LPCSTR Label)
 {
-	msvc_printf("%s(%d): Type(%s:%s) Handle(%d) Device(0x%x) Events(0x%x) Result(0x%x) Access(0x%x)\r\n", 
+	msvc_printf("%s(%d): Type(%s:%s) Handle(%d) Device(0x%x) Events(0x%x) Result(0x%x) Access(0x%x)\n", 
 		Label, Node->FileId, FSType(Node->FSType), __FType[Node->FileType], Node->Handle, Node->DeviceType, Info->Events, Info->Result, Node->Access);
 }
 VOID 
 VfsDebugInterface(MIB_IFROW *Interface, LPCSTR Label)
 {
-	msvc_printf("%s(%ls): Descript(%s)\r\n", 
+	msvc_printf("%s(%ls): Descript(%s)\n", 
 		Label, Interface->wszName, Interface->bDescr);
 }
 VOID 
 VfsDebugTime(SYSTEMTIME *Time, LPCSTR Label)
 {
-	msvc_printf("%s: wYear(%d) wMonth(%d) wDayOfWeek(%d) wDay(%d) wHour(%d) wMinute(%d) wSecond(%d) wMilliseconds(%d)\r\n",
+	msvc_printf("%s: wYear(%d) wMonth(%d) wDayOfWeek(%d) wDay(%d) wHour(%d) wMinute(%d) wSecond(%d) wMilliseconds(%d)\n",
 		Label, Time->wYear, Time->wMonth, Time->wDayOfWeek, Time->wDay, Time->wHour, Time->wMinute, Time->wSecond, Time->wMilliseconds);
 }
 VOID 
 VfsDebugTimer(WIN_TASK *Task, LPCSTR Label)
 {
-	msvc_printf("%s(%d): Timer(%d) Interval(%d) Ticks(%I64d)\r\n", 
+	msvc_printf("%s(%d): Timer(%d) Interval(%d) Ticks(%I64d)\n", 
 		Label, Task->TaskId, Task->Timer, Task->Interval, Task->Ticks);
 }
 VOID 
 VfsDebugLink(LINK_INFO *Info, LPSTR Label)
 {
-	msvc_printf("%s(%d): LinkInfoHeaderSize(%d) Flags(0x%x) VolumeIDOffset(%d)\r\n", 
+	msvc_printf("%s(%d): LinkInfoHeaderSize(%d) Flags(0x%x) VolumeIDOffset(%d)\n", 
 		Label, sizeof(SHELL_LINK_HEADER), Info->LinkInfoHeaderSize, Info->LinkInfoFlags, Info->VolumeIDOffset);
-	msvc_printf("+ LocalBasePathOffset(%d)\r\n", Info->LocalBasePathOffset);
-	msvc_printf("+ CommonNetworkRelativeLinkOffset(%d)\r\n", Info->CommonNetworkRelativeLinkOffset);
-	msvc_printf("+ CommonPathSuffixOffset(%d)\r\n", Info->CommonPathSuffixOffset);
+	msvc_printf("+ LocalBasePathOffset(%d)\n", Info->LocalBasePathOffset);
+	msvc_printf("+ CommonNetworkRelativeLinkOffset(%d)\n", Info->CommonNetworkRelativeLinkOffset);
+	msvc_printf("+ CommonPathSuffixOffset(%d)\n", Info->CommonPathSuffixOffset);
 }
 VOID 
 VfsDebugThread(WIN_THREAD_STRUCT *Thread, LPSTR Label)
 {
-	msvc_printf("%s: return(0x%lx) origin(0x%lx) size(0x%lx) source(0x%lx) dest(0x%lx) offset(0x%lx) Token(%lu) Flags(0x%x)\r\n", 
+	msvc_printf("%s: return(0x%lx) origin(0x%lx) size(0x%lx) source(0x%lx) dest(0x%lx) offset(0x%lx) Token(%lu) Flags(0x%x)\n", 
 		Label, Thread->raddr, Thread->origin, Thread->size, Thread->source, Thread->dest, Thread->offset, Thread->Token, Thread->Flags);
 }
 VOID 
@@ -484,9 +484,9 @@ vfs_VNODE(WIN_VNODE *Node, LPSTR Buffer)
 {
 	LPSTR psz = Buffer;
 
-	psz += msvc_sprintf(psz, "Type(%s:%s) Handle(%d) Object(%d) Event(%d) Index(%d) Access(0x%x) CloEx(%d)\r\n", 
+	psz += msvc_sprintf(psz, "Type(%s:%s) Handle(%d) Object(%d) Event(%d) Index(%d) Access(0x%x) CloEx(%d)\n", 
 		FSType(Node->FSType), FType(Node->FileType), Node->Handle, Node->Object, Node->Event, Node->Index, Node->Access, Node->CloseExec);
-	psz += msvc_sprintf(psz, "+ Device: Type(0x%x) Id(0x%x)\r\n", Node->DeviceType, Node->DeviceId);
+	psz += msvc_sprintf(psz, "+ Device: Type(0x%x) Id(0x%x)\n", Node->DeviceType, Node->DeviceId);
 	psz = VfsFileAttribs(psz, Node->Attribs);
 	psz = VfsFileFlags(psz, Node->Flags);
 	psz = VfsFileAccess(psz, Node->Access, OB_TYPE_FILE);
@@ -497,11 +497,11 @@ vfs_NAMEI(WIN_NAMEIDATA *Path, LPSTR Buffer)
 {
 	LPSTR psz = Buffer;
 
-	psz += msvc_sprintf(psz, "Resolved(%ls): MountId(%d) Object(%d) Size(%d) Type(%s:%s) DeviceId(0x%x)\r\n", 
+	psz += msvc_sprintf(psz, "Resolved(%ls): MountId(%d) Object(%d) Size(%d) Type(%s:%s) DeviceId(0x%x)\n", 
 		Path->Resolved, Path->MountId, Path->Object, Path->Size, FSType(Path->FSType), FType(Path->FileType), Path->DeviceId);
 	psz = VfsPathFlags(psz, "+ Flags", Path->Flags);
 	psz = VfsFileAttribs(psz, Path->Attribs);
-	psz += msvc_sprintf(psz, "+ Base: %ls\r\n", Path->Base);
+	psz += msvc_sprintf(psz, "+ Base: %ls\n", Path->Base);
 	return(psz - Buffer);
 }
 DWORD 
@@ -509,11 +509,11 @@ vfs_DEVICE(WIN_DEVICE *Device, LPSTR Buffer)
 {
 	LPSTR psz = Buffer;
 
-	psz += msvc_sprintf(psz, "Name(%s) Type(%s:%s) Flags(0x%x) Index(%d) I/O([%d][%d]) DevType(0x%x) DevId(0x%x)\r\n", 
+	psz += msvc_sprintf(psz, "Name(%s) Type(%s:%s) Flags(0x%x) Index(%d) I/O([%d][%d]) DevType(0x%x) DevId(0x%x)\n", 
 		Device->Name, FSType(Device->FSType), __FType[Device->FileType], Device->Flags, Device->Index, Device->Input, Device->Output, Device->DeviceType, Device->DeviceId);
-	psz += msvc_sprintf(psz, "+ ClassId: %ls\r\n", Device->ClassId);
-	psz += msvc_sprintf(psz, "+ NtName: %ls\r\n", Device->NtName);
-	psz += msvc_sprintf(psz, "+ NtPath: %ls\r\n", Device->NtPath);
+	psz += msvc_sprintf(psz, "+ ClassId: %ls\n", Device->ClassId);
+	psz += msvc_sprintf(psz, "+ NtName: %ls\n", Device->NtName);
+	psz += msvc_sprintf(psz, "+ NtPath: %ls\n", Device->NtPath);
 	return(psz - Buffer);
 }
 DWORD 
@@ -521,7 +521,7 @@ vfs_TTY(WIN_TTY *Terminal, LPSTR Buffer)
 {
 	LPSTR psz = Buffer;
 
-	psz += msvc_sprintf(psz, "Index(%d) Name(%s) Device(0x%x) Flags(0x%x) Group(%d) Session(%d) Row(%d) Col(%d)\r\n", 
+	psz += msvc_sprintf(psz, "Index(%d) Name(%s) Device(0x%x) Flags(0x%x) Group(%d) Session(%d) Row(%d) Col(%d)\n", 
 		Terminal->Index, Terminal->Name, Terminal->DeviceId, Terminal->Flags, Terminal->GroupId, Terminal->SessionId, Terminal->WinSize.Row, Terminal->WinSize.Column);
 //	psz = VfsTermFlags(psz, &Terminal->Mode, "+ mode");
 	return(psz - Buffer);
@@ -531,7 +531,7 @@ vfs_CONIN(DWORD Mode, LPSTR Buffer)
 {
 	LPSTR psz = Buffer;
 
-	psz += msvc_sprintf(psz, "\r\n");
+	psz += msvc_sprintf(psz, "\n");
 	psz = VfsInputMode(psz, "+ mode", Mode);
 	return(psz - Buffer);
 }
@@ -540,12 +540,12 @@ vfs_MOUNT(WIN_MOUNT *Mount, LPSTR Buffer)
 {
 	LPSTR psz = Buffer;
 
-	psz += msvc_sprintf(psz, "TypeName(%ls) MountId(%d) MaxPath(%d) DevType(0x%x) DevId(0x%x)\r\n", 
+	psz += msvc_sprintf(psz, "TypeName(%ls) MountId(%d) MaxPath(%d) DevType(0x%x) DevId(0x%x)\n", 
 		Mount->TypeName, Mount->MountId, Mount->MaxPath, Mount->DeviceType, Mount->DeviceId);
 	psz = VfsVolumeFlags(psz, "+ Flags", Mount->Flags);
-	psz += msvc_sprintf(psz, "+ Serial: %lu\r\n", Mount->Serial);
-	psz += msvc_sprintf(psz, "+ Label: %ls\r\n", Mount->Label);
-	psz += msvc_sprintf(psz, "+ Volume: %ls\r\n", Mount->Volume);
+	psz += msvc_sprintf(psz, "+ Serial: %lu\n", Mount->Serial);
+	psz += msvc_sprintf(psz, "+ Label: %ls\n", Mount->Label);
+	psz += msvc_sprintf(psz, "+ Volume: %ls\n", Mount->Volume);
 	return(psz - Buffer);
 }
 DWORD 
@@ -553,9 +553,9 @@ vfs_CFDATA(WIN_CFDATA *Config, LPSTR Buffer)
 {
 	LPSTR psz = Buffer;
 
-	psz += msvc_sprintf(psz, "NtName(%ls): Bus(%ls) FSType(%s), DosPath(%ls) Depth(%d) Class(%ls)\r\n", 
+	psz += msvc_sprintf(psz, "NtName(%ls): Bus(%ls) FSType(%s), DosPath(%ls) Depth(%d) Class(%ls)\n", 
 		Config->NtName, Config->BusName, FSType(Config->FSType), Config->DosPath, Config->Depth, Config->ClassName);
-	psz += msvc_sprintf(psz, "+ NtPath: %ls\r\n", Config->NtPath);
+	psz += msvc_sprintf(psz, "+ NtPath: %ls\n", Config->NtPath);
 	return(psz - Buffer);
 }
 DWORD 
@@ -563,10 +563,10 @@ vfs_STATFS(WIN_STATFS *Info, LPSTR Buffer)
 {
 	LPSTR psz = Buffer;
 
-	psz += msvc_sprintf(psz, "Type(%ls) DevId(0x%x) MaxPath(%d) ClustersTotal(%d) FreeClusters(%d)\r\n", 
+	psz += msvc_sprintf(psz, "Type(%ls) DevId(0x%x) MaxPath(%d) ClustersTotal(%d) FreeClusters(%d)\n", 
 		Info->TypeName, Info->DeviceId, Info->MaxPath, Info->ClustersTotal, Info->FreeClusters);
 	psz = VfsVolumeFlags(psz, "+ Flags", Info->Flags);
-	psz += msvc_sprintf(psz, "+ Path: %ls\r\n", Info->Path);
+	psz += msvc_sprintf(psz, "+ Path: %ls\n", Info->Path);
 	return(psz - Buffer);
 }
 

@@ -288,7 +288,7 @@ __fstatat(WIN_TASK *Task, int dirfd, const char *path, struct stat *buf, int fla
 		result = -EFAULT;
 	}else if (!path[0]){
 		result = -ENOENT;
-	}else if (!vfs_stat(pathat_win(&wPath, dirfd, path, flags | AT_OBJECT), &wStat)){
+	}else if (!vfs_stat(pathat_win(&wPath, dirfd, path, flags), &wStat)){
 		result -= errno_posix(GetLastError());
 	}else{
 		stat_posix(Task, buf, &wStat);
@@ -320,14 +320,15 @@ int
 __fchmodat(WIN_TASK *Task, int fd, const char *path, mode_t mode, int flag)
 {
 	int result = 0;
+	int atflags = flag | AT_NOCROSS;	/* sockets */
 	WIN_MODE wMode;
 	WIN_NAMEIDATA wPath = {0};
 
 	if (!path){
 		result = -EFAULT;
-	}else if (!*path){
+	}else if (!path[0]){
 		result = -ENOENT;
-	}else if (!vfs_chmod(pathat_win(&wPath, fd, path, flag), mode_win(&wMode, mode))){
+	}else if (!vfs_chmod(pathat_win(&wPath, fd, path, atflags), mode_win(&wMode, mode))){
 		result -= errno_posix(GetLastError());
 	}
 	return(result);

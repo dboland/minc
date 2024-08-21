@@ -53,7 +53,7 @@ SHGlobLink(WIN_NAMEIDATA *Path, LONG Depth)
 {
 	BOOL bResult = FALSE;
 
-	if (shell_readlink(Path, TRUE)){
+	if (shell_F_LOOKUP(Path, WIN_ISSYMLINK)){
 		if (!SHGlobType(L".lnk", Path)){
 			bResult = TRUE;
 		}else if (Depth >= WIN_SYMLOOP_MAX){

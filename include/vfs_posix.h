@@ -61,7 +61,7 @@ BOOL vfs_write(WIN_VNODE *Node, LPCVOID Buffer, DWORD Size, DWORD *Result);
 BOOL vfs_pwrite(WIN_VNODE *Node, LPCVOID Buffer, DWORD Size, DWORDLONG Offset, DWORD *Result);
 BOOL vfs_pread(WIN_VNODE *Node, LPVOID Buffer, DWORD Size, DWORDLONG Offset, DWORD *Result);
 VOID vfs_closefrom(WIN_VNODE Nodes[]);
-BOOL vfs_readlink(WIN_NAMEIDATA *Path, BOOL MakeReal);
+BOOL vfs_readlink(WIN_NAMEIDATA *Path);
 BOOL vfs_symlink(WIN_NAMEIDATA *Path, WIN_NAMEIDATA *Target);
 
 /* vfs_syscall.c */
@@ -213,8 +213,6 @@ BOOL drive_statfs(WIN_MOUNT *Mount, WIN_STATFS *Result);
 
 BOOL disk_chflags(WIN_NAMEIDATA *Path, DWORD Attributes);
 BOOL disk_futimes(WIN_VNODE *Node, FILETIME FileTime[2]);
-//BOOL disk_readlink(WIN_NAMEIDATA *Path, BOOL MakeReal);
-//BOOL disk_symlink(WIN_NAMEIDATA *Path, WIN_NAMEIDATA *Target);
 BOOL disk_HW_DISKNAMES(WIN_DEVICE *Device, LPSTR Result);
 
 /* registry.c */
