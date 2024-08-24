@@ -460,10 +460,10 @@ vfs_readlink(WIN_NAMEIDATA *Path)
 
 	switch (Path->FSType){
 		case FS_TYPE_DISK:
-			bResult = disk_F_LOOKUP(Path, 0);
+			bResult = disk_readlink(Path);
 			break;
 		case FS_TYPE_SHELL:
-			bResult = shell_F_LOOKUP(Path, 0);
+			bResult = shell_readlink(Path);
 			break;
 		default:
 			SetLastError(ERROR_BAD_FILE_TYPE);

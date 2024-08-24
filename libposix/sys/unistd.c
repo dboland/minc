@@ -163,20 +163,21 @@ int
 sys_rmdir(call_t call, const char *pathname)
 {
 	int result = 0;
+	int atflags = AT_SYMLINK_NOFOLLOW | AT_NOSLASH;
 	WIN_NAMEIDATA wPath = {0};
 
-	if (!vfs_rmdir(path_win(&wPath, pathname, O_NOFOLLOW))){
+	if (!vfs_rmdir(pathat_win(&wPath, AT_FDCWD, pathname, atflags))){
 		result -= errno_posix(GetLastError());
 	}
 	return(result);
 }
 int 
-__linkat(WIN_NAMEIDATA *Path, int fd2, const char *name2, int flag)
+__linkat(WIN_NAMEIDATA *Target, int fd2, const char *name2, int flag)
 {
 	int result = 0;
-	WIN_NAMEIDATA wpNew = {0};
+	WIN_NAMEIDATA wPath = {0};
 
-	if (!vfs_link(Path, pathat_win(&wpNew, fd2, name2, flag))){
+	if (!vfs_link(Target, pathat_win(&wPath, fd2, name2, flag))){
 		result -= errno_posix(GetLastError());
 	}
 	return(result);
@@ -186,14 +187,18 @@ sys_link(call_t call, const char *name1, const char *name2)
 {
 	WIN_NAMEIDATA wPath = {0};
 
-	return(__linkat(path_win(&wPath, name1, 0), AT_FDCWD, name2, AT_SYMLINK_FOLLOW));
+	return(__linkat(path_win(&wPath, name1, 0), AT_FDCWD, name2, AT_SYMLINK_NOFOLLOW));
 }
 int 
 sys_linkat(call_t call, int fd1, const char *name1, int fd2, const char *name2, int flag)
 {
+	int atflag = AT_SYMLINK_NOFOLLOW;
 	WIN_NAMEIDATA wPath = {0};
 
-	return(__linkat(pathat_win(&wPath, fd1, name1, flag), fd2, name2, flag));
+	if (flag & AT_SYMLINK_FOLLOW){
+		atflag = 0;
+	}
+	return(__linkat(pathat_win(&wPath, fd1, name1, atflag), fd2, name2, flag));
 }
 int 
 __unlinkat(WIN_TASK *Task, int fd, const char *path, int flag)
@@ -306,13 +311,14 @@ ssize_t
 __readlinkat(WIN_TASK *Task, int dirfd, const char *path, char *buf, size_t bufsiz)
 {
 	ssize_t result = 0;
+	int atflags = AT_SYMLINK_NOFOLLOW | AT_OBJECT;
 	WIN_NAMEIDATA wPath = {0};
 
 	if (!path){
 		result = -EFAULT;
 	}else if (!path[0]){
 		result = -ENOENT;
-	}else if (!vfs_readlink(pathat_win(&wPath, dirfd, path, AT_SYMLINK_NOFOLLOW))){
+	}else if (!vfs_readlink(pathat_win(&wPath, dirfd, path, atflags))){
 		result -= errno_posix(GetLastError());
 	}else{
 		result = pathnp_posix(buf, wPath.Resolved, bufsiz, TRUE) - buf;

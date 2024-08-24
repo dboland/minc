@@ -40,7 +40,7 @@ vfs_fstat(WIN_VNODE *Node, WIN_VATTR *Result)
 	switch (Node->FSType){
 		case FS_TYPE_CHAR:
 		case FS_TYPE_PDO:
-			bResult = char_fstat(Node, Result);
+			bResult = pdo_fstat(Node, Result);
 			break;
 		case FS_TYPE_PIPE:
 			bResult = pipe_fstat(Node, Result);
@@ -123,7 +123,7 @@ vfs_mknod(WIN_NAMEIDATA *Path, WIN_MODE *Mode, DWORD DeviceId)
 	HANDLE hNode;
 
 	hNode = CreateFileW(Path->Resolved, GENERIC_WRITE, FILE_SHARE_READ, 
-		NULL, CREATE_ALWAYS, FILE_CLASS_INODE, NULL);
+		NULL, CREATE_NEW, FILE_CLASS_INODE, NULL);
 	if (hNode == INVALID_HANDLE_VALUE){
 		return(FALSE);
 	}else if (!WriteFile(hNode, &iNode, sizeof(WIN_INODE), &dwResult, NULL)){

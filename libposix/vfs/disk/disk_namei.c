@@ -58,17 +58,19 @@ disk_lookup(WIN_NAMEIDATA *Path, DWORD Flags)
 
 	if (!VfsStatNode(Path, Flags)){
 		return(FALSE);
-	}else if (!(Flags & WIN_FOLLOW)){
+	}else if (Flags & WIN_REQUIREOBJECT){
 		bResult = TRUE;
+	}else if (!(Flags & WIN_FOLLOW)){
+		bResult = CloseHandle(Path->Object);
 	}else switch (Path->FSType){
 		case FS_TYPE_DISK:
-			bResult = disk_F_LOOKUP(Path, WIN_ISSYMLINK);
+			bResult = disk_F_LOOKUP(Path, Flags | WIN_ISSYMLINK);
 			break;
 		case FS_TYPE_PIPE:
 			bResult = pipe_F_LOOKUP(Path, Flags);
 			break;
 		case FS_TYPE_PDO:
-			bResult = pdo_F_LOOKUP(Path, DEVICE(Path->DeviceId));
+			bResult = pdo_F_LOOKUP(Path, Flags);
 			break;
 		default:
 			SetLastError(ERROR_BAD_FILE_TYPE);

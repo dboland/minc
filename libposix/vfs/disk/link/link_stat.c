@@ -38,9 +38,8 @@ link_stat(WIN_NAMEIDATA *Path, WIN_VATTR *Result)
 	BOOL bResult = FALSE;
 
 	if (VfsStatHandle(Path->Object, Result)){
-		Result->DeviceId = __Mounts->DeviceId;
+		Result->DeviceId = __Mounts[Path->MountId].DeviceId;
 		Result->Mode.FileType = Path->FileType;
-		Result->SpecialId = Path->DeviceId;
 		bResult = CloseHandle(Path->Object);
 	}
 	return(bResult);

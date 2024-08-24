@@ -33,15 +33,28 @@
 /****************************************************/
 
 BOOL 
+pdo_fstat(WIN_VNODE *Node, WIN_VATTR *Result)
+{
+	BOOL bResult = FALSE;
+
+	if (VfsStatHandle(Node->Object, Result)){
+		Result->DeviceId = __Mounts->DeviceId;
+		Result->Mode.FileType = Node->FileType;
+		Result->SpecialId = Node->DeviceId;
+		bResult = TRUE;
+	}
+	return(bResult);
+}
+BOOL 
 pdo_stat(WIN_NAMEIDATA *Path, WIN_VATTR *Result)
 {
 	BOOL bResult = FALSE;
 
-	if (VfsStatHandle(Path->Object, Result)){
+	if (VfsStatFile(Path->Resolved, FILE_ATTRIBUTE_NORMAL, Result)){
 		Result->DeviceId = __Mounts->DeviceId;
 		Result->Mode.FileType = Path->FileType;
 		Result->SpecialId = Path->DeviceId;
-		bResult = CloseHandle(Path->Object);
+		bResult = TRUE;
 	}
 	return(bResult);
 }

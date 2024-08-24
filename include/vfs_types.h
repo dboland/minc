@@ -196,6 +196,8 @@ typedef struct _WIN_NAMEIDATA {
 } WIN_NAMEIDATA;
 
 #define WIN_PATHCOPY		0x00400000
+#define WIN_REQUIREDEVICE	0x00800000
+#define WIN_REQUIREOBJECT	0x01000000
 
 /* sys/namei.h */
 

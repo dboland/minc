@@ -132,6 +132,12 @@ pathat_win(WIN_NAMEIDATA *Result, int dirfd, const char *path, int atflags)
 	if (atflags & AT_NOSLASH){
 		dwFlags |= WIN_STRIPSLASHES;
 	}
+	if (atflags & AT_DEVICE){
+		dwFlags |= WIN_REQUIREDEVICE;
+	}
+	if (atflags & AT_OBJECT){
+		dwFlags |= WIN_REQUIREOBJECT;
+	}
 
 	Result->MountId = 0;
 	Result->DeviceId = DEV_TYPE_ROOT;
@@ -179,6 +185,12 @@ path_win(WIN_NAMEIDATA *Result, const char *path, int flags)
 	}
 	if (flags & O_DIRECTORY){
 		atflags |= AT_REMOVEDIR;
+	}
+	if (flags & O_DEVICE){
+		atflags |= AT_DEVICE;
+	}
+	if (flags & O_OBJECT){
+		atflags |= AT_OBJECT;
 	}
 	return(pathat_win(Result, AT_FDCWD, path, atflags));
 }

@@ -125,6 +125,7 @@ ScreenTabulator(HANDLE Handle, UINT Flags, CONSOLE_SCREEN_BUFFER_INFO *Info)
 	}else if (GetConsoleScreenBufferInfo(Handle, &csbInfo)){
 		Info->dwCursorPosition = csbInfo.dwCursorPosition;
 	}
+	return(TRUE);
 }
 VOID 
 ScreenControl(HANDLE Handle, UINT Flags, CONSOLE_SCREEN_BUFFER_INFO *Info)

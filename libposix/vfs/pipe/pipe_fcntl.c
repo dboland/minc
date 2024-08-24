@@ -93,9 +93,10 @@ pipe_F_LOOKUP(WIN_NAMEIDATA *Path, DWORD Flags)
 	BOOL bResult = FALSE;
 	DWORD dwResult;
 
-	if (Flags & WIN_NOCROSSMOUNT){
-		bResult = CloseHandle(Path->Object);
-	}else if (ReadFile(Path->Object, Path->Resolved, Path->Size, &dwResult, NULL)){
+//	if (Flags & WIN_NOCROSSMOUNT){
+//		bResult = CloseHandle(Path->Object);
+//	}else 
+	if (ReadFile(Path->Object, Path->Resolved, Path->Size, &dwResult, NULL)){
 		Path->Last = Path->R - 1;
 		bResult = CloseHandle(Path->Object);
 	}else{
@@ -109,7 +110,6 @@ pipe_F_LOOKUP(WIN_NAMEIDATA *Path, DWORD Flags)
 BOOL 
 pipe_open(WIN_DEVICE *Device, WIN_FLAGS *Flags, WIN_VNODE *Result)
 {
-//	Device->Event = CreateEvent(NULL, FALSE, FALSE, NULL);
 	Result->DeviceType = Device->DeviceType;
 	Result->DeviceId = Device->DeviceId;
 	Result->Event = Device->Event;

@@ -185,7 +185,7 @@ win_readlink(LPCWSTR Path, SHELL_LINK_HEADER *Header, LPWSTR Target)
 	hFile = CreateFileW(Path, FILE_READ_DATA, FILE_SHARE_READ, 
 		NULL, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, NULL);
 	if (hFile == INVALID_HANDLE_VALUE){
-		return(FALSE);
+		WIN_ERR("CreateFile(%ls): %s\n", Path, win_strerror(GetLastError()));
 	}else if (!ReadFile(hFile, Header, sizeof(SHELL_LINK_HEADER), &dwResult, NULL)){
 		WIN_ERR("ReadFile(%ls): %s\n", Path, win_strerror(GetLastError()));
 	}else if (!IsEqualGUID(&Header->LinkCLSID, &CLSID_ShellLink)){

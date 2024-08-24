@@ -53,6 +53,8 @@ SHGlobLink(WIN_NAMEIDATA *Path, LONG Depth)
 {
 	BOOL bResult = FALSE;
 
+	/* Return invalid Shell links as regular files.
+	 */
 	if (shell_F_LOOKUP(Path, WIN_ISSYMLINK)){
 		if (!SHGlobType(L".lnk", Path)){
 			bResult = TRUE;
@@ -61,6 +63,9 @@ SHGlobLink(WIN_NAMEIDATA *Path, LONG Depth)
 		}else{
 			bResult = SHGlobLink(Path, Depth + 1);
 		}
+	}else{
+		bResult = TRUE;
+//		vfs_ktrace("SHGlobLink", STRUCT_NAMEI, Path);
 	}
 	return(bResult);
 }

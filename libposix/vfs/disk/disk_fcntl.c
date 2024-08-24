@@ -55,7 +55,9 @@ disk_F_LOOKUP(WIN_NAMEIDATA *Path, DWORD Flags)
 	DWORD dwResult;
 	LPWSTR pszBase = Path->Resolved;
 
-	if (ReadFile(Path->Object, szBuffer, Path->Size, &dwResult, NULL)){
+	if (!ReadFile(Path->Object, szBuffer, Path->Size, &dwResult, NULL)){
+		WIN_ERR("ReadFile(%ls): %s\n", Path->Resolved, win_strerror(GetLastError()));
+	}else{
 		if (szBuffer[1] == ':'){
 			Path->MountId = MOUNTID(szBuffer[0]);	/* nano.exe */
 		}else if (szBuffer[1] == '\\'){
@@ -68,8 +70,6 @@ disk_F_LOOKUP(WIN_NAMEIDATA *Path, DWORD Flags)
 		Path->Attribs = GetFileAttributesW(Path->Resolved);
 		Path->FileType = WIN_VREG;
 		bResult = CloseHandle(Path->Object);
-//	}else{
-//		WIN_ERR("disk_F_LOOKUP(%d): %s\n", Path->Object, win_strerror(GetLastError()));
 	}
 	return(bResult);
 }

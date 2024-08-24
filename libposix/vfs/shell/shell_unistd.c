@@ -51,3 +51,15 @@ shell_unlink(WIN_NAMEIDATA *Path)
 {
 	return(DeleteFileW(Path->Resolved));
 }
+BOOL 
+shell_readlink(WIN_NAMEIDATA *Path)
+{
+	BOOL bResult = FALSE;
+
+	if (Path->FileType != WIN_VLNK){		/* git.exe */
+		SetLastError(ERROR_BAD_ARGUMENTS);
+	}else{
+		bResult = shell_F_LOOKUP(Path, 0);
+	}
+	return(bResult);
+}

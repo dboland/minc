@@ -71,7 +71,7 @@ file_ioctl(WIN_TASK *Task, int fd, unsigned long request, va_list args)
 		case FIONREAD:
 			result = file_FIONREAD(pvNode, va_arg(args, int *));
 			break;
-		case FIOCLEX:	/* python.exe */
+		case FIOCLEX:			/* python.exe */
 			pvNode->CloseExec = TRUE;
 			break;
 		case FIONCLEX:

@@ -43,10 +43,14 @@
 
 /* sys/fcntl.c */
 
-#define O_NOCROSS		0x1000
+#define O_NOCROSS		0x00001000
+#define O_DEVICE		0x00002000
+#define O_OBJECT		0x00004000
 
-#define AT_NOCROSS		0x10
-#define AT_NOSLASH		0x20
+#define AT_NOCROSS		0x0010
+#define AT_NOSLASH		0x0020
+#define AT_DEVICE		0x0040
+#define AT_OBJECT		0x0080
 
 /* sys/signal.c */
 

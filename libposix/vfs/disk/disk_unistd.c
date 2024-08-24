@@ -185,3 +185,16 @@ disk_pwrite(WIN_VNODE *Node, LPCVOID Buffer, DWORD Size, DWORDLONG Offset, DWORD
 	}
 	return(bResult);
 }
+BOOL 
+disk_readlink(WIN_NAMEIDATA *Path)
+{
+	BOOL bResult = FALSE;
+
+//vfs_ktrace("disk_readlink", STRUCT_NAMEI, Path);
+	if (Path->FileType != WIN_VLNK){		/* git.exe */
+		SetLastError(ERROR_BAD_ARGUMENTS);
+	}else{
+		bResult = disk_F_LOOKUP(Path, 0);
+	}
+	return(bResult);
+}

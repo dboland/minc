@@ -301,7 +301,7 @@ __fstatat(WIN_TASK *Task, int dirfd, const char *path, struct stat *buf, int fla
 int 
 sys_lstat(call_t call, const char *path, struct stat *buf)
 {
-	return(__fstatat(call.Task, AT_FDCWD, path, buf, AT_SYMLINK_NOFOLLOW));
+	return(__fstatat(call.Task, AT_FDCWD, path, buf, AT_SYMLINK_NOFOLLOW | AT_OBJECT));
 }
 int 
 sys_fstatat(call_t call, int dirfd, const char *path, struct stat *buf, int flag)
@@ -401,7 +401,7 @@ __mknodat(WIN_TASK *Task, int fd, const char *path, mode_t mode, dev_t dev)
 	WIN_NAMEIDATA wPath = {0};
 	WIN_MODE wMode;
 
-	if (!vfs_mknod(pathat_win(&wPath, fd, path, AT_SYMLINK_NOFOLLOW), mode_win(&wMode, mode), dev)){
+	if (!vfs_mknod(pathat_win(&wPath, fd, path, 0), mode_win(&wMode, mode), dev)){
 		result -= errno_posix(GetLastError());
 	}
 	return(result);
@@ -424,7 +424,7 @@ __mkdirat(WIN_TASK *Task, int dirfd, const char *pathname, mode_t mode)
 	WIN_NAMEIDATA wPath = {0};
 
 	mode &= (~Task->FileMask & 00777);
-	if (!vfs_mkdir(pathat_win(&wPath, dirfd, pathname, AT_SYMLINK_NOFOLLOW), mode_win(&wMode, mode))){
+	if (!vfs_mkdir(pathat_win(&wPath, dirfd, pathname, 0), mode_win(&wMode, mode))){
 		result -= errno_posix(GetLastError());
 	}
 	return(result);
@@ -447,7 +447,7 @@ sys_mkfifoat(call_t call, int dirfd, const char *pathname, mode_t mode)
 	WIN_NAMEIDATA wPath = {0};
 	WIN_VNODE vNode = {0};
 
-	if (!vfs_mkfifo(pathat_win(&wPath, dirfd, pathname, AT_SYMLINK_NOFOLLOW), mode_win(&wMode, mode), &vNode)){
+	if (!vfs_mkfifo(pathat_win(&wPath, dirfd, pathname, 0), mode_win(&wMode, mode), &vNode)){
 		result -= errno_posix(GetLastError());
 	}else{
 		result = fd_posix(call.Task, &vNode, 0);
