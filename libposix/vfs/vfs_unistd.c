@@ -215,6 +215,7 @@ vfs_access(WIN_NAMEIDATA *Path, ACCESS_MASK Access)
 	}else if (!AccessCheck(psd, hToken, Access, &map, &priv, &dwSize, &amGranted, &bResult)){
 		WIN_ERR("AccessCheck(%ls): %s\n", Path->Resolved, win_strerror(GetLastError()));
 	}
+//vfs_ktrace("amGranted", STRUCT_ACCESS, &amGranted);
 	CloseHandle(hToken);
 	LocalFree(psd);
 	return(bResult);
@@ -226,10 +227,9 @@ vfs_chdir(WIN_TASK *Task, WIN_NAMEIDATA *Path)
 
 	/* perl.exe creates really weird paths.
 	 */
-//vfs_ktrace("vfs_chdir", STRUCT_NAMEI, Path);
 	if (Path->FileType != WIN_VDIR){
 		SetLastError(ERROR_DIRECTORY);
-	}else if (!vfs_access(Path, WIN_S_IRX)){
+	}else if (!vfs_access(Path, WIN_S_IEXEC)){	/* network drives (Synology) */
 		return(FALSE);
 	}else if (win_realpath(Path->Resolved, WIN_PATH_MAX, __Strings[Task->TaskId].Path)){
 		win_wcscpy(__Strings[Task->TaskId].Path, Path->Resolved);

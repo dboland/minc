@@ -42,7 +42,7 @@ PathRead(WIN_NAMEIDATA *Path, DWORD Flags)
 	*R++ = '\\';
 	Path->Base = R;
 	while (C = *S){
-		*S++;
+		S++;
 		if (C == '/'){
 			break;
 		}else if (C == ':'){	/* perl.exe */
@@ -145,7 +145,6 @@ vfs_lookup(WIN_NAMEIDATA *Path, LPWSTR Source, DWORD Flags)
 		}
 	}
 	PathClose(Path, Flags);
-//vfs_ktrace("vfs_lookup", STRUCT_NAMEI, Path);
 	return(Path);
 }
 BOOL 

@@ -44,8 +44,9 @@
 /* sys/fcntl.c */
 
 #define O_NOCROSS		0x00001000
-#define O_DEVICE		0x00002000
-#define O_OBJECT		0x00004000
+#define O_NOSLASH		0x00002000
+#define O_DEVICE		0x00004000
+#define O_OBJECT		0x00008000
 
 #define AT_NOCROSS		0x0010
 #define AT_NOSLASH		0x0020

@@ -320,7 +320,7 @@ int
 __fchmodat(WIN_TASK *Task, int fd, const char *path, mode_t mode, int flag)
 {
 	int result = 0;
-	int atflags = flag | AT_NOCROSS;	/* sockets */
+	int atflags = flag | AT_DEVICE;		/* syslogd.exe */
 	WIN_MODE wMode;
 	WIN_NAMEIDATA wPath = {0};
 

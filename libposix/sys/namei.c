@@ -186,6 +186,9 @@ path_win(WIN_NAMEIDATA *Result, const char *path, int flags)
 	if (flags & O_DIRECTORY){
 		atflags |= AT_REMOVEDIR;
 	}
+	if (flags & O_NOSLASH){
+		atflags |= AT_NOSLASH;
+	}
 	if (flags & O_DEVICE){
 		atflags |= AT_DEVICE;
 	}

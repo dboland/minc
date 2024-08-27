@@ -569,6 +569,15 @@ vfs_STATFS(WIN_STATFS *Info, LPSTR Buffer)
 	psz += msvc_sprintf(psz, "+ Path: %ls\n", Info->Path);
 	return(psz - Buffer);
 }
+DWORD 
+vfs_ACCESS(ACCESS_MASK Access, LPSTR Buffer)
+{
+	LPSTR psz = Buffer;
+
+	psz += msvc_sprintf(psz, "(0x%x)\n", Access);
+	psz = VfsFileAccess(psz, Access, OB_TYPE_FILE);
+	return(psz - Buffer);
+}
 
 /****************************************************/
 
@@ -602,6 +611,9 @@ vfs_ktrace(LPCSTR Label, STRUCT_TYPE Type, PVOID Data)
 		case STRUCT_STATFS:
 			vfs_STATFS((WIN_STATFS *)Data, szText);
 			break;
+		case STRUCT_ACCESS:
+			vfs_ACCESS(*(ACCESS_MASK *)Data, szText);
+			break;
 	}
-	msvc_printf("%s: %s", Label, szText);
+	msvc_printf("%s%s", Label, szText);
 }

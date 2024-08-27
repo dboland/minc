@@ -263,19 +263,19 @@ sys___getcwd(call_t call, char *buf, size_t size)
 	WIN_TASK *pwTask = call.Task;
 
 	pathn_posix(buf, __Strings[pwTask->TaskId].Path, size);
-	if (pwTask->Flags & PS_TRACED){
+	if (pwTask->TracePoints & KTRFAC_NAMEI){
 		ktrace_NAMEI(pwTask, buf, win_strlen(buf));
 	}
 	return(0);
 }
 int 
-sys_fchdir(call_t call, int fildes)
+sys_fchdir(call_t call, int fd)
 {
 	int result = 0;
 	WIN_NAMEIDATA wPath = {0};
 	WIN_TASK *pwTask = call.Task;
 
-	if (!vfs_chdir(pwTask, pathat_win(&wPath, fildes, "", 0))){
+	if (!vfs_chdir(pwTask, pathat_win(&wPath, fd, "", 0))){
 		result -= errno_posix(GetLastError());
 	}
 	return(result);
@@ -287,7 +287,7 @@ sys_chdir(call_t call, const char *path)
 	WIN_NAMEIDATA wPath = {0};
 	WIN_TASK *pwTask = call.Task;
 
-	if (!vfs_chdir(pwTask, path_win(&wPath, path, 0))){
+	if (!vfs_chdir(pwTask, path_win(&wPath, path, O_NOSLASH))){
 		result -= errno_posix(GetLastError());
 	}
 	return(result);
