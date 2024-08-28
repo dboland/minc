@@ -55,11 +55,17 @@ BOOL
 shell_readlink(WIN_NAMEIDATA *Path)
 {
 	BOOL bResult = FALSE;
+	SHELL_LINK_HEADER slHead;
+	WCHAR szBuffer[MAX_PATH];
 
-	if (Path->FileType != WIN_VLNK){		/* git.exe */
-		SetLastError(ERROR_BAD_ARGUMENTS);
-	}else{
-		bResult = shell_F_LOOKUP(Path, 0);
+	if (win_readlink(Path->Resolved, &slHead, szBuffer)){
+		if (szBuffer[1] == ':'){
+			Path->MountId = MOUNTID(szBuffer[0]);
+		}
+		Path->R = win_wcpcpy(Path->Resolved, szBuffer);
+		Path->Last = Path->R - 1;
+		Path->Attribs = slHead.FileAttributes;
+		bResult = TRUE;
 	}
 	return(bResult);
 }

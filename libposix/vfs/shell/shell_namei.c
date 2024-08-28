@@ -49,41 +49,16 @@ SHGlobType(LPCWSTR TypeName, WIN_NAMEIDATA *Path)
 	return(bResult);
 }
 BOOL 
-SHGlobLink(WIN_NAMEIDATA *Path, LONG Depth)
-{
-	BOOL bResult = FALSE;
-
-	/* Return invalid Shell links as regular files.
-	 */
-	if (shell_F_LOOKUP(Path, WIN_ISSYMLINK)){
-		if (!SHGlobType(L".lnk", Path)){
-			bResult = TRUE;
-		}else if (Depth >= WIN_SYMLOOP_MAX){
-			SetLastError(ERROR_TOO_MANY_LINKS);
-		}else{
-			bResult = SHGlobLink(Path, Depth + 1);
-		}
-	}else{
-		bResult = TRUE;
-//		vfs_ktrace("SHGlobLink", STRUCT_NAMEI, Path);
-	}
-	return(bResult);
-}
-
-/****************************************************/
-
-BOOL 
-shell_lookup(WIN_NAMEIDATA *Path, DWORD Flags)
+SHGlobLink(WIN_NAMEIDATA *Path, DWORD Flags)
 {
 	BOOL bResult = TRUE;
 
 	if (!SHGlobType(L".lnk", Path)){
 		bResult = FALSE;
 	}else if (Flags & WIN_FOLLOW){
-		bResult = SHGlobLink(Path, 0);
+		bResult = shell_readlink(Path);
 	}else{
 		Path->FSType = FS_TYPE_SHELL;
-		Path->Attribs |= FILE_ATTRIBUTE_SYMLINK;
 	}
 	return(bResult);
 }

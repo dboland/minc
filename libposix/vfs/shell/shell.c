@@ -28,7 +28,6 @@
  *
  */
 
-#include "shell_fcntl.c"
 #include "shell_unistd.c"
 #include "shell_namei.c"
 #include "shell_stat.c"

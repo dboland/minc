@@ -87,7 +87,7 @@ PathGlob(WIN_NAMEIDATA *Path, DWORD Flags)
 
 	switch (Path->Attribs){
 		case -1:
-			bResult = shell_lookup(Path, Flags);
+			bResult = FALSE;
 			break;
 		case FILE_CLASS_INODE:
 			bResult = disk_lookup(Path, Flags);
@@ -117,11 +117,11 @@ PathClose(WIN_NAMEIDATA *Path, DWORD Flags)
 	if (PathGlob(Path, Flags)){
 		if (Path->Attribs & FILE_ATTRIBUTE_DIRECTORY){
 			Path->FileType = WIN_VDIR;
-		}else if (Path->Attribs & FILE_ATTRIBUTE_SYMLINK){
-			Path->FileType = WIN_VLNK;
 		}
 	}else if (SHGlobType(L".exe", Path)){
 		Path->FileType = WIN_VREG;
+	}else if (SHGlobLink(Path, Flags)){
+		Path->FileType = WIN_VLNK;
 //	}else{
 //		vfs_ktrace("PathClose", STRUCT_NAMEI, Path);
 	}
@@ -134,7 +134,7 @@ WIN_NAMEIDATA *
 vfs_lookup(WIN_NAMEIDATA *Path, LPWSTR Source, DWORD Flags)
 {
 	PathOpen(Path, Source, Flags);
-	if (Flags & WIN_PATHCOPY){
+	if (Flags & WIN_PATHCOPY){	/* vfs_symlink() */
 		PathCopy(Path);
 	}else while (PathRead(Path, Flags)){
 		if (!PathGlob(Path, WIN_FOLLOW)){

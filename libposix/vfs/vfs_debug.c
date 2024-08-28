@@ -122,7 +122,7 @@ VfsFileAttribs(LPSTR Buffer, DWORD Attribs)
 		psz = VfsFlagName(psz, FILE_ATTRIBUTE_READONLY, "READONLY", Attribs, &Attribs);
 		psz = VfsFlagName(psz, FILE_ATTRIBUTE_HIDDEN, "HIDDEN", Attribs, &Attribs);
 		psz = VfsFlagName(psz, FILE_ATTRIBUTE_SYSTEM, "SYSTEM", Attribs, &Attribs);
-		psz = VfsFlagName(psz, FILE_ATTRIBUTE_SYMLINK, "SYMLINK", Attribs, &Attribs);
+		psz = VfsFlagName(psz, FILE_ATTRIBUTE_LABEL, "LABEL", Attribs, &Attribs);
 		psz = VfsFlagName(psz, FILE_ATTRIBUTE_DIRECTORY, "DIRECTORY", Attribs, &Attribs);
 		psz = VfsFlagName(psz, FILE_ATTRIBUTE_ARCHIVE, "ARCHIVE", Attribs, &Attribs);
 		psz = VfsFlagName(psz, FILE_ATTRIBUTE_DEVICE, "DEVICE", Attribs, &Attribs);
@@ -402,8 +402,10 @@ VfsPathFlags(LPSTR Buffer, LPCSTR Label, DWORD Flags)
 	psz = VfsFlagName(psz, WIN_NOCROSSMOUNT, "NOCROSSMOUNT", Flags, &Flags);
 	psz = VfsFlagName(psz, WIN_ISSYMLINK, "ISSYMLINK", Flags, &Flags);
 	psz = VfsFlagName(psz, WIN_REQUIREDIR, "REQUIREDIR", Flags, &Flags);
-	psz = VfsFlagName(psz, WIN_PATHCOPY, "PATHCOPY", Flags, &Flags);
 	psz = VfsFlagName(psz, WIN_STRIPSLASHES, "STRIPSLASHES", Flags, &Flags);
+	psz = VfsFlagName(psz, WIN_PATHCOPY, "PATHCOPY", Flags, &Flags);
+	psz = VfsFlagName(psz, WIN_REQUIREDEVICE, "REQUIREDEVICE", Flags, &Flags);
+	psz = VfsFlagName(psz, WIN_REQUIREOBJECT, "REQUIREOBJECT", Flags, &Flags);
 	psz += msvc_sprintf(psz, "[0x%x])\n", Flags);
 	return(psz);
 }
@@ -497,8 +499,9 @@ vfs_NAMEI(WIN_NAMEIDATA *Path, LPSTR Buffer)
 {
 	LPSTR psz = Buffer;
 
-	psz += msvc_sprintf(psz, "Resolved(%ls): MountId(%d) Object(%d) Size(%d) Type(%s:%s) DeviceId(0x%x)\n", 
-		Path->Resolved, Path->MountId, Path->Object, Path->Size, FSType(Path->FSType), FType(Path->FileType), Path->DeviceId);
+	psz += msvc_sprintf(psz, "(%ls):\n", Path->Resolved);
+	psz += msvc_sprintf(psz, "+ MountId(%d) Object(%d) Size(%d) Type(%s:%s) DeviceId(0x%x)\n", 
+		Path->MountId, Path->Object, Path->Size, FSType(Path->FSType), FType(Path->FileType), Path->DeviceId);
 	psz = VfsPathFlags(psz, "+ Flags", Path->Flags);
 	psz = VfsFileAttribs(psz, Path->Attribs);
 	psz += msvc_sprintf(psz, "+ Base: %ls\n", Path->Base);
