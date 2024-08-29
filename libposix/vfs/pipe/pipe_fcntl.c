@@ -96,7 +96,6 @@ pipe_F_LOOKUP(WIN_NAMEIDATA *Path, DWORD Flags)
 	if (Flags & WIN_REQUIREDEVICE){
 		bResult = CloseHandle(Path->Object);
 	}else if (ReadFile(Path->Object, Path->Resolved, Path->Size, &dwResult, NULL)){
-		Path->Last = Path->R - 1;
 		bResult = CloseHandle(Path->Object);
 	}else{
 		WIN_ERR("ReadFile(%d): %s\n", Path->Object, win_strerror(GetLastError()));

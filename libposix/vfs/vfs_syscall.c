@@ -82,7 +82,7 @@ VfsStatFile(LPCWSTR FileName, DWORD Attribs, WIN_VATTR *Result)
 	return(bResult);
 }
 BOOL 
-VfsStatNode(WIN_NAMEIDATA *Path, DWORD Flags)
+VfsOpenNode(WIN_NAMEIDATA *Path, DWORD Flags)
 {
 	BOOL bResult = FALSE;
 	WIN_INODE iNode;

@@ -439,9 +439,6 @@ vfs_symlink(WIN_NAMEIDATA *Path, WIN_NAMEIDATA *Target)
 	HANDLE hNode;
 
 //vfs_ktrace("vfs_symlink", STRUCT_NAMEI, Target);
-//	if (*Target->Last == '\\'){	/* GNU conftest.exe */
-//		*Target->Last = 0;
-//	}
 	hNode = CreateFileW(Path->Resolved, GENERIC_WRITE, FILE_SHARE_READ, 
 		NULL, CREATE_NEW, FILE_CLASS_INODE, NULL);
 	if (hNode == INVALID_HANDLE_VALUE){

@@ -32,31 +32,12 @@
 
 /****************************************************/
 
-/* BOOL 
-DiskGlobLink(WIN_NAMEIDATA *Path, LONG Depth)
-{
-	BOOL bResult = FALSE;
-
-	if (disk_readlink(Path, TRUE)){
-		if (Path->FileType != WIN_VLNK){
-			bResult = TRUE;
-		}else if (Depth >= WIN_SYMLOOP_MAX){
-			SetLastError(ERROR_TOO_MANY_LINKS);
-		}else{
-			bResult = DiskGlobLink(Path, Depth + 1);
-		}
-	}
-	return(bResult);
-} */
-
-/****************************************************/
-
 BOOL 
 disk_lookup(WIN_NAMEIDATA *Path, DWORD Flags)
 {
 	BOOL bResult = FALSE;
 
-	if (!VfsStatNode(Path, Flags)){
+	if (!VfsOpenNode(Path, Flags)){
 		return(FALSE);
 	}else if (Flags & WIN_REQUIREOBJECT){
 		bResult = TRUE;

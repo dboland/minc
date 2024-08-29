@@ -10,4 +10,4 @@ on your Windows machine.
 To build MinC from scratch you need the MinGW GCC build tools. It is not advisable 
 to attempt this at the moment. The build process is not yet fully automated.
 
-For downloading the installer and more information go to: http://minc.commandlinerevolution.nl/english/home.html
+For downloading the installer and more information go to: https://minc.commandlinerevolution.nl/english/home.html

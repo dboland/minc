@@ -42,8 +42,8 @@ vfs_ktrace_SET(WIN_TASK *Task, WIN_NAMEIDATA *Path, PVOID Buffer, LONG Size)
 	ACCESS_MASK amAccess = GENERIC_READ + GENERIC_WRITE;
 	DWORD dwShare = FILE_SHARE_READ + FILE_SHARE_WRITE;
 
-	hResult = CreateFileW(Path->Resolved, amAccess, dwShare, &sa, 
-		CREATE_ALWAYS, FILE_ATTRIBUTE_NORMAL, NULL);
+	hResult = CreateFileW(Path->Resolved, amAccess, dwShare, 
+		&sa, REATE_ALWAYS, FILE_ATTRIBUTE_NORMAL, NULL);
 	if (hResult == INVALID_HANDLE_VALUE){
 		return(FALSE);
 	}else if (!WriteFile(hResult, Buffer, Size, &dwCount, NULL)){
