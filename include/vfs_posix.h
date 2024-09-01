@@ -124,6 +124,7 @@ BOOL vfs_F_DUPFD(WIN_VNODE *Node, BOOL CloseExec, WIN_VNODE *Result);
 BOOL vfs_statfs(WIN_NAMEIDATA *Path, WIN_STATFS *Result);
 BOOL vfs_mount(WIN_VNODE *Node, WIN_NAMEIDATA *Path, DWORD Flags, WIN_MODE *Mode);
 BOOL vfs_getfsstat(WIN_CFDATA *Config, WIN_CFDRIVER *Driver, WIN_STATFS *Result);
+BOOL vfs_unmount(WIN_NAMEIDATA *Path);
 
 /* vfs_statvfs.c */
 
@@ -206,7 +207,6 @@ BOOL proc_execve(WIN_TASK *Task, LPSTR Command, PVOID Environ);
 
 BOOL drive_statvfs(WIN_CFDATA *Config, DWORD Flags, WIN_CFDRIVER *Result);
 BOOL drive_match(LPCWSTR NtName, DWORD DeviceType, WIN_CFDRIVER *Driver);
-BOOL drive_unmount(WIN_NAMEIDATA *Path);
 BOOL drive_statfs(WIN_MOUNT *Mount, WIN_STATFS *Result);
 
 /* disk.c */

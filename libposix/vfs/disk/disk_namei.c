@@ -37,7 +37,7 @@ disk_lookup(WIN_NAMEIDATA *Path, DWORD Flags)
 {
 	BOOL bResult = FALSE;
 
-	if (!VfsOpenNode(Path, Flags)){
+	if (!DiskOpenINode(Path, Flags)){
 		return(FALSE);
 	}else if (Flags & WIN_REQUIREOBJECT){
 		bResult = TRUE;

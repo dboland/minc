@@ -181,7 +181,6 @@ ScreenAnsi(HANDLE Handle, CHAR C, SEQUENCE *Seq, CONSOLE_SCREEN_BUFFER_INFO *Inf
 
 	if (Seq->CSI == '['){
 		bResult = AnsiControl(Handle, C, Info, Seq, dwSize);
-
 	}else if (Seq->CSI == '?'){		/* DEC private */
 		if (C == 'h'){			/* DECSM */
 			bResult = DECSetMode(Handle, AnsiStrToInt(Seq->Args));
@@ -190,7 +189,6 @@ ScreenAnsi(HANDLE Handle, CHAR C, SEQUENCE *Seq, CONSOLE_SCREEN_BUFFER_INFO *Inf
 		}else if (C == 'u'){		/* DECRSPS */
 			bResult = DECRestorePresentationState(Handle, Info, AnsiStrToInt(Seq->Args));
 		}
-
 	}else if (!Seq->CSI){			/* DEC private (ANSI allowed) */
 		if (C == '7'){			/* DECSC (apt-get) */
 			bResult = AnsiSaveCursor(Info);
@@ -199,13 +197,10 @@ ScreenAnsi(HANDLE Handle, CHAR C, SEQUENCE *Seq, CONSOLE_SCREEN_BUFFER_INFO *Inf
 //		}else if (C == 'c'){		/* RIS */
 //			bResult = AnsiResetToInitalState(Handle, Info);
 		}
-
 	}else if (Seq->CSI == '('){		/* DEC SCS (Shift-In) */
 		bResult = DECSelectCharacterSet(Handle, C);
-
 	}else if (Seq->CSI == ')'){		/* DEC SCS (Shift-Out) */
 		bResult = DECResetCharacterSet(Handle, C);
-
 	}
 	if (!bResult){
 		Seq->Buf[dwSize] = 0;
@@ -282,7 +277,7 @@ screen_write(HANDLE Handle, LPCSTR Buffer, DWORD Size, DWORD *Result)
 	if (dwMode & ENABLE_VIRTUAL_TERMINAL_PROCESSING){
 		bResult = WriteFile(Handle, Buffer, Size, &dwResult, NULL);
 	}else if (!ScreenRenderWindow(Handle, psbInfo)){
-		bResult = FALSE;
+		return(FALSE);
 	}else while (dwResult < Size){
 		__Char = *Buffer;
 		dwCount = 1;

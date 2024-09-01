@@ -96,23 +96,3 @@ drive_mount(WIN_DEVICE *Device, WIN_NAMEIDATA *Path, DWORD Flags, WIN_MODE *Mode
 	}
 	return(bResult);
 }
-BOOL 
-drive_unmount(WIN_NAMEIDATA *Path)
-{
-	BOOL bResult = FALSE;
-
-//vfs_ktrace("drive_unmount", STRUCT_NAMEI, Path);
-	if (Path->Attribs == -1){
-		return(FALSE);
-	}else if (Path->FileType != WIN_VDIR){
-		SetLastError(ERROR_DIRECTORY);
-	}else if (!(Path->Attribs & FILE_ATTRIBUTE_SYSTEM)){
-		bResult = TRUE;
-	}else if (!SetFileAttributesW(Path->Resolved, FILE_ATTRIBUTE_NORMAL)){
-		WIN_ERR("SetFileAttributes(%ls): %s\n", Path->Resolved, win_strerror(GetLastError()));
-	}else{
-		ZeroMemory(&__Mounts[Path->MountId], sizeof(WIN_MOUNT));
-		bResult = TRUE;
-	}
-	return(bResult);
-}

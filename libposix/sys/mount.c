@@ -246,7 +246,7 @@ sys_unmount(call_t call, const char *dir, int flags)
 	int result = 0;
 	WIN_NAMEIDATA wPath = {0};
 
-	if (!drive_unmount(path_win(&wPath, dir, O_NOCROSS))){
+	if (!vfs_unmount(path_win(&wPath, dir, O_NOCROSS))){
 		result -= errno_posix(GetLastError());
 	}
 	return(result);
