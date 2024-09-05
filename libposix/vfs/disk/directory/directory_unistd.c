@@ -37,10 +37,8 @@ dir_close(WIN_VNODE *Node)
 {
 	BOOL bResult = FALSE;
 
-	if (!disk_closedir(Node)){
-		return(FALSE);
-	}else if (file_close(Node)){
-		bResult = TRUE;
+	if (disk_closedir(Node)){
+		bResult = file_close(Node);
 	}
 	return(bResult);
 }

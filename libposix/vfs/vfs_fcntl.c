@@ -129,16 +129,17 @@ vfs_F_GETPATH(WIN_VNODE *Node, WIN_NAMEIDATA *Result)
 	}else if (puString->Length){
 		psz = win_wcpcpy(Result->Resolved, L"\\\\.\\GLOBALROOT");
 		psz = win_wcpcpy(psz, puString->Buffer);
-		Result->Last = psz - 1;
 		Result->R = psz;
+		Result->S = NULL;
+		Result->Base = psz;
+		Result->Last = psz - 1;
 		Result->FSType = Node->FSType;
 		Result->Attribs = Node->Attribs;
 		Result->FileType = Node->FileType;
 		Result->MountId = Node->MountId;
 		Result->Object = Node->Object;
+		Result->Index = Node->Index;
 		Result->Flags = 0;
-		Result->Base = Result->R;
-		Result->S = NULL;
 //vfs_ktrace("vfs_F_GETPATH", STRUCT_NAMEI, Result);
 		bResult = TRUE;
 	}

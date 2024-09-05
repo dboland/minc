@@ -69,8 +69,8 @@ DiskCreateFile(WIN_NAMEIDATA *Path, WIN_FLAGS *Flags, WIN_MODE *Mode, WIN_VNODE 
 BOOL 
 DiskOpenFile(WIN_NAMEIDATA *Path, WIN_FLAGS *Flags, WIN_VNODE *Result)
 {
-	HANDLE hResult;
 	BOOL bResult = FALSE;
+	HANDLE hResult;
 	SECURITY_ATTRIBUTES sa = {sizeof(sa), NULL, FALSE};
 
 	hResult = CreateFileW(Path->Resolved, Flags->Access, Flags->Share, 
@@ -94,14 +94,14 @@ DiskOpenINode(WIN_NAMEIDATA *Path, DWORD Flags)
 	BOOL bResult = FALSE;
 	WIN_INODE iNode;
 	DWORD dwResult;
-	HANDLE hNode;
+	HANDLE hResult;
 	SECURITY_ATTRIBUTES sa = {sizeof(sa), NULL, TRUE};
 
-	hNode = CreateFileW(Path->Resolved, GENERIC_READ, FILE_SHARE_READ, 
+	hResult = CreateFileW(Path->Resolved, GENERIC_READ, FILE_SHARE_READ, 
 		&sa, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, NULL);
-	if (hNode == INVALID_HANDLE_VALUE){
+	if (hResult == INVALID_HANDLE_VALUE){
 		WIN_ERR("CreateFile(%ls): %s\n", Path->Resolved, win_strerror(GetLastError()));
-	}else if (!ReadFile(hNode, &iNode, sizeof(WIN_INODE), &dwResult, NULL)){
+	}else if (!ReadFile(hResult, &iNode, sizeof(WIN_INODE), &dwResult, NULL)){
 		WIN_ERR("ReadFile(%ls): %s\n", Path->Resolved, win_strerror(GetLastError()));
 	}else if (iNode.Magic != TypeNameVirtual){
 		SetLastError(ERROR_BAD_ARGUMENTS);
@@ -110,7 +110,7 @@ DiskOpenINode(WIN_NAMEIDATA *Path, DWORD Flags)
 		Path->FileType = iNode.FileType;
 		Path->FSType = iNode.FSType;
 		Path->Size = iNode.NameSize;
-		Path->Object = hNode;
+		Path->Object = hResult;
 		bResult = TRUE;
 	}
 	return(bResult);

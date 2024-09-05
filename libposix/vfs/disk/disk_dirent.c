@@ -55,34 +55,9 @@ DiskGetEntity(WIN32_FIND_DATAW *Data, DWORD Index, WIN_DIRENT *Result)
 	}
 	return(bResult);
 }
-LPWSTR 
-DiskGetPattern(WIN_VNODE *Node, LPWSTR Pattern)
-{
-	if (win_F_GETPATH(Node->Handle, Pattern)){
-		win_wcscat(Pattern, L"\\*.*");
-	}
-	return(Pattern);
-}
 
 /****************************************************/
 
-BOOL 
-disk_rewinddir(WIN_VNODE *Node, WIN32_FIND_DATAW *Data)
-{
-	BOOL bResult = FALSE;
-	HANDLE hResult = NULL;
-	WCHAR szPattern[WIN_PATH_MAX];
-
-	hResult = FindFirstFileW(DiskGetPattern(Node, szPattern), Data);
-	if (hResult == INVALID_HANDLE_VALUE){
-		WIN_ERR("FindFirstFile(%ls): %s\n", szPattern, win_strerror(GetLastError()));
-	}else{
-		Node->Object = hResult;
-		Node->Index = 1;
-		bResult = TRUE;
-	}
-	return(bResult);
-}
 BOOL 
 disk_closedir(WIN_VNODE *Node)
 {
@@ -100,36 +75,54 @@ disk_closedir(WIN_VNODE *Node)
 	return(bResult);
 }
 BOOL 
-disk_readdir(WIN_VNODE *Node, WIN32_FIND_DATAW *Data)
+disk_rewinddir(WIN_NAMEIDATA *Path, WIN32_FIND_DATAW *Data)
 {
 	BOOL bResult = FALSE;
+	HANDLE hResult = NULL;
 
-	if (!Node->Object){
-		bResult = disk_rewinddir(Node, Data);
-	}else if (FindNextFileW(Node->Object, Data)){
-		bResult = TRUE;
-	}else if (GetLastError() == ERROR_NO_MORE_FILES){
-		Node->Index = -1;
+	hResult = FindFirstFileW(Path->Resolved, Data);
+	if (hResult == INVALID_HANDLE_VALUE){
+		WIN_ERR("FindFirstFile(%ls): %s\n", Path->Resolved, win_strerror(GetLastError()));
 	}else{
-		WIN_ERR("FindNextFile(%d): %s\n", Node->Object, win_strerror(GetLastError()));
+		Path->Object = hResult;
+		Path->Index = 1;
+		bResult = TRUE;
 	}
 	return(bResult);
 }
 BOOL 
-disk_getdents(WIN_VNODE *Node, WIN_DIRENT Entity[], DWORD Count, DWORD *Result)
+disk_readdir(WIN_NAMEIDATA *Path, WIN32_FIND_DATAW *Data)
+{
+	BOOL bResult = FALSE;
+
+	if (!Path->Object){
+		bResult = disk_rewinddir(Path, Data);
+	}else if (FindNextFileW(Path->Object, Data)){
+		bResult = TRUE;
+	}else if (ERROR_NO_MORE_FILES == GetLastError()){
+		Path->Index = -1;
+	}else{
+		WIN_ERR("FindNextFile(%d): %s\n", Path->Object, win_strerror(GetLastError()));
+	}
+	return(bResult);
+}
+BOOL 
+disk_getdents(WIN_NAMEIDATA *Path, WIN_DIRENT Entity[], DWORD Count, DWORD *Result)
 {
 	BOOL bResult = TRUE;
 	LONG lResult = 0;
 	WIN32_FIND_DATAW wfData;
 
-	if (Node->Index == -1){
-		bResult = disk_closedir(Node);
+//vfs_ktrace("disk_getdents", STRUCT_NAMEI, Path);
+	if (Path->Index == -1){
+//		bResult = disk_closedir(Node);
+		bResult = FALSE;
 	}else while (lResult < Count){
-		if (!disk_readdir(Node, &wfData)){
+		if (!disk_readdir(Path, &wfData)){
 			break;
-		}else if (DiskGetEntity(&wfData, Node->Index, Entity)){
+		}else if (DiskGetEntity(&wfData, Path->Index, Entity)){
 			Entity++;
-			Node->Index++;
+			Path->Index++;
 			lResult++;
 		}
 	}

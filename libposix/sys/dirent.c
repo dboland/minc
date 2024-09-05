@@ -70,20 +70,25 @@ int
 sys_getdents(call_t call, int fd, void *buf, size_t nbytes)
 {
 	int result = 0;
+	int atflags = AT_SYMLINK_NOFOLLOW;
 	DWORD dwCount = nbytes / sizeof(struct dirent);
 	PVOID pvData = win_malloc(dwCount * sizeof(WIN_DIRENT));
 	WIN_DIRENT *pEntity = pvData;
 	WIN_TASK *pwTask = call.Task;
+	WIN_VNODE *pvNode = &pwTask->Node[fd];
+	WIN_NAMEIDATA wPath = {0};
 
 	if (fd < 0 || fd >= OPEN_MAX){
-		result = -EINVAL;
-	}else if (!vfs_getdents(&pwTask->Node[fd], pEntity, dwCount, &dwCount)){
+		return(-EBADF);
+	}else if (!vfs_getdents(pathat_win(&wPath, fd, "*.*", atflags), pEntity, dwCount, &dwCount)){
 		result -= errno_posix(GetLastError());
 	}else while (dwCount--){
 		buf = dirent_posix(buf, pEntity);
 		result += sizeof(struct dirent);
 		pEntity++;
 	}
+	pvNode->Object = wPath.Object;
+	pvNode->Index = wPath.Index;
 	win_free(pvData);
 	return(result);
 }

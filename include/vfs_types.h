@@ -184,9 +184,10 @@ typedef struct _WIN_NAMEIDATA {
 	DWORD DeviceId;
 	WIN_VTYPE FileType;
 	WIN_FS_TYPE FSType;
+	DWORD Size;
+	DWORD Index;
 	HANDLE Object;
 	DWORD Attribs;
-	DWORD Size;
 	DWORD Flags;			/* see below */
 	WCHAR *Base;
 	WCHAR *Last;

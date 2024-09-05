@@ -282,7 +282,6 @@ __fstatat(WIN_TASK *Task, int dirfd, const char *path, struct stat *buf, int fla
 	int result = 0;
 	WIN_NAMEIDATA wPath = {0};
 	WIN_VATTR wStat = {0};
-//	CHAR szText[MAX_TEXT];
 
 	if (!path){
 		result = -EFAULT;
@@ -293,9 +292,6 @@ __fstatat(WIN_TASK *Task, int dirfd, const char *path, struct stat *buf, int fla
 	}else{
 		stat_posix(Task, buf, &wStat);
 	}
-//	if (Task->TracePoints & KTRFAC_USER){
-//		ktrace_USER(Task, "NAMEI", szText, vfs_NAMEI(&wPath, szText));
-//	}
 	return(result);
 }
 int 
