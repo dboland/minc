@@ -29,8 +29,8 @@
 #include "lmerr.h"
 #include "winnt.h"
 #include "basetsd.h"
-#include "winbase.h"
 #include "wincon.h"
+#include "winbase.h"
 
 typedef HANDLE HWND;
 

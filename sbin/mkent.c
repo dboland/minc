@@ -49,7 +49,7 @@
 #include "vfs_posix.h"
 #include "ws2_posix.h"
 #include "msvc_posix.h"
-#include "minc_posix.h"
+#include "bsd_posix.h"
 #include "arch_posix.h"
 
 extern __import SID8 SidSystem;

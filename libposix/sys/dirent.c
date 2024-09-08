@@ -32,63 +32,28 @@
 
 /****************************************************/
 
-void *
-dirent_posix(struct dirent *ent, WIN_DIRENT *Entity)
-{
-	switch (Entity->FileType){
-		case WIN_VDIR:
-			ent->d_type = DT_DIR;
-			break;
-		case WIN_VLNK:
-			ent->d_type = DT_LNK;
-			break;
-		case WIN_VCHR:
-			ent->d_type = DT_CHR;
-			break;
-		case WIN_VSOCK:
-			ent->d_type = DT_SOCK;
-			break;
-		case WIN_VBLK:
-			ent->d_type = DT_BLK;
-			break;
-		default:
-			ent->d_type = DT_REG;
-	}
-//	ent->d_namlen = win_stpcpy(ent->d_name, Entity->FileName) - ent->d_name;
-//	ent->d_reclen = DIRENT_RECSIZE(ent->d_namlen);
-//	ent->d_off = ent->d_reclen + ent->d_namlen;
-	ent->d_namlen = win_wcstombs(ent->d_name, Entity->FileName, MAXNAMLEN);
-	ent->d_reclen = sizeof(struct dirent);
-	ent->d_off = (off_t)ent->d_reclen;	/* __int64_t */
-	ent->d_fileno = (ino_t)Entity->Index;	/* __int64_t */
-	return(ent + 1);
-}
-
-/****************************************************/
-
 int
 sys_getdents(call_t call, int fd, void *buf, size_t nbytes)
 {
 	int result = 0;
 	int atflags = AT_SYMLINK_NOFOLLOW;
-	DWORD dwCount = nbytes / sizeof(struct dirent);
-	PVOID pvData = win_malloc(dwCount * sizeof(WIN_DIRENT));
-	WIN_DIRENT *pEntity = pvData;
+	DWORD dwSize = nbytes;
 	WIN_TASK *pwTask = call.Task;
 	WIN_VNODE *pvNode = &pwTask->Node[fd];
 	WIN_NAMEIDATA wPath = {0};
 
 	if (fd < 0 || fd >= OPEN_MAX){
-		return(-EBADF);
-	}else if (!vfs_getdents(pathat_win(&wPath, fd, "*.*", atflags), pEntity, dwCount, &dwCount)){
+		result = -EBADF;
+	}else if (!buf){
+		result = -EFAULT;
+	}else if (!vfs_getdents(pathat_win(&wPath, fd, "*.*", atflags), buf, dwSize, &dwSize)){
 		result -= errno_posix(GetLastError());
-	}else while (dwCount--){
-		buf = dirent_posix(buf, pEntity);
-		result += sizeof(struct dirent);
-		pEntity++;
+	}else if (dwSize == -1){
+		pwTask->Error = errno_posix(GetLastError());
+	}else{
+		pvNode->Object = wPath.Object;
+		pvNode->Index = wPath.Index;
+		result = dwSize;
 	}
-	pvNode->Object = wPath.Object;
-	pvNode->Index = wPath.Index;
-	win_free(pvData);
 	return(result);
 }

@@ -38,6 +38,7 @@ errno_posix(DWORD Error)
 	int result = -1;				/* ERESTART */
 
 	switch (Error){
+		case ERROR_NO_MORE_FILES:
 		case ERROR_SUCCESS:
 			result = 0;
 			break;

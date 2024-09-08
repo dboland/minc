@@ -33,13 +33,13 @@
 /************************************************************/
 
 BOOL 
-vfs_getdents(WIN_NAMEIDATA *Path, WIN_DIRENT Entity[], DWORD Count, DWORD *Result)
+vfs_getdents(WIN_NAMEIDATA *Path, PVOID Buffer, DWORD Size, DWORD *Result)
 {
 	BOOL bResult = FALSE;
 
 	switch (Path->FSType){
 		case FS_TYPE_DISK:
-			bResult = disk_getdents(Path, Entity, Count, Result);
+			bResult = disk_getdents(Path, Buffer, Size, Result);
 			break;
 		default:
 			SetLastError(ERROR_BAD_FILE_TYPE);

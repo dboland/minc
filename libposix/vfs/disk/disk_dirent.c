@@ -30,30 +30,69 @@
 
 #include <winbase.h>
 
+static const UCHAR __DTYPE_POSIX[] = {
+	WIN_DT_UNKNOWN,
+	WIN_DT_REG,
+	WIN_DT_DIR,
+	WIN_DT_BLK,
+	WIN_DT_CHR,
+	WIN_DT_LNK,
+	WIN_DT_SOCK,
+	WIN_DT_FIFO,
+	0
+};
+
+#define DIRENT_RECSIZE(namelen) \
+    ((offsetof(WIN_DIRENT, FileName) + (namelen) + 1 + 7) &~ 7)
+
 /************************************************************/
 
-BOOL 
-DiskGetEntity(WIN32_FIND_DATAW *Data, DWORD Index, WIN_DIRENT *Result)
+DWORD 
+DiskGlobINode(WIN_NAMEIDATA *Path, LPCWSTR FileName)
 {
-	BOOL bResult = FALSE;
-	LPWSTR pszType;
+	WIN_INODE iNode;
+	HANDLE hResult;
+	DWORD dwSize;
+	DWORD dwResult = WIN_VREG;
 
-	if (!(Data->dwFileAttributes & FILE_ATTRIBUTE_HIDDEN)){
-		Result->Index = Index;
-		Result->FileType = WIN_VREG;
-		win_wcscpy(Result->FileName, Data->cFileName);
-		pszType = win_typename(Result->FileName);
-		if (Data->dwFileAttributes == FILE_CLASS_INODE){
-			Result->FileType = WIN_VLNK;
-		}else if (Data->dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY){
-			Result->FileType = WIN_VDIR;
-		}else if (!win_wcscmp(pszType, L".lnk")){
-			Result->FileType = WIN_VLNK;
-			*pszType = 0;			/* chop off extension */
-		}
-		bResult = TRUE;
+	win_wcscpy(Path->Base, FileName);
+	hResult = CreateFileW(Path->Resolved, GENERIC_READ, FILE_SHARE_READ, 
+		NULL, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, NULL);
+	if (hResult == INVALID_HANDLE_VALUE){
+		WIN_ERR("CreateFile(%ls): %s\n", Path->Resolved, win_strerror(GetLastError()));
+	}else if (!ReadFile(hResult, &iNode, sizeof(WIN_INODE), &dwSize, NULL)){
+		WIN_ERR("ReadFile(%ls): %s\n", Path->Resolved, win_strerror(GetLastError()));
+	}else if (iNode.Magic == TypeNameVirtual){
+		dwResult = iNode.FileType;
 	}
-	return(bResult);
+	CloseHandle(hResult);
+	return(dwResult);
+}
+DWORD 
+DiskGetEntity(WIN32_FIND_DATAW *Data, WIN_NAMEIDATA *Path, PVOID Buffer)
+{
+	DWORD dwAttribs = Data->dwFileAttributes;
+	WIN_DIRENT *pwdInfo = Buffer;
+	DWORD dwFileType = WIN_VREG;
+	LPWSTR pszType = win_typename(Data->cFileName);
+	DWORD dwRecSize, dwNameSize;
+
+	if (dwAttribs == FILE_CLASS_INODE){
+		dwFileType = DiskGlobINode(Path, Data->cFileName);
+	}else if (dwAttribs & FILE_ATTRIBUTE_DIRECTORY){
+		dwFileType = WIN_VDIR;
+	}else if (!win_wcscmp(pszType, L".lnk")){
+		dwFileType = WIN_VLNK;
+		*pszType = 0;			/* chop off extension */
+	}
+	dwNameSize = win_wcstombs(pwdInfo->FileName, Data->cFileName, WIN_MAXNAMLEN);
+	dwRecSize = DIRENT_RECSIZE(dwNameSize);
+	pwdInfo->FileId = (DWORDLONG)Path->Index;
+	pwdInfo->Offset = (DWORDLONG)dwRecSize;
+	pwdInfo->RecSize = dwRecSize;
+	pwdInfo->NameSize = dwNameSize;
+	pwdInfo->FileType = __DTYPE_POSIX[dwFileType];
+	return(dwRecSize);
 }
 
 /****************************************************/
@@ -107,25 +146,28 @@ disk_readdir(WIN_NAMEIDATA *Path, WIN32_FIND_DATAW *Data)
 	return(bResult);
 }
 BOOL 
-disk_getdents(WIN_NAMEIDATA *Path, WIN_DIRENT Entity[], DWORD Count, DWORD *Result)
+disk_getdents(WIN_NAMEIDATA *Path, PVOID Buffer, DWORD Size, DWORD *Result)
 {
 	BOOL bResult = TRUE;
-	LONG lResult = 0;
+	DWORD dwResult = 0;
+	LONG lSize = Size;
 	WIN32_FIND_DATAW wfData;
+	DWORD dwSize;
 
 //vfs_ktrace("disk_getdents", STRUCT_NAMEI, Path);
 	if (Path->Index == -1){
-//		bResult = disk_closedir(Node);
-		bResult = FALSE;
-	}else while (lResult < Count){
+		dwResult = -1;
+	}else while (lSize >= sizeof(WIN_DIRENT)){
 		if (!disk_readdir(Path, &wfData)){
 			break;
-		}else if (DiskGetEntity(&wfData, Path->Index, Entity)){
-			Entity++;
+		}else if (!(wfData.dwFileAttributes & FILE_ATTRIBUTE_HIDDEN)){
+			dwSize = DiskGetEntity(&wfData, Path, Buffer);
+			dwResult += dwSize;
+			lSize -= dwSize;
+			Buffer += dwSize;
 			Path->Index++;
-			lResult++;
 		}
 	}
-	*Result = lResult;
+	*Result = dwResult;
 	return(bResult);
 }

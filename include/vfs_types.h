@@ -227,11 +227,26 @@ typedef struct _WIN_NAMEIDATA {
  * vfs_dirent.c
  */
 
+#define WIN_MAXNAMLEN		255
+
 typedef struct _WIN_DIRENT {
-	WIN_VTYPE FileType;
-	DWORD Index;
-	WCHAR FileName[MAX_PATH];
+	DWORDLONG FileId;
+	DWORDLONG Offset;
+	USHORT RecSize;
+	UCHAR FileType;
+	UCHAR NameSize;
+	UCHAR Padding[4];
+	CHAR FileName[WIN_MAXNAMLEN + 1];
 } WIN_DIRENT;
+
+#define WIN_DT_UNKNOWN		0
+#define WIN_DT_FIFO		1
+#define WIN_DT_CHR		2
+#define WIN_DT_DIR		4
+#define WIN_DT_BLK		6
+#define WIN_DT_REG		8
+#define WIN_DT_LNK		10
+#define WIN_DT_SOCK		12
 
 /*
  * vfs_fcntl.c

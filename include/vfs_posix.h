@@ -169,7 +169,7 @@ BOOL vfs_getrusage_CHILDREN(DWORD ParentId, WIN_RUSAGE *Result);
 
 /* vfs_dirent.c */
 
-BOOL vfs_getdents(WIN_NAMEIDATA *Path, WIN_DIRENT Entity[], DWORD Count, DWORD *Result);
+BOOL vfs_getdents(WIN_NAMEIDATA *Path, PVOID Buffer, DWORD Size, DWORD *Result);
 
 /* vfs_poll.c */
 

@@ -28,7 +28,7 @@ version.o: bsd.rc
 	windres -DVERSION=\\\"${VERSION}\\\" -DRELEASE=\\\"${RELEASE}\\\" $< $@
 
 mkent: mkent.o
-	gcc ${LDFLAGS} -o $@ $< ${MINGW}/lib/libiphlpapi.a ${LIBS}
+	gcc ${LDFLAGS} -o $@ $< ${MINGW}/lib/libiphlpapi.a
 
 libconsole.o: libconsole.c
 	gcc -c ${CFLAGS} -I${MINGW}/include -I../include -o $@ $<
