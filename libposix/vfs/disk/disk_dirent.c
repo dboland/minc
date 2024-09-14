@@ -156,7 +156,7 @@ disk_getdents(WIN_NAMEIDATA *Path, PVOID Buffer, DWORD Size, DWORD *Result)
 
 //vfs_ktrace("disk_getdents", STRUCT_NAMEI, Path);
 	if (Path->Index == -1){
-		dwResult = -1;
+		dwResult = 0;
 	}else while (lSize >= sizeof(WIN_DIRENT)){
 		if (!disk_readdir(Path, &wfData)){
 			break;

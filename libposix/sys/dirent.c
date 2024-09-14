@@ -48,8 +48,6 @@ sys_getdents(call_t call, int fd, void *buf, size_t nbytes)
 		result = -EFAULT;
 	}else if (!vfs_getdents(pathat_win(&wPath, fd, "*.*", atflags), buf, dwSize, &dwSize)){
 		result -= errno_posix(GetLastError());
-	}else if (dwSize == -1){
-		pwTask->Error = errno_posix(GetLastError());
 	}else{
 		pvNode->Object = wPath.Object;
 		pvNode->Index = wPath.Index;

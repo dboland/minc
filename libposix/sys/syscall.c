@@ -268,7 +268,8 @@ __seteuid(WIN_TASK *Task, uid_t uid)
 	}
 	if (uid == rid_posix(&Task->UserSid)){		/* PRIV_START check (ssh.exe) */
 		return(0);
-	}else if (__getuid(Task) && __geteuid(Task)){
+//	}else if (__getuid(Task) && __geteuid(Task)){
+	}else if (__geteuid(Task)){
 		result = -EPERM;
 	}else if (!vfs_seteuid(Task, rid_win(&sidUser, uid))){
 		result -= errno_posix(GetLastError());
@@ -285,12 +286,7 @@ __setuid(WIN_TASK *Task, uid_t uid)
 {
 	int result = 0;
 
-	if (!uid){
-		uid = WIN_ROOT_UID;
-	}
-	if (uid == Task->RealUid){
-		return(0);
-	}else if (!__seteuid(Task, uid)){
+	if (!__seteuid(Task, uid)){
 		Task->RealUid = rid_posix(&Task->UserSid);
 	}else{
 		result = -EPERM;
@@ -351,7 +347,8 @@ __setegid(WIN_TASK *Task, gid_t gid)
 	}
 	if (gid == rid_posix(&Task->GroupSid)){		/* PRIV_START check (ssh.exe) */
 		return(0);
-	}else if (__getuid(Task) && __geteuid(Task)){
+//	}else if (__getuid(Task) && __geteuid(Task)){
+	}else if (__geteuid(Task)){
 		result = -EPERM;
 	}else if (!vfs_setegid(Task, rid_win(&sidGroup, gid))){
 		result -= errno_posix(GetLastError());
@@ -368,15 +365,10 @@ __setgid(WIN_TASK *Task, gid_t gid)
 {
 	int result = 0;
 
-	if (!gid){
-		gid = WIN_ROOT_GID;
-	}
-	if (gid == Task->RealGid){
-		result = 0;
-	}else if (__setegid(Task, gid)){
-		result -= errno_posix(GetLastError());
-	}else{
+	if (!__setegid(Task, gid)){
 		Task->RealGid = rid_posix(&Task->GroupSid);
+	}else{
+		result -= errno_posix(GetLastError());
 	}
 	return(result);
 }
