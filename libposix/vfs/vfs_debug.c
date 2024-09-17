@@ -398,14 +398,22 @@ VfsPathFlags(LPSTR Buffer, LPCSTR Label, DWORD Flags)
 	LPSTR psz = Buffer;
 
 	psz += msvc_sprintf(psz, "%s([0x%x]", Label, Flags);
+	psz = VfsFlagName(psz, WIN_PATHCOPY, "PATHCOPY", Flags, &Flags);
+//	psz = VfsFlagName(psz, WIN_REQUIREDEVICE, "REQUIREDEVICE", Flags, &Flags);
+	psz = VfsFlagName(psz, WIN_REQUIREOBJECT, "REQUIREOBJECT", Flags, &Flags);
 	psz = VfsFlagName(psz, WIN_FOLLOW, "FOLLOW", Flags, &Flags);
 	psz = VfsFlagName(psz, WIN_NOCROSSMOUNT, "NOCROSSMOUNT", Flags, &Flags);
+	psz = VfsFlagName(psz, WIN_RDONLY, "ISSYMLINK", Flags, &Flags);
+	psz = VfsFlagName(psz, WIN_HASBUF, "REQUIREDIR", Flags, &Flags);
+	psz = VfsFlagName(psz, WIN_SAVENAME, "STRIPSLASHES", Flags, &Flags);
+	psz = VfsFlagName(psz, WIN_SAVESTART, "SAVESTART", Flags, &Flags);
+	psz = VfsFlagName(psz, WIN_ISDOTDOT, "ISDOTDOT", Flags, &Flags);
+	psz = VfsFlagName(psz, WIN_MAKEENTRY, "MAKEENTRY", Flags, &Flags);
+	psz = VfsFlagName(psz, WIN_ISLASTCN, "ISLASTCN", Flags, &Flags);
 	psz = VfsFlagName(psz, WIN_ISSYMLINK, "ISSYMLINK", Flags, &Flags);
 	psz = VfsFlagName(psz, WIN_REQUIREDIR, "REQUIREDIR", Flags, &Flags);
 	psz = VfsFlagName(psz, WIN_STRIPSLASHES, "STRIPSLASHES", Flags, &Flags);
-	psz = VfsFlagName(psz, WIN_PATHCOPY, "PATHCOPY", Flags, &Flags);
-	psz = VfsFlagName(psz, WIN_REQUIREDEVICE, "REQUIREDEVICE", Flags, &Flags);
-	psz = VfsFlagName(psz, WIN_REQUIREOBJECT, "REQUIREOBJECT", Flags, &Flags);
+	psz = VfsFlagName(psz, WIN_PDIRUNLOCK, "PDIRUNLOCK", Flags, &Flags);
 	psz += msvc_sprintf(psz, "[0x%x])\n", Flags);
 	return(psz);
 }
@@ -581,6 +589,15 @@ vfs_ACCESS(ACCESS_MASK Access, LPSTR Buffer)
 	psz = VfsFileAccess(psz, Access, OB_TYPE_FILE);
 	return(psz - Buffer);
 }
+DWORD 
+vfs_INODE(WIN_INODE *Node, LPSTR Buffer)
+{
+	LPSTR psz = Buffer;
+
+	psz += msvc_sprintf(psz, "(%s:%s): DeviceId(0x%x) NameSize(%d) Index(%d) Object(%d)\n",
+		FSType(Node->FSType), FType(Node->FileType), Node->DeviceId, Node->NameSize, Node->Index, Node->Object);
+	return(psz - Buffer);
+}
 
 /****************************************************/
 
@@ -616,6 +633,9 @@ vfs_ktrace(LPCSTR Label, STRUCT_TYPE Type, PVOID Data)
 			break;
 		case STRUCT_ACCESS:
 			vfs_ACCESS(*(ACCESS_MASK *)Data, szText);
+			break;
+		case STRUCT_INODE:
+			vfs_INODE((WIN_INODE *)Data, szText);
 			break;
 	}
 	msvc_printf("%s%s", Label, szText);

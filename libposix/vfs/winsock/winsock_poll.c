@@ -41,7 +41,6 @@ WSAPollEvents(WIN_VNODE *Node, LONG Events)
 	 * starting from the first FD_WRITE network event and lasting
 	 * until a send returns WSAEWOULDBLOCK.
 	 */
-//VfsNetFlags(Events, "WSAPollEvents");	// note: ktrace.exe hides these!
 	if (Events & FD_WRITE){
 		Node->Pending = WIN_POLLOUT;	/* ssh.exe */
 	}

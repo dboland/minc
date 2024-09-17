@@ -311,7 +311,7 @@ ssize_t
 __readlinkat(WIN_TASK *Task, int dirfd, const char *path, char *buf, size_t bufsiz)
 {
 	ssize_t result = 0;
-	int atflags = AT_SYMLINK_NOFOLLOW | AT_OBJECT;
+	int atflags = AT_SYMLINK | AT_SYMLINK_NOFOLLOW;
 	WIN_NAMEIDATA wPath = {0};
 
 	if (!path){

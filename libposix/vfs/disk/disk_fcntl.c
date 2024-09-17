@@ -48,29 +48,39 @@ disk_F_DUPFD(WIN_VNODE *Node, HANDLE Process, DWORD Options, WIN_VNODE *Result)
 	return(bResult);
 }
 BOOL 
-disk_F_LOOKUP(WIN_NAMEIDATA *Path, DWORD Flags)
+disk_F_LOOKUP(WIN_INODE *Node, DWORD Flags, WIN_NAMEIDATA *Result)
 {
-	BOOL bResult = FALSE;
+	BOOL bResult = TRUE;
 	WCHAR szBuffer[MAX_PATH];
 	DWORD dwResult;
-	LPWSTR pszBase = Path->Resolved;
+	LPWSTR pszBase = Result->Resolved;
 
-	if (!ReadFile(Path->Object, szBuffer, Path->Size, &dwResult, NULL)){
-		WIN_ERR("ReadFile(%ls): %s\n", Path->Resolved, win_strerror(GetLastError()));
-	}else{
+	Result->DeviceId = Node->DeviceId;
+	Result->FileType = Node->FileType;
+	Result->FSType = Node->FSType;
+	Result->Size = Node->NameSize;
+	if (Flags & WIN_ISSYMLINK){
+		Result->Object = Node->Object;
+	}else if (!(Flags & WIN_FOLLOW)){
+		bResult = CloseHandle(Node->Object);
+	}else if (ReadFile(Node->Object, szBuffer, Node->NameSize, &dwResult, NULL)){
 		if (szBuffer[1] == ':'){
-			Path->MountId = MOUNTID(szBuffer[0]);	/* nano.exe */
+			Result->MountId = MOUNTID(szBuffer[0]);	/* nano.exe */
 		}else if (szBuffer[1] == '\\'){
-			Path->MountId = 0;
-		}else if (Flags & WIN_ISSYMLINK){
-			pszBase = Path->Base;
+			Result->MountId = 0;
+		}else{
+			pszBase = Result->Base;
 		}
-		Path->R = win_wcpcpy(pszBase, szBuffer);
-		Path->Last = Path->R - 1;
-		Path->Attribs = GetFileAttributesW(Path->Resolved);
-		Path->FileType = WIN_VREG;
-		bResult = CloseHandle(Path->Object);
+		Result->R = win_wcpcpy(pszBase, szBuffer);
+		Result->Base = Result->R;
+		Result->Last = Result->R - 1;
+		Result->Attribs = GetFileAttributesW(Result->Resolved);
+		Result->FileType = WIN_VREG;
+		bResult = CloseHandle(Node->Object);
+	}else{
+		bResult = FALSE;
 	}
+//vfs_ktrace("disk_F_LOOKUP", STRUCT_NAMEI, Result);
 	return(bResult);
 }
 

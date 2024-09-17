@@ -81,6 +81,28 @@ VfsStatFile(LPCWSTR FileName, DWORD Attribs, WIN_VATTR *Result)
 	}
 	return(bResult);
 }
+BOOL 
+VfsStatNode(LPCWSTR FileName, WIN_INODE *Result)
+{
+	BOOL bResult = FALSE;
+	DWORD dwSize;
+	HANDLE hNode;
+	SECURITY_ATTRIBUTES sa = {sizeof(sa), NULL, TRUE};
+
+	hNode = CreateFileW(FileName, GENERIC_READ, FILE_SHARE_READ, 
+		&sa, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, NULL);
+	if (hNode == INVALID_HANDLE_VALUE){
+		WIN_ERR("CreateFile(%ls): %s\n", FileName, win_strerror(GetLastError()));
+	}else if (!ReadFile(hNode, Result, sizeof(WIN_INODE), &dwSize, NULL)){
+		WIN_ERR("ReadFile(%ls): %s\n", FileName, win_strerror(GetLastError()));
+	}else if (Result->Magic != TypeNameVirtual){
+		SetLastError(ERROR_BAD_ARGUMENTS);
+	}else{
+		Result->Object = hNode;
+		bResult = TRUE;
+	}
+	return(bResult);
+}
 
 /****************************************************/
 

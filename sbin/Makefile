@@ -51,7 +51,7 @@ install-local:
 
 install: ${DESTDIR}
 	@for file in ${PROGS}; do echo $$file; ginstall $$file "${DESTDIR}${SBINDIR}/$$file"; done
-	ginstall -m 06555 -o 0 -g 0 bsd.exe ${DESTDIR}/
+	ginstall -m 04555 -o 0 -g 0 bsd.exe ${DESTDIR}/
 
 clean:
 	/bin/rm -f *.exe *.o

@@ -88,30 +88,3 @@ DiskOpenFile(WIN_NAMEIDATA *Path, WIN_FLAGS *Flags, WIN_VNODE *Result)
 	}
 	return(bResult);
 }
-BOOL 
-DiskOpenINode(WIN_NAMEIDATA *Path, DWORD Flags)
-{
-	BOOL bResult = FALSE;
-	WIN_INODE iNode;
-	DWORD dwResult;
-	HANDLE hResult;
-	SECURITY_ATTRIBUTES sa = {sizeof(sa), NULL, TRUE};
-
-	hResult = CreateFileW(Path->Resolved, GENERIC_READ, FILE_SHARE_READ, 
-		&sa, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, NULL);
-	if (hResult == INVALID_HANDLE_VALUE){
-		WIN_ERR("CreateFile(%ls): %s\n", Path->Resolved, win_strerror(GetLastError()));
-	}else if (!ReadFile(hResult, &iNode, sizeof(WIN_INODE), &dwResult, NULL)){
-		WIN_ERR("ReadFile(%ls): %s\n", Path->Resolved, win_strerror(GetLastError()));
-	}else if (iNode.Magic != TypeNameVirtual){
-		SetLastError(ERROR_BAD_ARGUMENTS);
-	}else{
-		Path->DeviceId = iNode.DeviceId;
-		Path->FileType = iNode.FileType;
-		Path->FSType = iNode.FSType;
-		Path->Size = iNode.NameSize;
-		Path->Object = hResult;
-		bResult = TRUE;
-	}
-	return(bResult);
-}

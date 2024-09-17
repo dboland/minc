@@ -57,15 +57,20 @@ pdo_F_DUPFD(WIN_DEVICE *Device, HANDLE Process, DWORD Options, WIN_VNODE *Result
 	return(bResult);
 }
 BOOL 
-pdo_F_LOOKUP(WIN_NAMEIDATA *Path, DWORD Flags)
+pdo_F_LOOKUP(WIN_INODE *Node, DWORD Flags, WIN_NAMEIDATA *Result)
 {
-	BOOL bResult = FALSE;
+	BOOL bResult = TRUE;
 
-	if (Flags & WIN_REQUIREDEVICE){
-		bResult = TRUE;
+	Result->DeviceId = Node->DeviceId;
+	Result->FileType = Node->FileType;
+	Result->FSType = Node->FSType;
+	Result->Size = Node->NameSize;
+	if (Flags & WIN_REQUIREOBJECT){
+		Result->Object = Node->Object;
 	}else{
-		bResult = CloseHandle(Path->Object);
+		bResult = CloseHandle(Node->Object);
 	}
+//vfs_ktrace("pdo_F_LOOKUP", STRUCT_NAMEI, Result);
 	return(bResult);
 }
 

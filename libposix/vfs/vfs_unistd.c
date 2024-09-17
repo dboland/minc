@@ -438,7 +438,6 @@ vfs_symlink(WIN_NAMEIDATA *Path, WIN_NAMEIDATA *Target)
 		FS_TYPE_DISK, INAMESIZE(Target->Resolved), 0};
 	HANDLE hNode;
 
-//vfs_ktrace("vfs_symlink", STRUCT_NAMEI, Target);
 	hNode = CreateFileW(Path->Resolved, GENERIC_WRITE, FILE_SHARE_READ, 
 		NULL, CREATE_NEW, FILE_CLASS_INODE, NULL);
 	if (hNode == INVALID_HANDLE_VALUE){

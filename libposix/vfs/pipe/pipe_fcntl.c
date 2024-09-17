@@ -88,17 +88,23 @@ pipe_F_SETFL(WIN_VNODE *Node, WIN_FLAGS *Flags)
 	}
 }
 BOOL 
-pipe_F_LOOKUP(WIN_NAMEIDATA *Path, DWORD Flags)
+pipe_F_LOOKUP(WIN_INODE *Node, DWORD Flags, WIN_NAMEIDATA *Result)
 {
 	BOOL bResult = FALSE;
 	DWORD dwResult;
 
-	if (Flags & WIN_REQUIREDEVICE){
-		bResult = CloseHandle(Path->Object);
-	}else if (ReadFile(Path->Object, Path->Resolved, Path->Size, &dwResult, NULL)){
-		bResult = CloseHandle(Path->Object);
+	Result->DeviceId = Node->DeviceId;
+	Result->FileType = Node->FileType;
+	Result->FSType = Node->FSType;
+	Result->Size = Node->NameSize;
+	if (Flags & WIN_REQUIREOBJECT){
+		Result->Object = Node->Object;
+	}else if (!(Flags & WIN_FOLLOW)){
+		bResult = CloseHandle(Node->Object);
+	}else if (ReadFile(Node->Object, Result->Resolved, Node->NameSize, &dwResult, NULL)){
+		bResult = CloseHandle(Node->Object);
 	}else{
-		WIN_ERR("ReadFile(%d): %s\n", Path->Object, win_strerror(GetLastError()));
+		WIN_ERR("ReadFile(%d): %s\n", Node->Object, win_strerror(GetLastError()));
 	}
 	return(bResult);
 }

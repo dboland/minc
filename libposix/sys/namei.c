@@ -132,8 +132,8 @@ pathat_win(WIN_NAMEIDATA *Result, int dirfd, const char *path, int atflags)
 	if (atflags & AT_NOSLASH){
 		dwFlags |= WIN_STRIPSLASHES;
 	}
-	if (atflags & AT_DEVICE){
-		dwFlags |= WIN_REQUIREDEVICE;
+	if (atflags & AT_SYMLINK){
+		dwFlags |= WIN_ISSYMLINK;
 	}
 	if (atflags & AT_OBJECT){
 		dwFlags |= WIN_REQUIREOBJECT;
@@ -189,8 +189,8 @@ path_win(WIN_NAMEIDATA *Result, const char *path, int flags)
 	if (flags & O_NOSLASH){
 		atflags |= AT_NOSLASH;
 	}
-	if (flags & O_DEVICE){
-		atflags |= AT_DEVICE;
+	if (flags & O_SYMLINK){
+		atflags |= AT_SYMLINK;
 	}
 	if (flags & O_OBJECT){
 		atflags |= AT_OBJECT;

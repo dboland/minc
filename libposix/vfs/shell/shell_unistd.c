@@ -64,6 +64,7 @@ shell_readlink(WIN_NAMEIDATA *Path)
 		}
 		Path->R = win_wcpcpy(Path->Resolved, szBuffer);
 		Path->Last = Path->R - 1;
+		Path->FSType = FS_TYPE_DISK;
 		Path->Attribs = slHead.FileAttributes;
 		bResult = TRUE;
 	}

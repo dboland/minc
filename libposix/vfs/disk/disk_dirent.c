@@ -47,7 +47,7 @@ static const UCHAR __DTYPE_POSIX[] = {
 
 /************************************************************/
 
-DWORD 
+/* DWORD 
 DiskGlobINode(WIN_NAMEIDATA *Path, LPCWSTR FileName)
 {
 	WIN_INODE iNode;
@@ -67,23 +67,26 @@ DiskGlobINode(WIN_NAMEIDATA *Path, LPCWSTR FileName)
 	}
 	CloseHandle(hResult);
 	return(dwResult);
-}
-DWORD 
-DiskGetEntity(WIN32_FIND_DATAW *Data, WIN_NAMEIDATA *Path, PVOID Buffer)
+} */
+BOOL 
+DiskGetEntity(WIN32_FIND_DATAW *Data, WIN_NAMEIDATA *Path, PVOID Buffer, DWORD *Result)
 {
+	BOOL bResult = TRUE;
 	DWORD dwAttribs = Data->dwFileAttributes;
 	WIN_DIRENT *pwdInfo = Buffer;
-	DWORD dwFileType = WIN_VREG;
 	LPWSTR pszType = win_typename(Data->cFileName);
 	DWORD dwRecSize, dwNameSize;
 
 	if (dwAttribs == FILE_CLASS_INODE){
-		dwFileType = DiskGlobINode(Path, Data->cFileName);
+		win_wcscpy(Path->Base, Data->cFileName);
+		bResult = disk_lookup(Path, 0);
 	}else if (dwAttribs & FILE_ATTRIBUTE_DIRECTORY){
-		dwFileType = WIN_VDIR;
+		Path->FileType = WIN_VDIR;
 	}else if (!win_wcscmp(pszType, L".lnk")){
-		dwFileType = WIN_VLNK;
+		Path->FileType = WIN_VLNK;
 		*pszType = 0;			/* chop off extension */
+	}else{
+		Path->FileType = WIN_VREG;
 	}
 	dwNameSize = win_wcstombs(pwdInfo->FileName, Data->cFileName, WIN_MAXNAMLEN);
 	dwRecSize = DIRENT_RECSIZE(dwNameSize);
@@ -91,8 +94,9 @@ DiskGetEntity(WIN32_FIND_DATAW *Data, WIN_NAMEIDATA *Path, PVOID Buffer)
 	pwdInfo->Offset = (DWORDLONG)dwRecSize;
 	pwdInfo->RecSize = dwRecSize;
 	pwdInfo->NameSize = dwNameSize;
-	pwdInfo->FileType = __DTYPE_POSIX[dwFileType];
-	return(dwRecSize);
+	pwdInfo->FileType = __DTYPE_POSIX[Path->FileType];
+	*Result = dwRecSize;
+	return(bResult);
 }
 
 /****************************************************/
@@ -160,8 +164,9 @@ disk_getdents(WIN_NAMEIDATA *Path, PVOID Buffer, DWORD Size, DWORD *Result)
 	}else while (lSize >= sizeof(WIN_DIRENT)){
 		if (!disk_readdir(Path, &wfData)){
 			break;
-		}else if (!(wfData.dwFileAttributes & FILE_ATTRIBUTE_HIDDEN)){
-			dwSize = DiskGetEntity(&wfData, Path, Buffer);
+		}else if (wfData.dwFileAttributes & FILE_ATTRIBUTE_HIDDEN){
+			continue;
+		}else if (DiskGetEntity(&wfData, Path, Buffer, &dwSize)){
 			dwResult += dwSize;
 			lSize -= dwSize;
 			Buffer += dwSize;
