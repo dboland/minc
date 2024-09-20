@@ -70,7 +70,7 @@ rid_posix(SID8 *Sid)
 		bAuth = 0;
 		ulSubAuth = 0;
 	}
-	result = bAuth * 100000000;
+	result = bAuth * 100000000;		/* hello Andrew Tridgell */
 	result += ulSubAuth * 1000000;
 	result += ulRid;
 	return(result);
@@ -297,7 +297,7 @@ __fstatat(WIN_TASK *Task, int dirfd, const char *path, struct stat *buf, int fla
 int 
 sys_lstat(call_t call, const char *path, struct stat *buf)
 {
-	return(__fstatat(call.Task, AT_FDCWD, path, buf, AT_SYMLINK | AT_SYMLINK_NOFOLLOW));
+	return(__fstatat(call.Task, AT_FDCWD, path, buf, AT_SYMLINK | AT_OBJECT));
 }
 int 
 sys_fstatat(call_t call, int dirfd, const char *path, struct stat *buf, int flag)
@@ -316,7 +316,7 @@ int
 __fchmodat(WIN_TASK *Task, int fd, const char *path, mode_t mode, int flag)
 {
 	int result = 0;
-	int atflags = flag | AT_OBJECT;		/* syslogd.exe */
+	int atflags = flag | AT_OBJECT | AT_LOCKLEAF;	/* syslogd.exe */
 	WIN_MODE wMode;
 	WIN_NAMEIDATA wPath = {0};
 

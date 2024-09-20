@@ -36,19 +36,19 @@ BOOL
 disk_lookup(WIN_NAMEIDATA *Path, DWORD Flags)
 {
 	BOOL bResult = FALSE;
-	WIN_INODE iNode;
+	HANDLE hResult = NULL;
 
-	if (!VfsStatNode(Path->Resolved, &iNode)){
-		return(FALSE);
-	}else switch (iNode.FSType){
+	if (!VfsStatNode(Path, Flags, &hResult)){
+		bResult = CloseHandle(hResult);
+	}else switch (Path->FSType){
 		case FS_TYPE_DISK:
-			bResult = disk_F_LOOKUP(&iNode, Flags, Path);
+			bResult = disk_F_LOOKUP(hResult, Flags, Path);
 			break;
 		case FS_TYPE_PIPE:
-			bResult = pipe_F_LOOKUP(&iNode, Flags, Path);
+			bResult = pipe_F_LOOKUP(hResult, Flags, Path);
 			break;
 		case FS_TYPE_PDO:
-			bResult = pdo_F_LOOKUP(&iNode, Flags, Path);
+			bResult = pdo_F_LOOKUP(hResult, Flags, Path);
 			break;
 		default:
 			SetLastError(ERROR_BAD_FILE_TYPE);

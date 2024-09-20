@@ -69,23 +69,44 @@ pipe_stat(WIN_NAMEIDATA *Path, WIN_VATTR *Result)
 	return(bResult);
 }
 BOOL 
-pipe_mknod(LPWSTR FileName, LPWSTR NtName, WIN_MODE *Mode)
+pipe_mknod(LPWSTR FileName, WIN_MODE *Mode, LPWSTR NtName)
 {
 	BOOL bResult = FALSE;
-	DWORD dwResult;
-	WIN_INODE iNode = {TypeNameVirtual, DEV_CLASS_CPU, Mode->FileType, 
-		FS_TYPE_PIPE, INAMESIZE(NtName), 0};
-	HANDLE hNode;
+	PSECURITY_DESCRIPTOR psd;
+	WIN_ACL_CONTROL wControl;
+	SECURITY_ATTRIBUTES sa = {sizeof(sa), &wControl.Security, FALSE};
+	WCHAR szDirName[WIN_PATH_MAX];
 
-//__PRINTF("  pipe_mknod(%ls): %ls\n", FileName, NtName)
-	hNode = CreateFileW(FileName, GENERIC_WRITE, FILE_SHARE_READ, 
-		NULL, CREATE_ALWAYS, FILE_CLASS_INODE, NULL);
-	if (hNode == INVALID_HANDLE_VALUE){
-		WIN_ERR("CreateFile(%ls): %s\n", FileName, win_strerror(GetLastError()));
-	}else if (!WriteFile(hNode, &iNode, sizeof(WIN_INODE), &dwResult, NULL)){
-		WIN_ERR("WriteFile(%ls): %s\n", FileName, win_strerror(GetLastError()));
-	}else if (WriteFile(hNode, NtName, iNode.NameSize, &dwResult, NULL)){
-		bResult = CloseHandle(hNode);
+	if (!win_acl_get_file(win_dirname(szDirName, FileName), &psd)){
+		return(FALSE);
+	}else if (!win_acl_init(Mode, &wControl)){
+		WIN_ERR("win_acl_init(%ls): %s\n", szDirName, win_strerror(GetLastError()));
+	}else if (vfs_acl_create(psd, Mode, 0, &wControl)){
+		bResult = pipe_F_CREATE(FileName, Mode->FileType, &sa, NtName);
 	}
+	LocalFree(psd);
+	win_acl_free(&wControl);
+	return(bResult);
+}
+BOOL 
+pipe_chmod(WIN_NAMEIDATA *Path, WIN_MODE *Mode)
+{
+	BOOL bResult = FALSE;
+	SECURITY_INFORMATION siType = OWNER_SECURITY_INFORMATION + GROUP_SECURITY_INFORMATION + DACL_SECURITY_INFORMATION;
+	PSECURITY_DESCRIPTOR psd;
+	DWORD dwSize = 0;
+	WIN_ACL_CONTROL wControl;
+
+	if (!win_acl_get_fd(Path->Object, &psd)){
+		return(FALSE);
+	}else if (!win_acl_init(Mode, &wControl)){
+		WIN_ERR("pipe_chmod(%d): %s\n", Path->Object, win_strerror(GetLastError()));
+	}else if (!vfs_acl_chmod(psd, Mode, &wControl)){
+		WIN_ERR("pipe_chmod(%d): %s\n", Path->Object, win_strerror(GetLastError()));
+	}else if (SetUserObjectSecurity(Path->Object, &siType, &wControl.Security)){
+		bResult = CloseHandle(Path->Object);
+	}
+	LocalFree(psd);
+	win_acl_free(&wControl);
 	return(bResult);
 }

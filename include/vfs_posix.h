@@ -62,7 +62,7 @@ BOOL vfs_pwrite(WIN_VNODE *Node, LPCVOID Buffer, DWORD Size, DWORDLONG Offset, D
 BOOL vfs_pread(WIN_VNODE *Node, LPVOID Buffer, DWORD Size, DWORDLONG Offset, DWORD *Result);
 VOID vfs_closefrom(WIN_VNODE Nodes[]);
 BOOL vfs_readlink(WIN_NAMEIDATA *Path);
-BOOL vfs_symlink(WIN_NAMEIDATA *Path, WIN_NAMEIDATA *Target);
+BOOL vfs_symlink(WIN_NAMEIDATA *Path, WIN_MODE *Mode, WIN_NAMEIDATA *Target);
 
 /* vfs_syscall.c */
 

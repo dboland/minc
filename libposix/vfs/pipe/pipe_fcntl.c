@@ -88,25 +88,41 @@ pipe_F_SETFL(WIN_VNODE *Node, WIN_FLAGS *Flags)
 	}
 }
 BOOL 
-pipe_F_LOOKUP(WIN_INODE *Node, DWORD Flags, WIN_NAMEIDATA *Result)
+pipe_F_LOOKUP(HANDLE Handle, DWORD Flags, WIN_NAMEIDATA *Result)
 {
 	BOOL bResult = FALSE;
 	DWORD dwResult;
 
-	Result->DeviceId = Node->DeviceId;
-	Result->FileType = Node->FileType;
-	Result->FSType = Node->FSType;
-	Result->Size = Node->NameSize;
 	if (Flags & WIN_REQUIREOBJECT){
-		Result->Object = Node->Object;
+		Result->Object = Handle;
 	}else if (!(Flags & WIN_FOLLOW)){
-		bResult = CloseHandle(Node->Object);
-	}else if (ReadFile(Node->Object, Result->Resolved, Node->NameSize, &dwResult, NULL)){
-		bResult = CloseHandle(Node->Object);
+		bResult = CloseHandle(Handle);
+	}else if (ReadFile(Handle, Result->Resolved, Result->Size, &dwResult, NULL)){
+		bResult = CloseHandle(Handle);
 	}else{
-		WIN_ERR("ReadFile(%d): %s\n", Node->Object, win_strerror(GetLastError()));
+		WIN_ERR("ReadFile(%ls): %s\n", Result->Resolved, win_strerror(GetLastError()));
 	}
+//vfs_ktrace("pipe_F_LOOKUP", STRUCT_NAMEI, Result);
 	return(bResult);
+}
+BOOL 
+pipe_F_CREATE(LPWSTR FileName, DWORD FileType, SECURITY_ATTRIBUTES *Attribs, LPWSTR NtName)
+{
+	BOOL bResult = FALSE;
+	DWORD dwResult;
+	WIN_INODE iNode = {TypeNameVirtual, DEV_CLASS_CPU, FileType, 
+		FS_TYPE_PIPE, INAMESIZE(NtName), 0, 0};
+	HANDLE hNode;
+
+	hNode = CreateFileW(FileName, GENERIC_WRITE, FILE_SHARE_READ, 
+		Attribs, CREATE_NEW, FILE_CLASS_INODE, NULL);
+	if (hNode == INVALID_HANDLE_VALUE){
+		return(FALSE);
+	}else if (!WriteFile(hNode, &iNode, sizeof(WIN_INODE), &dwResult, NULL)){
+		WIN_ERR("WriteFile(%ls): %s\n", FileName, win_strerror(GetLastError()));
+	}else if (WriteFile(hNode, NtName, iNode.NameSize, &dwResult, NULL)){
+		bResult = CloseHandle(hNode);
+	}
 }
 
 /****************************************************/

@@ -57,20 +57,33 @@ pdo_F_DUPFD(WIN_DEVICE *Device, HANDLE Process, DWORD Options, WIN_VNODE *Result
 	return(bResult);
 }
 BOOL 
-pdo_F_LOOKUP(WIN_INODE *Node, DWORD Flags, WIN_NAMEIDATA *Result)
+pdo_F_LOOKUP(HANDLE Handle, DWORD Flags, WIN_NAMEIDATA *Result)
 {
 	BOOL bResult = TRUE;
 
-	Result->DeviceId = Node->DeviceId;
-	Result->FileType = Node->FileType;
-	Result->FSType = Node->FSType;
-	Result->Size = Node->NameSize;
 	if (Flags & WIN_REQUIREOBJECT){
-		Result->Object = Node->Object;
+		Result->Object = Handle;
 	}else{
-		bResult = CloseHandle(Node->Object);
+		bResult = CloseHandle(Handle);
 	}
-//vfs_ktrace("pdo_F_LOOKUP", STRUCT_NAMEI, Result);
+	return(bResult);
+}
+BOOL 
+pdo_F_CREATE(LPWSTR FileName, DWORD FileType, SECURITY_ATTRIBUTES *Attribs, DWORD DeviceId)
+{
+	BOOL bResult = FALSE;
+	DWORD dwResult;
+	WIN_INODE iNode = {TypeNameVirtual, DeviceId, FileType, 
+		FS_TYPE_PDO, 0, 0, 0};
+	HANDLE hNode;
+
+	hNode = CreateFileW(FileName, GENERIC_WRITE, FILE_SHARE_READ, 
+		Attribs, CREATE_NEW, FILE_CLASS_INODE, NULL);
+	if (hNode == INVALID_HANDLE_VALUE){
+		return(FALSE);
+	}else if (WriteFile(hNode, &iNode, sizeof(WIN_INODE), &dwResult, NULL)){
+		bResult = CloseHandle(hNode);
+	}
 	return(bResult);
 }
 

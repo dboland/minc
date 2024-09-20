@@ -401,6 +401,7 @@ VfsPathFlags(LPSTR Buffer, LPCSTR Label, DWORD Flags)
 	psz = VfsFlagName(psz, WIN_PATHCOPY, "PATHCOPY", Flags, &Flags);
 //	psz = VfsFlagName(psz, WIN_REQUIREDEVICE, "REQUIREDEVICE", Flags, &Flags);
 	psz = VfsFlagName(psz, WIN_REQUIREOBJECT, "REQUIREOBJECT", Flags, &Flags);
+	psz = VfsFlagName(psz, WIN_LOCKLEAF, "LOCKLEAF", Flags, &Flags);
 	psz = VfsFlagName(psz, WIN_FOLLOW, "FOLLOW", Flags, &Flags);
 	psz = VfsFlagName(psz, WIN_NOCROSSMOUNT, "NOCROSSMOUNT", Flags, &Flags);
 	psz = VfsFlagName(psz, WIN_RDONLY, "ISSYMLINK", Flags, &Flags);
@@ -594,8 +595,8 @@ vfs_INODE(WIN_INODE *Node, LPSTR Buffer)
 {
 	LPSTR psz = Buffer;
 
-	psz += msvc_sprintf(psz, "(%s:%s): DeviceId(0x%x) NameSize(%d) Index(%d) Object(%d)\n",
-		FSType(Node->FSType), FType(Node->FileType), Node->DeviceId, Node->NameSize, Node->Index, Node->Object);
+	psz += msvc_sprintf(psz, "(%s:%s): DeviceId(0x%x) NameSize(%d) Reserved1(%d) Reserved2(%d)\n",
+		FSType(Node->FSType), FType(Node->FileType), Node->DeviceId, Node->NameSize, Node->Reserved1, Node->Reserved2);
 	return(psz - Buffer);
 }
 

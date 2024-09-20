@@ -50,11 +50,11 @@ pdo_stat(WIN_NAMEIDATA *Path, WIN_VATTR *Result)
 {
 	BOOL bResult = FALSE;
 
-	if (VfsStatFile(Path->Resolved, FILE_ATTRIBUTE_NORMAL, Result)){
+	if (VfsStatHandle(Path->Object, Result)){
 		Result->DeviceId = __Mounts->DeviceId;
 		Result->Mode.FileType = Path->FileType;
 		Result->SpecialId = Path->DeviceId;
-		bResult = TRUE;
+		bResult = CloseHandle(Path->Object);
 	}
 	return(bResult);
 }

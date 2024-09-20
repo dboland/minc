@@ -138,6 +138,9 @@ pathat_win(WIN_NAMEIDATA *Result, int dirfd, const char *path, int atflags)
 	if (atflags & AT_OBJECT){
 		dwFlags |= WIN_REQUIREOBJECT;
 	}
+	if (atflags & AT_LOCKLEAF){
+		dwFlags |= WIN_LOCKLEAF;
+	}
 
 	Result->MountId = 0;
 	Result->DeviceId = DEV_TYPE_ROOT;

@@ -341,12 +341,13 @@ __symlinkat(WIN_NAMEIDATA *Target, int fd, const char *path)
 	int result = 0;
 	int atflags = AT_SYMLINK_NOFOLLOW;
 	WIN_NAMEIDATA wPath = {0};
+	WIN_MODE wMode;
 
 	if (!path){
 		result = -EFAULT;
 	}else if (!path[0]){
 		result = -ENOENT;
-	}else if (!vfs_symlink(pathat_win(&wPath, fd, path, atflags), Target)){
+	}else if (!vfs_symlink(pathat_win(&wPath, fd, path, atflags), mode_win(&wMode, 00755), Target)){
 		result -= errno_posix(GetLastError());
 	}
 	return(result);

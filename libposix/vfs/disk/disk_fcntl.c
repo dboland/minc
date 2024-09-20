@@ -48,22 +48,18 @@ disk_F_DUPFD(WIN_VNODE *Node, HANDLE Process, DWORD Options, WIN_VNODE *Result)
 	return(bResult);
 }
 BOOL 
-disk_F_LOOKUP(WIN_INODE *Node, DWORD Flags, WIN_NAMEIDATA *Result)
+disk_F_LOOKUP(HANDLE Handle, DWORD Flags, WIN_NAMEIDATA *Result)
 {
 	BOOL bResult = TRUE;
 	WCHAR szBuffer[MAX_PATH];
 	DWORD dwResult;
 	LPWSTR pszBase = Result->Resolved;
 
-	Result->DeviceId = Node->DeviceId;
-	Result->FileType = Node->FileType;
-	Result->FSType = Node->FSType;
-	Result->Size = Node->NameSize;
 	if (Flags & WIN_ISSYMLINK){
-		Result->Object = Node->Object;
+		Result->Object = Handle;
 	}else if (!(Flags & WIN_FOLLOW)){
-		bResult = CloseHandle(Node->Object);
-	}else if (ReadFile(Node->Object, szBuffer, Node->NameSize, &dwResult, NULL)){
+		bResult = CloseHandle(Handle);
+	}else if (ReadFile(Handle, szBuffer, Result->Size, &dwResult, NULL)){
 		if (szBuffer[1] == ':'){
 			Result->MountId = MOUNTID(szBuffer[0]);	/* nano.exe */
 		}else if (szBuffer[1] == '\\'){
@@ -76,11 +72,31 @@ disk_F_LOOKUP(WIN_INODE *Node, DWORD Flags, WIN_NAMEIDATA *Result)
 		Result->Last = Result->R - 1;
 		Result->Attribs = GetFileAttributesW(Result->Resolved);
 		Result->FileType = WIN_VREG;
-		bResult = CloseHandle(Node->Object);
+		bResult = CloseHandle(Handle);
 	}else{
 		bResult = FALSE;
 	}
 //vfs_ktrace("disk_F_LOOKUP", STRUCT_NAMEI, Result);
+	return(bResult);
+}
+BOOL 
+disk_F_CREATE(LPWSTR FileName, DWORD FileType, SECURITY_ATTRIBUTES *Attribs, LPWSTR Target)
+{
+	BOOL bResult = FALSE;
+	DWORD dwResult;
+	WIN_INODE iNode = {TypeNameVirtual, DEV_TYPE_ROOT, FileType, 
+		FS_TYPE_DISK, INAMESIZE(Target), 0, 0};
+	HANDLE hNode;
+
+	hNode = CreateFileW(FileName, GENERIC_WRITE, FILE_SHARE_READ, 
+		Attribs, CREATE_NEW, FILE_CLASS_INODE, NULL);
+	if (hNode == INVALID_HANDLE_VALUE){
+		return(FALSE);
+	}else if (!WriteFile(hNode, &iNode, sizeof(WIN_INODE), &dwResult, NULL)){
+		WIN_ERR("WriteFile(%ls): %s\n", FileName, win_strerror(GetLastError()));
+	}else if (WriteFile(hNode, Target, iNode.NameSize, &dwResult, NULL)){
+		bResult = CloseHandle(hNode);
+	}
 	return(bResult);
 }
 

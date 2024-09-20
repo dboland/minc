@@ -82,25 +82,35 @@ VfsStatFile(LPCWSTR FileName, DWORD Attribs, WIN_VATTR *Result)
 	return(bResult);
 }
 BOOL 
-VfsStatNode(LPCWSTR FileName, WIN_INODE *Result)
+VfsStatNode(WIN_NAMEIDATA *Path, DWORD Flags, HANDLE *Result)
 {
 	BOOL bResult = FALSE;
 	DWORD dwSize;
-	HANDLE hNode;
+	HANDLE hNode = NULL;
 	SECURITY_ATTRIBUTES sa = {sizeof(sa), NULL, TRUE};
+	WIN_INODE iNode;
+	ACCESS_MASK amAccess = GENERIC_READ;
 
-	hNode = CreateFileW(FileName, GENERIC_READ, FILE_SHARE_READ, 
+	if (Flags & WIN_LOCKLEAF){
+		amAccess |= WRITE_DAC | WRITE_OWNER;
+	}
+	hNode = CreateFileW(Path->Resolved, amAccess, FILE_SHARE_READ, 
 		&sa, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, NULL);
 	if (hNode == INVALID_HANDLE_VALUE){
-		WIN_ERR("CreateFile(%ls): %s\n", FileName, win_strerror(GetLastError()));
-	}else if (!ReadFile(hNode, Result, sizeof(WIN_INODE), &dwSize, NULL)){
-		WIN_ERR("ReadFile(%ls): %s\n", FileName, win_strerror(GetLastError()));
-	}else if (Result->Magic != TypeNameVirtual){
-		SetLastError(ERROR_BAD_ARGUMENTS);
-	}else{
-		Result->Object = hNode;
+		return(FALSE);
+	}else if (!ReadFile(hNode, &iNode, sizeof(WIN_INODE), &dwSize, NULL)){
+		WIN_ERR("ReadFile(%ls): %s\n", Path->Resolved, win_strerror(GetLastError()));
+	}else if (iNode.Magic == TypeNameVirtual){
+		Path->DeviceId = iNode.DeviceId;
+		Path->FileType = iNode.FileType;
+		Path->FSType = iNode.FSType;
+		Path->Size = iNode.NameSize;
 		bResult = TRUE;
+	}else{
+		Path->FSType = FS_TYPE_SHELL;
+		Path->FileType = WIN_VREG;
 	}
+	*Result = hNode;
 	return(bResult);
 }
 

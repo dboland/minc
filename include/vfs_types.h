@@ -173,8 +173,8 @@ typedef struct _WIN_INODE {
 	WIN_VTYPE FileType;	/* in userland, everything is a file */
 	WIN_FS_TYPE FSType;
 	DWORD NameSize;
-	DWORD Index;
-	PVOID Object;
+	DWORD Reserved1;
+	DWORD Reserved2;
 } WIN_INODE;
 
 #define INAMESIZE(wcs)		((win_wcslen(wcs) + 1) * sizeof(WCHAR))

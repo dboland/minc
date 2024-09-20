@@ -52,6 +52,7 @@
 #define AT_NOSLASH		0x0020
 #define AT_SYMLINK		0x0040
 #define AT_OBJECT		0x0080
+#define AT_LOCKLEAF		0x0100
 
 /* sys/signal.c */
 

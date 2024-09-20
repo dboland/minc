@@ -61,7 +61,7 @@ vfs_stat(WIN_NAMEIDATA *Path, WIN_VATTR *Result)
 {
 	BOOL bResult = FALSE;
 
-	/* CreateFile() yields "Access is denied" on open files
+	/* CreateFile() yields ERROR_ACCESS_DENIED on open files
 	 * which previously have been deleted (git.exe).
 	 */
 	if (Path->Attribs == -1){
@@ -91,6 +91,8 @@ vfs_chmod(WIN_NAMEIDATA *Path, WIN_MODE *Mode)
 
 	switch (Path->FSType){
 		case FS_TYPE_PIPE:
+			bResult = pipe_chmod(Path, Mode);
+			break;
 		case FS_TYPE_PDO:
 		case FS_TYPE_DISK:
 			bResult = disk_chmod(Path, Mode);
@@ -117,20 +119,20 @@ BOOL
 vfs_mknod(WIN_NAMEIDATA *Path, WIN_MODE *Mode, DWORD DeviceId)
 {
 	BOOL bResult = FALSE;
-	WIN_INODE iNode = {TypeNameVirtual, DeviceId, Mode->FileType, 
-		FS_TYPE_PDO, 0, 0};
-	DWORD dwResult;
-	HANDLE hNode;
+	PSECURITY_DESCRIPTOR psd;
+	WIN_ACL_CONTROL wControl;
+	SECURITY_ATTRIBUTES sa = {sizeof(sa), &wControl.Security, FALSE};
+	WCHAR szDirName[WIN_PATH_MAX];
 
-	hNode = CreateFileW(Path->Resolved, GENERIC_WRITE, FILE_SHARE_READ, 
-		NULL, CREATE_NEW, FILE_CLASS_INODE, NULL);
-	if (hNode == INVALID_HANDLE_VALUE){
+	if (!win_acl_get_file(win_dirname(szDirName, Path->Resolved), &psd)){
 		return(FALSE);
-	}else if (!WriteFile(hNode, &iNode, sizeof(WIN_INODE), &dwResult, NULL)){
-		WIN_ERR("WriteFile(%ls): %s\n", Path->Resolved, win_strerror(GetLastError()));
-	}else{
-		bResult = CloseHandle(hNode);
+	}else if (!win_acl_init(Mode, &wControl)){
+		WIN_ERR("win_acl_init(%s): %s\n", szDirName, win_strerror(GetLastError()));
+	}else if (vfs_acl_create(psd, Mode, 0, &wControl)){
+		bResult = pdo_F_CREATE(Path->Resolved, Mode->FileType, &sa, DeviceId);
 	}
+	LocalFree(psd);
+	win_acl_free(&wControl);
 	return(bResult);
 }
 BOOL 

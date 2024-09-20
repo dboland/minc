@@ -47,27 +47,6 @@ static const UCHAR __DTYPE_POSIX[] = {
 
 /************************************************************/
 
-/* DWORD 
-DiskGlobINode(WIN_NAMEIDATA *Path, LPCWSTR FileName)
-{
-	WIN_INODE iNode;
-	HANDLE hResult;
-	DWORD dwSize;
-	DWORD dwResult = WIN_VREG;
-
-	win_wcscpy(Path->Base, FileName);
-	hResult = CreateFileW(Path->Resolved, GENERIC_READ, FILE_SHARE_READ, 
-		NULL, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, NULL);
-	if (hResult == INVALID_HANDLE_VALUE){
-		WIN_ERR("CreateFile(%ls): %s\n", Path->Resolved, win_strerror(GetLastError()));
-	}else if (!ReadFile(hResult, &iNode, sizeof(WIN_INODE), &dwSize, NULL)){
-		WIN_ERR("ReadFile(%ls): %s\n", Path->Resolved, win_strerror(GetLastError()));
-	}else if (iNode.Magic == TypeNameVirtual){
-		dwResult = iNode.FileType;
-	}
-	CloseHandle(hResult);
-	return(dwResult);
-} */
 BOOL 
 DiskGetEntity(WIN32_FIND_DATAW *Data, WIN_NAMEIDATA *Path, PVOID Buffer, DWORD *Result)
 {
@@ -109,10 +88,8 @@ disk_closedir(WIN_VNODE *Node)
 	if (!Node->Object){
 		return(TRUE);
 	}else if (!FindClose(Node->Object)){
-		WIN_ERR("FindClose(0x%x): %s\n", Node->Object, win_strerror(GetLastError()));
+		WIN_ERR("FindClose(%d): %s\n", Node->Object, win_strerror(GetLastError()));
 	}else{
-		Node->Object = NULL;
-		Node->Index = 0;
 		bResult = TRUE;
 	}
 	return(bResult);
@@ -138,14 +115,21 @@ disk_readdir(WIN_NAMEIDATA *Path, WIN32_FIND_DATAW *Data)
 {
 	BOOL bResult = FALSE;
 
+	/* Windows does some type of garbage collection on the search handle.
+	 * When not closing it immediately after the last FindNextFile(),
+	 * FindClose() yields ERROR_NOACCESS (gmake.exe).
+	 */
 	if (!Path->Object){
 		bResult = disk_rewinddir(Path, Data);
 	}else if (FindNextFileW(Path->Object, Data)){
 		bResult = TRUE;
-	}else if (ERROR_NO_MORE_FILES == GetLastError()){
-		Path->Index = -1;
-	}else{
+	}else if (ERROR_NO_MORE_FILES != GetLastError()){
 		WIN_ERR("FindNextFile(%d): %s\n", Path->Object, win_strerror(GetLastError()));
+	}else if (!FindClose(Path->Object)){
+		WIN_ERR("FindClose(%d): %s\n", Path->Object, win_strerror(GetLastError()));
+	}else{
+		Path->Object = NULL;
+		Path->Index = -1;
 	}
 	return(bResult);
 }
@@ -158,21 +142,24 @@ disk_getdents(WIN_NAMEIDATA *Path, PVOID Buffer, DWORD Size, DWORD *Result)
 	WIN32_FIND_DATAW wfData;
 	DWORD dwSize;
 
-//vfs_ktrace("disk_getdents", STRUCT_NAMEI, Path);
 	if (Path->Index == -1){
-		dwResult = 0;
+		SetLastError(ERROR_NO_MORE_FILES);
 	}else while (lSize >= sizeof(WIN_DIRENT)){
 		if (!disk_readdir(Path, &wfData)){
 			break;
 		}else if (wfData.dwFileAttributes & FILE_ATTRIBUTE_HIDDEN){
 			continue;
-		}else if (DiskGetEntity(&wfData, Path, Buffer, &dwSize)){
+		}else if (!DiskGetEntity(&wfData, Path, Buffer, &dwSize)){
+			bResult = FALSE;
+			break;
+		}else{
 			dwResult += dwSize;
 			lSize -= dwSize;
 			Buffer += dwSize;
 			Path->Index++;
 		}
 	}
+//vfs_ktrace("disk_getdents", STRUCT_NAMEI, Path);
 	*Result = dwResult;
 	return(bResult);
 }

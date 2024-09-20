@@ -430,23 +430,23 @@ vfs_revoke(WIN_VNODE *Node)
 	return(bResult);
 }
 BOOL 
-vfs_symlink(WIN_NAMEIDATA *Path, WIN_NAMEIDATA *Target)
+vfs_symlink(WIN_NAMEIDATA *Path, WIN_MODE *Mode, WIN_NAMEIDATA *Target)
 {
 	BOOL bResult = FALSE;
-	DWORD dwResult;
-	WIN_INODE iNode = {TypeNameVirtual, Path->DeviceId, WIN_VLNK, 
-		FS_TYPE_DISK, INAMESIZE(Target->Resolved), 0};
-	HANDLE hNode;
+	PSECURITY_DESCRIPTOR psd;
+	WIN_ACL_CONTROL wControl;
+	SECURITY_ATTRIBUTES sa = {sizeof(sa), &wControl.Security, FALSE};
+	WCHAR szDirName[WIN_PATH_MAX];
 
-	hNode = CreateFileW(Path->Resolved, GENERIC_WRITE, FILE_SHARE_READ, 
-		NULL, CREATE_NEW, FILE_CLASS_INODE, NULL);
-	if (hNode == INVALID_HANDLE_VALUE){
+	if (!win_acl_get_file(win_dirname(szDirName, Path->Resolved), &psd)){
 		return(FALSE);
-	}else if (!WriteFile(hNode, &iNode, sizeof(WIN_INODE), &dwResult, NULL)){
-		WIN_ERR("WriteFile(%d): %s\n", hNode, win_strerror(GetLastError()));
-	}else if (WriteFile(hNode, Target->Resolved, iNode.NameSize, &dwResult, NULL)){
-		bResult = CloseHandle(hNode);
+	}else if (!win_acl_init(Mode, &wControl)){
+		WIN_ERR("win_acl_init(%s): %s\n", szDirName, win_strerror(GetLastError()));
+	}else if (vfs_acl_create(psd, Mode, 0, &wControl)){
+		bResult = disk_F_CREATE(Path->Resolved, WIN_VLNK, &sa, Target->Resolved);
 	}
+	LocalFree(psd);
+	win_acl_free(&wControl);
 	return(bResult);
 }
 BOOL 

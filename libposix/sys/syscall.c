@@ -666,7 +666,7 @@ syscall_leave(call_t call)
 	int code = call.Code;
 	WIN_TASK *pwTask = call.Task;
 
-	if (result < 0){
+	if (result < 0){		/* hello Linus Torvalds */
 		pwTask->Error = -result;
 	}
 	/* Note: WriteFile() will touch the %edx register.

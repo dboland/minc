@@ -101,7 +101,7 @@ pipe_bind(WIN_VNODE *Node, LPSOCKADDR Name, INT Length)
 
 	if (!PipeCreateFile(VfsCreateName(szName), dwAttribs, __PipeEvent, Node)){
 		return(FALSE);
-	}else if (pipe_mknod((LPWSTR)Name->sa_data, szName, &wMode)){
+	}else if (pipe_mknod((LPWSTR)Name->sa_data, &wMode, szName)){
 		bResult = TRUE;
 	}
 	return(bResult);

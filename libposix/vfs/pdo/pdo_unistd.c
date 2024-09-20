@@ -126,9 +126,7 @@ pdo_unlink(WIN_NAMEIDATA *Path)
 {
 	BOOL bResult = FALSE;
 
-	if (!CloseHandle(Path->Object)){
-		WIN_ERR("CloseHandle(%d): %s\n", Path->Object, win_strerror(GetLastError()));
-	}else if (*Path->Last == '\\'){		/* GNU conftest.exe */
+	if (*Path->Last == '\\'){		/* GNU conftest.exe */
 		SetLastError(ERROR_BAD_PATHNAME);
 	}else{
 		bResult = DeleteFileW(Path->Resolved);
