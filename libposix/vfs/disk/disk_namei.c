@@ -39,7 +39,9 @@ disk_lookup(WIN_NAMEIDATA *Path, DWORD Flags)
 	HANDLE hResult = NULL;
 
 	if (!VfsStatNode(Path, Flags, &hResult)){
-		bResult = CloseHandle(hResult);
+		Path->FSType = FS_TYPE_DISK;
+		Path->FileType = WIN_VREG;
+		bResult = TRUE;
 	}else switch (Path->FSType){
 		case FS_TYPE_DISK:
 			bResult = disk_F_LOOKUP(hResult, Flags, Path);

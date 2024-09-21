@@ -86,31 +86,30 @@ VfsStatNode(WIN_NAMEIDATA *Path, DWORD Flags, HANDLE *Result)
 {
 	BOOL bResult = FALSE;
 	DWORD dwSize;
-	HANDLE hNode = NULL;
+	HANDLE hResult;
 	SECURITY_ATTRIBUTES sa = {sizeof(sa), NULL, TRUE};
 	WIN_INODE iNode;
-	ACCESS_MASK amAccess = GENERIC_READ;
+	ACCESS_MASK amAccess = FILE_READ_DATA | READ_CONTROL;
 
 	if (Flags & WIN_LOCKLEAF){
 		amAccess |= WRITE_DAC | WRITE_OWNER;
 	}
-	hNode = CreateFileW(Path->Resolved, amAccess, FILE_SHARE_READ, 
-		&sa, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, NULL);
-	if (hNode == INVALID_HANDLE_VALUE){
+	hResult = CreateFileW(Path->Resolved, amAccess, FILE_SHARE_READ, 
+		&sa, OPEN_EXISTING, FILE_CLASS_INODE, NULL);
+	if (hResult == INVALID_HANDLE_VALUE){
 		return(FALSE);
-	}else if (!ReadFile(hNode, &iNode, sizeof(WIN_INODE), &dwSize, NULL)){
+	}else if (!ReadFile(hResult, &iNode, sizeof(WIN_INODE), &dwSize, NULL)){
 		WIN_ERR("ReadFile(%ls): %s\n", Path->Resolved, win_strerror(GetLastError()));
 	}else if (iNode.Magic == TypeNameVirtual){
 		Path->DeviceId = iNode.DeviceId;
 		Path->FileType = iNode.FileType;
 		Path->FSType = iNode.FSType;
 		Path->Size = iNode.NameSize;
+		*Result = hResult;
 		bResult = TRUE;
-	}else{
-		Path->FSType = FS_TYPE_SHELL;
-		Path->FileType = WIN_VREG;
+	}else if (CloseHandle(hResult)){
+		SetLastError(ERROR_BAD_ARGUMENTS);
 	}
-	*Result = hNode;
 	return(bResult);
 }
 

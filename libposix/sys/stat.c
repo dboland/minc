@@ -297,7 +297,7 @@ __fstatat(WIN_TASK *Task, int dirfd, const char *path, struct stat *buf, int fla
 int 
 sys_lstat(call_t call, const char *path, struct stat *buf)
 {
-	return(__fstatat(call.Task, AT_FDCWD, path, buf, AT_SYMLINK | AT_OBJECT));
+	return(__fstatat(call.Task, AT_FDCWD, path, buf, AT_SYMLINK | AT_OBJECT | AT_SYMLINK_NOFOLLOW));
 }
 int 
 sys_fstatat(call_t call, int dirfd, const char *path, struct stat *buf, int flag)

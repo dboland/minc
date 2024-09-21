@@ -86,6 +86,7 @@ pipe_F_SETFL(WIN_VNODE *Node, WIN_FLAGS *Flags)
 		Node->CloseExec = Flags->CloseExec;
 		bResult = TRUE;
 	}
+	return(bResult);
 }
 BOOL 
 pipe_F_LOOKUP(HANDLE Handle, DWORD Flags, WIN_NAMEIDATA *Result)
@@ -123,6 +124,7 @@ pipe_F_CREATE(LPWSTR FileName, DWORD FileType, SECURITY_ATTRIBUTES *Attribs, LPW
 	}else if (WriteFile(hNode, NtName, iNode.NameSize, &dwResult, NULL)){
 		bResult = CloseHandle(hNode);
 	}
+	return(bResult);
 }
 
 /****************************************************/

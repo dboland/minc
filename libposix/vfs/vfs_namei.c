@@ -141,6 +141,7 @@ vfs_lookup(WIN_NAMEIDATA *Path, LPWSTR Source, DWORD Flags)
 			*Path->R++ = '\\';
 			PathCopy(Path);
 			Path->Last = Path->R - 1;
+			SetLastError(ERROR_DIRECTORY);
 			return(Path);
 		}
 	}
