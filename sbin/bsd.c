@@ -67,9 +67,12 @@
 unsigned char		_verbose;
 unsigned char		_boot;
 
+int runcmd(char *argv[]);
+
 /* src/sys/netinet/ip_input.c */
-//void ip_init(void);
 void tty_init(void);
+
+/* sys/arch/i386/stand/boot/crt0.c */
 
 /************************************************************/
 
@@ -194,6 +197,19 @@ boot(void)
 	fprintf(stderr, "execve(%s): %s\n", *args, strerror(errno));
 }
 void 
+notty(void)
+{
+	char *root = getenv("MINCROOT");
+	char *msg = "MinC is installed and working but could not configure itself.\n"
+		"Please exclude %s from your anti-virus software\n"
+		"and run /sbin/setup.sh as administrator.\n\n"
+		"Press any key to continue . . .";
+	char buf;
+
+	fprintf(stderr, msg, root);
+	read(0, &buf, 1);
+}
+void 
 single(void)
 {
 	int mib[2] = {CTL_KERN, KERN_SECURELVL};
@@ -212,6 +228,7 @@ single(void)
 	(void) revoke(_PATH_CONSOLE);
 	setsid();
 	if (!getty(_PATH_CONSOLE)){
+		notty();
 		args[0] = "/bin/sh";
 		args[1] = NULL;
 	}

@@ -58,7 +58,7 @@ MManLoadFile(HANDLE Handle, PVOID Address, DWORD Size, LARGE_INTEGER *Offset, PV
 	}else if (!SetFilePointerEx(Handle, *Offset, Offset, FILE_BEGIN)){
 		WIN_ERR("SetFilePointerEx(%d): %s\n", Handle, win_strerror(GetLastError()));
 	}else if (!ReadFile(Handle, Address, Size, &dwResult, NULL)){
-		WIN_ERR("ReadFile(0x%x): %s\n", Address, win_strerror(GetLastError()));
+		WIN_ERR("ReadFile(%d): %s\n", Handle, win_strerror(GetLastError()));
 	}else if (!SetFilePointerEx(Handle, liCurrent, &liCurrent, FILE_BEGIN)){
 		WIN_ERR("SetFilePointerEx(%d): %s\n", Handle, win_strerror(GetLastError()));
 	}else{

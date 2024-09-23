@@ -190,6 +190,8 @@ vfs_dup2(WIN_VNODE *Node, WIN_VNODE *Result)
 	BOOL bResult = FALSE;
 	WIN_VNODE vnCurrent = *Result;
 
+	/* Note: the CloseExec flag should be in duplicate.
+	 */
 	if (vfs_F_DUPFD(Node, FALSE, Result)){
 		bResult = vfs_close(&vnCurrent);
 	}

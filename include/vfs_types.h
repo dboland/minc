@@ -399,6 +399,9 @@ typedef struct _WIN_TASK {
 	DWORD Nice;
 	DWORD Flags;
 	DWORD Depth;
+//	DWORD SetSize;
+//	DWORD TextSize;
+//	DWORD DataSize;
 	SID8 UserSid;			/* effective user id */
 	SID8 GroupSid;			/* effective group id */
 	HANDLE TraceHandle;

@@ -33,13 +33,38 @@
 /****************************************************/
 
 BOOL 
+dir_F_SETLK(WIN_VNODE *Node, DWORD Flags, LARGE_INTEGER *Offset, LARGE_INTEGER *Size)
+{
+	BOOL bResult = FALSE;
+
+	OVERLAPPED ovl = {0, 0, Offset->LowPart, Offset->HighPart, Node->Event};
+	DWORDLONG dwlSegment = Size->QuadPart * Offset->QuadPart;
+
+	if (Node->LockSize){
+		Node->LockRegion -= dwlSegment;
+		Node->LockSize -= Size->QuadPart;
+		bResult = TRUE;
+	}
+	if (Flags != LOCKFILE_UNLOCK){
+		Node->LockRegion += dwlSegment;
+		Node->LockSize += Size->QuadPart;
+		bResult = TRUE;
+	}
+	return(bResult);
+}
+
+/****************************************************/
+
+BOOL 
 dir_open(WIN_NAMEIDATA *Path, WIN_FLAGS *Flags, WIN_MODE *Mode, WIN_VNODE *Result)
 {
 	BOOL bResult = FALSE;
 	HANDLE hResult;
 
 	Flags->Attribs |= FILE_FLAG_BACKUP_SEMANTICS;
-	if (DiskOpenFile(Path, Flags, Result)){
+	if (Path->Attribs == -1){
+		return(FALSE);
+	}else if (DiskOpenFile(Path, Flags, Result)){
 		bResult = TRUE;
 	}
 	return(bResult);

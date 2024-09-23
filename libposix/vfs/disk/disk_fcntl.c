@@ -99,6 +99,23 @@ disk_F_CREATE(LPWSTR FileName, DWORD FileType, SECURITY_ATTRIBUTES *Attribs, LPW
 	}
 	return(bResult);
 }
+BOOL 
+disk_F_SETLK(WIN_VNODE *Node, DWORD Flags, LARGE_INTEGER *Offset, LARGE_INTEGER *Size)
+{
+	BOOL bResult = FALSE;
+
+	switch (Node->FileType){
+		case WIN_VREG:
+			bResult = file_F_SETLK(Node, Flags, Offset, Size);
+			break;
+		case WIN_VDIR:
+			bResult = dir_F_SETLK(Node, Flags, Offset, Size);
+			break;
+		default:
+			SetLastError(ERROR_BAD_FILE_TYPE);
+	}
+	return(bResult);
+}
 
 /****************************************************/
 

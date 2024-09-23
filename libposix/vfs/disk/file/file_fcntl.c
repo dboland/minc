@@ -33,6 +33,36 @@
 /****************************************************/
 
 BOOL 
+file_F_SETLK(WIN_VNODE *Node, DWORD Flags, LARGE_INTEGER *Offset, LARGE_INTEGER *Size)
+{
+	OVERLAPPED ovl = {0, 0, Offset->LowPart, Offset->HighPart, Node->Event};
+	DWORDLONG dwlSegment = Size->QuadPart * Offset->QuadPart;
+
+	/* Windows locking works opposite to POSIX locking. Exclusive locks
+	 * cannot overlap an existing locked region of a file. Shared locks
+	 * can overlap a locked region provided locks held on that region
+	 * are shared locks.
+	 */
+	if (UnlockFileEx(Node->Handle, 0, Size->LowPart, Size->HighPart, &ovl)){
+		Node->LockRegion -= dwlSegment;
+		Node->LockSize -= Size->QuadPart;
+	}else if (ERROR_NOT_LOCKED != GetLastError()){
+		return(FALSE);
+	}
+	if (Flags == LOCKFILE_UNLOCK){
+		return(TRUE);
+	}else if (!LockFileEx(Node->Handle, Flags, 0, Size->LowPart, Size->HighPart, &ovl)){
+		return(FALSE);
+	}else{
+		Node->LockRegion += dwlSegment;
+		Node->LockSize += Size->QuadPart;
+	}
+	return(TRUE);
+}
+
+/****************************************************/
+
+BOOL 
 file_open(WIN_NAMEIDATA *Path, WIN_FLAGS *Flags, WIN_MODE *Mode, WIN_VNODE *Result)
 {
 	BOOL bResult = FALSE;

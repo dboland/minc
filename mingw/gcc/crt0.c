@@ -32,6 +32,7 @@
 #include <stdint.h>
 
 #include <sys/param.h>
+#include <sys/exec.h>		/* use struct exec for next version */
 
 extern int main(int argc, char *argv[], char *env[]);
 
