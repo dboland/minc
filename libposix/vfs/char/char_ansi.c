@@ -313,12 +313,12 @@ AnsiCursorDown(HANDLE Handle, CONSOLE_SCREEN_BUFFER_INFO *Info, WORD Count)
 BOOL 
 AnsiCursorForward(HANDLE Handle, CONSOLE_SCREEN_BUFFER_INFO *Info, WORD Count)
 {
-	COORD cPos = Info->dwCursorPosition;
+	COORD cPos = AnsiRenderCursor(Info);
 
 	/* terminfo(5) - am: automatic right margin (mutt.exe)
 	 */
 	cPos.X += Count;
-	if (cPos.X > Info->srWindow.Right){
+	if (cPos.X > Info->srWindow.Right){		/* lynx.exe */
 		cPos.X -= Info->srWindow.Right + 1;
 		cPos.Y++;
 	}
@@ -328,12 +328,12 @@ AnsiCursorForward(HANDLE Handle, CONSOLE_SCREEN_BUFFER_INFO *Info, WORD Count)
 BOOL 
 AnsiCursorBack(HANDLE Handle, CONSOLE_SCREEN_BUFFER_INFO *Info, WORD Count)
 {
-	COORD cPos = Info->dwCursorPosition;
+	COORD cPos = AnsiRenderCursor(Info);
 
 	/* terminfo(5) - bw: automatic left margin (top.exe)
 	 */
 	cPos.X -= Count;
-	if (cPos.X < 0){
+	if (cPos.X < 0){				/* lynx.exe */
 		cPos.X += Info->srWindow.Right + 1;
 		cPos.Y--;
 	}

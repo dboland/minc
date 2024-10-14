@@ -96,9 +96,6 @@ PollWait(WIN_VNODE *Nodes[], DWORD *TimeOut)
 	dwStatus = WSAWaitForMultipleEvents(dwCount, hObjects, FALSE, dwTimeOut, TRUE);
 	if (dwStatus == WSA_WAIT_FAILED){
 		WIN_ERR("WSAWaitForMultipleEvents(%s): %s\n", win_strobj(hObjects, dwCount), win_strerror(WSAGetLastError()));
-//		vfs_raise(WM_COMMAND, CTRL_ABORT_EVENT, 0);
-//	}else if (!dwStatus){
-//		SetLastError(ERROR_SIGNAL_PENDING);
 	}else{
 		bResult = TRUE;
 	}

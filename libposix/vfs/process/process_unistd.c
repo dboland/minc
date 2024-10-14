@@ -168,11 +168,11 @@ proc_execve(WIN_TASK *Task, LPSTR Command, PVOID Environ)
 		ProcInheritChannels(pi.hProcess, Task->Node);
 		CloseHandle(hThread);
 		CloseHandle(pi.hProcess);
-		Task->State = WIN_SRUN;
 		/* https://man7.org/linux/man-pages/man2/execve.2.html */
 		ZeroMemory(Task->Action, WIN_NSIG * sizeof(WIN_SIGACTION));
-		Task->Timer = NULL;
 		ZeroMemory(Task->AtExit, WIN_ATEXIT_MAX * sizeof(WIN_ATEXITPROC));
+		Task->State = WIN_SRUN;
+		Task->Timer = NULL;
 		bResult = TRUE;
 	}else{
 		WIN_ERR("CreateProcessAsUser(%s): %s\n", Command, win_strerror(GetLastError()));

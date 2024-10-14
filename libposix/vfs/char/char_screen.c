@@ -241,7 +241,7 @@ ScreenPutChar(HANDLE Handle, LPCSTR Buffer, UINT Flags, UINT CodePage, CONSOLE_S
 	DWORD dwWidth, dwCount = 1;
 
 	if (Info->dwCursorPosition.X > Info->srWindow.Right){
-		Info->dwCursorPosition.X = 0;		/* mutt */
+		Info->dwCursorPosition.X = 0;		/* mutt.exe */
 		ScreenLineFeed(Handle, Flags, Info);
 	}
 	if (CodePage == CP_UTF8){
@@ -289,7 +289,7 @@ screen_write(HANDLE Handle, LPCSTR Buffer, DWORD Size, DWORD *Result)
 			__ANSI_BUF.Char1 = 0;
 			__ANSI_BUF.CSI = 0;
 			__ANSI_BUF.Args = __Escape;
-		}else if (__Char < 32){			/* Space (SP) */
+		}else if (__Char < 16){			/* ACS_RARROW (DLE) */
 			ScreenControl(Handle, uiFlags, psbInfo);
 		}else{
 			dwCount = ScreenPutChar(Handle, Buffer, uiFlags, uiCodePage, psbInfo);

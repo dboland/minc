@@ -96,7 +96,6 @@ PathGlob(WIN_NAMEIDATA *Path, DWORD Flags)
 			bResult = drive_lookup(Path, Flags);
 			break;
 		case FILE_CLASS_ROOT:
-//vfs_ktrace("PathGlob", STRUCT_NAMEI, Path);
 			break;
 	}
 	return(bResult);
@@ -141,7 +140,6 @@ vfs_lookup(WIN_NAMEIDATA *Path, LPWSTR Source, DWORD Flags)
 			*Path->R++ = '\\';
 			PathCopy(Path);
 			Path->Last = Path->R - 1;
-			SetLastError(ERROR_DIRECTORY);
 			return(Path);
 		}
 	}

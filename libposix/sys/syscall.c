@@ -171,8 +171,7 @@ __getuid(WIN_TASK *Task)
 	SID8 sidUser;
 
 	if (!uid){
-		uid = rid_posix(win_getuid(&sidUser));
-		Task->RealUid = uid;
+		uid = rid_posix(&Task->UserSid);
 	}
 	if (uid == WIN_ROOT_UID){
 		uid = 0;
@@ -216,8 +215,7 @@ __getgid(WIN_TASK *Task)
 	SID8 sidGroup;
 
 	if (!gid){
-		gid = rid_posix(win_getgid(&sidGroup));
-		Task->RealGid = gid;
+		gid = rid_posix(&Task->GroupSid);
 	}
 	if (gid == WIN_ROOT_GID){
 		gid = 0;
