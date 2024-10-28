@@ -255,8 +255,11 @@ ScreenPutChar(HANDLE Handle, LPCSTR Buffer, UINT Flags, UINT CodePage, CONSOLE_S
 			dwCount += 4;
 		}
 	}
+	/* On Vista, when emitting multibyte (utf-8),
+	 * dwWidth will be zero.
+	 */
 	if (WriteFile(Handle, Buffer, dwCount, &dwWidth, NULL)){
-		Info->dwCursorPosition.X += dwWidth;
+		Info->dwCursorPosition.X++;
 	}
 	return(dwCount);
 }

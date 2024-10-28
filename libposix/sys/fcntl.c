@@ -43,8 +43,8 @@ flags_win(WIN_FLAGS *Result, int flags)
 
 	if (flags & O_RDWR){
 		Result->Access |= GENERIC_WRITE;
-	}else if (flags & O_APPEND){
-		Result->Access = FILE_APPEND_DATA;
+	}else if (flags & O_APPEND){			/* mutt.exe (save) */
+		Result->Access |= FILE_APPEND_DATA;
 	}else if (flags & O_WRONLY){
 		Result->Access = GENERIC_WRITE;
 	}

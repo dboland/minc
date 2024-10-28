@@ -89,7 +89,7 @@ SID8		*__SidNone;
 WIN_TTY 	*__CTTY;
 CHAR 		*__Escape;
 CHAR		*__Input = __INPUT_BUF;
-CONST CHAR	*__Clipboard;		/* Clipboard buffer */
+CONST WCHAR	*__Clipboard;		/* Clipboard buffer */
 WIN_TASK	*__Process;
 
 BOOL proc_poll(VOID);

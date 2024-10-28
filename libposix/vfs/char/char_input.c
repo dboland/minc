@@ -97,7 +97,8 @@ InputInsert(DWORD KeyState, CHAR *Result)
 	}else if (!OpenClipboard(NULL)){
 		WIN_ERR("OpenClipboard(): %s\n", win_strerror(GetLastError()));
 		bResult = FALSE;
-	}else if (__Lock = GetClipboardData(CF_TEXT)){
+//	}else if (__Lock = GetClipboardData(CF_TEXT)){
+	}else if (__Lock = GetClipboardData(CF_UNICODETEXT)){
 		__Clipboard = GlobalLock(__Lock);
 	}
 	return(bResult);
@@ -205,8 +206,9 @@ BOOL
 InputReadClipboard(CHAR *Buffer)
 {
 	BOOL bResult = TRUE;
+	WCHAR szBuffer[WIN_MAX_INPUT], *pszBuffer = szBuffer;
 	LONG lSize = WIN_MAX_INPUT;
-	CHAR C;
+	WCHAR C;
 
 	__Input = Buffer;
 	while (lSize > 0){
@@ -217,11 +219,12 @@ InputReadClipboard(CHAR *Buffer)
 			__Clipboard = NULL;
 			break;
 		}else if (C != '\n'){
-			*Buffer++ = C;
+			*pszBuffer++ = C;
 			lSize--;
 		}
 	}
-	*Buffer = 0;
+	*pszBuffer = 0;
+	win_wcstombs(Buffer, szBuffer, WIN_MAX_INPUT);
 	return(bResult);
 }
 BOOL 

@@ -313,7 +313,7 @@ AnsiCursorDown(HANDLE Handle, CONSOLE_SCREEN_BUFFER_INFO *Info, WORD Count)
 BOOL 
 AnsiCursorForward(HANDLE Handle, CONSOLE_SCREEN_BUFFER_INFO *Info, WORD Count)
 {
-	COORD cPos = AnsiRenderCursor(Info);
+	COORD cPos = Info->dwCursorPosition;
 
 	/* terminfo(5) - am: automatic right margin (mutt.exe)
 	 */
@@ -328,7 +328,7 @@ AnsiCursorForward(HANDLE Handle, CONSOLE_SCREEN_BUFFER_INFO *Info, WORD Count)
 BOOL 
 AnsiCursorBack(HANDLE Handle, CONSOLE_SCREEN_BUFFER_INFO *Info, WORD Count)
 {
-	COORD cPos = AnsiRenderCursor(Info);
+	COORD cPos = Info->dwCursorPosition;
 
 	/* terminfo(5) - bw: automatic left margin (top.exe)
 	 */

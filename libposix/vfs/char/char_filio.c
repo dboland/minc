@@ -49,7 +49,7 @@ char_FIONREAD(WIN_VNODE *Node, ULONG *Result)
 	ULONG ulResult = 0;
 
 	if (__Clipboard){
-		ulResult += win_strlen(__Clipboard);
+		ulResult += win_wcslen(__Clipboard);
 	}
 	if (__Input){
 		ulResult += win_strlen(__Input);
