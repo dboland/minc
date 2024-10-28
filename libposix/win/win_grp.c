@@ -35,7 +35,7 @@
 BOOL 
 GrpLookupNTAuth(WIN_GRENT *Group)
 {
-	BOOL bResult = FALSE;
+	BOOL bResult = TRUE;
 	SID_NAME_USE snType = 0;
 	SID8 Sid = {0};
 	LPLOCALGROUP_MEMBERS_INFO_1 lgmInfo = NULL;
@@ -48,10 +48,8 @@ GrpLookupNTAuth(WIN_GRENT *Group)
 	naStatus = NetLocalGroupGetMembers(NULL, Group->Account, 1, (LPBYTE *)&lgmInfo, MAX_PREFERRED_LENGTH, &dwCount, &dwTotal, &dwResume);
 	if (naStatus != NERR_Success){
 		SetLastError(naStatus);
-	}else{
-		bResult = TRUE;
-	}
-	if (dwCount--){
+		bResult = FALSE;
+	}else if (dwCount--){
 		pszMembers = win_wcstombp(pszMembers, lgmInfo[dwCount].lgrmi1_name, MAX_NAME);
 		while (dwCount--){
 			pszMembers = win_stpcpy(pszMembers, ",");

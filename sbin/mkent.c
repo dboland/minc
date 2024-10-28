@@ -122,8 +122,10 @@ print_usage(char *prog)
 void 
 mk_group(FILE *stream)
 {
+	int mib[3] = {CTL_USER, USER_GRP, GRP_GETGRENT};
 	WIN_GRENT wGroup;
-	char buf[MAX_TEXT] = "";
+	char buf[MAX_TEXT];
+	size_t size = MAX_TEXT;
 	WIN_PWENUM wnInfo = {0};
 	DWORD wksType = 0;
 	DWORD dwSize;
@@ -144,35 +146,41 @@ mk_group(FILE *stream)
 		}
 		fprintf(stream, "%s\n", group_posix(buf, MAX_TEXT, &wGroup));
 	}
-	win_setgrent(&wnInfo, WIN_NETENUM_LOCAL);
-	while (win_getgrent(&wnInfo, &wGroup)){
-		fprintf(stream, "%s\n", group_posix(buf, MAX_TEXT, &wGroup));
+	while (!sysctl(mib, 3, buf, &size, NULL, 0)){
+		fprintf(stream, "%s\n", buf);
 	}
-	win_endgrent(&wnInfo);
+	mib[2] = GRP_ENDGRENT;
+	sysctl(mib, 3, NULL, NULL, NULL, 0);
 }
 void 
 mk_passwd(FILE *stream)
 {
-	WIN_PWENT pwEntry = {0};
-	WIN_PWENUM pwEnum = {0};
+	int mib[4] = {CTL_USER, USER_PWD, PWD_GETPWUID};
+	char buf[WIN_PATH_MAX];
+	size_t size = WIN_PATH_MAX;
 
-	win_getpwuid(&SidSystem, &pwEntry);
-	fprintf(stream, "%s\n", passwd_posix(_PWDBUF, MAX_PWDBUF, &pwEntry));
-	win_getpwuid(&SidService, &pwEntry);
-	fprintf(stream, "%s\n", passwd_posix(_PWDBUF, MAX_PWDBUF, &pwEntry));
-	win_getpwuid(&SidAdmins, &pwEntry);
-	fprintf(stream, "%s\n", passwd_posix(_PWDBUF, MAX_PWDBUF, &pwEntry));
-	if (win_getpwnam(L"NT SERVICE\\TrustedInstaller", &pwEntry)){	/* Vista */
-		fprintf(stream, "%s\n", passwd_posix(_PWDBUF, MAX_PWDBUF, &pwEntry));
+	mib[3] = WIN_ROOT_UID;
+	if (!sysctl(mib, 4, buf, &size, NULL, 0)){
+		fprintf(stream, "%s\n", buf);
 	}
-	win_setpwent(&pwEnum, WIN_NETENUM_LOCAL);
-	while (win_getpwent(&pwEnum, &pwEntry)){
-		fprintf(stream, "%s\n", passwd_posix(_PWDBUF, MAX_PWDBUF, &pwEntry));
-//		if (_paths){
-//			mkdir(path, 00700);
-//		}
+	mib[3] = WIN_DAEMON_UID;
+	if (!sysctl(mib, 4, buf, &size, NULL, 0)){
+		fprintf(stream, "%s\n", buf);
 	}
-	win_endpwent(&pwEnum);
+	mib[3] = WIN_ROOT_GID;
+	if (!sysctl(mib, 4, buf, &size, NULL, 0)){
+		fprintf(stream, "%s\n", buf);
+	}
+	mib[3] = DOMAIN_NT_SERVICE_RID_INSTALLER;	/* Vista */
+	if (!sysctl(mib, 4, buf, &size, NULL, 0)){
+		fprintf(stream, "%s\n", buf);
+	}
+	mib[2] = PWD_GETPWENT;
+	while (!sysctl(mib, 3, buf, &size, NULL, 0)){
+		fprintf(stream, "%s\n", buf);
+	}
+	mib[2] = PWD_ENDPWENT;
+	sysctl(mib, 3, NULL, NULL, NULL, 0);
 }
 void 
 mk_resolv(FILE *stream)

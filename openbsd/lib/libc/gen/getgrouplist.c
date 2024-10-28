@@ -28,11 +28,12 @@
  *
  */
 
+#include <errno.h>
+#include <stdlib.h>
+
 #include "win/windows.h"
 #include "win_posix.h"
 #include "arch_posix.h"
-
-#include <errno.h>
 
 int 
 getgrouplist(const char *user, gid_t group, gid_t *groups, int *ngroups)

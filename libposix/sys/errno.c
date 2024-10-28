@@ -35,7 +35,7 @@
 int 
 errno_posix(DWORD Error)
 {
-	int result = -1;				/* ERESTART */
+	int result = ECANCELED;
 
 	switch (Error){
 		case ERROR_NO_MORE_FILES:
@@ -50,6 +50,7 @@ errno_posix(DWORD Error)
 //		case ERROR_INVALID_DATA:		/* 13: The data is invalid. */
 			result = EINVAL;
 			break;
+		case ERROR_NO_SUCH_ALIAS:		/* 1376: The specified local group does not exist. */
 		case NERR_GroupNotFound:
 		case NERR_UserNotFound:
 		case ERROR_NONE_MAPPED:			/* 1332: No mapping between account names and security IDs was done. */
@@ -166,6 +167,7 @@ errno_posix(DWORD Error)
 		case ERROR_CTX_NOT_CONSOLE:
 			result = ENOTTY;
 			break;
+		case ERROR_NO_MORE_ITEMS:
 		case ERROR_IO_DEVICE:
 		case ERROR_HANDLE_EOF:			/* 38: on exit when xterm enabled (vim.exe) */
 		case ERROR_INVALID_USER_BUFFER:
@@ -183,9 +185,6 @@ errno_posix(DWORD Error)
 			break;
 		case ERROR_GEN_FAILURE:			/* 31: A device attached to the system is not functioning. */
 			result = ENOTBLK;
-			break;
-		case WSANOTINITIALISED:
-			result = ECANCELED;
 			break;
 		case WSAECONNABORTED:
 		case ERROR_CONNECTION_ABORTED:
@@ -241,7 +240,7 @@ errno_posix(DWORD Error)
 			result = EADDRINUSE;
 			break;
 		default:
-			__PRINTF("errno_posix(%d): %s\n", Error, win_strerror(Error))
+			msvc_printf("errno_posix(%d): %s\n", Error, win_strerror(Error));
 	}
 	return(result);
 }

@@ -37,7 +37,7 @@
 #include "win/windows.h"
 #include "win_types.h"
 #include "vfs_posix.h"
-#include "minc_posix.h"
+#include "bsd_posix.h"
 
 void 
 usage(char *prog)

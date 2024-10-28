@@ -335,8 +335,6 @@ static VOID NTAPI TlsMainCRTStartup(LPVOID hinstDLL, DWORD fdwReason, LPVOID lpv
  * win_pwd.c
  */
 
-#define WIN_ROOT_UID	500000018
-
 #define WIN_NETENUM_LOCAL		1
 #define WIN_NETENUM_GLOBAL		2
 
@@ -365,8 +363,6 @@ typedef struct _WIN_PWENUM {
 /*
  * win_grp.c
  */
-
-#define WIN_ROOT_GID	532000544
 
 typedef struct _WIN_GRENT {
 	SID8 Sid;

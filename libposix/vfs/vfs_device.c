@@ -77,11 +77,11 @@ system_attach(WIN_DEVICE *Device)
 		case DEV_TYPE_SWD:
 			bResult = config_found("swd", FS_TYPE_PDO, WIN_VCHR, Device);
 			break;
-		case DEV_TYPE_IDE:
-			bResult = config_found("ide", FS_TYPE_PDO, WIN_VCHR, Device);
-			break;
 		case DEV_TYPE_PCI:
 			bResult = config_found("pci", FS_TYPE_PDO, WIN_VCHR, Device);
+			break;
+		case DEV_TYPE_IDE:
+			bResult = config_found("ide", FS_TYPE_PDO, WIN_VCHR, Device);
 			break;
 		case DEV_TYPE_ACPI:
 			bResult = config_found("acpi", FS_TYPE_PDO, WIN_VCHR, Device);
@@ -117,7 +117,7 @@ disk_attach(WIN_DEVICE *Device)
 	BOOL bResult = TRUE;
 
 	switch (Device->DeviceType){
-		case DEV_TYPE_HDC:
+		case DEV_TYPE_WDC:
 			bResult = config_found("wdc", FS_TYPE_PDO, WIN_VBLK, Device);
 			break;
 		case DEV_TYPE_SCSI:
@@ -262,14 +262,11 @@ display_attach(WIN_DEVICE *Device)
 	BOOL bResult = TRUE;
 
 	switch (Device->DeviceType){
-		case DEV_TYPE_WSDISPLAY:
-			bResult = config_found("wsdisplay", FS_TYPE_PDO, WIN_VCHR, Device);
-			break;
 		case DEV_TYPE_VGA:
 			bResult = config_found("vga", FS_TYPE_PDO, WIN_VCHR, Device);
 			break;
 		default:
-			bResult = FALSE;
+			bResult = config_found("wsdisplay", FS_TYPE_PDO, WIN_VCHR, Device);
 	}
 	return(bResult);
 }
@@ -279,17 +276,14 @@ keyboard_attach(WIN_DEVICE *Device)
 	BOOL bResult = TRUE;
 
 	switch (Device->DeviceType){
-		case DEV_TYPE_WSKBD:
-			bResult = config_found("wskbd", FS_TYPE_PDO, WIN_VCHR, Device);
-			break;
-		case DEV_TYPE_HIDKBD:
-			bResult = config_found("ukbd", FS_TYPE_PDO, WIN_VCHR, Device);
-			break;
 		case DEV_TYPE_COMKBD:
 			bResult = config_found("comkbd", FS_TYPE_PDO, WIN_VCHR, Device);
 			break;
+		case DEV_TYPE_USBKBD:
+			bResult = config_found("ukbd", FS_TYPE_PDO, WIN_VCHR, Device);
+			break;
 		default:
-			bResult = FALSE;
+			bResult = config_found("wskbd", FS_TYPE_PDO, WIN_VCHR, Device);
 	}
 	return(bResult);
 }
@@ -299,17 +293,14 @@ mouse_attach(WIN_DEVICE *Device)
 	BOOL bResult = TRUE;
 
 	switch (Device->DeviceType){
-		case DEV_TYPE_WSMOUSE:
-			bResult = config_found("wsmouse", FS_TYPE_PDO, WIN_VCHR, Device);
-			break;
-		case DEV_TYPE_HIDMOUSE:
-			bResult = config_found("ums", FS_TYPE_PDO, WIN_VCHR, Device);
-			break;
 		case DEV_TYPE_COMMOUSE:
 			bResult = config_found("comms", FS_TYPE_PDO, WIN_VCHR, Device);
 			break;
+		case DEV_TYPE_USBMOUSE:
+			bResult = config_found("ums", FS_TYPE_PDO, WIN_VCHR, Device);
+			break;
 		default:
-			bResult = FALSE;
+			bResult = config_found("wsmouse", FS_TYPE_PDO, WIN_VCHR, Device);
 	}
 	return(bResult);
 }
@@ -331,9 +322,6 @@ storage_attach(WIN_DEVICE *Device)
 		case DEV_TYPE_FLOPPY:
 			bResult = config_found("fd", FS_TYPE_DRIVE, WIN_VBLK, Device);
 			break;
-//		case DEV_TYPE_USBSTOR:
-//			bResult = config_found("sd", FS_TYPE_DRIVE, WIN_VBLK, Device);
-//			break;
 		case DEV_TYPE_REMOTE:
 			bResult = config_found("smb", FS_TYPE_DRIVE, WIN_VBLK, Device);
 			break;

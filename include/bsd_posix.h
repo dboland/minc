@@ -48,7 +48,7 @@ char *group_posix(char *buf, size_t buflen, WIN_GRENT *Group);
 
 /* pwd.c */
 
-char *passwd_posix(char *buf, size_t buflen, WIN_PWENT *WinPwd);
+//char *passwd_posix(char *buf, size_t buflen, WIN_PWENT *WinPwd);
 
 /* syscall.S */
 

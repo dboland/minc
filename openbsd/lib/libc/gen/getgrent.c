@@ -30,42 +30,24 @@
 
 #include <stdio.h>
 #include <stdlib.h>
-
-#include "win/windows.h"
-#include "win_posix.h"
-#include "arch_posix.h"
-
 #include <limits.h>
 #include <string.h>
 #include <errno.h>
 #include <grp.h>
 
-#define GRPBUF_MAX	MAX_TEXT
+#include "arch_types.h"
+
+#include <sys/sysctl.h>
+
+#define GRPBUF_MAX	512
 
 char			*_MEMBUF[NGROUPS_MAX];
 
 struct group		_GROUP;
 char			_GRPBUF[GRPBUF_MAX];
 
-WIN_PWENUM		_GRPENUM;
-
 /************************************************************/
 
-char *
-group_posix(char *buf, size_t buflen, WIN_GRENT *Group)
-{
-	char *result = buf;
-
-	bzero(buf, buflen);
-	buf += sprintf(buf, "%ls", Group->Account);
-	buf = stpcpy(buf, ":*:");
-//	buf = stpcpy(buf, Group->Comment);
-//	buf = stpcpy(buf, ":");
-	buf += sprintf(buf, "%lu", rid_posix(&Group->Sid));
-	buf = stpcpy(buf, ":");
-	buf = stpcpy(buf, Group->Members);
-	return(result);
-}
 char *
 grp_skip(char *p, char c)
 {
@@ -104,14 +86,9 @@ grent_posix(struct group *grp, char *buf)
 int 
 setgroupent(int stayopen)
 {
-	int result = -1;
+	int mib[3] = {CTL_USER, USER_GRP, GRP_SETGRENT};
 
-	if (!win_setgrent(&_GRPENUM, WIN_NETENUM_LOCAL)){
-		errno = errno_posix(errno_win());
-	}else{
-		result = 0;
-	}
-	return(result);
+	return(sysctl(mib, 3, NULL, NULL, NULL, 0));
 }
 void 
 setgrent(void)
@@ -121,23 +98,18 @@ setgrent(void)
 void 
 endgrent(void)
 {
-	if (_GRPENUM.Data){
-		win_endgrent(&_GRPENUM);
-	}
+	int mib[3] = {CTL_USER, USER_GRP, GRP_ENDGRENT};
+
+	sysctl(mib, 3, NULL, NULL, NULL, 0);
 }
 int 
 getgrent_r(struct group *grp, char *buf, size_t buflen, struct group **result)
 {
 	int status = -1;
-	WIN_GRENT wgResult;
+	int mib[3] = {CTL_USER, USER_GRP, GRP_GETGRENT};
 
-	if (!_GRPENUM.Data){
-		setgroupent(1);
-	}
-	if (!win_getgrent(&_GRPENUM, &wgResult)){
-		errno = errno_posix(errno_win());
-	}else{
-		*result = grent_posix(grp, group_posix(buf, buflen, &wgResult));
+	if (!sysctl(mib, 3, buf, &buflen, NULL, 0)){
+		*result = grent_posix(grp, buf);
 		status = 0;
 	}
 	return(status);
@@ -146,19 +118,14 @@ int
 getgrnam_r(const char *name, struct group *grp, char *buf, size_t buflen, struct group **result)
 {
 	int status = -1;
-	WCHAR szAccount[MAX_NAME];
-	WIN_GRENT wgResult;
+	int mib[4] = {CTL_USER, USER_GRP, GRP_GETGRNAM, (int)name};
 
 	if (!name){
 		errno = EINVAL;
 	}else if (!buf || !result){
 		errno = EFAULT;
-	}else if (!mbstowcs(szAccount, name, MAX_NAME)){
-		errno = EINVAL;
-	}else if (!win_getgrnam(szAccount, &wgResult)){
-		errno = errno_posix(errno_win());
-	}else{
-		*result = grent_posix(grp, group_posix(buf, buflen, &wgResult));
+	}else if (!sysctl(mib, 4, buf, &buflen, NULL, 0)){
+		*result = grent_posix(grp, buf);
 		status = 0;
 	}
 	return(status);
@@ -167,20 +134,12 @@ int
 getgrgid_r(gid_t gid, struct group *grp, char *buf, size_t buflen, struct group **result)
 {
 	int status = -1;
-	WIN_GRENT wgResult;
-	SID8 sid;
+	int mib[4] = {CTL_USER, USER_GRP, GRP_GETGRGID, gid};
 
-	if (!gid){
-		gid = WIN_ROOT_GID;
-	}
-	if (gid < 0){
-		errno = EINVAL;
-	}else if (!buf || !result){
+	if (!buf || !result){
 		errno = EFAULT;
-	}else if (!win_getgrgid(rid_win(&sid, gid), &wgResult)){
-		errno = errno_posix(errno_win());
-	}else{
-		*result = grent_posix(grp, group_posix(buf, buflen, &wgResult));
+	}else if (!sysctl(mib, 4, buf, &buflen, NULL, 0)){
+		*result = grent_posix(grp, buf);
 		status = 0;
 	}
 	return(status);

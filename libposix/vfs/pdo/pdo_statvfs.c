@@ -43,6 +43,9 @@ PDOLookupBus(LPCWSTR BusName, DWORD Class)
 	}else if (!win_wcsncmp(BusName, L"USB", 3)){
 		dwResult |= DEV_BUS_USB;
 
+	}else if (!win_wcscmp(BusName, L"HID")){
+		dwResult |= DEV_BUS_USB;
+
 	}else if (!win_wcscmp(BusName, L"ACPI")){
 		dwResult |= DEV_BUS_ACPI;
 
@@ -107,9 +110,6 @@ PDOLookup(LPCWSTR Bus, LPCWSTR Class, LPCWSTR Service)
 	}else if (!win_wcscmp(Class, L"volume")){
 		dwResult = PDOLookupBus(Bus, DEV_CLASS_STORAGE);
 
-	}else if (!win_wcscmp(Class, L"hidclass")){
-		dwResult = PDOLookupBus(Bus, DEV_CLASS_USB);
-
 	}else if (!win_wcscmp(Class, L"ports")){
 		dwResult = PDOLookupClass(Service, DEV_BUS_ISA);
 
@@ -132,6 +132,9 @@ PDOLookup(LPCWSTR Bus, LPCWSTR Class, LPCWSTR Service)
 
 	}else if (!win_wcscmp(Class, L"bluetooth")){
 		dwResult = PDOLookupBus(Bus, DEV_CLASS_USB);
+
+	}else if (!win_wcscmp(Class, L"camera")){
+		dwResult = PDOLookupBus(Bus, DEV_CLASS_MEDIA);
 
 	}else if (!win_wcscmp(Class, L"audioendpoint")){
 		dwResult = DEV_TYPE_AUDIO;

@@ -159,11 +159,11 @@ win_getpwent(WIN_PWENUM *Enum, WIN_PWENT *Result)
 	return(bResult);
 }
 VOID 
-win_endpwent(WIN_PWENUM *Info)
+win_endpwent(WIN_PWENUM *Enum)
 {
-	NetApiBufferFree(Info->Data);
-	Info->Data = NULL;
-	Info->Index = 0;
-	Info->Count = 0;
-	Info->Resume = 0;
+	NetApiBufferFree(Enum->Data);
+	Enum->Data = NULL;
+	Enum->Index = 0;
+	Enum->Count = 0;
+	Enum->Resume = 0;
 }

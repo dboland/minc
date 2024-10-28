@@ -30,64 +30,21 @@
 
 #include <stdio.h>
 #include <stdlib.h>
-
-#include "win/windows.h"
-#include "win_posix.h"
-#include "arch_posix.h"
-
 #include <string.h>
 #include <errno.h>
 #include <pwd.h>
 
-#define PWDBUF_MAX	MAX_COMMENT
+#include "arch_types.h"
+
+#include <sys/sysctl.h>
+
+#define PWDBUF_MAX	255
 
 char 			_PWDBUF[PWDBUF_MAX];
 struct passwd		_PASSWD;
 
-WIN_PWENUM		_PWDENUM;
-
 /************************************************************/
 
-char *
-passwd_posix(char *buf, size_t buflen, WIN_PWENT *WinPwd)
-{
-	char *result = buf;
-	char *shell = "/bin/ksh";
-
-	buf += sprintf(buf, "%ls", WinPwd->Account);
-	buf = stpcpy(buf, ":");
-	buf = stpcpy(buf, WinPwd->Password);
-	buf = stpcpy(buf, ":");
-	buf += sprintf(buf, "%lu", rid_posix(&WinPwd->UserSid));
-	buf = stpcpy(buf, ":");
-	buf += sprintf(buf, "%lu", rid_posix(&WinPwd->GroupSid));
-	/* login class */
-	if (WinPwd->Integrity == SECURITY_MANDATORY_LOW_RID){
-		buf = stpcpy(buf, ":daemon");
-	}else{
-		buf = stpcpy(buf, ":default");
-	}
-	buf = stpcpy(buf, ":");
-	buf += sprintf(buf, "%lu", WinPwd->Change);
-	buf = stpcpy(buf, ":");
-	buf += sprintf(buf, "%lu", WinPwd->Expire);
-	buf = stpcpy(buf, ":");
-	buf = stpcpy(buf, WinPwd->Comment);
-	buf = stpcpy(buf, ":");
-	if (*WinPwd->Home){
-		buf = pathp_posix(buf, WinPwd->Home);
-	}else if (WinPwd->Integrity == SECURITY_MANDATORY_SYSTEM_RID){
-		buf = stpcpy(buf, "/root");
-	}else if (WinPwd->Integrity == SECURITY_MANDATORY_LOW_RID){
-		buf = stpcpy(buf, "/var/empty");
-		shell = "/bin/sh";
-	}else{
-		buf += sprintf(buf, "/home/%ls", WinPwd->Account);
-	}
-	buf = stpcpy(buf, ":");
-	buf = stpcpy(buf, shell);
-	return(result);
-}
 char *
 pwd_skip(char *p)
 {
@@ -133,16 +90,11 @@ pwent_posix(struct passwd *pwd, char *buf)
 int 
 setpassent(int stayopen)
 {
-	int result = -1;
+	int mib[3] = {CTL_USER, USER_PWD, PWD_SETPWENT};
 
 	/* see: ./lib/libc/gen/pwcache.c */
 
-	if (!win_setpwent(&_PWDENUM, WIN_NETENUM_LOCAL)){
-		errno = errno_posix(errno_win());
-	}else{
-		result = 0;
-	}
-	return(result);
+	return(sysctl(mib, 3, NULL, NULL, NULL, 0));
 }
 void 
 setpwent(void)
@@ -152,23 +104,18 @@ setpwent(void)
 void 
 endpwent(void)
 {
-	if (_PWDENUM.Data){
-		win_endpwent(&_PWDENUM);
-	}
+	int mib[3] = {CTL_USER, USER_PWD, PWD_ENDPWENT};
+
+	sysctl(mib, 3, NULL, NULL, NULL, 0);
 }
 int 
 getpwent_r(struct passwd *pwd, char *buf, size_t buflen, struct passwd **result)
 {
 	int status = -1;
-	WIN_PWENT pwResult;
+	int mib[3] = {CTL_USER, USER_PWD, PWD_GETPWENT};
 
-	if (!_PWDENUM.Data){
-		setpassent(1);
-	}
-	if (!win_getpwent(&_PWDENUM, &pwResult)){
-		errno = errno_posix(errno_win());
-	}else{
-		*result = pwent_posix(pwd, passwd_posix(buf, buflen, &pwResult));
+	if (!sysctl(mib, 3, buf, &buflen, NULL, 0)){
+		*result = pwent_posix(pwd, buf);
 		status = 0;
 	}
 	return(status);
@@ -177,19 +124,14 @@ int
 getpwnam_r(const char *name, struct passwd *pwd, char *buf, size_t buflen, struct passwd **result)
 {
 	int status = -1;
-	WCHAR szAccount[MAX_NAME];
-	WIN_PWENT pwResult;
+	int mib[4] = {CTL_USER, USER_PWD, PWD_GETPWNAM, (int)name};
 
 	if (!name){
 		errno = EINVAL;
 	}else if (!buf || !result){
 		errno = EFAULT;
-	}else if (!mbstowcs(szAccount, name, MAX_NAME)){
-		errno = EINVAL;
-	}else if (!win_getpwnam(szAccount, &pwResult)){
-		errno = errno_posix(errno_win());
-	}else{
-		*result = pwent_posix(pwd, passwd_posix(buf, buflen, &pwResult));
+	}else if (!sysctl(mib, 4, buf, &buflen, NULL, 0)){
+		*result = pwent_posix(pwd, buf);
 		status = 0;
 	}
 	return(status);
@@ -198,20 +140,12 @@ int
 getpwuid_r(uid_t uid, struct passwd *pwd, char *buf, size_t buflen, struct passwd **result)
 {
 	int status = -1;
-	WIN_PWENT pwResult;
-	SID8 sid;
+	int mib[4] = {CTL_USER, USER_PWD, PWD_GETPWUID, uid};
 
-	if (!uid){
-		uid = WIN_ROOT_UID;
-	}
-	if (uid < 0){
-		errno = EINVAL;
-	}else if (!buf || !result){
+	if (!buf || !result){
 		errno = EFAULT;
-	}else if (!win_getpwuid(rid_win(&sid, uid), &pwResult)){
-		errno = errno_posix(errno_win());
-	}else{
-		*result = pwent_posix(pwd, passwd_posix(buf, buflen, &pwResult));
+	}else if (!sysctl(mib, 4, buf, &buflen, NULL, 0)){
+		*result = pwent_posix(pwd, buf);
 		status = 0;
 	}
 	return(status);

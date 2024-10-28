@@ -421,6 +421,26 @@ sysctl_MACHDEP(const int *name, void *oldp, size_t *oldlenp, void *newp, size_t 
 /****************************************************/
 
 int 
+sysctl_USER(const int *name, void *oldp, size_t *oldlenp, void *newp, size_t newlen)
+{
+	int result = 0;
+
+	switch (name[1]){
+		case USER_PWD:
+			result = pwd_USER_PWD(name, oldp, oldlenp);
+			break;
+		case USER_GRP:
+			result = grp_USER_GRP(name, oldp, oldlenp);
+			break;
+		default:
+			result = -ENOENT;
+	}
+	return(result);
+}
+
+/****************************************************/
+
+int 
 sys___sysctl(call_t call, const int *name, u_int namelen, void *oldp, size_t *oldlenp, void *newp, size_t newlen)
 {
 	int result = 0;
@@ -448,6 +468,9 @@ sys___sysctl(call_t call, const int *name, u_int namelen, void *oldp, size_t *ol
 			break;
 		case CTL_MACHDEP:
 			result = sysctl_MACHDEP(name, oldp, oldlenp, newp, newlen);
+			break;
+		case CTL_USER:
+			result = sysctl_USER(name, oldp, oldlenp, newp, newlen);
 			break;
 		default:
 			result = -ENOENT;

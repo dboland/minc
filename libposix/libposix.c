@@ -99,7 +99,6 @@ WIN_NAMEIDATA *path_win(WIN_NAMEIDATA *Path, const char *pathname, int flags);
 #include "sys/wait.c"
 #include "sys/signal.c"
 #include "sys/sched.c"
-#include "utime.c"
 #include "sys/mman.c"
 #include "sys/poll.c"
 #include "sys/select.c"
@@ -121,6 +120,9 @@ WIN_NAMEIDATA *path_win(WIN_NAMEIDATA *Path, const char *pathname, int flags);
 #include "sys/sockio.c"
 #include "sys/ioctl.c"
 #include "sys/msg.c"
+#include "utime.c"
+#include "pwd.c"
+#include "grp.c"
 
 #define _KERNEL
 #include "sys/file.c"

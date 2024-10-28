@@ -36,7 +36,7 @@
 /************************************************************/
 
 DWORD 
-DriveLookupClass(LPCWSTR ClassName)
+DriveLookupStorage(LPCWSTR ClassName)
 {
 	DWORD dwResult = DEV_CLASS_STORAGE;
 
@@ -53,15 +53,15 @@ DriveLookupClass(LPCWSTR ClassName)
 	return(dwResult);
 }
 DWORD 
-DriveLookupBus(LPCWSTR BusName)
+DriveLookupDevice(LPCWSTR BusName)
 {
 	DWORD dwResult = DEV_CLASS_DISK;
 
 	if (!win_wcscmp(BusName, L"ROOT")){
 		dwResult = DEV_TYPE_ROOT;
 
-	}else if (!win_wcsncmp(BusName, L"SCSI", 4)){
-		dwResult = DEV_TYPE_SCSI;
+	}else if (!win_wcsncmp(BusName, L"SCSI", 4)){	/* IDE interface for SCSI device */
+		dwResult = DEV_TYPE_IDE;
 
 		/* Vista */
 
@@ -84,10 +84,10 @@ drive_statvfs(WIN_CFDATA *Config, DWORD Flags, WIN_CFDRIVER *Result)
 	switch (uiType){
 		case DRIVE_REMOVABLE:
 //			win_wcscpy(Result->ClassId, DEVINTERFACE_PARTITION);
-			Config->DeviceType = DriveLookupClass(Config->ClassName);
+			Config->DeviceType = DriveLookupStorage(Config->ClassName);
 			break;
 		case DRIVE_NO_ROOT_DIR:		/* Not mounted */
-			Config->DeviceType = DriveLookupBus(Config->BusName);
+			Config->DeviceType = DriveLookupDevice(Config->BusName);
 			break;
 		case DRIVE_FIXED:
 			win_wcscpy(Result->ClassId, DEVINTERFACE_PARTITION);
