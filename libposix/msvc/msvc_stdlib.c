@@ -40,3 +40,21 @@ msvc_init(int *_argc, char ***_argv, char ***_env)
 	__getmainargs(_argc, _argv, _env, 0, &info);
 //	_setmode(_iob[2]._file, _O_U8TEXT);
 }
+char *
+msvc_dirname(char *path)
+{
+	char *base = NULL;
+	char *p = path;
+	char c;
+
+	while (c = *p){
+		if (c == '\\'){
+			base = p;
+		}
+		p++;
+	}
+	if (base){
+		*base = 0;
+	}
+	return(path);
+}

@@ -132,6 +132,10 @@ BOOL vfs_setvfs(WIN_CFDATA *Config, DWORD Flags);
 VOID vfs_endvfs(WIN_CFDATA *Config);
 BOOL vfs_getvfs(WIN_CFDATA *Config, DWORD Flags);
 
+/* vfs_libgen.c */
+
+VOID vfs_setproctitle(LPCSTR Title);
+
 /* vfs_time.c */
 
 BOOL vfs_setitimer(WIN_TASK *Task, LONG *Interval, DWORDLONG *TimeOut);
@@ -175,10 +179,6 @@ BOOL vfs_getdents(WIN_NAMEIDATA *Path, PVOID Buffer, DWORD Size, DWORD *Result);
 
 BOOL vfs_poll(WIN_TASK *Task, WIN_VNODE *Nodes[], WIN_POLLFD *Info[], DWORD *TimeOut, DWORD *Result);
 
-/* vfs_libgen.c */
-
-VOID vfs_setproctitle(LPCSTR Title);
-
 /* vfs_time.c */
 
 BOOL vfs_utimes(WIN_NAMEIDATA *Path, FILETIME FileTime[2]);
@@ -195,7 +195,7 @@ BOOL tty_attach(WIN_DEVICE *Device);
 
 /* process.c */
 
-WIN_TASK *proc_init(WIN_SIGPROC SignalProc);
+WIN_TASK *proc_start(WIN_SIGPROC SignalProc);
 WIN_TASK *proc_dup(WIN_TASK *Parent, WIN_THREAD_STRUCT *Thread);
 BOOL proc_close(WIN_TASK *Task);
 BOOL proc_poll(VOID);

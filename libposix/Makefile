@@ -1,7 +1,6 @@
 include ../Makefile.inc
 
 RELEASE=6.1.0
-BINDIR=/bin
 
 LIBPOSIX=libposix-${RELEASE}.dll
 IMPLIB=libposix.dll.a
@@ -59,5 +58,5 @@ install-local: ${LIBDIR} ${BINDIR}
 	/bin/cp ${IMPLIB} ${LIBDIR}/libmingw32.a
 
 install: ${DESTDIR}
-	ginstall -m 04555 ${LIBPOSIX} ${DESTDIR}${BINDIR}/
+	ginstall -m 04555 ${LIBPOSIX} ${DESTDIR}${SBINDIR}/
 

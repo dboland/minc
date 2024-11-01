@@ -89,6 +89,6 @@ void	consinit(void);		/* sys/arch/i386/i386/machdep.c:3392 */
 
 void    cpu_startup(void);	/* sys/arch/i386/i386/machdep.c:382 */
 void    cpu_configure(void);	/* configure devices (sys/arch/i386/i386/autoconf.c:105) */
-void    diskconf(void);		/* configure root/swap (sys/arch/i386/i386/autoconf.c:175) */
+char 	*diskconf(void);	/* configure root/swap (sys/arch/i386/i386/autoconf.c:175) */
 
 #endif /* __SYSTM_H__ */

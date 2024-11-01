@@ -378,6 +378,7 @@ typedef struct _WIN_GLOBALS {
 	UINT MsgBufSize;
 	SID8 SidMachine;
 	SID8 SidNone;
+	CHAR Root[MAX_PATH];
 } WIN_GLOBALS;
 
 /*

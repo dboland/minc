@@ -1,7 +1,6 @@
 include ../Makefile.inc
 
 RELEASE=6.1.0
-SBINDIR=/sbin
 
 LDFLAGS= -s -Wl,--disable-auto-import -Wl,--enable-stdcall-fixup
 GCCLIB=/lib/gcc/mingw32/4.8.1
@@ -13,6 +12,9 @@ WINDIR=/C/WINDOWS/system32
 .DEFAULT:
 
 all: ${PROGS} bsd.exe
+
+bsd.o: bsd.c
+	gcc -c -DNOPIE ${CFLAGS} -I../include -I../openbsd/sys -o $@ $<
 
 %.o: %.c
 	gcc -c ${CFLAGS} -I../include -I../openbsd/sys -o $@ $<
@@ -38,7 +40,7 @@ libconsole.o: libconsole.c
 #
 
 bsd.exe: bsd.o version.o
-	gcc ${LDFLAGS} -o $@ $^
+	gcc -static ${LDFLAGS} -o $@ $^
 
 console.exe: console.o libconsole.o
 	gcc ${LDFLAGS} -L${WINDIR} -o $@ console.o libconsole.o -lutil
@@ -51,7 +53,7 @@ install-local:
 
 install: ${DESTDIR}
 	@for file in ${PROGS}; do echo $$file; ginstall $$file "${DESTDIR}${SBINDIR}/$$file"; done
-	ginstall -m 04555 -o 0 -g 0 bsd.exe ${DESTDIR}/
+	ginstall -m 04555 -o 0 -g 0 bsd.exe ${DESTDIR}${SBINDIR}/
 
 clean:
 	/bin/rm -f *.exe *.o

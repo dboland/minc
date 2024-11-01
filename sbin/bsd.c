@@ -66,13 +66,15 @@
 
 unsigned char		_verbose;
 unsigned char		_boot;
-
-int runcmd(char *argv[]);
+unsigned char		_home;
 
 /* src/sys/netinet/ip_input.c */
 void tty_init(void);
 
 /* sys/arch/i386/stand/boot/crt0.c */
+
+char *_term = "interix";
+char *_ctype = "en_US.UTF-8";
 
 /************************************************************/
 
@@ -84,7 +86,7 @@ die(const char *msg, ...)
 	va_start(args, msg);
 	vfprintf(stderr, msg, args);
 	va_end(args);
-	exit(-1);
+	_exit(-1);
 }
 void 
 sig(int signum)
@@ -127,7 +129,7 @@ fs_unmount(void)
 int
 getty(const char *path)
 {
-	int result = 0;
+	int result = -1;
 	int fd;
 
 	/* ./lib/libutil/login_tty.c
@@ -143,7 +145,7 @@ getty(const char *path)
 		dup2(fd, STDERR_FILENO);
 		if (fd > STDERR_FILENO)
 			close(fd);
-		result = 1;
+		result = 0;
 	}
 	return(result);
 }
@@ -161,7 +163,8 @@ shell(char *args[])
 	}else{
 		fprintf(stderr, "getpwnam(%s): %s\n", login, strerror(errno));
 	}
-	if (chdir(home) < 0){
+	write(1, "\e)U", 3);		/* reset to utf-8 code page */
+	if (_home && chdir(home) < 0){
 		fprintf(stderr, "chdir(%s): %s\n", home, strerror(errno));
 	}
 	execve(*args, args, environ);
@@ -181,6 +184,41 @@ trpoints(const char *opts)
 		result |= KTRFAC_GENIO;
 	return(result);
 }
+void 
+notty(void)
+{
+	char *root = getenv("MINCROOT");
+	char *msg = "MinC is installed and working but could not configure itself.\n"
+		"Please exclude %s from your anti-virus software,\n"
+		"open the console as Administrator and run /sbin/setup.sh.\n\n"
+		"Press ENTER to continue . . .";
+	char buf;
+
+	fprintf(stderr, msg, root);
+	read(0, &buf, 1);
+}
+void 
+parseargs(int argc, char *argv[])
+{
+	int ch;
+
+	while ((ch = getopt(argc, argv, "t:vbh")) > 0){
+		switch (ch){
+		case 'v':
+			_verbose++;
+			break;
+		case 'b':
+			_boot++;
+			break;
+		case 't':
+			ktrace("boot.out", KTROP_SET, trpoints(optarg), 0);
+			break;
+		case 'h':
+			_home++;
+			break;
+		}
+	}
+}
 
 /************************************************************/
 
@@ -195,19 +233,6 @@ boot(void)
 	fs_unmount();		// fsck.exe operation?
 	execve(*args, args, environ);
 	fprintf(stderr, "execve(%s): %s\n", *args, strerror(errno));
-}
-void 
-notty(void)
-{
-	char *root = getenv("MINCROOT");
-	char *msg = "MinC is installed and working but could not configure itself.\n"
-		"Please exclude %s from your anti-virus software\n"
-		"and run /sbin/setup.sh as administrator.\n\n"
-		"Press any key to continue . . .";
-	char buf;
-
-	fprintf(stderr, msg, root);
-	read(0, &buf, 1);
 }
 void 
 single(void)
@@ -227,7 +252,7 @@ single(void)
 //	close(2);
 	(void) revoke(_PATH_CONSOLE);
 	setsid();
-	if (!getty(_PATH_CONSOLE)){
+	if (getty(_PATH_CONSOLE) < 0){
 		notty();
 		args[0] = "/bin/sh";
 		args[1] = NULL;
@@ -252,27 +277,18 @@ main(int argc, char *argv[], char *envp[])
 	int mib[2] = {CTL_KERN, KERN_SECURELVL};
 	size_t size = sizeof(int);
 	int level = 0;
-	char *progname = *argv++;
-	char *token;
 	pid_t pid;
 	int status;
+	char *root = diskconf();
 
-	while (token = *argv++){
-		if (!strcmp(token, "-v")){
-			_verbose++;
-		}else if (!strcmp(token, "-b")){
-			_boot++;
-		}else if (!strcmp(token, "-t")){
-			ktrace("boot.out", KTROP_SET, trpoints(*argv), 0);
-		}
-	}
-//	signal(SIGINT, SIG_IGN);
-//	signal(SIGCHLD, SIG_IGN);
+	parseargs(argc, argv);
 	signal(SIGQUIT, sig);
 	signal(SIGWINCH, sig);
-//	signal(SIGINFO, SIG_IGN);
 	sysctl(mib, 2, &level, &size, NULL, 0);
+	setenv("MINCROOT", root, 1);
 	setenv("PATH", _PATH_DEFPATH, 1);
+	setenv("TERM", _term, 1);
+	setenv("LC_CTYPE", _ctype, 1);
 	switch (pid = fork()){
 		case -1:
 			die("fork(): %s\n", strerror(errno));
@@ -287,4 +303,5 @@ main(int argc, char *argv[], char *envp[])
 		default:
 			waitpid(pid, &status, 0);
 	}
+	return(0);
 }

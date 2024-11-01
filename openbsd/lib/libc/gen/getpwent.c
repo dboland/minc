@@ -48,7 +48,7 @@ struct passwd		_PASSWD;
 char *
 pwd_skip(char *p)
 {
-	while (*p != ':'){
+	while (*p && *p != ':'){
 		p++;
 	}
 	*p++ = 0;

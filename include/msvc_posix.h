@@ -39,6 +39,8 @@ int msvc_swprintf(wchar_t *buffer, const wchar_t *format, ...);
 /* stdlib.h */
 
 void msvc_init(int *_argc, char ***_argv, char ***_env);
+char *msvc_dirname(char *path);
+int _putenv(const char *envstring);
 
 char *_itoa(int value, char *str, int radix);
 int __getmainargs(int *_Argc, char ***_Argv, char ***_Env, int _DoWildCard, _startupinfo *_StartInfo);

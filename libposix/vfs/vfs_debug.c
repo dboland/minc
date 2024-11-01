@@ -521,7 +521,7 @@ vfs_DEVICE(WIN_DEVICE *Device, LPSTR Buffer)
 {
 	LPSTR psz = Buffer;
 
-	psz += msvc_sprintf(psz, "Name(%s) Type(%s:%s) Flags(0x%x) Index(%d) I/O([%d][%d]) DevType(0x%x) DevId(0x%x)\n", 
+	psz += msvc_sprintf(psz, "(%s): Type(%s:%s) Flags(0x%x) Index(%d) I/O([%d][%d]) DevType(0x%x) DevId(0x%x)\n", 
 		Device->Name, FSType(Device->FSType), __FType[Device->FileType], Device->Flags, Device->Index, Device->Input, Device->Output, Device->DeviceType, Device->DeviceId);
 	psz += msvc_sprintf(psz, "+ ClassId: %ls\n", Device->ClassId);
 	psz += msvc_sprintf(psz, "+ NtName: %ls\n", Device->NtName);
@@ -533,7 +533,7 @@ vfs_TTY(WIN_TTY *Terminal, LPSTR Buffer)
 {
 	LPSTR psz = Buffer;
 
-	psz += msvc_sprintf(psz, "Index(%d) Name(%s) Device(0x%x) Flags(0x%x) Group(%d) Session(%d) Row(%d) Col(%d)\n", 
+	psz += msvc_sprintf(psz, "(%d): Name(%s) Device(0x%x) Flags(0x%x) Group(%d) Session(%d) Row(%d) Col(%d)\n", 
 		Terminal->Index, Terminal->Name, Terminal->DeviceId, Terminal->Flags, Terminal->GroupId, Terminal->SessionId, Terminal->WinSize.Row, Terminal->WinSize.Column);
 //	psz = VfsTermFlags(psz, &Terminal->Mode, "+ mode");
 	return(psz - Buffer);
@@ -543,7 +543,7 @@ vfs_CONIN(DWORD Mode, LPSTR Buffer)
 {
 	LPSTR psz = Buffer;
 
-	psz += msvc_sprintf(psz, "\n");
+	psz += msvc_sprintf(psz, ":\n");
 	psz = VfsInputMode(psz, "+ mode", Mode);
 	return(psz - Buffer);
 }
@@ -552,7 +552,7 @@ vfs_MOUNT(WIN_MOUNT *Mount, LPSTR Buffer)
 {
 	LPSTR psz = Buffer;
 
-	psz += msvc_sprintf(psz, "TypeName(%ls) MountId(%d) MaxPath(%d) DevType(0x%x) DevId(0x%x)\n", 
+	psz += msvc_sprintf(psz, "(%ls): MountId(%d) MaxPath(%d) DevType(0x%x) DevId(0x%x)\n", 
 		Mount->TypeName, Mount->MountId, Mount->MaxPath, Mount->DeviceType, Mount->DeviceId);
 	psz = VfsVolumeFlags(psz, "+ Flags", Mount->Flags);
 	psz += msvc_sprintf(psz, "+ Serial: %lu\n", Mount->Serial);
@@ -565,7 +565,7 @@ vfs_CFDATA(WIN_CFDATA *Config, LPSTR Buffer)
 {
 	LPSTR psz = Buffer;
 
-	psz += msvc_sprintf(psz, "NtName(%ls): Bus(%ls) FSType(%s), DosPath(%ls) Depth(%d) Class(%ls)\n", 
+	psz += msvc_sprintf(psz, "(%ls): Bus(%ls) FSType(%s), DosPath(%ls) Depth(%d) Class(%ls)\n", 
 		Config->NtName, Config->BusName, FSType(Config->FSType), Config->DosPath, Config->Depth, Config->ClassName);
 	psz += msvc_sprintf(psz, "+ NtPath: %ls\n", Config->NtPath);
 	return(psz - Buffer);
@@ -575,7 +575,7 @@ vfs_STATFS(WIN_STATFS *Info, LPSTR Buffer)
 {
 	LPSTR psz = Buffer;
 
-	psz += msvc_sprintf(psz, "Type(%ls) DevId(0x%x) MaxPath(%d) ClustersTotal(%d) FreeClusters(%d)\n", 
+	psz += msvc_sprintf(psz, "(%ls): DevId(0x%x) MaxPath(%d) ClustersTotal(%d) FreeClusters(%d)\n", 
 		Info->TypeName, Info->DeviceId, Info->MaxPath, Info->ClustersTotal, Info->FreeClusters);
 	psz = VfsVolumeFlags(psz, "+ Flags", Info->Flags);
 	psz += msvc_sprintf(psz, "+ Path: %ls\n", Info->Path);
@@ -586,7 +586,7 @@ vfs_ACCESS(ACCESS_MASK Access, LPSTR Buffer)
 {
 	LPSTR psz = Buffer;
 
-	psz += msvc_sprintf(psz, "(0x%x)\n", Access);
+	psz += msvc_sprintf(psz, "(0x%x):\n", Access);
 	psz = VfsFileAccess(psz, Access, OB_TYPE_FILE);
 	return(psz - Buffer);
 }

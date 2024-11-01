@@ -68,8 +68,8 @@
 #define DEV_TYPE_SWD		(DEV_CLASS_SYSTEM)
 #define DEV_TYPE_ACPI		(DEV_CLASS_SYSTEM + DEV_BUS_ACPI)
 #define DEV_TYPE_EHCI		(DEV_CLASS_SYSTEM + DEV_BUS_USB)	/* USB Enhanced Host Controller Interface (USB 2.0) */
-#define DEV_TYPE_PCI		(DEV_CLASS_SYSTEM + DEV_BUS_PCI)	/* Peripheral Component Interconnect bus */
-#define DEV_TYPE_IDE		(DEV_CLASS_SYSTEM + DEV_BUS_IDE)	/* Peripheral Component Interconnect bus */
+#define DEV_TYPE_PCI		(DEV_CLASS_SYSTEM + DEV_BUS_PCI)	/* PCI controller device */
+#define DEV_TYPE_IDE		(DEV_CLASS_SYSTEM + DEV_BUS_IDE)	/* IDE controller device */
 
 #define DEV_TYPE_MEM		(DEV_CLASS_CPU + 1)		/* physical memory device */
 #define DEV_TYPE_KMEM		(DEV_CLASS_CPU + 2)		/* kernel memory device (libposix.dll) */

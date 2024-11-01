@@ -49,11 +49,10 @@ pathnp_posix(char *dest, LPCWSTR Source, LONG Size, BOOL EndPtr)
 	win_wcstombs(src, Source, Size);
 	if (src[1] == ':'){		/* MinGW ld.exe */
 		dest = win_stpcpy(dest, "/mnt/");
-		*dest++ = *src++;
-		src++;
 		Size -= 5;
 	}else if (src[0] == '\\'){
 		dest = win_stpcpy(dest, "/proc");
+		Size -= 5;
 	}else if (src[1] == '\\'){
 		src++;
 	}
@@ -61,6 +60,8 @@ pathnp_posix(char *dest, LPCWSTR Source, LONG Size, BOOL EndPtr)
 		Size--;
 		if (Size < 1){
 			break;
+		}else if (c == ':'){
+			continue;
 		}else if (c == '\\'){
 			c = '/';
 		}else if (c == '.'){

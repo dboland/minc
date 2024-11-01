@@ -37,7 +37,6 @@
 #include "pdo_wsconsio.c"
 #include "pdo_ptm.c"
 #include "pdo_root.c"
-//#include "pdo_namei.c"
 #include "pdo_fcntl.c"
 #include "pdo_unistd.c"
 #include "pdo_poll.c"
@@ -51,8 +50,6 @@ VOID
 pdo_init(WIN_DEV_CLASS Devices[])
 {
 	__Devices = Devices;
-
-//	config_init("pci0", FS_TYPE_PDO, WIN_VCHR, DEV_TYPE_PCI);
 
 	config_init("mem", FS_TYPE_PDO, WIN_VCHR, DEV_TYPE_MEM);
 	config_init("kmem", FS_TYPE_PDO, WIN_VCHR, DEV_TYPE_KMEM);

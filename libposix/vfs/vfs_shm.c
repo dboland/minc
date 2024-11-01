@@ -54,14 +54,14 @@ SHMCreate(LPCSTR Name, DWORD SizeLow)
 /************************************************************/
 
 WIN_SESSION *
-vfs_shminit(LPCSTR Name)
+vfs_shminit(LPCSTR Name, HINSTANCE Instance)
 {
 	WIN_SESSION *wsResult = NULL;
 
 	if (!(__Shared = OpenFileMapping(FILE_MAP_WRITE, FALSE, Name))){
 		wsResult = SHMCreate(Name, sizeof(WIN_SESSION));
 		pdo_init(wsResult->Devices);
-		sysctl_init(wsResult->Globals);
+		proc_init(Instance, wsResult->Globals);
 	}else if (!(wsResult = MapViewOfFile(__Shared, FILE_MAP_WRITE, 0, 0, 0))){
 		WIN_ERR("MapViewOfFile(%d): %s\n", __Shared, win_strerror(GetLastError()));
 	}

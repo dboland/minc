@@ -99,7 +99,6 @@ BOOL proc_poll(VOID);
 #include "vfs_signal.c"
 #include "vfs_statvfs.c"
 #include "vfs_libgen.c"
-#include "vfs_sysctl.c"
 #include "vfs_syscall.c"
 #include "vfs_tty.c"
 #include "vfs_device.c"
@@ -140,7 +139,7 @@ BOOL
 vfs_PROCESS_ATTACH(HINSTANCE Instance, LPVOID Reserved)
 {
 	__TlsIndex = TlsAlloc();
-	__Session = vfs_shminit(OBJECT_NAME("Session"));
+	__Session = vfs_shminit(OBJECT_NAME("Session"), Instance);
 	__Tasks = __Session->Tasks;
 	__Devices = __Session->Devices;
 	__Terminals = __Session->Terminals;

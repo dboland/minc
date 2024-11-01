@@ -89,7 +89,7 @@ task_init(char *cmdbuf, char *argv[], void *frame_address)
 	LPWSTR pszCommand;
 
 	__THREAD_FRAME = (u_long)frame_address;
-	pwTask = proc_init(sigproc_win);
+	pwTask = proc_start(sigproc_win);
 	srand(time_posix(&pwTask->Started));
 
 	pszCommand = __Strings[pwTask->TaskId].Command;
