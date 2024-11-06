@@ -48,13 +48,13 @@ InputMode(WIN_TERMIO *Attribs)
 	}
 	return(dwResult);
 }
-VOID 
-InputChar(CHAR C, DWORD KeyState, CHAR *Result)
+BOOL 
+InputChar(CHAR C, DWORD KeyState, CHAR *Buffer)
 {
 	DWORD dwCount;
 	UINT uiMessage;
 
-	/* On Schift Out (SO), switch to alternative character set,
+	/* On Shift Out (SO), switch to alternative character set,
 	 * for file names on remote systems.
 	 */
 	if (C == 14){		/* Ctrl-N (SO): shift out */
@@ -62,107 +62,89 @@ InputChar(CHAR C, DWORD KeyState, CHAR *Result)
 	}else if (C == 15){	/* Ctrl-O (SI): shift in */
 		SetConsoleOutputCP(CP_UTF8);
 	}else if (KeyState & LEFT_ALT_PRESSED){		/* nano.exe */
-		*Result++ = '\e';
+		*Buffer++ = '\e';
 	}
-	*Result++ = C;
-	*Result = 0;
-}
-VOID 
-InputReturn(DWORD KeyState, WIN_TERMIO *Attribs, CHAR *Result)
-{
-	if (Attribs->IFlags & WIN_ICRNL){
-		InputChar('\n', KeyState, Result);
-	}else{
-		InputChar('\r', KeyState, Result);
-	}
-}
-VOID 
-InputTabulator(DWORD KeyState, CHAR *Result)
-{
-	if (KeyState & SHIFT_PRESSED){
-		win_strcpy(Result, "\e[Z");
-	}else{
-		InputChar('\t', KeyState, Result);
-	}
+	*Buffer++ = C;
+	*Buffer = 0;
+	return(TRUE);
 }
 BOOL 
-InputInsert(DWORD KeyState, CHAR *Result)
+InputReturn(DWORD KeyState, WIN_TERMIO *Attribs, CHAR *Buffer)
+{
+	if (Attribs->IFlags & WIN_ICRNL){
+		InputChar('\n', KeyState, Buffer);
+	}else{
+		InputChar('\r', KeyState, Buffer);
+	}
+	return(TRUE);
+}
+BOOL 
+InputTabulator(DWORD KeyState, CHAR *Buffer)
+{
+	if (KeyState & SHIFT_PRESSED){
+		win_strcpy(Buffer, "\e[Z");
+	}else{
+		InputChar('\t', KeyState, Buffer);
+	}
+	return(TRUE);
+}
+BOOL 
+InputInsert(DWORD KeyState, CHAR *Buffer)
 {
 	BOOL bResult = TRUE;
 
 	if (!(KeyState & SHIFT_PRESSED)){
-		win_strcpy(Result, ANSI_CURSOR(VK_INSERT));
+		win_strcpy(Buffer, ANSI_CURSOR(VK_INSERT));
 	}else if (!IsClipboardFormatAvailable(CF_TEXT)){
-		*Result = 0;
+		*Buffer = 0;
 	}else if (!OpenClipboard(NULL)){
-		WIN_ERR("OpenClipboard(): %s\n", win_strerror(GetLastError()));
 		bResult = FALSE;
-//	}else if (__Lock = GetClipboardData(CF_TEXT)){
 	}else if (__Lock = GetClipboardData(CF_UNICODETEXT)){
 		__Clipboard = GlobalLock(__Lock);
+	}else{
+		bResult = FALSE;
 	}
 	return(bResult);
 }
 BOOL 
-InputKey(KEY_EVENT_RECORD *Event, WIN_TERMIO *Attribs, CHAR *Result)
+InputKey(KEY_EVENT_RECORD *Event, WIN_TERMIO *Attribs, CHAR *Buffer)
 {
 	BOOL bResult = TRUE;
 	CHAR CH = Event->uChar.AsciiChar;
 	WORD VK = Event->wVirtualKeyCode;
 
 	if (!Event->bKeyDown){
-		return(FALSE);
+		*Buffer = 0;
 	}else if (VK == VK_RETURN){
-		InputReturn(Event->dwControlKeyState, Attribs, Result);
+		bResult = InputReturn(Event->dwControlKeyState, Attribs, Buffer);
 	}else if (CH){
-		InputChar(CH, Event->dwControlKeyState, Result);
+		bResult = InputChar(CH, Event->dwControlKeyState, Buffer);
 	}else if (VK == VK_INSERT){
-		bResult = InputInsert(Event->dwControlKeyState, Result);
+		bResult = InputInsert(Event->dwControlKeyState, Buffer);
 	}else if (VK <= VK_MODIFY){
-		bResult = FALSE;
+		*Buffer = 0;
 	}else if (VK <= VK_CURSOR){
-		win_strcpy(Result, ANSI_CURSOR(VK));
+		win_strcpy(Buffer, ANSI_CURSOR(VK));
 	}else if (VK <= VK_WINDOWS){
-		bResult = FALSE;
+		*Buffer = 0;
 	}else if (VK <= VK_FUNCTION){
-		win_strcpy(Result, ANSI_FUNCTION(VK));
+		win_strcpy(Buffer, ANSI_FUNCTION(VK));
 	}else{
-		bResult = FALSE;
+		*Buffer = 0;
 	}
 	return(bResult);
 }
 BOOL 
-InputMouse(MOUSE_EVENT_RECORD *Event, CHAR *Result)
+InputMouse(MOUSE_EVENT_RECORD *Event, CHAR *Buffer)
 {
-	BOOL bResult = TRUE;
-
 	if (Event->dwEventFlags != MOUSE_WHEELED){
-		bResult = FALSE;
+		return(TRUE);
 	}else if (GET_WHEEL_DELTA_WPARAM(Event->dwButtonState) > 0){
-		win_strcpy(Result, ANSI_CURSOR(VK_UP));
+		win_strcpy(Buffer, ANSI_CURSOR(VK_UP));
 	}else{
-		win_strcpy(Result, ANSI_CURSOR(VK_DOWN));
+		win_strcpy(Buffer, ANSI_CURSOR(VK_DOWN));
 	}
-	return(bResult);
-}
-BOOL 
-InputEvent(INPUT_RECORD *Record, WIN_TERMIO *Attribs, LPSTR Buffer)
-{
-	BOOL bResult = FALSE;
-
-	switch (Record->EventType){
-		case KEY_EVENT:
-			bResult = InputKey(&Record->KeyEvent, Attribs, Buffer);
-			break;
-		case WINDOW_BUFFER_SIZE_EVENT:
-		case FOCUS_EVENT:
-		case MENU_EVENT:
-		case MOUSE_EVENT:
-			break;
-		default:
-			SetLastError(ERROR_IO_DEVICE);
-	}
-	return(bResult);
+	return(TRUE);
 }
 BOOL 
 InputReadEvent(HANDLE Handle, WIN_TERMIO *Attribs, CHAR *Buffer)
@@ -171,11 +153,21 @@ InputReadEvent(HANDLE Handle, WIN_TERMIO *Attribs, CHAR *Buffer)
 	INPUT_RECORD iRecord;
 	DWORD dwCount = 0;
 
-	*Buffer = 0;
 	if (!ReadConsoleInput(Handle, &iRecord, 1, &dwCount)){
 		WIN_ERR("ReadConsoleInput(%d): %s\n", Handle, win_strerror(GetLastError()));
-	}else{
-		bResult = InputEvent(&iRecord, Attribs, Buffer);
+	}else switch (iRecord.EventType){
+		case KEY_EVENT:
+			bResult = InputKey(&iRecord.KeyEvent, Attribs, Buffer);
+			break;
+		case WINDOW_BUFFER_SIZE_EVENT:
+		case FOCUS_EVENT:
+		case MENU_EVENT:
+		case MOUSE_EVENT:
+			*Buffer = 0;
+			bResult = TRUE;
+			break;
+		default:
+			SetLastError(ERROR_IO_DEVICE);
 	}
 	__Input = Buffer;
 	return(bResult);
@@ -186,11 +178,9 @@ InputReadLine(HANDLE Handle, WIN_TERMIO *Attribs, CHAR *Buffer)
 	BOOL bResult = FALSE;
 	LONG lCount = 0;
 
-	*Buffer = 0;
 	if (!ReadFile(Handle, Buffer, WIN_MAX_INPUT, &lCount, NULL)){
 		vfs_raise(WM_COMMAND, CTRL_ABORT_EVENT, 0);
-	}else if (lCount > 0){
-		lCount--;
+	}else if (lCount-- > 0){
 		if (Attribs->LFlags & WIN_ISIG){	/* ENABLE_PROCESSED_INPUT */
 			Buffer[lCount--] = 0;		/* remove NL, leave CR */
 		}
@@ -198,6 +188,8 @@ InputReadLine(HANDLE Handle, WIN_TERMIO *Attribs, CHAR *Buffer)
 			Buffer[lCount] = '\n';		/* replace CR (ftp.exe) */
 		}
 		bResult = TRUE;
+	}else{
+		*Buffer = 0;
 	}
 	__Input = Buffer;
 	return(bResult);
@@ -296,8 +288,8 @@ input_read(HANDLE Handle, LPSTR Buffer, DWORD Size, DWORD *Result)
 			InputReadClipboard(__INPUT_BUF);
 		}else if (dwMode & ENABLE_LINE_INPUT){
 			InputReadLine(Handle, &__CTTY->Attribs, __INPUT_BUF);
-		}else{
-			InputReadEvent(Handle, &__CTTY->Attribs, __INPUT_BUF);
+		}else if (!InputReadEvent(Handle, &__CTTY->Attribs, __INPUT_BUF)){
+			break;
 		}
 	}
 	*Result = dwResult;

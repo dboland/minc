@@ -132,7 +132,7 @@ getty(const char *path)
 	int result = -1;
 	int fd;
 
-	/* ./lib/libutil/login_tty.c
+	/* copy of ./lib/libutil/login_tty.c
 	 */
 	fd = open(path, O_RDWR);
 	if (fd < 0){
@@ -145,6 +145,7 @@ getty(const char *path)
 		dup2(fd, STDERR_FILENO);
 		if (fd > STDERR_FILENO)
 			close(fd);
+		write(STDOUT_FILENO, "\e)U", 3);	/* reset to utf-8 alt charset */
 		result = 0;
 	}
 	return(result);
@@ -163,7 +164,6 @@ shell(char *args[])
 	}else{
 		fprintf(stderr, "getpwnam(%s): %s\n", login, strerror(errno));
 	}
-	write(1, "\e)U", 3);		/* reset to utf-8 code page */
 	if (_home && chdir(home) < 0){
 		fprintf(stderr, "chdir(%s): %s\n", home, strerror(errno));
 	}
@@ -198,11 +198,11 @@ notty(void)
 	read(0, &buf, 1);
 }
 void 
-parseargs(int argc, char *argv[])
+args(int argc, char *argv[])
 {
 	int ch;
 
-	while ((ch = getopt(argc, argv, "t:vbh")) > 0){
+	while ((ch = getopt(argc, argv, "t:kvbh")) > 0){
 		switch (ch){
 		case 'v':
 			_verbose++;
@@ -210,11 +210,14 @@ parseargs(int argc, char *argv[])
 		case 'b':
 			_boot++;
 			break;
-		case 't':
+		case 'k':
 			ktrace("boot.out", KTROP_SET, trpoints(optarg), 0);
 			break;
 		case 'h':
 			_home++;
+			break;
+		case 't':
+			_term = optarg;
 			break;
 		}
 	}
@@ -281,7 +284,7 @@ main(int argc, char *argv[], char *envp[])
 	int status;
 	char *root = diskconf();
 
-	parseargs(argc, argv);
+	args(argc, argv);
 	signal(SIGQUIT, sig);
 	signal(SIGWINCH, sig);
 	sysctl(mib, 2, &level, &size, NULL, 0);

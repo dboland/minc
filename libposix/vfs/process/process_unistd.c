@@ -48,7 +48,7 @@ ProcDupChannels(WIN_VNODE Nodes[], WIN_VNODE Result[])
 		Result++;
 	}
 }
-BOOL 
+/* BOOL 
 ProcCloseExec(WIN_VNODE Nodes[])
 {
 	DWORD dwIndex = 0;
@@ -61,19 +61,21 @@ ProcCloseExec(WIN_VNODE Nodes[])
 		Nodes++;
 	}
 	return(TRUE);
-}
+} */
 VOID 
-ProcInheritChannels(HANDLE Process, WIN_VNODE Result[])
+ProcInheritChannels(HANDLE Process, WIN_VNODE Nodes[])
 {
 	DWORD dwIndex = 0;
 
 	while (dwIndex < WIN_OPEN_MAX){
-		if (Result->Access){
-			if (!(Result->Flags & HANDLE_FLAG_INHERIT)){
-				vfs_F_INHERIT(Result, Process);
+		if (Nodes->Access){
+			if (Nodes->CloseExec){
+				vfs_close(Nodes);
+			}else if (!(Nodes->Flags & HANDLE_FLAG_INHERIT)){
+				vfs_F_INHERIT(Nodes, Process);
 			}
 		}
-		Result++;
+		Nodes++;
 		dwIndex++;
 	}
 }
@@ -120,7 +122,7 @@ proc_close(WIN_TASK *Task)
 {
 	BOOL bResult = FALSE;
 
-	/* In very specific (yet unknown) cases CreateProcess() is 
+	/* In very rare (yet unknown) cases CreateProcess() is 
 	 * actually *faster* than CreateThread() (building perl.exe)
 	 */
 	Task->ParentId = 0;		/* relinquish ownership */
@@ -151,7 +153,7 @@ proc_execve(WIN_TASK *Task, LPSTR Command, PVOID Environ)
 	si.lpDesktop = "";		/* Vista */
 	si.dwFlags = STARTF_PS_EXEC;
 	si.dwX = Task->TaskId;
-	ProcCloseExec(Task->Node);
+//	ProcCloseExec(Task->Node);
 	if (!win_cap_get_proc(dwAccess, TokenPrimary, &hToken)){
 		WIN_ERR("win_cap_get_proc(%s): %s\n", Command, win_strerror(GetLastError()));
 	}else if (!AclCreateControl(WIN_P_IRWX | TOKEN_IMPERSONATE, &wControl)){

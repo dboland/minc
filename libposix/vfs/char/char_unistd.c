@@ -80,6 +80,8 @@ char_revoke(WIN_DEVICE *Device)
 	}else if (!CloseHandle(Device->Output)){
 		WIN_ERR("CloseHandle(%d): %s\n", Device->Output, win_strerror(GetLastError()));
 	}else{
+		Device->Input = NULL;
+		Device->Output = NULL;
 		Device->Flags = 0;
 		__Terminals[Device->Index].Flags = 0;
 		bResult = TRUE;

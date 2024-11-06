@@ -47,7 +47,7 @@
 
 static const DWORD __SIG_WIN[NSIG] = {
 	0,
-	CTRL_HANGUP_EVENT,
+	CTRL_LOGOFF_EVENT,
 	CTRL_C_EVENT,
 	CTRL_QUIT_EVENT,
 	CTRL_ILLEGAL_INSTRUCTION_EVENT,
@@ -55,20 +55,18 @@ static const DWORD __SIG_WIN[NSIG] = {
 	CTRL_ABORT_EVENT,
 	CTRL_EMULATOR_EVENT,
 	CTRL_DIVIDE_BY_ZERO_EVENT,
-	CTRL_SHUTDOWN_EVENT,
-/* 10 */
-	CTRL_BUS_EVENT,
+	CTRL_CLOSE_EVENT,
+	CTRL_BUS_EVENT,			/* 10 */
 	CTRL_ACCESS_VIOLATION_EVENT,
 	CTRL_INVALID_ARGUMENT_EVENT,
 	CTRL_PIPE_EVENT,
 	CTRL_TIMER_EVENT,
-	CTRL_CLOSE_EVENT,
+	CTRL_SHUTDOWN_EVENT,
 	CTRL_URGENT_EVENT,
 	CTRL_STOP_EVENT,
 	CTRL_BREAK_EVENT,
 	CTRL_CONTINUE_EVENT,
-/* 20 */
-	CTRL_CHILD_EVENT,
+	CTRL_CHILD_EVENT,		/* 20 */
 	CTRL_BACKGROUND_READ_EVENT,
 	CTRL_BACKGROUND_WRITE_EVENT,
 	CTRL_IO_EVENT,
@@ -78,10 +76,9 @@ static const DWORD __SIG_WIN[NSIG] = {
 	-27,
 	CTRL_SIZE_EVENT,
 	CTRL_INFO_EVENT,
-/* 30 */
-	CTRL_USER1_EVENT,
+	CTRL_USER1_EVENT,		/* 30 */
 	CTRL_USER2_EVENT,
-	-32
+	CTRL_DETACH_EVENT
 };
 
 /****************************************************/
@@ -131,8 +128,7 @@ sigproc_default(WIN_TASK *Task, int signum)
 		__sigsuspend(Task, &mask);
 	}else if (sigbit & ~SIGMASK_IGNORE){
 		Task->Status = signum;
-		Task->Flags |= WIN_PS_EXITING;
-		proc_exit(127);
+		__exit(Task, 127);
 	}
 	return(result);
 }
@@ -190,12 +186,11 @@ sigproc_win(DWORD CtrlType, CONTEXT *Context)
 		case CTRL_BREAK_EVENT:
 			signum = SIGTSTP;
 			break;
-		case CTRL_LOGOFF_EVENT:
 		case CTRL_SHUTDOWN_EVENT:
-			signum = SIGKILL;		/* cannot be caught or ignored */
-			break;
-		case CTRL_CLOSE_EVENT:
 			signum = SIGTERM;		/* default of kill command */
+			break;
+		case CTRL_CLOSE_EVENT:			/* closing Console window */
+			signum = SIGKILL;		/* cannot be caught or ignored */
 			break;
 		case CTRL_ACCESS_VIOLATION_EVENT:
 			signum = SIGSEGV;
@@ -230,7 +225,7 @@ sigproc_win(DWORD CtrlType, CONTEXT *Context)
 		case CTRL_VTIMER_EVENT:
 			signum = SIGVTALRM;		/* SIGALRM in program time */
 			break;
-		case CTRL_HANGUP_EVENT:
+		case CTRL_LOGOFF_EVENT:
 			signum = SIGHUP;
 			break;
 		case CTRL_USER1_EVENT:
