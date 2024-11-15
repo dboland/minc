@@ -48,22 +48,8 @@ ProcDupChannels(WIN_VNODE Nodes[], WIN_VNODE Result[])
 		Result++;
 	}
 }
-/* BOOL 
-ProcCloseExec(WIN_VNODE Nodes[])
-{
-	DWORD dwIndex = 0;
-
-	while (dwIndex < WIN_OPEN_MAX){
-		if (Nodes->CloseExec){
-			vfs_close(Nodes);
-		}
-		dwIndex++;
-		Nodes++;
-	}
-	return(TRUE);
-} */
 VOID 
-ProcInheritChannels(HANDLE Process, WIN_VNODE Nodes[])
+ProcInheritChannels(WIN_VNODE Nodes[], HANDLE Process)
 {
 	DWORD dwIndex = 0;
 
@@ -153,7 +139,6 @@ proc_execve(WIN_TASK *Task, LPSTR Command, PVOID Environ)
 	si.lpDesktop = "";		/* Vista */
 	si.dwFlags = STARTF_PS_EXEC;
 	si.dwX = Task->TaskId;
-//	ProcCloseExec(Task->Node);
 	if (!win_cap_get_proc(dwAccess, TokenPrimary, &hToken)){
 		WIN_ERR("win_cap_get_proc(%s): %s\n", Command, win_strerror(GetLastError()));
 	}else if (!AclCreateControl(WIN_P_IRWX | TOKEN_IMPERSONATE, &wControl)){
@@ -167,7 +152,7 @@ proc_execve(WIN_TASK *Task, LPSTR Command, PVOID Environ)
 		}else{
 			Task->Handle = pi.hThread;
 		}
-		ProcInheritChannels(pi.hProcess, Task->Node);
+		ProcInheritChannels(Task->Node, pi.hProcess);
 		CloseHandle(hThread);
 		CloseHandle(pi.hProcess);
 		/* https://man7.org/linux/man-pages/man2/execve.2.html */

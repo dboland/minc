@@ -129,8 +129,6 @@ InputKey(KEY_EVENT_RECORD *Event, WIN_TERMIO *Attribs, CHAR *Buffer)
 		*Buffer = 0;
 	}else if (VK <= VK_FUNCTION){
 		win_strcpy(Buffer, ANSI_FUNCTION(VK));
-	}else{
-		*Buffer = 0;
 	}
 	return(bResult);
 }
@@ -153,6 +151,7 @@ InputReadEvent(HANDLE Handle, WIN_TERMIO *Attribs, CHAR *Buffer)
 	INPUT_RECORD iRecord;
 	DWORD dwCount = 0;
 
+	*Buffer = 0;
 	if (!ReadConsoleInput(Handle, &iRecord, 1, &dwCount)){
 		WIN_ERR("ReadConsoleInput(%d): %s\n", Handle, win_strerror(GetLastError()));
 	}else switch (iRecord.EventType){
@@ -163,7 +162,6 @@ InputReadEvent(HANDLE Handle, WIN_TERMIO *Attribs, CHAR *Buffer)
 		case FOCUS_EVENT:
 		case MENU_EVENT:
 		case MOUSE_EVENT:
-			*Buffer = 0;
 			bResult = TRUE;
 			break;
 		default:
@@ -202,9 +200,9 @@ InputReadClipboard(CHAR *Buffer)
 	LONG lSize = WIN_MAX_INPUT;
 	WCHAR C;
 
-	__Input = Buffer;
+	*Buffer = 0;
 	while (lSize > 0){
-		C = *__Clipboard++;
+		C = *__Clipboard;
 		if (!C){
 			GlobalUnlock(__Lock);
 			CloseClipboard();
@@ -214,9 +212,11 @@ InputReadClipboard(CHAR *Buffer)
 			*pszBuffer++ = C;
 			lSize--;
 		}
+		__Clipboard++;
 	}
 	*pszBuffer = 0;
 	win_wcstombs(Buffer, szBuffer, WIN_MAX_INPUT);
+	__Input = Buffer;
 	return(bResult);
 }
 BOOL 

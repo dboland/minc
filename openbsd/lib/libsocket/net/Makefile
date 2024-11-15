@@ -11,6 +11,9 @@ OBJECTS=base64.o freeaddrinfo.o gai_strerror.o \
 OBJECTS+=getservent.c.o linkaddr.c.o if_indextoname.c.o if_nametoindex.c.o
 LIBC= send.o recv.o herror.o
 
+# IPv6
+OBJECTS+=ip6opt.o rthdr.o vars6.o
+
 SHOBJECTS=base64.so freeaddrinfo.so gai_strerror.so \
 	getnetbyaddr.so getnetbyname.so getnetent.so \
 	getpeereid.so getproto.so getprotoent.so getprotoname.so \
@@ -23,6 +26,8 @@ SHOBJECTS=base64.so freeaddrinfo.so gai_strerror.so \
 	res_random.so ethers.so vars6.so
 SHOBJECTS+=getservent.c.so linkaddr.c.so if_indextoname.c.so if_nametoindex.c.so
 LIBC= send.so recv.so herror.so
+
+SHOBJECTS+=ip6opt.so rthdr.so vars6.so
 
 all: ${OBJECTS} ${SHOBJECTS}
 

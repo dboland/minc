@@ -206,12 +206,12 @@ VfsScreenMode(LPSTR Buffer, LPCSTR Label, DWORD Mode)
 	return(psz);
 }
 LPSTR 
-VfsNetFlags(LPSTR Buffer, LONG NetworkEvents, LPCSTR Label)
+VfsNetFlags(LPSTR Buffer, LONG NetworkEvents)
 {
 	LPSTR psz = Buffer;
 	DWORD dwRemain = NetworkEvents;
 
-	psz += msvc_sprintf(psz, "%s(0x%x): ", Label, NetworkEvents);
+	psz += msvc_sprintf(psz, "([0x%x]", NetworkEvents);
 	psz = VfsFlagName(psz, FD_READ, "READ", dwRemain, &dwRemain);
 	psz = VfsFlagName(psz, FD_WRITE, "WRITE", dwRemain, &dwRemain);
 	psz = VfsFlagName(psz, FD_OOB, "OOB", dwRemain, &dwRemain);
@@ -222,7 +222,7 @@ VfsNetFlags(LPSTR Buffer, LONG NetworkEvents, LPCSTR Label)
 	psz = VfsFlagName(psz, FD_GROUP_QOS, "GROUP_QOS", dwRemain, &dwRemain);
 	psz = VfsFlagName(psz, FD_ROUTING_INTERFACE_CHANGE, "ROUTING_INTERFACE_CHANGE", dwRemain, &dwRemain);
 	psz = VfsFlagName(psz, FD_ADDRESS_LIST_CHANGE, "ADDRESS_LIST_CHANGE", dwRemain, &dwRemain);
-	psz += msvc_sprintf(psz, " remain(0x%x)\n", dwRemain);
+	psz += msvc_sprintf(psz, "[0x%x])\n", dwRemain);
 	return(psz);
 }
 BOOL 
@@ -599,6 +599,14 @@ vfs_INODE(WIN_INODE *Node, LPSTR Buffer)
 		FSType(Node->FSType), FType(Node->FileType), Node->DeviceId, Node->NameSize, Node->Reserved1, Node->Reserved2);
 	return(psz - Buffer);
 }
+DWORD 
+vfs_NETFLAGS(LONG Events, LPSTR Buffer)
+{
+	LPSTR psz = Buffer;
+
+	psz = VfsNetFlags(psz, Events);
+	return(psz - Buffer);
+}
 
 /****************************************************/
 
@@ -637,6 +645,9 @@ vfs_ktrace(LPCSTR Label, STRUCT_TYPE Type, PVOID Data)
 			break;
 		case STRUCT_INODE:
 			vfs_INODE((WIN_INODE *)Data, szText);
+			break;
+		case STRUCT_NETFLAGS:
+			vfs_NETFLAGS(*(LONG *)Data, szText);
 			break;
 	}
 	msvc_printf("%s%s", Label, szText);

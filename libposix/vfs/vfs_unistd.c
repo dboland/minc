@@ -187,15 +187,14 @@ vfs_dup(WIN_VNODE *Node, WIN_VNODE *Result)
 BOOL 
 vfs_dup2(WIN_VNODE *Node, WIN_VNODE *Result)
 {
-	BOOL bResult = TRUE;
+	BOOL bResult = FALSE;
 	WIN_VNODE vnCurrent = *Result;
 
-	/* The CloseExec flag should be in duplicate. But this will fail
-	 * because ksh.exe sets FD_CLOEXEC on standard streams of its children.
-	 */
-	if (!vfs_F_DUPFD(Node, FALSE, Result)){
-		bResult = FALSE;
-	}else if (Node->Handle != vnCurrent.Handle){
+	if (!Node->Handle){
+		SetLastError(ERROR_INVALID_HANDLE);
+	}else if (Node == Result){
+		bResult = TRUE;
+	}else if (vfs_F_DUPFD(Node, FALSE, Result)){
 		bResult = vfs_close(&vnCurrent);
 	}
 	return(bResult);

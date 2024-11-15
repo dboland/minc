@@ -31,3 +31,18 @@
 #include "shell_unistd.c"
 #include "shell_namei.c"
 #include "shell_stat.c"
+
+/****************************************************/
+
+VOID 
+shell_init(HINSTANCE Instance, WIN_GLOBALS *Globals)
+{
+	LPSTR pszRoot = Globals->Root;
+
+	if (!GetModuleFileName(Instance, pszRoot, MAX_PATH)){
+		WIN_ERR("GetModuleFileName(0x%x): %s\n", Instance, win_strerror(GetLastError()));
+	}else{
+		msvc_dirname(msvc_dirname(pszRoot));
+	}
+	AclInit(&Globals->SidMachine, &Globals->SidNone);
+}

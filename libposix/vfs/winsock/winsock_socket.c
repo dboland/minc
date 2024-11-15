@@ -29,11 +29,18 @@
  */
 
 #include <mswsock.h>
+#include <ws2tcpip.h>
 
-#define IP_TOS		3
+//#define IP_TOS		3
 #define IP_PORTRANGE	19
 
 #define SO_TIMESTAMP	0x800
+
+#define IPV6_USE_MIN_MTU	42
+#define IPV6_RECVPKTINFO	36
+#define IPV6_RECVHOPLIMIT	37
+
+#define ICMP6_FILTER		18
 
 /****************************************************/
 
@@ -69,6 +76,42 @@ ws2_setsockopt_SO(INT Name, CONST CHAR *Value)
 			break;
 		default:
 			WIN_ERR("setsockopt(SOL_SOCKET): Name(0x%x): %s\n", Name, win_strerror(WSAGetLastError()));
+	}
+	return(bResult);
+}
+BOOL 
+ws2_setsockopt_IP6(INT Name, CONST CHAR *Value)
+{
+	BOOL bResult = FALSE;
+
+	/* netinet6/in6.h
+	 * https://learn.microsoft.com/en-us/windows/win32/winsock/ipproto-ipv6-socket-options
+	 */
+
+	switch (Name){
+		case IPV6_RECVHOPLIMIT:
+		case IPV6_RECVPKTINFO:
+		case IPV6_USE_MIN_MTU:	/* ping6.exe */
+			bResult = TRUE;
+			break;
+		default:
+			WIN_ERR("setsockopt(IPPROTO_IPV6): Name(0x%x): %s\n", Name, win_strerror(WSAGetLastError()));
+	}
+	return(bResult);
+}
+BOOL 
+ws2_setsockopt_ICMP6(INT Name, CONST CHAR *Value)
+{
+	BOOL bResult = FALSE;
+
+	/* netinet/icmp6.h */
+
+	switch (Name){
+		case ICMP6_FILTER:	/* ping6.exe */
+			bResult = TRUE;
+			break;
+		default:
+			WIN_ERR("setsockopt(IPPROTO_ICMPV6): Name(0x%x): %s\n", Name, win_strerror(WSAGetLastError()));
 	}
 	return(bResult);
 }
@@ -234,14 +277,25 @@ ws2_setsockopt(WIN_VNODE *Node, INT Level, INT Name, CONST CHAR *Value, INT Leng
 {
 	BOOL bResult = FALSE;
 
+	/* netinet/in.h
+	 */
 	if (SOCKET_ERROR != setsockopt(Node->Socket, Level, Name, Value, Length)){
 		bResult = TRUE;
-	}else if (Level == IPPROTO_IP){
-		bResult = ws2_setsockopt_IP(Name, Value);
-	}else if (Level == SOL_SOCKET){
-		bResult = ws2_setsockopt_SO(Name, Value);
-	}else{
-		WIN_ERR("setsockopt(%d): %s\n", Node->Socket, win_strerror(WSAGetLastError()));
+	}else switch (Level){
+		case IPPROTO_IP:
+			bResult = ws2_setsockopt_IP(Name, Value);
+			break;
+		case SOL_SOCKET:
+			bResult = ws2_setsockopt_SO(Name, Value);
+			break;
+		case IPPROTO_IPV6:
+			bResult = ws2_setsockopt_IP6(Name, Value);
+			break;
+		case IPPROTO_ICMPV6:
+			bResult = ws2_setsockopt_ICMP6(Name, Value);
+			break;
+		default:
+			WIN_ERR("setsockopt(%d): %s\n", Node->Socket, win_strerror(WSAGetLastError()));
 	}
 	return(bResult);
 }
