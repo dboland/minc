@@ -55,12 +55,12 @@ ScreenRenderWindow(HANDLE Handle, CONSOLE_SCREEN_BUFFER_INFO *Info)
 
 	if (!GetConsoleScreenBufferInfo(Handle, Info)){
 		bResult = FALSE;
-	}else if (__CTTY->VEdit){
-		Info->srWindow = sRect;
+//	}else if (__CTTY->VEdit){
+//		Info->srWindow = sRect;
 //	}else if (!AnsiEqualRect(&sRect, &Info->srWindow)){
 //		vfs_raise(WM_SIZE, Info->srWindow.Right + 1, Info->srWindow.Bottom + 1);
-	}else if (cPos.X > sRect.Right){
-		Info->dwCursorPosition.X = cPos.X;
+//	}else if (cPos.X > sRect.Right){
+//		Info->dwCursorPosition.X = cPos.X;
 	}
 	return(bResult);
 }
@@ -303,16 +303,16 @@ screen_write(HANDLE Handle, LPCSTR Buffer, DWORD Size, DWORD *Result)
 	*Result = dwResult;
 	return(bResult);
 }
-DWORD 
-screen_poll(HANDLE Handle, WIN_POLLFD *Info)
+BOOL 
+screen_poll(HANDLE Handle, WIN_POLLFD *Info, DWORD *Result)
 {
-	DWORD dwResult = 0;
+	BOOL bResult = TRUE;
 	SHORT sResult = Info->Result | WIN_POLLOUT;	/* ssh.exe */
 
 	if (Info->Result = sResult & Info->Events){
-		dwResult++;
+		*Result += 1;
 	}
-	return(dwResult);
+	return(bResult);
 }
 
 /****************************************************/

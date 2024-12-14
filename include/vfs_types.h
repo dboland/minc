@@ -437,15 +437,15 @@ typedef struct _WIN_POLLFD {
 } WIN_POLLFD;
 
 #define WIN_POLLIN		0x0001
-#define WIN_POLLPRI		0x0002		/* Pty slave state change detected */
+#define WIN_POLLPRI		0x0002		/* Pty slave state change detected? */
 #define WIN_POLLOUT		0x0004
-#define WIN_POLLERR		0x0008
+#define WIN_POLLERR		0x0008		/* An error has occurred on the device or socket */
 #define WIN_POLLHUP		0x0010
 #define WIN_POLLNVAL		0x0020
-#define WIN_POLLRDNORM		0x0040
-#define WIN_POLLRDBAND		0x0080
+#define WIN_POLLRDNORM		0x0040		/* Normal data may be read without blocking */
+#define WIN_POLLRDBAND		0x0080		/* Priority data may be read without blocking */
 #define WIN_POLLWRBAND		0x0100
-#define WIN_POLLIGNORE		(WIN_POLLERR | WIN_POLLHUP | WIN_POLLNVAL)
+#define WIN_POLLREMOVE		0x0200		/* Remove event from queue */
 
 /*
  * vfs_termio.c

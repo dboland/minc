@@ -32,22 +32,21 @@
 
 /****************************************************/
 
-DWORD 
-pipe_poll(WIN_VNODE *Node, WIN_POLLFD *Info)
+BOOL 
+pipe_poll(WIN_VNODE *Node, WIN_POLLFD *Info, DWORD *Result)
 {
-	DWORD dwResult = 1;
+	BOOL bResult = FALSE;
 
 	switch (Node->FileType){
 		case WIN_VSOCK:
 		case WIN_VCHR:
-			dwResult = sock_poll(Node, Info);
+			bResult = sock_poll(Node, Info, Result);
 			break;
 		case WIN_VFIFO:
-			dwResult = fifo_poll(Node, Info);
+			bResult = fifo_poll(Node, Info, Result);
 			break;
 		default:
 			SetLastError(ERROR_BAD_PIPE);
-			Info->Result = WIN_POLLERR;
 	}
-	return(dwResult);
+	return(bResult);
 }

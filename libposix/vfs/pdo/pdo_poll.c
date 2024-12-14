@@ -32,21 +32,20 @@
 
 /****************************************************/
 
-DWORD 
-pdo_poll(WIN_DEVICE *Device, WIN_POLLFD *Info)
+BOOL 
+pdo_poll(WIN_DEVICE *Device, WIN_POLLFD *Info, DWORD *Result)
 {
-	DWORD dwResult = 1;
+	BOOL bResult = FALSE;
 
 	switch (Device->FSType){
 		case FS_TYPE_CHAR:
-			dwResult = input_poll(Device->Input, Info);
+			bResult = input_poll(Device->Input, Info, Result);
 			break;
 		case FS_TYPE_MAILSLOT:
-			dwResult = mail_poll(Device->Input, Info);
+			bResult = mail_poll(Device->Input, Info, Result);
 			break;
 		default:
-			Info->Result = WIN_POLLERR;
 			SetLastError(ERROR_BAD_DEVICE);
 	}
-	return(dwResult);
+	return(bResult);
 }

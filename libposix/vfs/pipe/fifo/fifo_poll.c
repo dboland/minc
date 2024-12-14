@@ -49,13 +49,13 @@ FifoPollError(HANDLE Handle, DWORD Error)
 
 /****************************************************/
 
-DWORD 
-fifo_poll(WIN_VNODE *Node, WIN_POLLFD *Info)
+BOOL 
+fifo_poll(WIN_VNODE *Node, WIN_POLLFD *Info, DWORD *Result)
 {
+	BOOL bResult = TRUE;
 	DWORD dwAvail = 0;
 	SHORT sResult = WIN_POLLOUT;
-	SHORT sMask = Info->Events | WIN_POLLIGNORE;
-	DWORD dwResult = 0;
+	SHORT sMask = Info->Events | WIN_POLLERR;
 	DWORD dwMessage = 0;
 
 	if (!PeekNamedPipe(Node->Handle, NULL, 0, NULL, &dwAvail, &dwMessage)){
@@ -64,7 +64,7 @@ fifo_poll(WIN_VNODE *Node, WIN_POLLFD *Info)
 		sResult = WIN_POLLIN;
 	}
 	if (Info->Result = sResult & sMask){
-		dwResult++;
+		*Result += 1;
 	}
-	return(dwResult);
+	return(bResult);
 }

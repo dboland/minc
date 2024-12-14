@@ -133,6 +133,18 @@ InputKey(KEY_EVENT_RECORD *Event, WIN_TERMIO *Attribs, CHAR *Buffer)
 	return(bResult);
 }
 BOOL 
+InputBufferSize(WINDOW_BUFFER_SIZE_RECORD *Event)
+{
+	BOOL bResult = FALSE;
+
+	if (vfs_raise(WM_COMMAND, CTRL_SIZE_EVENT, 0)){
+		SetLastError(ERROR_SIGNAL_PENDING);
+	}else{
+		bResult = TRUE;
+	}
+	return(bResult);
+}
+BOOL 
 InputMouse(MOUSE_EVENT_RECORD *Event, CHAR *Buffer)
 {
 	if (Event->dwEventFlags != MOUSE_WHEELED){
@@ -159,6 +171,8 @@ InputReadEvent(HANDLE Handle, WIN_TERMIO *Attribs, CHAR *Buffer)
 			bResult = InputKey(&iRecord.KeyEvent, Attribs, Buffer);
 			break;
 		case WINDOW_BUFFER_SIZE_EVENT:
+			bResult = InputBufferSize(&iRecord.WindowBufferSizeEvent);
+			break;
 		case FOCUS_EVENT:
 		case MENU_EVENT:
 		case MOUSE_EVENT:
@@ -219,44 +233,57 @@ InputReadClipboard(CHAR *Buffer)
 	__Input = Buffer;
 	return(bResult);
 }
-BOOL 
-InputIsAnsi(KEY_EVENT_RECORD *Event)
+SHORT 
+InputPollAnsi(KEY_EVENT_RECORD *Event)
 {
-	BOOL bResult = FALSE;
-	UCHAR CH = Event->uChar.AsciiChar;
+	SHORT sResult = 0;
 	WORD VK = Event->wVirtualKeyCode;
+	UCHAR uChar;
 
 	if (!Event->bKeyDown){
-		return(FALSE);
-	}else if (CH){
-		bResult = TRUE;
+		uChar = 0;
+	}else if (Event->uChar.AsciiChar){
+		uChar = Event->uChar.AsciiChar;
 	}else if (VK <= VK_MODIFY){
-		bResult = FALSE;
+		uChar = 0;
 	}else if (VK <= VK_CURSOR){
-		bResult = *ANSI_CURSOR(VK);
+		uChar = *ANSI_CURSOR(VK);
 	}else if (VK <= VK_WINDOWS){
-		bResult = FALSE;
+		uChar = 0;
 	}else if (VK <= VK_FUNCTION){
-		bResult = *ANSI_FUNCTION(VK);
+		uChar = *ANSI_FUNCTION(VK);
+	}else{
+		uChar = 0;
 	}
-	return(bResult);
+	if (uChar){
+		sResult |= WIN_POLLIN;
+	}else{
+		sResult |= WIN_POLLREMOVE;
+	}
+	return(sResult);
 }
 BOOL 
-InputIsEvent(INPUT_RECORD *Record)
+InputPollEvent(INPUT_RECORD *Record, SHORT *Result)
 {
-	BOOL bResult = FALSE;
+	BOOL bResult = TRUE;
 
 	switch (Record->EventType){
 		case KEY_EVENT:
-			bResult = InputIsAnsi(&Record->KeyEvent);
+			*Result = InputPollAnsi(&Record->KeyEvent);
 			break;
 		case WINDOW_BUFFER_SIZE_EVENT:
+			*Result = WIN_POLLREMOVE | WIN_POLLERR;
+			bResult = InputBufferSize(&Record->WindowBufferSizeEvent);
+			break;
 		case MOUSE_EVENT:
 		case FOCUS_EVENT:
 		case MENU_EVENT:
+			*Result = WIN_POLLREMOVE;
 			break;
 		default:
+			*Result = WIN_POLLREMOVE | WIN_POLLERR;
 			SetLastError(ERROR_IO_DEVICE);
+			bResult = FALSE;
 	}
 	return(bResult);
 }
@@ -266,8 +293,8 @@ InputIsEvent(INPUT_RECORD *Record)
 BOOL 
 input_read(HANDLE Handle, LPSTR Buffer, DWORD Size, DWORD *Result)
 {
-	CHAR C = 0;
 	BOOL bResult = FALSE;
+	CHAR C = 0;
 	DWORD dwResult = 0;
 	DWORD dwMode = InputMode(&__CTTY->Attribs);
 	LONG lSize = Size;
@@ -295,30 +322,29 @@ input_read(HANDLE Handle, LPSTR Buffer, DWORD Size, DWORD *Result)
 	*Result = dwResult;
 	return(bResult);
 }
-DWORD 
-input_poll(HANDLE Handle, WIN_POLLFD *Info)
+BOOL 
+input_poll(HANDLE Handle, WIN_POLLFD *Info, DWORD *Result)
 {
-	DWORD dwResult = 0;
+	BOOL bResult = TRUE;
 	DWORD dwCount = 0;
 	INPUT_RECORD iRecord;
 	SHORT sResult = 0;
-	SHORT sMask = Info->Events | WIN_POLLIGNORE;
+	SHORT sMask = Info->Events | WIN_POLLERR;
 
 	if (*__Input || __Clipboard){		/* vim.exe */
 		sResult = WIN_POLLIN;
 	}else if (!PeekConsoleInput(Handle, &iRecord, 1, &dwCount)){
-		sResult = WIN_POLLERR;
-	}else if (!dwCount){
-		sResult = 0;
-	}else if (!InputIsEvent(&iRecord)){
-		ReadConsoleInput(Handle, &iRecord, 1, &dwCount);
-	}else{
-		sResult = WIN_POLLIN;
+		bResult = FALSE;
+	}else if (dwCount){
+		bResult = InputPollEvent(&iRecord, &sResult);
+	}
+	if (sResult & WIN_POLLREMOVE){
+		bResult = ReadConsoleInput(Handle, &iRecord, 1, &dwCount);
 	}
 	if (Info->Result = sResult & sMask){
-		dwResult++;
+		*Result += 1;
 	}
-	return(dwResult);
+	return(bResult);
 }
 
 /****************************************************/

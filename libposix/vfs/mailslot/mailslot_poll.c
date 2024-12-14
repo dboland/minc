@@ -32,18 +32,17 @@
 
 /****************************************************/
 
-DWORD 
-mail_poll(HANDLE Handle, WIN_POLLFD *Info)
+BOOL 
+mail_poll(HANDLE Handle, WIN_POLLFD *Info, DWORD *Result)
 {
-	DWORD dwResult = 0;
+	BOOL bResult = TRUE;
 	SHORT sResult = WIN_POLLERR;
-	SHORT sMask = Info->Events | WIN_POLLIGNORE;
+	SHORT sMask = Info->Events | WIN_POLLERR;
 	DWORD dwSize = 0;
 	DWORD dwCount = 0;
 
 	if (!GetMailslotInfo(Handle, NULL, &dwSize, &dwCount, NULL)){
-		WIN_ERR("GetMailslotInfo(%d): %s\n", Handle, win_strerror(GetLastError()));
-		vfs_raise(WM_COMMAND, CTRL_ABORT_EVENT, 0);
+		bResult = FALSE;
 	}else if (dwSize == MAILSLOT_NO_MESSAGE){
 		sResult = WIN_POLLOUT;
 	}else if (dwSize){
@@ -52,9 +51,9 @@ mail_poll(HANDLE Handle, WIN_POLLFD *Info)
 		sResult = 0;
 	}
 	if (Info->Result = sMask & sResult){
-		dwResult++;
+		*Result += 1;
 	}
 //__PRINTF("mail_poll(%d): Size(%d) Count(%d) sResult(0x%x) dwResult(%d)\n", 
 //		Handle, dwSize, dwCount, sResult, dwResult)
-	return(dwResult);
+	return(bResult);
 }

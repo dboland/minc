@@ -187,9 +187,12 @@ ws2_accept(WIN_VNODE *Node, LPSOCKADDR Address, LPINT Length, WIN_VNODE *Result)
 {
 	BOOL bResult = FALSE;
 	WIN_POLLFD fdInfo = {Node->FileId, WIN_POLLRDBAND | WIN_POLLIN, 0};
+	DWORD dwResult = 0;
 
 	while (!bResult){
-		if (ws2_poll(Node, &fdInfo)){
+		if (!ws2_poll(Node, &fdInfo, &dwResult)){
+			break;
+		}else if (dwResult){
 			bResult = WSAcceptFile(Node, Address, Length, Result);
 			break;
 		}else if (!sock_select(Node, INFINITE)){

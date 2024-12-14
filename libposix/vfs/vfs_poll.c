@@ -44,41 +44,48 @@ PollGetObjects(WIN_VNODE *Nodes[], HANDLE Result[])
 	}
 	return(dwResult);
 }
-DWORD 
-PollNoWait(WIN_VNODE *Nodes[], WIN_POLLFD *Info[])
+BOOL 
+PollNode(WIN_VNODE *Node, WIN_POLLFD *Info, DWORD *Result)
 {
-	DWORD dwResult = 0;
-	WIN_VNODE *pNode;
-	WIN_POLLFD *pInfo;
+	BOOL bResult = FALSE;
 
-	while (pNode = *Nodes++){
-		pInfo = *Info++;
-		switch (pNode->FSType){
-			case FS_TYPE_CHAR:
-				dwResult += char_poll(pNode, pInfo);
-				break;
-			case FS_TYPE_PIPE:
-				dwResult += pipe_poll(pNode, pInfo);
-				break;
-			case FS_TYPE_PDO:
-				dwResult += pdo_poll(DEVICE(pNode->DeviceId), pInfo);
-				break;
-			case FS_TYPE_MAILSLOT:
-				dwResult += mail_poll(pNode->Handle, pInfo);
-				break;
-			case FS_TYPE_DISK:
-				dwResult += disk_poll(pNode->Handle, pInfo);
-				break;
-			case FS_TYPE_WINSOCK:
-				dwResult += ws2_poll(pNode, pInfo);
-				break;
-			default:
-				SetLastError(ERROR_BAD_FILE_TYPE);
-				pInfo->Result = WIN_POLLERR;
-				dwResult++;
+	switch (Node->FSType){
+		case FS_TYPE_CHAR:
+			bResult = char_poll(Node, Info, Result);
+			break;
+		case FS_TYPE_PIPE:
+			bResult = pipe_poll(Node, Info, Result);
+			break;
+		case FS_TYPE_PDO:
+			bResult = pdo_poll(DEVICE(Node->DeviceId), Info, Result);
+			break;
+		case FS_TYPE_MAILSLOT:
+			bResult = mail_poll(Node->Handle, Info, Result);
+			break;
+		case FS_TYPE_DISK:
+			bResult = disk_poll(Node->Handle, Info, Result);
+			break;
+		case FS_TYPE_WINSOCK:
+			bResult = ws2_poll(Node, Info, Result);
+			break;
+		default:
+			SetLastError(ERROR_BAD_FILE_TYPE);
+	}
+	return(bResult);
+}
+BOOL 
+PollNoWait(WIN_VNODE *Nodes[], WIN_POLLFD *Info[], DWORD *Result)
+{
+	WIN_VNODE *pvNode;
+	DWORD dwResult = 0;
+
+	while (pvNode = *Nodes++){
+		if (!PollNode(pvNode, *Info++, &dwResult)){
+			return(FALSE);
 		}
 	}
-	return(dwResult);
+	*Result = dwResult;
+	return(TRUE);
 }
 BOOL 
 PollWait(WIN_VNODE *Nodes[], DWORD *TimeOut)
@@ -115,11 +122,12 @@ BOOL
 vfs_poll(WIN_TASK *Task, WIN_VNODE *Nodes[], WIN_POLLFD *Info[], DWORD *TimeOut, DWORD *Result)
 {
 	BOOL bResult = FALSE;
-	DWORD dwResult = 0;
 
 	Task->State = WIN_SSLEEP;
 	while (!bResult){
-		if (dwResult = PollNoWait(Nodes, Info)){
+		if (!PollNoWait(Nodes, Info, Result)){
+			break;
+		}else if (*Result){
 			bResult = TRUE;
 		}else if (!*TimeOut){
 			bResult = TRUE;
@@ -130,6 +138,5 @@ vfs_poll(WIN_TASK *Task, WIN_VNODE *Nodes[], WIN_POLLFD *Info[], DWORD *TimeOut,
 		}
 	}
 	Task->State = WIN_SRUN;
-	*Result = dwResult;
 	return(bResult);
 }

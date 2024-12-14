@@ -61,9 +61,12 @@ ws2_read(WIN_VNODE *Node, LPSTR Buffer, DWORD Size, DWORD *Result)
 {
 	BOOL bResult = FALSE;
 	WIN_POLLFD fdInfo = {Node->FileId, WIN_POLLIN | WIN_POLLHUP | WIN_POLLRDBAND, 0};
+	DWORD dwResult = 0;
 
 	while (!bResult){
-		if (ws2_poll(Node, &fdInfo)){
+		if (!ws2_poll(Node, &fdInfo, &dwResult)){
+			break;
+		}else if (dwResult){
 			bResult = fifo_read(Node, Buffer, Size, Result);
 			break;
 		}else if (!sock_select(Node, INFINITE)){

@@ -32,14 +32,14 @@
 
 /****************************************************/
 
-DWORD 
-disk_poll(HANDLE Handle, WIN_POLLFD *Info)
+BOOL 
+disk_poll(HANDLE Handle, WIN_POLLFD *Info, DWORD *Result)
 {
-	DWORD dwResult = 0;
+	BOOL bResult = TRUE;
 	SHORT sResult = WIN_POLLIN;
 
 	if (Info->Result = sResult & Info->Events){
-		dwResult++;
+		*Result += 1;
 	}
-	return(dwResult);
+	return(bResult);
 }

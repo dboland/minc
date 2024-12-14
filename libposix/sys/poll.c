@@ -74,7 +74,9 @@ __poll(WIN_TASK *Task, struct pollfd fds[], nfds_t nfds, DWORD *TimeOut)
 	WIN_VNODE *vnVector[WSA_MAXIMUM_WAIT_EVENTS + 1];
 	DWORD dwResult = 0;
 
-	if (!pollfd_win(Task, vnVector, fdVector, fds, nfds)){
+	if (!fds){
+		result = -EFAULT;
+	}else if (!pollfd_win(Task, vnVector, fdVector, fds, nfds)){
 		result = -EINVAL;
 	}else if (!vfs_poll(Task, vnVector, fdVector, TimeOut, &dwResult)){
 		result -= errno_posix(GetLastError());

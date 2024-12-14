@@ -3,7 +3,7 @@ include ../../../Makefile.inc
 RELEASE=75.0
 
 ARCH=i386
-CFLAGS+= -g -ffreestanding -DNOPIE
+CFLAGS+= -g -DNOPIE
 #CFLAGS+= -fno-builtin
 LDFLAGS= -shared -s
 IMPLIB= libc.dll.a

@@ -81,30 +81,30 @@ WSAUnblock(WIN_VNODE *Node)
 
 /****************************************************/
 
-DWORD 
-ws2_poll(WIN_VNODE *Node, WIN_POLLFD *Info)
+BOOL 
+ws2_poll(WIN_VNODE *Node, WIN_POLLFD *Info, DWORD *Result)
 {
-	DWORD dwResult = 0;
+	BOOL bResult = TRUE;
 	SHORT sResult = WIN_POLLERR;
-	SHORT sMask = Info->Events | WIN_POLLIGNORE;
+	SHORT sMask = Info->Events | WIN_POLLERR;
 	WSANETWORKEVENTS nwEvents = {0};
 	ULONG ulCount = 0;
 
 	if (!(Node->Attribs & FILE_FLAG_OVERLAPPED)){		/* wget.exe */
 		sResult = WSAUnblock(Node);
 	}else if (SOCKET_ERROR == WSAEnumNetworkEvents(Node->Socket, Node->Event, &nwEvents)){
-		WIN_ERR("WSAEnumNetworkEvents(%d): %s\n", Node->Socket, win_strerror(WSAGetLastError()));
+		bResult = FALSE;
 	}else if (nwEvents.lNetworkEvents){
 		sResult = WSAPollEvents(Node, nwEvents.lNetworkEvents);
 	}else if (!ws2_FIONREAD(Node->Socket, &ulCount)){	/* ssh.exe */
-		sResult = WIN_POLLERR;
+		bResult = FALSE;
 	}else if (ulCount){					/* ab.exe */
 		sResult = WIN_POLLIN;
 	}else{
 		sResult = Node->Pending;
 	}
 	if (Info->Result = sResult & sMask){
-		dwResult++;
+		*Result += 1;
 	}
-	return(dwResult);
+	return(bResult);
 }

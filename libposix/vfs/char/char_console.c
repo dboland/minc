@@ -83,12 +83,14 @@ con_TIOCSETA(WIN_DEVICE *Device, WIN_TERMIO *Attribs)
 
 /****************************************************/
 
-DWORD 
-con_poll(WIN_DEVICE *Device, WIN_POLLFD *Info)
+BOOL 
+con_poll(WIN_DEVICE *Device, WIN_POLLFD *Info, DWORD *Result)
 {
-	DWORD dwResult = 0;
-
-	dwResult += input_poll(Device->Input, Info);
-	dwResult += screen_poll(Device->Output, Info);
-	return(dwResult);
+	if (!input_poll(Device->Input, Info, Result)){
+		return(FALSE);
+	}
+	if (!screen_poll(Device->Output, Info, Result)){
+		return(FALSE);
+	}
+	return(TRUE);
 }

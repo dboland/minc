@@ -152,6 +152,10 @@ sigproc_posix(WIN_TASK *Task, int signum, ucontext_t *ucontext)
 	if (Task->TracePoints & KTRFAC_PSIG){
 		ktrace_PSIG(Task, signum, handler, &info);
 	}
+	/* Restarting system calls after being interrupted by a signal
+	 * is the default in both BSD and Linux, yet some softwares
+	 * still expect EINTR (vim.exe).
+	 */
 	if (flags & SA_RESTART){
 		result = -1;
 	}

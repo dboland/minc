@@ -32,25 +32,24 @@
 
 /****************************************************/
 
-DWORD 
-char_poll(WIN_VNODE *Node, WIN_POLLFD *Info)
+BOOL 
+char_poll(WIN_VNODE *Node, WIN_POLLFD *Info, DWORD *Result)
 {
-	DWORD dwResult = 1;
+	BOOL bResult = FALSE;
 
 	switch (Node->DeviceType){
 		case DEV_TYPE_CONSOLE:
 		case DEV_TYPE_PTY:
-			dwResult = con_poll(DEVICE(Node->DeviceId), Info);
+			bResult = con_poll(DEVICE(Node->DeviceId), Info, Result);
 			break;
 		case DEV_TYPE_INPUT:
-			dwResult = input_poll(Node->Handle, Info);
+			bResult = input_poll(Node->Handle, Info, Result);
 			break;
 		case DEV_TYPE_SCREEN:	/* ssh.exe (if no ctty) */
-			dwResult = screen_poll(Node->Handle, Info);
+			bResult = screen_poll(Node->Handle, Info, Result);
 			break;
 		default:
-			Info->Result = WIN_POLLERR;
 			SetLastError(ERROR_BAD_DEVICE);
 	}
-	return(dwResult);
+	return(bResult);
 }

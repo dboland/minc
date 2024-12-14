@@ -58,14 +58,14 @@ SockPollError(WIN_VNODE *Node, DWORD Error)
 
 /****************************************************/
 
-DWORD 
-sock_poll(WIN_VNODE *Node, WIN_POLLFD *Info)
+BOOL 
+sock_poll(WIN_VNODE *Node, WIN_POLLFD *Info, DWORD *Result)
 {
+	BOOL bResult = TRUE;
 	SHORT sResult = WIN_POLLOUT;
-	SHORT sMask = Info->Events | WIN_POLLIGNORE;
+	SHORT sMask = Info->Events | WIN_POLLERR;
 	DWORD dwAvail = 0;
 	DWORD dwRemain = 0;
-	DWORD dwResult = 0;
 
 	if (!PeekNamedPipe(Node->Handle, NULL, 0, NULL, &dwAvail, &dwRemain)){
 		sResult = SockPollError(Node, GetLastError());
@@ -73,7 +73,7 @@ sock_poll(WIN_VNODE *Node, WIN_POLLFD *Info)
 		sResult = WIN_POLLIN;
 	}
 	if (Info->Result = sResult & sMask){
-		dwResult++;
+		*Result += 1;
 	}
-	return(dwResult);
+	return(bResult);
 }
