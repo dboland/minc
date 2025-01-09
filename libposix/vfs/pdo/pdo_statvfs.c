@@ -130,8 +130,8 @@ PDOLookup(LPCWSTR Bus, LPCWSTR Class, LPCWSTR Service)
 	}else if (!win_wcscmp(Class, L"monitor")){
 		dwResult = PDOLookupBus(Bus, DEV_CLASS_DISPLAY);
 
-	}else if (!win_wcscmp(Class, L"bluetooth")){
-		dwResult = PDOLookupBus(Bus, DEV_CLASS_USB);
+//	}else if (!win_wcscmp(Class, L"bluetooth")){
+//		dwResult = PDOLookupBus(Bus, DEV_CLASS_USB);
 
 	}else if (!win_wcscmp(Class, L"camera")){
 		dwResult = PDOLookupBus(Bus, DEV_CLASS_MEDIA);
@@ -154,9 +154,9 @@ PDOClass(LPCWSTR ClassID, LPWSTR Result)
 	WIN_VNODE vNode;
 	DWORD dwResult;
 	WIN_FLAGS wFlags = {GENERIC_READ, 0, 0, REG_SZ, FALSE};
-	WIN_NAMEIDATA iNode;
+	WIN_NAMEIDATA wPath;
 
-	if (reg_open(reg_lookup(&iNode, REG_CLASS, ClassID), &wFlags, &vNode)){
+	if (reg_open(reg_lookup(&wPath, REG_CLASS, ClassID), &wFlags, &vNode)){
 		reg_read(&vNode, L"Class", Result, MAX_NAME, &dwResult);
 		reg_close(&vNode);
 		win_wcslcase(Result);
@@ -172,13 +172,13 @@ pdo_statvfs(WIN_CFDATA *Config, DWORD Flags, WIN_CFDRIVER *Driver)
 	WIN_VNODE vNode = {0};
 	DWORD dwSize;
 	WIN_FLAGS wFlags = {GENERIC_READ, 0, 0, REG_SZ, FALSE};
-	WIN_NAMEIDATA iNode;
+	WIN_NAMEIDATA wPath;
 	WCHAR szClass[MAX_GUID];
 	WCHAR szText[MAX_TEXT];
 
 	ZeroMemory(Driver, sizeof(WIN_CFDRIVER));
-	if (reg_open(reg_lookup(&iNode, REG_DRIVER, Config->DosPath), &wFlags, &vNode)){
-		win_wcscpy(Driver->ClassId, iNode.R);
+	if (reg_open(reg_lookup(&wPath, REG_DRIVER, Config->DosPath), &wFlags, &vNode)){
+		win_wcscpy(Driver->ClassId, wPath.R);
 		/* Device Class ("Components" in msinfo32.exe) */
 		if (reg_read(&vNode, L"ClassGUID", szClass, MAX_GUID, &dwSize)){
 			PDOClass(szClass, Driver->NtClass);
@@ -197,7 +197,7 @@ pdo_statvfs(WIN_CFDATA *Config, DWORD Flags, WIN_CFDRIVER *Driver)
 		}
 		bResult = reg_close(&vNode);
 	}else{
-		WIN_ERR("reg_open(%ls): %s\n", iNode.Resolved, win_strerror(GetLastError()));
+		WIN_ERR("reg_open(%ls): %s\n", wPath.Resolved, win_strerror(GetLastError()));
 	}
 	Config->DeviceType = PDOLookup(Config->BusName, Driver->NtClass, Driver->Service);
 	return(bResult);

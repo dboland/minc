@@ -49,18 +49,12 @@ ScreenMode(WIN_TERMIO *Attribs)
 BOOL 
 ScreenRenderWindow(HANDLE Handle, CONSOLE_SCREEN_BUFFER_INFO *Info)
 {
-	BOOL bResult = TRUE;
-	SMALL_RECT sRect = Info->srWindow;
-	COORD cPos = Info->dwCursorPosition;
+	BOOL bResult = FALSE;
 
-	if (!GetConsoleScreenBufferInfo(Handle, Info)){
-		bResult = FALSE;
-//	}else if (__CTTY->VEdit){
-//		Info->srWindow = sRect;
-//	}else if (!AnsiEqualRect(&sRect, &Info->srWindow)){
-//		vfs_raise(WM_SIZE, Info->srWindow.Right + 1, Info->srWindow.Bottom + 1);
-//	}else if (cPos.X > sRect.Right){
-//		Info->dwCursorPosition.X = cPos.X;
+	if (GetConsoleScreenBufferInfo(Handle, Info)){
+		Info->srWindow.Left = 0;
+		Info->srWindow.Right = Info->dwSize.X - 1;
+		bResult = TRUE;
 	}
 	return(bResult);
 }
@@ -98,7 +92,7 @@ ScreenLineFeed(HANDLE Handle, UINT Flags, CONSOLE_SCREEN_BUFFER_INFO *Info)
 	SHORT sBottom = Info->dwSize.Y - 1;
 
 	if ((Flags & uiFlags) == uiFlags){		/* ssh.exe */
-		cPos.X = 0;
+		cPos.X = sRect.Left;
 	}
 	if (cPos.Y < sRect.Bottom){
 		cPos.Y++;
@@ -241,7 +235,7 @@ ScreenPutChar(HANDLE Handle, LPCSTR Buffer, UINT Flags, UINT CodePage, CONSOLE_S
 	DWORD dwWidth, dwCount = 1;
 
 	if (Info->dwCursorPosition.X > Info->srWindow.Right){
-		Info->dwCursorPosition.X = 0;		/* mutt.exe */
+		Info->dwCursorPosition.X = Info->srWindow.Left;		/* mutt.exe */
 		ScreenLineFeed(Handle, Flags, Info);
 	}
 	if (CodePage == CP_UTF8){
@@ -280,6 +274,7 @@ screen_write(HANDLE Handle, LPCSTR Buffer, DWORD Size, DWORD *Result)
 	if (dwMode & ENABLE_VIRTUAL_TERMINAL_PROCESSING){
 		bResult = WriteFile(Handle, Buffer, Size, &dwResult, NULL);
 	}else if (!ScreenRenderWindow(Handle, psbInfo)){
+//	}else if (!GetConsoleScreenBufferInfo(Handle, psbInfo)){
 		return(FALSE);
 	}else while (dwResult < Size){
 		__Char = *Buffer;
@@ -326,7 +321,8 @@ screen_TIOCGWINSZ(HANDLE Handle, WIN_WINSIZE *Result)
 	if (!GetConsoleScreenBufferInfo(Handle, &sbInfo)){
 		WIN_ERR("GetConsoleScreenBufferInfo(%d): %s\n", Handle, win_strerror(GetLastError()));
 	}else{
-		Result->Column = (sbInfo.srWindow.Right - sbInfo.srWindow.Left) + 1;
+//		Result->Column = (sbInfo.srWindow.Right - sbInfo.srWindow.Left) + 1;
+		Result->Column = sbInfo.dwSize.X;
 		Result->Row = (sbInfo.srWindow.Bottom - sbInfo.srWindow.Top) + 1;
 		Result->XPixel = sbInfo.dwCursorPosition.X + 1;
 		Result->YPixel = sbInfo.dwCursorPosition.Y + 1;

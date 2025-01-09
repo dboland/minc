@@ -238,24 +238,22 @@ InputPollAnsi(KEY_EVENT_RECORD *Event)
 {
 	SHORT sResult = 0;
 	WORD VK = Event->wVirtualKeyCode;
-	UCHAR uChar;
+	BOOL bIsAnsi = FALSE;
 
 	if (!Event->bKeyDown){
-		uChar = 0;
+		bIsAnsi = FALSE;
 	}else if (Event->uChar.AsciiChar){
-		uChar = Event->uChar.AsciiChar;
+		bIsAnsi = TRUE;
 	}else if (VK <= VK_MODIFY){
-		uChar = 0;
+		bIsAnsi = FALSE;
 	}else if (VK <= VK_CURSOR){
-		uChar = *ANSI_CURSOR(VK);
+		bIsAnsi = *ANSI_CURSOR(VK);
 	}else if (VK <= VK_WINDOWS){
-		uChar = 0;
+		bIsAnsi = FALSE;
 	}else if (VK <= VK_FUNCTION){
-		uChar = *ANSI_FUNCTION(VK);
-	}else{
-		uChar = 0;
+		bIsAnsi = *ANSI_FUNCTION(VK);
 	}
-	if (uChar){
+	if (bIsAnsi){
 		sResult |= WIN_POLLIN;
 	}else{
 		sResult |= WIN_POLLREMOVE;
