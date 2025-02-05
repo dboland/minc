@@ -107,6 +107,11 @@ pipe_bind(WIN_VNODE *Node, LPSOCKADDR Name, INT Length)
 	return(bResult);
 }
 BOOL 
+pipe_listen(WIN_VNODE *Node, INT Backlog)
+{
+	return(TRUE);
+}
+BOOL 
 pipe_connect(WIN_VNODE *Node, CONST LPSOCKADDR Name, INT Length)
 {
 	return(PipeOpenFile((LPWSTR)Name->sa_data, __PipeEvent, Node));

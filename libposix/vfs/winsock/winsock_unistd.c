@@ -57,7 +57,7 @@ ws2_write(WIN_VNODE *Node, LPCSTR Buffer, DWORD Size, DWORD *Result)
 	return(fifo_write(Node, Buffer, Size, Result));
 }
 BOOL 
-ws2_read(WIN_VNODE *Node, LPSTR Buffer, DWORD Size, DWORD *Result)
+ws2_read(WIN_TASK *Task, WIN_VNODE *Node, LPSTR Buffer, DWORD Size, DWORD *Result)
 {
 	BOOL bResult = FALSE;
 	WIN_POLLFD fdInfo = {Node->FileId, WIN_POLLIN | WIN_POLLHUP | WIN_POLLRDBAND, 0};
@@ -71,7 +71,7 @@ ws2_read(WIN_VNODE *Node, LPSTR Buffer, DWORD Size, DWORD *Result)
 			break;
 		}else if (!sock_select(Node, INFINITE)){
 			break;
-		}else if (proc_poll()){
+		}else if (proc_poll(Task)){
 			break;
 		}
 	}

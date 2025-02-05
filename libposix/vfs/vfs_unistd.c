@@ -74,7 +74,7 @@ vfs_closefrom(WIN_VNODE Nodes[])
 	}
 }
 BOOL 
-vfs_read(WIN_VNODE *Node, LPVOID Buffer, DWORD Size, DWORD *Result)
+vfs_read(WIN_TASK *Task, WIN_VNODE *Node, LPVOID Buffer, DWORD Size, DWORD *Result)
 {
 	BOOL bResult = FALSE;
 
@@ -83,10 +83,10 @@ vfs_read(WIN_VNODE *Node, LPVOID Buffer, DWORD Size, DWORD *Result)
 			bResult = ReadFile(Node->Handle, Buffer, Size, Result, NULL);
 			break;
 		case FS_TYPE_WINSOCK:
-			bResult = ws2_read(Node, Buffer, Size, Result);
+			bResult = ws2_read(Task, Node, Buffer, Size, Result);
 			break;
 		case FS_TYPE_PIPE:
-			bResult = pipe_read(Node, Buffer, Size, Result);
+			bResult = pipe_read(Task, Node, Buffer, Size, Result);
 			break;
 		case FS_TYPE_MAILSLOT:
 			bResult = mail_read(Node, Buffer, Size, Result);

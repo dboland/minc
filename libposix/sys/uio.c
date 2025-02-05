@@ -61,7 +61,7 @@ sys_readv(call_t call, int fd, const struct iovec *iov, int iovcnt)
 		result = -EINVAL;
 	}else if (fd < 0 || fd >= OPEN_MAX){
 		result = -EBADF;
-	}else if (!vfs_readv(&pwTask->Node[fd], (WIN_IOVEC *)iov, iovcnt, &ulResult)){
+	}else if (!vfs_readv(pwTask, &pwTask->Node[fd], (WIN_IOVEC *)iov, iovcnt, &ulResult)){
 		result -= errno_posix(GetLastError());
 	}else{
 		result = ulResult;

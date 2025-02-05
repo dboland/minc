@@ -40,7 +40,7 @@ ___kernel:
 	# setup call_t struct
 	cmp $SYS_MAXSYSCALL,%eax
 	jg 1f
-	push %eax		# code
+	push %eax		# syscall code
 	push $-1		# WIN_TASK
 	push %ecx
 	push %ebx

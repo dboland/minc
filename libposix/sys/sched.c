@@ -51,8 +51,8 @@ copy_stack(u_long origin, u_long src, u_long *dest)
 	int size;
 	u_long next;
 
-//__PRINTF("origin(0x%lx) src(0x%lx) dest(0x%lx) __THREAD_FRAME(0x%lx)\n", 
-//			origin, src, dest[0], __THREAD_FRAME)
+//__PRINTF("+ origin(0x%lx) src(0x%lx) dest(0x%lx) __THREAD_FRAME(0x%lx)\n", 
+//	origin, src, dest[0], __THREAD_FRAME)
 	if (!src){				/* at process frame (_start()) */
 		depth = 0;
 	}else if (src == __THREAD_FRAME){	/* at thread frame (main()) */
@@ -66,7 +66,7 @@ copy_stack(u_long origin, u_long src, u_long *dest)
 			size = next - src;
 		}
 //__PRINTF("+ copy_stack(%d): source(0x%lx) dest(0x%lx) ret(0x%lx) size(%d)\n", 
-//			depth, src, dest[0], *(long *)(src + 4), size)
+//	depth, src, dest[0], *(long *)(src + 4), size)
 		dest[0] -= size;
 		memcpy((void *)dest[0], (void *)src, size);
 		if (!depth){
@@ -101,7 +101,7 @@ task_init(char *cmdbuf, char *argv[], void *frame_address)
 void 
 task_copy(WIN_THREAD_STRUCT *Thread)
 {
-//VfsDebugThread(Thread, "PARENT");
+//vfs_ktrace("task_copy", STRUCT_THREAD, Thread);
 	/* copy frames */
 	copy_stack(Thread->origin, Thread->source, &Thread->dest);
 	/* add current frame */

@@ -166,7 +166,7 @@ sys_nanosleep(call_t call, const struct timespec *req, struct timespec *rem)
 		llTimeOut = (LONGLONG)(req->tv_sec * 10000000);
 		llTimeOut += req->tv_nsec * 0.01;			/* 100-nanosecond intervals */
 	}
-	if (!vfs_nanosleep(&llTimeOut, &dwlRemain)){
+	if (!vfs_nanosleep(call.Task, &llTimeOut, &dwlRemain)){
 		result -= errno_posix(GetLastError());
 	}
 	if (rem){

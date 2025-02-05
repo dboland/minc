@@ -52,7 +52,7 @@ pipe_close(WIN_VNODE *Node)
 	return(bResult);
 }
 BOOL 
-pipe_read(WIN_VNODE *Node, LPSTR Buffer, DWORD Size, DWORD *Result)
+pipe_read(WIN_TASK *Task, WIN_VNODE *Node, LPSTR Buffer, DWORD Size, DWORD *Result)
 {
 	BOOL bResult = FALSE;
 
@@ -61,7 +61,7 @@ pipe_read(WIN_VNODE *Node, LPSTR Buffer, DWORD Size, DWORD *Result)
 			bResult = ReadFile(Node->Handle, Buffer, Size, Result, NULL);
 			break;
 		case WIN_VSOCK:
-			bResult = sock_read(Node, Buffer, Size, Result);
+			bResult = sock_read(Task, Node, Buffer, Size, Result);
 			break;
 		case WIN_VFIFO:
 			bResult = fifo_read(Node, Buffer, Size, Result);

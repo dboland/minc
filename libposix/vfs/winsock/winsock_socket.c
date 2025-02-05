@@ -87,7 +87,6 @@ ws2_setsockopt_IP6(INT Name, CONST CHAR *Value)
 	/* netinet6/in6.h
 	 * https://learn.microsoft.com/en-us/windows/win32/winsock/ipproto-ipv6-socket-options
 	 */
-
 	switch (Name){
 		case IPV6_RECVHOPLIMIT:
 		case IPV6_RECVPKTINFO:
@@ -183,7 +182,7 @@ ws2_listen(WIN_VNODE *Node, INT Backlog)
 	return(bResult);
 }
 BOOL 
-ws2_accept(WIN_VNODE *Node, LPSOCKADDR Address, LPINT Length, WIN_VNODE *Result)
+ws2_accept(WIN_TASK *Task, WIN_VNODE *Node, LPSOCKADDR Address, LPINT Length, WIN_VNODE *Result)
 {
 	BOOL bResult = FALSE;
 	WIN_POLLFD fdInfo = {Node->FileId, WIN_POLLRDBAND | WIN_POLLIN, 0};
@@ -197,7 +196,7 @@ ws2_accept(WIN_VNODE *Node, LPSOCKADDR Address, LPINT Length, WIN_VNODE *Result)
 			break;
 		}else if (!sock_select(Node, INFINITE)){
 			break;
-		}else if (proc_poll()){
+		}else if (proc_poll(Task)){
 			break;
 		}
 	}

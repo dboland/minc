@@ -131,7 +131,7 @@ argv_posix(char *buf, int size, char *argv[])
 	return(count);
 }
 BOOL 
-shebang_win(WIN_VNODE *Node, WIN_NAMEIDATA *Path, const char *filename, LPSTR Result)
+shebang_win(WIN_TASK *Task, WIN_VNODE *Node, WIN_NAMEIDATA *Path, const char *filename, LPSTR Result)
 {
 	BOOL bResult = FALSE;
 	DWORD dwRead;
@@ -143,7 +143,7 @@ shebang_win(WIN_VNODE *Node, WIN_NAMEIDATA *Path, const char *filename, LPSTR Re
 		SetLastError(ERROR_PATH_BUSY);
 	}else if (Node->FSType != FS_TYPE_DISK){
 		SetLastError(ERROR_ACCESS_DENIED);
-	}else if (!vfs_read(Node, line, MAXLINE, &dwRead)){
+	}else if (!vfs_read(Task, Node, line, MAXLINE, &dwRead)){
 		bResult = FALSE;
 	}else if (line[0] == 'M' && line[1] == 'Z'){	/* hello Mark Zbikowski */
 		win_wcstombs(Result, Path->Resolved, WIN_PATH_MAX);
@@ -589,7 +589,7 @@ sys_execve(call_t call, const char *path, char *const argv[], char *const envp[]
 		result = -EFAULT;
 	}else if (!vfs_open(path_win(&wPath, path, 0), &wFlags, mode_win(&wMode, 0666), &vNode)){
 		result -= errno_posix(GetLastError());
-	}else if (!shebang_win(&vNode, &wPath, path, szCommand)){
+	}else if (!shebang_win(pwTask, &vNode, &wPath, path, szCommand)){
 		result -= errno_posix(GetLastError());
 	}else if (!proc_execve(pwTask, argv_win(pwTask, szCommand, argv), env_win(envp))){
 		result -= errno_posix(GetLastError());
@@ -650,7 +650,7 @@ syscall_enter(call_t call)
 	if (pwTask->Timer){		/* ftp.exe */
 		WaitForSingleObjectEx(__Interrupt, 0, TRUE);
 	}
-	if (proc_poll()){
+	if (proc_poll(pwTask)){
 		result = sys_interrupt;
 	}
 	pwTask->Code = code;
@@ -662,7 +662,7 @@ syscall_leave(call_t call)
 {
 	int result = call.c_ax;
 	int code = call.Code;
-	WIN_TASK *pwTask = call.Task;
+	WIN_TASK *pwTask = &__Tasks[CURRENT];
 
 	if (result < 0){		/* hello Linus Torvalds */
 		pwTask->Error = -result;

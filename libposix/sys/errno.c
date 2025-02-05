@@ -58,6 +58,7 @@ errno_posix(DWORD Error)
 		case ERROR_MOD_NOT_FOUND:
 		case ERROR_FILE_NOT_FOUND:
 		case ERROR_INVALID_NAME:		/* 123: The filename, directory name, or volume label syntax is incorrect */
+		case ERROR_PROC_NOT_FOUND:		/* 127: The specified procedure could not be found (mutt.exe) */
 		case ERROR_PATH_NOT_FOUND:		/* 3: The system cannot find the file specified (gcc.exe) */
 			result = ENOENT;
 			break;

@@ -92,7 +92,7 @@ CHAR		*__Input = __INPUT_BUF;
 CONST WCHAR	*__Clipboard;		/* Clipboard buffer */
 WIN_TASK	*__Process;
 
-BOOL proc_poll(VOID);
+BOOL proc_poll(WIN_TASK *Task);
 
 #include "vfs_acl.c"
 #include "vfs_debug.c"

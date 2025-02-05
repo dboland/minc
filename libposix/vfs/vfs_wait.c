@@ -50,9 +50,8 @@ WaitNoHang(WIN_TASK *Children[], DWORD Status, WIN_USAGE *Result)
 	WIN_TASK *pwTask = NULL;
 
 	while (pwTask = *Children++){
-		if (pwTask->Flags & WIN_PS_NOZOMBIE){	/* recursive wait (ksh.exe) */
-			ZeroMemory(pwTask, sizeof(WIN_TASK));
-		}else if (pwTask->Flags & WIN_PS_ZOMBIE){
+//vfs_ktrace("WaitNoHang", STRUCT_TASK, pwTask);
+		if (pwTask->Flags & WIN_PS_ZOMBIE){
 			Result->TaskId = pwTask->TaskId;
 			Result->Status = pwTask->Status;
 			proc_close(pwTask);
@@ -69,17 +68,14 @@ WaitNoHang(WIN_TASK *Children[], DWORD Status, WIN_USAGE *Result)
 BOOL 
 WaitTimeOut(WIN_TASK *Children[], DWORD TimeOut)
 {
-	BOOL bResult = FALSE;
+	BOOL bResult = TRUE;
 	DWORD dwStatus;
 	HANDLE hObjects[MAXIMUM_WAIT_OBJECTS];
 	DWORD dwCount = WaitGetObjects(Children, hObjects);
 
 	dwStatus = WaitForMultipleObjectsEx(dwCount, hObjects, FALSE, TimeOut, TRUE);
 	if (dwStatus == WAIT_FAILED){
-		WIN_ERR("WaitForMultipleObjects(%s): %s\n", win_strobj(hObjects, dwCount), win_strerror(GetLastError()));
-		vfs_raise(WM_COMMAND, CTRL_ABORT_EVENT, 0);
-	}else{
-		bResult = TRUE;
+		bResult = FALSE;
 	}
 	return(bResult);
 }
@@ -99,7 +95,7 @@ vfs_wait4(WIN_TASK *Task, WIN_TASK *Children[], BOOL NoHang, DWORD Status, WIN_U
 			bResult = TRUE;
 		}else if (!WaitTimeOut(Children, INFINITE)){
 			break;
-		}else if (proc_poll()){
+		}else if (proc_poll(Task)){
 			break;
 		}
 	}

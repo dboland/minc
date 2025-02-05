@@ -84,13 +84,13 @@ vfs_bind(WIN_VNODE *Node, LPSOCKADDR Address, INT Length)
 	return(bResult);
 }
 BOOL 
-vfs_accept(WIN_VNODE *Node, LPSOCKADDR Address, LPINT Length, WIN_VNODE *Result)
+vfs_accept(WIN_TASK *Task, WIN_VNODE *Node, LPSOCKADDR Address, LPINT Length, WIN_VNODE *Result)
 {
 	BOOL bResult = FALSE;
 
 	switch (Node->FSType){
 		case FS_TYPE_WINSOCK:
-			bResult = ws2_accept(Node, Address, Length, Result);
+			bResult = ws2_accept(Task, Node, Address, Length, Result);
 			break;
 		default:
 			WSASetLastError(WSAEPFNOSUPPORT);
@@ -239,6 +239,9 @@ vfs_listen(WIN_VNODE *Node, INT Backlog)
 	switch (Node->FSType){
 		case FS_TYPE_WINSOCK:
 			bResult = ws2_listen(Node, Backlog);
+			break;
+		case FS_TYPE_PIPE:
+			bResult = pipe_listen(Node, Backlog);
 			break;
 		default:
 			WSASetLastError(WSAEPFNOSUPPORT);

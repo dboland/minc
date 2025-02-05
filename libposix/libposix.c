@@ -147,6 +147,7 @@ posix_PROCESS_DETACH(WIN_TASK *Task)
 		vfs_closefrom(Task->Node);
 		if (!vfs_kill_PID(pid_win(Task->ParentId), WM_COMMAND, CTRL_CHILD_EVENT, Task->TaskId)){
 			proc_close(Task);		/* orphaned */
+//			Task->ParentId = 1;
 		}
 	}
 	return(TRUE);
@@ -163,6 +164,7 @@ posix_THREAD_DETACH(WIN_TASK *Task)
 		__closefrom(Task->Node, 0);
 		if (!vfs_kill_PID(pid_win(Task->ParentId), WM_COMMAND, CTRL_CHILD_EVENT, Task->TaskId)){
 			proc_close(Task);		/* orphaned */
+//			Task->ParentId = 1;
 		}
 	}
 	return(TRUE);

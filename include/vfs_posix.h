@@ -56,7 +56,7 @@ BOOL vfs_chdir(WIN_TASK *Task, WIN_NAMEIDATA *Path);
 BOOL vfs_sync(VOID);
 BOOL vfs_chroot(WIN_NAMEIDATA *Path);
 BOOL vfs_revoke(WIN_VNODE *Node);
-BOOL vfs_read(WIN_VNODE *Node, LPVOID Buffer, DWORD Size, DWORD *Result);
+BOOL vfs_read(WIN_TASK *Task, WIN_VNODE *Node, LPVOID Buffer, DWORD Size, DWORD *Result);
 BOOL vfs_write(WIN_VNODE *Node, LPCVOID Buffer, DWORD Size, DWORD *Result);
 BOOL vfs_pwrite(WIN_VNODE *Node, LPCVOID Buffer, DWORD Size, DWORDLONG Offset, DWORD *Result);
 BOOL vfs_pread(WIN_VNODE *Node, LPVOID Buffer, DWORD Size, DWORDLONG Offset, DWORD *Result);
@@ -132,14 +132,11 @@ BOOL vfs_setvfs(WIN_CFDATA *Config, DWORD Flags);
 VOID vfs_endvfs(WIN_CFDATA *Config);
 BOOL vfs_getvfs(WIN_CFDATA *Config, DWORD Flags);
 
-/* vfs_libgen.c */
-
-VOID vfs_setproctitle(LPCSTR Title);
-
 /* vfs_time.c */
 
 BOOL vfs_setitimer(WIN_TASK *Task, LONG *Interval, DWORDLONG *TimeOut);
-BOOL vfs_nanosleep(DWORDLONG *TimeOut, DWORDLONG *Remain);
+BOOL vfs_nanosleep(WIN_TASK *Task, DWORDLONG *TimeOut, DWORDLONG *Remain);
+BOOL vfs_utimes(WIN_NAMEIDATA *Path, FILETIME FileTime[2]);
 
 /* vfs_stdlib.c */
 
@@ -164,12 +161,16 @@ BOOL vfs_namei(HANDLE Handle, DWORD Index, WIN_VNODE *Result);
 /* vfs_uio.c */
 
 BOOL vfs_writev(WIN_VNODE *Node, const WIN_IOVEC Data[], LONG Count, ULONG *Result);
-BOOL vfs_readv(WIN_VNODE *Node, const WIN_IOVEC Data[], LONG Count, ULONG *Result);
+BOOL vfs_readv(WIN_TASK *Task, WIN_VNODE *Node, const WIN_IOVEC Data[], LONG Count, ULONG *Result);
 
 /* vfs_resource.c */
 
 BOOL vfs_getrusage_SELF(DWORD ThreadId, WIN_RUSAGE *Result);
 BOOL vfs_getrusage_CHILDREN(DWORD ParentId, WIN_RUSAGE *Result);
+
+/* vfs_libgen.c */
+
+VOID vfs_setproctitle(LPCSTR Title);
 
 /* vfs_dirent.c */
 
@@ -178,10 +179,6 @@ BOOL vfs_getdents(WIN_NAMEIDATA *Path, PVOID Buffer, DWORD Size, DWORD *Result);
 /* vfs_poll.c */
 
 BOOL vfs_poll(WIN_TASK *Task, WIN_VNODE *Nodes[], WIN_POLLFD *Info[], DWORD *TimeOut, DWORD *Result);
-
-/* vfs_time.c */
-
-BOOL vfs_utimes(WIN_NAMEIDATA *Path, FILETIME FileTime[2]);
 
 /* vfs_wait.c */
 
@@ -198,7 +195,7 @@ BOOL tty_attach(WIN_DEVICE *Device);
 WIN_TASK *proc_start(WIN_SIGPROC SignalProc);
 WIN_TASK *proc_dup(WIN_TASK *Parent, WIN_THREAD_STRUCT *Thread);
 BOOL proc_close(WIN_TASK *Task);
-BOOL proc_poll(VOID);
+BOOL proc_poll(WIN_TASK *Task);
 DWORD proc_VM_LOADAVG(WIN_TASK Tasks[], WIN_LOADAVG *Load);
 DECLSPEC_NORETURN VOID proc_exit(DWORD ExitCode);
 BOOL proc_execve(WIN_TASK *Task, LPSTR Command, PVOID Environ);

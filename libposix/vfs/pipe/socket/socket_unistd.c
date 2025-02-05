@@ -33,7 +33,7 @@
 /****************************************************/
 
 BOOL 
-sock_read(WIN_VNODE *Node, LPSTR Buffer, DWORD Size, DWORD *Result)
+sock_read(WIN_TASK *Task, WIN_VNODE *Node, LPSTR Buffer, DWORD Size, DWORD *Result)
 {
 	BOOL bResult = FALSE;
 	ULONG ulResult = 0;
@@ -46,7 +46,7 @@ sock_read(WIN_VNODE *Node, LPSTR Buffer, DWORD Size, DWORD *Result)
 			break;
 		}else if (!sock_select(Node, INFINITE)){
 			break;
-		}else if (proc_poll()){
+		}else if (proc_poll(Task)){
 			break;
 		}
 	}

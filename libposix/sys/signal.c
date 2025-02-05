@@ -104,6 +104,101 @@ context_posix(ucontext_t *ucontext, CONTEXT *Context)
 	return(ucontext);
 }
 int 
+signum_posix(DWORD CtrlType)
+{
+	int signum = 0;
+
+	switch (CtrlType){
+		case CTRL_C_EVENT:
+			signum = SIGINT;		/* user interrupt */
+			break;
+		case CTRL_BREAK_EVENT:
+			signum = SIGTSTP;
+			break;
+		case CTRL_CLOSE_EVENT:			/* closing Console window */
+			signum = SIGKILL;		/* cannot be caught or ignored */
+			break;
+		case CTRL_LOGOFF_EVENT:
+			signum = SIGHUP;
+			break;
+		case CTRL_SHUTDOWN_EVENT:
+			signum = SIGTERM;		/* default of kill command */
+			break;
+		case CTRL_ACCESS_VIOLATION_EVENT:
+			signum = SIGSEGV;
+			break;
+		case CTRL_ILLEGAL_INSTRUCTION_EVENT:
+			signum = SIGILL;
+			break;
+		case CTRL_DIVIDE_BY_ZERO_EVENT:
+			signum = SIGFPE;
+			break;
+		case CTRL_SIZE_EVENT:
+			signum = SIGWINCH;
+			break;
+		case CTRL_CHILD_EVENT:
+			signum = SIGCHLD;
+			break;
+		case CTRL_TIMER_EVENT:
+			signum = SIGALRM;
+			break;
+		case CTRL_DETACH_EVENT:
+			signum = SIGTHR;
+			break;
+		case CTRL_QUIT_EVENT:
+			signum = SIGQUIT;		/* SIGTERM with coredump */
+			break;
+		case CTRL_PIPE_EVENT:
+			signum = SIGPIPE;
+			break;
+		case CTRL_ABORT_EVENT:
+			signum = SIGABRT;		/* sent by abort() */
+			break;
+		case CTRL_VTIMER_EVENT:
+			signum = SIGVTALRM;		/* SIGALRM in program time */
+			break;
+		case CTRL_USER1_EVENT:
+			signum = SIGUSR1;
+			break;
+		case CTRL_USER2_EVENT:
+			signum = SIGUSR2;
+			break;
+		case CTRL_INVALID_ARGUMENT_EVENT:
+			signum = SIGSYS;
+			break;
+		case CTRL_EMULATOR_EVENT:
+			signum = SIGEMT;
+			break;
+		case CTRL_BUS_EVENT:
+			signum = SIGBUS;
+			break;
+		case CTRL_INFO_EVENT:
+			signum = SIGINFO;
+			break;
+		case CTRL_STOP_EVENT:	/* Ye Olde TTY was loud when idle (CuriousMark, 2018) */
+			signum = SIGSTOP;
+			break;
+		case CTRL_CONTINUE_EVENT:
+			signum = SIGCONT;
+			break;
+		case CTRL_BACKGROUND_READ_EVENT:
+			signum = SIGTTIN;
+			break;
+		case CTRL_BACKGROUND_WRITE_EVENT:
+			signum = SIGTTOU;
+			break;
+		case CTRL_IO_EVENT:
+			signum = SIGIO;
+			break;
+		case CTRL_URGENT_EVENT:
+			signum = SIGURG;
+			break;
+		default:
+			msvc_printf("signal_posix(%d): Not implemented.\n", CtrlType);
+	}
+	return(signum);
+}
+int 
 __sigsuspend(WIN_TASK *Task, const sigset_t *mask)
 {
 	int result = 0;
@@ -159,11 +254,12 @@ sigproc_posix(WIN_TASK *Task, int signum, ucontext_t *ucontext)
 	if (flags & SA_RESTART){
 		result = -1;
 	}
-//	if (sigbit & Task->ProcMask){		/* this will hang in boot (init.exe) */
-//		Task->Pending |= sigbit;
-//		result = -1;
-//	}else 
-	if (handler == SIG_DFL){		/* 0 */
+	/* This will hang during boot.
+	 */
+	if (sigbit & Task->ProcMask){
+		Task->Pending = __SIG_WIN[signum];
+		result = -1;
+	}else if (handler == SIG_DFL){		/* 0 */
 		result = sigproc_default(Task, signum);
 	}else if (handler == SIG_IGN){		/* 1 */
 		result = -1;
@@ -181,97 +277,8 @@ sigproc_win(DWORD CtrlType, CONTEXT *Context)
 {
 	BOOL bResult = FALSE;
 	ucontext_t ucontext = {0};
-	int signum = 0;
 
-	switch (CtrlType){
-		case CTRL_C_EVENT:
-			signum = SIGINT;		/* user interrupt */
-			break;
-		case CTRL_BREAK_EVENT:
-			signum = SIGTSTP;
-			break;
-		case CTRL_SHUTDOWN_EVENT:
-			signum = SIGTERM;		/* default of kill command */
-			break;
-		case CTRL_CLOSE_EVENT:			/* closing Console window */
-			signum = SIGKILL;		/* cannot be caught or ignored */
-			break;
-		case CTRL_ACCESS_VIOLATION_EVENT:
-			signum = SIGSEGV;
-			break;
-		case CTRL_ILLEGAL_INSTRUCTION_EVENT:
-			signum = SIGILL;
-			break;
-		case CTRL_DIVIDE_BY_ZERO_EVENT:
-			signum = SIGFPE;
-			break;
-		case CTRL_SIZE_EVENT:
-			signum = SIGWINCH;
-			break;
-		case CTRL_CHILD_EVENT:
-			signum = SIGCHLD;
-			break;
-		case CTRL_TIMER_EVENT:
-			signum = SIGALRM;
-			break;
-		case CTRL_DETACH_EVENT:
-			signum = SIGTHR;
-			break;
-		case CTRL_QUIT_EVENT:
-			signum = SIGQUIT;		/* SIGTERM with coredump */
-			break;
-		case CTRL_PIPE_EVENT:
-			signum = SIGPIPE;
-			break;
-		case CTRL_ABORT_EVENT:
-			signum = SIGABRT;		/* sent by abort() */
-			break;
-		case CTRL_VTIMER_EVENT:
-			signum = SIGVTALRM;		/* SIGALRM in program time */
-			break;
-		case CTRL_LOGOFF_EVENT:
-			signum = SIGHUP;
-			break;
-		case CTRL_USER1_EVENT:
-			signum = SIGUSR1;
-			break;
-		case CTRL_USER2_EVENT:
-			signum = SIGUSR2;
-			break;
-		case CTRL_INVALID_ARGUMENT_EVENT:
-			signum = SIGSYS;
-			break;
-		case CTRL_EMULATOR_EVENT:
-			signum = SIGEMT;
-			break;
-		case CTRL_BUS_EVENT:
-			signum = SIGBUS;
-			break;
-		case CTRL_INFO_EVENT:
-			signum = SIGINFO;
-			break;
-		case CTRL_STOP_EVENT:	/* Ye Olde TTY was loud when idle (CuriousMark, 2018) */
-			signum = SIGSTOP;
-			break;
-		case CTRL_CONTINUE_EVENT:
-			signum = SIGCONT;
-			break;
-		case CTRL_BACKGROUND_READ_EVENT:
-			signum = SIGTTIN;
-			break;
-		case CTRL_BACKGROUND_WRITE_EVENT:
-			signum = SIGTTOU;
-			break;
-		case CTRL_IO_EVENT:
-			signum = SIGIO;
-			break;
-		case CTRL_URGENT_EVENT:
-			signum = SIGURG;
-			break;
-		default:
-			msvc_printf("sigproc_win(%d): Not implemented.\n", CtrlType);
-	}
-	if (!sigproc_posix(&__Tasks[CURRENT], signum, context_posix(&ucontext, Context))){
+	if (!sigproc_posix(&__Tasks[CURRENT], signum_posix(CtrlType), context_posix(&ucontext, Context))){
 		bResult = TRUE;
 	}
 	return(bResult);
@@ -370,11 +377,12 @@ int
 sys_sigpending(call_t call, sigset_t *set)
 {
 	int result = 0;
+	int signum = signum_posix(call.Task->Pending);
 
 	if (!set){
 		result = -EFAULT;
 	}else{
-		*set = call.Task->Pending;
+		*set = sigmask(signum);
 	}
 	return(result);
 }
@@ -397,8 +405,6 @@ sys_kill(call_t call, pid_t pid, int sig)
 		}
 	}else if (!pid){
 		result = kill_GRP(pwTask, pwTask->GroupId, sig);
-	}else if (pid == pwTask->TaskId){
-		result = sigproc_posix(pwTask, sig, &ucontext);
 	}else if (pid >= CHILD_MAX){
 		result = -EINVAL;
 	}else if (!vfs_kill_PID(pid_win(pid), WM_COMMAND, __SIG_WIN[sig], pwTask->TaskId)){

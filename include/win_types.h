@@ -29,7 +29,7 @@
  */
 
 #include "arch_types.h"
-#include "ole_types.h"
+#include "shell_types.h"
 
 /* winerror.h */
 

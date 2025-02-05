@@ -159,7 +159,7 @@ pathat_win(WIN_NAMEIDATA *Result, int dirfd, const char *path, int atflags)
 		Result->MountId = MOUNTID(path[0]);
 		*Result->R++ = *path++;
 		*Result->R++ = *path++;
-		path++;
+//		path++;
 
 	}else if (dirfd == AT_FDCWD){
 		Result->MountId = pwTask->MountId;

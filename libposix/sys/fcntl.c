@@ -134,21 +134,17 @@ fdflags_posix(WIN_VNODE *Node)
 /****************************************************/
 
 int 
-fcntl_F_DUPFD(WIN_TASK *Task, WIN_VNODE *Node, int cmd, int offset)
+fcntl_F_DUPFD(WIN_TASK *Task, WIN_VNODE *Node, BOOL CloseExec, int offset)
 {
 	int result = 0;
-	WIN_VNODE vnResult = {0};
-	BOOL bCloseExec = FALSE;
+	WIN_VNODE vNode = {0};
 
-	if (cmd == F_DUPFD_CLOEXEC){
-		bCloseExec = TRUE;
-	}
 	if (offset < 0 || offset >= OPEN_MAX){
 		result = -EBADF;
-	}else if (!vfs_F_DUPFD(Node, bCloseExec, &vnResult)){
+	}else if (!vfs_F_DUPFD(Node, CloseExec, &vNode)){
 		result -= errno_posix(GetLastError());
 	}else{
-		result = fd_posix(Task, &vnResult, offset);
+		result = fd_posix(Task, &vNode, offset);
 	}
 	return(result);
 }
@@ -174,7 +170,7 @@ fcntl_F_SETFD(WIN_VNODE *Node, int flags)
 	return(0);
 }
 int 
-fcntl_F_SETLK(WIN_TASK *Task, WIN_VNODE *Node, struct flock *lock)
+fcntl_F_SETLK(WIN_TASK *Task, WIN_VNODE *Node, BOOL Wait, struct flock *lock)
 {
 	int result = 0;
 	DWORD dwFlags = LOCKFILE_FAIL_IMMEDIATELY;
@@ -183,6 +179,9 @@ fcntl_F_SETLK(WIN_TASK *Task, WIN_VNODE *Node, struct flock *lock)
 
 	if (Task->TracePoints & KTRFAC_STRUCT){
 		ktrace_STRUCT(Task, "flock", 5, lock, sizeof(struct flock));
+	}
+	if (Wait){
+		dwFlags = 0;
 	}
 	if (!dwlSize && Node->LockSize){
 		dwlSize = Node->LockSize;
@@ -247,8 +246,10 @@ sys_fcntl(call_t call, int fd, int cmd, ...)
 		result = -EBADF;
 	}else switch (cmd){
 		case F_DUPFD:
+			result = fcntl_F_DUPFD(pwTask, &vNodes[fd], FALSE, va_arg(args, int));
+			break;
 		case F_DUPFD_CLOEXEC:
-			result = fcntl_F_DUPFD(pwTask, &vNodes[fd], cmd, va_arg(args, int));
+			result = fcntl_F_DUPFD(pwTask, &vNodes[fd], TRUE, va_arg(args, int));
 			break;
 		case F_SETFD:
 			result = fcntl_F_SETFD(&vNodes[fd], va_arg(args, int));
@@ -263,7 +264,10 @@ sys_fcntl(call_t call, int fd, int cmd, ...)
 			result = flflags_posix(&vNodes[fd]);
 			break;
 		case F_SETLK:		/* makewhatis (mandoc.exe) */
-			result = fcntl_F_SETLK(pwTask, &vNodes[fd], va_arg(args, struct flock *));
+			result = fcntl_F_SETLK(pwTask, &vNodes[fd], FALSE, va_arg(args, struct flock *));
+			break;
+		case F_SETLKW:
+			result = fcntl_F_SETLK(pwTask, &vNodes[fd], TRUE, va_arg(args, struct flock *));
 			break;
 		case F_GETLK:
 			result = fcntl_F_GETLK(&vNodes[fd], va_arg(args, struct flock *));

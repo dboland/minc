@@ -561,7 +561,7 @@ sys_read(call_t call, int fd, void *buf, size_t count)
 
 	if (fd < 0 || fd >= OPEN_MAX){
 		return(-EBADF);
-	}else if (!vfs_read(&pwTask->Node[fd], buf, dwCount, &dwResult)){
+	}else if (!vfs_read(pwTask, &pwTask->Node[fd], buf, dwCount, &dwResult)){
 		result -= errno_posix(GetLastError());
 	}else if (dwResult == -1){
 		pwTask->Error = errno_posix(GetLastError());

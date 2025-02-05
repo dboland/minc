@@ -133,7 +133,7 @@ vfs_poll(WIN_TASK *Task, WIN_VNODE *Nodes[], WIN_POLLFD *Info[], DWORD *TimeOut,
 			bResult = TRUE;
 		}else if (!PollWait(Nodes, TimeOut)){
 			break;
-		}else if (proc_poll()){
+		}else if (proc_poll(Task)){
 			break;
 		}
 	}

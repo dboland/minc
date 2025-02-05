@@ -95,7 +95,7 @@ vfs_setitimer(WIN_TASK *Task, LONG *Interval, DWORDLONG *TimeOut)
 	return(bResult);
 }
 BOOL 
-vfs_nanosleep(DWORDLONG *TimeOut, DWORDLONG *Remain)
+vfs_nanosleep(WIN_TASK *Task, DWORDLONG *TimeOut, DWORDLONG *Remain)
 {
 	BOOL bResult = FALSE;
 	LONGLONG llTimeOut = *TimeOut;
@@ -110,7 +110,7 @@ vfs_nanosleep(DWORDLONG *TimeOut, DWORDLONG *Remain)
 	dwResult = WaitForMultipleObjectsEx(2, hObjects, FALSE, INFINITE, TRUE);
 	if (dwResult == WAIT_FAILED){
 		WIN_ERR("WaitForMultipleObjectsEx(%s): %s\n", win_strobj(hObjects, 2), win_strerror(GetLastError()));
-	}else if (!proc_poll()){
+	}else if (!proc_poll(Task)){
 		bResult = TRUE;
 	}
 	llRemain -= TimeGetTickCount();

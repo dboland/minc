@@ -171,24 +171,3 @@ win___tfork_thread(WIN___TFORK *Params, SIZE_T Size, LPTHREAD_START_ROUTINE Star
 	}
 	return(bResult);
 }
-BOOL 
-win_execve(LPSTR Command, LPCSTR Path, STARTUPINFO *Info)
-{
-	BOOL bResult = FALSE;
-	PROCESS_INFORMATION pi = {0};
-
-	Info->cb = sizeof(STARTUPINFO);
-	Info->lpDesktop = "";			/* Vista */
-	Info->dwFlags = STARTF_USESTDHANDLES;
-	if (CreateProcess(NULL, Command, NULL, NULL, TRUE, NORMAL_PRIORITY_CLASS, NULL, Path, Info, &pi)){
-		CloseHandle(pi.hThread);
-		CloseHandle(Info->hStdInput);
-		CloseHandle(Info->hStdOutput);
-		CloseHandle(Info->hStdError);
-		WaitForSingleObject(pi.hProcess, INFINITE);
-		CloseHandle(pi.hProcess);
-		bResult = TRUE;
-	}
-	win_free(Command);
-	return(bResult);
-}

@@ -56,7 +56,7 @@ vfs_writev(WIN_VNODE *Node, const WIN_IOVEC Data[], DWORD Count, DWORD *Result)
 	return(bResult);
 }
 BOOL 
-vfs_readv(WIN_VNODE *Node, const WIN_IOVEC Data[], DWORD Count, DWORD *Result)
+vfs_readv(WIN_TASK *Task, WIN_VNODE *Node, const WIN_IOVEC Data[], DWORD Count, DWORD *Result)
 {
 	BOOL bResult = TRUE;
 	LONG lIndex = 0;
@@ -64,7 +64,7 @@ vfs_readv(WIN_VNODE *Node, const WIN_IOVEC Data[], DWORD Count, DWORD *Result)
 	DWORD dwCount = 0;
 
 	while (lIndex < Count){
-		if (!vfs_read(Node, Data->Buffer, Data->Length, &dwCount)){
+		if (!vfs_read(Task, Node, Data->Buffer, Data->Length, &dwCount)){
 			bResult = FALSE;
 			break;
 		}

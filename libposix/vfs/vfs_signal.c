@@ -146,6 +146,7 @@ vfs_kill_SYS(DWORD CallerId, UINT Message, WPARAM WParam, LPARAM LParam)
 BOOL 
 vfs_raise(UINT Message, WPARAM WParam, LPARAM LParam)
 {
+	BOOL bResult = TRUE;
 	DWORD CtrlType;
 	CONTEXT ctx = {0};
 
@@ -174,7 +175,12 @@ vfs_raise(UINT Message, WPARAM WParam, LPARAM LParam)
 			 */
 			CtrlType = CTRL_INFO_EVENT;
 	}
-	return(__SignalProc(CtrlType, &ctx));
+	if (__SignalProc(CtrlType, &ctx)){	/* signal handled by user program */
+		SetLastError(ERROR_SIGNAL_PENDING);
+	}else{
+		bResult = FALSE;
+	}
+	return(bResult);
 }
 BOOL 
 vfs_sigsuspend(WIN_TASK *Task, CONST UINT *Mask)

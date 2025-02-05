@@ -261,7 +261,7 @@ sys_accept(call_t call, int sockfd, struct sockaddr *addr, socklen_t *addrlen)
 	pwTask->State = SSLEEP;
 	if (sockfd < 0 || sockfd >= OPEN_MAX){	/* ab.exe */
 		result = -EBADF;
-	}else if (!vfs_accept(&pwTask->Node[sockfd], &sAddress, addrlen, &vnResult)){
+	}else if (!vfs_accept(pwTask, &pwTask->Node[sockfd], &sAddress, addrlen, &vnResult)){
 		result -= errno_posix(WSAGetLastError());
 	}else{
 		saddr_posix(pwTask, addr, addrlen, &sAddress);

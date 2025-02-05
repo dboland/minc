@@ -418,15 +418,30 @@ VfsPathFlags(LPSTR Buffer, LPCSTR Label, DWORD Flags)
 	psz += msvc_sprintf(psz, "[0x%x])\n", Flags);
 	return(psz);
 }
+LPSTR 
+VfsTaskFlags(LPSTR Buffer, LPCSTR Label, DWORD Flags)
+{
+	LPSTR psz = Buffer;
+
+	psz += msvc_sprintf(psz, "%s([0x%x]", Label, Flags);
+	psz = VfsFlagName(psz, WIN_PS_CONTROLT, "CONTROLT", Flags, &Flags);
+	psz = VfsFlagName(psz, WIN_PS_EXEC, "EXEC", Flags, &Flags);
+	psz = VfsFlagName(psz, WIN_PS_INEXEC, "INEXEC", Flags, &Flags);
+	psz = VfsFlagName(psz, WIN_PS_EXITING, "EXITING", Flags, &Flags);
+	psz = VfsFlagName(psz, WIN_PS_PPWAIT, "PPWAIT", Flags, &Flags);
+	psz = VfsFlagName(psz, WIN_PS_ISPWAIT, "ISPWAIT", Flags, &Flags);
+	psz = VfsFlagName(psz, WIN_PS_TRACED, "TRACED", Flags, &Flags);
+	psz = VfsFlagName(psz, WIN_PS_NOZOMBIE, "NOZOMBIE", Flags, &Flags);
+	psz = VfsFlagName(psz, WIN_PS_STOPPED, "STOPPED", Flags, &Flags);
+	psz = VfsFlagName(psz, WIN_PS_SYSTEM, "SYSTEM", Flags, &Flags);
+	psz = VfsFlagName(psz, WIN_PS_EMBRYO, "EMBRYO", Flags, &Flags);
+	psz = VfsFlagName(psz, WIN_PS_ZOMBIE, "ZOMBIE", Flags, &Flags);
+	psz += msvc_sprintf(psz, "[0x%x])\n", Flags);
+	return(psz);
+}
 
 /****************************************************/
 
-VOID 
-VfsDebugTask(WIN_TASK *Task, LPCSTR Label)
-{
-	msvc_printf("%s(%d): Command(%ls) Parent(%d) Flags(0x%x) Status(0x%x) Depth(%d) Process(%d) Thread(%d) Handle(%d) Session(%d) Group(%d) CTTY(%d)\n", 
-		Label, Task->TaskId, __Strings[Task->TaskId].Command, Task->ParentId, Task->Flags, Task->Status, Task->Depth, Task->ProcessId, Task->ThreadId, Task->Handle, Task->SessionId, Task->GroupId, Task->CTTY);
-}
 VOID 
 VfsDebugStat(WIN_VATTR *Stat, LPCSTR Label)
 {
@@ -465,12 +480,6 @@ VfsDebugLink(LINK_INFO *Info, LPSTR Label)
 	msvc_printf("+ LocalBasePathOffset(%d)\n", Info->LocalBasePathOffset);
 	msvc_printf("+ CommonNetworkRelativeLinkOffset(%d)\n", Info->CommonNetworkRelativeLinkOffset);
 	msvc_printf("+ CommonPathSuffixOffset(%d)\n", Info->CommonPathSuffixOffset);
-}
-VOID 
-VfsDebugThread(WIN_THREAD_STRUCT *Thread, LPSTR Label)
-{
-	msvc_printf("%s: return(0x%lx) origin(0x%lx) size(0x%lx) source(0x%lx) dest(0x%lx) offset(0x%lx) Token(%lu) Flags(0x%x)\n", 
-		Label, Thread->raddr, Thread->origin, Thread->size, Thread->source, Thread->dest, Thread->offset, Thread->Token, Thread->Flags);
 }
 VOID 
 VfsDebugLinkFlags(DWORD Flags)
@@ -607,6 +616,26 @@ vfs_NETFLAGS(LONG Events, LPSTR Buffer)
 	psz = VfsNetFlags(psz, Events);
 	return(psz - Buffer);
 }
+DWORD 
+vfs_TASK(WIN_TASK *Task, LPSTR Buffer)
+{
+	LPSTR psz = Buffer;
+
+	psz += msvc_sprintf(psz, "(%d): Parent(%d) Depth(%d) Process(%d) Thread(%d) Handle(%d) Session(%d) Group(%d) CTTY(%d)\n", 
+		Task->TaskId, Task->ParentId, Task->Depth, Task->ProcessId, Task->ThreadId, Task->Handle, Task->SessionId, Task->GroupId, Task->CTTY);
+	psz = VfsTaskFlags(psz, "+ Flags", Task->Flags);
+	psz += msvc_sprintf(psz, "+ Command: %ls\n", __Strings[Task->TaskId].Command);
+	return(psz - Buffer);
+}
+DWORD 
+vfs_THREAD(WIN_THREAD_STRUCT *Thread, LPSTR Buffer)
+{
+	LPSTR psz = Buffer;
+
+	psz += msvc_sprintf(psz, "(%d): return(0x%lx) origin(0x%lx) size(0x%lx) source(0x%lx) dest(0x%lx) offset(0x%lx) Flags(0x%x)\n", 
+		Thread->Result, Thread->raddr, Thread->origin, Thread->size, Thread->source, Thread->dest, Thread->offset, Thread->Flags);
+	return(psz - Buffer);
+}
 
 /****************************************************/
 
@@ -648,6 +677,12 @@ vfs_ktrace(LPCSTR Label, STRUCT_TYPE Type, PVOID Data)
 			break;
 		case STRUCT_NETFLAGS:
 			vfs_NETFLAGS(*(LONG *)Data, szText);
+			break;
+		case STRUCT_TASK:
+			vfs_TASK((WIN_TASK *)Data, szText);
+			break;
+		case STRUCT_THREAD:
+			vfs_THREAD((WIN_THREAD_STRUCT *)Data, szText);
 			break;
 	}
 	msvc_printf("%s%s", Label, szText);
