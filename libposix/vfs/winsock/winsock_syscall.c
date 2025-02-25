@@ -55,3 +55,25 @@ WSAcceptFile(WIN_VNODE *Node, LPSOCKADDR Address, LPINT Length, WIN_VNODE *Resul
 	}
 	return(bResult);
 }
+BOOL 
+WSASendMsgProc(WIN_VNODE *Node, LPWSAMSG Msg, LPDWORD Result, LPWSAOVERLAPPED Overlapped, LPWSAOVERLAPPED_COMPLETION_ROUTINE Completion)
+{
+	BOOL bResult = FALSE;
+
+	if (SOCKET_ERROR != WSASendTo(Node->Socket, Msg->lpBuffers, Msg->dwBufferCount, Result, Msg->dwFlags, Msg->name, Msg->namelen, NULL, NULL)){
+		bResult = TRUE;
+//	}else{
+//		WIN_ERR("WSASendTo(%d): %s\n", Node->Socket, win_strerror(WSAGetLastError()));
+	}
+	return(bResult);
+}
+BOOL 
+WSARecvMsgProc(WIN_VNODE *Node, LPWSAMSG Msg, LPDWORD Result, LPWSAOVERLAPPED Overlapped, LPWSAOVERLAPPED_COMPLETION_ROUTINE Completion)
+{
+	BOOL bResult = FALSE;
+
+	if (SOCKET_ERROR != WSARecvFrom(Node->Socket, Msg->lpBuffers, Msg->dwBufferCount, Result, &Msg->dwFlags, Msg->name, &Msg->namelen, NULL, NULL)){
+		bResult = TRUE;
+	}
+	return(bResult);
+}

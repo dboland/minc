@@ -51,9 +51,6 @@ pollfd_win(WIN_TASK *Task, WIN_VNODE *Nodes[], WIN_POLLFD *Info[], struct pollfd
 		}else if (fds->events){
 			Nodes[count] = &vnList[fd];
 			Info[count] = (WIN_POLLFD *)fds;
-			if (Task->TracePoints & KTRFAC_STRUCT){
-				ktrace_STRUCT(Task, "pollfd", 6, fds, sizeof(struct pollfd));
-			}
 			count++;
 		}
 		i++;
@@ -84,6 +81,9 @@ __poll(WIN_TASK *Task, struct pollfd fds[], nfds_t nfds, DWORD *TimeOut)
 		result = dwResult;
 	}else if (*TimeOut){
 		result = -EINTR;
+	}
+	if (Task->TracePoints & KTRFAC_STRUCT){
+		ktrace_STRUCT(Task, "pollfd", 6, fds, sizeof(struct pollfd) * nfds);
 	}
 	return(result);
 }

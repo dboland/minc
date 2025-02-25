@@ -36,7 +36,6 @@ VOID CALLBACK
 TimeProc(PVOID Param, DWORD LowValue, DWORD HighValue)
 {
 	WIN_TASK *pwTask = Param;
-//	DWORDLONG dwlTime = (HighValue * 0x100000000) + LowValue;
 
 	/* This procedure will not be called when including the handle 
 	 * created by CreateWaitableTimer() in one of the 

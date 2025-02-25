@@ -112,6 +112,7 @@ kproc_posix(struct kinfo_proc *proc, WIN_TASK *Task)
 	proc->p_vm_dsize = 10;
 	proc->p_vm_ssize = (WIN_STACKSIZE + dwPageSize - 1) / dwPageSize;
 	if (win_KERN_PROC(Task->ThreadId, &kInfo)){
+
 		proc->p_uvalid = 1;			/* CHAR: following p_u* members from struct user are valid */
 
 		timeval_posix(&tv, &kInfo.Created);
@@ -122,14 +123,13 @@ kproc_posix(struct kinfo_proc *proc, WIN_TASK *Task)
 		proc->p_rtime_sec = rtime * 0.000001;
 		proc->p_rtime_usec = rtime - (proc->p_rtime_sec * 1000000);
 
-		proc->p_uticks = kticks_posix(&kInfo.User);
-		proc->p_sticks = kticks_posix(&kInfo.Kernel);
+		proc->p_uticks = kticks_posix(&kInfo.User);	/* millisconds */
+		proc->p_sticks = kticks_posix(&kInfo.Kernel) + proc->p_uticks;
 
-		rtime *= 0.001;				/* milliseconds */
-		if (rtime > 0){
-			nticks = proc->p_uticks + proc->p_sticks;
-			proc->p_pctcpu = (nticks * 100) / rtime;
-		}
+//		nticks = proc->p_uticks + proc->p_sticks;
+//		proc->p_pctcpu = (nticks * 10000) / rtime;
+		proc->p_pctcpu = (proc->p_sticks * 100000) / rtime;
+
 	}
 	proc->p_stat = Task->State;			/* CHAR: S* process status (from LWP). */
 	proc->p_cpuid = Task->Processor;		/* LONG: CPU id */

@@ -49,8 +49,8 @@ ws2_init(VOID)
 {
 	BOOL bResult = FALSE;
 	WSADATA wsaData;
-//	WORD wVersion = 0x0101;		//v. 1.1
-	WORD wVersion = 0x0202;		//v. 2.2
+//	WORD wVersion = 0x0101;		/* v. 1.1 */
+	WORD wVersion = 0x0202;		/* v. 2.2 */
 
 	if (WSAStartup(wVersion, &wsaData)){
 		WIN_ERR("WSAStartup(0x%x): %s\n", wVersion, win_strerror(WSAGetLastError()));

@@ -94,8 +94,9 @@ typedef struct _SYSTEM_PROCESSOR_PERFORMANCE_INFORMATION {
     LARGE_INTEGER IdleTime;
     LARGE_INTEGER KernelTime;
     LARGE_INTEGER UserTime;
-    LARGE_INTEGER DpcTime;
-    LARGE_INTEGER InterruptTime;
+//    LARGE_INTEGER DpcTime;
+//    LARGE_INTEGER InterruptTime;
+    LARGE_INTEGER Reserved[2];
     ULONG InterruptCount;
 } SYSTEM_PROCESSOR_PERFORMANCE_INFORMATION;
 
@@ -192,80 +193,6 @@ typedef struct _WIN_OBJECT_CONTROL {
 typedef VOID (*WIN_ATEXITPROC)(VOID);
 
 /*
- * win_signal.c
- */
-
-#define WM_STRING		0xC000			/* RegisterWindowMessage() */
-#define WM_XPCONSOLE		(WM_STRING + 154)	/* 0xC09A */
-
-#define WIN_NSIG		33
-
-#define CTRL_C_EVENT				0	/* SIGINT */
-#define CTRL_BREAK_EVENT			1	/* SIGTSTP */
-#define CTRL_CLOSE_EVENT			2	/* SIGKILL */
-#define CTRL_LOGOFF_EVENT			5	/* SIGHUP */
-#define CTRL_SHUTDOWN_EVENT			6	/* SIGTERM */
-#define CTRL_ACCESS_VIOLATION_EVENT		10
-#define CTRL_ILLEGAL_INSTRUCTION_EVENT		11
-#define CTRL_DIVIDE_BY_ZERO_EVENT		12
-#define CTRL_SIZE_EVENT				13
-#define CTRL_CHILD_EVENT			14
-#define CTRL_TIMER_EVENT			15
-#define CTRL_DETACH_EVENT			16
-#define CTRL_QUIT_EVENT				17
-#define CTRL_PIPE_EVENT				18
-#define CTRL_ABORT_EVENT			19
-#define CTRL_VTIMER_EVENT			20
-#define CTRL_URGENT_EVENT			21
-#define CTRL_USER1_EVENT			22
-#define CTRL_USER2_EVENT			23
-#define CTRL_INVALID_ARGUMENT_EVENT		24
-#define CTRL_MONITOR_EVENT			25
-#define CTRL_EMULATOR_EVENT			26
-#define CTRL_BUS_EVENT				27
-#define CTRL_INFO_EVENT				28
-#define CTRL_STOP_EVENT				29	/* Motor stop feature */
-#define CTRL_CONTINUE_EVENT			30
-#define CTRL_BACKGROUND_READ_EVENT		31
-#define CTRL_BACKGROUND_WRITE_EVENT		32
-#define CTRL_IO_EVENT				33
-
-typedef struct _WIN_SIGACTION {
-	PVOID Function;
-	UINT Mask;
-	DWORD Flags;
-} WIN_SIGACTION;
-
-typedef BOOL (CALLBACK *WIN_SIGPROC)(DWORD, CONTEXT *);
-
-/*
- * win_resource.c
- */
-
-#define WIN_RLIMIT_CPU      0               /* cpu time in milliseconds */
-#define WIN_RLIMIT_FSIZE    1               /* maximum file size */
-#define WIN_RLIMIT_DATA     2               /* data size */
-#define WIN_RLIMIT_STACK    3               /* stack size */
-#define WIN_RLIMIT_CORE     4               /* core file size */
-#define WIN_RLIMIT_RSS      5               /* resident set size */
-#define WIN_RLIMIT_MEMLOCK  6               /* locked-in-memory address space */
-#define WIN_RLIMIT_NPROC    7               /* number of processes */
-#define WIN_RLIMIT_NOFILE   8               /* number of open files */
-#define WIN_RLIM_NLIMITS    9               /* number of resource limits */
-
-#define WIN_RLIM_INFINITY   (((DWORDLONG)1 << 63) - 1)
-
-typedef struct _WIN_RLIMIT {
-	DWORDLONG Current;
-	DWORDLONG Maximum;
-} WIN_RLIMIT;
-
-typedef struct _WIN_RUSAGE {
-	DWORDLONG Kernel;
-	DWORDLONG User;
-} WIN_RUSAGE;
-
-/*
  * win_sched.c
  */
 
@@ -309,11 +236,6 @@ typedef struct _WIN_THREAD_STRUCT {
 	DWORD ThreadId;
 	DWORD Result;
 } WIN_THREAD_STRUCT;
-
-typedef struct _WIN_USAGE {
-	DWORD TaskId;
-	DWORD Status;
-} WIN_USAGE;
 
 #define CURRENT	(ULONG)TlsGetValue(__TlsIndex)
 

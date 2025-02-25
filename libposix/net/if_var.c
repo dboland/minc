@@ -49,6 +49,7 @@ ifflags_posix(MIB_IFROW *Interface)
 			break;
 		case IF_TYPE_SOFTWARE_LOOPBACK:
 			result |= IFF_LOOPBACK;
+			break;
 		case IF_TYPE_ETHERNET_CSMACD:
 		case IF_TYPE_IEEE80211:
 			result |= IFF_BROADCAST;

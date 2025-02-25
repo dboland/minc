@@ -30,47 +30,110 @@
 
 #include <netinet/in.h>
 
+/* https://learn.microsoft.com/en-us/windows/win32/winsock/ipproto-ip-socket-options
+ */
+
+#define WS_IP_PORTRANGE		-1	/* ftp.exe -A */
+
+static const 
+UINT IN_SOCKOPT_WIN[] = {
+	0,
+	WS_IP_OPTIONS,
+	WS_IP_HDRINCL,
+	WS_IP_TOS,
+	WS_IP_TTL,
+	0,
+	0,
+	0,
+	0,
+	WS_IP_MULTICAST_IF,
+	WS_IP_MULTICAST_TTL,	/* 10 */
+	WS_IP_MULTICAST_LOOP,
+	WS_IP_ADD_MEMBERSHIP,
+	WS_IP_DROP_MEMBERSHIP,
+	0,
+	0,
+	0,
+	0,
+	0,
+	WS_IP_PORTRANGE,
+	0,			/* 20 */
+	0,
+	0,
+	0,
+	0,
+	0,
+	0,
+	0,
+	0,
+	0,
+	WS_IP_RECVIF,		/* 30 */
+	WS_IP_RECVTTL,
+	0,
+	0,
+	0,
+	0,
+	0,
+	0,
+	0,
+	0,
+	0,			/* 40 */
+	0
+};
+static const 
+int IN_SOCKOPT_POSIX[] = {
+	0,
+	IP_OPTIONS,
+	IP_HDRINCL,
+	IP_TOS,
+	IP_TTL,
+	0,
+	0,
+	0,
+	0,
+	IP_MULTICAST_IF,
+	IP_MULTICAST_TTL,	/* 10 */
+	IP_MULTICAST_LOOP,
+	IP_ADD_MEMBERSHIP,
+	IP_DROP_MEMBERSHIP,
+	0,
+	0,
+	0,
+	0,
+	0,
+	0,
+	0,			/* 20 */
+	IP_RECVTTL,
+	0,
+	0,
+	IP_RECVIF,
+	0,
+	0,
+	0,
+	0,
+	0,
+	0,			/* 30 */
+	0,
+	0,
+	0,
+	0,
+	0,
+	0,
+	0,
+	0,
+	0,
+	0,			/* 40 */
+	0
+};
+
 /****************************************************/
 
 void *
-inaddr_posix(struct sockaddr_in *addr, DWORD Port, BYTE Address[4])
+inaddr_posix(struct sockaddr_in *addr, USHORT Family, DWORD Port, BYTE Address[4])
 {
 	addr->sin_len = sizeof(struct sockaddr_in);
-	addr->sin_family = AF_INET;
+	addr->sin_family = Family;
 	addr->sin_port = Port;
 	win_memcpy(&addr->sin_addr, Address, 4);
 	return(addr + 1);
-}
-
-/****************************************************/
-
-int 
-in_NET_INET6_IPV6_DAD_PENDING(int *count, size_t *size)
-{
-	int result = 0;
-	DWORD dwResult;
-
-	if (ws2_NET_INET6_IPV6_DAD_PENDING(&dwResult)){
-		*count = dwResult;
-	}else{
-		result = -ENOENT;
-	}
-	return(result);
-}
-int 
-in_NET_INET6_IPV6(const int *name, void *buf, size_t *size)
-{
-	int result = 0;
-
-	switch (name[3]){
-		case IPV6CTL_FORWARDING:	/* 1 */
-			result = ip_NET_INET_IP_FORWARDING((int *)buf, size);
-			break;
-		case IPV6CTL_DAD_PENDING:	/* 49 */
-			result = in_NET_INET6_IPV6_DAD_PENDING((int *)buf, size);
-			break;
-		default:
-			result = -ENOENT;
-	}
-	return(result);
 }

@@ -33,7 +33,7 @@
 /****************************************************/
 
 BOOL 
-proc_poll_OLD(VOID)
+proc_poll_OLD(WIN_TASK *Task)
 {
 	MSG msg;
 	BOOL bResult = TRUE;
@@ -50,15 +50,15 @@ proc_poll_OLD(VOID)
 BOOL 
 proc_poll(WIN_TASK *Task)
 {
-	MSG msg;
 	BOOL bResult = FALSE;
-	DWORD dwPending = Task->Pending;
+	MSG msg;
 
-	Task->Pending = 0;
-	if (dwPending){
-		bResult = vfs_raise(WM_COMMAND, dwPending, 0);
-	}else if (PeekMessage(&msg, NULL, 0, 0, PM_REMOVE)){
+	if (PeekMessage(&msg, NULL, 0, 0, PM_REMOVE)){
 		bResult = vfs_raise(msg.message, msg.wParam, msg.lParam);
+	}else if (Task->Pending){
+		SetLastError(ERROR_SIGNAL_PENDING);
+		Task->Pending = 0;
+		bResult = TRUE;
 	}
 	return(bResult);
 }

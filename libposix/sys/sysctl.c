@@ -75,7 +75,7 @@ sysctl_KERN(const int *name, void *oldp, size_t *oldlenp, void *newp, size_t new
 		case KERN_ARGMAX:
 			*(int *)oldp = MAX_ARGBUF - (MAX_ARGBUF % MIN_BUFSIZE);
 			break;
-		case KERN_MSGBUFSIZE:
+		case KERN_MSGBUFSIZE:	/* dmesg.exe */
 			result = msgbuf_KERN_MSGBUFSIZE((int *)oldp, oldlenp);
 			break;
 		case KERN_MSGBUF:
@@ -307,11 +307,11 @@ sysctl_NET_INET6(const int *name, void *buf, size_t *size)
 {
 	int result = 0;
 
-	/* netinet/in.c */
+	/* netinet6/in6.c */
 
 	switch (name[2]){
 		case IPPROTO_IPV6:	/* 41 */
-			result = in_NET_INET6_IPV6(name, buf, size);
+			result = ip6_NET_INET6_IPV6(name, buf, size);
 			break;
 		default:
 			result = -ENOENT;

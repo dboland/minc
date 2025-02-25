@@ -21,6 +21,7 @@
  * FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
  * DEALINGS IN THE SOFTWARE.
  */
+
 /*
  * Definitions for Windows Sockets 2
  *
@@ -51,6 +52,35 @@ typedef struct ws2_sockaddr SOCKADDR;
 typedef struct ws2_sockaddr *PSOCKADDR;
 typedef struct ws2_sockaddr *LPSOCKADDR;
 
+#define WS_SOL_SOCKET              0xffff
+#define WS_SO_DEBUG                0x0001
+#define WS_SO_ACCEPTCONN           0x0002
+#define WS_SO_REUSEADDR            0x0004
+#define WS_SO_EXCLUSIVEADDRUSE     (~WS_SO_REUSEADDR)
+#define WS_SO_KEEPALIVE            0x0008
+#define WS_SO_DONTROUTE            0x0010
+#define WS_SO_BROADCAST            0x0020
+#define WS_SO_USELOOPBACK          0x0040
+#define WS_SO_LINGER               0x0080
+#define WS_SO_OOBINLINE            0x0100
+#define WS_SO_DONTLINGER           (~WS_SO_LINGER)
+#define WS_SO_SNDBUF               0x1001
+#define WS_SO_RCVBUF               0x1002
+#define WS_SO_SNDLOWAT             0x1003
+#define WS_SO_RCVLOWAT             0x1004
+#define WS_SO_SNDTIMEO             0x1005
+#define WS_SO_RCVTIMEO             0x1006
+#define WS_SO_ERROR                0x1007
+#define WS_SO_TYPE                 0x1008
+#define WS_SO_GROUP_ID             0x2001
+#define WS_SO_GROUP_PRIORITY       0x2002
+#define WS_SO_MAX_MSG_SIZE         0x2003
+#define WS_SO_PROTOCOL_INFOA       0x2004
+#define WS_SO_PROTOCOL_INFOW       0x2005
+#define WS_SO_PROTOCOL_INFO        _AW(WS_SO_PROTOCOL_INFO)
+#define WS_PVD_CONFIG              0x3001
+#define WS_SO_CONDITIONAL_ACCEPT   0x3002
+
 WINSOCK_API_LINKAGE INT PASCAL WSAGetLastError(VOID);
 
 /* NT's version of iovec (sys/uio.h) */
@@ -74,7 +104,7 @@ typedef struct _SOCKET_ADDRESS {
 typedef u_int  SOCKET;
 
 /* 
- * mswsock.h
+ * ws2def.h
  */
 
 typedef struct _WSAMSG {

@@ -80,17 +80,19 @@ int
 getrusage_SELF(WIN_TASK *Task, struct rusage *usage)
 {
 	int result = 0;
-	WIN_RUSAGE ruInfo = {0};
+	DWORDLONG dwlTime;
 
-	if (!vfs_getrusage_SELF(Task->ThreadId, &ruInfo)){
+	if (!vfs_getrusage_SELF(Task)){
 		result -= errno_posix(GetLastError());
 	}else{
 		win_bzero(usage, sizeof(struct rusage));
-		rtime_posix(&usage->ru_utime, (DWORDLONG *)&ruInfo.User);
-		rtime_posix(&usage->ru_stime, (DWORDLONG *)&ruInfo.Kernel);
-		if (Task->TracePoints & KTRFAC_STRUCT){
-			ktrace_STRUCT(Task, "rusage", 6, usage, sizeof(struct rusage));
-		}
+
+		dwlTime = *(DWORDLONG *)&Task->UserTime;
+		rtime_posix(&usage->ru_utime, &dwlTime);
+
+		dwlTime += *(DWORDLONG *)&Task->KernelTime;
+		rtime_posix(&usage->ru_stime, &dwlTime);
+
 	}
 	return(result);
 }
@@ -98,17 +100,16 @@ int
 getrusage_CHILDREN(WIN_TASK *Task, struct rusage *usage)
 {
 	int result = 0;
-	WIN_RUSAGE ruInfo = {0};
+	DWORDLONG dwlUser = *(DWORDLONG *)&Task->UserTime;
+	DWORDLONG dwlKernel = *(DWORDLONG *)&Task->KernelTime;
 
-	if (!vfs_getrusage_CHILDREN(Task->TaskId, &ruInfo)){
+	if (!vfs_getrusage_CHILDREN(Task->TaskId, &dwlUser, &dwlKernel)){
 		result -= errno_posix(GetLastError());
 	}else{
 		win_bzero(usage, sizeof(struct rusage));
-		rtime_posix(&usage->ru_utime, &ruInfo.User);
-		rtime_posix(&usage->ru_stime, &ruInfo.Kernel);
-		if (Task->TracePoints & KTRFAC_STRUCT){
-			ktrace_STRUCT(Task, "rusage", 6, usage, sizeof(struct rusage));
-		}
+		rtime_posix(&usage->ru_utime, &dwlUser);
+		dwlKernel += dwlUser;
+		rtime_posix(&usage->ru_stime, &dwlKernel);
 	}
 	return(result);
 }
@@ -119,18 +120,22 @@ int
 sys_getrusage(call_t call, int who, struct rusage *usage)
 {
 	int result = 0;
+	WIN_TASK *pwTask = call.Task;
 
 	if (!usage){
-		result = -EFAULT;
+		return(-EFAULT);
 	}else switch (who){
 		case RUSAGE_SELF:
-			result = getrusage_SELF(call.Task, usage);
+			result = getrusage_SELF(pwTask, usage);
 			break;
 		case RUSAGE_CHILDREN:
-			result = getrusage_CHILDREN(call.Task, usage);
+			result = getrusage_CHILDREN(pwTask, usage);
 			break;
 		default:
 			result = -EINVAL;
+	}
+	if (pwTask->TracePoints & KTRFAC_STRUCT){
+		ktrace_STRUCT(pwTask, "rusage", 6, usage, sizeof(struct rusage));
 	}
 	return(result);
 }

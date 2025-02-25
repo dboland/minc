@@ -28,89 +28,32 @@
  *
  */
 
-#include <mswsock.h>
 #include <ws2tcpip.h>
 
-//#define IP_TOS		3
-#define IP_PORTRANGE	19
+#define WS_SO_TIMESTAMP		0x800
 
-#define SO_TIMESTAMP	0x800
+GUID WSAID_WSASENDMSG = {0xa441e712,0x754f,0x43ca,{0x84,0xa7,0x0d,0xee,0x44,0xcf,0x60,0x6d}};
+GUID WSAID_WSARECVMSG = {0xf689d7c8,0x6f1f,0x436b,{0x8a,0x53,0xe5,0x4f,0xe3,0x51,0xc3,0x22}};
 
-#define IPV6_USE_MIN_MTU	42
-#define IPV6_RECVPKTINFO	36
-#define IPV6_RECVHOPLIMIT	37
-
-#define ICMP6_FILTER		18
+typedef INT (WINSOCK_API_LINKAGE *LPFN_WSASENDMSG)(SOCKET,LPWSAMSG,DWORD,LPDWORD,LPWSAOVERLAPPED,LPWSAOVERLAPPED_COMPLETION_ROUTINE);
+typedef INT (WINSOCK_API_LINKAGE *LPFN_WSARECVMSG)(SOCKET,LPWSAMSG,LPDWORD,LPWSAOVERLAPPED,LPWSAOVERLAPPED_COMPLETION_ROUTINE);
 
 /****************************************************/
 
 BOOL 
-ws2_setsockopt_IP(INT Name, CONST CHAR *Value)
+ws2_setsockopt_SOL(WIN_VNODE *Node, INT Name, CONST CHAR *Value)
 {
 	BOOL bResult = FALSE;
 
-	/* netinet/in.h */
-
+	/* sys/socket.h
+	 */
+	Node->Options |= Name;
 	switch (Name){
-		case IP_TOS:		/* returns WSAEINVAL (ssh.exe) */
-			bResult = TRUE;
-			break;
-		case IP_PORTRANGE:	/* range to choose for unspec port, returns WSAENOPROTOOPT (ftp.exe -A) */
-			bResult = TRUE;	/* Value is 0x1 ?? */
-			break;
-		default:
-			WIN_ERR("setsockopt(IPPROTO_IP): Name(%d): %s\n", Name, win_strerror(WSAGetLastError()));
-	}
-	return(bResult);
-}
-BOOL 
-ws2_setsockopt_SO(INT Name, CONST CHAR *Value)
-{
-	BOOL bResult = FALSE;
-
-	/* sys/socket.h */
-
-	switch (Name){
-		case SO_TIMESTAMP:	/* dig.exe */
+		case WS_SO_TIMESTAMP:	/* dig.exe */
 			bResult = TRUE;
 			break;
 		default:
 			WIN_ERR("setsockopt(SOL_SOCKET): Name(0x%x): %s\n", Name, win_strerror(WSAGetLastError()));
-	}
-	return(bResult);
-}
-BOOL 
-ws2_setsockopt_IP6(INT Name, CONST CHAR *Value)
-{
-	BOOL bResult = FALSE;
-
-	/* netinet6/in6.h
-	 * https://learn.microsoft.com/en-us/windows/win32/winsock/ipproto-ipv6-socket-options
-	 */
-	switch (Name){
-		case IPV6_RECVHOPLIMIT:
-		case IPV6_RECVPKTINFO:
-		case IPV6_USE_MIN_MTU:	/* ping6.exe */
-			bResult = TRUE;
-			break;
-		default:
-			WIN_ERR("setsockopt(IPPROTO_IPV6): Name(0x%x): %s\n", Name, win_strerror(WSAGetLastError()));
-	}
-	return(bResult);
-}
-BOOL 
-ws2_setsockopt_ICMP6(INT Name, CONST CHAR *Value)
-{
-	BOOL bResult = FALSE;
-
-	/* netinet/icmp6.h */
-
-	switch (Name){
-		case ICMP6_FILTER:	/* ping6.exe */
-			bResult = TRUE;
-			break;
-		default:
-			WIN_ERR("setsockopt(IPPROTO_ICMPV6): Name(0x%x): %s\n", Name, win_strerror(WSAGetLastError()));
 	}
 	return(bResult);
 }
@@ -203,21 +146,31 @@ ws2_accept(WIN_TASK *Task, WIN_VNODE *Node, LPSOCKADDR Address, LPINT Length, WI
 	return(bResult);
 }
 BOOL 
-ws2_sendmsg(WIN_VNODE *Node, WSAMSG *Msg, DWORD Flags, LPDWORD Result)
+ws2_sendmsg(WIN_VNODE *Node, WSAMSG *Msg, LPDWORD Result)
 {
 	BOOL bResult = FALSE;
+	LPFN_WSASENDMSG WSASendMsg;
+	DWORD dwResult;
 
-	if (SOCKET_ERROR != WSASendTo(Node->Socket, Msg->lpBuffers, Msg->dwBufferCount, Result, Flags, Msg->name, Msg->namelen, NULL, NULL)){
+	if (SOCKET_ERROR == WSAIoctl(Node->Socket, SIO_GET_EXTENSION_FUNCTION_POINTER, &WSAID_WSASENDMSG, sizeof(GUID), &WSASendMsg, sizeof(WSASendMsg), &dwResult, NULL, NULL)){
+		bResult = WSASendMsgProc(Node, Msg, Result, NULL, NULL);
+	}else if (SOCKET_ERROR != WSASendMsg(Node->Socket, Msg, Msg->dwFlags, Result, NULL, NULL)){
 		bResult = TRUE;
+//	}else{
+//		WIN_ERR("WSASendMsg(%d): %s\n", Node->Socket, win_strerror(WSAGetLastError()));
 	}
 	return(bResult);
 }
 BOOL 
-ws2_recvmsg(WIN_VNODE *Node, WSAMSG *Msg, DWORD *Flags, LPDWORD Result)
+ws2_recvmsg(WIN_VNODE *Node, WSAMSG *Msg, LPDWORD Result)
 {
 	BOOL bResult = FALSE;
+	LPFN_WSARECVMSG WSARecvMsg;
+	DWORD dwResult;
 
-	if (SOCKET_ERROR != WSARecvFrom(Node->Socket, Msg->lpBuffers, Msg->dwBufferCount, Result, Flags, Msg->name, &Msg->namelen, NULL, NULL)){
+	if (SOCKET_ERROR == WSAIoctl(Node->Socket, SIO_GET_EXTENSION_FUNCTION_POINTER, &WSAID_WSARECVMSG, sizeof(GUID), &WSARecvMsg, sizeof(WSARecvMsg), &dwResult, NULL, NULL)){
+		bResult = WSARecvMsgProc(Node, Msg, Result, NULL, NULL);
+	}else if (SOCKET_ERROR != WSARecvMsg(Node->Socket, Msg, Result, NULL, NULL)){
 		bResult = TRUE;
 	}
 	return(bResult);
@@ -227,7 +180,7 @@ ws2_sendto(WIN_VNODE *Node, LPCSTR Buffer, UINT Size, DWORD Flags, CONST LPSOCKA
 {
 	BOOL bResult = TRUE;
 	UINT uiResult = 0;
-	UINT uiFlags = Flags & ~WIN_MSG_NOSIGNAL;
+	UINT uiFlags = Flags & ~WS_MSG_NOSIGNAL;
 
 	/* On WinXP SP2 we get "A blocking operation was interrupted by
 	 * a call to WSACancelBlockingCall" (traceroute.exe).
@@ -267,10 +220,10 @@ ws2_shutdown(WIN_VNODE *Node, INT How)
 BOOL 
 ws2_getsockopt(WIN_VNODE *Node, INT Level, INT Name, CHAR *Value, INT *Length)
 {
-	BOOL bResult = TRUE;
+	BOOL bResult = FALSE;
 
-	if (SOCKET_ERROR == getsockopt(Node->Socket, Level, Name, Value, Length)){
-		bResult = FALSE;
+	if (SOCKET_ERROR != getsockopt(Node->Socket, Level, Name, Value, Length)){
+		bResult = TRUE;
 	}
 	return(bResult);
 }
@@ -283,21 +236,14 @@ ws2_setsockopt(WIN_VNODE *Node, INT Level, INT Name, CONST CHAR *Value, INT Leng
 	 */
 	if (SOCKET_ERROR != setsockopt(Node->Socket, Level, Name, Value, Length)){
 		bResult = TRUE;
-	}else switch (Level){
-		case IPPROTO_IP:
-			bResult = ws2_setsockopt_IP(Name, Value);
-			break;
-		case SOL_SOCKET:
-			bResult = ws2_setsockopt_SO(Name, Value);
-			break;
-		case IPPROTO_IPV6:
-			bResult = ws2_setsockopt_IP6(Name, Value);
-			break;
-		case IPPROTO_ICMPV6:
-			bResult = ws2_setsockopt_ICMP6(Name, Value);
-			break;
-		default:
-			WIN_ERR("setsockopt(%d): %s\n", Node->Socket, win_strerror(WSAGetLastError()));
+	}else if (Level == SOL_SOCKET){
+		bResult = ws2_setsockopt_SOL(Node, Name, Value);
+	}else if (Name == -1){		/* BSD-only, must be ignored or implemented */
+		bResult = TRUE;
+	}else if (Name){		/* Vista-only, can be ignored */
+		bResult = TRUE;
+//	}else{
+//		WIN_ERR("setsockopt(%d): %s\n", Node->Socket, win_strerror(WSAGetLastError()));
 	}
 	return(bResult);
 }

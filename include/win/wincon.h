@@ -41,4 +41,3 @@ typedef struct _CONSOLE_SCREEN_BUFFER_INFO {
 	SMALL_RECT srWindow;
 	COORD dwMaximumWindowSize;
 } CONSOLE_SCREEN_BUFFER_INFO;
-

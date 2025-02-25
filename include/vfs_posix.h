@@ -165,8 +165,8 @@ BOOL vfs_readv(WIN_TASK *Task, WIN_VNODE *Node, const WIN_IOVEC Data[], LONG Cou
 
 /* vfs_resource.c */
 
-BOOL vfs_getrusage_SELF(DWORD ThreadId, WIN_RUSAGE *Result);
-BOOL vfs_getrusage_CHILDREN(DWORD ParentId, WIN_RUSAGE *Result);
+BOOL vfs_getrusage_SELF(WIN_TASK *Task);
+BOOL vfs_getrusage_CHILDREN(DWORD ParentId, DWORDLONG *UserTime, DWORDLONG *KernelTime);
 
 /* vfs_libgen.c */
 
@@ -182,7 +182,7 @@ BOOL vfs_poll(WIN_TASK *Task, WIN_VNODE *Nodes[], WIN_POLLFD *Info[], DWORD *Tim
 
 /* vfs_wait.c */
 
-BOOL vfs_wait4(WIN_TASK *Task, WIN_TASK *Children[], BOOL NoHang, DWORD Status, WIN_USAGE *Result);
+BOOL vfs_wait4(WIN_TASK *Task, WIN_TASK *Children[], BOOL NoHang, DWORD Status, WIN_WAITINFO *Result);
 
 /* vfs_tty.c */
 

@@ -30,6 +30,14 @@
 
 #include <iprtrmib.h>
 
+/* Missing in MinGW */
+
+#define MIB_IPADDR_PRIMARY		0x0001
+#define MIB_IPADDR_DYNAMIC		0x0004
+#define MIB_IPADDR_DISCONNECTED		0x0008
+#define MIB_IPADDR_DELETED		0x0040
+#define MIB_IPADDR_TRANSIENT		0x0080
+
 /****************************************************/
 
 DWORD 

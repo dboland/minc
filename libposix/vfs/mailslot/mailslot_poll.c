@@ -37,7 +37,7 @@ mail_poll(HANDLE Handle, WIN_POLLFD *Info, DWORD *Result)
 {
 	BOOL bResult = TRUE;
 	SHORT sResult = WIN_POLLERR;
-	SHORT sMask = Info->Events | WIN_POLLERR;
+	SHORT sMask = Info->Events | WIN_POLLIGNORE;
 	DWORD dwSize = 0;
 	DWORD dwCount = 0;
 

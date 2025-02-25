@@ -91,7 +91,14 @@ die(const char *msg, ...)
 void 
 sig(int signum)
 {
-	printf("%s: %s\n", __progname, strsignal(signum));
+	if (signum == SIGTERM){
+		printf("System halt.\n");
+		exit(0);
+	}else if (signum == SIGHUP){
+		printf("Reboot.\n");
+	}else{
+		printf("%s: %s\n", __progname, strsignal(signum));
+	}
 }
 int 
 fs_mount(void)
@@ -145,7 +152,6 @@ getty(const char *path)
 		dup2(fd, STDERR_FILENO);
 		if (fd > STDERR_FILENO)
 			close(fd);
-		write(STDOUT_FILENO, "\e)U", 3);	/* reset to utf-8 alt charset */
 		result = 0;
 	}
 	return(result);
@@ -230,10 +236,12 @@ boot(void)
 {
 	char *args[] = {"/sbin/init", NULL};
 
+	consinit();
 	tty_init();
 	ifinit();
 	cpu_configure();
 	fs_unmount();		// fsck.exe operation?
+	write(STDOUT_FILENO, "\r\n", 2);
 	execve(*args, args, environ);
 	fprintf(stderr, "execve(%s): %s\n", *args, strerror(errno));
 }
@@ -244,6 +252,7 @@ single(void)
 	int level = 1;
 	char *args[] = {"/bin/ksh", "-l", NULL};
 
+	consinit();
 	tty_init();
 	ifinit();
 	cpu_configure();
@@ -283,10 +292,11 @@ main(int argc, char *argv[], char *envp[])
 	pid_t pid;
 	int status;
 	char *root = diskconf();
+	sigset_t set = 0;
 
 	args(argc, argv);
-	signal(SIGQUIT, sig);
-	signal(SIGWINCH, sig);
+	signal(SIGTERM, sig);
+//	signal(SIGWINCH, sig);
 	sysctl(mib, 2, &level, &size, NULL, 0);
 	setenv("MINCROOT", root, 1);
 	setenv("PATH", _PATH_DEFPATH, 1);

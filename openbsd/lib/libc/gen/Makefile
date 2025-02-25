@@ -11,7 +11,7 @@ OBJECTS= assert.o \
 	nftw.o pause.o popen.o psignal.o \
 	pw_dup.o readpassphrase.o scandir.o \
 	setjmperr.o setmode.o \
-	siginterrupt.o siglist.o signal.o signame.o \
+	siginterrupt.o siglist.o signame.o \
 	sigsetops.o sleep.o strtofflags.o \
 	time.o times.o timezone.o getlogin.o \
 	tolower_.o vis.o unvis.o \
@@ -28,7 +28,7 @@ OBJECTS= assert.o \
 	telldir.o closedir.o exec.o
 
 OBJECTS+= getpwent.c.o getgrent.c.o setproctitle.c.o setprogname.c.o \
-	getprogname.c.o getgrouplist.c.o
+	getprogname.c.o getgrouplist.c.o signal.c.o
 #OBJECTS+= _exit.S.o _getlogin.S.o _setlogin.S.o
 OBJECTS+= syslog_r.o syslog.o auth_subr.o login_cap.o authenticate.o
 

@@ -55,7 +55,7 @@ fifo_poll(WIN_VNODE *Node, WIN_POLLFD *Info, DWORD *Result)
 	BOOL bResult = TRUE;
 	DWORD dwAvail = 0;
 	SHORT sResult = WIN_POLLOUT;
-	SHORT sMask = Info->Events | WIN_POLLERR;
+	SHORT sMask = Info->Events | WIN_POLLIGNORE;
 	DWORD dwMessage = 0;
 
 	if (!PeekNamedPipe(Node->Handle, NULL, 0, NULL, &dwAvail, &dwMessage)){

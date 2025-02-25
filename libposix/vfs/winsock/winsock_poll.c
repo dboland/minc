@@ -87,7 +87,7 @@ ws2_poll(WIN_VNODE *Node, WIN_POLLFD *Info, DWORD *Result)
 {
 	BOOL bResult = TRUE;
 	SHORT sResult = WIN_POLLERR;
-	SHORT sMask = Info->Events | WIN_POLLERR;
+	SHORT sMask = Info->Events | WIN_POLLIGNORE;
 	WSANETWORKEVENTS nwEvents = {0};
 	ULONG ulCount = 0;
 

@@ -43,11 +43,12 @@ ConControlHandler(DWORD CtrlType)
 	 */
 	TlsSetValue(__TlsIndex, (PVOID)__Process->TaskId);
 	if (__Process->GroupId == __CTTY->GroupId){
-		if (!vfs_raise(WM_COMMAND, CtrlType, 0)){
+		if (!vfs_raise(WM_COMMAND, CTRL_BASE + CtrlType, 0)){
 			__Process->Flags |= WIN_PS_EXITING;
 			/* causes ExitProcess() */
 			bResult = FALSE;
 		}else{
+			__Process->Pending = CTRL_BASE + CtrlType;
 			SetEvent(__Interrupt);
 		}
 	}

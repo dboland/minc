@@ -103,7 +103,6 @@ SID8 SidIntegritySystem		= {1, 1, {0, 0, 0, 0, 0, 16}, 0x4000};
 #include "win_unistd.c"
 #include "win_grp.c"
 #include "win_mman.c"
-#include "win_resource.c"
 #include "win_uio.c"
 #include "win_signal.c"
 #include "win_time.c"

@@ -85,17 +85,17 @@ int
 sock_SIOCGIFGROUP(struct ifgroupreq *req)
 {
 	char *ifname = req->ifgr_name;
-	char *result = req->ifgr_groups->ifgrq_group;
+	char *buf = req->ifgr_groups->ifgrq_group;
 	char c;
 
 	if (!req->ifgr_len){
 		req->ifgr_len = sizeof(struct ifg_req);
 	}else while (c = *ifname++){
 		if (c >= '0' && c <= '9'){
-			*result = 0;
+			*buf = 0;
 			break;
 		}
-		*result++ = c;
+		*buf++ = c;
 	}
 	return(0);
 }
@@ -112,7 +112,7 @@ sock_SIOCGIFADDR(struct ifreq *req)
 	if (dwStatus != ERROR_SUCCESS){
 		result -= errno_posix(dwStatus);
 	}else{
-		inaddr_posix(addr, 0, (BYTE *)&ifaInfo.dwAddr);
+		inaddr_posix(addr, AF_INET, 0, (BYTE *)&ifaInfo.dwAddr);
 	}
 	return(result);
 }
@@ -129,7 +129,7 @@ sock_SIOCGIFNETMASK(struct ifreq *req)
 	if (dwStatus != ERROR_SUCCESS){
 		result -= errno_posix(dwStatus);
 	}else{
-		inaddr_posix(addr, 0, (BYTE *)&ifaInfo.dwMask);
+		inaddr_posix(addr, AF_INET, 0, (BYTE *)&ifaInfo.dwMask);
 	}
 	return(result);
 }
@@ -148,7 +148,7 @@ sock_SIOCGIFBRDADDR(struct ifreq *req)
 		result -= errno_posix(dwStatus);
 	}else{
 		dwBroadcast = ifaInfo.dwAddr | ~ifaInfo.dwMask;
-		inaddr_posix(addr, 0, (BYTE *)&dwBroadcast);
+		inaddr_posix(addr, AF_INET, 0, (BYTE *)&dwBroadcast);
 	}
 	return(result);
 }

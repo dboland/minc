@@ -33,47 +33,36 @@
 /************************************************************/
 
 BOOL 
-ResAddUsage(HANDLE Handle, WIN_RUSAGE *Result)
-{
-	BOOL bResult = FALSE;
-	FILETIME ftCreation, ftExit, ftKernel, ftUser;
-
-	if (GetThreadTimes(Handle, &ftCreation, &ftExit, &ftKernel, &ftUser)){
-		Result->Kernel += *(DWORDLONG *)&ftKernel;
-		Result->User += *(DWORDLONG *)&ftUser;
-		bResult = TRUE;
-	}
-	return(bResult);
-}
-
-/************************************************************/
-
-BOOL 
-vfs_getrusage_SELF(DWORD ThreadId, WIN_RUSAGE *Result)
+vfs_getrusage_SELF(WIN_TASK *Task)
 {
 	BOOL bResult = FALSE;
 	HANDLE hThread;
 
-	if (!(hThread = OpenThread(THREAD_QUERY_INFORMATION, FALSE, ThreadId))){
+	if (!(hThread = OpenThread(THREAD_QUERY_INFORMATION, FALSE, Task->ThreadId))){
 		return(FALSE);
-	}else if (ResAddUsage(hThread, Result)){
+	}else if (GetThreadTimes(hThread, &Task->Started, &Task->Exited, &Task->KernelTime, &Task->UserTime)){
 		bResult = CloseHandle(hThread);
 	}
 	return(bResult);
 }
 BOOL 
-vfs_getrusage_CHILDREN(DWORD ParentId, WIN_RUSAGE *Result)
+vfs_getrusage_CHILDREN(DWORD ParentId, DWORDLONG *UserTime, DWORDLONG *KernelTime)
 {
 	BOOL bResult = TRUE;
+	DWORDLONG dwlUser = *UserTime;
+	DWORDLONG dwlKernel = *KernelTime;
 	DWORD dwIndex = WIN_PID_INIT;
 	WIN_TASK *pwTask = &__Tasks[dwIndex];
 
 	while (dwIndex < WIN_CHILD_MAX){
 		if (pwTask->ParentId == ParentId){
-			bResult = ResAddUsage(pwTask->Handle, Result);
+			dwlUser += *(DWORDLONG *)&pwTask->UserTime;
+			dwlKernel += *(DWORDLONG *)&pwTask->KernelTime;
 		}
 		dwIndex++;
 		pwTask++;
 	}
+	*UserTime = dwlUser;
+	*KernelTime = dwlKernel;
 	return(bResult);
 }

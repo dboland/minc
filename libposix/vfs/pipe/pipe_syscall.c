@@ -28,7 +28,7 @@
  *
  */
 
-#include <winbase.h>
+#include <mswsock.h>
 
 /****************************************************/
 
@@ -82,4 +82,48 @@ PipeOpenFile(LPCWSTR Name, HANDLE Event, WIN_VNODE *Result)
 //		WIN_ERR("PipeOpenFile(%ls): %s\n", szPath, win_strerror(GetLastError()));
 	}
 	return(bResult);
+}
+PVOID 
+PipeAllocData(WSAMSG *Message, DWORD *Size, DWORD *Result)
+{
+	DWORD dwSize = 0;
+	DWORD dwIndex = 0;
+	DWORD dwCount = Message->dwBufferCount;
+	LPWSABUF pwsData = Message->lpBuffers;
+
+	while (dwIndex < dwCount){
+		dwSize += pwsData->len;
+		pwsData++;
+		dwIndex++;
+	}
+	*Result = dwSize;
+	dwSize += Message->Control.len;
+	*Size = dwSize;
+	return(win_malloc(dwSize));
+}
+PVOID 
+PipePushDatagram(PVOID Data, LPWSABUF Buffers, DWORD Count)
+{
+	DWORD dwIndex = 0;
+
+	while (dwIndex < Count){
+		win_memcpy(Data, Buffers->buf, Buffers->len);
+		Data += Buffers->len;
+		Buffers++;
+		dwIndex++;
+	}
+	return(Data);
+}
+PVOID 
+PipePopDatagram(PVOID Data, LPWSABUF Buffers, DWORD Count)
+{
+	DWORD dwIndex = 0;
+
+	while (dwIndex < Count){
+		win_memcpy(Buffers->buf, Data, Buffers->len);
+		Data += Buffers->len;
+		Buffers++;
+		dwIndex++;
+	}
+	return(Data);
 }

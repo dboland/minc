@@ -38,10 +38,10 @@ vfs_socket(INT Family, INT Type, INT Protocol, WIN_VNODE *Result)
 	BOOL bResult = FALSE;
 
 	switch (Family){
-		case WIN_AF_LOCAL:
+		case WS_AF_LOCAL:
 			bResult = pipe_socket(Family, Type, Protocol, Result);
 			break;
-		case WIN_AF_ROUTE:
+		case WS_AF_ROUTE:
 			bResult = route_socket(Family, Type, Protocol, Result);
 			break;
 		default:
@@ -88,6 +88,7 @@ vfs_accept(WIN_TASK *Task, WIN_VNODE *Node, LPSOCKADDR Address, LPINT Length, WI
 {
 	BOOL bResult = FALSE;
 
+	Task->State = WIN_SSLEEP;
 	switch (Node->FSType){
 		case FS_TYPE_WINSOCK:
 			bResult = ws2_accept(Task, Node, Address, Length, Result);
@@ -95,19 +96,20 @@ vfs_accept(WIN_TASK *Task, WIN_VNODE *Node, LPSOCKADDR Address, LPINT Length, WI
 		default:
 			WSASetLastError(WSAEPFNOSUPPORT);
 	}
+	Task->State = WIN_SRUN;
 	return(bResult);
 }
 BOOL 
-vfs_sendmsg(WIN_VNODE *Node, WSAMSG *Message, DWORD Flags, DWORD *Result)
+vfs_sendmsg(WIN_VNODE *Node, WSAMSG *Message, DWORD *Result)
 {
 	BOOL bResult = FALSE;
 
 	switch (Node->FSType){
 		case FS_TYPE_WINSOCK:	/* dig.exe */
-			bResult = ws2_sendmsg(Node, Message, Flags, Result);
+			bResult = ws2_sendmsg(Node, Message, Result);
 			break;
 		case FS_TYPE_PIPE:
-			bResult = pipe_sendmsg(Node, Message, Flags, Result);
+			bResult = pipe_sendmsg(Node, Message, Result);
 			break;
 		default:
 			WSASetLastError(WSAEPFNOSUPPORT);
@@ -115,16 +117,16 @@ vfs_sendmsg(WIN_VNODE *Node, WSAMSG *Message, DWORD Flags, DWORD *Result)
 	return(bResult);
 }
 BOOL 
-vfs_recvmsg(WIN_VNODE *Node, WSAMSG *Message, DWORD *Flags, DWORD *Result)
+vfs_recvmsg(WIN_VNODE *Node, WSAMSG *Message, DWORD *Result)
 {
 	BOOL bResult = FALSE;
 
 	switch (Node->FSType){
 		case FS_TYPE_WINSOCK:
-			bResult = ws2_recvmsg(Node, Message, Flags, Result);
+			bResult = ws2_recvmsg(Node, Message, Result);
 			break;
 		case FS_TYPE_PIPE:
-			bResult = pipe_recvmsg(Node, Message, Flags, Result);
+			bResult = pipe_recvmsg(Node, Message, Result);
 			break;
 		default:
 			WSASetLastError(WSAEPFNOSUPPORT);
@@ -136,7 +138,7 @@ vfs_socketpair(INT Family, DWORD Attribs, INT Protocol, WIN_VNODE Result[2])
 {
 	BOOL bResult = FALSE;
 
-	if (Family == WIN_AF_LOCAL){
+	if (Family == WS_AF_LOCAL){
 		bResult = pipe_socketpair(Family, Attribs, Protocol, Result);
 	}else{
 		WSASetLastError(WSAEPFNOSUPPORT);

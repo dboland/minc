@@ -45,7 +45,8 @@
 #define SIGMASK_STOP	(BIT_SIGSTOP | BIT_SIGTSTP | BIT_SIGTTIN | BIT_SIGTTOU | BIT_SIGCONT)
 #define SIGMASK_IGNORE	(BIT_SIGWINCH | BIT_SIGCHLD | BIT_SIGURG | BIT_SIGINFO)
 
-static const DWORD __SIG_WIN[NSIG] = {
+static const 
+DWORD __SIG_WIN[NSIG] = {
 	-1,
 	CTRL_LOGOFF_EVENT,
 	CTRL_C_EVENT,
@@ -194,7 +195,7 @@ signum_posix(DWORD CtrlType)
 			signum = SIGURG;
 			break;
 		default:
-			msvc_printf("signal_posix(%d): Not implemented.\n", CtrlType);
+			msvc_printf("signum_posix(%d): Not implemented.\n", CtrlType);
 	}
 	return(signum);
 }
@@ -205,7 +206,7 @@ __sigsuspend(WIN_TASK *Task, const sigset_t *mask)
 
 	if (!mask){
 		result = -EFAULT;
-	}else if (vfs_sigsuspend(Task, mask)){
+	}else if (!vfs_sigsuspend(Task, mask)){
 		result -= errno_posix(GetLastError());
 	}
 	return(result);
@@ -222,7 +223,8 @@ sigproc_default(WIN_TASK *Task, int signum)
 		SetEvent(__Interrupt);
 		__sigsuspend(Task, &mask);
 	}else if (sigbit & ~SIGMASK_IGNORE){
-		Task->Status = signum;
+//		Task->Status = signum;
+		Task->Status = (Task->Error * 0x100) + signum;
 		__exit(Task, 127);
 	}
 	return(result);
@@ -247,24 +249,21 @@ sigproc_posix(WIN_TASK *Task, int signum, ucontext_t *ucontext)
 	if (Task->TracePoints & KTRFAC_PSIG){
 		ktrace_PSIG(Task, signum, handler, &info);
 	}
-	/* Restarting system calls after being interrupted by a signal
-	 * is the default in both BSD and Linux, yet some softwares
-	 * still expect EINTR (vim.exe).
-	 */
-	if (flags & SA_RESTART){
+	if (flags & SA_RESTART){		/* supersedes SIG_IGN */
 		result = -1;
 	}
 	/* This will hang during boot.
 	 */
-	if (sigbit & Task->ProcMask){
-		Task->Pending = __SIG_WIN[signum];
-		result = -1;
-	}else if (handler == SIG_DFL){		/* 0 */
+//	if (Task->ProcMask & sigbit){
+//		Task->Pending = __SIG_WIN[signum];
+//		result = -1;
+//	}else 
+	if (handler == SIG_DFL){		/* terminate process, if applicable */
 		result = sigproc_default(Task, signum);
-	}else if (handler == SIG_IGN){		/* 1 */
-		result = -1;
-	}else if (handler == SIG_ERR){		/* -1 */
+	}else if (handler == SIG_ERR){		/* never terminate, but interrupt system call */
 		Task->Status = (Task->Error * 0x100) + signum;
+	}else if (handler == SIG_IGN){		/* never terminate, never interrupt system call */
+		result = -1;
 	}else if (flags & SA_SIGINFO){
 		action(signum, &info, ucontext);
 	}else{
@@ -364,6 +363,7 @@ sys_sigprocmask(call_t call, int how, const sigset_t *restrict set, sigset_t *re
 		}else if (how == SIG_SETMASK){	// 3
 			curset = newset;
 		}
+//__PRINTF("curset: 0x%x\n", curset)
 		pwTask->ProcMask = curset;
 	}
 	return(result);

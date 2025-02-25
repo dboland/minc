@@ -41,9 +41,9 @@ void *
 ifamsg_posix(WIN_TASK *Task, void *buf, WIN_IFENT *Adapter, PSOCKET_ADDRESS Address)
 {
 	struct ifa_msghdr *hdr = buf;
-	socklen_t addrlen = Address->iSockaddrLength;
+	UINT uiLength = Address->iSockaddrLength;
 
-	hdr->ifam_msglen = sizeof(struct ifa_msghdr) + addrlen;
+	hdr->ifam_msglen = sizeof(struct ifa_msghdr) + uiLength;
 	hdr->ifam_version = RTM_VERSION;
 	hdr->ifam_type = RTM_NEWADDR;
 	hdr->ifam_hdrlen = sizeof(struct ifa_msghdr);
@@ -54,8 +54,8 @@ ifamsg_posix(WIN_TASK *Task, void *buf, WIN_IFENT *Adapter, PSOCKET_ADDRESS Addr
 	hdr->ifam_flags = Adapter->IfFlags;
 //	hdr->ifam_metric
 	buf += hdr->ifam_hdrlen;
-	saddr_posix(Task, buf, &addrlen, Address->lpSockaddr);
-	return(buf + addrlen);
+	saddr_posix(Task, buf, Address->lpSockaddr, &uiLength);
+	return(buf + uiLength);
 }
 void *
 ifmsg_posix(WIN_TASK *Task, void *buf, WIN_IFENT *Adapter)
@@ -142,8 +142,8 @@ rtmsg_posix(void *buf, MIB_IFROW *Interface, MIB_IPFORWARDROW *Address)
 //	metrics->rmx_rtt
 //	metrics->rmx_rttvar
 	addr = buf + hdr->rtm_hdrlen;
-	inaddr_posix(addr++, 0, (BYTE *)&Address->dwForwardDest);
-	inaddr_posix(addr++, 0, (BYTE *)&Address->dwForwardNextHop);
+	inaddr_posix(addr++, AF_INET, 0, (BYTE *)&Address->dwForwardDest);
+	inaddr_posix(addr++, AF_INET, 0, (BYTE *)&Address->dwForwardNextHop);
 	return(addr);
 }
 void *
@@ -164,7 +164,7 @@ inmsg_posix(void *buf, MIB_IPNETROW *Address)
 	}
 //	hdr->ifam_metric
 	buf += hdr->ifam_hdrlen;
-	buf = inaddr_posix(buf, 0, (BYTE *)&Address->dwAddr);
+	buf = inaddr_posix(buf, AF_INET, 0, (BYTE *)&Address->dwAddr);
 	buf = dladdr_posix(buf, Address->dwIndex, Address->dwType, Address->bPhysAddr, Address->dwPhysAddrLen);
 	return(buf);
 }
@@ -204,7 +204,7 @@ route_NET_RT_IFLIST(void *buf, size_t *size)
 	if (!buf){
 		*size = 0;
 	}
-	if (!ws2_setifaddrs(WIN_AF_UNSPEC, &ifEnum)){
+	if (!ws2_setifaddrs(WS_AF_UNSPEC, &ifEnum)){
 		result -= errno_posix(GetLastError());
 	}else while (ws2_getifaddrs(&ifEnum, &ifInfo)){
 		if (!buf){

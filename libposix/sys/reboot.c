@@ -35,7 +35,7 @@
 VOID 
 reboot_HALT(VOID)
 {
-	vfs_kill_PID(pid_win(0), WM_COMMAND, CTRL_SHUTDOWN_EVENT, 0);
+	vfs_kill_PID(pid_win(1), WM_COMMAND, CTRL_CLOSE_EVENT, 0);
 }
 
 /****************************************************/

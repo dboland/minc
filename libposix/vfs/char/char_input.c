@@ -327,7 +327,7 @@ input_poll(HANDLE Handle, WIN_POLLFD *Info, DWORD *Result)
 	DWORD dwCount = 0;
 	INPUT_RECORD iRecord;
 	SHORT sResult = 0;
-	SHORT sMask = Info->Events | WIN_POLLERR;
+	SHORT sMask = Info->Events | WIN_POLLIGNORE;
 
 	if (*__Input || __Clipboard){		/* vim.exe */
 		sResult = WIN_POLLIN;

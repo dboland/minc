@@ -28,53 +28,16 @@
  *
  */
 
-#include <psapi.h>
+#include <winbase.h>
 
-PIMAGE_NT_HEADERS NTAPI ImageNtHeader(PVOID);
+/****************************************************/
 
-/************************************************************/
-
-BOOL 
-win_getrlimit_DATA(WIN_RLIMIT *Limit)
+VOID 
+consinit(VOID)
 {
-	IMAGE_NT_HEADERS *intHeaders = ImageNtHeader(GetModuleHandle(NULL));
-	WORD wCount = intHeaders->FileHeader.NumberOfSections;
-	IMAGE_SECTION_HEADER *isHeader = (IMAGE_SECTION_HEADER *)(intHeaders + 1);
-	HANDLE hHeap = GetProcessHeap();
-	PROCESS_HEAP_ENTRY phEntry = {0};
+	WORD wAttribs = BACKGROUND_BLUE | FOREGROUND_WHITE | FOREGROUND_INTENSITY;
 
-	/* GetProcessWorkingSetSize() */
-	Limit->Current = 0;
-	while (wCount--){
-		if (!win_strncmp(isHeader->Name, ".data", 5)){
-			Limit->Current += isHeader->Misc.VirtualSize;
-		}else if (!win_strncmp(isHeader->Name, ".rdata", 6)){
-			Limit->Current += isHeader->Misc.VirtualSize;
-		}
-		isHeader++;
-	}
-	Limit->Maximum = Limit->Current;
-	while (HeapWalk(hHeap, &phEntry)){
-		if (!phEntry.Region.dwUnCommittedSize){
-			break;
-		}
-		Limit->Current += phEntry.Region.dwCommittedSize;
-		Limit->Maximum += phEntry.Region.dwCommittedSize + phEntry.Region.dwUnCommittedSize;
-	}
-	return(TRUE);
-}
-BOOL 
-win_getrlimit_AS(WIN_RLIMIT *Limit)
-{
-	MEMORY_BASIC_INFORMATION mbInfo;
-	BOOL bResult = FALSE;
-
-	if (!VirtualQuery(&mbInfo, &mbInfo, sizeof(MEMORY_BASIC_INFORMATION))){
-		WIN_ERR("VirtualQuery(%s): %s\n", "RLIMIT_AS", win_strerror(GetLastError()));
-	}else{
-		Limit->Current = mbInfo.BaseAddress - mbInfo.AllocationBase;
-		Limit->Maximum = mbInfo.BaseAddress + mbInfo.RegionSize - mbInfo.AllocationBase;
-		bResult = TRUE;
-	}
-	return(bResult);
+	/* sys/arch/i386/i386/machdep.c
+	 */
+	SetConsoleTextAttribute(GetStdHandle(STD_OUTPUT_HANDLE), wAttribs);
 }

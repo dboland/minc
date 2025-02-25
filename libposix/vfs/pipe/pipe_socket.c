@@ -28,54 +28,7 @@
  *
  */
 
-#include <mswsock.h>
-
-/****************************************************/
-
-PVOID 
-SockAllocData(WSAMSG *Message, DWORD *Size, DWORD *Result)
-{
-	DWORD dwSize = 0;
-	DWORD dwIndex = 0;
-	DWORD dwCount = Message->dwBufferCount;
-	LPWSABUF pwsData = Message->lpBuffers;
-
-	while (dwIndex < dwCount){
-		dwSize += pwsData->len;
-		pwsData++;
-		dwIndex++;
-	}
-	*Result = dwSize;
-	dwSize += Message->Control.len;
-	*Size = dwSize;
-	return(win_malloc(dwSize));
-}
-PVOID 
-SockPushData(PVOID Data, LPWSABUF Buffers, DWORD Count)
-{
-	DWORD dwIndex = 0;
-
-	while (dwIndex < Count){
-		win_memcpy(Data, Buffers->buf, Buffers->len);
-		Data += Buffers->len;
-		Buffers++;
-		dwIndex++;
-	}
-	return(Data);
-}
-PVOID 
-SockPopData(LPWSABUF Buffers, PVOID Data, DWORD Count)
-{
-	DWORD dwIndex = 0;
-
-	while (dwIndex < Count){
-		win_memcpy(Buffers->buf, Data, Buffers->len);
-		Data += Buffers->len;
-		Buffers++;
-		dwIndex++;
-	}
-	return(Data);
-}
+#include <winbase.h>
 
 /****************************************************/
 
@@ -145,15 +98,15 @@ pipe_recvfrom(WIN_VNODE *Node, LPSTR Buffer, UINT Size, DWORD Flags, DWORD *Resu
 	return(fifo_read(Node, Buffer, Size, Result));
 }
 BOOL 
-pipe_sendmsg(WIN_VNODE *Node, WSAMSG *Message, DWORD Flags, DWORD *Result)
+pipe_sendmsg(WIN_VNODE *Node, WSAMSG *Message, DWORD *Result)
 {
 	BOOL bResult = FALSE;
 	DWORD dwSize, dwResult;
 	PVOID pvData, P;
 
-	pvData = SockAllocData(Message, &dwSize, &dwResult);
-	P = SockPushData(pvData, Message->lpBuffers, Message->dwBufferCount);
-	P = SockPushData(P, &Message->Control, 1);
+	pvData = PipeAllocData(Message, &dwSize, &dwResult);
+	P = PipePushDatagram(pvData, Message->lpBuffers, Message->dwBufferCount);
+	P = PipePushDatagram(P, &Message->Control, 1);
 	if (!fifo_write(Node, pvData, dwSize, &dwSize)){
 		WIN_ERR("pipe_sendmsg(%d): %s\n", Node->Handle, win_strerror(GetLastError()));
 	}else{
@@ -164,18 +117,18 @@ pipe_sendmsg(WIN_VNODE *Node, WSAMSG *Message, DWORD Flags, DWORD *Result)
 	return(bResult);
 }
 BOOL 
-pipe_recvmsg(WIN_VNODE *Node, WSAMSG *Message, DWORD *Flags, DWORD *Result)
+pipe_recvmsg(WIN_VNODE *Node, WSAMSG *Message, DWORD *Result)
 {
 	BOOL bResult = FALSE;
 	DWORD dwSize, dwResult;
 	PVOID pvData;
 
-	pvData = SockAllocData(Message, &dwSize, &dwResult);
+	pvData = PipeAllocData(Message, &dwSize, &dwResult);
 	if (!fifo_read(Node, pvData, dwSize, &dwSize)){
 		WIN_ERR("pipe_recvmsg(%d): %s\n", Node->Handle, win_strerror(GetLastError()));
 	}else{
-		pvData = SockPopData(Message->lpBuffers, pvData, Message->dwBufferCount);
-		SockPopData(&Message->Control, pvData, 1);
+		pvData = PipePopDatagram(pvData, Message->lpBuffers, Message->dwBufferCount);
+		PipePopDatagram(pvData, &Message->Control, 1);
 		*Result = dwResult;
 		bResult = TRUE;
 	}

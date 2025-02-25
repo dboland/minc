@@ -175,11 +175,6 @@ BOOL win_dladdr(LPCVOID Address, MEMORY_BASIC_INFORMATION *Info, LPWSTR FileName
 BOOL win_readlink(LPCWSTR Path, SHELL_LINK_HEADER *Header, LPWSTR Target);
 BOOL win_symlink(LPCWSTR Path, LPCWSTR Target);
 
-/* win_resource.c */
-
-BOOL win_getrlimit_DATA(WIN_RLIMIT *Limit);
-BOOL win_getrlimit_AS(WIN_RLIMIT *Limit);
-
 /* win_ldt.c */
 
 VOID win_ldt_attach(DWORD Count);

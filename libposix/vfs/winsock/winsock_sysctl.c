@@ -107,7 +107,7 @@ ws2_NET_INET6_IPV6_DAD_PENDING(DWORD *Count)
 	PIP_ADAPTER_UNICAST_ADDRESS paUnicast;
 	DWORD dwCount = 0;
 
-	if (!ws2_setifaddrs(WIN_AF_INET6, &ifEnum)){
+	if (!ws2_setifaddrs(AF_INET6, &ifEnum)){
 		return(FALSE);
 	}else while (ws2_getifaddrs(&ifEnum, &ifInfo)){
 		paUnicast = ifInfo.Unicast;

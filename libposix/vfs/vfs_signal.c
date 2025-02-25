@@ -125,18 +125,18 @@ BOOL
 vfs_kill_SYS(DWORD CallerId, UINT Message, WPARAM WParam, LPARAM LParam)
 {
 	BOOL bResult = TRUE;
-	DWORD dwIndex = WIN_PID_INIT;
+	DWORD dwIndex = WIN_CHILD_MAX - 1;
 	WIN_TASK *pwTask = &__Tasks[dwIndex];
 
 	if (!win_group_member(&SidAdmins)){
 		SetLastError(ERROR_PRIVILEGE_NOT_HELD);
 		bResult = FALSE;
-	}else while (dwIndex < WIN_CHILD_MAX){
+	}else while (dwIndex >= WIN_PID_INIT){
 		if (pwTask->Flags && pwTask->TaskId != CallerId){
 			vfs_kill_PID(pwTask->ThreadId, Message, WParam, LParam);
 		}
-		dwIndex++;
-		pwTask++;
+		dwIndex--;
+		pwTask--;
 	}
 	return(bResult);
 }
@@ -147,35 +147,35 @@ BOOL
 vfs_raise(UINT Message, WPARAM WParam, LPARAM LParam)
 {
 	BOOL bResult = TRUE;
-	DWORD CtrlType;
+	DWORD dwCtrlType;
 	CONTEXT ctx = {0};
 
 	switch (Message){
 		case WM_SIZE:
-			CtrlType = CTRL_SIZE_EVENT;
+			dwCtrlType = CTRL_SIZE_EVENT;
 			break;
 		case WM_CLOSE:
-			CtrlType = CTRL_CLOSE_EVENT;
+			dwCtrlType = CTRL_CLOSE_EVENT;
 			break;
 		case WM_QUIT:
-			CtrlType = CTRL_QUIT_EVENT;
+			dwCtrlType = CTRL_QUIT_EVENT;
 			break;
 		case WM_COMMAND:
-			CtrlType = WParam;
+			dwCtrlType = WParam;
 			break;
 		case WM_TIMER:
-			CtrlType = CTRL_TIMER_EVENT;
+			dwCtrlType = CTRL_TIMER_EVENT;
 			break;
 		case WM_USER:
-			CtrlType = CTRL_DETACH_EVENT;
+			dwCtrlType = CTRL_DETACH_EVENT;
 			break;
 		default:
 			/* WM_STRING class message from WinXP, when started
 			 * with START batch command
 			 */
-			CtrlType = CTRL_INFO_EVENT;
+			dwCtrlType = CTRL_INFO_EVENT;
 	}
-	if (__SignalProc(CtrlType, &ctx)){	/* signal handled by user program */
+	if (__SignalProc(dwCtrlType, &ctx)){	/* signal handled by user program */
 		SetLastError(ERROR_SIGNAL_PENDING);
 	}else{
 		bResult = FALSE;
@@ -183,7 +183,7 @@ vfs_raise(UINT Message, WPARAM WParam, LPARAM LParam)
 	return(bResult);
 }
 BOOL 
-vfs_sigsuspend(WIN_TASK *Task, CONST UINT *Mask)
+vfs_sigsuspend_OLD(WIN_TASK *Task, CONST UINT *Mask)
 {
 	HACCEL hKeys = NULL;
 	UINT uiCurrent = Task->ProcMask;
@@ -203,4 +203,23 @@ vfs_sigsuspend(WIN_TASK *Task, CONST UINT *Mask)
 	Task->State = WIN_SRUN;
 	Task->ProcMask = uiCurrent;
 	return(FALSE);
+}
+BOOL 
+vfs_sigsuspend(WIN_TASK *Task, CONST UINT *Mask)
+{
+	BOOL bResult = FALSE;
+	HACCEL hKeys = NULL;
+	UINT uiCurrent = Task->ProcMask;
+	MSG msg = {0};
+
+	Task->ProcMask = *Mask;
+	Task->State = WIN_SSLEEP;
+	if (GetMessage(&msg, NULL, 0, 0)){
+		vfs_raise(msg.message, msg.wParam, msg.lParam);
+	}else{
+		bResult = TRUE;
+	}
+	Task->State = WIN_SRUN;
+	Task->ProcMask = uiCurrent;
+	return(bResult);
 }

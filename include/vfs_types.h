@@ -281,7 +281,10 @@ typedef struct _WIN_VNODE {
 	};
 	DWORDLONG LockRegion;
 	DWORDLONG LockSize;
-	HANDLE Object;
+	union {
+		HANDLE Object;	/* search handle */
+		UINT Options;	/* socket layer options */
+	};
 	DWORD Index;
 	BOOL CloseExec;
 	LONG Owner;
@@ -382,6 +385,93 @@ typedef struct _WIN_GLOBALS {
 } WIN_GLOBALS;
 
 /*
+ * vfs_signal.c
+ */
+
+#define WM_STRING		0xC000			/* RegisterWindowMessage() */
+#define WM_XPCONSOLE		(WM_STRING + 154)	/* 0xC09A */
+#define WM_QUIT			18
+#define WIN_NSIG		33
+
+#undef CTRL_C_EVENT
+#undef CTRL_BREAK_EVENT
+#undef CTRL_CLOSE_EVENT
+#undef CTRL_LOGOFF_EVENT
+#undef CTRL_SHUTDOWN_EVENT
+
+#define CTRL_BASE			100
+#define CTRL_C_EVENT			(CTRL_BASE+0)	/* SIGINT */
+#define CTRL_BREAK_EVENT		(CTRL_BASE+1)	/* SIGTSTP */
+#define CTRL_CLOSE_EVENT		(CTRL_BASE+2)	/* SIGKILL */
+#define CTRL_ACCESS_VIOLATION_EVENT	(CTRL_BASE+3)
+#define CTRL_ILLEGAL_INSTRUCTION_EVENT	(CTRL_BASE+4)
+#define CTRL_LOGOFF_EVENT		(CTRL_BASE+5)	/* SIGHUP */
+#define CTRL_SHUTDOWN_EVENT		(CTRL_BASE+6)	/* SIGTERM */
+#define CTRL_DIVIDE_BY_ZERO_EVENT	(CTRL_BASE+7)
+#define CTRL_SIZE_EVENT			(CTRL_BASE+8)
+#define CTRL_CHILD_EVENT		(CTRL_BASE+9)
+#define CTRL_TIMER_EVENT		(CTRL_BASE+10)
+#define CTRL_DETACH_EVENT		(CTRL_BASE+11)
+#define CTRL_QUIT_EVENT			(CTRL_BASE+12)
+#define CTRL_PIPE_EVENT			(CTRL_BASE+13)
+#define CTRL_ABORT_EVENT		(CTRL_BASE+14)
+#define CTRL_VTIMER_EVENT		(CTRL_BASE+15)
+#define CTRL_URGENT_EVENT		(CTRL_BASE+16)
+#define CTRL_USER1_EVENT		(CTRL_BASE+17)
+#define CTRL_USER2_EVENT		(CTRL_BASE+18)
+#define CTRL_INVALID_ARGUMENT_EVENT	(CTRL_BASE+19)
+#define CTRL_MONITOR_EVENT		(CTRL_BASE+20)
+#define CTRL_EMULATOR_EVENT		(CTRL_BASE+21)
+#define CTRL_BUS_EVENT			(CTRL_BASE+22)
+#define CTRL_INFO_EVENT			(CTRL_BASE+23)
+#define CTRL_STOP_EVENT			(CTRL_BASE+24)	/* Motor stop feature */
+#define CTRL_CONTINUE_EVENT		(CTRL_BASE+25)
+#define CTRL_BACKGROUND_READ_EVENT	(CTRL_BASE+26)
+#define CTRL_BACKGROUND_WRITE_EVENT	(CTRL_BASE+27)
+#define CTRL_IO_EVENT			(CTRL_BASE+28)
+
+typedef struct _WIN_SIGACTION {
+	PVOID Function;
+	UINT Mask;
+	DWORD Flags;
+} WIN_SIGACTION;
+
+typedef BOOL (CALLBACK *WIN_SIGPROC)(DWORD, CONTEXT *);
+
+/*
+ * vfs_resource.c
+ */
+
+#define WIN_RLIMIT_CPU      0               /* cpu time in milliseconds */
+#define WIN_RLIMIT_FSIZE    1               /* maximum file size */
+#define WIN_RLIMIT_DATA     2               /* data size */
+#define WIN_RLIMIT_STACK    3               /* stack size */
+#define WIN_RLIMIT_CORE     4               /* core file size */
+#define WIN_RLIMIT_RSS      5               /* resident set size */
+#define WIN_RLIMIT_MEMLOCK  6               /* locked-in-memory address space */
+#define WIN_RLIMIT_NPROC    7               /* number of processes */
+#define WIN_RLIMIT_NOFILE   8               /* number of open files */
+#define WIN_RLIM_NLIMITS    9               /* number of resource limits */
+
+#define WIN_RLIM_INFINITY   (((DWORDLONG)1 << 63) - 1)
+
+typedef struct _WIN_RLIMIT {
+	DWORDLONG Current;
+	DWORDLONG Maximum;
+} WIN_RLIMIT;
+
+/*
+ * vfs_wait.c
+ */
+
+typedef struct _WIN_WAITINFO {
+	DWORD TaskId;
+	DWORD Status;
+	DWORDLONG KernelTime;
+	DWORDLONG UserTime;
+} WIN_WAITINFO;
+
+/*
  * vfs_sched.c
  */
 
@@ -408,6 +498,9 @@ typedef struct _WIN_TASK {
 	HANDLE TraceHandle;
 	DWORD TracePoints;
 	FILETIME Started;
+	FILETIME Exited;
+	FILETIME UserTime;
+	FILETIME KernelTime;
 	DWORD State;
 	DWORD Code;			/* syscall currently running */
 	HANDLE Timer;
@@ -446,6 +539,7 @@ typedef struct _WIN_POLLFD {
 #define WIN_POLLRDBAND		0x0080		/* Priority data may be read without blocking */
 #define WIN_POLLWRBAND		0x0100
 #define WIN_POLLREMOVE		0x0200		/* Remove event from queue */
+#define WIN_POLLIGNORE		(WIN_POLLERR | WIN_POLLHUP | WIN_POLLNVAL)
 
 /*
  * vfs_termio.c
@@ -497,8 +591,6 @@ typedef struct _WIN_TTY {
 #define COMMON_LVB_AUTOWRAP		0x2000
 #define COMMON_LVB_REVERSE_VIDEO	0x4000
 #define COMMON_LVB_UNDERSCORE		0x8000
-
-/* sys/termios.h */
 
 /* Local */
 

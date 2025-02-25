@@ -39,7 +39,7 @@ ticks_posix(FILETIME *Time)
 
 	llTime -= 116444736000000000LL;	/* epoch */
 	llTime *= 0.0000001;		/* milliseconds */
-	return(llTime);
+	return((long)llTime);
 }
 u_int64_t
 ticks64_posix(LARGE_INTEGER *Time)
@@ -167,12 +167,14 @@ kern_KERN_CPTIME(long states[CPUSTATES])
 {
 	FILETIME ftIdle, ftKernel, ftUser;
 
+	/* System time is not kernel time!
+	 */
 	GetSystemTimes(&ftIdle, &ftKernel, &ftUser);
-	states[CP_USER] = ticks_posix(&ftUser);
-	states[CP_NICE] = 0;
-	states[CP_SYS] = ticks_posix(&ftKernel);
-	states[CP_INTR] = 0;
+	states[CP_USER] = ticks_posix(&ftUser);;
 	states[CP_IDLE] = ticks_posix(&ftIdle);
+	states[CP_SYS] = states[CP_USER] + ticks_posix(&ftKernel) - states[CP_IDLE];
+	states[CP_NICE] = 0;
+	states[CP_INTR] = 0;
 	return(0);
 }
 int 
@@ -190,10 +192,10 @@ kern_KERN_CPTIME2(int cpu, u_int64_t states[CPUSTATES])
 	}else{
 		psppInfo += cpu;
 		states[CP_USER] = ticks64_posix(&psppInfo->UserTime);
-		states[CP_NICE] = ticks64_posix(&psppInfo->DpcTime);
-		states[CP_SYS] = ticks64_posix(&psppInfo->KernelTime);
-		states[CP_INTR] = ticks64_posix(&psppInfo->InterruptTime);
 		states[CP_IDLE] = ticks64_posix(&psppInfo->IdleTime);
+		states[CP_SYS] = states[CP_USER] + ticks64_posix(&psppInfo->KernelTime) - states[CP_IDLE];
+		states[CP_NICE] = 0;
+		states[CP_INTR] = 0;
 	}
 	win_free(psppInfo);
 	return(result);

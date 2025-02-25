@@ -102,37 +102,6 @@ typedef struct _FIXED_INFO {
 #define IP_ADAPTER_ADDRESS_TRANSIENT 0x00000002
 
 typedef enum {
-  IfOperStatusUp = 1,
-  IfOperStatusDown,
-  IfOperStatusTesting,
-  IfOperStatusUnknown,
-  IfOperStatusDormant,
-  IfOperStatusNotPresent,
-  IfOperStatusLowerLayerDown
-} IF_OPER_STATUS;
-typedef enum {
-  IpDadStateInvalid = 0,
-  IpDadStateTentative,
-  IpDadStateDuplicate,
-  IpDadStateDeprecated,
-  IpDadStatePreferred
-} IP_DAD_STATE;
-typedef enum {
-  IpPrefixOriginOther = 0,
-  IpPrefixOriginManual,
-  IpPrefixOriginWellKnown,
-  IpPrefixOriginDhcp,
-  IpPrefixOriginRouterAdvertisement
-} IP_PREFIX_ORIGIN;
-typedef enum {
-  IpSuffixOriginOther = 0,
-  IpSuffixOriginManual,
-  IpSuffixOriginWellKnown,
-  IpSuffixOriginDhcp,
-  IpSuffixOriginLinkLayerAddress,
-  IpSuffixOriginRandom
-} IP_SUFFIX_ORIGIN;
-typedef enum {
   ScopeLevelInterface = 1,
   ScopeLevelLink = 2,
   ScopeLevelSubnet = 3,
@@ -175,6 +144,31 @@ typedef struct _IP_ADAPTER_MULTICAST_ADDRESS {
   SOCKET_ADDRESS Address;
 } IP_ADAPTER_MULTICAST_ADDRESS,*PIP_ADAPTER_MULTICAST_ADDRESS;
 
+typedef enum {
+  IpPrefixOriginOther = 0,
+  IpPrefixOriginManual,
+  IpPrefixOriginWellKnown,
+  IpPrefixOriginDhcp,
+  IpPrefixOriginRouterAdvertisement
+} IP_PREFIX_ORIGIN;
+
+typedef enum {
+  IpSuffixOriginOther = 0,
+  IpSuffixOriginManual,
+  IpSuffixOriginWellKnown,
+  IpSuffixOriginDhcp,
+  IpSuffixOriginLinkLayerAddress,
+  IpSuffixOriginRandom
+} IP_SUFFIX_ORIGIN;
+
+typedef enum {
+  IpDadStateInvalid = 0,
+  IpDadStateTentative,
+  IpDadStateDuplicate,
+  IpDadStateDeprecated,
+  IpDadStatePreferred
+} IP_DAD_STATE;
+
 typedef struct _IP_ADAPTER_UNICAST_ADDRESS {
   _ANONYMOUS_UNION union {
     ULONGLONG Alignment;
@@ -185,12 +179,13 @@ typedef struct _IP_ADAPTER_UNICAST_ADDRESS {
   } DUMMYUNIONNAME;
   struct _IP_ADAPTER_UNICAST_ADDRESS* Next;
   SOCKET_ADDRESS Address;
-  IP_PREFIX_ORIGIN PrefixOrigin;
-  IP_SUFFIX_ORIGIN SuffixOrigin;
-  IP_DAD_STATE DadState;
+  IP_PREFIX_ORIGIN PrefixOrigin;	/* see above */
+  IP_SUFFIX_ORIGIN SuffixOrigin;	/* see above */
+  IP_DAD_STATE DadState;		/* see above */
   ULONG ValidLifetime;
   ULONG PreferredLifetime;
   ULONG LeaseLifetime;
+  UINT8 OnLinkPrefixLength;
 } IP_ADAPTER_UNICAST_ADDRESS,*PIP_ADAPTER_UNICAST_ADDRESS;
 
 typedef struct _IP_ADAPTER_DNS_SERVER_ADDRESS {
@@ -218,6 +213,16 @@ typedef struct _IP_ADAPTER_PREFIX {
   ULONG PrefixLength;
 } IP_ADAPTER_PREFIX,*PIP_ADAPTER_PREFIX;
 
+typedef enum {
+  IfOperStatusUp = 1,
+  IfOperStatusDown,
+  IfOperStatusTesting,
+  IfOperStatusUnknown,
+  IfOperStatusDormant,
+  IfOperStatusNotPresent,
+  IfOperStatusLowerLayerDown
+} IF_OPER_STATUS;
+
 typedef struct _IP_ADAPTER_ADDRESSES {
   ULONG Length;
   DWORD IfIndex;
@@ -235,7 +240,7 @@ typedef struct _IP_ADAPTER_ADDRESSES {
   ULONG Flags;
   DWORD Mtu;
   DWORD IfType;
-  IF_OPER_STATUS OperStatus;
+  IF_OPER_STATUS OperStatus;	/* see above */
   DWORD Ipv6IfIndex;
   DWORD ZoneIndices[16];
   PIP_ADAPTER_PREFIX FirstPrefix;

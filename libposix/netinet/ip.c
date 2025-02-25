@@ -40,7 +40,7 @@ ip_NET_INET_IP_FORWARDING(int *enabled, size_t *size)
 	ULONG ulStatus;
 	MIB_IPSTATS ipStats;
 
-	ulStatus = GetIpStatistics(&ipStats);
+	ulStatus = GetIpStatisticsEx(&ipStats, WS_AF_INET);
 	if (ulStatus != ERROR_SUCCESS){
 		result -= errno_posix(ulStatus);
 	}else if (ipStats.dwForwarding == MIB_IP_FORWARDING){
@@ -57,7 +57,7 @@ ip_NET_INET_IP_DEFTTL(int *value, size_t *size)
 	ULONG ulStatus;
 	MIB_IPSTATS ipStats;
 
-	ulStatus = GetIpStatistics(&ipStats);
+	ulStatus = GetIpStatisticsEx(&ipStats, WS_AF_INET);
 	if (ulStatus != ERROR_SUCCESS){
 		result -= errno_posix(ulStatus);
 	}else{

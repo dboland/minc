@@ -63,7 +63,7 @@ sock_poll(WIN_VNODE *Node, WIN_POLLFD *Info, DWORD *Result)
 {
 	BOOL bResult = TRUE;
 	SHORT sResult = WIN_POLLOUT;
-	SHORT sMask = Info->Events | WIN_POLLERR;
+	SHORT sMask = Info->Events | WIN_POLLIGNORE;
 	DWORD dwAvail = 0;
 	DWORD dwRemain = 0;
 

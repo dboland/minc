@@ -73,6 +73,8 @@ char 	*__PROGNAME;		/* ktrace.c */
 
 WIN_NAMEIDATA *path_win(WIN_NAMEIDATA *Path, const char *pathname, int flags);
 
+/* Hello Terry Davis */
+
 #include "kern/syscalls.c"
 #include "string.c"
 #include "sys/errno.c"
@@ -87,6 +89,8 @@ WIN_NAMEIDATA *path_win(WIN_NAMEIDATA *Path, const char *pathname, int flags);
 #include "sys/fcntl.c"
 #include "sys/time.c"
 #include "sys/proc.c"
+#include "netinet/in.c"
+#include "netinet6/in6.c"
 #include "sys/socket.c"
 #include "sys/tty.c"
 #include "sys/termio.c"
@@ -112,7 +116,7 @@ WIN_NAMEIDATA *path_win(WIN_NAMEIDATA *Path, const char *pathname, int flags);
 #include "net/if_dl.c"
 #include "net/if_var.c"
 #include "netinet/ip.c"
-#include "netinet/in.c"
+#include "netinet6/ip6.c"
 #include "net/route.c"
 #include "netinet/in_pcb.c"
 #include "netinet/tcp.c"

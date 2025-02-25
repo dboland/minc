@@ -94,6 +94,19 @@ taskv_win(WIN_TASK *Parent, pid_t pid, WIN_TASK *Result[])
 	Result[count] = NULL;
 	return(count);
 }
+void 
+rusage_posix(WIN_TASK *Task, WIN_WAITINFO *Info, struct rusage *result)
+{
+	DWORDLONG dwlTime = Info->UserTime;
+
+	win_bzero(result, sizeof(struct rusage));
+	rtime_posix(&result->ru_utime, &dwlTime);
+	dwlTime += Info->KernelTime;
+	rtime_posix(&result->ru_stime, &dwlTime);
+	if (Task->TracePoints & KTRFAC_STRUCT){
+		ktrace_STRUCT(Task, "rusage", 6, result, sizeof(struct rusage));
+	}
+}
 
 /************************************************************/
 
@@ -101,7 +114,7 @@ pid_t
 sys_wait4(call_t call, pid_t pid, int *status, int options, struct rusage *rusage)
 {
 	pid_t result = 0;
-	WIN_USAGE wuResult = {0};
+	WIN_WAITINFO wInfo = {0};
 	WIN_TASK *ptVector[CHILD_MAX + 1];
 	BOOL bNoHang = FALSE;
 	WIN_TASK *pwTask = call.Task;
@@ -117,16 +130,16 @@ sys_wait4(call_t call, pid_t pid, int *status, int options, struct rusage *rusag
 		result = -EINVAL;
 	}else if (!taskv_win(pwTask, pid, ptVector)){
 		result = -ECHILD;
-	}else if (!vfs_wait4(pwTask, ptVector, bNoHang, dwStatus, &wuResult)){
+	}else if (!vfs_wait4(pwTask, ptVector, bNoHang, dwStatus, &wInfo)){
 		result -= errno_posix(GetLastError());
 	}else{
-		result = wuResult.TaskId;
+		result = wInfo.TaskId;
 	}
 	if (status){
-		*status = wuResult.Status;
+		*status = wInfo.Status;
 	}
 	if (rusage){
-		getrusage_SELF(pwTask, rusage);
+		rusage_posix(pwTask, &wInfo, rusage);
 	}
 	return(result);
 }

@@ -35,23 +35,24 @@
 DWORD 
 WSAGetIfFlags(PIP_ADAPTER_ADDRESSES Adapter)
 {
-	DWORD dwResult = WIN_IFF_UP;
+	DWORD dwResult = WS_IFF_UP;
 
 	if (Adapter->OperStatus == IfOperStatusUp){
-		dwResult |= WIN_IFF_RUNNING;
+		dwResult |= WS_IFF_RUNNING;
 	}
 	if (!(Adapter->Flags & IP_ADAPTER_NO_MULTICAST)){
-		dwResult |= WIN_IFF_MULTICAST;
+		dwResult |= WS_IFF_MULTICAST;
 	}
 	switch (Adapter->IfType){
 		case IF_TYPE_PPP:
-			dwResult |= WIN_IFF_POINTOPOINT;
+			dwResult |= WS_IFF_POINTOPOINT;
 			break;
 		case IF_TYPE_SOFTWARE_LOOPBACK:
-			dwResult |= WIN_IFF_LOOPBACK;
+			dwResult |= WS_IFF_LOOPBACK;
+			break;
 		case IF_TYPE_ETHERNET_CSMACD:
 		case IF_TYPE_IEEE80211:
-			dwResult |= WIN_IFF_BROADCAST;
+			dwResult |= WS_IFF_BROADCAST;
 			break;
 	}
 	return(dwResult);

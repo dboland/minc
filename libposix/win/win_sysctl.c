@@ -43,10 +43,11 @@ win_HW_PAGESIZE(VOID)
 DWORD 
 win_HW_NCPU(VOID)
 {
-	SYSTEM_INFO sInfo;
-
-	GetSystemInfo(&sInfo);
-	return(sInfo.dwNumberOfProcessors);
+	/* This information can be retreived with GetSystemInfo(),
+	 * but is not wise to use. top.exe will want to get info per CPU,
+	 * which will hang.
+	 */
+	return(1);
 }
 UINT 
 win_HW_USERMEM(VOID)
@@ -133,12 +134,13 @@ win_KERN_PROC(DWORD ThreadId, WIN_KINFO_PROC *Result)
 	return(bResult);
 }
 BOOL 
-win_KERN_CPTIME2(SYSTEM_PROCESSOR_PERFORMANCE_INFORMATION Buffer[], ULONG Size)
+win_KERN_CPTIME2(SYSTEM_PROCESSOR_PERFORMANCE_INFORMATION Buffer[], LONG Size)
 {
 	BOOL bResult = FALSE;
 	NTSTATUS ntStatus;
+	ULONG ulSize;
 
-	ntStatus = NtQuerySystemInformation(SystemProcessorPerformanceInformation, Buffer, Size, NULL);
+	ntStatus = NtQuerySystemInformation(SystemProcessorPerformanceInformation, Buffer, Size, &ulSize);
 	if (!NT_SUCCESS(ntStatus)){
 		WIN_ERR("NtQuerySystemInformation(SystemProcessorPerformanceInformation): %s\n", nt_strerror(ntStatus));
 	}else{

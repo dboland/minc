@@ -27,15 +27,6 @@
 #define MAXLEN_IFDESCR 256
 #define MAX_INTERFACE_NAME_LEN 256
 
-#define MIB_IPNET_TYPE_OTHER 1
-#define MIB_IPNET_TYPE_INVALID 2
-#define MIB_IPNET_TYPE_DYNAMIC 3
-#define MIB_IPNET_TYPE_STATIC 4
-
-#define MIB_IP_FORWARDING		1
-#define MIB_IP_NOT_FORWARDING		2
-#define MIB_USE_CURRENT_FORWARDING	0xFFFF
-
 typedef struct {
   DWORD dwAddr;
   DWORD dwIndex;
@@ -43,8 +34,14 @@ typedef struct {
   DWORD dwBCastAddr;
   DWORD dwReasmSize;
   unsigned short unused1;
-  unsigned short wType;
+  unsigned short wType;		/* see below */
 } MIB_IPADDRROW, *PMIB_IPADDRROW;
+
+#define MIB_IPADDR_PRIMARY	0x0001
+#define MIB_IPADDR_DYNAMIC	0x0004
+#define MIB_IPADDR_DISCONNECTED	0x0008
+#define MIB_IPADDR_DELETED	0x0040
+#define MIB_IPADDR_TRANSIENT	0x0080
 
 typedef struct {
   DWORD dwNumEntries;
@@ -54,7 +51,7 @@ typedef struct {
 typedef struct {
   WCHAR wszName[MAX_INTERFACE_NAME_LEN];
   DWORD dwIndex;
-  DWORD dwType;
+  DWORD dwType;			/* see: http://www.iana.org/assignments/ianaiftype-mib */
   DWORD dwMtu;
   DWORD dwSpeed;
   DWORD dwPhysAddrLen;
@@ -84,7 +81,7 @@ typedef struct {
 } MIB_IFTABLE, *PMIB_IFTABLE;
 
 typedef struct {
-  DWORD dwForwarding;
+  DWORD dwForwarding;		/* see below */
   DWORD dwDefaultTTL;
   DWORD dwInReceives;
   DWORD dwInHdrErrors;
@@ -108,6 +105,10 @@ typedef struct {
   DWORD dwNumAddr;
   DWORD dwNumRoutes;
 } MIB_IPSTATS, *PMIB_IPSTATS;
+
+#define MIB_IP_FORWARDING		1
+#define MIB_IP_NOT_FORWARDING		2
+#define MIB_USE_CURRENT_FORWARDING	0xFFFF
 
 typedef struct {
   DWORD dwState;
@@ -149,8 +150,13 @@ typedef struct {
   DWORD dwPhysAddrLen;
   BYTE bPhysAddr[MAXLEN_PHYSADDR];
   DWORD dwAddr;
-  DWORD dwType;
+  DWORD dwType;			/* see below */
 } MIB_IPNETROW, *PMIB_IPNETROW;
+
+#define MIB_IPNET_TYPE_OTHER 1
+#define MIB_IPNET_TYPE_INVALID 2
+#define MIB_IPNET_TYPE_DYNAMIC 3
+#define MIB_IPNET_TYPE_STATIC 4
 
 typedef struct {
   DWORD dwNumEntries;

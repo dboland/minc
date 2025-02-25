@@ -91,7 +91,7 @@ msgbuf_WINSOCK(WIN_IFDATA *Config, WIN_CFDRIVER *Driver, LPSTR Result)
 	LPSTR psz = Result;
 
 	if (Driver->Flags & WIN_DVF_CONFIG_READY){
-		psz += msvc_sprintf(psz, "%s at ", Driver->Name);
+		psz += msvc_sprintf(psz, "%s on ", Driver->Name);
 	}else{
 		psz += msvc_sprintf(psz, "+ not configured: ");
 	}

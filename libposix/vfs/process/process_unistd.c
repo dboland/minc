@@ -114,6 +114,8 @@ proc_close(WIN_TASK *Task)
 	Task->ParentId = 0;		/* relinquish ownership */
 	if (!Task->Handle){
 		SetLastError(ERROR_INVALID_THREAD_ID);
+	}else if (!GetThreadTimes(Task->Handle, &Task->Started, &Task->Exited, &Task->KernelTime, &Task->UserTime)){
+		WIN_ERR("GetThreadTimes(%d): %s\n", Task->Handle, win_strerror(GetLastError()));
 	}else if (CloseHandle(Task->Handle)){
 		bResult = TRUE;
 	}else{				/* tar.exe */

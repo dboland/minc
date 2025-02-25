@@ -61,7 +61,7 @@ ws2_indextoname(DWORD Index, LPSTR Result)
 	USHORT sUnit = 0;
 	UINT uiError = ERROR_BAD_DEVICE;
 
-	if (!Index){		/* XP */
+	if (!Index){		/* XP SP2 */
 		uiError = ERROR_INVALID_PARAMETER;
 	}else while (sUnit < WIN_UNIT_MAX){
 		if (pwDevice->Index == Index){
