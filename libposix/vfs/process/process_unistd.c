@@ -96,6 +96,9 @@ proc_dup(WIN_TASK *Parent, WIN_THREAD_STRUCT *Thread)
 	ptResult->RealGid = Parent->RealGid;
 	ptResult->SavedGid = Parent->SavedGid;
 	ptResult->ProcMask = Parent->ProcMask;
+	ptResult->ClockTime = Parent->ClockTime;
+	ptResult->KernelTime = 0;
+	ptResult->UserTime = 0;
 	win_memcpy(ptResult->Limit, Parent->Limit, WIN_RLIM_NLIMITS * sizeof(DWORDLONG));
 	win_memcpy(ptResult->AtExit, Parent->AtExit, WIN_ATEXIT_MAX * sizeof(WIN_ATEXITPROC));
 	win_memcpy(ptResult->Action, Parent->Action, WIN_NSIG * sizeof(WIN_SIGACTION));
@@ -114,8 +117,6 @@ proc_close(WIN_TASK *Task)
 	Task->ParentId = 0;		/* relinquish ownership */
 	if (!Task->Handle){
 		SetLastError(ERROR_INVALID_THREAD_ID);
-	}else if (!GetThreadTimes(Task->Handle, &Task->Started, &Task->Exited, &Task->KernelTime, &Task->UserTime)){
-		WIN_ERR("GetThreadTimes(%d): %s\n", Task->Handle, win_strerror(GetLastError()));
 	}else if (CloseHandle(Task->Handle)){
 		bResult = TRUE;
 	}else{				/* tar.exe */

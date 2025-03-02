@@ -91,6 +91,7 @@ CHAR 		*__Escape;
 CHAR		*__Input = __INPUT_BUF;
 CONST WCHAR	*__Clipboard;		/* Clipboard buffer */
 WIN_TASK	*__Process;
+LARGE_INTEGER	*__Frequency;
 
 BOOL proc_poll(WIN_TASK *Task);
 
@@ -116,6 +117,7 @@ BOOL proc_poll(WIN_TASK *Task);
 #include "vfs_fcntl.c"
 #include "vfs_stdlib.c"
 #include "vfs_unistd.c"
+#include "vfs_time.c"
 #include "process/process.c"
 #include "vfs_uio.c"
 #include "vfs_filio.c"
@@ -126,7 +128,6 @@ BOOL proc_poll(WIN_TASK *Task);
 #include "vfs_termio.c"
 #include "vfs_socket.c"
 #include "vfs_shm.c"
-#include "vfs_time.c"
 #include "vfs_resource.c"
 #include "vfs_wait.c"
 #include "vfs_ktrace.c"
@@ -149,6 +150,7 @@ vfs_PROCESS_ATTACH(HINSTANCE Instance, LPVOID Reserved)
 	__Globals = __Session->Globals;
 	__SidMachine = &__Globals->SidMachine;
 	__SidNone = &__Globals->SidNone;
+	__Frequency = &__Globals->Frequency;
 	__PipeEvent = event_attach(OBJECT_NAME("PipeEvent"), FALSE);
 	__MailEvent = event_attach(OBJECT_NAME("MailEvent"), FALSE);
 	__Interrupt = event_attach(OBJECT_NAME("Interrupt"), FALSE);
@@ -165,7 +167,7 @@ vfs_PROCESS_DETACH(WIN_TASK *Task)
 /****************************************************/
 
 BOOL 
-vfs_init(WIN_FS_TYPE FileSystem)
+vfs_start(WIN_FS_TYPE FileSystem)
 {
 	BOOL bResult = FALSE;
 

@@ -130,7 +130,7 @@ clock_gettime_MONOTONIC(struct timespec *tp)
 	int result = 0;
 	LONGLONG llTime;
 
-	if (!win_clock_gettime_MONOTONIC(&llTime)){	/* nanoseconds */
+	if (!vfs_clock_gettime_MONOTONIC(&llTime)){	/* nanoseconds */
 		result -= errno_posix(GetLastError());
 	}else{
 		tp->tv_sec = (time_t)(llTime * 0.000000001);		/* seconds (gcc needs cast!) */

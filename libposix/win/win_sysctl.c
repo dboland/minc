@@ -73,6 +73,9 @@ win_HW_PHYSMEM64(VOID)
 	GlobalMemoryStatusEx(&msInfo);
 	return(msInfo.ullTotalPhys);
 }
+
+/****************************************************/
+
 UINT 
 win_KERN_CLOCKRATE(VOID)
 {
@@ -83,9 +86,21 @@ win_KERN_CLOCKRATE(VOID)
 	}
 	return(liFrequency.LowPart);
 }
+BOOL 
+win_KERN_PROC(DWORD ThreadId, WIN_KUSAGE *Result)
+{
+	BOOL bResult = FALSE;
+	HANDLE hThread = NULL;
 
-/****************************************************/
-
+	if (!(hThread = OpenThread(THREAD_QUERY_INFORMATION, FALSE, ThreadId))){
+		return(FALSE);
+	}else if (GetThreadTimes(hThread, &Result->Creation, &Result->Exit, &Result->Kernel, &Result->User)){
+		bResult = CloseHandle(hThread);
+	}else{
+		WIN_ERR("GetThreadTimes(%d): %s\n", hThread, win_strerror(GetLastError()));
+	}
+	return(bResult);
+}
 BOOL 
 win_KERN_HOSTNAME(LPSTR Current, LPCSTR New, DWORD Size)
 {
@@ -111,25 +126,6 @@ win_KERN_DOMAINNAME(LPSTR Current, LPCSTR New, DWORD Size)
 		bResult = SetComputerNameExA(ComputerNamePhysicalDnsDomain, New);
 	}else{
 		SetLastError(ERROR_BAD_ARGUMENTS);
-	}
-	return(bResult);
-}
-BOOL 
-win_KERN_PROC(DWORD ThreadId, WIN_KINFO_PROC *Result)
-{
-	BOOL bResult = FALSE;
-	HANDLE hThread = NULL;
-	PFILETIME pftCreation = &Result->Created;
-	PFILETIME pftExit = &Result->Exited;
-	PFILETIME pftKernel = &Result->Kernel;
-	PFILETIME pftUser = &Result->User;
-
-	if (!(hThread = OpenThread(THREAD_QUERY_INFORMATION, FALSE, ThreadId))){
-		return(FALSE);
-	}else if (GetThreadTimes(hThread, pftCreation, pftExit, pftKernel, pftUser)){
-		bResult = CloseHandle(hThread);
-	}else{
-		WIN_ERR("GetThreadTimes(%d): %s\n", hThread, win_strerror(GetLastError()));
 	}
 	return(bResult);
 }

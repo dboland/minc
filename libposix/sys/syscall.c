@@ -643,7 +643,11 @@ syscall_enter(call_t call)
 	struct sysent *ent = &sysent[code];
 	void *result = ent->sy_call;
 	WIN_TASK *pwTask = &__Tasks[CURRENT];
+	LONGLONG llTime = pwTask->ClockTime;
 
+	if (vfs_clock_gettime_MONOTONIC(&pwTask->ClockTime)){	/* nanoseconds */
+		pwTask->UserTime += pwTask->ClockTime - llTime;
+	}
 	if (pwTask->TracePoints & KTRFAC_SYSCALL){
 		ktrace_SYSCALL(pwTask, code, ent->sy_argsize, &call.Base + 1);
 	}
@@ -663,9 +667,13 @@ syscall_leave(call_t call)
 	int result = call.c_ax;
 	int code = call.Code;
 	WIN_TASK *pwTask = &__Tasks[CURRENT];
+	LONGLONG llTime = pwTask->ClockTime;
 
 	if (result < 0){		/* hello Linus Torvalds */
 		pwTask->Error = -result;
+	}
+	if (vfs_clock_gettime_MONOTONIC(&pwTask->ClockTime)){	/* nanoseconds */
+		pwTask->KernelTime += pwTask->ClockTime - llTime;
 	}
 	/* Note: WriteFile() will touch the %edx register.
 	 */

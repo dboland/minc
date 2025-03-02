@@ -72,44 +72,37 @@ rtime_posix(struct timeval *tp, DWORDLONG *Time)
 {
 	LONGLONG llTime = *Time;
 
-	llTime *= 0.1;					/* microseconds */
+	llTime *= 0.001;				/* microseconds */
 	tp->tv_sec = (time_t)(llTime * 0.000001);
 	tp->tv_usec = llTime - (tp->tv_sec * 1000000);
 }
 int 
 getrusage_SELF(WIN_TASK *Task, struct rusage *usage)
 {
-	int result = 0;
 	DWORDLONG dwlTime;
 
-	if (!vfs_getrusage_SELF(Task)){
-		result -= errno_posix(GetLastError());
-	}else{
-		win_bzero(usage, sizeof(struct rusage));
-
-		dwlTime = *(DWORDLONG *)&Task->UserTime;
-		rtime_posix(&usage->ru_utime, &dwlTime);
-
-		dwlTime += *(DWORDLONG *)&Task->KernelTime;
-		rtime_posix(&usage->ru_stime, &dwlTime);
-
-	}
-	return(result);
+	win_bzero(usage, sizeof(struct rusage));
+	dwlTime = Task->UserTime;
+	rtime_posix(&usage->ru_utime, &dwlTime);
+	dwlTime += Task->KernelTime;
+	rtime_posix(&usage->ru_stime, &dwlTime);
+	return(0);
 }
 int 
 getrusage_CHILDREN(WIN_TASK *Task, struct rusage *usage)
 {
 	int result = 0;
-	DWORDLONG dwlUser = *(DWORDLONG *)&Task->UserTime;
-	DWORDLONG dwlKernel = *(DWORDLONG *)&Task->KernelTime;
+	WIN_RUSAGE wrUsage = {0};
+	DWORDLONG dwlTime;
 
-	if (!vfs_getrusage_CHILDREN(Task->TaskId, &dwlUser, &dwlKernel)){
+	if (!vfs_getrusage_CHILDREN(Task->TaskId, &wrUsage)){
 		result -= errno_posix(GetLastError());
 	}else{
 		win_bzero(usage, sizeof(struct rusage));
-		rtime_posix(&usage->ru_utime, &dwlUser);
-		dwlKernel += dwlUser;
-		rtime_posix(&usage->ru_stime, &dwlKernel);
+		dwlTime = wrUsage.UserTime;
+		rtime_posix(&usage->ru_utime, &dwlTime);
+		dwlTime += wrUsage.KernelTime;
+		rtime_posix(&usage->ru_stime, &dwlTime);
 	}
 	return(result);
 }

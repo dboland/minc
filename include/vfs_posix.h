@@ -34,7 +34,7 @@
 BOOL vfs_PROCESS_ATTACH(HINSTANCE Instance, LPVOID Reserved);
 BOOL vfs_PROCESS_DETACH(WIN_TASK *Task);
 BOOL vfs_THREAD_DETACH(WIN_TASK *Task);
-BOOL vfs_init(DWORD FileSystem);
+BOOL vfs_start(DWORD FileSystem);
 BOOL vfs_finish(DWORD FileSystem);
 
 /* vfs_unistd.c */
@@ -137,6 +137,7 @@ BOOL vfs_getvfs(WIN_CFDATA *Config, DWORD Flags);
 BOOL vfs_setitimer(WIN_TASK *Task, LONG *Interval, DWORDLONG *TimeOut);
 BOOL vfs_nanosleep(WIN_TASK *Task, DWORDLONG *TimeOut, DWORDLONG *Remain);
 BOOL vfs_utimes(WIN_NAMEIDATA *Path, FILETIME FileTime[2]);
+BOOL vfs_clock_gettime_MONOTONIC(DWORDLONG *Result);
 
 /* vfs_stdlib.c */
 
@@ -165,8 +166,7 @@ BOOL vfs_readv(WIN_TASK *Task, WIN_VNODE *Node, const WIN_IOVEC Data[], LONG Cou
 
 /* vfs_resource.c */
 
-BOOL vfs_getrusage_SELF(WIN_TASK *Task);
-BOOL vfs_getrusage_CHILDREN(DWORD ParentId, DWORDLONG *UserTime, DWORDLONG *KernelTime);
+BOOL vfs_getrusage_CHILDREN(DWORD ParentId, WIN_RUSAGE *Result);
 
 /* vfs_libgen.c */
 
@@ -182,7 +182,7 @@ BOOL vfs_poll(WIN_TASK *Task, WIN_VNODE *Nodes[], WIN_POLLFD *Info[], DWORD *Tim
 
 /* vfs_wait.c */
 
-BOOL vfs_wait4(WIN_TASK *Task, WIN_TASK *Children[], BOOL NoHang, DWORD Status, WIN_WAITINFO *Result);
+BOOL vfs_wait4(WIN_TASK *Task, WIN_TASK *Children[], BOOL NoHang, DWORD Status, WIN_RUSAGE *Result);
 
 /* vfs_tty.c */
 
@@ -196,9 +196,9 @@ WIN_TASK *proc_start(WIN_SIGPROC SignalProc);
 WIN_TASK *proc_dup(WIN_TASK *Parent, WIN_THREAD_STRUCT *Thread);
 BOOL proc_close(WIN_TASK *Task);
 BOOL proc_poll(WIN_TASK *Task);
-DWORD proc_VM_LOADAVG(WIN_TASK Tasks[], WIN_LOADAVG *Load);
 DECLSPEC_NORETURN VOID proc_exit(DWORD ExitCode);
 BOOL proc_execve(WIN_TASK *Task, LPSTR Command, PVOID Environ);
+VOID proc_F_ORPHANED(WIN_TASK *Task);
 
 /* drive.c */
 

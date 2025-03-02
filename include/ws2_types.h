@@ -28,7 +28,7 @@
  *
  */
 
-#include "ws2ipdef.h"
+#include "win/ws2ipdef.h"
 
 #define WS_IFF_UP          0x1             /* interface is up */
 #define WS_IFF_BROADCAST   0x2             /* broadcast address valid */

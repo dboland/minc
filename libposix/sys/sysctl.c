@@ -188,13 +188,10 @@ sysctl_HW(const int *name, void *oldp, size_t *oldlenp, void *newp, size_t newle
 int 
 sysctl_VM_LOADAVG(struct loadavg *load, size_t size)
 {
-	int result = 0;
-	DWORD dwCount = size / sizeof(struct loadavg);
-
-	if (!proc_VM_LOADAVG(__Tasks, (WIN_LOADAVG *)load)){
-		result -= errno_posix(GetLastError());
-	}
-	return(result);
+	/* Not sure what this should be.
+	 * Let OpenBSD figure it out (top.exe).
+	 */
+	return(0);
 }
 int 
 sysctl_VM_UVMEXP(struct uvmexp *uvm, size_t size)
@@ -334,7 +331,7 @@ sysctl_NET(const int *name, void *oldp, size_t *oldlenp, void *newp, size_t newl
 			result = sysctl_NET_INET6(name, oldp, oldlenp);
 			break;
 		case PF_KEY:
-			*oldlenp = 0;		/* no IPSEC (ifconfig.exe) */
+			*oldlenp = 0;		/* no IPSEC (netstat.exe) */
 			break;
 		default:
 			result = -ENOENT;

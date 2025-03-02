@@ -33,27 +33,28 @@
 /************************************************************/
 
 WIN_TASK *
-ProcCreateTask(DWORD TaskId)
+ProcCreateTask(DWORD Offset)
 {
-	WIN_TASK *pwTask = &__Tasks[TaskId];
+	WIN_TASK *pwTask = &__Tasks[Offset];
 	DWORD dwAffinity = 0;
 
-	while (TaskId < WIN_CHILD_MAX){
+	while (Offset < WIN_CHILD_MAX){
 		if (!pwTask->Flags){
 			pwTask->Flags = WIN_PS_EMBRYO;
-			pwTask->TaskId = TaskId;
+			pwTask->TaskId = Offset;
 			pwTask->ThreadId = GetCurrentThreadId();
 			pwTask->ProcessId = GetCurrentProcessId();
 			pwTask->Processor = KeGetCurrentProcessorNumber();
 			GetSystemTimeAsFileTime(&pwTask->Started);
+			vfs_clock_gettime_MONOTONIC(&pwTask->ClockTime);
 			return(pwTask);
 		}else if (pwTask->Flags & WIN_PS_NOZOMBIE){
 			ZeroMemory(pwTask, sizeof(WIN_TASK));
 		}
-		TaskId++;
+		Offset++;
 		pwTask++;
 	}
-	WIN_ERR("ProcCreateTask(%d): %s\n", TaskId, win_strerror(ERROR_MAX_THRDS_REACHED));
+	WIN_ERR("ProcCreateTask(%d): %s\n", Offset, win_strerror(ERROR_MAX_THRDS_REACHED));
 	vfs_raise(WM_COMMAND, CTRL_ABORT_EVENT, 0);
 	return(NULL);
 }

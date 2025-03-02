@@ -30,22 +30,13 @@
 
 #include <winbase.h>
 
-/****************************************************/
+/************************************************************/
 
-DWORD 
-proc_VM_LOADAVG(WIN_TASK Tasks[], WIN_LOADAVG *Load)
+VOID 
+proc_F_ORPHANED(WIN_TASK *Task)
 {
-	DWORD dwResult = 0;
-	DWORD dwIndex = 0;
-	WIN_TASK *pTask = Tasks;
+	DWORD dwProcessId = __Tasks[WIN_PID_INIT].ProcessId;
 
-	while (dwIndex < WIN_CHILD_MAX){
-		if (pTask->Flags){
-			Load->Averages[0] = 1;
-			dwResult++;
-		}
-		dwIndex++;
-		pTask++;
-	}
-	return(dwResult);
+	Task->Handle = win_F_DISINHERIT(Task->Handle, dwProcessId);
+	Task->TaskId = WIN_PID_INIT;
 }

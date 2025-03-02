@@ -77,9 +77,9 @@ DWORDLONG win_HW_PHYSMEM64(VOID);
 UINT win_KERN_CLOCKRATE(VOID);
 BOOL win_KERN_HOSTNAME(LPSTR Current, LPCSTR New, DWORD Size);
 BOOL win_KERN_DOMAINNAME(LPSTR Current, LPCSTR New, DWORD Size);
-BOOL win_KERN_PROC(DWORD ThreadId, WIN_KINFO_PROC *Result);
 BOOL win_KERN_CPTIME2(SYSTEM_PROCESSOR_PERFORMANCE_INFORMATION Buffer[], ULONG Size);
 BOOL win_KERN_BOOTTIME(FILETIME *Result);
+BOOL win_KERN_PROC(DWORD ThreadId, WIN_KUSAGE *Result);
 
 /* win_libgen.c */
 
@@ -183,7 +183,6 @@ BOOL win_ldt_write(DWORD Selector, DWORD Base, DWORD Limit);
 
 /* win_time.c */
 
-BOOL win_clock_gettime_MONOTONIC(DWORDLONG *Result);
 BOOL win_settimeofday(DWORDLONG Time, WORD MilliSeconds);
 
 /* win_mount.c */

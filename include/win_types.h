@@ -182,6 +182,17 @@ typedef struct _WIN_OBJECT_CONTROL {
 } WIN_OBJECT_CONTROL;
 
 /*
+ * win_sysctl.c
+ */
+
+typedef struct _WIN_KUSAGE {
+	FILETIME Creation;
+	FILETIME Exit;
+	FILETIME Kernel;
+	FILETIME User;
+} WIN_KUSAGE;
+
+/*
  * win_stdlib.c
  */
 
@@ -292,22 +303,6 @@ typedef struct _WIN_GRENT {
 	CHAR Comment[MAX_COMMENT];
 	CHAR Members[MAX_TEXT];
 } WIN_GRENT;
-
-/*
- * win_sysctl.c
- */
-
-typedef struct _WIN_LOADAVG {
-	DWORD Averages[3];
-	LONG Scale;
-} WIN_LOADAVG;
-
-typedef struct _WIN_KINFO_PROC {
-	FILETIME Created;
-	FILETIME Exited;
-	FILETIME Kernel;
-	FILETIME User;
-} WIN_KINFO_PROC;
 
 /*
  * win_uio.c

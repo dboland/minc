@@ -54,6 +54,41 @@ TimeGetTickCount(VOID)
 /****************************************************/
 
 BOOL 
+vfs_clock_gettime_MONOTONIC(DWORDLONG *Result)
+{
+	BOOL bResult = FALSE;
+	LARGE_INTEGER liCount;
+	DWORD dwFrequency;
+
+	if (!QueryPerformanceCounter(&liCount)){
+		WIN_ERR("QueryPerformanceCounter(): %s\n", win_strerror(GetLastError()));
+	}else{
+		dwFrequency = 1000000000LL / __Frequency->QuadPart;
+		*Result = liCount.QuadPart * dwFrequency;
+		bResult = TRUE;
+	}
+	return(bResult);
+}
+
+/************************************************************/
+
+BOOL 
+vfs_getitimer(WIN_TASK *Task, HANDLE *Result)
+{
+	BOOL bResult = TRUE;
+	HANDLE hResult = NULL;
+
+	if (Task->Timer){
+		hResult = Task->Timer;
+	}else if (hResult = CreateWaitableTimer(NULL, FALSE, NULL)){
+		Task->Timer = hResult;
+	}else{
+		bResult = FALSE;
+	}
+	*Result = hResult;
+	return(bResult);
+}
+BOOL 
 vfs_setitimer(WIN_TASK *Task, LONG *Interval, DWORDLONG *TimeOut)
 {
 	BOOL bResult = FALSE;
@@ -72,16 +107,16 @@ vfs_setitimer(WIN_TASK *Task, LONG *Interval, DWORDLONG *TimeOut)
 		ptProc = NULL;
 	}
 	liTimeOut.QuadPart = (LONGLONG)(dwlTimeOut * -0.01);	/* 100-nanosecond intervals */
-	if (!win_clock_gettime_MONOTONIC(&dwlTicks)){
+	if (!vfs_clock_gettime_MONOTONIC(&dwlTicks)){
 		return(FALSE);
-	}else if (!proc_getitimer(Task, &hTimer)){
+	}else if (!vfs_getitimer(Task, &hTimer)){
 		return(FALSE);
 	}else if (!SetWaitableTimer(hTimer, &liTimeOut, lInterval, ptProc, Task, FALSE)){
 		WIN_ERR("SetWaitableTimer(%d): %s\n", hTimer, win_strerror(GetLastError()));
 	}else{
 		bResult = TRUE;
 	}
-	llRemain = Task->Ticks - dwlTicks;
+	llRemain = Task->TimerTicks - dwlTicks;
 	if (llRemain > 0){
 		*TimeOut = llRemain;
 	}else{
@@ -89,7 +124,7 @@ vfs_setitimer(WIN_TASK *Task, LONG *Interval, DWORDLONG *TimeOut)
 	}
 	*Interval = Task->Interval;
 	Task->Interval = lInterval;
-	Task->Ticks = dwlTicks + dwlTimeOut;
+	Task->TimerTicks = dwlTicks + dwlTimeOut;
 //VfsDebugTimer(Task, "vfs_setitimer");
 	return(bResult);
 }

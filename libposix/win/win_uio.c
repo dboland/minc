@@ -50,7 +50,7 @@ win_writev(HANDLE Handle, const WIN_IOVEC Data[], DWORD Count, ULONG *Result)
 		Data++;
 	}
 	if (!WriteFile(Handle, pvBuffer, ulSize, &dwSize, NULL)){
-		WIN_ERR("win_writev(WriteFile(%d)): %s\n", Handle, win_strerror(GetLastError()));
+		WIN_ERR("win_writev(%d): %s\n", Handle, win_strerror(GetLastError()));
 	}else{
 		*Result = ulSize;
 		bResult = TRUE;

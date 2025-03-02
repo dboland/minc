@@ -1,4 +1,4 @@
-VERSION=20211209
+VERSION=20240915
 BUILD=$(shell date +%s)
 DESTDIR=/C/MinC
 GCCVER=4.8.1
@@ -8,10 +8,10 @@ SRCDIR=/D/openbsd-master
 .SUFFIXES:
 .DEFAULT:
 
-# PIC default: 0x10000000 (lib space)
+# PIC default: 0x10000000 (library space)
 # PIE default: 0x00400000 (program space)
 
-IMGBASE_LIBDL=		0x0FF80000 # (500K)
+IMGBASE_LIBD=		0x0FF80000 # (500K)
 IMGBASE_LIBPOSIX=	0x0FF00000 # (500K)
 IMGBASE_LIBC=		0x0FE00000
 IMGBASE_LIBSOCKET=	0x0FD00000
@@ -23,10 +23,11 @@ LIBPERL_IMGBASE=	0x0F600000 # (3MB)
 
 PREFIX=/usr
 BINDIR=/bin
+SBINDIR=/sbin
 UBINDIR=${PREFIX}/bin
 LIBDIR=${PREFIX}/lib
 INCDIR=${PREFIX}/include
 SHDIR=${PREFIX}/share
 MANDIR=${SHDIR}/man
 
-CFLAGS= -Wimplicit-function-declaration -Werror -ffixed-bx
+CFLAGS= -Wimplicit-function-declaration -Werror -ffixed-bx -ffreestanding

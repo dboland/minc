@@ -67,7 +67,7 @@ ktime_posix(FILETIME *Started)
 u_int64_t 
 kticks_posix(FILETIME *Time)
 {
-	DWORDLONG dwlTime = *(LONGLONG *)Time;
+	DWORDLONG dwlTime = *(DWORDLONG *)Time;
 
 	dwlTime *= 0.0001;				/* milliseconds */
 	return(dwlTime);
@@ -77,11 +77,10 @@ kproc_posix(struct kinfo_proc *proc, WIN_TASK *Task)
 {
 	WIN_TTY *pTerminal = &__Terminals[Task->CTTY];
 	wchar_t *command = win_basename(__Strings[Task->TaskId].Command);
-	struct timeval tv;
-	WIN_KINFO_PROC kInfo = {0};
 	DWORD dwPageSize = win_HW_PAGESIZE();
+	WIN_KUSAGE wkUsage;
+	struct timeval tv;
 	u_int64_t rtime;
-	u_int64_t nticks;
 
 	/* see: src/sys/sys/sysctl.h */
 
@@ -111,23 +110,21 @@ kproc_posix(struct kinfo_proc *proc, WIN_TASK *Task)
 	proc->p_vm_tsize = 10;
 	proc->p_vm_dsize = 10;
 	proc->p_vm_ssize = (WIN_STACKSIZE + dwPageSize - 1) / dwPageSize;
-	if (win_KERN_PROC(Task->ThreadId, &kInfo)){
+	if (win_KERN_PROC(Task->ThreadId, &wkUsage)){
 
 		proc->p_uvalid = 1;			/* CHAR: following p_u* members from struct user are valid */
 
-		timeval_posix(&tv, &kInfo.Created);
+		timeval_posix(&tv, &wkUsage.Creation);
 		proc->p_ustart_sec = tv.tv_sec;
 		proc->p_ustart_usec = tv.tv_usec;
 
-		rtime = ktime_posix(&kInfo.Created);	/* microseconds */
+		rtime = ktime_posix(&wkUsage.Creation);	/* microseconds */
 		proc->p_rtime_sec = rtime * 0.000001;
 		proc->p_rtime_usec = rtime - (proc->p_rtime_sec * 1000000);
 
-		proc->p_uticks = kticks_posix(&kInfo.User);	/* millisconds */
-		proc->p_sticks = kticks_posix(&kInfo.Kernel) + proc->p_uticks;
+		proc->p_uticks = kticks_posix(&wkUsage.User);	/* milliseconds */
+		proc->p_sticks = kticks_posix(&wkUsage.Kernel) + proc->p_uticks;
 
-//		nticks = proc->p_uticks + proc->p_sticks;
-//		proc->p_pctcpu = (nticks * 10000) / rtime;
 		proc->p_pctcpu = (proc->p_sticks * 100000) / rtime;
 
 	}

@@ -38,7 +38,7 @@ DllMainCRTStartup(HINSTANCE hinstDLL, DWORD fdwReason, LPVOID lpvReserved)
 	BOOL bResult = TRUE;
 
 	if (fdwReason == DLL_PROCESS_ATTACH){
-		bResult = vfs_init(FS_TYPE_WINSOCK);
+		bResult = vfs_start(FS_TYPE_WINSOCK);
 	}else if (fdwReason == DLL_PROCESS_DETACH){
 		bResult = vfs_finish(FS_TYPE_WINSOCK);
 	}

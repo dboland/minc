@@ -157,7 +157,7 @@ typedef WIN_DEVICE WIN_DEV_CLASS[WIN_UNIT_MAX];
 
 #define TypeNameLink		0x6B6E6C2E	/* ".lnk" */
 #define TypeNameExe		0x6578652E	/* ".exe" */
-#define TypeNameVirtual		0x7366762E	/* ".vfs" */
+//#define TypeNameVirtual		0x7366762E	/* ".vfs" */
 
 #define FILE_ATTRIBUTE_LABEL	0x00000008
 
@@ -382,53 +382,53 @@ typedef struct _WIN_GLOBALS {
 	SID8 SidMachine;
 	SID8 SidNone;
 	CHAR Root[MAX_PATH];
+	DWORD Load[3];
+	LARGE_INTEGER Frequency;	/* result of QueryPerformanceFrequency() */
 } WIN_GLOBALS;
 
 /*
  * vfs_signal.c
  */
 
+#define SIGMASK(s)		(1U << ((s)-1))
+
 #define WM_STRING		0xC000			/* RegisterWindowMessage() */
 #define WM_XPCONSOLE		(WM_STRING + 154)	/* 0xC09A */
 #define WM_QUIT			18
 #define WIN_NSIG		33
 
-#undef CTRL_C_EVENT
-#undef CTRL_BREAK_EVENT
-#undef CTRL_CLOSE_EVENT
-#undef CTRL_LOGOFF_EVENT
-#undef CTRL_SHUTDOWN_EVENT
-
-#define CTRL_BASE			100
-#define CTRL_C_EVENT			(CTRL_BASE+0)	/* SIGINT */
-#define CTRL_BREAK_EVENT		(CTRL_BASE+1)	/* SIGTSTP */
-#define CTRL_CLOSE_EVENT		(CTRL_BASE+2)	/* SIGKILL */
-#define CTRL_ACCESS_VIOLATION_EVENT	(CTRL_BASE+3)
-#define CTRL_ILLEGAL_INSTRUCTION_EVENT	(CTRL_BASE+4)
-#define CTRL_LOGOFF_EVENT		(CTRL_BASE+5)	/* SIGHUP */
-#define CTRL_SHUTDOWN_EVENT		(CTRL_BASE+6)	/* SIGTERM */
-#define CTRL_DIVIDE_BY_ZERO_EVENT	(CTRL_BASE+7)
-#define CTRL_SIZE_EVENT			(CTRL_BASE+8)
-#define CTRL_CHILD_EVENT		(CTRL_BASE+9)
-#define CTRL_TIMER_EVENT		(CTRL_BASE+10)
-#define CTRL_DETACH_EVENT		(CTRL_BASE+11)
-#define CTRL_QUIT_EVENT			(CTRL_BASE+12)
-#define CTRL_PIPE_EVENT			(CTRL_BASE+13)
-#define CTRL_ABORT_EVENT		(CTRL_BASE+14)
-#define CTRL_VTIMER_EVENT		(CTRL_BASE+15)
-#define CTRL_URGENT_EVENT		(CTRL_BASE+16)
-#define CTRL_USER1_EVENT		(CTRL_BASE+17)
-#define CTRL_USER2_EVENT		(CTRL_BASE+18)
-#define CTRL_INVALID_ARGUMENT_EVENT	(CTRL_BASE+19)
-#define CTRL_MONITOR_EVENT		(CTRL_BASE+20)
-#define CTRL_EMULATOR_EVENT		(CTRL_BASE+21)
-#define CTRL_BUS_EVENT			(CTRL_BASE+22)
-#define CTRL_INFO_EVENT			(CTRL_BASE+23)
-#define CTRL_STOP_EVENT			(CTRL_BASE+24)	/* Motor stop feature */
-#define CTRL_CONTINUE_EVENT		(CTRL_BASE+25)
-#define CTRL_BACKGROUND_READ_EVENT	(CTRL_BASE+26)
-#define CTRL_BACKGROUND_WRITE_EVENT	(CTRL_BASE+27)
-#define CTRL_IO_EVENT			(CTRL_BASE+28)
+#define CTRL_C_EVENT			0	/* SIGINT */
+#define CTRL_BREAK_EVENT		1	/* SIGTSTP */
+#define CTRL_CLOSE_EVENT		2	/* SIGKILL */
+#define CTRL_ACCESS_VIOLATION_EVENT	3	/* SIGSEGV */
+#define CTRL_ILLEGAL_INSTRUCTION_EVENT	4	/* SIGILL */
+#define CTRL_LOGOFF_EVENT		5	/* SIGHUP */
+#define CTRL_SHUTDOWN_EVENT		6	/* SIGTERM */
+#define CTRL_DIVIDE_BY_ZERO_EVENT	7	/* SIGFPE */
+#define CTRL_SIZE_EVENT			8	/* SIGWINCH */
+#define CTRL_CHILD_EVENT		9	/* SIGCHLD */
+#define CTRL_TIMER_EVENT		10	/* SIGALRM */
+#define CTRL_DETACH_EVENT		11	/* SIGTHR */
+#define CTRL_QUIT_EVENT			12	/* SIGQUIT */
+#define CTRL_PIPE_EVENT			13	/* SIGPIPE */
+#define CTRL_ABORT_EVENT		14	/* SIGABRT */
+#define CTRL_VTIMER_EVENT		15	/* SIGVTALRM */
+#define CTRL_URGENT_EVENT		16	/* SIGURG */
+#define CTRL_USER1_EVENT		17	/* SIGUSR1 */
+#define CTRL_USER2_EVENT		18	/* SIGUSR2 */
+#define CTRL_INVALID_ARGUMENT_EVENT	19	/* SIGSYS */
+#define CTRL_EMULATOR_EVENT		20	/* SIGEMT */
+#define CTRL_BUS_EVENT			21	/* SIGBUS */
+#define CTRL_INFO_EVENT			22	/* SIGINFO */
+#define CTRL_STOP_EVENT			23	/* SIGSTOP */
+#define CTRL_CONTINUE_EVENT		24	/* SIGCONT */
+#define CTRL_BACKGROUND_READ_EVENT	25	/* SIGTTIN */
+#define CTRL_BACKGROUND_WRITE_EVENT	26	/* SIGTTOU */
+#define CTRL_IO_EVENT			27	/* SIGIO */
+#define CTRL_TRAP_EVENT			28	/* SIGTRAP */
+#define CTRL_EXCEDED_CPUTIME_EVENT	29	/* SIGXCPU */
+#define CTRL_EXCEDED_FILE_SIZE_EVENT	30	/* SIGXFSZ */
+#define CTRL_PROFILING_EVENT		31	/* SIGPROF */
 
 typedef struct _WIN_SIGACTION {
 	PVOID Function;
@@ -464,12 +464,14 @@ typedef struct _WIN_RLIMIT {
  * vfs_wait.c
  */
 
-typedef struct _WIN_WAITINFO {
+typedef struct _WIN_RUSAGE {
 	DWORD TaskId;
 	DWORD Status;
+	DWORDLONG StartTime;
+	DWORDLONG ExitTime;
 	DWORDLONG KernelTime;
 	DWORDLONG UserTime;
-} WIN_WAITINFO;
+} WIN_RUSAGE;
 
 /*
  * vfs_sched.c
@@ -498,13 +500,13 @@ typedef struct _WIN_TASK {
 	HANDLE TraceHandle;
 	DWORD TracePoints;
 	FILETIME Started;
-	FILETIME Exited;
-	FILETIME UserTime;
-	FILETIME KernelTime;
+	DWORDLONG ClockTime;		/* clock at syscall() in nanoseconds */
+	DWORDLONG KernelTime;		/* kernel time in nanoseconds */
+	DWORDLONG UserTime;		/* user time in nanoseconds */
 	DWORD State;
 	DWORD Code;			/* syscall currently running */
-	HANDLE Timer;
-	DWORDLONG Ticks;		/* number of ticks in nanoseconds */
+	HANDLE Timer;			/* interval timer */
+	DWORDLONG TimerTicks;		/* in nanoseconds */
 	LONG Interval;			/* last interval in milliseconds */
 	UINT ProcMask;			/* blocked signals */
 	UINT Pending;			/* pending signals */

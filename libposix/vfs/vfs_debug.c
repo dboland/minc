@@ -470,7 +470,7 @@ VOID
 VfsDebugTimer(WIN_TASK *Task, LPCSTR Label)
 {
 	msvc_printf("%s(%d): Timer(%d) Interval(%d) Ticks(%I64d)\n", 
-		Label, Task->TaskId, Task->Timer, Task->Interval, Task->Ticks);
+		Label, Task->TaskId, Task->Timer, Task->Interval, Task->TimerTicks);
 }
 VOID 
 VfsDebugLink(LINK_INFO *Info, LPSTR Label)

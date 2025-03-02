@@ -47,16 +47,16 @@
 
 static const 
 DWORD __SIG_WIN[NSIG] = {
-	-1,
+	0,
 	CTRL_LOGOFF_EVENT,
 	CTRL_C_EVENT,
 	CTRL_QUIT_EVENT,
 	CTRL_ILLEGAL_INSTRUCTION_EVENT,
-	-5,
+	CTRL_TRAP_EVENT,
 	CTRL_ABORT_EVENT,
 	CTRL_EMULATOR_EVENT,
 	CTRL_DIVIDE_BY_ZERO_EVENT,
-	CTRL_CLOSE_EVENT,
+	CTRL_CLOSE_EVENT,		/* closing Console window */
 	CTRL_BUS_EVENT,			/* 10 */
 	CTRL_ACCESS_VIOLATION_EVENT,
 	CTRL_INVALID_ARGUMENT_EVENT,
@@ -71,15 +71,51 @@ DWORD __SIG_WIN[NSIG] = {
 	CTRL_BACKGROUND_READ_EVENT,
 	CTRL_BACKGROUND_WRITE_EVENT,
 	CTRL_IO_EVENT,
-	-24,
-	-25,
+	CTRL_EXCEDED_CPUTIME_EVENT,
+	CTRL_EXCEDED_FILE_SIZE_EVENT,
 	CTRL_VTIMER_EVENT,
-	-27,
+	CTRL_PROFILING_EVENT,
 	CTRL_SIZE_EVENT,
 	CTRL_INFO_EVENT,
 	CTRL_USER1_EVENT,		/* 30 */
 	CTRL_USER2_EVENT,
 	CTRL_DETACH_EVENT
+};
+static const 
+int __SIG_POSIX[NSIG] = {
+	SIGINT,
+	SIGTSTP,
+	SIGKILL,		/* cannot be caught or ignored */
+	SIGSEGV,
+	SIGILL,
+	SIGHUP,
+	SIGTERM,		/* default of kill command */
+	SIGFPE,
+	SIGWINCH,
+	SIGCHLD,
+	SIGALRM,	/* 10 */
+	SIGTHR,
+	SIGQUIT,		/* SIGTERM with coredump */
+	SIGPIPE,
+	SIGABRT,		/* sent by abort() */
+	SIGVTALRM,		/* SIGALRM in program time */
+	SIGURG,
+	SIGUSR1,
+	SIGUSR2,
+	SIGSYS,
+	SIGEMT,		/* 20 */
+	SIGBUS,
+	SIGINFO,
+	SIGSTOP,		/* Motor stop feature (CuriousMark, 2018) */
+	SIGCONT,
+	SIGTTIN,
+	SIGTTOU,
+	SIGIO,
+	SIGTRAP,
+	SIGXCPU,
+	SIGXFSZ,	/* 30 */
+	SIGPROF,
+	0
 };
 
 /****************************************************/
@@ -103,101 +139,6 @@ context_posix(ucontext_t *ucontext, CONTEXT *Context)
 	ucontext->sc_gs = Context->SegGs;
 	ucontext->sc_ss = Context->SegSs;
 	return(ucontext);
-}
-int 
-signum_posix(DWORD CtrlType)
-{
-	int signum = 0;
-
-	switch (CtrlType){
-		case CTRL_C_EVENT:
-			signum = SIGINT;		/* user interrupt */
-			break;
-		case CTRL_BREAK_EVENT:
-			signum = SIGTSTP;
-			break;
-		case CTRL_CLOSE_EVENT:			/* closing Console window */
-			signum = SIGKILL;		/* cannot be caught or ignored */
-			break;
-		case CTRL_LOGOFF_EVENT:
-			signum = SIGHUP;
-			break;
-		case CTRL_SHUTDOWN_EVENT:
-			signum = SIGTERM;		/* default of kill command */
-			break;
-		case CTRL_ACCESS_VIOLATION_EVENT:
-			signum = SIGSEGV;
-			break;
-		case CTRL_ILLEGAL_INSTRUCTION_EVENT:
-			signum = SIGILL;
-			break;
-		case CTRL_DIVIDE_BY_ZERO_EVENT:
-			signum = SIGFPE;
-			break;
-		case CTRL_SIZE_EVENT:
-			signum = SIGWINCH;
-			break;
-		case CTRL_CHILD_EVENT:
-			signum = SIGCHLD;
-			break;
-		case CTRL_TIMER_EVENT:
-			signum = SIGALRM;
-			break;
-		case CTRL_DETACH_EVENT:
-			signum = SIGTHR;
-			break;
-		case CTRL_QUIT_EVENT:
-			signum = SIGQUIT;		/* SIGTERM with coredump */
-			break;
-		case CTRL_PIPE_EVENT:
-			signum = SIGPIPE;
-			break;
-		case CTRL_ABORT_EVENT:
-			signum = SIGABRT;		/* sent by abort() */
-			break;
-		case CTRL_VTIMER_EVENT:
-			signum = SIGVTALRM;		/* SIGALRM in program time */
-			break;
-		case CTRL_USER1_EVENT:
-			signum = SIGUSR1;
-			break;
-		case CTRL_USER2_EVENT:
-			signum = SIGUSR2;
-			break;
-		case CTRL_INVALID_ARGUMENT_EVENT:
-			signum = SIGSYS;
-			break;
-		case CTRL_EMULATOR_EVENT:
-			signum = SIGEMT;
-			break;
-		case CTRL_BUS_EVENT:
-			signum = SIGBUS;
-			break;
-		case CTRL_INFO_EVENT:
-			signum = SIGINFO;
-			break;
-		case CTRL_STOP_EVENT:	/* Ye Olde TTY was loud when idle (CuriousMark, 2018) */
-			signum = SIGSTOP;
-			break;
-		case CTRL_CONTINUE_EVENT:
-			signum = SIGCONT;
-			break;
-		case CTRL_BACKGROUND_READ_EVENT:
-			signum = SIGTTIN;
-			break;
-		case CTRL_BACKGROUND_WRITE_EVENT:
-			signum = SIGTTOU;
-			break;
-		case CTRL_IO_EVENT:
-			signum = SIGIO;
-			break;
-		case CTRL_URGENT_EVENT:
-			signum = SIGURG;
-			break;
-		default:
-			msvc_printf("signum_posix(%d): Not implemented.\n", CtrlType);
-	}
-	return(signum);
 }
 int 
 __sigsuspend(WIN_TASK *Task, const sigset_t *mask)
@@ -258,11 +199,11 @@ sigproc_posix(WIN_TASK *Task, int signum, ucontext_t *ucontext)
 //		Task->Pending = __SIG_WIN[signum];
 //		result = -1;
 //	}else 
-	if (handler == SIG_DFL){		/* terminate process, if applicable */
+	if (handler == SIG_DFL){		/* terminate, if applicable */
 		result = sigproc_default(Task, signum);
-	}else if (handler == SIG_ERR){		/* never terminate, but interrupt system call */
-		Task->Status = (Task->Error * 0x100) + signum;
-	}else if (handler == SIG_IGN){		/* never terminate, never interrupt system call */
+	}else if (handler == SIG_ERR){		/* don't terminate, but interrupt system call */
+		Task->Status = signum;
+	}else if (handler == SIG_IGN){		/* don't terminate, don't interrupt */
 		result = -1;
 	}else if (flags & SA_SIGINFO){
 		action(signum, &info, ucontext);
@@ -277,7 +218,7 @@ sigproc_win(DWORD CtrlType, CONTEXT *Context)
 	BOOL bResult = FALSE;
 	ucontext_t ucontext = {0};
 
-	if (!sigproc_posix(&__Tasks[CURRENT], signum_posix(CtrlType), context_posix(&ucontext, Context))){
+	if (!sigproc_posix(&__Tasks[CURRENT], __SIG_POSIX[CtrlType], context_posix(&ucontext, Context))){
 		bResult = TRUE;
 	}
 	return(bResult);
@@ -363,7 +304,6 @@ sys_sigprocmask(call_t call, int how, const sigset_t *restrict set, sigset_t *re
 		}else if (how == SIG_SETMASK){	// 3
 			curset = newset;
 		}
-//__PRINTF("curset: 0x%x\n", curset)
 		pwTask->ProcMask = curset;
 	}
 	return(result);
@@ -377,12 +317,11 @@ int
 sys_sigpending(call_t call, sigset_t *set)
 {
 	int result = 0;
-	int signum = signum_posix(call.Task->Pending);
 
 	if (!set){
 		result = -EFAULT;
 	}else{
-		*set = sigmask(signum);
+		*set = call.Task->Pending;
 	}
 	return(result);
 }

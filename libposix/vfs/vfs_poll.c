@@ -137,6 +137,6 @@ vfs_poll(WIN_TASK *Task, WIN_VNODE *Nodes[], WIN_POLLFD *Info[], DWORD *TimeOut,
 			break;
 		}
 	}
-	Task->State = WIN_SRUN;
+	Task->State = WIN_SONPROC;
 	return(bResult);
 }

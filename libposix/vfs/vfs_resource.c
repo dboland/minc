@@ -33,36 +33,19 @@
 /************************************************************/
 
 BOOL 
-vfs_getrusage_SELF(WIN_TASK *Task)
-{
-	BOOL bResult = FALSE;
-	HANDLE hThread;
-
-	if (!(hThread = OpenThread(THREAD_QUERY_INFORMATION, FALSE, Task->ThreadId))){
-		return(FALSE);
-	}else if (GetThreadTimes(hThread, &Task->Started, &Task->Exited, &Task->KernelTime, &Task->UserTime)){
-		bResult = CloseHandle(hThread);
-	}
-	return(bResult);
-}
-BOOL 
-vfs_getrusage_CHILDREN(DWORD ParentId, DWORDLONG *UserTime, DWORDLONG *KernelTime)
+vfs_getrusage_CHILDREN(DWORD ParentId, WIN_RUSAGE *Result)
 {
 	BOOL bResult = TRUE;
-	DWORDLONG dwlUser = *UserTime;
-	DWORDLONG dwlKernel = *KernelTime;
 	DWORD dwIndex = WIN_PID_INIT;
 	WIN_TASK *pwTask = &__Tasks[dwIndex];
 
 	while (dwIndex < WIN_CHILD_MAX){
 		if (pwTask->ParentId == ParentId){
-			dwlUser += *(DWORDLONG *)&pwTask->UserTime;
-			dwlKernel += *(DWORDLONG *)&pwTask->KernelTime;
+			Result->UserTime += pwTask->UserTime;
+			Result->KernelTime += pwTask->KernelTime;
 		}
 		dwIndex++;
 		pwTask++;
 	}
-	*UserTime = dwlUser;
-	*KernelTime = dwlKernel;
 	return(bResult);
 }

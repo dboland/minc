@@ -33,5 +33,4 @@
 #include "process_stdlib.c"
 #include "process_unistd.c"
 #include "process_poll.c"
-#include "process_sysctl.c"
-#include "process_time.c"
+#include "process_fcntl.c"

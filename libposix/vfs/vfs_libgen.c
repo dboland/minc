@@ -33,6 +33,14 @@
 /****************************************************/
 
 VOID 
+vfs_init(WIN_GLOBALS *Globals)
+{
+	AclInit(&Globals->SidMachine, &Globals->SidNone);
+	if (!QueryPerformanceFrequency(&Globals->Frequency)){
+		WIN_ERR("QueryPerformanceFrequency(): %s\n", win_strerror(GetLastError()));
+	}
+}
+VOID 
 vfs_setproctitle(LPCSTR Title)
 {
 	win_mbstowcs(__Strings[CURRENT].Command, Title, WIN_MAX_PROCTITLE);

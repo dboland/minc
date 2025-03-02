@@ -35,24 +35,17 @@
 BOOL CALLBACK 
 ConControlHandler(DWORD CtrlType)
 {
-	BOOL bResult = TRUE;
-
 	/* To deliver signals, Windows (CSRSS.EXE) actually forks!
 	 * Copying the call stack to a new thread and executing
 	 * our code. Let's make sure it uses our Task struct too:
 	 */
 	TlsSetValue(__TlsIndex, (PVOID)__Process->TaskId);
 	if (__Process->GroupId == __CTTY->GroupId){
-		if (!vfs_raise(WM_COMMAND, CTRL_BASE + CtrlType, 0)){
-			__Process->Flags |= WIN_PS_EXITING;
-			/* causes ExitProcess() */
-			bResult = FALSE;
-		}else{
-			__Process->Pending = CTRL_BASE + CtrlType;
+		if (vfs_raise(WM_COMMAND, CtrlType, 0)){
 			SetEvent(__Interrupt);
 		}
 	}
-	return(bResult);
+	return(TRUE);	/* FALSE causes ExitProcess() */
 }
 
 /****************************************************/

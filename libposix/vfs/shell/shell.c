@@ -44,5 +44,4 @@ shell_init(HINSTANCE Instance, WIN_GLOBALS *Globals)
 	}else{
 		msvc_dirname(msvc_dirname(pszRoot));
 	}
-	AclInit(&Globals->SidMachine, &Globals->SidNone);
 }

@@ -45,20 +45,17 @@ WaitGetObjects(WIN_TASK *Children[], HANDLE Result[])
 	return(dwResult);
 }
 BOOL 
-WaitNoHang(WIN_TASK *Children[], DWORD Status, WIN_WAITINFO *Result)
+WaitNoHang(WIN_TASK *Children[], DWORD Status, WIN_RUSAGE *Result)
 {
 	WIN_TASK *pwTask = NULL;
 
 	while (pwTask = *Children++){
 		if (pwTask->Flags & WIN_PS_NOZOMBIE){   /* recursive wait (ksh.exe) */
 			ZeroMemory(pwTask, sizeof(WIN_TASK));
-//			break;
 		}else if (pwTask->Flags & WIN_PS_ZOMBIE){
 			Result->TaskId = pwTask->TaskId;
 			Result->Status = pwTask->Status;
 			proc_close(pwTask);
-			Result->UserTime += *(DWORDLONG *)&pwTask->UserTime;
-			Result->KernelTime += *(DWORDLONG *)&pwTask->KernelTime;
 			return(TRUE);
 		}else if (pwTask->Status & Status){
 			Result->TaskId = pwTask->TaskId;
@@ -87,7 +84,7 @@ WaitTimeOut(WIN_TASK *Children[], DWORD TimeOut)
 /************************************************************/
 
 BOOL 
-vfs_wait4(WIN_TASK *Task, WIN_TASK *Children[], BOOL NoHang, DWORD Status, WIN_WAITINFO *Result)
+vfs_wait4(WIN_TASK *Task, WIN_TASK *Children[], BOOL NoHang, DWORD Status, WIN_RUSAGE *Result)
 {
 	BOOL bResult = FALSE;
 
@@ -103,10 +100,8 @@ vfs_wait4(WIN_TASK *Task, WIN_TASK *Children[], BOOL NoHang, DWORD Status, WIN_W
 			break;
 		}
 	}
-	if (vfs_getrusage_SELF(Task)){
-		Result->UserTime += *(DWORDLONG *)&Task->UserTime;
-		Result->KernelTime += *(DWORDLONG *)&Task->KernelTime;
-	}
-	Task->State = WIN_SRUN;
+	Result->KernelTime = Task->KernelTime;
+	Result->UserTime = Task->UserTime;
+	Task->State = WIN_SONPROC;
 	return(bResult);
 }

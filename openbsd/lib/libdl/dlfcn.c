@@ -39,25 +39,18 @@ dlopen(const char *path, int mode)
 {
 	void *result = NULL;
 	WIN_NAMEIDATA wPath;
-	WIN_TASK *pwTask = &__Tasks[CURRENT];
 
 	if (!path){
 		result = win_dlopen(NULL);
-	}else if (!(result = win_dlopen(path_win(&wPath, path, 0)->Resolved))){
-		pwTask->Error = errno_posix(errno_win());
+	}else{
+		result = win_dlopen(path_win(&wPath, path, 0)->Resolved);
 	}
 	return(result);
 }
 void *
 dlsym(void *handle, const char *symbol)
 {
-	void *result = NULL;
-	WIN_TASK *pwTask = &__Tasks[CURRENT];
-
-	if (!(result = win_dlsym(handle, symbol))){
-		pwTask->Error = errno_posix(errno_win());
-	}
-	return(result);
+	return(win_dlsym(handle, symbol));
 }
 char *
 dlerror(void)
@@ -75,11 +68,8 @@ dladdr(const void *addr, Dl_info *info)
 	int result = 0;
 	MEMORY_BASIC_INFORMATION mbInfo;
 	WCHAR szPath[MAX_PATH];
-	WIN_TASK *pwTask = &__Tasks[CURRENT];
 
-	if (!win_dladdr(addr, &mbInfo, szPath)){
-		pwTask->Error = errno_posix(errno_win());
-	}else{
+	if (win_dladdr(addr, &mbInfo, szPath)){
 		info->dli_fname = path_posix(__DL_PATH_BUF, szPath);
 		info->dli_fbase = mbInfo.AllocationBase;
 		info->dli_sname = NULL;
