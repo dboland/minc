@@ -57,7 +57,7 @@ ktrace_SYSCALL(WIN_TASK *Task, register_t code, size_t argsize, register_t args[
 		{NULL, 0}
 	};
 	DWORD dwCount = 3;
-//	ULONG ulResult;
+	ULONG ulResult;
 	register_t buf[4] = {0};
 
 	if (code == SYS___sysctl){

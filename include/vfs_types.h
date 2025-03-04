@@ -157,7 +157,7 @@ typedef WIN_DEVICE WIN_DEV_CLASS[WIN_UNIT_MAX];
 
 #define TypeNameLink		0x6B6E6C2E	/* ".lnk" */
 #define TypeNameExe		0x6578652E	/* ".exe" */
-//#define TypeNameVirtual		0x7366762E	/* ".vfs" */
+#define TypeNameVirtual		0x7366762E	/* ".vfs" */
 
 #define FILE_ATTRIBUTE_LABEL	0x00000008
 

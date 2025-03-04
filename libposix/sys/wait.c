@@ -99,9 +99,6 @@ rusage_posix(WIN_TASK *Task, WIN_RUSAGE *Usage, struct rusage *result)
 {
 	DWORDLONG dwlTime;
 
-	Usage->UserTime = Task->UserTime;
-	Usage->KernelTime = Task->KernelTime;
-
 	vfs_getrusage_CHILDREN(Task->TaskId, Usage);
 
 	win_bzero(result, sizeof(struct rusage));

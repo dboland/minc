@@ -150,8 +150,7 @@ posix_PROCESS_DETACH(WIN_TASK *Task)
 		Task->State = WIN_SZOMB;
 		vfs_closefrom(Task->Node);
 		if (!vfs_kill_PID(pid_win(Task->ParentId), WM_COMMAND, CTRL_CHILD_EVENT, Task->TaskId)){
-//			proc_close(Task);		/* orphaned */
-			proc_F_ORPHANED(Task);
+			proc_close(Task);		/* orphaned */
 		}
 	}
 	return(TRUE);
@@ -167,8 +166,7 @@ posix_THREAD_DETACH(WIN_TASK *Task)
 		Task->State = WIN_SZOMB;
 		__closefrom(Task->Node, 0);
 		if (!vfs_kill_PID(pid_win(Task->ParentId), WM_COMMAND, CTRL_CHILD_EVENT, Task->TaskId)){
-//			proc_close(Task);		/* orphaned */
-			proc_F_ORPHANED(Task);
+			proc_close(Task);		/* orphaned */
 		}
 	}
 	return(TRUE);

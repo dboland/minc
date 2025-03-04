@@ -62,6 +62,8 @@ pipe_bind(WIN_VNODE *Node, LPSOCKADDR Name, INT Length)
 BOOL 
 pipe_listen(WIN_VNODE *Node, INT Backlog)
 {
+	/* saslauthd.exe
+	 */
 	return(TRUE);
 }
 BOOL 

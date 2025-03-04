@@ -95,7 +95,7 @@ vfs_setitimer(WIN_TASK *Task, LONG *Interval, DWORDLONG *TimeOut)
 	LARGE_INTEGER liTimeOut;
 	DWORDLONG dwlTimeOut = *TimeOut;
 	LONG lInterval = *Interval;
-	DWORDLONG dwlTicks = 0LL;
+	DWORDLONG dwlTicks = Task->ClockTime;
 	LONGLONG llRemain;
 	HANDLE hTimer;
 	PTIMERAPCROUTINE ptProc = TimeProc;
@@ -107,9 +107,7 @@ vfs_setitimer(WIN_TASK *Task, LONG *Interval, DWORDLONG *TimeOut)
 		ptProc = NULL;
 	}
 	liTimeOut.QuadPart = (LONGLONG)(dwlTimeOut * -0.01);	/* 100-nanosecond intervals */
-	if (!vfs_clock_gettime_MONOTONIC(&dwlTicks)){
-		return(FALSE);
-	}else if (!vfs_getitimer(Task, &hTimer)){
+	if (!vfs_getitimer(Task, &hTimer)){
 		return(FALSE);
 	}else if (!SetWaitableTimer(hTimer, &liTimeOut, lInterval, ptProc, Task, FALSE)){
 		WIN_ERR("SetWaitableTimer(%d): %s\n", hTimer, win_strerror(GetLastError()));
@@ -125,7 +123,6 @@ vfs_setitimer(WIN_TASK *Task, LONG *Interval, DWORDLONG *TimeOut)
 	*Interval = Task->Interval;
 	Task->Interval = lInterval;
 	Task->TimerTicks = dwlTicks + dwlTimeOut;
-//VfsDebugTimer(Task, "vfs_setitimer");
 	return(bResult);
 }
 BOOL 

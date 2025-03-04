@@ -217,8 +217,11 @@ sigproc_win(DWORD CtrlType, CONTEXT *Context)
 {
 	BOOL bResult = FALSE;
 	ucontext_t ucontext = {0};
+	WIN_TASK *pwTask = &__Tasks[CURRENT];
 
-	if (!sigproc_posix(&__Tasks[CURRENT], __SIG_POSIX[CtrlType], context_posix(&ucontext, Context))){
+	if (!vfs_clock_gettime_MONOTONIC(&pwTask->ClockTime)){
+		return(TRUE);
+	}else if (!sigproc_posix(pwTask, __SIG_POSIX[CtrlType], context_posix(&ucontext, Context))){
 		bResult = TRUE;
 	}
 	return(bResult);

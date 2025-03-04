@@ -55,6 +55,8 @@ WaitNoHang(WIN_TASK *Children[], DWORD Status, WIN_RUSAGE *Result)
 		}else if (pwTask->Flags & WIN_PS_ZOMBIE){
 			Result->TaskId = pwTask->TaskId;
 			Result->Status = pwTask->Status;
+			Result->UserTime += pwTask->UserTime;
+			Result->KernelTime += pwTask->KernelTime;
 			proc_close(pwTask);
 			return(TRUE);
 		}else if (pwTask->Status & Status){
@@ -100,8 +102,8 @@ vfs_wait4(WIN_TASK *Task, WIN_TASK *Children[], BOOL NoHang, DWORD Status, WIN_R
 			break;
 		}
 	}
-	Result->KernelTime = Task->KernelTime;
-	Result->UserTime = Task->UserTime;
+	Result->KernelTime += Task->KernelTime;
+	Result->UserTime += Task->UserTime;
 	Task->State = WIN_SONPROC;
 	return(bResult);
 }

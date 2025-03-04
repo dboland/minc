@@ -198,7 +198,6 @@ BOOL proc_close(WIN_TASK *Task);
 BOOL proc_poll(WIN_TASK *Task);
 DECLSPEC_NORETURN VOID proc_exit(DWORD ExitCode);
 BOOL proc_execve(WIN_TASK *Task, LPSTR Command, PVOID Environ);
-VOID proc_F_ORPHANED(WIN_TASK *Task);
 
 /* drive.c */
 
