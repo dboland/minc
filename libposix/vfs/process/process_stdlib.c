@@ -104,9 +104,9 @@ proc_start(WIN_SIGPROC SignalProc)
 		ProcInitChannels(__Process->Node);
 		ProcInitLimits(__Process->Limit);
 	}
-//	if (proc_setugid(__Process)){
-//		__Process->IsSetUGid = 1;
-//	}
+	if (proc_setugid(__Process)){
+		__Process->IsSetUGid = 1;
+	}
 	__CTTY = &__Terminals[__Process->CTTY];
 	return(__Process);
 }

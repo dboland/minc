@@ -91,7 +91,10 @@ task_init(char *cmdbuf, char *argv[], void *frame_address)
 	__THREAD_FRAME = (u_long)frame_address;
 	pwTask = proc_start(sigproc_win);
 	srand(time_posix(&pwTask->Started));
-
+	if (pwTask->Flags & WIN_PS_SYSTEM){			/* top.exe */
+		pwTask->RealUid = rid_posix(&pwTask->UserSid);
+		pwTask->RealGid = rid_posix(&pwTask->GroupSid);
+	}
 	pszCommand = __Strings[pwTask->TaskId].Command;
 	win_mbstowcs(pszCommand, argv[0], WIN_MAX_PROCTITLE);
 	argv[0] = path_posix(cmdbuf, pszCommand);

@@ -45,11 +45,6 @@ TimeProc(PVOID Param, DWORD LowValue, DWORD HighValue)
 		WIN_ERR("PostThreadMessage(%d): %s\n", pwTask->ThreadId, win_strerror(GetLastError()));
 	}
 }
-LONGLONG 
-TimeGetTickCount(VOID)
-{
-	return((LONGLONG)(GetTickCount() * 10000));
-}
 
 /****************************************************/
 
@@ -126,17 +121,17 @@ vfs_setitimer(WIN_TASK *Task, LONG *Interval, DWORDLONG *TimeOut)
 	return(bResult);
 }
 BOOL 
-vfs_nanosleep(WIN_TASK *Task, DWORDLONG *TimeOut, DWORDLONG *Remain)
+vfs_nanosleep(WIN_TASK *Task, DWORDLONG TimeOut, DWORDLONG *Remain)
 {
 	BOOL bResult = FALSE;
-	LONGLONG llTimeOut = *TimeOut;
-	LONGLONG llRemain = llTimeOut + TimeGetTickCount();
+	LONGLONG llRemain;
+	LONGLONG llElapsed = 0;
 	HANDLE hTimer = CreateWaitableTimer(NULL, FALSE, NULL);
 	HANDLE hObjects[2] = {__Interrupt, hTimer};
 	LARGE_INTEGER liTimeOut;
 	DWORD dwResult;
 
-	liTimeOut.QuadPart = -llTimeOut;	/* relative time */
+	liTimeOut.QuadPart = (LONGLONG)(TimeOut * -0.01);	/* 100-nanosecond intervals */
 	SetWaitableTimer(hTimer, &liTimeOut, 0, NULL, NULL, FALSE);
 	dwResult = WaitForMultipleObjectsEx(2, hObjects, FALSE, INFINITE, TRUE);
 	if (dwResult == WAIT_FAILED){
@@ -144,7 +139,10 @@ vfs_nanosleep(WIN_TASK *Task, DWORDLONG *TimeOut, DWORDLONG *Remain)
 	}else if (!proc_poll(Task)){
 		bResult = TRUE;
 	}
-	llRemain -= TimeGetTickCount();
+	if (vfs_clock_gettime_MONOTONIC(&llElapsed)){
+		llElapsed -= Task->ClockTime;
+	}
+	llRemain = TimeOut - llElapsed;
 	if (llRemain > 0){
 		*Remain = llRemain;
 	}else{

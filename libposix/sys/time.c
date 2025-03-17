@@ -155,23 +155,26 @@ int
 sys_nanosleep(call_t call, const struct timespec *req, struct timespec *rem)
 {
 	int result = 0;
-	DWORDLONG dwlRemain = 0LL;
-	LONGLONG llTimeOut;
+	DWORDLONG dwlTimeOut;
+	WIN_TASK *pwTask = call.Task;
 
 	if (!req){
 		return(-EFAULT);
 	}else if (req->tv_nsec < 0 || req->tv_nsec > 1000000000){
 		return(-EINVAL);
 	}else{
-		llTimeOut = (LONGLONG)(req->tv_sec * 10000000);
-		llTimeOut += req->tv_nsec * 0.01;			/* 100-nanosecond intervals */
+		dwlTimeOut = (DWORDLONG)(req->tv_sec * 1000000000);
+		dwlTimeOut += req->tv_nsec;
 	}
-	if (!vfs_nanosleep(call.Task, &llTimeOut, &dwlRemain)){
+	if (!vfs_nanosleep(pwTask, dwlTimeOut, &dwlTimeOut)){
 		result -= errno_posix(GetLastError());
 	}
 	if (rem){
-		rem->tv_sec = (time_t)(dwlRemain * 0.0000001);
-		rem->tv_nsec = dwlRemain - (rem->tv_sec * 1000000);	/* nanoseconds */
+		rem->tv_sec = (time_t)(dwlTimeOut * 0.000000001);
+		rem->tv_nsec = dwlTimeOut - (rem->tv_sec * 1000000000);	/* nanoseconds */
+		if (pwTask->TracePoints & KTRFAC_STRUCT){
+			ktrace_STRUCT(pwTask, "reltimespec", 11, rem, sizeof(struct timespec));
+		}
 	}
 	return(result);
 }

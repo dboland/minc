@@ -500,7 +500,7 @@ typedef struct _WIN_TASK {
 	HANDLE TraceHandle;
 	DWORD TracePoints;
 	FILETIME Started;
-	DWORDLONG ClockTime;		/* clock at syscall() in nanoseconds */
+	DWORDLONG ClockTime;		/* monotonic clock at syscall() in nanoseconds */
 	DWORDLONG KernelTime;		/* kernel time in nanoseconds */
 	DWORDLONG UserTime;		/* user time in nanoseconds */
 	DWORD State;

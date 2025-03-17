@@ -134,8 +134,6 @@ proc_execve(WIN_TASK *Task, LPSTR Command, PVOID Environ)
 	PROCESS_INFORMATION pi = {0};
 	DWORD dwAccess = TOKEN_QUERY + TOKEN_DUPLICATE + TOKEN_ASSIGN_PRIMARY;
 	HANDLE hThread;
-	WIN_OBJECT_CONTROL wControl;
-	SECURITY_ATTRIBUTES sa = {sizeof(sa), &wControl.Security, FALSE};
 	DWORD dwFlags = NORMAL_PRIORITY_CLASS;
 
 	si.cb = sizeof(STARTUPINFO);
@@ -144,9 +142,7 @@ proc_execve(WIN_TASK *Task, LPSTR Command, PVOID Environ)
 	si.dwX = Task->TaskId;
 	if (!win_cap_get_proc(dwAccess, TokenPrimary, &hToken)){
 		WIN_ERR("win_cap_get_proc(%s): %s\n", Command, win_strerror(GetLastError()));
-	}else if (!AclCreateControl(WIN_P_IRWX | TOKEN_IMPERSONATE, &wControl)){
-		WIN_ERR("AclCreateControl(%s): %s\n", Command, win_strerror(GetLastError()));
-	}else if (CreateProcessAsUser(hToken, NULL, Command, &sa, NULL, TRUE, dwFlags, Environ, NULL, &si, &pi)){
+	}else if (CreateProcessAsUser(hToken, NULL, Command, NULL, NULL, TRUE, dwFlags, Environ, NULL, &si, &pi)){
 		Task->Flags |= WIN_PS_EXEC;
 		Task->ThreadId = pi.dwThreadId;
 		hThread = Task->Handle;
@@ -165,10 +161,24 @@ proc_execve(WIN_TASK *Task, LPSTR Command, PVOID Environ)
 		Task->Timer = NULL;
 		bResult = TRUE;
 	}else{
-		WIN_ERR("CreateProcessAsUser(%s): %s\n", Command, win_strerror(GetLastError()));
+		WIN_ERR("CreateProcessAsUser(%s): Handle(%d): %s\n", Command, hToken, win_strerror(GetLastError()));
 	}
 	CloseHandle(hToken);
 	win_free(Command);
 	win_free(Environ);
+	return(bResult);
+}
+BOOL 
+proc_orphanize(WIN_TASK *Task)
+{
+	BOOL bResult = FALSE;
+
+	if (CloseHandle(Task->Handle)){
+		Task->Handle = NULL;
+		Task->ParentId = WIN_PID_INIT;
+		bResult = vfs_kill_PID(__Tasks[WIN_PID_INIT].ThreadId, WM_COMMAND, CTRL_CHILD_EVENT, Task->TaskId);
+	}else{
+		WIN_ERR("proc_orphanize(%d): %s\n", Task->Handle, win_strerror(GetLastError()));
+	}
 	return(bResult);
 }

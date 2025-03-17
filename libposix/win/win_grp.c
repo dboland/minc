@@ -186,7 +186,7 @@ win_getgrouplist(WIN_PWENT *Passwd, SID8 *Primary, SID8 *Result[], DWORD *Count)
 	if (Passwd->Privileges == USER_PRIV_GUEST){
 		sidResult[dwCount++] = SidUsers;	/* WS2_32.DLL/IPHLPAPI.DLL access */
 	}else if (Passwd->Privileges == USER_PRIV_ADMIN){
-		sidResult[dwCount++] = SidLocalService;	/* Vista */
+		sidResult[dwCount++] = SidLocalAdmin;	/* Vista */
 	}
 	sidResult[dwCount++] = *Primary;
 	*Result = sidResult;

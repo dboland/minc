@@ -49,8 +49,6 @@
 
 #define WIN_ERR			msvc_printf
 
-const GUID CLSID_ShellLink = {0x00021401, 0, 0, {0xc0, 0, 0, 0, 0, 0, 0, 0x46}};
-
 SID8 SidNull			= {1, 1, {0, 0, 0, 0, 0, 0}, 0};
 SID8 SidEveryone		= {1, 1, {0, 0, 0, 0, 0, 1}, 0};
 SID8 SidLocal			= {1, 1, {0, 0, 0, 0, 0, 2}, 0};

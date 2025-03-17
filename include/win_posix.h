@@ -159,9 +159,10 @@ BOOL win_madvise(PVOID Address, SIZE_T Size, DWORD Type);
 /* win_capability.c */
 
 BOOL win_cap_get_proc(DWORD Access, TOKEN_TYPE Type, HANDLE *Result);
-BOOL win_cap_set_mode(SID8 *User, ACCESS_MASK Access, ACL *Result);
+BOOL win_cap_set_mode(ACCESS_MASK Access, ACL *Result);
 BOOL win_cap_setuid(WIN_PWENT *Passwd, HANDLE *Result);
 BOOL win_cap_setgroups(SID8 *Primary, SID8 Groups[], DWORD Count, HANDLE *Result);
+BOOL win_cap_setgid(SID8 *Group);
 
 /* win_dlfcn.c */
 

@@ -135,7 +135,7 @@ BOOL vfs_getvfs(WIN_CFDATA *Config, DWORD Flags);
 /* vfs_time.c */
 
 BOOL vfs_setitimer(WIN_TASK *Task, LONG *Interval, DWORDLONG *TimeOut);
-BOOL vfs_nanosleep(WIN_TASK *Task, DWORDLONG *TimeOut, DWORDLONG *Remain);
+BOOL vfs_nanosleep(WIN_TASK *Task, DWORDLONG TimeOut, DWORDLONG *Remain);
 BOOL vfs_utimes(WIN_NAMEIDATA *Path, FILETIME FileTime[2]);
 BOOL vfs_clock_gettime_MONOTONIC(DWORDLONG *Result);
 
@@ -198,6 +198,7 @@ BOOL proc_close(WIN_TASK *Task);
 BOOL proc_poll(WIN_TASK *Task);
 DECLSPEC_NORETURN VOID proc_exit(DWORD ExitCode);
 BOOL proc_execve(WIN_TASK *Task, LPSTR Command, PVOID Environ);
+BOOL proc_orphanize(WIN_TASK *Task);
 
 /* drive.c */
 

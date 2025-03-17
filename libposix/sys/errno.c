@@ -39,7 +39,7 @@ errno_posix(DWORD Error)
 
 	switch (Error){
 		case ERROR_NO_MORE_FILES:
-		case ERROR_SUCCESS:
+		case ERROR_SUCCESS:			/* read() and write() operations */
 			result = 0;
 			break;
 		case WSAEINVAL:

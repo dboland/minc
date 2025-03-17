@@ -591,6 +591,8 @@ sys_execve(call_t call, const char *path, char *const argv[], char *const envp[]
 		result -= errno_posix(GetLastError());
 	}else if (!shebang_win(pwTask, &vNode, &wPath, path, szCommand)){
 		result -= errno_posix(GetLastError());
+//	}else if (!proc_setugid(pwTask)){
+//		result -= errno_posix(GetLastError());
 	}else if (!proc_execve(pwTask, argv_win(pwTask, szCommand, argv), env_win(envp))){
 		result -= errno_posix(GetLastError());
 	}else{

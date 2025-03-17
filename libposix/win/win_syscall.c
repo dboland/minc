@@ -112,7 +112,7 @@ win_group_member(PSID Group)
 	return(bResult);
 }
 BOOL 
-win_getgroups(SID8 **Groups, DWORD *Count)
+win_getgroups(SID8 *Groups[], DWORD *Count)
 {
 	BOOL bResult = FALSE;
 	PTOKEN_GROUPS ptGroups;

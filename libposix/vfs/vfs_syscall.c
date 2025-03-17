@@ -118,11 +118,13 @@ VfsStatNode(WIN_NAMEIDATA *Path, DWORD Flags, HANDLE *Result)
 BOOL 
 vfs_seteuid(WIN_TASK *Task, SID8 *Sid)
 {
-	HANDLE hToken = NULL;
 	BOOL bResult = FALSE;
+	HANDLE hToken = NULL;
 	WIN_PWENT pwEntry;
 
-	if (!win_getpwuid(Sid, &pwEntry)){
+	if (EqualSid(&Task->UserSid, Sid)){
+		bResult = TRUE;
+	}else if (!win_getpwuid(Sid, &pwEntry)){
 		return(FALSE);
 	}else if (!win_cap_setuid(&pwEntry, &hToken)){
 		return(FALSE);
@@ -137,22 +139,12 @@ vfs_seteuid(WIN_TASK *Task, SID8 *Sid)
 BOOL 
 vfs_setegid(WIN_TASK *Task, SID8 *Sid)
 {
-	HANDLE hToken;
 	BOOL bResult = FALSE;
-	DWORD dwCount = 0;
-	SID8 *grList = NULL;
 
-	if (!win_getgroups(&grList, &dwCount)){
-		return(FALSE);
-	}else if (!win_cap_setgroups(Sid, grList, dwCount, &hToken)){
-		WIN_ERR("win_cap_setgroups(%s): %s\n", win_strsid(Sid), win_strerror(GetLastError()));
-	}else if (!SetThreadToken(NULL, hToken)){
-		WIN_ERR("SetThreadToken(%s): %s\n", win_strsid(Sid), win_strerror(GetLastError()));
-	}else{
+	if (win_cap_setgid(Sid)){
 		Task->GroupSid = *Sid;
-		bResult = CloseHandle(hToken);
+		bResult = TRUE;
 	}
-	win_free(grList);
 	return(bResult);
 }
 BOOL 

@@ -30,20 +30,21 @@
 
 #include <sys/signal.h>
 
-#define BIT_SIGTHR		0x80000000	/* null signal (child detaching) */
-#define BIT_SIGWINCH		0x08000000
-#define BIT_SIGCHLD		0x00080000
-#define BIT_SIGURG		0x00008000
-#define BIT_SIGINFO		0x10000000
 #define BIT_SIGKILL		0x00000100
+#define BIT_SIGURG		0x00008000
 #define BIT_SIGSTOP		0x00010000
 #define BIT_SIGTSTP		0x00020000
+#define BIT_SIGCONT		0x00040000
+#define BIT_SIGCHLD		0x00080000
 #define BIT_SIGTTIN		0x00100000
 #define BIT_SIGTTOU		0x00200000
-#define BIT_SIGCONT		0x00040000
+#define BIT_SIGIO		0x00400000
+#define BIT_SIGWINCH		0x08000000
+#define BIT_SIGINFO		0x10000000
+#define BIT_SIGTHR		0x80000000	/* null signal (child detaching) */
 
 #define SIGMASK_STOP	(BIT_SIGSTOP | BIT_SIGTSTP | BIT_SIGTTIN | BIT_SIGTTOU | BIT_SIGCONT)
-#define SIGMASK_IGNORE	(BIT_SIGWINCH | BIT_SIGCHLD | BIT_SIGURG | BIT_SIGINFO)
+#define SIGMASK_IGNORE	(BIT_SIGWINCH | BIT_SIGCHLD | BIT_SIGURG | BIT_SIGINFO | BIT_SIGIO)
 
 static const 
 DWORD __SIG_WIN[NSIG] = {
@@ -155,20 +156,21 @@ __sigsuspend(WIN_TASK *Task, const sigset_t *mask)
 int 
 sigproc_default(WIN_TASK *Task, int signum)
 {
-	int result = -1;
 	sigset_t sigbit = sigmask(signum);
 	sigset_t mask = 0;
 
+	/* Return value must be -1 because non-lethal signals
+	 * are discarded by default, see signal(2).
+	 */
 	if (sigbit & SIGMASK_STOP){
 		Task->Status = _WSTOPPED;
 		SetEvent(__Interrupt);
 		__sigsuspend(Task, &mask);
 	}else if (sigbit & ~SIGMASK_IGNORE){
-//		Task->Status = signum;
-		Task->Status = (Task->Error * 0x100) + signum;
+		Task->Status = signum;
 		__exit(Task, 127);
 	}
-	return(result);
+	return(-1);
 }
 int 
 sigproc_posix(WIN_TASK *Task, int signum, ucontext_t *ucontext)
@@ -202,7 +204,7 @@ sigproc_posix(WIN_TASK *Task, int signum, ucontext_t *ucontext)
 	if (handler == SIG_DFL){		/* terminate, if applicable */
 		result = sigproc_default(Task, signum);
 	}else if (handler == SIG_ERR){		/* don't terminate, but interrupt system call */
-		Task->Status = signum;
+		Task->Status = (Task->Error * 0x100) + signum;
 	}else if (handler == SIG_IGN){		/* don't terminate, don't interrupt */
 		result = -1;
 	}else if (flags & SA_SIGINFO){
@@ -219,9 +221,7 @@ sigproc_win(DWORD CtrlType, CONTEXT *Context)
 	ucontext_t ucontext = {0};
 	WIN_TASK *pwTask = &__Tasks[CURRENT];
 
-	if (!vfs_clock_gettime_MONOTONIC(&pwTask->ClockTime)){
-		return(TRUE);
-	}else if (!sigproc_posix(pwTask, __SIG_POSIX[CtrlType], context_posix(&ucontext, Context))){
+	if (!sigproc_posix(pwTask, __SIG_POSIX[CtrlType], context_posix(&ucontext, Context))){
 		bResult = TRUE;
 	}
 	return(bResult);

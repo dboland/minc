@@ -28,7 +28,7 @@ OBJECTS= assert.o \
 	telldir.o closedir.o exec.o
 
 OBJECTS+= getpwent.c.o getgrent.c.o setproctitle.c.o setprogname.c.o \
-	getprogname.c.o getgrouplist.c.o signal.c.o
+	getprogname.c.o signal.c.o getgrouplist.c.o
 #OBJECTS+= _exit.S.o _getlogin.S.o _setlogin.S.o
 OBJECTS+= syslog_r.o syslog.o auth_subr.o login_cap.o authenticate.o
 

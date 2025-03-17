@@ -32,25 +32,6 @@
 
 /*******************************************************/
 
-SID8 *
-groups_win(DWORD *Count)
-{
-	DWORD dwCount = *Count;
-	SID8 *sidResult = win_malloc(sizeof(SID8) * (dwCount + 4));
-
-	/* Administrators */
-	/* bypass traverse checking (SeChangeNotifyPrivilege) */
-	sidResult[dwCount++] = SidEveryone;
-	/* WinStation/Desktop access */
-	sidResult[dwCount++] = SidRestricted;
-	/* Shared memory access */
-	sidResult[dwCount++] = SidAuthenticated;
-	*Count = dwCount;
-	return(sidResult);
-}
-
-/*******************************************************/
-
 long 
 sys_pathconf(call_t call, const char *path, int name)
 {
@@ -140,7 +121,7 @@ sys_setgroups(call_t call, int size, const gid_t *list)
 	if (size < 0 || size >= NGROUPS_MAX){
 		result = -EINVAL;
 	}else{
-		grList = groups_win(&dwCount);
+		grList = win_malloc(sizeof(SID8) * dwCount);
 		while (size--){
 			if (!list[size]){
 				grList[dwIndex] = *rid_win(&sid, WIN_ROOT_GID);

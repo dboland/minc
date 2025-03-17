@@ -228,9 +228,6 @@ args(int argc, char *argv[])
 		}
 	}
 }
-
-/************************************************************/
-
 void 
 boot(void)
 {
@@ -283,6 +280,30 @@ multi(void)
 
 /************************************************************/
 
+void 
+do_init(int level)
+{
+	if (_boot)
+		boot();
+	else if (!level)
+		single();
+	else
+		multi();
+}
+void 
+do_state(pid_t pid)
+{
+	sigset_t mask = 0;
+	int status;
+
+	if (_boot)
+		while (sigsuspend(&mask));
+	else
+		waitpid(pid, &status, 0);
+}
+
+/************************************************************/
+
 int 
 main(int argc, char *argv[], char *envp[])
 {
@@ -290,13 +311,9 @@ main(int argc, char *argv[], char *envp[])
 	size_t size = sizeof(int);
 	int level = 0;
 	pid_t pid;
-	int status;
 	char *root = diskconf();
-	sigset_t set = 0;
 
 	args(argc, argv);
-	signal(SIGTERM, sig);
-//	signal(SIGWINCH, sig);
 	sysctl(mib, 2, &level, &size, NULL, 0);
 	setenv("MINCROOT", root, 1);
 	setenv("PATH", _PATH_DEFPATH, 1);
@@ -306,15 +323,10 @@ main(int argc, char *argv[], char *envp[])
 		case -1:
 			die("fork(): %s\n", strerror(errno));
 		case 0:
-			if (_boot)
-				boot();
-			else if (!level)
-				single();
-			else
-				multi();
+			do_init(level);
 			break;
 		default:
-			waitpid(pid, &status, 0);
+			do_state(pid);
 	}
 	return(0);
 }

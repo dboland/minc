@@ -131,7 +131,7 @@ vfs_kill_SYS(DWORD CallerId, UINT Message, WPARAM WParam, LPARAM LParam)
 	if (!win_group_member(&SidAdmins)){
 		SetLastError(ERROR_PRIVILEGE_NOT_HELD);
 		bResult = FALSE;
-	}else while (dwIndex >= WIN_PID_INIT){
+	}else while (dwIndex > WIN_PID_INIT){	/* no signals for pid 1 */
 		if (pwTask->Flags && pwTask->TaskId != CallerId){
 			vfs_kill_PID(pwTask->ThreadId, Message, WParam, LParam);
 		}
@@ -214,10 +214,10 @@ vfs_sigsuspend(WIN_TASK *Task, CONST UINT *Mask)
 
 	Task->ProcMask = *Mask;
 	Task->State = WIN_SSLEEP;
-	if (GetMessage(&msg, NULL, 0, 0)){
-		vfs_raise(msg.message, msg.wParam, msg.lParam);
-	}else{
+	if (!GetMessage(&msg, NULL, 0, 0)){	/* WM_QUIT caught */
 		bResult = TRUE;
+	}else if (!vfs_raise(msg.message, msg.wParam, msg.lParam)){
+		SetLastError(ERROR_SIGNAL_PENDING);
 	}
 	Task->State = WIN_SRUN;
 	Task->ProcMask = uiCurrent;

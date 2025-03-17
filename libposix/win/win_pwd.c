@@ -58,7 +58,7 @@ PwdLookupNTAuth(WIN_PWENT *Entity)
 			Entity->GroupSid = SidUsers;
 			Entity->Integrity = SECURITY_MANDATORY_MEDIUM_RID;
 		}else{
-			Entity->GroupSid = SidBatch;
+			Entity->GroupSid = SidAuthenticated;
 			Entity->Integrity = SECURITY_MANDATORY_LOW_RID;
 		}
 		bResult = TRUE;
@@ -87,7 +87,7 @@ PwdLookup(WIN_PWENT *Entity)
 			break;
 		case SECURITY_BUILTIN_DOMAIN_RID:	/* 32 (Builtin) */
 		default:				/* 6 (SERVICE) */
-			Entity->GroupSid = SidBatch;
+			Entity->GroupSid = SidAuthenticated;
 			Entity->Privileges = USER_PRIV_GUEST;
 			Entity->Integrity = SECURITY_MANDATORY_LOW_RID;
 	}

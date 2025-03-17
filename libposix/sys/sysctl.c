@@ -423,10 +423,10 @@ sysctl_USER(const int *name, void *oldp, size_t *oldlenp, void *newp, size_t new
 	int result = 0;
 
 	switch (name[1]){
-		case USER_PWD:
+		case USER_PWD:		/* pwd.c */
 			result = pwd_USER_PWD(name, oldp, oldlenp);
 			break;
-		case USER_GRP:
+		case USER_GRP:		/* grp.c */
 			result = grp_USER_GRP(name, oldp, oldlenp);
 			break;
 		default:

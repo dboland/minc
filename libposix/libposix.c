@@ -47,8 +47,6 @@ extern SID8 SidNull;
 extern SID8 SidBuiltin;
 extern SID8 SidAdmins;
 extern SID8 SidEveryone;
-extern SID8 SidAuthenticated;
-extern SID8 SidRestricted;
 extern SID8 SidSystem;
 extern SID8 SidUsers;
 extern SID8 SidTrustedInstaller;
@@ -150,7 +148,7 @@ posix_PROCESS_DETACH(WIN_TASK *Task)
 		Task->State = WIN_SZOMB;
 		vfs_closefrom(Task->Node);
 		if (!vfs_kill_PID(pid_win(Task->ParentId), WM_COMMAND, CTRL_CHILD_EVENT, Task->TaskId)){
-			proc_close(Task);		/* orphaned */
+			proc_orphanize(Task);
 		}
 	}
 	return(TRUE);
@@ -166,7 +164,7 @@ posix_THREAD_DETACH(WIN_TASK *Task)
 		Task->State = WIN_SZOMB;
 		__closefrom(Task->Node, 0);
 		if (!vfs_kill_PID(pid_win(Task->ParentId), WM_COMMAND, CTRL_CHILD_EVENT, Task->TaskId)){
-			proc_close(Task);		/* orphaned */
+			proc_orphanize(Task);
 		}
 	}
 	return(TRUE);

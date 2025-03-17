@@ -35,7 +35,7 @@
 DWORD 
 ScreenMode(WIN_TERMIO *Attribs)
 {
-	DWORD dwResult = ENABLE_PROCESSED_OUTPUT; // | ENABLE_WRAP_AT_EOL_OUTPUT;
+	DWORD dwResult = ENABLE_PROCESSED_OUTPUT | ENABLE_WRAP_AT_EOL_OUTPUT;
 	UINT uiFlags = WIN_OPOST | WIN_ONLCR;
 
 	if ((Attribs->OFlags & uiFlags) != uiFlags){
