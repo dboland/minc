@@ -122,6 +122,46 @@ grp_GRP_GETGRGID(gid_t gid, char *buf, size_t buflen)
 	return(result);
 }
 int 
+grp_GRP_GETGROUPLIST(const char *user, gid_t group, gid_t *groups, int *ngroups)
+{
+	int result = 0;
+	WIN_PWENT pwEntry;
+	WCHAR szAccount[MAX_NAME];
+	SID8 *psGroups = NULL;
+	SID8 sid;
+	DWORD dwCount = 0;
+	int index = 0;
+	gid_t next;
+
+	if (!group){
+		group = WIN_ROOT_GID;
+	}
+	if (!mbstowcs(szAccount, user, MAX_NAME)){
+		result = -EINVAL;
+	}else if (!win_getpwnam(szAccount, &pwEntry)){
+		result -= errno_posix(GetLastError());
+	}else if (!win_getgrouplist(&pwEntry, rid_win(&sid, group), &psGroups, &dwCount)){
+		result -= errno_posix(GetLastError());
+	}else if (*ngroups < dwCount){
+		result = -EINVAL;
+	}else while (index < dwCount){
+		next = rid_posix(psGroups);
+		if (next == WIN_ROOT_GID){
+			groups[index] = 0;
+		}else{
+			groups[index] = next;
+		}
+		psGroups++;
+		index++;
+	}
+	win_free(psGroups);
+	*ngroups = dwCount;
+	return(result);
+}
+
+/****************************************************/
+
+int 
 grp_USER_GRP(const int *name, void *oldp, size_t *oldlenp)
 {
 	int result = 0;
@@ -141,6 +181,9 @@ grp_USER_GRP(const int *name, void *oldp, size_t *oldlenp)
 			break;
 		case GRP_GETGRGID:
 			result = grp_GRP_GETGRGID(name[3], oldp, *oldlenp);
+			break;
+		case GRP_GETGROUPLIST:
+			result = grp_GRP_GETGROUPLIST((const char *)name[3], name[4], oldp, oldlenp);
 			break;
 		default:
 			result = -ENOENT;

@@ -173,12 +173,12 @@ proc_orphanize(WIN_TASK *Task)
 {
 	BOOL bResult = FALSE;
 
+	Task->ParentId = WIN_PID_INIT;
 	if (CloseHandle(Task->Handle)){
 		Task->Handle = NULL;
-		Task->ParentId = WIN_PID_INIT;
-		bResult = vfs_kill_PID(__Tasks[WIN_PID_INIT].ThreadId, WM_COMMAND, CTRL_CHILD_EVENT, Task->TaskId);
 	}else{
 		WIN_ERR("proc_orphanize(%d): %s\n", Task->Handle, win_strerror(GetLastError()));
 	}
+	bResult = vfs_kill_PID(__Tasks[WIN_PID_INIT].ThreadId, WM_COMMAND, CTRL_CHILD_EVENT, Task->TaskId);
 	return(bResult);
 }

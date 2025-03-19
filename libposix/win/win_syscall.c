@@ -116,25 +116,31 @@ win_getgroups(SID8 *Groups[], DWORD *Count)
 {
 	BOOL bResult = FALSE;
 	PTOKEN_GROUPS ptGroups;
+	PSID_AND_ATTRIBUTES psaGroups;
 	HANDLE hToken;
-	SID8 *grList;
+	SID8 *psResult;
 	DWORD dwCount;
 	DWORD dwIndex = 0;
+	DWORD dwResult = 0;
 	PSID pSid;
 
 	if (!win_cap_get_proc(TOKEN_QUERY, 0, &hToken)){
 		return(FALSE);
 	}else if (CapGetGroups(hToken, &ptGroups)){
 		dwCount = ptGroups->GroupCount;
-		grList = win_malloc(sizeof(SID8) * dwCount);
+		psResult = win_malloc(sizeof(SID8) * dwCount);
+		psaGroups = ptGroups->Groups;
 		while (dwIndex < dwCount){
-			pSid = ptGroups->Groups[dwIndex].Sid;
-			CopySid(GetLengthSid(pSid), &grList[dwIndex], pSid);
+			pSid = psaGroups->Sid;
+			if (psaGroups->Attributes & SE_GROUP_ENABLED){
+				CopySid(GetLengthSid(pSid), &psResult[dwResult++], pSid);
+			}
 			dwIndex++;
+			psaGroups++;
 		}
-		win_free(ptGroups);
-		*Groups = grList;
-		*Count = dwCount;
+		LocalFree(ptGroups);
+		*Groups = psResult;
+		*Count = dwResult;
 		bResult = TRUE;
 	}
 	CloseHandle(hToken);

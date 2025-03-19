@@ -63,7 +63,7 @@ errno_posix(DWORD Error)
 			result = ENOENT;
 			break;
 		case ERROR_PRIVILEGE_NOT_HELD:
-		case ERROR_NOT_ALL_ASSIGNED:
+		case ERROR_NOT_ALL_ASSIGNED:		/* 1300: AdjustTokenPrivileges() */
 		case ERROR_LOGON_SESSION_EXISTS:
 		case ERROR_INVALID_OPERATION:
 		case ERROR_ELEVATION_REQUIRED:

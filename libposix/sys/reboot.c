@@ -32,20 +32,14 @@
 
 /****************************************************/
 
-VOID 
-reboot_HALT(VOID)
-{
-	vfs_kill_PID(pid_win(1), WM_COMMAND, CTRL_SHUTDOWN_EVENT, 0);
-}
-
-/****************************************************/
-
 void 
 sys_reboot(call_t call, int howto)
 {
 	switch (howto){
 		case RB_HALT:
-			reboot_HALT();
+			vfs_kill_PID(pid_win(0), WM_QUIT, 0, 0);
 			break;
+		default:
+			vfs_kill_PID(pid_win(0), WM_COMMAND, CTRL_LOGOFF_EVENT, 0);
 	}
 }

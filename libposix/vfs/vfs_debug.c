@@ -300,8 +300,8 @@ VfsSpecificFlags(LPSTR Buffer, ACCESS_MASK Perms, DWORD Type, LPCSTR Label)
 
 	if (dwRemain){
 		psz += msvc_sprintf(psz, "%s(0x%08lx): ", Label, dwRemain);
+		win_strcpy(mask, "---");
 		if (Type == OB_TYPE_FILE){
-			win_strcpy(mask, "---");
 			// 0x0001
 			if (TestAccess(Perms, FILE_READ_DATA, &dwRemain))
 				mask[0] = 'r';
@@ -313,22 +313,34 @@ VfsSpecificFlags(LPSTR Buffer, ACCESS_MASK Perms, DWORD Type, LPCSTR Label)
 				mask[2] = 'x';
 			psz += msvc_sprintf(psz, "file(%s) ", mask);
 		}else{
-			psz = VfsFlagName(psz, PROCESS_TERMINATE, "TERMINATE", dwRemain, &dwRemain);
-			psz = VfsFlagName(psz, PROCESS_CREATE_THREAD, "CREATE_THREAD", dwRemain, &dwRemain);
+			// 0x0001
+			if (TestAccess(Perms, PROCESS_TERMINATE, &dwRemain))
+				mask[0] = 'r';
+			// 0x0002
+			if (TestAccess(Perms, PROCESS_CREATE_THREAD, &dwRemain))
+				mask[1] = 'w';
+			/* 0x0800 */
+			if (TestAccess(Perms, PROCESS_SUSPEND_RESUME, &dwRemain))
+				mask[2] = 'x';
+			psz += msvc_sprintf(psz, "process(%s) ", mask);
 		}
+		win_strcpy(mask, "---");
 		if (Type == OB_TYPE_FILE){
-			win_strcpy(mask, "---");
 			// 0x0080
 			if (TestAccess(Perms, FILE_READ_ATTRIBUTES, &dwRemain))
 				mask[0] = 'r';
 			// 0x0100
 			if (TestAccess(Perms, FILE_WRITE_ATTRIBUTES, &dwRemain))
 				mask[1] = 'w';
-			psz += msvc_sprintf(psz, "attr(%s) ", mask);
 		}else{
-			psz = VfsFlagName(psz, PROCESS_CREATE_PROCESS, "CREATE_PROCESS", dwRemain, &dwRemain);
-			psz = VfsFlagName(psz, PROCESS_SET_QUOTA, "SET_QUOTA", dwRemain, &dwRemain);
+			/* 0x0200 */
+			if (TestAccess(Perms, PROCESS_SET_INFORMATION, &dwRemain))
+				mask[1] = 'w';
+			/* 0x0400 */
+			if (TestAccess(Perms, PROCESS_QUERY_INFORMATION, &dwRemain))
+				mask[0] = 'r';
 		}
+		psz += msvc_sprintf(psz, "attr(%s) ", mask);
 		strcpy(mask, "---");
 		if (Type == OB_TYPE_FILE){
 			// 0x0008
@@ -348,20 +360,7 @@ VfsSpecificFlags(LPSTR Buffer, ACCESS_MASK Perms, DWORD Type, LPCSTR Label)
 			// 0x0020
 			if (TestAccess(Perms, PROCESS_VM_WRITE, &dwRemain))
 				mask[1] = 'w';
-			psz += msvc_sprintf(psz, " vm(%s)", mask);
-		}
-		if (Type != OB_TYPE_FILE){
-			win_strcpy(mask, "---");
-			/* 0x0200 */
-			if (TestAccess(Perms, PROCESS_SET_INFORMATION, &dwRemain))
-				mask[1] = 'w';
-			/* 0x0400 */
-			if (TestAccess(Perms, PROCESS_QUERY_INFORMATION, &dwRemain))
-				mask[0] = 'r';
-			/* 0x0800 */
-			if (TestAccess(Perms, PROCESS_SUSPEND_RESUME, &dwRemain))
-				mask[2] = 'x';
-			psz += msvc_sprintf(psz, " process(%s) ", mask);
+			psz += msvc_sprintf(psz, "vm(%s) ", mask);
 		}
 		if (Type == OB_TYPE_FILE){
 			/* 0x0004 */
@@ -371,12 +370,17 @@ VfsSpecificFlags(LPSTR Buffer, ACCESS_MASK Perms, DWORD Type, LPCSTR Label)
 			/* 0x0200 */
 			psz = VfsFlagName(psz, FILE_NO_EA_KNOWLEDGE, "NO_EA_KNOWLEDGE", dwRemain, &dwRemain);
 		}else{
-			/* 0x0004 */
-			psz = VfsFlagName(psz, TOKEN_IMPERSONATE, "IMPERSONATE", dwRemain, &dwRemain);
-			/* 0x0040 */
+			// 0x0004
+			psz = VfsFlagName(psz, PROCESS_SET_SESSIONID, "SET_SESSIONID", dwRemain, &dwRemain);
+			// 0x0040
 			psz = VfsFlagName(psz, PROCESS_DUP_HANDLE, "DUP_HANDLE", dwRemain, &dwRemain);
+			// 0x0080
+			psz = VfsFlagName(psz, PROCESS_CREATE_PROCESS, "CREATE_PROCESS", dwRemain, &dwRemain);
+			// 0x0100
+			psz = VfsFlagName(psz, PROCESS_SET_QUOTA, "SET_QUOTA", dwRemain, &dwRemain);
+			// 0x1000
+			psz = VfsFlagName(psz, PROCESS_QUERY_LIMITED_INFORMATION, "QUERY_LIMITED", dwRemain, &dwRemain);
 		}
-		psz = VfsFlagName(psz, PROCESS_QUERY_LIMITED_INFORMATION, "QUERY_LIMITED", dwRemain, &dwRemain);
 		psz += msvc_sprintf(psz, " remain(0x%x)\n", dwRemain);
 	}
 	return(psz);
@@ -439,6 +443,41 @@ VfsTaskFlags(LPSTR Buffer, LPCSTR Label, DWORD Flags)
 	psz += msvc_sprintf(psz, "[0x%x])\n", Flags);
 	return(psz);
 }
+LPSTR 
+VfsTokenAttribs(LPSTR Buffer, LPCSTR Label, DWORD Attribs)
+{
+	LPSTR psz = Buffer;
+
+	psz += msvc_sprintf(psz, "%s([0x%x]", Label, Attribs);
+	psz = VfsFlagName(psz, SE_GROUP_LOGON_ID, "LOGON_ID", Attribs, &Attribs);
+	psz = VfsFlagName(psz, SE_GROUP_OWNER, "OWNER", Attribs, &Attribs);
+	psz = VfsFlagName(psz, SE_GROUP_INTEGRITY, "INTEGRITY", Attribs, &Attribs);
+	psz = VfsFlagName(psz, SE_GROUP_INTEGRITY_ENABLED, "INTEGRITY_ENABLED", Attribs, &Attribs);
+	psz = VfsFlagName(psz, SE_GROUP_USE_FOR_DENY_ONLY, "DENY_ONLY", Attribs, &Attribs);
+	psz = VfsFlagName(psz, SE_GROUP_RESOURCE, "RESOURCE", Attribs, &Attribs);
+	psz = VfsFlagName(psz, SE_GROUP_MANDATORY, "MANDATORY", Attribs, &Attribs);
+	psz = VfsFlagName(psz, SE_GROUP_ENABLED, "ENABLED", Attribs, &Attribs);
+	psz = VfsFlagName(psz, SE_GROUP_ENABLED_BY_DEFAULT, "ENABLED_BY_DEFAULT", Attribs, &Attribs);
+	psz += msvc_sprintf(psz, "[0x%x])\n", Attribs);
+	return(psz);
+}
+/* LPSTR 
+VfsTokenGroups(LPSTR Buffer, LPCSTR Label, PTOKEN_GROUPS Token)
+{
+	LPSTR psz = Buffer;
+	DWORD dwCount = Token->GroupCount;
+	SID_AND_ATTRIBUTES *psEntry = Token->Groups;
+	DWORD dwIndex = 0;
+
+	psz += msvc_sprintf(psz, "%s(%d):\n", Label, dwCount);
+	while (dwIndex < dwCount){
+		psz += msvc_sprintf(psz, "[%d] %s\n", dwIndex, win_strsid(psEntry->Sid));
+		psz = VfsTokenAttribs(psz, "    attribs", psEntry->Attributes);
+		psEntry++;
+		dwIndex++;
+	}
+	return(psz);
+} */
 
 /****************************************************/
 
@@ -636,13 +675,25 @@ vfs_THREAD(WIN_THREAD_STRUCT *Thread, LPSTR Buffer)
 		Thread->Result, Thread->raddr, Thread->origin, Thread->size, Thread->source, Thread->dest, Thread->offset, Thread->Flags);
 	return(psz - Buffer);
 }
+/* DWORD 
+vfs_CAP_CONTROL(WIN_CAP_CONTROL *Control, LPSTR Buffer)
+{
+	LPSTR psz = Buffer;
+
+	psz += msvc_sprintf(psz, "(%d): AuthId(0x%x)\n", 
+		Control->SessionId, Control->AuthId.LowPart);
+	psz += msvc_sprintf(psz, "TokenUser: %s\n", win_strsid(&Control->User));
+	psz += msvc_sprintf(psz, "TokenPrimaryGroup: %s\n", win_strsid(&Control->Primary));
+	psz = VfsTokenGroups(psz, "TokenGroups", Control->Groups);
+	return(psz - Buffer);
+} */
 
 /****************************************************/
 
 VOID 
 vfs_ktrace(LPCSTR Label, STRUCT_TYPE Type, PVOID Data)
 {
-	CHAR szText[MAX_TEXT];
+	CHAR szText[WIN_PATH_MAX * 2] = "Unknown struct";
 
 	switch (Type){
 		case STRUCT_VNODE:
@@ -684,6 +735,9 @@ vfs_ktrace(LPCSTR Label, STRUCT_TYPE Type, PVOID Data)
 		case STRUCT_THREAD:
 			vfs_THREAD((WIN_THREAD_STRUCT *)Data, szText);
 			break;
+//		case STRUCT_CAP_CONTROL:
+//			vfs_CAP_CONTROL((WIN_CAP_CONTROL *)Data, szText);
+//			break;
 	}
 	msvc_printf("%s%s", Label, szText);
 }

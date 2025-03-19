@@ -248,8 +248,7 @@ win_execve(LPSTR Command, LPCSTR Path, STARTUPINFO *Info)
 		CloseHandle(Info->hStdError);
 		CloseHandle(pi.hThread);
 		WaitForSingleObject(pi.hProcess, INFINITE);
-		CloseHandle(pi.hProcess);
-		bResult = TRUE;
+		bResult = CloseHandle(pi.hProcess);
 	}
 	win_free(Command);
 	return(bResult);

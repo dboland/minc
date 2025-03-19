@@ -31,48 +31,22 @@
 #include <errno.h>
 #include <stdlib.h>
 
-#include "win/windows.h"
-#include "win_posix.h"
-#include "arch_posix.h"
+#include <sys/sysctl.h>
+
+#include "arch_types.h"
 
 int 
 getgrouplist(const char *user, gid_t group, gid_t *groups, int *ngroups)
 {
 	int result = -1;
-	WIN_PWENT pwEntry;
-	WCHAR szAccount[MAX_NAME];
-	SID8 *sidList = NULL;
-	SID8 sid;
-	DWORD dwCount = 0;
-	int i = 0;
-	gid_t next;
+	int mib[5] = {CTL_USER, USER_GRP, GRP_GETGROUPLIST, (int)user, group};
 
-	if (!group){
-		group = WIN_ROOT_GID;
-	}
 	if (!user){
 		errno = EINVAL;
 	}else if (!groups || !ngroups){
 		errno = EFAULT;
-	}else if (!mbstowcs(szAccount, user, MAX_NAME)){
-		errno = EINVAL;
-	}else if (!win_getpwnam(szAccount, &pwEntry)){
-		errno = errno_posix(errno_win());
-	}else if (!win_getgrouplist(&pwEntry, rid_win(&sid, group), &sidList, &dwCount)){
-		errno = errno_posix(errno_win());
-	}else if (*ngroups >= dwCount){
-		while (i < dwCount){
-			next = rid_posix(&sidList[i]);
-			if (next == WIN_ROOT_GID){
-				groups[i] = 0;
-			}else{
-				groups[i] = next;
-			}
-			i++;
-		}
-		result = dwCount;
+	}else{
+		result = sysctl(mib, 5, groups, ngroups, NULL, 0);
 	}
-	win_free(sidList);
-	*ngroups = dwCount;
 	return(result);
 }

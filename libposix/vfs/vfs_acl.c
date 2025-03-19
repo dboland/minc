@@ -130,8 +130,7 @@ AclCreateControl(ACCESS_MASK Access, WIN_OBJECT_CONTROL *Result)
 	PSECURITY_DESCRIPTOR pSec = &Result->Security;
 	PACL pAcl = &Result->DefaultAcl;
 
-//	if (!win_cap_set_mode(win_geteuid(&Result->SidUser), Access, pAcl)){
-	if (!win_cap_set_mode(Access, pAcl)){
+	if (!win_cap_set_mode_OLD(win_geteuid(&Result->SidUser), Access, pAcl)){
 		return(FALSE);
 	}else if (!InitializeSecurityDescriptor(pSec, SECURITY_DESCRIPTOR_REVISION)){
 		WIN_ERR("InitializeSecurityDescriptor(): %s\n", win_strerror(GetLastError()));

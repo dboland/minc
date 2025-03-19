@@ -91,11 +91,12 @@ die(const char *msg, ...)
 void 
 sig(int signum)
 {
-	if (signum == SIGTERM){
-		printf("System halt.\n");
-		exit(0);
+	if (signum == SIGQUIT){
+		fprintf(stderr, "System halt.\n");
+		kill(1, SIGKILL);
 	}else if (signum == SIGHUP){
-		printf("Reboot.\n");
+		fprintf(stderr, "System reboot.\n");
+		kill(1, SIGHUP);
 	}else{
 		printf("%s: %s\n", __progname, strsignal(signum));
 	}
@@ -277,11 +278,8 @@ multi(void)
 	getty(PATH_PTMDEV);
 	shell(args);
 }
-
-/************************************************************/
-
 void 
-do_init(int level)
+state(int level)
 {
 	if (_boot)
 		boot();
@@ -289,17 +287,6 @@ do_init(int level)
 		single();
 	else
 		multi();
-}
-void 
-do_state(pid_t pid)
-{
-	sigset_t mask = 0;
-	int status;
-
-	if (_boot)
-		while (sigsuspend(&mask));
-	else
-		waitpid(pid, &status, 0);
 }
 
 /************************************************************/
@@ -312,6 +299,7 @@ main(int argc, char *argv[], char *envp[])
 	int level = 0;
 	pid_t pid;
 	char *root = diskconf();
+	int status;
 
 	args(argc, argv);
 	sysctl(mib, 2, &level, &size, NULL, 0);
@@ -319,14 +307,16 @@ main(int argc, char *argv[], char *envp[])
 	setenv("PATH", _PATH_DEFPATH, 1);
 	setenv("TERM", _term, 1);
 	setenv("LC_CTYPE", _ctype, 1);
+	signal(SIGQUIT, sig);
+	bsd_signal(SIGHUP, sig);
 	switch (pid = fork()){
 		case -1:
 			die("fork(): %s\n", strerror(errno));
 		case 0:
-			do_init(level);
+			state(level);
 			break;
 		default:
-			do_state(pid);
+			waitpid(pid, &status, 0);
 	}
 	return(0);
 }

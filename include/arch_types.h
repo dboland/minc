@@ -65,25 +65,26 @@
 
 /* sysctl() CTL_USER definitions */
 
-#define CTL_USER		8
+#define CTL_USER	8
 
-#define USER_PWD		1
+#define USER_PWD	1
 
-#define PWD_UNSPEC	0
-#define PWD_SETPWENT	1
-#define PWD_ENDPWENT	2
-#define PWD_GETPWENT	3
-#define PWD_GETPWNAM	4
-#define PWD_GETPWUID	5
+#define PWD_UNSPEC		0
+#define PWD_SETPWENT		1
+#define PWD_ENDPWENT		2
+#define PWD_GETPWENT		3
+#define PWD_GETPWNAM		4
+#define PWD_GETPWUID		5
 
-#define USER_GRP		2
+#define USER_GRP	2
 
-#define GRP_UNSPEC	0
-#define GRP_SETGRENT	1
-#define GRP_ENDGRENT	2
-#define GRP_GETGRENT	3
-#define GRP_GETGRNAM	4
-#define GRP_GETGRGID	5
+#define GRP_UNSPEC		0
+#define GRP_SETGRENT		1
+#define GRP_ENDGRENT		2
+#define GRP_GETGRENT		3
+#define GRP_GETGRNAM		4
+#define GRP_GETGRGID		5
+#define GRP_GETGROUPLIST	6
 
 #define WIN_ROOT_UID	500000018
 #define WIN_DAEMON_UID	500000006

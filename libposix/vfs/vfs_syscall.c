@@ -141,7 +141,9 @@ vfs_setegid(WIN_TASK *Task, SID8 *Sid)
 {
 	BOOL bResult = FALSE;
 
-	if (win_cap_setgid(Sid)){
+	if (EqualSid(&Task->GroupSid, Sid)){
+		bResult = TRUE;
+	}else if (win_cap_setgid(Sid)){
 		Task->GroupSid = *Sid;
 		bResult = TRUE;
 	}
