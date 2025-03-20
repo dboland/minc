@@ -28,19 +28,27 @@
  *
  */
 
-#include <sys/reboot.h>
+#include <winbase.h>
 
-/****************************************************/
+/************************************************************/
 
-int 
-sys_reboot(call_t call, int howto)
+BOOL 
+vfs_reboot(WIN_TASK *Task, USHORT Type, USHORT DeviceId)
 {
-	int result = 0;
+	BOOL bResult = FALSE;
+	DWORD dwThreadId = __Tasks[WIN_PID_INIT].ThreadId;
 
-	if (!vfs_reboot(call.Task, B_TYPE(howto), B_UNIT(howto))){
-		result -= errno_posix(GetLastError());
-	}else{
-		__exit(call.Task, 0);
+	if (!win_group_member(&SidAdmins)){
+		SetLastError(ERROR_PRIVILEGE_NOT_HELD);
+	}else switch (Type){
+		case WIN_RB_HALT:
+			bResult = vfs_kill_PID(dwThreadId, WM_QUIT, 0, 0);
+			break;
+		case WIN_RB_AUTOBOOT:
+			bResult = vfs_kill_PID(dwThreadId, WM_COMMAND, CTRL_LOGOFF_EVENT, 0);
+			break;
+		default:
+			SetLastError(ERROR_NOT_SUPPORTED);
 	}
-	return(result);
+	return(bResult);
 }

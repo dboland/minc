@@ -168,6 +168,10 @@ BOOL vfs_readv(WIN_TASK *Task, WIN_VNODE *Node, const WIN_IOVEC Data[], LONG Cou
 
 BOOL vfs_getrusage_CHILDREN(DWORD ParentId, WIN_RUSAGE *Result);
 
+/* vfs_reboot.c */
+
+BOOL vfs_reboot(WIN_TASK *Task, USHORT Type, USHORT DeviceId);
+
 /* vfs_libgen.c */
 
 VOID vfs_setproctitle(LPCSTR Title);

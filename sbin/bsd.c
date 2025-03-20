@@ -98,7 +98,7 @@ sig(int signum)
 		fprintf(stderr, "System reboot.\n");
 		kill(1, SIGHUP);
 	}else{
-		printf("%s: %s\n", __progname, strsignal(signum));
+		fprintf(stderr, "%s: %s\n", __progname, strsignal(signum));
 	}
 }
 int 
@@ -307,8 +307,8 @@ main(int argc, char *argv[], char *envp[])
 	setenv("PATH", _PATH_DEFPATH, 1);
 	setenv("TERM", _term, 1);
 	setenv("LC_CTYPE", _ctype, 1);
-	signal(SIGQUIT, sig);
-	bsd_signal(SIGHUP, sig);
+//	signal(SIGQUIT, sig);
+//	signal(SIGHUP, sig);
 	switch (pid = fork()){
 		case -1:
 			die("fork(): %s\n", strerror(errno));

@@ -186,28 +186,6 @@ vfs_raise(UINT Message, WPARAM WParam, LPARAM LParam)
 	return(bResult);
 }
 BOOL 
-vfs_sigsuspend_OLD(WIN_TASK *Task, CONST UINT *Mask)
-{
-	HACCEL hKeys = NULL;
-	UINT uiCurrent = Task->ProcMask;
-	MSG msg = {0};
-
-	Task->ProcMask = *Mask;
-	Task->State = WIN_SSLEEP;
-	if (GetMessage(&msg, NULL, 0, 0)){
-		if (!TranslateAccelerator(NULL, hKeys, &msg)){
-			TranslateMessage(&msg);
-			DispatchMessage(&msg);
-		}
-	}
-	if (vfs_raise(msg.message, msg.wParam, msg.lParam)){
-		SetLastError(ERROR_SIGNAL_PENDING);
-	}
-	Task->State = WIN_SRUN;
-	Task->ProcMask = uiCurrent;
-	return(FALSE);
-}
-BOOL 
 vfs_sigsuspend(WIN_TASK *Task, CONST UINT *Mask)
 {
 	BOOL bResult = FALSE;

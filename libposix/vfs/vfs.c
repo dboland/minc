@@ -133,7 +133,7 @@ BOOL proc_poll(WIN_TASK *Task);
 #include "vfs_ktrace.c"
 #include "vfs_event.c"
 #include "vfs_systm.c"
-//#include "vfs_ldt.c"
+#include "vfs_reboot.c"
 
 /****************************************************/
 

@@ -439,6 +439,20 @@ typedef struct _WIN_SIGACTION {
 typedef BOOL (CALLBACK *WIN_SIGPROC)(DWORD, CONTEXT *);
 
 /*
+ * vfs_reboot.c
+ */
+
+#define WIN_RB_AUTOBOOT     0       /* flags for system auto-booting itself */
+#define WIN_RB_ASKNAME      0x0001  /* ask for file name to reboot from */
+#define WIN_RB_SINGLE       0x0002  /* reboot to single user only */
+#define WIN_RB_NOSYNC       0x0004  /* dont sync before reboot */
+#define WIN_RB_HALT         0x0008  /* don't reboot, just halt */
+#define WIN_RB_INITNAME     0x0010  /* name given for /etc/init (unused) */
+#define WIN_RB_DFLTROOT     0x0020  /* use compiled-in rootdev */
+#define WIN_RB_KDB          0x0040  /* give control to kernel debugger */
+#define WIN_RB_RDONLY       0x0080  /* mount root fs read-only */
+
+/*
  * vfs_resource.c
  */
 
