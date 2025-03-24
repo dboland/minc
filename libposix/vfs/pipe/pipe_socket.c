@@ -69,7 +69,14 @@ pipe_listen(WIN_VNODE *Node, INT Backlog)
 BOOL 
 pipe_connect(WIN_VNODE *Node, CONST LPSOCKADDR Name, INT Length)
 {
-	return(PipeOpenFile((LPWSTR)Name->sa_data, __PipeEvent, Node));
+	BOOL bResult = FALSE;
+
+	if (PipeOpenFile((LPWSTR)Name->sa_data, __PipeEvent, Node)){
+		bResult = TRUE;
+//	}else{
+//		WIN_ERR("pipe_connect(%ls): %s\n", Name->sa_data, win_strerror(GetLastError()));
+	}
+	return(bResult);
 }
 BOOL 
 pipe_socketpair(INT Domain, INT Mode, INT Protocol, WIN_VNODE Result[2])

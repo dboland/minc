@@ -67,7 +67,7 @@ GrpLookup(WIN_GRENT *Group)
 	ULONG ulSubAuth = Group->Sid.SubAuthority[0];
 
 	switch (ulSubAuth){
-		case SECURITY_NT_NON_UNIQUE_RID:	/* 21 (Machine) */
+		case SECURITY_MACHINE_DOMAIN_RID:	/* 21 (Machine) */
 		case SECURITY_BUILTIN_DOMAIN_RID:	/* 32 (Builtin) */
 			bResult = GrpLookupNTAuth(Group);
 			break;
@@ -162,7 +162,7 @@ win_getgrouplist(WIN_PWENT *Passwd, SID8 *Primary, SID8 *Result[], DWORD *Count)
 	DWORD dwCount = 0;
 	DWORD dwTotal = 0;
 	DWORD dwResult = 0;
-	DWORD dwSize = sizeof(SID8) * 3;
+	DWORD dwSize = sizeof(SID8) * 4;
 	DWORD dwIndex = 0;
 	SID8 *psResult = win_malloc(dwSize);
 
@@ -183,8 +183,11 @@ win_getgrouplist(WIN_PWENT *Passwd, SID8 *Primary, SID8 *Result[], DWORD *Count)
 		WIN_ERR("NetUserGetLocalGroups(%ls): %s\n", Passwd->Account, win_strerror(naStatus));
 		bResult = FALSE;
 	}
+	psResult[dwResult++] = SidAuthenticated;
 	if (Passwd->Privileges == USER_PRIV_GUEST){
 		psResult[dwResult++] = SidUsers;	/* WS2_32.DLL/IPHLPAPI.DLL access */
+	}else if (Passwd->Privileges == USER_PRIV_USER){
+		psResult[dwResult++] = SidLocalUser;
 	}else if (Passwd->Privileges == USER_PRIV_ADMIN){
 		psResult[dwResult++] = SidLocalAdmin;	/* Vista */
 	}

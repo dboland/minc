@@ -141,9 +141,8 @@ win_getgroups(SID8 *Groups[], DWORD *Count)
 		LocalFree(ptGroups);
 		*Groups = psResult;
 		*Count = dwResult;
-		bResult = TRUE;
+		bResult = CloseHandle(hToken);
 	}
-	CloseHandle(hToken);
 	return(bResult);
 }
 BOOL 
@@ -152,7 +151,7 @@ win_setgroups(SID8 Groups[], DWORD Count)
 	BOOL bResult = FALSE;
 	HANDLE hToken;
 
-	if (!win_cap_setgroups(Groups, Groups, Count, &hToken)){
+	if (!win_cap_setgroups(Groups, Count, &hToken)){
 		return(FALSE);
 	}else if (!SetThreadToken(NULL, hToken)){
 		WIN_ERR("SetThreadToken(): %s\n", win_strerror(GetLastError()));

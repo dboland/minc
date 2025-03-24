@@ -77,7 +77,7 @@ PwdLookup(WIN_PWENT *Entity)
 	if (bAuth != SECURITY_NT_AUTHORITY_RID){
 		return(FALSE);
 	}else switch (ulSubAuth){
-		case SECURITY_NT_NON_UNIQUE_RID:	/* 21 (Machine) */
+		case SECURITY_MACHINE_DOMAIN_RID:	/* 21 (Machine) */
 			bResult = PwdLookupNTAuth(Entity);
 			break;
 		case SECURITY_LOCAL_SYSTEM_RID:		/* 18 (SYSTEM) */

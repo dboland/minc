@@ -39,7 +39,7 @@ EventCreateFile(LPCSTR Name, BOOL Manual)
 	WIN_OBJECT_CONTROL wControl;
 	SECURITY_ATTRIBUTES sa = {sizeof(sa), &wControl.Security, FALSE};
 
-	if (!AclCreateControl(EVENT_ALL_ACCESS, &wControl)){
+	if (!AclCreateControl(EVENT_ALL_ACCESS, EVENT_ALL_ACCESS, &wControl)){
 		return(NULL);
 	}else if (!(hResult = CreateEvent(&sa, Manual, FALSE, Name))){
 		WIN_ERR("CreateEvent(%s): %s\n", Name, win_strerror(GetLastError()));

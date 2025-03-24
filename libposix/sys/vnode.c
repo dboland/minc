@@ -48,15 +48,15 @@ int
 fd_posix(WIN_TASK *Task, WIN_VNODE *Node, int offset)
 {
 	int fd = offset > 0 ? offset : 0;
-	WIN_VNODE *pNode = &Task->Node[fd];
+	WIN_VNODE *pvNode = &Task->Node[fd];
 
 	while (fd < OPEN_MAX){
-		if (!pNode->Access){
+		if (!pvNode->Access){
 			Node->FileId = fd;
-			*pNode = *Node;
+			*pvNode = *Node;
 			return(fd);
 		}
-		pNode++;
+		pvNode++;
 		fd++;
 	}
 	return(-EMFILE);

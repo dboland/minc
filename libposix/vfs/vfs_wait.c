@@ -69,7 +69,7 @@ WaitNoHang(WIN_TASK *Children[], DWORD Status, WIN_RUSAGE *Result)
 	return(FALSE);
 }
 BOOL 
-WaitTimeOut(WIN_TASK *Children[], DWORD TimeOut)
+WaitTimeOut(WIN_TASK *Task, WIN_TASK *Children[], DWORD TimeOut, WIN_RUSAGE *Result)
 {
 	BOOL bResult = TRUE;
 	DWORD dwStatus;
@@ -96,14 +96,12 @@ vfs_wait4(WIN_TASK *Task, WIN_TASK *Children[], BOOL NoHang, DWORD Status, WIN_R
 			bResult = TRUE;
 		}else if (NoHang){
 			bResult = TRUE;
-		}else if (!WaitTimeOut(Children, INFINITE)){
+		}else if (!WaitTimeOut(Task, Children, INFINITE, Result)){
 			break;
 		}else if (proc_poll(Task)){
 			break;
 		}
 	}
-	Result->KernelTime += Task->KernelTime;
-	Result->UserTime += Task->UserTime;
 	Task->State = WIN_SONPROC;
 	return(bResult);
 }

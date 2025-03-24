@@ -31,15 +31,7 @@
 #include <ddk/ntapi.h>
 
 #define TOKEN_ADJUST_SESSIONID		0x100
-
-#define PREFIX_LOCAL(a,b)	(a != SECURITY_NT_AUTHORITY_RID || \
-				(b != SECURITY_NT_NON_UNIQUE_RID \
-				&& b != SECURITY_BUILTIN_DOMAIN_RID \
-				&& b != SECURITY_LOCAL_ADMIN_RID))
-
-#define PREFIX_LADMIN		((SECURITY_NT_AUTHORITY_RID * 0xFFFF) + SECURITY_LOCAL_ADMIN_RID)
-
-#define CAP_ACESIZE	(sizeof(ACCESS_ALLOWED_ACE) - sizeof(DWORD))
+#define CAP_ACESIZE			(sizeof(ACCESS_ALLOWED_ACE) - sizeof(DWORD))
 
 typedef struct _WIN_CAP_CONTROL {
 	SID8 User;
@@ -128,12 +120,19 @@ CapMergeGroups(PTOKEN_GROUPS Source, SID8 Groups[], DWORD Count)
 		pSid = Source->Groups[dwIndex].Sid;
 		bAuth = pSid->IdentifierAuthority.Value[5];
 		ulSubAuth = pSid->SubAuthority[0];
-		if (PREFIX_LOCAL(bAuth, ulSubAuth)){
-			*ptEntry = Source->Groups[dwIndex];
-			dwResult++;
-			ptEntry++;
-		}else if (ulSubAuth != ulLast){
-			ptEntry = CapAddGroups(ptEntry, ulSubAuth, Groups, Count, &dwResult);
+		if (ulSubAuth != ulLast){
+			if (EqualPrefixSid(pSid, &SidNTAuthority)){
+				ptEntry = CapAddGroups(ptEntry, ulSubAuth, Groups, Count, &dwResult);
+			}else switch (ulSubAuth){
+				case SECURITY_MACHINE_DOMAIN_RID:
+				case SECURITY_BUILTIN_DOMAIN_RID:
+					ptEntry = CapAddGroups(ptEntry, ulSubAuth, Groups, Count, &dwResult);
+					break;
+				default:
+					*ptEntry = Source->Groups[dwIndex];
+					dwResult++;
+					ptEntry++;
+			}
 		}
 		dwIndex++;
 		ulLast = ulSubAuth;
@@ -288,23 +287,7 @@ win_cap_get_proc(DWORD Access, TOKEN_TYPE Type, HANDLE *Result)
 	return(bResult);
 }
 BOOL 
-win_cap_set_mode_OLD(SID8 *User, ACCESS_MASK Access, ACL *Result)
-{
-	DWORD aceSize = sizeof(ACCESS_ALLOWED_ACE) - sizeof(DWORD);
-
-        Result->AclRevision = ACL_REVISION;
-        Result->AclSize = sizeof(ACL);
-        Result->AceCount = 0;
-	Result->AclSize += aceSize + GetLengthSid(&SidAdmins);
-	AddAccessAllowedAce(Result, ACL_REVISION, GENERIC_ALL | TOKEN_IMPERSONATE, &SidAdmins);
-	Result->AclSize += aceSize + GetLengthSid(User);
-	AddAccessAllowedAce(Result, ACL_REVISION, GENERIC_ALL | TOKEN_IMPERSONATE, User);
-	Result->AclSize += aceSize + GetLengthSid(&SidAuthenticated);
-	AddAccessAllowedAce(Result, ACL_REVISION, Access | TOKEN_IMPERSONATE, &SidAuthenticated);
-	return(TRUE);
-}
-BOOL 
-win_cap_set_mode(ACL *Result)
+win_cap_set_mode(DWORD Group, DWORD Other, ACL *Result)
 {
 	Result->AclRevision = ACL_REVISION;
 	Result->AclSize = sizeof(ACL);
@@ -312,9 +295,9 @@ win_cap_set_mode(ACL *Result)
 	Result->AclSize += CAP_ACESIZE + GetLengthSid(&SidAdmins);
 	AddAccessAllowedAce(Result, ACL_REVISION, GENERIC_ALL, &SidAdmins);
 	Result->AclSize += CAP_ACESIZE + GetLengthSid(&SidUsers);
-	AddAccessAllowedAce(Result, ACL_REVISION, WIN_P_IRWX, &SidUsers);
+	AddAccessAllowedAce(Result, ACL_REVISION, Group, &SidUsers);
 	Result->AclSize += CAP_ACESIZE + GetLengthSid(&SidAuthenticated);
-	AddAccessAllowedAce(Result, ACL_REVISION, WIN_P_IRX, &SidAuthenticated);
+	AddAccessAllowedAce(Result, ACL_REVISION, Other, &SidAuthenticated);
 	return(TRUE);
 }
 BOOL 
@@ -377,8 +360,9 @@ win_cap_setuid(WIN_PWENT *Passwd, HANDLE *Result)
 	BOOL bResult = FALSE;
 	HANDLE hToken = NULL;
 	WIN_CAP_CONTROL wControl;
+	DWORD dwAccess = TOKEN_ADJUST_PRIVILEGES | TOKEN_QUERY;
 
-	if (!win_cap_get_proc(MAXIMUM_ALLOWED, 0, &hToken)){
+	if (!win_cap_get_proc(dwAccess, 0, &hToken)){
 		return(FALSE);
 	}else if (!CapGetPrimary(hToken, &wControl.Primary)){
 		WIN_ERR("CapGetPrimary(%d): %s\n", hToken, win_strerror(GetLastError()));
@@ -389,7 +373,7 @@ win_cap_setuid(WIN_PWENT *Passwd, HANDLE *Result)
 	}else if (win_cap_init(&wControl)){
 
 		wControl.User = Passwd->UserSid;
-		win_cap_set_mode(&wControl.DefaultACL);
+		win_cap_set_mode(WIN_P_IRWX, WIN_P_IRX, &wControl.DefaultACL);
 
 		if (CapTogglePrivilege(hToken, "SeCreateTokenPrivilege", SE_PRIVILEGE_ENABLED)){
 			if (CapTogglePrivilege(hToken, "SeTcbPrivilege", SE_PRIVILEGE_ENABLED)){
@@ -409,8 +393,9 @@ win_cap_setgid(SID8 *Group)
 	BOOL bResult = FALSE;
 	TOKEN_PRIMARY_GROUP tPrimaryGroup = {Group};
 	HANDLE hToken = NULL;
+	DWORD dwAccess = TOKEN_ADJUST_PRIVILEGES | TOKEN_ADJUST_DEFAULT;
 
-	if (!win_cap_get_proc(MAXIMUM_ALLOWED, 0, &hToken)){
+	if (!win_cap_get_proc(dwAccess, 0, &hToken)){
 		return(FALSE);
 	}else if (CapTogglePrivilege(hToken, "SeTcbPrivilege", SE_PRIVILEGE_ENABLED)){
 		bResult = SetTokenInformation(hToken, TokenPrimaryGroup, &tPrimaryGroup, sizeof(TOKEN_PRIMARY_GROUP));
@@ -420,14 +405,15 @@ win_cap_setgid(SID8 *Group)
 	return(bResult);
 }
 BOOL 
-win_cap_setgroups(SID8 *Primary, SID8 Groups[], DWORD Count, HANDLE *Result)
+win_cap_setgroups(SID8 Groups[], DWORD Count, HANDLE *Result)
 {
 	BOOL bResult = FALSE;
 	WIN_CAP_CONTROL wControl;
 	HANDLE hToken = NULL;
 	PTOKEN_GROUPS ptGroups;
+	DWORD dwAccess = TOKEN_ADJUST_PRIVILEGES | TOKEN_QUERY;
 
-	if (!win_cap_get_proc(MAXIMUM_ALLOWED, 0, &hToken)){
+	if (!win_cap_get_proc(dwAccess, 0, &hToken)){
 		return(FALSE);
 	}else if (!CapGetUser(hToken, &wControl.User)){
 		WIN_ERR("CapGetUser(): %s\n", win_strerror(GetLastError()));
@@ -440,8 +426,7 @@ win_cap_setgroups(SID8 *Primary, SID8 Groups[], DWORD Count, HANDLE *Result)
 	}else if (win_cap_init(&wControl)){
 
 		wControl.Groups = CapMergeGroups(ptGroups, Groups, Count);
-//		wControl.Primary = *Primary;
-		win_cap_set_mode(&wControl.DefaultACL);
+		win_cap_set_mode(WIN_P_IRWX, WIN_P_IRX, &wControl.DefaultACL);
 
 		if (CapTogglePrivilege(hToken, "SeCreateTokenPrivilege", SE_PRIVILEGE_ENABLED)){
 			if (CapTogglePrivilege(hToken, "SeTcbPrivilege", SE_PRIVILEGE_ENABLED)){

@@ -97,8 +97,8 @@ proc_dup(WIN_TASK *Parent, WIN_THREAD_STRUCT *Thread)
 	ptResult->SavedGid = Parent->SavedGid;
 	ptResult->ProcMask = Parent->ProcMask;
 	ptResult->ClockTime = Parent->ClockTime;
-	ptResult->KernelTime = 0;
-	ptResult->UserTime = 0;
+	ptResult->KernelTime = 0LL;
+	ptResult->UserTime = 0LL;
 	win_memcpy(ptResult->Limit, Parent->Limit, WIN_RLIM_NLIMITS * sizeof(DWORDLONG));
 	win_memcpy(ptResult->AtExit, Parent->AtExit, WIN_ATEXIT_MAX * sizeof(WIN_ATEXITPROC));
 	win_memcpy(ptResult->Action, Parent->Action, WIN_NSIG * sizeof(WIN_SIGACTION));
@@ -132,7 +132,7 @@ proc_execve(WIN_TASK *Task, LPSTR Command, PVOID Environ)
 	STARTUPINFO si = {0};
 	HANDLE hToken = NULL;
 	PROCESS_INFORMATION pi = {0};
-	DWORD dwAccess = TOKEN_QUERY + TOKEN_DUPLICATE + TOKEN_ASSIGN_PRIMARY;
+	DWORD dwAccess = TOKEN_QUERY | TOKEN_DUPLICATE | TOKEN_ASSIGN_PRIMARY;
 	HANDLE hThread;
 	DWORD dwFlags = NORMAL_PRIORITY_CLASS;
 
@@ -159,11 +159,10 @@ proc_execve(WIN_TASK *Task, LPSTR Command, PVOID Environ)
 		ZeroMemory(Task->AtExit, WIN_ATEXIT_MAX * sizeof(WIN_ATEXITPROC));
 		Task->State = WIN_SRUN;
 		Task->Timer = NULL;
-		bResult = TRUE;
+		bResult = CloseHandle(hToken);
 	}else{
 		WIN_ERR("CreateProcessAsUser(%s): Handle(%d): %s\n", Command, hToken, win_strerror(GetLastError()));
 	}
-	CloseHandle(hToken);
 	win_free(Command);
 	win_free(Environ);
 	return(bResult);
@@ -171,14 +170,17 @@ proc_execve(WIN_TASK *Task, LPSTR Command, PVOID Environ)
 BOOL 
 proc_orphanize(WIN_TASK *Task)
 {
-	BOOL bResult = FALSE;
+	BOOL bResult = TRUE;
+	WIN_TASK *pwTask = &__Tasks[WIN_PID_INIT];
 
 	Task->ParentId = WIN_PID_INIT;
-	if (CloseHandle(Task->Handle)){
+	if (!Task->Handle){		/* remote thread exited (ffmpeg.exe) */
+		bResult = FALSE;
+	}else if (CloseHandle(Task->Handle)){
 		Task->Handle = NULL;
-	}else{
+	}else if (ERROR_INVALID_HANDLE != GetLastError()){
 		WIN_ERR("proc_orphanize(%d): %s\n", Task->Handle, win_strerror(GetLastError()));
 	}
-	bResult = vfs_kill_PID(__Tasks[WIN_PID_INIT].ThreadId, WM_COMMAND, CTRL_CHILD_EVENT, Task->TaskId);
+	bResult = vfs_kill_PID(pwTask->ThreadId, WM_COMMAND, CTRL_CHILD_EVENT, Task->TaskId);
 	return(bResult);
 }

@@ -124,13 +124,13 @@ AclDupEntry(ACE_PEEK *Entry, PSID Sid, ACCESS_ALLOWED_ACE8 *Result)
 	return((ACE_PEEK *)Result);
 }
 BOOL 
-AclCreateControl(ACCESS_MASK Access, WIN_OBJECT_CONTROL *Result)
+AclCreateControl(DWORD Group, DWORD Other, WIN_OBJECT_CONTROL *Result)
 {
 	BOOL bResult = FALSE;
 	PSECURITY_DESCRIPTOR pSec = &Result->Security;
 	PACL pAcl = &Result->DefaultAcl;
 
-	if (!win_cap_set_mode_OLD(win_geteuid(&Result->SidUser), Access, pAcl)){
+	if (!win_cap_set_mode(Group, Other, pAcl)){
 		return(FALSE);
 	}else if (!InitializeSecurityDescriptor(pSec, SECURITY_DESCRIPTOR_REVISION)){
 		WIN_ERR("InitializeSecurityDescriptor(): %s\n", win_strerror(GetLastError()));

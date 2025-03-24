@@ -60,7 +60,7 @@ rid_posix(SID8 *Sid)
 		bAuth = SECURITY_NT_AUTHORITY_RID;
 		ulSubAuth = SECURITY_NT_NON_UNIQUE;
 		ulRid = DOMAIN_GROUP_RID_USERS;
-	}else if (ulSubAuth == SECURITY_NT_NON_UNIQUE){		/* Machine */
+	}else if (ulSubAuth == SECURITY_MACHINE_DOMAIN_RID){	/* Machine */
 		if (!EqualPrefixSid(Sid, __SidMachine)){
 			bAuth = SECURITY_OTHER_AUTHORITY_RID;
 		}
@@ -90,7 +90,7 @@ rid_win(SID8 *Result, int rid)
 		*Result = SidNull;
 		Result->IdentifierAuthority.Value[5] = bAuth;
 		Result->SubAuthority[0] = rid % 100000000;
-	}else if (ulSubAuth == SECURITY_NT_NON_UNIQUE){		/* 21 (Machine) */
+	}else if (ulSubAuth == SECURITY_MACHINE_DOMAIN_RID){	/* 21 (Machine) */
 		CopySid(sizeof(SID8), Result, __SidMachine);
 		Result->SubAuthority[Result->SubAuthorityCount-1] = ulRid;
 	}else if (ulSubAuth == SECURITY_BUILTIN_DOMAIN){	/* 32 (Builtin) */

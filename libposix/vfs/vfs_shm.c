@@ -39,7 +39,7 @@ SHMCreate(LPCSTR Name, DWORD SizeLow)
 	WIN_OBJECT_CONTROL wControl;
 	SECURITY_ATTRIBUTES sa = {sizeof(sa), &wControl.Security, FALSE};
 
-	if (!AclCreateControl(WIN_S_IRW, &wControl)){
+	if (!AclCreateControl(WIN_S_IRW, WIN_S_IREAD, &wControl)){
 		return(NULL);
 	}else if (!(__Shared = CreateFileMapping(INVALID_HANDLE_VALUE, &sa, PAGE_READWRITE, 0, SizeLow, Name))){
 		WIN_ERR("CreateFileMapping(%s): %s\n", Name, win_strerror(GetLastError()));
