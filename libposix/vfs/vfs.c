@@ -56,6 +56,7 @@ extern SID8 SidAuthenticated;
 extern SID8 SidUsers;
 extern SID8 SidGuests;
 extern SID8 SidBuiltin;
+extern SID8 SidNull;
 
 typedef struct _SEQUENCE {
 	CHAR *Args;
@@ -176,7 +177,7 @@ vfs_start(WIN_FS_TYPE FileSystem)
 			bResult = TRUE;
 			break;
 		case FS_TYPE_WINSOCK:
-			bResult = ws2_init();
+			bResult = ws2_start();
 			break;
 		default:
 			SetLastError(ERROR_BAD_FILE_TYPE);

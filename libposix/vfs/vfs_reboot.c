@@ -42,7 +42,8 @@ vfs_reboot(WIN_TASK *Task, USHORT Type, USHORT DeviceId)
 		SetLastError(ERROR_PRIVILEGE_NOT_HELD);
 	}else switch (Type){
 		case WIN_RB_HALT:
-			bResult = vfs_kill_PID(dwThreadId, WM_QUIT, 0, 0);
+//			bResult = vfs_kill_PID(dwThreadId, WM_QUIT, 0, 0);
+			bResult = TRUE;
 			break;
 		case WIN_RB_AUTOBOOT:
 			bResult = vfs_kill_PID(dwThreadId, WM_COMMAND, CTRL_LOGOFF_EVENT, 0);

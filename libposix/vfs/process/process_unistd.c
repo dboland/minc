@@ -135,6 +135,8 @@ proc_execve(WIN_TASK *Task, LPSTR Command, PVOID Environ)
 	DWORD dwAccess = TOKEN_QUERY | TOKEN_DUPLICATE | TOKEN_ASSIGN_PRIMARY;
 	HANDLE hThread;
 	DWORD dwFlags = NORMAL_PRIORITY_CLASS;
+	WIN_OBJECT_CONTROL wControl;
+	SECURITY_ATTRIBUTES sa = {sizeof(sa), &wControl.Security, FALSE};
 
 	si.cb = sizeof(STARTUPINFO);
 	si.lpDesktop = "";		/* Vista */
@@ -142,7 +144,9 @@ proc_execve(WIN_TASK *Task, LPSTR Command, PVOID Environ)
 	si.dwX = Task->TaskId;
 	if (!win_cap_get_proc(dwAccess, TokenPrimary, &hToken)){
 		WIN_ERR("win_cap_get_proc(%s): %s\n", Command, win_strerror(GetLastError()));
-	}else if (CreateProcessAsUser(hToken, NULL, Command, NULL, NULL, TRUE, dwFlags, Environ, NULL, &si, &pi)){
+	}else if (!AclCreateControl(WIN_P_IRWX, WIN_P_IRX, &wControl)){
+		WIN_ERR("AclCreateControl(%s): %s\n", Command, win_strerror(GetLastError()));
+	}else if (CreateProcessAsUser(hToken, NULL, Command, &sa, &sa, TRUE, dwFlags, Environ, NULL, &si, &pi)){
 		Task->Flags |= WIN_PS_EXEC;
 		Task->ThreadId = pi.dwThreadId;
 		hThread = Task->Handle;

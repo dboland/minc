@@ -126,7 +126,7 @@ vfs_seteuid(WIN_TASK *Task, SID8 *Sid)
 		bResult = TRUE;
 	}else if (!win_getpwuid(Sid, &pwEntry)){
 		return(FALSE);
-	}else if (!win_cap_setuid(&pwEntry, &hToken)){
+	}else if (!win_cap_setuid(&__Globals->AuthId, &pwEntry, &hToken)){
 		return(FALSE);
 	}else if (!SetThreadToken(NULL, hToken)){
 		WIN_ERR("SetThreadToken(%ls): %s\n", pwEntry.Account, win_strerror(GetLastError()));

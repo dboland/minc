@@ -33,14 +33,14 @@
 /****************************************************/
 
 BOOL 
-char_read(WIN_VNODE *Node, LPSTR Buffer, LONG Size, DWORD *Result)
+char_read(WIN_TASK *Task, WIN_VNODE *Node, LPSTR Buffer, LONG Size, DWORD *Result)
 {
 	BOOL bResult = FALSE;
 
 	switch (Node->DeviceType){
 		case DEV_TYPE_CONSOLE:
 		case DEV_TYPE_PTY:
-			bResult = input_read(Node->Handle, Buffer, Size, Result);
+			bResult = input_read(Task, Node->Handle, Buffer, Size, Result);
 			break;
 		case DEV_TYPE_INPUT:
 		case DEV_TYPE_NULL:

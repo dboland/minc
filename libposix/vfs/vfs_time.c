@@ -32,22 +32,6 @@
 
 /****************************************************/
 
-VOID CALLBACK 
-TimeProc(PVOID Param, DWORD LowValue, DWORD HighValue)
-{
-	WIN_TASK *pwTask = Param;
-
-	/* This procedure will not be called when including the handle 
-	 * created by CreateWaitableTimer() in one of the 
-	 * WaitFor*Ex() functions.
-	 */
-	if (!PostThreadMessage(pwTask->ThreadId, WM_TIMER, LowValue, HighValue)){
-		WIN_ERR("PostThreadMessage(%d): %s\n", pwTask->ThreadId, win_strerror(GetLastError()));
-	}
-}
-
-/****************************************************/
-
 BOOL 
 vfs_clock_gettime_MONOTONIC(DWORDLONG *Result)
 {
@@ -66,6 +50,40 @@ vfs_clock_gettime_MONOTONIC(DWORDLONG *Result)
 }
 
 /************************************************************/
+
+VOID CALLBACK 
+TimeProc(PVOID Param, DWORD LowValue, DWORD HighValue)
+{
+	WIN_TASK *pwTask = Param;
+
+	/* This procedure will not be called when including the handle 
+	 * created by CreateWaitableTimer() in one of the 
+	 * WaitFor*Ex() functions.
+	 */
+	if (!PostThreadMessage(pwTask->ThreadId, WM_TIMER, LowValue, HighValue)){
+		WIN_ERR("PostThreadMessage(%d): %s\n", pwTask->ThreadId, win_strerror(GetLastError()));
+	}
+}
+BOOL 
+TimeWaitSleep(WIN_TASK *Task, HANDLE Handle, DWORDLONG TimeOut, DWORDLONG *Remain)
+{
+	BOOL bResult = FALSE;
+	HANDLE hObjects[2] = {__Interrupt, Handle};
+	DWORDLONG dwlElapsed = 0LL;
+
+	if (WAIT_FAILED == WaitForMultipleObjectsEx(2, hObjects, FALSE, INFINITE, TRUE)){
+		WIN_ERR("WaitForMultipleObjectsEx(%s): %s\n", win_strobj(hObjects, 2), win_strerror(GetLastError()));
+	}else{
+		bResult = TRUE;
+	}
+	if (vfs_clock_gettime_MONOTONIC(&dwlElapsed)){
+		dwlElapsed -= Task->ClockTime;
+	}
+	*Remain = TimeOut - dwlElapsed;
+	return(bResult);
+}
+
+/****************************************************/
 
 BOOL 
 vfs_getitimer(WIN_TASK *Task, HANDLE *Result)
@@ -124,25 +142,22 @@ BOOL
 vfs_nanosleep(WIN_TASK *Task, DWORDLONG TimeOut, DWORDLONG *Remain)
 {
 	BOOL bResult = FALSE;
-	LONGLONG llRemain;
-	LONGLONG llElapsed = 0;
+	LONGLONG llRemain = 0LL;
 	HANDLE hTimer = CreateWaitableTimer(NULL, FALSE, NULL);
-	HANDLE hObjects[2] = {__Interrupt, hTimer};
 	LARGE_INTEGER liTimeOut;
-	DWORD dwResult;
 
 	liTimeOut.QuadPart = (LONGLONG)(TimeOut * -0.01);	/* 100-nanosecond intervals */
-	SetWaitableTimer(hTimer, &liTimeOut, 0, NULL, NULL, FALSE);
-	dwResult = WaitForMultipleObjectsEx(2, hObjects, FALSE, INFINITE, TRUE);
-	if (dwResult == WAIT_FAILED){
-		WIN_ERR("WaitForMultipleObjectsEx(%s): %s\n", win_strobj(hObjects, 2), win_strerror(GetLastError()));
-	}else if (!proc_poll(Task)){
-		bResult = TRUE;
+	if (!SetWaitableTimer(hTimer, &liTimeOut, 0, NULL, NULL, FALSE)){
+		WIN_ERR("SetWaitableTimer(%I64d): %s\n", TimeOut, win_strerror(GetLastError()));
+	}else while (!bResult){
+		if (!TimeWaitSleep(Task, hTimer, TimeOut, &llRemain)){
+			break;
+		}else if (proc_poll(Task)){
+			break;
+		}else if (llRemain < 9000000LL){	/* hallo Werner Heisenberg */
+			bResult = TRUE;
+		}
 	}
-	if (vfs_clock_gettime_MONOTONIC(&llElapsed)){
-		llElapsed -= Task->ClockTime;
-	}
-	llRemain = TimeOut - llElapsed;
 	if (llRemain > 0){
 		*Remain = llRemain;
 	}else{

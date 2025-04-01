@@ -62,7 +62,7 @@ PDOLookupBus(LPCWSTR BusName, DWORD Class)
 	return(dwResult);
 }
 DWORD 
-PDOLookupClass(LPCWSTR Service, DWORD Bus)
+PDOLookupService(LPCWSTR Service, DWORD Bus)
 {
 	DWORD dwResult = Bus;
 
@@ -111,7 +111,7 @@ PDOLookup(LPCWSTR Bus, LPCWSTR Class, LPCWSTR Service)
 		dwResult = PDOLookupBus(Bus, DEV_CLASS_STORAGE);
 
 	}else if (!win_wcscmp(Class, L"ports")){
-		dwResult = PDOLookupClass(Service, DEV_BUS_ISA);
+		dwResult = PDOLookupService(Service, DEV_BUS_ISA);
 
 	}else if (!win_wcscmp(Service, L"usbprint")){	/* no "Printer" class for USB */
 		dwResult = DEV_TYPE_USBPRINT;
@@ -130,9 +130,6 @@ PDOLookup(LPCWSTR Bus, LPCWSTR Class, LPCWSTR Service)
 	}else if (!win_wcscmp(Class, L"monitor")){
 		dwResult = PDOLookupBus(Bus, DEV_CLASS_DISPLAY);
 
-//	}else if (!win_wcscmp(Class, L"bluetooth")){
-//		dwResult = PDOLookupBus(Bus, DEV_CLASS_USB);
-
 	}else if (!win_wcscmp(Class, L"camera")){
 		dwResult = PDOLookupBus(Bus, DEV_CLASS_MEDIA);
 
@@ -149,7 +146,7 @@ PDOLookup(LPCWSTR Bus, LPCWSTR Class, LPCWSTR Service)
 	return(dwResult);
 }
 VOID 
-PDOClass(LPCWSTR ClassID, LPWSTR Result)
+PDOLookupClass(LPCWSTR ClassID, LPWSTR Result)
 {
 	WIN_VNODE vNode;
 	DWORD dwResult;
@@ -178,24 +175,33 @@ pdo_statvfs(WIN_CFDATA *Config, DWORD Flags, WIN_CFDRIVER *Driver)
 
 	ZeroMemory(Driver, sizeof(WIN_CFDRIVER));
 	if (reg_open(reg_lookup(&wPath, REG_DRIVER, Config->DosPath), &wFlags, &vNode)){
+
+		/* GUID of attached software device
+		 */
 		win_wcscpy(Driver->ClassId, wPath.R);
-		/* Device Class ("Components" in msinfo32.exe) */
+
+		/* Device Class ("Components" in msinfo32.exe)
+		 */
 		if (reg_read(&vNode, L"ClassGUID", szClass, MAX_GUID, &dwSize)){
-			PDOClass(szClass, Driver->NtClass);
+			PDOLookupClass(szClass, Driver->NtClass);
 		}
-		/* Device Driver (*.sys) */
+
+		/* Device Driver (*.sys)
+		 */
 		if (!reg_read(&vNode, L"Service", Driver->Service, MAX_NAME, &dwSize)){
 			win_wcscpy(Driver->Service, Driver->NtClass);
 		}
 		if (!reg_read(&vNode, L"LocationInformation", Driver->Location, MAX_COMMENT, &dwSize)){
-			win_wcscpy(Driver->Location, Driver->Service);
+			win_wcscpy(win_wcpcpy(Driver->Location, Driver->Service), L".sys");
 		}
 		if (reg_read(&vNode, L"FriendlyName", szText, MAX_TEXT, &dwSize)){
 			win_wcscpy(Driver->Comment, szText);
 		}else if (reg_read(&vNode, L"DeviceDesc", szText, MAX_TEXT, &dwSize)){
 			win_wcscpy(Driver->Comment, szText);
 		}
+
 		bResult = reg_close(&vNode);
+
 	}else{
 		WIN_ERR("reg_open(%ls): %s\n", wPath.Resolved, win_strerror(GetLastError()));
 	}

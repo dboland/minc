@@ -266,7 +266,6 @@ __seteuid(WIN_TASK *Task, uid_t uid)
 	}
 	if (uid == rid_posix(&Task->UserSid)){		/* PRIV_START check (ssh.exe) */
 		return(0);
-//	}else if (__getuid(Task) && __geteuid(Task)){
 	}else if (__geteuid(Task)){
 		result = -EPERM;
 	}else if (!vfs_seteuid(Task, rid_win(&sidUser, uid))){
@@ -345,7 +344,6 @@ __setegid(WIN_TASK *Task, gid_t gid)
 	}
 	if (gid == rid_posix(&Task->GroupSid)){		/* PRIV_START check (ssh.exe) */
 		return(0);
-//	}else if (__getuid(Task) && __geteuid(Task)){
 	}else if (__geteuid(Task)){
 		result = -EPERM;
 	}else if (!vfs_setegid(Task, rid_win(&sidGroup, gid))){

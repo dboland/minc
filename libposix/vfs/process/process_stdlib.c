@@ -61,7 +61,7 @@ ProcInitChannels(WIN_VNODE Result[])
 BOOL 
 proc_setugid(WIN_TASK *Task)
 {
-	BOOL bResult = TRUE;
+	BOOL bResult = FALSE;
 	WCHAR szPath[MAX_PATH];
 	WIN_VATTR wStat = {0};
 

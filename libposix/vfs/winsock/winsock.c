@@ -45,11 +45,10 @@
 /************************************************************/
 
 BOOL 
-ws2_init(VOID)
+ws2_start(VOID)
 {
 	BOOL bResult = FALSE;
 	WSADATA wsaData;
-//	WORD wVersion = 0x0101;		/* v. 1.1 */
 	WORD wVersion = 0x0202;		/* v. 2.2 */
 
 	if (WSAStartup(wVersion, &wsaData)){

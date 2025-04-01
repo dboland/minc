@@ -130,7 +130,7 @@ sys_setgroups(call_t call, int size, const gid_t *list)
 			}
 			dwIndex++;
 		}
-		if (!win_setgroups(grList, dwCount)){
+		if (!win_setgroups(&__Globals->AuthId, grList, dwCount)){
 			result -= errno_posix(GetLastError());
 		}
 		win_free(grList);
@@ -586,7 +586,7 @@ sys_pread(call_t call, int fd, void *buf, size_t nbytes, off_t offset)
 		result = -EINVAL;
 	}else if (fd < 0 || fd >= OPEN_MAX){
 		result = -EBADF;
-	}else if (!vfs_pread(&pwTask->Node[fd], buf, nbytes, offset, &dwResult)){
+	}else if (!vfs_pread(pwTask, &pwTask->Node[fd], buf, nbytes, offset, &dwResult)){
 		result -= errno_posix(GetLastError());
 	}else{
 		result = dwResult;

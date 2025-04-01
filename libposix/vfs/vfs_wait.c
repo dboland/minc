@@ -71,14 +71,14 @@ WaitNoHang(WIN_TASK *Children[], DWORD Status, WIN_RUSAGE *Result)
 BOOL 
 WaitTimeOut(WIN_TASK *Task, WIN_TASK *Children[], DWORD TimeOut, WIN_RUSAGE *Result)
 {
-	BOOL bResult = TRUE;
-	DWORD dwStatus;
+	BOOL bResult = FALSE;
 	HANDLE hObjects[MAXIMUM_WAIT_OBJECTS];
 	DWORD dwCount = WaitGetObjects(Children, hObjects);
 
-	dwStatus = WaitForMultipleObjectsEx(dwCount, hObjects, FALSE, TimeOut, TRUE);
-	if (dwStatus == WAIT_FAILED){
-		bResult = FALSE;
+	if (WAIT_FAILED == WaitForMultipleObjectsEx(dwCount, hObjects, FALSE, TimeOut, TRUE)){
+		WIN_ERR("WaitForMultipleObjectsEx(%s): %s\n", win_strobj(hObjects, 2), win_strerror(GetLastError()));
+	}else{
+		bResult = TRUE;
 	}
 	return(bResult);
 }

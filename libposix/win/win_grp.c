@@ -183,11 +183,11 @@ win_getgrouplist(WIN_PWENT *Passwd, SID8 *Primary, SID8 *Result[], DWORD *Count)
 		WIN_ERR("NetUserGetLocalGroups(%ls): %s\n", Passwd->Account, win_strerror(naStatus));
 		bResult = FALSE;
 	}
-	psResult[dwResult++] = SidAuthenticated;
+//	psResult[dwResult++] = SidAuthenticated;
 	if (Passwd->Privileges == USER_PRIV_GUEST){
 		psResult[dwResult++] = SidUsers;	/* WS2_32.DLL/IPHLPAPI.DLL access */
 	}else if (Passwd->Privileges == USER_PRIV_USER){
-		psResult[dwResult++] = SidLocalUser;
+		psResult[dwResult++] = SidLocalUser;	/* Vista */
 	}else if (Passwd->Privileges == USER_PRIV_ADMIN){
 		psResult[dwResult++] = SidLocalAdmin;	/* Vista */
 	}

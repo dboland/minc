@@ -384,6 +384,7 @@ typedef struct _WIN_GLOBALS {
 	CHAR Root[MAX_PATH];
 	DWORD Load[3];
 	LARGE_INTEGER Frequency;	/* result of QueryPerformanceFrequency() */
+	LUID AuthId;
 } WIN_GLOBALS;
 
 /*

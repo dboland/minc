@@ -124,22 +124,32 @@ vfs_kill_ANY(DWORD ParentId, UINT Message, WPARAM WParam, LPARAM LParam)
 BOOL 
 vfs_kill_SYS(DWORD CallerId, UINT Message, WPARAM WParam, LPARAM LParam)
 {
-	BOOL bResult = TRUE;
+	BOOL bResult = FALSE;
 	DWORD dwIndex = WIN_CHILD_MAX - 1;
 	WIN_TASK *pwTask = &__Tasks[dwIndex];
+	DWORD dwCount = 0;
 
 	if (!win_group_member(&SidAdmins)){
 		SetLastError(ERROR_PRIVILEGE_NOT_HELD);
 		return(FALSE);
-	}else while (dwIndex > WIN_PID_INIT){	/* no signals for pid 1 */
+	}else while (dwIndex >= WIN_PID_INIT){
 		if (pwTask->Flags && pwTask->TaskId != CallerId){
-			vfs_kill_PID(pwTask->ThreadId, Message, WParam, LParam);
+			if (vfs_kill_PID(pwTask->ThreadId, Message, WParam, LParam)){
+				dwCount++;
+			}
 		}
 		dwIndex--;
 		pwTask--;
 	}
-	if (WParam != CTRL_CLOSE_EVENT && WParam != CTRL_STOP_EVENT){
-		vfs_kill_PID(pwTask->ThreadId, Message, WParam, LParam);
+	/* no lethal signals for pid 1
+	 */
+//	if (WParam != CTRL_CLOSE_EVENT && WParam != CTRL_STOP_EVENT){
+//		vfs_kill_PID(pwTask->ThreadId, Message, WParam, LParam);
+//	}
+	if (!dwCount){
+		SetLastError(ERROR_INVALID_THREAD_ID);
+	}else{
+		bResult = TRUE;
 	}
 	return(bResult);
 }

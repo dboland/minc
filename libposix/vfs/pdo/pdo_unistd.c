@@ -49,14 +49,14 @@ pdo_close(WIN_VNODE *Node)
 	return(bResult);
 }
 BOOL 
-pdo_read(WIN_DEVICE *Device, LPSTR Buffer, LONG Size, DWORD *Result)
+pdo_read(WIN_TASK *Task, WIN_DEVICE *Device, LPSTR Buffer, LONG Size, DWORD *Result)
 {
 	BOOL bResult = FALSE;
 
 	switch (Device->DeviceType){
 		case DEV_TYPE_PTY:
 		case DEV_TYPE_CONSOLE:
-			bResult = input_read(Device->Input, Buffer, Size, Result);
+			bResult = input_read(Task, Device->Input, Buffer, Size, Result);
 			break;
 		case DEV_TYPE_ROUTE:
 			bResult = route_read(Device, Buffer, Size, Result);

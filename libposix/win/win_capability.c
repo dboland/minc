@@ -34,12 +34,13 @@
 #define CAP_ACESIZE			(sizeof(ACCESS_ALLOWED_ACE) - sizeof(DWORD))
 
 typedef struct _WIN_CAP_CONTROL {
+	LUID AuthId;
 	SID8 User;
 	SID8 Primary;
-	LUID AuthId;
 	DWORD SessionId;
 	PTOKEN_GROUPS Groups;
 	PTOKEN_PRIVILEGES Privs;
+//	PTOKEN_DEFAULT_DACL Default;
 	ACL DefaultACL;
 	ACCESS_ALLOWED_ACE8 Ace[4];
 } WIN_CAP_CONTROL;
@@ -47,6 +48,9 @@ typedef struct _WIN_CAP_CONTROL {
 /* The "Replace a process level token" (SeAssignPrimaryTokenPrivilege) setting
  * determines which user accounts can call the CreateProcessAsUser() application
  * programming interface (API) so that one service can start another.
+ * The "Create a token object" (SeCreateTokenPrivilege) is needed for NtCreateToken().
+ * The "Act as part of the operating system" (SeTcbPrivilege) is needed for
+ * assigning a TokenSessionId.
  */
 
 /************************************************************/
@@ -85,16 +89,12 @@ SID_AND_ATTRIBUTES *
 CapAddGroups(SID_AND_ATTRIBUTES Entry[], ULONG SubAuth, SID8 Groups[], DWORD Count, DWORD *Result)
 {
 	DWORD dwIndex = 0;
-	DWORD dwAttribs = SE_GROUP_ENABLED | SE_GROUP_ENABLED_BY_DEFAULT;
+//	DWORD dwAttribs = SE_GROUP_ENABLED | SE_GROUP_ENABLED_BY_DEFAULT;
 
 	while (dwIndex < Count){
 		if (Groups->SubAuthority[0] == SubAuth){
 			Entry->Sid = Groups;
-			if (SubAuth == SECURITY_BUILTIN_DOMAIN_RID){
-				Entry->Attributes = dwAttribs | SE_GROUP_OWNER;
-			}else{
-				Entry->Attributes = dwAttribs | SE_GROUP_MANDATORY;
-			}
+			Entry->Attributes = SE_GROUP_ENABLED | SE_GROUP_OWNER;
 			*Result += 1;
 			Entry++;
 		}
@@ -120,10 +120,12 @@ CapMergeGroups(PTOKEN_GROUPS Source, SID8 Groups[], DWORD Count)
 		pSid = Source->Groups[dwIndex].Sid;
 		bAuth = pSid->IdentifierAuthority.Value[5];
 		ulSubAuth = pSid->SubAuthority[0];
-		if (ulSubAuth != ulLast){
-			if (EqualPrefixSid(pSid, &SidNTAuthority)){
-				ptEntry = CapAddGroups(ptEntry, ulSubAuth, Groups, Count, &dwResult);
-			}else switch (ulSubAuth){
+		if (EqualPrefixSid(pSid, &SidNTAuthority)){
+			*ptEntry = Source->Groups[dwIndex];
+			dwResult++;
+			ptEntry++;
+		}else if (ulSubAuth != ulLast){
+			switch (ulSubAuth){
 				case SECURITY_MACHINE_DOMAIN_RID:
 				case SECURITY_BUILTIN_DOMAIN_RID:
 					ptEntry = CapAddGroups(ptEntry, ulSubAuth, Groups, Count, &dwResult);
@@ -262,6 +264,8 @@ CapTogglePrivilege(HANDLE Token, LPCSTR Name, DWORD Value)
 			WIN_ERR("AdjustTokenPrivileges(%s): %s\n", Name, win_strerror(GetLastError()));
 		}else if (ERROR_SUCCESS == GetLastError()){
 			bResult = TRUE;
+//		}else{
+//			WIN_ERR("AdjustTokenPrivileges(%s): %s\n", Name, win_strerror(GetLastError()));
 		}
 	}
 	return(bResult);
@@ -301,24 +305,20 @@ win_cap_set_mode(DWORD Group, DWORD Other, ACL *Result)
 	return(TRUE);
 }
 BOOL 
-win_cap_init(WIN_CAP_CONTROL *Result)
+win_cap_init(PLUID AuthId, WIN_CAP_CONTROL *Result)
 {
 	BOOL bResult = FALSE;
 	HANDLE hToken;
 	DWORD dwSize = 0;
-	TOKEN_STATISTICS tStats = {0};
-	TOKEN_SOURCE tSource = {0};
 	DWORD dwSessionId = 0;
 	NTSTATUS ntStatus;
 
 	if (!OpenProcessToken(GetCurrentProcess(), TOKEN_QUERY, &hToken)){
 		WIN_ERR("OpenProcessToken(TOKEN_QUERY): %s\n", win_strerror(GetLastError()));
-	}else if (!GetTokenInformation(hToken, TokenStatistics, &tStats, sizeof(TOKEN_STATISTICS), &dwSize)){
-		WIN_ERR("GetTokenInformation(TokenStatistics): %s\n", win_strerror(GetLastError()));
 	}else if (!GetTokenInformation(hToken, TokenSessionId, &dwSessionId, sizeof(DWORD), &dwSize)){
 		WIN_ERR("GetTokenInformation(TokenSessionId): %s\n", win_strerror(GetLastError()));
 	}else{
-		Result->AuthId = tStats.AuthenticationId;
+		Result->AuthId = *AuthId;
 		Result->SessionId = dwSessionId;
 		bResult = CloseHandle(hToken);
 	}
@@ -329,6 +329,7 @@ win_cap_free(WIN_CAP_CONTROL *Control)
 {
 	LocalFree(Control->Privs);
 	LocalFree(Control->Groups);
+//	LocalFree(Control->Default);
 }
 BOOL 
 win_cap_from_name(LPCSTR Name, PTOKEN_PRIVILEGES Token)
@@ -355,7 +356,7 @@ win_cap_to_name(PTOKEN_PRIVILEGES Token, LPSTR Buffer, DWORD *Size)
 	return(bResult);
 }
 BOOL 
-win_cap_setuid(WIN_PWENT *Passwd, HANDLE *Result)
+win_cap_setuid(PLUID AuthId, WIN_PWENT *Passwd, HANDLE *Result)
 {
 	BOOL bResult = FALSE;
 	HANDLE hToken = NULL;
@@ -370,7 +371,9 @@ win_cap_setuid(WIN_PWENT *Passwd, HANDLE *Result)
 		WIN_ERR("CapGetGroups(%d): %s\n", hToken, win_strerror(GetLastError()));
 	}else if (!CapGetPrivileges(hToken, &wControl.Privs)){
 		WIN_ERR("CapGetPrivileges(%d): %s\n", hToken, win_strerror(GetLastError()));
-	}else if (win_cap_init(&wControl)){
+//	}else if (!CapGetDefault(hToken, &wControl.Default)){
+//		WIN_ERR("CapGetDefault(%d): %s\n", hToken, win_strerror(GetLastError()));
+	}else if (win_cap_init(AuthId, &wControl)){
 
 		wControl.User = Passwd->UserSid;
 		win_cap_set_mode(WIN_P_IRWX, WIN_P_IRX, &wControl.DefaultACL);
@@ -405,7 +408,7 @@ win_cap_setgid(SID8 *Group)
 	return(bResult);
 }
 BOOL 
-win_cap_setgroups(SID8 Groups[], DWORD Count, HANDLE *Result)
+win_cap_setgroups(PLUID AuthId, SID8 Groups[], DWORD Count, HANDLE *Result)
 {
 	BOOL bResult = FALSE;
 	WIN_CAP_CONTROL wControl;
@@ -423,7 +426,9 @@ win_cap_setgroups(SID8 Groups[], DWORD Count, HANDLE *Result)
 		WIN_ERR("CapGetPrimary(%d): %s\n", hToken, win_strerror(GetLastError()));
 	}else if (!CapGetGroups(hToken, &ptGroups)){
 		WIN_ERR("CapGetGroups(%d): %s\n", hToken, win_strerror(GetLastError()));
-	}else if (win_cap_init(&wControl)){
+//	}else if (!CapGetDefault(hToken, &wControl.Default)){
+//		WIN_ERR("CapGetDefault(%d): %s\n", hToken, win_strerror(GetLastError()));
+	}else if (win_cap_init(AuthId, &wControl)){
 
 		wControl.Groups = CapMergeGroups(ptGroups, Groups, Count);
 		win_cap_set_mode(WIN_P_IRWX, WIN_P_IRX, &wControl.DefaultACL);

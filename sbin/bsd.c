@@ -239,7 +239,7 @@ boot(void)
 	ifinit();
 	cpu_configure();
 	fs_unmount();		// fsck.exe operation?
-	write(STDOUT_FILENO, "\r\n", 2);
+	fprintf(stderr, "\r\n");
 	execve(*args, args, environ);
 	fprintf(stderr, "execve(%s): %s\n", *args, strerror(errno));
 }
@@ -257,9 +257,9 @@ single(void)
 	fs_unmount();
 	fs_mount();
 	sysctl(mib, 2, NULL, NULL, &level, sizeof(int));
-//	close(0);
-//	close(1);
-//	close(2);
+	close(0);
+	close(1);
+	close(2);
 	(void) revoke(_PATH_CONSOLE);
 	setsid();
 	if (getty(_PATH_CONSOLE) < 0){

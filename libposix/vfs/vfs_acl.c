@@ -192,7 +192,7 @@ vfs_acl_create(WIN_PSD Security, WIN_MODE *Mode, BYTE Flags, WIN_ACL_CONTROL *Re
 	PACL aclNew, pAcl = NULL;
 	ACCESS_MASK aMaskNew;
 	ACCESS_ALLOWED_ACE8 aceBuf;
-	SID8 sid;
+	SID8 sid = SidNull;
 	BOOL bDefaulted, bPresent = FALSE;
 	BYTE bFlagsNew;
 	DWORD dwType, dwTypeMask = 0;

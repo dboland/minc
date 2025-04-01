@@ -146,12 +146,12 @@ win_getgroups(SID8 *Groups[], DWORD *Count)
 	return(bResult);
 }
 BOOL 
-win_setgroups(SID8 Groups[], DWORD Count)
+win_setgroups(PLUID AuthId, SID8 Groups[], DWORD Count)
 {
 	BOOL bResult = FALSE;
 	HANDLE hToken;
 
-	if (!win_cap_setgroups(Groups, Count, &hToken)){
+	if (!win_cap_setgroups(AuthId, Groups, Count, &hToken)){
 		return(FALSE);
 	}else if (!SetThreadToken(NULL, hToken)){
 		WIN_ERR("SetThreadToken(): %s\n", win_strerror(GetLastError()));
@@ -160,9 +160,6 @@ win_setgroups(SID8 Groups[], DWORD Count)
 	}
 	return(bResult);
 }
-
-/************************************************************/
-
 BOOL 
 win___tfork_thread(WIN___TFORK *Params, SIZE_T Size, LPTHREAD_START_ROUTINE Start, PVOID Data, DWORD *Result)
 {

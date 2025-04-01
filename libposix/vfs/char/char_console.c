@@ -43,9 +43,10 @@ ConControlHandler(DWORD CtrlType)
 	 */
 	TlsSetValue(__TlsIndex, (PVOID)__Process->TaskId);
 	if (__Process->GroupId == __CTTY->GroupId){
-		if (!vfs_raise(WM_COMMAND, CtrlType, 0)){
-			SetEvent(__Interrupt);
-		}else{
+		if (vfs_raise(WM_COMMAND, CtrlType, 0)){
+			SetEvent(__Interrupt);		/* ping6.exe */
+		}else if (CtrlType == CTRL_C_EVENT){	/* syslogd.exe -d */
+			__Process->Flags |= WIN_PS_EXITING;
 			bResult = FALSE;	/* causes ExitProcess() */
 		}
 	}

@@ -31,8 +31,6 @@
 #include <stdarg.h>
 #include <stdint.h>
 
-#include <sys/fcntl.h>
-
 #include "msvc_posix.h"
 
 #include "msvc_stdio.c"

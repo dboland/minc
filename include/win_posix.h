@@ -100,7 +100,7 @@ SID8 *win_getgid(SID8 *Sid);
 SID8 *win_getegid(SID8 *Sid);
 BOOL win_group_member(PSID Group);
 BOOL win_getgroups(SID8 **Groups, DWORD *Count);
-BOOL win_setgroups(SID8 Groups[], DWORD Count);
+BOOL win_setgroups(PLUID AuthId, SID8 Groups[], DWORD Count);
 BOOL win___tfork_thread(WIN___TFORK *Params, SIZE_T Size, LPTHREAD_START_ROUTINE *Start, PVOID Data, DWORD *Result);
 BOOL win_chroot(LPCWSTR Path);
 BOOL win_execve(LPSTR Command, LPCSTR Path, STARTUPINFO *Info);
@@ -160,8 +160,8 @@ BOOL win_madvise(PVOID Address, SIZE_T Size, DWORD Type);
 
 BOOL win_cap_get_proc(DWORD Access, TOKEN_TYPE Type, HANDLE *Result);
 BOOL win_cap_set_mode(DWORD Group, DWORD Other, ACL *Result);
-BOOL win_cap_setuid(WIN_PWENT *Passwd, HANDLE *Result);
-BOOL win_cap_setgroups(SID8 *Primary, SID8 Groups[], DWORD Count, HANDLE *Result);
+BOOL win_cap_setuid(PLUID AuthId, WIN_PWENT *Passwd, HANDLE *Result);
+BOOL win_cap_setgroups(PLUID AuthId, SID8 *Primary, SID8 Groups[], DWORD Count, HANDLE *Result);
 BOOL win_cap_setgid(SID8 *Group);
 
 /* win_dlfcn.c */

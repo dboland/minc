@@ -307,6 +307,11 @@ typedef enum tagTOKEN_TYPE {
         TokenImpersonation
 } TOKEN_TYPE,*PTOKEN_TYPE;
 
+typedef struct _LUID {
+	DWORD LowPart;
+	LONG HighPart;
+} LUID, *PLUID;
+
 /* 
  * ntdef.h
  */

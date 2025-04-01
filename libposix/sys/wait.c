@@ -107,7 +107,7 @@ rusage_posix(WIN_TASK *Task, WIN_RUSAGE *Usage, struct rusage *result)
 	win_bzero(result, sizeof(struct rusage));
 	dwlTime = Usage->UserTime;
 	rtime_posix(&result->ru_utime, &dwlTime);
-	dwlTime += Usage->KernelTime;
+	dwlTime = Usage->KernelTime;
 	rtime_posix(&result->ru_stime, &dwlTime);
 
 	if (Task->TracePoints & KTRFAC_STRUCT){

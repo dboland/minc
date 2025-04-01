@@ -92,10 +92,10 @@ vfs_read(WIN_TASK *Task, WIN_VNODE *Node, LPVOID Buffer, DWORD Size, DWORD *Resu
 			bResult = mail_read(Node, Buffer, Size, Result);
 			break;
 		case FS_TYPE_CHAR:
-			bResult = char_read(Node, Buffer, Size, Result);
+			bResult = char_read(Task, Node, Buffer, Size, Result);
 			break;
 		case FS_TYPE_PDO:
-			bResult = pdo_read(DEVICE(Node->DeviceId), Buffer, Size, Result);
+			bResult = pdo_read(Task, DEVICE(Node->DeviceId), Buffer, Size, Result);
 			break;
 		default:
 			SetLastError(ERROR_BAD_FILE_TYPE);
@@ -153,7 +153,7 @@ vfs_pwrite(WIN_VNODE *Node, LPCVOID Buffer, DWORD Size, DWORDLONG Offset, DWORD 
 	return(bResult);
 }
 BOOL 
-vfs_pread(WIN_VNODE *Node, LPVOID Buffer, DWORD Size, DWORDLONG Offset, DWORD *Result)
+vfs_pread(WIN_TASK *Task, WIN_VNODE *Node, LPVOID Buffer, DWORD Size, DWORDLONG Offset, DWORD *Result)
 {
 	BOOL bResult = FALSE;
 
@@ -166,7 +166,7 @@ vfs_pread(WIN_VNODE *Node, LPVOID Buffer, DWORD Size, DWORDLONG Offset, DWORD *R
 			SetLastError(ERROR_PIPE_CONNECTED);
 			break;
 		case FS_TYPE_PDO:
-			bResult = pdo_read(DEVICE(Node->DeviceId), Buffer, Size, Result);
+			bResult = pdo_read(Task, DEVICE(Node->DeviceId), Buffer, Size, Result);
 			break;
 		default:
 			SetLastError(ERROR_BAD_FILE_TYPE);

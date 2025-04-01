@@ -137,9 +137,7 @@ InputBufferSize(WINDOW_BUFFER_SIZE_RECORD *Event)
 {
 	BOOL bResult = FALSE;
 
-	if (vfs_raise(WM_COMMAND, CTRL_SIZE_EVENT, 0)){
-		SetLastError(ERROR_SIGNAL_PENDING);
-	}else{
+	if (!vfs_raise(WM_COMMAND, CTRL_SIZE_EVENT, 0)){
 		bResult = TRUE;
 	}
 	return(bResult);
@@ -191,7 +189,7 @@ InputReadLine(HANDLE Handle, WIN_TERMIO *Attribs, CHAR *Buffer)
 	LONG lCount = 0;
 
 	if (!ReadFile(Handle, Buffer, WIN_MAX_INPUT, &lCount, NULL)){
-		vfs_raise(WM_COMMAND, CTRL_ABORT_EVENT, 0);
+		WIN_ERR("ReadFile(%d): %s\n", Handle, win_strerror(GetLastError()));
 	}else if (lCount-- > 0){
 		if (Attribs->LFlags & WIN_ISIG){	/* ENABLE_PROCESSED_INPUT */
 			Buffer[lCount--] = 0;		/* remove NL, leave CR */
@@ -231,6 +229,25 @@ InputReadClipboard(CHAR *Buffer)
 	*pszBuffer = 0;
 	win_wcstombs(Buffer, szBuffer, WIN_MAX_INPUT);
 	__Input = Buffer;
+	return(bResult);
+}
+BOOL 
+InputWaitChar(HANDLE Handle, DWORD Mode, LPSTR Buffer)
+{
+	BOOL bResult = FALSE;
+	HANDLE hObjects[2] = {__Interrupt, Handle};
+	DWORD dwStatus;
+
+	dwStatus = WaitForMultipleObjectsEx(2, hObjects, FALSE, INFINITE, TRUE);
+	if (dwStatus == WAIT_FAILED){
+		return(FALSE);
+	}else if (!dwStatus){
+		bResult = TRUE;
+	}else if (Mode & ENABLE_LINE_INPUT){
+		bResult = InputReadLine(Handle, &__CTTY->Attribs, Buffer);
+	}else{
+		bResult = InputReadEvent(Handle, &__CTTY->Attribs, Buffer);
+	}
 	return(bResult);
 }
 SHORT 
@@ -289,13 +306,13 @@ InputPollEvent(INPUT_RECORD *Record, SHORT *Result)
 /****************************************************/
 
 BOOL 
-input_read(HANDLE Handle, LPSTR Buffer, DWORD Size, DWORD *Result)
+input_read(WIN_TASK *Task, HANDLE Handle, LPSTR Buffer, DWORD Size, DWORD *Result)
 {
 	BOOL bResult = FALSE;
 	CHAR C = 0;
 	DWORD dwResult = 0;
-	DWORD dwMode = InputMode(&__CTTY->Attribs);
 	LONG lSize = Size;
+	DWORD dwMode = InputMode(&__CTTY->Attribs);
 
 	if (dwMode & ENABLE_VIRTUAL_TERMINAL_INPUT){
 		bResult = ReadFile(Handle, Buffer, Size, &dwResult, NULL);
@@ -311,9 +328,9 @@ input_read(HANDLE Handle, LPSTR Buffer, DWORD Size, DWORD *Result)
 			bResult = TRUE;
 		}else if (__Clipboard){
 			InputReadClipboard(__INPUT_BUF);
-		}else if (dwMode & ENABLE_LINE_INPUT){
-			InputReadLine(Handle, &__CTTY->Attribs, __INPUT_BUF);
-		}else if (!InputReadEvent(Handle, &__CTTY->Attribs, __INPUT_BUF)){
+		}else if (!InputWaitChar(Handle, dwMode, __INPUT_BUF)){
+			break;
+		}else if (proc_poll(Task)){
 			break;
 		}
 	}

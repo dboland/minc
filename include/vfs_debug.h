@@ -46,10 +46,4 @@ typedef enum _STRUCT_TYPE{
 	STRUCT_CAP_CONTROL
 } STRUCT_TYPE;
 
-LPSTR VfsFileAccess(LPSTR Buffer, ACCESS_MASK Access, DWORD Type);
-
-//DWORD vfs_VNODE(WIN_VNODE *Node, LPSTR Buffer);
-//DWORD vfs_NAMEI(WIN_NAMEIDATA *Path, LPSTR Buffer);
-//DWORD vfs_TERMIO(WIN_TERMIO *Mode, LPSTR Buffer);
-
 VOID vfs_ktrace(LPCSTR Label, STRUCT_TYPE Type, PVOID Data);
