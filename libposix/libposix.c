@@ -44,7 +44,7 @@
 #include "bsd_posix.h"
 
 extern SID8 SidNull;
-extern SID8 SidBuiltin;
+extern SID8 SidBuiltinAuth;
 extern SID8 SidAdmins;
 extern SID8 SidEveryone;
 extern SID8 SidSystem;

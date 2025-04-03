@@ -32,25 +32,6 @@
 
 /****************************************************/
 
-BOOL 
-vfs_clock_gettime_MONOTONIC(DWORDLONG *Result)
-{
-	BOOL bResult = FALSE;
-	LARGE_INTEGER liCount;
-	DWORD dwFrequency;
-
-	if (!QueryPerformanceCounter(&liCount)){
-		WIN_ERR("QueryPerformanceCounter(): %s\n", win_strerror(GetLastError()));
-	}else{
-		dwFrequency = 1000000000LL / __Frequency->QuadPart;
-		*Result = liCount.QuadPart * dwFrequency;
-		bResult = TRUE;
-	}
-	return(bResult);
-}
-
-/************************************************************/
-
 VOID CALLBACK 
 TimeProc(PVOID Param, DWORD LowValue, DWORD HighValue)
 {
@@ -76,7 +57,7 @@ TimeWaitSleep(WIN_TASK *Task, HANDLE Handle, DWORDLONG TimeOut, DWORDLONG *Remai
 	}else{
 		bResult = TRUE;
 	}
-	if (vfs_clock_gettime_MONOTONIC(&dwlElapsed)){
+	if (win_clock_gettime_MONOTONIC(&dwlElapsed)){
 		dwlElapsed -= Task->ClockTime;
 	}
 	*Remain = TimeOut - dwlElapsed;

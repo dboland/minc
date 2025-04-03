@@ -302,15 +302,37 @@ typedef struct _MEMORY_BASIC_INFORMATION {
         DWORD Type;
 } MEMORY_BASIC_INFORMATION,*PMEMORY_BASIC_INFORMATION;
 
+/* 
+ * ntapi.h
+ */
+
 typedef enum tagTOKEN_TYPE {
         TokenPrimary = 1,
         TokenImpersonation
 } TOKEN_TYPE,*PTOKEN_TYPE;
-
 typedef struct _LUID {
 	DWORD LowPart;
 	LONG HighPart;
 } LUID, *PLUID;
+typedef struct _SID_AND_ATTRIBUTES {
+    PSID  Sid; 
+    DWORD Attributes; 
+} SID_AND_ATTRIBUTES; 
+typedef struct _TOKEN_GROUPS {
+	DWORD GroupCount; 
+	SID_AND_ATTRIBUTES Groups[ANYSIZE_ARRAY]; 
+} TOKEN_GROUPS,*PTOKEN_GROUPS;
+typedef struct _LUID_AND_ATTRIBUTES {
+    LUID  Luid; 
+    DWORD Attributes; 
+} LUID_AND_ATTRIBUTES; 
+typedef struct _TOKEN_PRIVILEGES {
+    DWORD PrivilegeCount; 
+    LUID_AND_ATTRIBUTES Privileges[ANYSIZE_ARRAY]; 
+} TOKEN_PRIVILEGES,*PTOKEN_PRIVILEGES; 
+typedef struct _TOKEN_DEFAULT_DACL {
+    PACL DefaultDacl; 
+} TOKEN_DEFAULT_DACL,*PTOKEN_DEFAULT_DACL;
 
 /* 
  * ntdef.h

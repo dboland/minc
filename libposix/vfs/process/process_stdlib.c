@@ -64,6 +64,7 @@ proc_setugid(WIN_TASK *Task)
 	BOOL bResult = FALSE;
 	WCHAR szPath[MAX_PATH];
 	WIN_VATTR wStat = {0};
+	WIN_CAP_CONTROL wControl;
 
 	if (!GetModuleFileNameW(NULL, szPath, MAX_PATH)){
 		return(FALSE);

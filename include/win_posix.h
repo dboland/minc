@@ -92,7 +92,7 @@ BOOL win_flagname(DWORD Flag, LPCSTR Name, DWORD Mask, DWORD *Remain);
 LPWSTR win_docname_r(LPCWSTR FileName, LPWSTR Buffer, LONG Size);
 BOOL win_sidname(SID8 *Sid, LPSTR Buffer, DWORD Length);
 
-/* win_unistd.c */
+/* win_syscall.c */
 
 SID8 *win_getuid(SID8 *Sid);
 SID8 *win_geteuid(SID8 *Sid);
@@ -100,7 +100,7 @@ SID8 *win_getgid(SID8 *Sid);
 SID8 *win_getegid(SID8 *Sid);
 BOOL win_group_member(PSID Group);
 BOOL win_getgroups(SID8 **Groups, DWORD *Count);
-BOOL win_setgroups(PLUID AuthId, SID8 Groups[], DWORD Count);
+BOOL win_setgroups(WIN_CAP_CONTROL *Control, SID8 Groups[], DWORD Count);
 BOOL win___tfork_thread(WIN___TFORK *Params, SIZE_T Size, LPTHREAD_START_ROUTINE *Start, PVOID Data, DWORD *Result);
 BOOL win_chroot(LPCWSTR Path);
 BOOL win_execve(LPSTR Command, LPCSTR Path, STARTUPINFO *Info);
@@ -160,9 +160,11 @@ BOOL win_madvise(PVOID Address, SIZE_T Size, DWORD Type);
 
 BOOL win_cap_get_proc(DWORD Access, TOKEN_TYPE Type, HANDLE *Result);
 BOOL win_cap_set_mode(DWORD Group, DWORD Other, ACL *Result);
-BOOL win_cap_setuid(PLUID AuthId, WIN_PWENT *Passwd, HANDLE *Result);
-BOOL win_cap_setgroups(PLUID AuthId, SID8 *Primary, SID8 Groups[], DWORD Count, HANDLE *Result);
+BOOL win_cap_setuid(WIN_CAP_CONTROL *Control, WIN_PWENT *Passwd, HANDLE *Result);
+BOOL win_cap_setgroups(WIN_CAP_CONTROL *Control, SID8 Groups[], DWORD Count, HANDLE *Result);
 BOOL win_cap_setgid(SID8 *Group);
+BOOL win_cap_init(WIN_CAP_CONTROL *Result);
+VOID win_cap_free(WIN_CAP_CONTROL *Control);
 
 /* win_dlfcn.c */
 
@@ -171,7 +173,7 @@ BOOL win_dlclose(HMODULE Module);
 FARPROC win_dlsym(HMODULE Module, LPCSTR ProcName);
 BOOL win_dladdr(LPCVOID Address, MEMORY_BASIC_INFORMATION *Info, LPWSTR FileName);
 
-/* win_syscall.c */
+/* win_unistd.c */
 
 BOOL win_readlink(LPCWSTR Path, SHELL_LINK_HEADER *Header, LPWSTR Target);
 BOOL win_symlink(LPCWSTR Path, LPCWSTR Target);
@@ -184,6 +186,7 @@ BOOL win_ldt_write(DWORD Selector, DWORD Base, DWORD Limit);
 
 /* win_time.c */
 
+BOOL win_clock_gettime_MONOTONIC(DWORDLONG *Result);
 BOOL win_settimeofday(DWORDLONG Time, WORD MilliSeconds);
 
 /* win_mount.c */

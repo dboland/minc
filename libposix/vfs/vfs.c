@@ -49,6 +49,11 @@
 #define WIN_ERR			msvc_printf
 #define OBJECT_NAME(name)	"Local\\MinC_" VERSION "_" name
 
+extern WIN_GLOBALS 	*__Globals;
+extern SID8 		*__SidMachine;
+extern SID8		*__SidNone;
+extern LARGE_INTEGER	*__Frequency;
+
 extern SID8 SidSystem;
 extern SID8 SidAdmins;
 extern SID8 SidEveryone;
@@ -84,15 +89,11 @@ WIN_DEV_CLASS	*__Devices;
 WIN_TTY		*__Terminals;
 WIN_MOUNT	*__Mounts;
 WIN_PSTRING	*__Strings;
-WIN_GLOBALS	*__Globals;
-SID8		*__SidMachine;
-SID8		*__SidNone;
 WIN_TTY 	*__CTTY;
 CHAR 		*__Escape;
 CHAR		*__Input = __INPUT_BUF;
 CONST WCHAR	*__Clipboard;		/* Clipboard buffer */
 WIN_TASK	*__Process;
-LARGE_INTEGER	*__Frequency;
 
 BOOL proc_poll(WIN_TASK *Task);
 

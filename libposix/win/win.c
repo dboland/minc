@@ -54,7 +54,7 @@ SID8 SidEveryone		= {1, 1, {0, 0, 0, 0, 0, 1}, 0};
 SID8 SidLocal			= {1, 1, {0, 0, 0, 0, 0, 2}, 0};
 SID8 SidConsoleLogon		= {1, 1, {0, 0, 0, 0, 0, 2}, 1};
 SID8 SidCreator			= {1, 1, {0, 0, 0, 0, 0, 3}, 0};
-SID8 SidNTAuthority		= {1, 1, {0, 0, 0, 0, 0, 5}, 0};
+SID8 SidNTAuth			= {1, 1, {0, 0, 0, 0, 0, 5}, 0};
 SID8 SidBatch			= {1, 1, {0, 0, 0, 0, 0, 5}, 3};
 SID8 SidInteractive		= {1, 1, {0, 0, 0, 0, 0, 5}, 4};
 SID8 SidLogonSession		= {1, 3, {0, 0, 0, 0, 0, 5}, 5, 0, 0};
@@ -64,7 +64,7 @@ SID8 SidRestricted		= {1, 1, {0, 0, 0, 0, 0, 5}, 12};
 SID8 SidThisOrganization	= {1, 1, {0, 0, 0, 0, 0, 5}, 15};
 SID8 SidSystem			= {1, 1, {0, 0, 0, 0, 0, 5}, 18};
 SID8 SidLocalService		= {1, 1, {0, 0, 0, 0, 0, 5}, 19};
-SID8 SidBuiltin			= {1, 2, {0, 0, 0, 0, 0, 5}, 32, 0};
+SID8 SidBuiltinAuth		= {1, 2, {0, 0, 0, 0, 0, 5}, 32, 0};
 SID8 SidAdmins			= {1, 2, {0, 0, 0, 0, 0, 5}, 32, 544};
 SID8 SidUsers			= {1, 2, {0, 0, 0, 0, 0, 5}, 32, 545};
 SID8 SidGuests			= {1, 2, {0, 0, 0, 0, 0, 5}, 32, 546};
@@ -89,6 +89,11 @@ SID8 SidIntegrityLow		= {1, 1, {0, 0, 0, 0, 0, 16}, 0x1000};
 SID8 SidIntegrityMedium		= {1, 1, {0, 0, 0, 0, 0, 16}, 0x2000};
 SID8 SidIntegrityHigh		= {1, 1, {0, 0, 0, 0, 0, 16}, 0x3000};
 SID8 SidIntegritySystem		= {1, 1, {0, 0, 0, 0, 0, 16}, 0x4000};
+
+WIN_GLOBALS	*__Globals;
+SID8		*__SidMachine;
+SID8		*__SidNone;
+LARGE_INTEGER	*__Frequency;
 
 #include "win_string.c"
 #include "win_wchar.c"

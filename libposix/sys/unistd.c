@@ -117,6 +117,7 @@ sys_setgroups(call_t call, int size, const gid_t *list)
 	SID8 *grList;
 	DWORD dwIndex = 0;
 	DWORD dwCount = size;
+	WIN_CAP_CONTROL wControl;
 
 	if (size < 0 || size >= NGROUPS_MAX){
 		result = -EINVAL;
@@ -130,9 +131,12 @@ sys_setgroups(call_t call, int size, const gid_t *list)
 			}
 			dwIndex++;
 		}
-		if (!win_setgroups(&__Globals->AuthId, grList, dwCount)){
+		if (!win_cap_init(&wControl)){
+			result -= errno_posix(GetLastError());
+		}else if (!win_setgroups(&wControl, grList, dwCount)){
 			result -= errno_posix(GetLastError());
 		}
+		win_cap_free(&wControl);
 		win_free(grList);
 	}
 	return(result);

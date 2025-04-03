@@ -372,22 +372,6 @@ typedef struct _WIN_VATTR {
 } WIN_VATTR;
 
 /*
- * vfs_sysctl.c
- */
-
-typedef struct _WIN_GLOBALS {
-	UINT SecureLevel;
-	CHAR *MsgBuffer;
-	UINT MsgBufSize;
-	SID8 SidMachine;
-	SID8 SidNone;
-	CHAR Root[MAX_PATH];
-	DWORD Load[3];
-	LARGE_INTEGER Frequency;	/* result of QueryPerformanceFrequency() */
-	LUID AuthId;
-} WIN_GLOBALS;
-
-/*
  * vfs_signal.c
  */
 

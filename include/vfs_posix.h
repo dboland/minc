@@ -137,7 +137,6 @@ BOOL vfs_getvfs(WIN_CFDATA *Config, DWORD Flags);
 BOOL vfs_setitimer(WIN_TASK *Task, LONG *Interval, DWORDLONG *TimeOut);
 BOOL vfs_nanosleep(WIN_TASK *Task, DWORDLONG TimeOut, DWORDLONG *Remain);
 BOOL vfs_utimes(WIN_NAMEIDATA *Path, FILETIME FileTime[2]);
-BOOL vfs_clock_gettime_MONOTONIC(DWORDLONG *Result);
 
 /* vfs_stdlib.c */
 

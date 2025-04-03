@@ -182,6 +182,26 @@ typedef struct _WIN_KUSAGE {
 } WIN_KUSAGE;
 
 /*
+ * win_capability.c
+ */
+
+#define TOKEN_ADJUST_SESSIONID		0x100
+#define CAP_ACESIZE			(sizeof(ACCESS_ALLOWED_ACE) - sizeof(DWORD))
+
+typedef struct _WIN_CAP_CONTROL {
+	HANDLE Token;
+	LUID AuthId;
+	SID8 User;
+	SID8 Primary;
+	DWORD SessionId;
+	PTOKEN_GROUPS Groups;
+	PTOKEN_PRIVILEGES Privs;
+//	PTOKEN_DEFAULT_DACL Default;
+	ACL DefaultACL;
+	ACCESS_ALLOWED_ACE8 Ace[4];
+} WIN_CAP_CONTROL;
+
+/*
  * win_stdlib.c
  */
 
@@ -309,3 +329,20 @@ typedef struct _WIN_IOVEC {
 
 typedef struct _WIN___TFORK {
 } WIN___TFORK;
+
+/*
+ * win.c
+ */
+
+typedef struct _WIN_GLOBALS {
+	UINT SecureLevel;
+	CHAR *MsgBuffer;
+	UINT MsgBufSize;
+	SID8 SidMachine;
+	SID8 SidNone;
+	CHAR Root[MAX_PATH];
+	DWORD Load[3];
+	LARGE_INTEGER Frequency;	/* result of QueryPerformanceFrequency() */
+	LUID AuthId;
+} WIN_GLOBALS;
+

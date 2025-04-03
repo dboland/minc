@@ -94,7 +94,7 @@ rid_win(SID8 *Result, int rid)
 		CopySid(sizeof(SID8), Result, __SidMachine);
 		Result->SubAuthority[Result->SubAuthorityCount-1] = ulRid;
 	}else if (ulSubAuth == SECURITY_BUILTIN_DOMAIN){	/* 32 (Builtin) */
-		*Result = SidBuiltin;
+		*Result = SidBuiltinAuth;
 		Result->SubAuthority[1] = ulRid;
 	}else{
 		*Result = SidNull;

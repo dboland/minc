@@ -267,7 +267,7 @@ __seteuid(WIN_TASK *Task, uid_t uid)
 	if (uid == rid_posix(&Task->UserSid)){		/* PRIV_START check (ssh.exe) */
 		return(0);
 	}else if (__geteuid(Task)){
-		result = -EPERM;
+		return(-EPERM);
 	}else if (!vfs_seteuid(Task, rid_win(&sidUser, uid))){
 		result -= errno_posix(GetLastError());
 	}
@@ -645,7 +645,7 @@ syscall_enter(call_t call)
 	WIN_TASK *pwTask = &__Tasks[CURRENT];
 	LONGLONG llTime = pwTask->ClockTime;
 
-	if (vfs_clock_gettime_MONOTONIC(&pwTask->ClockTime)){	/* nanoseconds */
+	if (win_clock_gettime_MONOTONIC(&pwTask->ClockTime)){	/* nanoseconds */
 		pwTask->UserTime += pwTask->ClockTime - llTime;
 	}
 	if (pwTask->TracePoints & KTRFAC_SYSCALL){
@@ -672,7 +672,7 @@ syscall_leave(call_t call)
 	if (result < 0){		/* hello Linus Torvalds */
 		pwTask->Error = -result;
 	}
-	if (vfs_clock_gettime_MONOTONIC(&pwTask->ClockTime)){	/* nanoseconds */
+	if (win_clock_gettime_MONOTONIC(&pwTask->ClockTime)){	/* nanoseconds */
 		pwTask->KernelTime += pwTask->ClockTime - llTime;
 	}
 	/* Note: WriteFile() will touch the %edx register.

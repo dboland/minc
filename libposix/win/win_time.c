@@ -33,6 +33,25 @@
 /************************************************************/
 
 BOOL 
+win_clock_gettime_MONOTONIC(DWORDLONG *Result)
+{
+	BOOL bResult = FALSE;
+	LARGE_INTEGER liCount;
+	DWORD dwFrequency;
+
+	if (!QueryPerformanceCounter(&liCount)){
+		WIN_ERR("QueryPerformanceCounter(): %s\n", win_strerror(GetLastError()));
+	}else{
+		dwFrequency = 1000000000LL / __Frequency->QuadPart;
+		*Result = liCount.QuadPart * dwFrequency;
+		bResult = TRUE;
+	}
+	return(bResult);
+}
+
+/************************************************************/
+
+BOOL 
 win_settimeofday(DWORDLONG Time, WORD MilliSeconds)
 {
 	BOOL bResult = FALSE;

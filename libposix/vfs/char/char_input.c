@@ -240,7 +240,7 @@ InputWaitChar(HANDLE Handle, DWORD Mode, LPSTR Buffer)
 
 	dwStatus = WaitForMultipleObjectsEx(2, hObjects, FALSE, INFINITE, TRUE);
 	if (dwStatus == WAIT_FAILED){
-		return(FALSE);
+		WIN_ERR("WaitForMultipleObjectsEx(%s): %s\n", win_strobj(hObjects, 2), win_strerror(GetLastError()));
 	}else if (!dwStatus){
 		bResult = TRUE;
 	}else if (Mode & ENABLE_LINE_INPUT){

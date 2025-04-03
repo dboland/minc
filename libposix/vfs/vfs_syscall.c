@@ -121,19 +121,23 @@ vfs_seteuid(WIN_TASK *Task, SID8 *Sid)
 	BOOL bResult = FALSE;
 	HANDLE hToken = NULL;
 	WIN_PWENT pwEntry;
+	WIN_CAP_CONTROL wControl;
 
-	if (EqualSid(&Task->UserSid, Sid)){
-		bResult = TRUE;
+	if (EqualSid(Sid, &Task->UserSid)){
+		return(TRUE);
 	}else if (!win_getpwuid(Sid, &pwEntry)){
 		return(FALSE);
-	}else if (!win_cap_setuid(&__Globals->AuthId, &pwEntry, &hToken)){
+	}else if (!win_cap_init(&wControl)){
 		return(FALSE);
+	}else if (!win_cap_setuid(&wControl, &pwEntry, &hToken)){
+		bResult = FALSE;
 	}else if (!SetThreadToken(NULL, hToken)){
 		WIN_ERR("SetThreadToken(%ls): %s\n", pwEntry.Account, win_strerror(GetLastError()));
 	}else{
 		Task->UserSid = *Sid;
 		bResult = CloseHandle(hToken);
 	}
+	win_cap_free(&wControl);
 	return(bResult);
 }
 BOOL 
@@ -141,8 +145,8 @@ vfs_setegid(WIN_TASK *Task, SID8 *Sid)
 {
 	BOOL bResult = FALSE;
 
-	if (EqualSid(&Task->GroupSid, Sid)){
-		bResult = TRUE;
+	if (EqualSid(Sid, &Task->GroupSid)){
+		return(TRUE);
 	}else if (win_cap_setgid(Sid)){
 		Task->GroupSid = *Sid;
 		bResult = TRUE;

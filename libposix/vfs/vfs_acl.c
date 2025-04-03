@@ -158,7 +158,7 @@ AclAddEntry(PACL Acl, BYTE Flags, ACCESS_MASK Access, PSID Sid)
 
 /************************************************************/
 
-BOOL 
+/* BOOL 
 vfs_acl_add(WIN_PSD Security, PSID Sid, BYTE Flags, WIN_ACL_CONTROL *Result)
 {
 	BOOL bResult = FALSE;
@@ -182,7 +182,7 @@ vfs_acl_add(WIN_PSD Security, PSID Sid, BYTE Flags, WIN_ACL_CONTROL *Result)
 	}
 	Result->Acl = aclNew;
 	return(bResult);
-}
+} */
 BOOL 
 vfs_acl_create(WIN_PSD Security, WIN_MODE *Mode, BYTE Flags, WIN_ACL_CONTROL *Result)
 {

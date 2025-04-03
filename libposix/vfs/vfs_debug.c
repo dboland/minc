@@ -61,6 +61,21 @@ static const CHAR *__FType[] = {
 	"VFIFO", 
 	"VBAD"
 };
+static const CHAR *__STYPE[] = {
+	"not-mapped",
+	"user",
+	"group",
+	"domain",
+	"alias",
+	"well-known",
+	"deleted-account",
+	"invalid",
+	"unknown",
+	"computer",
+	"label",
+	"logon-session",
+	""
+};
 
 /****************************************************/
 
@@ -471,43 +486,12 @@ VfsGroupsAttribs(LPSTR Buffer, DWORD Index, SID_AND_ATTRIBUTES *Entry)
 	DWORD accSize = MAX_NAME;
 	DWORD domSize = MAX_NAME;
 	SID_NAME_USE snuType = 0;
-	CHAR *pszType;
+	CHAR *pszType = "";
 
 	LookupAccountSid(NULL, Entry->Sid, Account, &accSize, Domain, &domSize, &snuType);
 	psz += msvc_sprintf(psz, "%d: %s (%s\\%s)\n", Index, win_strsid(Entry->Sid), Domain, Account);
-	psz = VfsTokenAttribs(psz, "   attribs", Entry->Attributes);
-	switch (snuType){
-		case SidTypeUser:
-			pszType = "user";
-			break;
-		case SidTypeGroup:
-			pszType = "group";
-			break;
-		case SidTypeDomain:
-			pszType = "domain";
-			break;
-		case SidTypeAlias:
-			pszType = "alias";
-			break;
-		case SidTypeWellKnownGroup:
-			pszType = "well-known group";
-			break;
-		case SidTypeDeletedAccount:
-			pszType = "deleted account";
-			break;
-		case SidTypeInvalid:
-			pszType = "invalid";
-			break;
-		case SidTypeUnknown:
-			pszType = "unknown";
-			break;
-		case SidTypeComputer:
-			pszType = "computer";
-			break;
-		default:
-			pszType = "not mapped";
-	}
-	psz += msvc_sprintf(psz, "   type(%d): %s\n", snuType, pszType);
+	psz = VfsTokenAttribs(psz, "  attribs", Entry->Attributes);
+	psz += msvc_sprintf(psz, "  type(%d): %s\n", snuType, __STYPE[snuType]);
 	return(psz);
 }
 LPSTR 

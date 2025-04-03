@@ -50,11 +50,13 @@ win_geteuid(SID8 *Sid)
 {
 	HANDLE hToken;
 
-	if (!OpenThreadToken(GetCurrentThread(), TOKEN_QUERY, TRUE, &hToken)){
-		win_getuid(Sid);
-	}else{
+	if (OpenThreadToken(GetCurrentThread(), TOKEN_QUERY, TRUE, &hToken)){
 		CapGetUser(hToken, Sid);
 		CloseHandle(hToken);
+	}else if (ERROR_NO_TOKEN == GetLastError()){
+		win_getuid(Sid);
+	}else{
+		WIN_ERR("win_geteuid(OpenThreadToken(TOKEN_QUERY)): %s\n", win_strerror(GetLastError()));
 	}
 	return(Sid);
 }
@@ -76,11 +78,13 @@ win_getegid(SID8 *Sid)
 {
 	HANDLE hToken;
 
-	if (!OpenThreadToken(GetCurrentThread(), TOKEN_QUERY, TRUE, &hToken)){
-		win_getgid(Sid);
-	}else{
+	if (OpenThreadToken(GetCurrentThread(), TOKEN_QUERY, TRUE, &hToken)){
 		CapGetPrimary(hToken, Sid);
 		CloseHandle(hToken);
+	}else if (ERROR_NO_TOKEN == GetLastError()){
+		win_getgid(Sid);
+	}else{
+		WIN_ERR("win_getegid(OpenThreadToken(TOKEN_QUERY)): %s\n", win_strerror(GetLastError()));
 	}
 	return(Sid);
 }
@@ -146,12 +150,12 @@ win_getgroups(SID8 *Groups[], DWORD *Count)
 	return(bResult);
 }
 BOOL 
-win_setgroups(PLUID AuthId, SID8 Groups[], DWORD Count)
+win_setgroups(WIN_CAP_CONTROL *Control, SID8 Groups[], DWORD Count)
 {
 	BOOL bResult = FALSE;
 	HANDLE hToken;
 
-	if (!win_cap_setgroups(AuthId, Groups, Count, &hToken)){
+	if (!win_cap_setgroups(Control, Groups, Count, &hToken)){
 		return(FALSE);
 	}else if (!SetThreadToken(NULL, hToken)){
 		WIN_ERR("SetThreadToken(): %s\n", win_strerror(GetLastError()));

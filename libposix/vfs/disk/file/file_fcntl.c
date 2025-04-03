@@ -66,6 +66,7 @@ BOOL
 file_open(WIN_NAMEIDATA *Path, WIN_FLAGS *Flags, WIN_MODE *Mode, WIN_VNODE *Result)
 {
 	BOOL bResult = FALSE;
+	SID8 sid;
 
 	if (Flags->Creation != OPEN_EXISTING){
 		bResult = DiskCreateFile(Path, Flags, Mode, Result);

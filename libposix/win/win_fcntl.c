@@ -118,7 +118,7 @@ win_F_DISINHERIT(HANDLE Handle, DWORD ProcessId)
 	DWORD dwOptions = DUPLICATE_SAME_ACCESS | DUPLICATE_CLOSE_SOURCE;
 
 	if (!(hProcess = OpenProcess(PROCESS_DUP_HANDLE, FALSE, ProcessId))){
-		WIN_ERR("OpenProcess(%d): %s\n", ProcessId, win_strerror(GetLastError()));
+		WIN_ERR("OpenProcess(PROCESS_DUP_HANDLE): %s\n", win_strerror(GetLastError()));
 	}else if (!DuplicateHandle(GetCurrentProcess(), Handle, hProcess, &hResult, 0, FALSE, dwOptions)){
 		WIN_ERR("win_F_DISINHERIT(%d): %s\n", Handle, win_strerror(GetLastError()));
 	}
@@ -136,7 +136,7 @@ win_F_INHERIT(HANDLE Handle, ACCESS_MASK Access, DWORD ProcessId)
 		dwOptions |= DUPLICATE_SAME_ACCESS;
 	}
 	if (!(hProcess = OpenProcess(PROCESS_DUP_HANDLE, FALSE, ProcessId))){
-		WIN_ERR("OpenProcess(%d): %s\n", ProcessId, win_strerror(GetLastError()));
+		WIN_ERR("OpenProcess(PROCESS_DUP_HANDLE): %s\n", win_strerror(GetLastError()));
 	}else if (!DuplicateHandle(hProcess, Handle, GetCurrentProcess(), &hResult, Access, FALSE, dwOptions)){
 		WIN_ERR("win_F_INHERIT(%d): %s\n", Handle, win_strerror(GetLastError()));
 	}

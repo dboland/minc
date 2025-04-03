@@ -146,7 +146,7 @@ proc_execve(WIN_TASK *Task, LPSTR Command, PVOID Environ)
 		WIN_ERR("win_cap_get_proc(%s): %s\n", Command, win_strerror(GetLastError()));
 	}else if (!AclCreateControl(WIN_P_IRWX, WIN_P_IRX, &wControl)){
 		WIN_ERR("AclCreateControl(%s): %s\n", Command, win_strerror(GetLastError()));
-	}else if (CreateProcessAsUser(hToken, NULL, Command, &sa, &sa, TRUE, dwFlags, Environ, NULL, &si, &pi)){
+	}else if (CreateProcessAsUser(hToken, NULL, Command, &sa, NULL, TRUE, dwFlags, Environ, NULL, &si, &pi)){
 		Task->Flags |= WIN_PS_EXEC;
 		Task->ThreadId = pi.dwThreadId;
 		hThread = Task->Handle;

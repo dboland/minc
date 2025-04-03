@@ -142,7 +142,7 @@ ktrace_PSIG(WIN_TASK *Task, int signo, sig_t action, siginfo_t *info)
 	header.ktr_type = KTR_PSIG;
 	header.ktr_pid = Task->TaskId;
 	header.ktr_tid = Task->ThreadId;
-	if (vfs_clock_gettime_MONOTONIC(&llTime)){
+	if (win_clock_gettime_MONOTONIC(&llTime)){
 		ttime_posix(&header.ktr_time, &llTime);
 	}
 	win_strncpy(header.ktr_comm, __PROGNAME, MAXCOMLEN);
@@ -192,7 +192,7 @@ ktrace_STRUCT(WIN_TASK *Task, const char *name, size_t len, const void *data, si
 	header.ktr_pid = Task->TaskId;
 	header.ktr_tid = Task->ThreadId;
 	header.ktr_len = len + 1 + size;
-	if (vfs_clock_gettime_MONOTONIC(&llTime)){
+	if (win_clock_gettime_MONOTONIC(&llTime)){
 		ttime_posix(&header.ktr_time, &llTime);
 	}
 	win_strncpy(header.ktr_comm, __PROGNAME, MAXCOMLEN);
@@ -215,7 +215,7 @@ ktrace_USER(WIN_TASK *Task, const char *label, void *addr, size_t len)
 	header.ktr_pid = Task->TaskId;
 	header.ktr_tid = Task->ThreadId;
 	header.ktr_len = sizeof(struct ktr_user) + len;
-	if (vfs_clock_gettime_MONOTONIC(&llTime)){
+	if (win_clock_gettime_MONOTONIC(&llTime)){
 		ttime_posix(&header.ktr_time, &llTime);
 	}
 	win_strncpy(header.ktr_comm, __PROGNAME, MAXCOMLEN);
