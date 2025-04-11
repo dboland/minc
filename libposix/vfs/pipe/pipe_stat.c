@@ -69,23 +69,22 @@ pipe_stat(WIN_NAMEIDATA *Path, WIN_VATTR *Result)
 	return(bResult);
 }
 BOOL 
-pipe_mknod(LPWSTR FileName, WIN_MODE *Mode, LPWSTR NtName)
+pipe_mknod(WIN_TASK *Task, LPWSTR FileName, WIN_MODE *Mode, LPWSTR NtName)
 {
 	BOOL bResult = FALSE;
-	PSECURITY_DESCRIPTOR psd;
-	WIN_ACL_CONTROL wControl;
-	SECURITY_ATTRIBUTES sa = {sizeof(sa), &wControl.Security, FALSE};
+	SECURITY_DESCRIPTOR sd;
+	WIN_ACL_CONTROL wControl = {&Task->UserSid, &Task->GroupSid, NULL, NULL};
+	SECURITY_ATTRIBUTES sa = {sizeof(sa), &sd, FALSE};
 	WCHAR szDirName[WIN_PATH_MAX];
 
-	if (!win_acl_get_file(win_dirname(szDirName, FileName), &psd)){
+	if (!win_acl_get_file(win_dirname(szDirName, FileName), &wControl.Source)){
 		return(FALSE);
-	}else if (!win_acl_init(Mode, &wControl)){
-		WIN_ERR("win_acl_init(%ls): %s\n", szDirName, win_strerror(GetLastError()));
-	}else if (vfs_acl_create(psd, Mode, 0, &wControl)){
+	}else if (!vfs_acl_init(&wControl, 0, Mode->Special, &sd)){
+		WIN_ERR("vfs_acl_init(%ls): %s\n", szDirName, win_strerror(GetLastError()));
+	}else if (vfs_acl_create(&wControl, Mode, 0, &sd)){
 		bResult = pipe_F_CREATE(FileName, Mode->FileType, &sa, NtName);
 	}
-	LocalFree(psd);
-	win_acl_free(&wControl);
+	vfs_acl_free(&wControl);
 	return(bResult);
 }
 BOOL 
@@ -93,20 +92,19 @@ pipe_chmod(WIN_NAMEIDATA *Path, WIN_MODE *Mode)
 {
 	BOOL bResult = FALSE;
 	SECURITY_INFORMATION siType = OWNER_SECURITY_INFORMATION + GROUP_SECURITY_INFORMATION + DACL_SECURITY_INFORMATION;
-	PSECURITY_DESCRIPTOR psd;
+	SECURITY_DESCRIPTOR sd;
 	DWORD dwSize = 0;
-	WIN_ACL_CONTROL wControl;
+	WIN_ACL_CONTROL wControl = {Path->Owner, Path->Group, NULL, NULL};
 
-	if (!win_acl_get_fd(Path->Object, &psd)){
+	if (!win_acl_get_fd(Path->Object, &wControl.Source)){
 		return(FALSE);
-	}else if (!win_acl_init(Mode, &wControl)){
+	}else if (!vfs_acl_init(&wControl, Path->MountId, Mode->Special, &sd)){
 		WIN_ERR("pipe_chmod(%d): %s\n", Path->Object, win_strerror(GetLastError()));
-	}else if (!vfs_acl_chmod(psd, Mode, &wControl)){
+	}else if (!vfs_acl_chmod(&wControl, Mode, &sd)){
 		WIN_ERR("pipe_chmod(%d): %s\n", Path->Object, win_strerror(GetLastError()));
-	}else if (SetUserObjectSecurity(Path->Object, &siType, &wControl.Security)){
+	}else if (SetUserObjectSecurity(Path->Object, &siType, &sd)){
 		bResult = CloseHandle(Path->Object);
 	}
-	LocalFree(psd);
-	win_acl_free(&wControl);
+	vfs_acl_free(&wControl);
 	return(bResult);
 }

@@ -42,9 +42,59 @@ AclLookupW(LPCWSTR Name, SID8 *Result)
 
 	return(LookupAccountNameW(NULL, Name, Result, &sidLen, wszDomain, &bufLen, &snType));
 }
+BOOL 
+AclLookup(LPCSTR Name, SID8 *Sid, DWORD *Size)
+{
+	BOOL bResult = FALSE;
+	CHAR szDomain[MAX_NAME];
+	DWORD dwSize = MAX_NAME;
+	SID_NAME_USE snType = 0;
+
+	if (!*Name){			// inetd.exe
+		SetLastError(ERROR_BAD_ARGUMENTS);
+	}else if (!LookupAccountName(NULL, Name, Sid, Size, szDomain, &dwSize, &snType)){
+		WIN_ERR("LookupAccountName(%s): %s\n", Name, win_strerror(GetLastError()));
+	}else{
+		bResult = TRUE;
+	}
+	return(bResult);
+}
+VOID 
+AclInit(SID8 *SidMachine, SID8 *SidNone)
+{
+	CHAR szName[MAX_NAME];
+	DWORD dwLen = MAX_NAME;
+	DWORD dwSize = sizeof(SID8);
+	SID_NAME_USE snType = 0;
+
+	if (!GetComputerName(szName, &dwLen)){
+		WIN_ERR("GetComputerName(): %s\n", win_strerror(GetLastError()));
+	}else if (AclLookup(szName, SidMachine, &dwSize)){
+		SidMachine->SubAuthorityCount++;
+		CopySid(sizeof(SID8), SidNone, SidMachine);
+		SidNone->SubAuthority[SidNone->SubAuthorityCount-1] = DOMAIN_GROUP_RID_USERS;
+	}
+}
 
 /************************************************************/
 
+BOOL 
+win_acl_get_sid(LPCSTR Name, SID8 *Sid, DWORD *Size)
+{
+	BOOL bResult = FALSE;
+	CHAR szDomain[MAX_NAME];
+	DWORD dwSize = MAX_NAME;
+	SID_NAME_USE snType = 0;
+
+	if (!*Name){			// inetd.exe
+		SetLastError(ERROR_BAD_ARGUMENTS);
+	}else if (!LookupAccountName(NULL, Name, Sid, Size, szDomain, &dwSize, &snType)){
+		WIN_ERR("LookupAccountName(%s): %s\n", Name, win_strerror(GetLastError()));
+	}else{
+		bResult = TRUE;
+	}
+	return(bResult);
+}
 BOOL 
 win_acl_get_file(LPCWSTR FileName, PSECURITY_DESCRIPTOR *Result)
 {
@@ -80,67 +130,28 @@ win_acl_get_fd(HANDLE Handle, PSECURITY_DESCRIPTOR *Result)
 	return(bResult);
 }
 BOOL 
-win_acl_init(WIN_MODE *Mode, WIN_ACL_CONTROL *Result)
+win_acl_dup(PSECURITY_DESCRIPTOR Source, PSECURITY_DESCRIPTOR Result)
 {
 	BOOL bResult = FALSE;
-	PSECURITY_DESCRIPTOR psdResult = &Result->Security;
-	PSID pOwner, pGroup;
-	BOOL bOwner = FALSE;
-	BOOL bGroup = FALSE;
-
-	ZeroMemory(Result, sizeof(WIN_ACL_CONTROL));
-	if (Mode->Special & WIN_S_ISUID){
-		pOwner = &SidAdmins;
-	}else{
-		pOwner = win_geteuid(&Result->Owner);
-	}
-	if (Mode->Special & WIN_S_ISGID){
-		pGroup = &SidSystem;
-	}else{
-		pGroup = win_getegid(&Result->Group);
-	}
-	if (!InitializeSecurityDescriptor(psdResult, SECURITY_DESCRIPTOR_REVISION)){
-		WIN_ERR("InitializeSecurityDescriptor(): %s\n", win_strerror(GetLastError()));
-	}else if (!SetSecurityDescriptorOwner(psdResult, pOwner, bOwner)){
-		WIN_ERR("SetSecurityDescriptorOwner(%s): %s\n", win_strsid(pOwner), win_strerror(GetLastError()));
-	}else if (!SetSecurityDescriptorGroup(psdResult, pGroup, bGroup)){
-		WIN_ERR("SetSecurityDescriptorGroup(%s): %s\n", win_strsid(pGroup), win_strerror(GetLastError()));
-	}else{
-		bResult = TRUE;
-	}
-	return(bResult);
-}
-BOOL 
-win_acl_dup(PSECURITY_DESCRIPTOR Security, WIN_ACL_CONTROL *Result)
-{
-	BOOL bResult = FALSE;
-	PSECURITY_DESCRIPTOR psdResult = &Result->Security;
-	PSID pOwner, pGroup;
+	PSID pOwner = NULL;
+	PSID pGroup = NULL;
 	BOOL bOwner, bGroup;
 
-	ZeroMemory(Result, sizeof(WIN_ACL_CONTROL));
-	if (!GetSecurityDescriptorOwner(Security, &pOwner, &bOwner)){
+	if (!GetSecurityDescriptorOwner(Source, &pOwner, &bOwner)){
 		WIN_ERR("GetSecurityDescriptorOwner(): %s\n", win_strerror(GetLastError()));
 	}
-	if (!GetSecurityDescriptorGroup(Security, &pGroup, &bGroup)){
+	if (!GetSecurityDescriptorGroup(Source, &pGroup, &bGroup)){
 		WIN_ERR("GetSecurityDescriptorGroup(): %s\n", win_strerror(GetLastError()));
 	}
-	if (!InitializeSecurityDescriptor(psdResult, SECURITY_DESCRIPTOR_REVISION)){
+	if (!InitializeSecurityDescriptor(Result, SECURITY_DESCRIPTOR_REVISION)){
 		WIN_ERR("InitializeSecurityDescriptor(): %s\n", win_strerror(GetLastError()));
-	}else if (!SetSecurityDescriptorOwner(psdResult, pOwner, bOwner)){
+	}else if (!SetSecurityDescriptorOwner(Result, pOwner, bOwner)){
 		WIN_ERR("SetSecurityDescriptorOwner(%s): %s\n", win_strsid(pOwner), win_strerror(GetLastError()));
-	}else if (!SetSecurityDescriptorGroup(psdResult, pGroup, bGroup)){
+	}else if (!SetSecurityDescriptorGroup(Result, pGroup, bGroup)){
 		WIN_ERR("SetSecurityDescriptorGroup(%s): %s\n", win_strsid(pGroup), win_strerror(GetLastError()));
 	}else{
 		bResult = TRUE;
 	}
 	return(bResult);
-}
-VOID 
-win_acl_free(WIN_ACL_CONTROL *Control)
-{
-	if (Control->Acl){
-		win_free(Control->Acl);
-	}
 }
 

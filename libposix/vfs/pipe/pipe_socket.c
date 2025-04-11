@@ -45,7 +45,7 @@ pipe_socket(INT Family, INT Type, INT Protocol, WIN_VNODE *Result)
 	return(TRUE);
 }
 BOOL 
-pipe_bind(WIN_VNODE *Node, LPSOCKADDR Name, INT Length)
+pipe_bind(WIN_TASK *Task, WIN_VNODE *Node, LPSOCKADDR Name, INT Length)
 {
 	BOOL bResult = FALSE;
 	WIN_MODE wMode = {WIN_VSOCK, WIN_S_IRW, WIN_S_IRW, WIN_S_IRW, 0};
@@ -54,7 +54,7 @@ pipe_bind(WIN_VNODE *Node, LPSOCKADDR Name, INT Length)
 
 	if (!PipeCreateFile(VfsCreateName(szName), dwAttribs, __PipeEvent, Node)){
 		return(FALSE);
-	}else if (pipe_mknod((LPWSTR)Name->sa_data, &wMode, szName)){
+	}else if (pipe_mknod(Task, (LPWSTR)Name->sa_data, &wMode, szName)){
 		bResult = TRUE;
 	}
 	return(bResult);

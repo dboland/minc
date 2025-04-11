@@ -47,20 +47,19 @@ env_win(char *const envp[])
 	/* Keep Windows "Path" variable on top (login_passwd.exe).
 	 * Keep Windows "SystemRoot" variable, needed for WSASocket().
 	 */
-	size = win_getenv("Path", pvResult, WIN_PATH_MAX) + 1;
-	p += size;
-	size += win_getenv("SystemRoot", p, MAX_PATH) + 1;
+	p = win_stpcpy(p, __Globals->Path) + 1;
+	p = win_stpcpy(p, __Globals->SystemRoot) + 1;
 	while (entry = *envp++){
 		if (!win_strncmp(entry, "SystemRoot=", 11)){
 			continue;
 		}else if (!win_strncmp(entry, "Path=", 5)){
 			continue;
 		}
+		size = p - (char *)pvResult;
 		len = win_strlen(entry) + 1;
 		pvResult = win_realloc(pvResult, size + len);
 		p = pvResult + size;
 		p = win_stpcpy(p, entry) + 1;
-		size = p - (char *)pvResult;
 	}
 	*p = 0;
 	return(pvResult);
@@ -503,7 +502,7 @@ sys_fchown(call_t call, int fd, uid_t owner, gid_t group)
 	}
 	if (fd < 0 || fd >= OPEN_MAX){
 		result = -EBADF;
-	}else if (!vfs_fchown(&pwTask->Node[fd], rid_win(&sidUser, owner), rid_win(&sidGroup, group))){
+	}else if (!vfs_fchown(pwTask, &pwTask->Node[fd], rid_win(&sidUser, owner), rid_win(&sidGroup, group))){
 		result -= errno_posix(GetLastError());
 	}
 	return(result);
@@ -589,8 +588,6 @@ sys_execve(call_t call, const char *path, char *const argv[], char *const envp[]
 		result -= errno_posix(GetLastError());
 	}else if (!shebang_win(pwTask, &vNode, &wPath, path, szCommand)){
 		result -= errno_posix(GetLastError());
-//	}else if (!proc_setugid(pwTask)){
-//		result -= errno_posix(GetLastError());
 	}else if (!proc_execve(pwTask, argv_win(pwTask, szCommand, argv), env_win(envp))){
 		result -= errno_posix(GetLastError());
 	}else{

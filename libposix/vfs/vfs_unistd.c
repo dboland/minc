@@ -210,12 +210,16 @@ vfs_access(WIN_NAMEIDATA *Path, ACCESS_MASK Access)
 	ACCESS_MASK amGranted;
 	DWORD dwSize = sizeof(PRIVILEGE_SET);
 
+	/* For AccessCheck() we need a handle to an impersonation token that
+	 * represents the client that is attempting to gain access, so we also
+	 * need to TOKEN_DUPLICATE.
+	 */
 	if (!Access){
 		return(Path->Attribs != -1);
 	}else if (!win_acl_get_file(Path->Resolved, &psd)){
 		return(FALSE);
-	}else if (!win_cap_get_proc(MAXIMUM_ALLOWED, TokenImpersonation, &hToken)){
-		WIN_ERR("win_cap_get_proc(%d): %s\n", GetCurrentProcess(), win_strerror(GetLastError()));
+	}else if (!win_cap_get_proc(TOKEN_DUPLICATE | TOKEN_QUERY, TokenImpersonation, &hToken)){
+		WIN_ERR("win_cap_get_proc(DUPLICATE|QUERY): %s\n", win_strerror(GetLastError()));
 	}else if (!AccessCheck(psd, hToken, Access, &map, &priv, &dwSize, &amGranted, &bResult)){
 		WIN_ERR("AccessCheck(%ls): %s\n", Path->Resolved, win_strerror(GetLastError()));
 	}
@@ -248,14 +252,14 @@ vfs_chown(WIN_NAMEIDATA *Path, PSID NewUser, PSID NewGroup)
 	return(disk_chown(Path, NewUser, NewGroup));
 }
 BOOL 
-vfs_fchown(WIN_VNODE *Node, PSID NewUser, PSID NewGroup)
+vfs_fchown(WIN_TASK *Task, WIN_VNODE *Node, PSID NewUser, PSID NewGroup)
 {
 	BOOL bResult = FALSE;
 	WIN_NAMEIDATA wPath = {0};
 
-	if (Node->Access & WRITE_DAC){
+	if (Node->Access & WRITE_DAC){		/* install.exe */
 		bResult = disk_fchown(Node, NewUser, NewGroup);
-	}else if (vfs_F_GETPATH(Node, &wPath)){		/* install.exe */
+	}else if (vfs_F_GETPATH(Node, &Task->UserSid, &Task->GroupSid, &wPath)){
 		bResult = disk_chown(&wPath, NewUser, NewGroup);
 	}
 	return(bResult);
@@ -437,20 +441,19 @@ BOOL
 vfs_symlink(WIN_NAMEIDATA *Path, WIN_MODE *Mode, WIN_NAMEIDATA *Target)
 {
 	BOOL bResult = FALSE;
-	PSECURITY_DESCRIPTOR psd;
-	WIN_ACL_CONTROL wControl;
-	SECURITY_ATTRIBUTES sa = {sizeof(sa), &wControl.Security, FALSE};
+	SECURITY_DESCRIPTOR sd;
+	WIN_ACL_CONTROL wControl = {Path->Owner, Path->Group, NULL, NULL};
+	SECURITY_ATTRIBUTES sa = {sizeof(sa), &sd, FALSE};
 	WCHAR szDirName[WIN_PATH_MAX];
 
-	if (!win_acl_get_file(win_dirname(szDirName, Path->Resolved), &psd)){
+	if (!win_acl_get_file(win_dirname(szDirName, Path->Resolved), &wControl.Source)){
 		return(FALSE);
-	}else if (!win_acl_init(Mode, &wControl)){
-		WIN_ERR("win_acl_init(%s): %s\n", szDirName, win_strerror(GetLastError()));
-	}else if (vfs_acl_create(psd, Mode, 0, &wControl)){
+	}else if (!vfs_acl_init(&wControl, Path->MountId, Mode->Special, &sd)){
+		WIN_ERR("vfs_acl_init(%ls): %s\n", szDirName, win_strerror(GetLastError()));
+	}else if (vfs_acl_create(&wControl, Mode, 0, &sd)){
 		bResult = disk_F_CREATE(Path->Resolved, WIN_VLNK, &sa, Target->Resolved);
 	}
-	LocalFree(psd);
-	win_acl_free(&wControl);
+	vfs_acl_free(&wControl);
 	return(bResult);
 }
 BOOL 

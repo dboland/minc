@@ -34,7 +34,7 @@
 
 BOOL vfs_socket(INT Family, INT Type, INT Protocol, WIN_VNODE *Result);
 BOOL vfs_connect(WIN_VNODE *Node, CONST LPSOCKADDR Address, INT Size);
-BOOL vfs_bind(WIN_VNODE *Node, LPSOCKADDR Address, INT Length);
+BOOL vfs_bind(WIN_TASK *Task, WIN_VNODE *Node, LPSOCKADDR Address, INT Length);
 BOOL vfs_accept(WIN_TASK *Task, WIN_VNODE *Node, LPSOCKADDR Address, LPINT Length, WIN_VNODE *Result);
 BOOL vfs_sendto(WIN_VNODE *Node, LPCSTR Buffer, UINT Size, DWORD Flags, CONST LPSOCKADDR To, UINT ToLen, DWORD *Result);
 BOOL vfs_recvfrom(WIN_VNODE *Node, LPSTR Buffer, UINT Size, DWORD Flags, LPSOCKADDR From, UINT *FromLen, DWORD *Result);

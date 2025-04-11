@@ -112,3 +112,41 @@ LARGE_INTEGER	*__Frequency;
 #include "win_time.c"
 #include "win_sysctl.c"
 #include "win_dlfcn.c"
+
+/************************************************************/
+
+VOID 
+win_init(WIN_GLOBALS *Globals, HINSTANCE Instance)
+{
+	TOKEN_STATISTICS tStats = {0};
+	HANDLE hToken;
+	DWORD dwSize = 0;
+	LPSTR pszRoot = Globals->Root;
+	LPSTR psz;
+
+	if (!GetModuleFileName(Instance, pszRoot, MAX_PATH)){
+		WIN_ERR("GetModuleFileName(0x%x): %s\n", Instance, win_strerror(GetLastError()));
+	}else{
+		msvc_dirname(msvc_dirname(pszRoot));
+	}
+	AclInit(&Globals->SidMachine, &Globals->SidNone);
+	if (!QueryPerformanceFrequency(&Globals->Frequency)){
+		WIN_ERR("QueryPerformanceFrequency(): %s\n", win_strerror(GetLastError()));
+	}
+	if (!OpenProcessToken(GetCurrentProcess(), TOKEN_QUERY, &hToken)){
+		WIN_ERR("OpenProcessToken(TOKEN_QUERY): %s\n", win_strerror(GetLastError()));
+	}else if (!GetTokenInformation(hToken, TokenStatistics, &tStats, sizeof(TOKEN_STATISTICS), &dwSize)){
+		WIN_ERR("GetTokenInformation(TokenStatistics): %s\n", win_strerror(GetLastError()));
+	}else{
+		Globals->AuthId = tStats.AuthenticationId;
+		CloseHandle(hToken);
+	}
+	psz = win_stpcpy(Globals->Path, "Path=");
+	psz = win_stpcpy(win_stpcpy(psz, pszRoot), "\\sbin;");
+	psz = win_stpcpy(win_stpcpy(psz, pszRoot), "\\usr\\lib;");
+	psz = win_stpcpy(win_stpcpy(psz, pszRoot), "\\usr\\libexec;");
+	dwSize = WIN_PATH_MAX - (psz - Globals->Path);
+	GetEnvironmentVariable("Path", psz, dwSize);
+	psz = win_stpcpy(Globals->SystemRoot, "SystemRoot=");
+	GetEnvironmentVariable("SystemRoot", psz, MAX_PATH);
+}

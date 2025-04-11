@@ -67,23 +67,22 @@ disk_stat(WIN_NAMEIDATA *Path, WIN_VATTR *Result)
 	return(bResult);
 }
 BOOL 
-disk_fchmod(WIN_VNODE *Node, WIN_MODE *Mode)
+disk_fchmod(WIN_VNODE *Node, SID8 *Owner, SID8 *Group, WIN_MODE *Mode)
 {
 	BOOL bResult = FALSE;
 	SECURITY_INFORMATION siType = OWNER_SECURITY_INFORMATION + GROUP_SECURITY_INFORMATION + DACL_SECURITY_INFORMATION;
-	PSECURITY_DESCRIPTOR psd;
+	SECURITY_DESCRIPTOR sd;
 	DWORD dwSize = 0;
-	WIN_ACL_CONTROL wControl;
+	WIN_ACL_CONTROL wControl = {Owner, Group, NULL, NULL};
 
-	if (!win_acl_get_fd(Node->Handle, &psd)){
+	if (!win_acl_get_fd(Node->Handle, &wControl.Source)){
 		return(FALSE);
-	}else if (!win_acl_init(Mode, &wControl)){
+	}else if (!vfs_acl_init(&wControl, Node->MountId, Mode->Special, &sd)){
 		WIN_ERR("disk_fchmod(%d): %s\n", Node->Handle, win_strerror(GetLastError()));
-	}else if (vfs_acl_chmod(psd, Mode, &wControl)){
-		bResult = SetUserObjectSecurity(Node->Handle, &siType, &wControl.Security);
+	}else if (vfs_acl_chmod(&wControl, Mode, &sd)){
+		bResult = SetUserObjectSecurity(Node->Handle, &siType, &sd);
 	}
-	LocalFree(psd);
-	win_acl_free(&wControl);
+	vfs_acl_free(&wControl);
 	return(bResult);
 }
 BOOL 
@@ -97,7 +96,7 @@ disk_chmod(WIN_NAMEIDATA *Path, WIN_MODE *Mode)
 
 	if (!disk_open(Path, &wFlags, &wMode, &vNode)){
 		return(FALSE);
-	}else if (disk_fchmod(&vNode, Mode)){
+	}else if (disk_fchmod(&vNode, Path->Owner, Path->Group, Mode)){
 		bResult = CloseHandle(vNode.Handle);
 	}
 	return(bResult);

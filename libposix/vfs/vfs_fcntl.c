@@ -114,7 +114,7 @@ vfs_F_SETFL(WIN_VNODE *Node, WIN_FLAGS *Flags)
 	return(bResult);
 }
 BOOL 
-vfs_F_GETPATH(WIN_VNODE *Node, WIN_NAMEIDATA *Result)
+vfs_F_GETPATH(WIN_VNODE *Node, SID8 *Owner, SID8 *Group, WIN_NAMEIDATA *Result)
 {
 	BOOL bResult = FALSE;
 	NTSTATUS ntStatus;
@@ -133,6 +133,8 @@ vfs_F_GETPATH(WIN_VNODE *Node, WIN_NAMEIDATA *Result)
 		Result->S = NULL;
 		Result->Base = psz;
 		Result->Last = psz - 1;
+		Result->Owner = Owner;
+		Result->Group = Group;
 		Result->FSType = Node->FSType;
 		Result->Attribs = Node->Attribs;
 		Result->FileType = Node->FileType;
@@ -144,30 +146,6 @@ vfs_F_GETPATH(WIN_VNODE *Node, WIN_NAMEIDATA *Result)
 		bResult = TRUE;
 	}
 	LocalFree(puString);
-	return(bResult);
-}
-BOOL 
-vfs_F_ADDACE(WIN_VNODE *Node, PSID Sid)
-{
-	BOOL bResult = FALSE;
-	PSECURITY_DESCRIPTOR psd;
-	FILETIME fTime = {0, 0};
-	WIN_ACL_CONTROL wControl;
-	SECURITY_INFORMATION siType = DACL_SECURITY_INFORMATION;
-	BYTE bFlags = INHERITED_ACE;
-
-	if (Node->FileType == WIN_VDIR){
-		bFlags |= OBJECT_INHERIT_ACE | CONTAINER_INHERIT_ACE;
-	}
-	if (!win_acl_get_fd(Node->Handle, &psd)){
-		return(FALSE);
-	}else if (!win_acl_dup(psd, &wControl)){
-		WIN_ERR("win_acl_dup(%d): %s\n", Node->Handle, win_strerror(GetLastError()));
-	}else if (vfs_acl_add(psd, Sid, bFlags, &wControl)){
-		bResult = SetUserObjectSecurity(Node->Handle, &siType, &wControl.Security);
-	}
-	LocalFree(psd);
-	win_acl_free(&wControl);
 	return(bResult);
 }
 BOOL 

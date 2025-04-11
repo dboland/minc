@@ -144,13 +144,18 @@ BOOL
 vfs_setegid(WIN_TASK *Task, SID8 *Sid)
 {
 	BOOL bResult = FALSE;
+	HANDLE hToken = NULL;
+	DWORD dwAccess = TOKEN_ADJUST_PRIVILEGES | TOKEN_ADJUST_DEFAULT;
 
 	if (EqualSid(Sid, &Task->GroupSid)){
 		return(TRUE);
-	}else if (win_cap_setgid(Sid)){
+	}else if (!win_cap_get_proc(dwAccess, 0, &hToken)){
+		return(FALSE);
+	}else if (win_cap_setgid(hToken, Sid)){
 		Task->GroupSid = *Sid;
 		bResult = TRUE;
 	}
+	CloseHandle(hToken);
 	return(bResult);
 }
 BOOL 
@@ -161,7 +166,7 @@ vfs_getlogin(WIN_TASK *Task, LPSTR Name, DWORD Size)
 	SID_NAME_USE snType = 0;
 	DWORD dwSize = MAX_NAME;
 
-	/* This always returns logged on user, not impersonated one.
+	/* In WinXP, this returns logged on user, not impersonated one.
 	 */
 	if (!LookupAccountSid(NULL, &Task->UserSid, Name, &Size, szBuf, &dwSize, &snType)){
 		WIN_ERR("LookupAccountSid(%s): %s\n", win_strsid(&Task->UserSid), win_strerror(GetLastError()));

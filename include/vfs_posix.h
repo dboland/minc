@@ -63,6 +63,8 @@ BOOL vfs_pread(WIN_TASK *Task, WIN_VNODE *Node, LPVOID Buffer, DWORD Size, DWORD
 VOID vfs_closefrom(WIN_VNODE Nodes[]);
 BOOL vfs_readlink(WIN_NAMEIDATA *Path);
 BOOL vfs_symlink(WIN_NAMEIDATA *Path, WIN_MODE *Mode, WIN_NAMEIDATA *Target);
+BOOL vfs_chown(WIN_NAMEIDATA *Path, PSID NewUser, PSID NewGroup);
+BOOL vfs_fchown(WIN_TASK *Task, WIN_VNODE *Node, PSID NewUser, PSID NewGroup);
 
 /* vfs_syscall.c */
 
@@ -70,9 +72,7 @@ BOOL vfs_seteuid(WIN_TASK *Task, SID8 *Sid);
 BOOL vfs_setegid(WIN_TASK *Task, SID8 *Sid);
 BOOL vfs_setlogin(WIN_TASK *Task, LPCSTR Name);
 BOOL vfs_getlogin(WIN_TASK *Task, LPSTR Name, DWORD Size);
-BOOL vfs_chown(WIN_NAMEIDATA *Path, PSID NewUser, PSID NewGroup);
 BOOL vfs_pipe(WIN_VNODE Result[2]);
-BOOL vfs_fchown(WIN_VNODE *Node, PSID NewUser, PSID NewGroup);
 BOOL vfs_setsid(WIN_TASK *Task);
 BOOL vfs_setugid(WIN_TASK *Task);
 
@@ -98,7 +98,7 @@ BOOL vfs_stat(WIN_NAMEIDATA *Path, WIN_VATTR *Result);
 BOOL vfs_chmod(WIN_NAMEIDATA *Path, WIN_MODE *Mode);
 BOOL vfs_mkfifo(WIN_NAMEIDATA *Path, WIN_MODE *Mode, WIN_VNODE *Result);
 BOOL vfs_mknod(WIN_NAMEIDATA *Path, WIN_MODE *Mode, DWORD DeviceId);
-BOOL vfs_fchmod(WIN_VNODE *Node, WIN_MODE *Mode);
+BOOL vfs_fchmod(WIN_VNODE *Node, SID8 *Owner, SID8 *Group, WIN_MODE *Mode);
 BOOL vfs_mkdir(WIN_NAMEIDATA *Path, WIN_MODE *Mode);
 
 /* vfs_signal.c */
@@ -116,7 +116,7 @@ BOOL vfs_kill_SYS(DWORD CallerId, UINT Message, WPARAM WParam, LPARAM LParam);
 BOOL vfs_open(WIN_NAMEIDATA *Path, WIN_FLAGS *Flags, WIN_MODE *Mode, WIN_VNODE *Result);
 BOOL vfs_F_SETLK(WIN_VNODE *Node, DWORD Flags, LARGE_INTEGER *Offset, LARGE_INTEGER *Size);
 BOOL vfs_F_SETFL(WIN_VNODE *Node, WIN_FLAGS *Flags);
-BOOL vfs_F_GETPATH(WIN_VNODE *Node, WIN_NAMEIDATA *Path);
+BOOL vfs_F_GETPATH(WIN_VNODE *Node, SID8 *Owner, SID8 *Group, WIN_NAMEIDATA *Result);
 BOOL vfs_F_DUPFD(WIN_VNODE *Node, BOOL CloseExec, WIN_VNODE *Result);
 
 /* vfs_mount.c */

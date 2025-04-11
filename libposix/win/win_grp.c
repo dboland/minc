@@ -162,7 +162,7 @@ win_getgrouplist(WIN_PWENT *Passwd, SID8 *Primary, SID8 *Result[], DWORD *Count)
 	DWORD dwCount = 0;
 	DWORD dwTotal = 0;
 	DWORD dwResult = 0;
-	DWORD dwSize = sizeof(SID8) * 4;
+	DWORD dwSize = sizeof(SID8) * 6;
 	DWORD dwIndex = 0;
 	SID8 *psResult = win_malloc(dwSize);
 
@@ -183,13 +183,20 @@ win_getgrouplist(WIN_PWENT *Passwd, SID8 *Primary, SID8 *Result[], DWORD *Count)
 		WIN_ERR("NetUserGetLocalGroups(%ls): %s\n", Passwd->Account, win_strerror(naStatus));
 		bResult = FALSE;
 	}
-	psResult[dwResult++] = SidAuthenticated;
-	if (Passwd->Privileges == USER_PRIV_GUEST){
-		psResult[dwResult++] = SidUsers;	/* WS2_32.DLL/IPHLPAPI.DLL access */
-	}else if (Passwd->Privileges == USER_PRIV_USER){
-		psResult[dwResult++] = SidLocalUser;	/* Vista */
-	}else if (Passwd->Privileges == USER_PRIV_ADMIN){
-		psResult[dwResult++] = SidLocalAdmin;	/* Vista */
+	psResult[dwResult++] = SidInteractive;
+	switch (Passwd->Privileges){
+		case USER_PRIV_ADMIN:
+			psResult[dwResult++] = SidAuthenticated;
+			psResult[dwResult++] = SidLocalAdmin;	/* Vista */
+			break;
+		case USER_PRIV_USER:
+			psResult[dwResult++] = SidAuthenticated;
+			psResult[dwResult++] = SidLocalUser;	/* Vista */
+			break;
+		case USER_PRIV_GUEST:
+			psResult[dwResult++] = SidUsers;	/* WS2_32.DLL/IPHLPAPI.DLL access */
+			psResult[dwResult++] = SidBatch;
+			break;
 	}
 	psResult[dwResult++] = *Primary;
 	*Result = psResult;

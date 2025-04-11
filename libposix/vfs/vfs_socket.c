@@ -67,13 +67,13 @@ vfs_connect(WIN_VNODE *Node, CONST LPSOCKADDR Address, INT Size)
 	return(bResult);
 }
 BOOL 
-vfs_bind(WIN_VNODE *Node, LPSOCKADDR Address, INT Length)
+vfs_bind(WIN_TASK *Task, WIN_VNODE *Node, LPSOCKADDR Address, INT Length)
 {
 	BOOL bResult = FALSE;
 
 	switch (Node->FSType){
 		case FS_TYPE_PIPE:
-			bResult = pipe_bind(Node, Address, Length);
+			bResult = pipe_bind(Task, Node, Address, Length);
 			break;
 		case FS_TYPE_WINSOCK:
 			bResult = ws2_bind(Node, Address, Length);

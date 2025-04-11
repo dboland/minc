@@ -50,27 +50,26 @@ BOOL
 disk_fchown(WIN_VNODE *Node, PSID NewUser, PSID NewGroup)
 {
 	BOOL bResult = FALSE;
-	PSECURITY_DESCRIPTOR psd;
+	SECURITY_DESCRIPTOR sd;
 	SECURITY_INFORMATION si = DACL_SECURITY_INFORMATION;
 	FILETIME fTime = {0, 0};
-	WIN_ACL_CONTROL wControl;
+	WIN_ACL_CONTROL wControl = {NULL, NULL, NULL, NULL};
 
-	if (!win_acl_get_fd(Node->Handle, &psd)){
+	if (!win_acl_get_fd(Node->Handle, &wControl.Source)){
 		return(FALSE);
-	}else if (!win_acl_dup(psd, &wControl)){
+	}else if (!win_acl_dup(wControl.Source, &sd)){
 		WIN_ERR("win_acl_dup(%d): %s\n", Node->Handle, win_strerror(GetLastError()));
-	}else if (vfs_acl_chown(psd, NewUser, NewGroup, &wControl)){
+	}else if (vfs_acl_chown(&wControl, NewUser, NewGroup, &sd)){
 		GetSystemTimeAsFileTime(&fTime);
-		if (!SetUserObjectSecurity(Node->Handle, &si, &wControl.Security)){
-			WIN_ERR("SetUserObjectSecurity(%lu): %s\n", Node->Handle, win_strerror(GetLastError()));
+		if (!SetUserObjectSecurity(Node->Handle, &si, &sd)){
+			WIN_ERR("SetUserObjectSecurity(%d): %s\n", Node->Handle, win_strerror(GetLastError()));
 		}else if (!SetFileTime(Node->Handle, &fTime, NULL, NULL)){
 			WIN_ERR("SetFileTime(%lu): %s\n", fTime.dwHighDateTime, win_strerror(GetLastError()));
 		}else{
 			bResult = TRUE;
 		}
 	}
-	LocalFree(psd);
-	win_acl_free(&wControl);
+	vfs_acl_free(&wControl);
 	return(bResult);
 }
 BOOL 

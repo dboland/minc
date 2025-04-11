@@ -30,6 +30,9 @@
 
 #include "win_types.h"
 
+VOID win_init(WIN_GLOBALS *Globals, HINSTANCE Instance);
+BOOL AclLookup(LPCSTR Name, SID8 *Sid, DWORD *Size);
+
 /* win_string.c */
 
 LPSTR win_strerror(HRESULT Error);
@@ -102,7 +105,6 @@ BOOL win_group_member(PSID Group);
 BOOL win_getgroups(SID8 **Groups, DWORD *Count);
 BOOL win_setgroups(WIN_CAP_CONTROL *Control, SID8 Groups[], DWORD Count);
 BOOL win___tfork_thread(WIN___TFORK *Params, SIZE_T Size, LPTHREAD_START_ROUTINE *Start, PVOID Data, DWORD *Result);
-BOOL win_chroot(LPCWSTR Path);
 BOOL win_execve(LPSTR Command, LPCSTR Path, STARTUPINFO *Info);
 
 /* win_stdlib.c */
@@ -116,11 +118,10 @@ BOOL win_realpath(LPCWSTR Path, DWORD Size, LPWSTR Resolved);
 
 /* win_acl.c */
 
+BOOL win_acl_get_sid(LPCSTR Name, SID8 *Sid, DWORD *Size);
 BOOL win_acl_get_file(LPCWSTR FileName, PSECURITY_DESCRIPTOR *Result);
 BOOL win_acl_get_fd(HANDLE Handle, PSECURITY_DESCRIPTOR *Result);
-BOOL win_acl_init(WIN_MODE *Mode, WIN_ACL_CONTROL *Result);
-BOOL win_acl_dup(PSECURITY_DESCRIPTOR Security, WIN_ACL_CONTROL *Result);
-VOID win_acl_free(WIN_ACL_CONTROL *Control);
+BOOL win_acl_dup(PSECURITY_DESCRIPTOR Source, PSECURITY_DESCRIPTOR Result);
 
 /* win_pwd.c */
 
@@ -159,10 +160,10 @@ BOOL win_madvise(PVOID Address, SIZE_T Size, DWORD Type);
 /* win_capability.c */
 
 BOOL win_cap_get_proc(DWORD Access, TOKEN_TYPE Type, HANDLE *Result);
-BOOL win_cap_set_mode(DWORD Group, DWORD Other, ACL *Result);
+BOOL win_cap_set_mode(ACCESS_MASK Group, ACCESS_MASK Other, ACL *Result);
 BOOL win_cap_setuid(WIN_CAP_CONTROL *Control, WIN_PWENT *Passwd, HANDLE *Result);
 BOOL win_cap_setgroups(WIN_CAP_CONTROL *Control, SID8 Groups[], DWORD Count, HANDLE *Result);
-BOOL win_cap_setgid(SID8 *Group);
+BOOL win_cap_setgid(HANDLE Token, SID8 *Group);
 BOOL win_cap_init(WIN_CAP_CONTROL *Result);
 VOID win_cap_free(WIN_CAP_CONTROL *Control);
 
@@ -177,6 +178,7 @@ BOOL win_dladdr(LPCVOID Address, MEMORY_BASIC_INFORMATION *Info, LPWSTR FileName
 
 BOOL win_readlink(LPCWSTR Path, SHELL_LINK_HEADER *Header, LPWSTR Target);
 BOOL win_symlink(LPCWSTR Path, LPCWSTR Target);
+BOOL win_chroot(LPCWSTR Path);
 
 /* win_ldt.c */
 

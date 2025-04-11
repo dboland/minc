@@ -114,7 +114,7 @@ HANDLE
 win_F_DISINHERIT(HANDLE Handle, DWORD ProcessId)
 {
 	HANDLE hProcess = NULL;
-	HANDLE hResult = NULL;
+	HANDLE hResult = Handle;
 	DWORD dwOptions = DUPLICATE_SAME_ACCESS | DUPLICATE_CLOSE_SOURCE;
 
 	if (!(hProcess = OpenProcess(PROCESS_DUP_HANDLE, FALSE, ProcessId))){

@@ -43,42 +43,8 @@
  *
  */
 
-#define WIN_PSD	PSECURITY_DESCRIPTOR
-
 /************************************************************/
 
-BOOL 
-AclLookup(LPCSTR Name, SID8 *Sid, DWORD *Size)
-{
-	BOOL bResult = FALSE;
-	CHAR szDomain[MAX_NAME];
-	DWORD dwSize = MAX_NAME;
-	SID_NAME_USE snType = 0;
-
-	if (!*Name){			/* inetd.exe */
-		SetLastError(ERROR_BAD_ARGUMENTS);
-	}else if (!LookupAccountName(NULL, Name, Sid, Size, szDomain, &dwSize, &snType)){
-		WIN_ERR("LookupAccountName(%s): %s\n", Name, win_strerror(GetLastError()));
-	}else{
-		bResult = TRUE;
-	}
-	return(bResult);
-}
-VOID 
-AclInit(SID8 *SidMachine, SID8 *SidNone)
-{
-	CHAR szName[MAX_NAME];
-	DWORD dwSize = MAX_NAME;
-	DWORD sidLen = sizeof(SID8);
-
-	if (!GetComputerName(szName, &dwSize)){
-		WIN_ERR("GetComputerName(): %s\n", win_strerror(GetLastError()));
-	}else if (AclLookup(szName, SidMachine, &sidLen)){
-		SidMachine->SubAuthorityCount++;
-		CopySid(sidLen, SidNone, SidMachine);
-		SidNone->SubAuthority[SidNone->SubAuthorityCount-1] = DOMAIN_GROUP_RID_USERS;
-	}
-}
 DWORD 
 AclOwnerType(ACE_PEEK *Entry, DWORD *TypeMask)
 {
@@ -96,6 +62,12 @@ AclOwnerType(ACE_PEEK *Entry, DWORD *TypeMask)
 			dwResult = WIN_ACL_GROUP;
 		}else{
 			dwResult = WIN_ACL_USER;
+		}
+	}else if (aMask & DELETE){			/* Vista */
+		if (dwTypeMask & WIN_ACL_GROUP){
+			dwResult = WIN_ACL_OTHER;
+		}else{
+			dwResult = WIN_ACL_GROUP;
 		}
 	}else if (aMask & READ_CONTROL){
 		if (dwTypeMask & WIN_ACL_OTHER){
@@ -158,54 +130,71 @@ AclAddEntry(PACL Acl, BYTE Flags, ACCESS_MASK Access, PSID Sid)
 
 /************************************************************/
 
-/* BOOL 
-vfs_acl_add(WIN_PSD Security, PSID Sid, BYTE Flags, WIN_ACL_CONTROL *Result)
+BOOL 
+vfs_acl_init(WIN_ACL_CONTROL *Control, DWORD MountId, DWORD Mode, PSECURITY_DESCRIPTOR Result)
 {
 	BOOL bResult = FALSE;
-	BOOL bDefaulted, bPresent = FALSE;
-	PACL aclNew, pAcl = NULL;
-	ACCESS_MASK aMask = READ_CONTROL | SYNCHRONIZE | WIN_S_IRX;
+	PSID pOwner = NULL;
+	PSID pGroup = NULL;
+	BOOL bOwner, bGroup;
+	DWORD dwType = __Mounts[MountId].DeviceType;
 
-	if (!GetSecurityDescriptorDacl(Security, &bPresent, &pAcl, &bDefaulted)){
-		WIN_ERR("GetSecurityDescriptorDacl(): %s\n", win_strerror(GetLastError()));
-	}else if (!bPresent || !pAcl){
-		return(FALSE);
+//__PRINTF("dwType: 0x%x\n", dwType)
+	if (!GetSecurityDescriptorOwner(Control->Source, &pOwner, &bOwner)){
+		WIN_ERR("GetSecurityDescriptorOwner(): %s\n", win_strerror(GetLastError()));
 	}
-	aclNew = win_malloc(pAcl->AclSize);
-	win_memcpy(aclNew, pAcl, pAcl->AclSize);
-	if (!AclAddEntry(aclNew, Flags, aMask, Sid)){
-		WIN_ERR("AclAddEntry(): %s\n", win_strerror(GetLastError()));
-	}else if (!SetSecurityDescriptorDacl(&Result->Security, bPresent, aclNew, bDefaulted)){
-		WIN_ERR("SetSecurityDescriptorDacl(): %s\n", win_strerror(GetLastError()));
+	if (!GetSecurityDescriptorGroup(Control->Source, &pGroup, &bGroup)){
+		WIN_ERR("GetSecurityDescriptorGroup(): %s\n", win_strerror(GetLastError()));
+	}
+	if (Mode & WIN_S_ISUID){
+		pOwner = &SidAdmins;
+	}else if (dwType != DEV_TYPE_REMOTE){	/* Samba */
+		pOwner = Control->Owner;
+	}
+	if (Mode & WIN_S_ISGID){
+		pGroup = &SidSystem;
+	}else if (dwType != DEV_TYPE_REMOTE){
+		pGroup = Control->Group;
+	}
+	if (!InitializeSecurityDescriptor(Result, SECURITY_DESCRIPTOR_REVISION)){
+		WIN_ERR("InitializeSecurityDescriptor(): %s\n", win_strerror(GetLastError()));
+	}else if (!SetSecurityDescriptorOwner(Result, pOwner, bOwner)){
+		WIN_ERR("SetSecurityDescriptorOwner(%s): %s\n", win_strsid(pOwner), win_strerror(GetLastError()));
+	}else if (!SetSecurityDescriptorGroup(Result, pGroup, bGroup)){
+		WIN_ERR("SetSecurityDescriptorGroup(%s): %s\n", win_strsid(pGroup), win_strerror(GetLastError()));
 	}else{
 		bResult = TRUE;
 	}
-	Result->Acl = aclNew;
 	return(bResult);
-} */
+}
+VOID 
+vfs_acl_free(WIN_ACL_CONTROL *Control)
+{
+	win_free(Control->Acl);
+	LocalFree(Control->Source);
+}
 BOOL 
-vfs_acl_create(WIN_PSD Security, WIN_MODE *Mode, BYTE Flags, WIN_ACL_CONTROL *Result)
+vfs_acl_create(WIN_ACL_CONTROL *Control, WIN_MODE *Mode, BYTE Flags, PSECURITY_DESCRIPTOR Result)
 {
 	BOOL bResult = FALSE;
 	ACE_PEEK *pEntry;
 	WORD wIndex = 0;
-	PACL aclNew, pAcl = NULL;
+	PACL paclNew, pAcl = NULL;
 	ACCESS_MASK aMaskNew;
 	ACCESS_ALLOWED_ACE8 aceBuf;
-	SID8 sid = SidNull;
-	BOOL bDefaulted, bPresent = FALSE;
+	BOOL bDefaulted, bPresent;
 	BYTE bFlagsNew;
 	DWORD dwType, dwTypeMask = 0;
 
-	if (!GetSecurityDescriptorDacl(Security, &bPresent, &pAcl, &bDefaulted)){
+	if (!GetSecurityDescriptorDacl(Control->Source, &bPresent, &pAcl, &bDefaulted)){
 		WIN_ERR("GetSecurityDescriptorDacl(): %s\n", win_strerror(GetLastError()));
 	}else if (bPresent && pAcl){
 		wIndex = pAcl->AceCount;
 	}
-	aclNew = win_malloc(sizeof(ACL));
-	aclNew->AclRevision = ACL_REVISION;
-	aclNew->AclSize = sizeof(ACL);
-	aclNew->AceCount = 0;
+	paclNew = win_malloc(sizeof(ACL));
+	paclNew->AclRevision = ACL_REVISION;
+	paclNew->AclSize = sizeof(ACL);
+	paclNew->AceCount = 0;
 	while (wIndex--){
 		GetAce(pAcl, wIndex, (PVOID)&pEntry);
 		dwType = AclOwnerType(pEntry, &dwTypeMask);
@@ -213,7 +202,7 @@ vfs_acl_create(WIN_PSD Security, WIN_MODE *Mode, BYTE Flags, WIN_ACL_CONTROL *Re
 		bFlagsNew = pEntry->Header.AceFlags & ~ALL_INHERIT_ACE;
 		if (dwType == WIN_ACL_USER){
 			if (EqualPrefixSid(&pEntry->Sid, __SidMachine)){
-				pEntry = AclDupEntry(pEntry, win_geteuid(&sid), &aceBuf);
+				pEntry = AclDupEntry(pEntry, Control->Owner, &aceBuf);
 			}
 			pEntry->Mask = aMaskNew + Mode->User;
 		}else if (dwType == WIN_ACL_GROUP){
@@ -224,37 +213,37 @@ vfs_acl_create(WIN_PSD Security, WIN_MODE *Mode, BYTE Flags, WIN_ACL_CONTROL *Re
 			continue;
 		}
 		pEntry->Header.AceFlags = bFlagsNew + Flags;
-		aclNew->AclSize += pEntry->Header.AceSize;
-		aclNew = win_realloc(aclNew, aclNew->AclSize);
-		AddAce(aclNew, ACL_REVISION, 0, pEntry, pEntry->Header.AceSize);
+		paclNew->AclSize += pEntry->Header.AceSize;
+		paclNew = win_realloc(paclNew, paclNew->AclSize);
+		AddAce(paclNew, ACL_REVISION, 0, pEntry, pEntry->Header.AceSize);
 	}
 	/* When creating files/subfolders in in user's profile tree (git.exe)
 	 */
 	if (!(dwTypeMask & WIN_ACL_OTHER)){
 		aMaskNew = READ_CONTROL | FILE_READ_ATTRIBUTES | SYNCHRONIZE | Mode->Other;
-		AclAddEntry(aclNew, Flags, aMaskNew, &SidAuthenticated);
+		AclAddEntry(paclNew, Flags, aMaskNew, &SidAuthenticated);
 	}
-	if (!SetSecurityDescriptorDacl(&Result->Security, bPresent, aclNew, bDefaulted)){
+	if (!SetSecurityDescriptorDacl(Result, bPresent, paclNew, FALSE)){
 		WIN_ERR("SetSecurityDescriptorDacl(): %s\n", win_strerror(GetLastError()));
 	}else{
 		bResult = TRUE;
 	}
-	Result->Acl = aclNew;
+	Control->Acl = paclNew;
 	return(bResult);
 }
 BOOL 
-vfs_acl_chmod(WIN_PSD Security, WIN_MODE *Mode, WIN_ACL_CONTROL *Result)
+vfs_acl_chmod(WIN_ACL_CONTROL *Control, WIN_MODE *Mode, PSECURITY_DESCRIPTOR Result)
 {
 	BOOL bResult = FALSE;
 	ACE_PEEK *Info;
 	WORD wIndex = 0;
 	ACCESS_MASK amNew;
 	BOOL bPresent = FALSE;
-	BOOL bDefaulted;
+	BOOL bDefaulted = FALSE;
 	PACL pAcl = NULL;
 	DWORD dwType, dwTypeMask = 0;
 
-	if (!GetSecurityDescriptorDacl(Security, &bPresent, &pAcl, &bDefaulted)){
+	if (!GetSecurityDescriptorDacl(Control->Source, &bPresent, &pAcl, &bDefaulted)){
 		WIN_ERR("GetSecurityDescriptorDacl(): %s\n", win_strerror(GetLastError()));
 	}else if (bPresent && pAcl){
 		wIndex = pAcl->AceCount;
@@ -271,7 +260,7 @@ vfs_acl_chmod(WIN_PSD Security, WIN_MODE *Mode, WIN_ACL_CONTROL *Result)
 			Info->Mask = amNew + Mode->Other;
 		}
 	}
-	if (!SetSecurityDescriptorDacl(&Result->Security, bPresent, pAcl, bDefaulted)){
+	if (!SetSecurityDescriptorDacl(Result, bPresent, pAcl, bDefaulted)){
 		WIN_ERR("SetSecurityDescriptorDacl(): %s\n", win_strerror(GetLastError()));
 	}else{
 		bResult = TRUE;
@@ -279,12 +268,12 @@ vfs_acl_chmod(WIN_PSD Security, WIN_MODE *Mode, WIN_ACL_CONTROL *Result)
 	return(bResult);
 }
 BOOL 
-vfs_acl_chown(WIN_PSD Security, PSID NewUser, PSID NewGroup, WIN_ACL_CONTROL *Result)
+vfs_acl_chown(WIN_ACL_CONTROL *Control, PSID NewUser, PSID NewGroup, PSECURITY_DESCRIPTOR Result)
 {
 	BOOL bResult = FALSE;
 	BOOL bPresent = FALSE;
 	BOOL bDefaulted;
-	PACL aclNew, acl = NULL;
+	PACL paclNew, pAcl = NULL;
 	ACE_PEEK *pEntry;
 	WORD wIndex = 0;
 	DWORD sdSize;
@@ -292,17 +281,17 @@ vfs_acl_chown(WIN_PSD Security, PSID NewUser, PSID NewGroup, WIN_ACL_CONTROL *Re
 	WORD aceSize = sizeof(ACCESS_ALLOWED_ACE) - sizeof(DWORD);
 	DWORD dwType, dwTypeMask = 0;
 
-	if (!GetSecurityDescriptorDacl(Security, &bPresent, &acl, &bDefaulted)){
+	if (!GetSecurityDescriptorDacl(Control->Source, &bPresent, &pAcl, &bDefaulted)){
 		WIN_ERR("GetSecurityDescriptorDacl(): %s\n", win_strerror(GetLastError()));
-	}else if (bPresent && acl){
-		wIndex = acl->AceCount;
+	}else if (bPresent && pAcl){
+		wIndex = pAcl->AceCount;
 	}
-	aclNew = win_malloc(sizeof(ACL));
-	aclNew->AclRevision = ACL_REVISION;
-	aclNew->AclSize = sizeof(ACL);
-	aclNew->AceCount = 0;
+	paclNew = win_malloc(sizeof(ACL));
+	paclNew->AclRevision = ACL_REVISION;
+	paclNew->AclSize = sizeof(ACL);
+	paclNew->AceCount = 0;
 	while (wIndex--){
-		GetAce(acl, wIndex, (PVOID)&pEntry);
+		GetAce(pAcl, wIndex, (PVOID)&pEntry);
 		dwType = AclOwnerType(pEntry, &dwTypeMask);
 		aceBuf.Header = pEntry->Header;
 		aceBuf.Mask = pEntry->Mask;
@@ -319,20 +308,20 @@ vfs_acl_chown(WIN_PSD Security, PSID NewUser, PSID NewGroup, WIN_ACL_CONTROL *Re
 				pEntry = (ACE_PEEK *)&aceBuf;
 			}
 		}
-		aclNew->AclSize += pEntry->Header.AceSize;
-		aclNew = win_realloc(aclNew, aclNew->AclSize);
-		AddAce(aclNew, ACL_REVISION, 0, pEntry, pEntry->Header.AceSize);
+		paclNew->AclSize += pEntry->Header.AceSize;
+		paclNew = win_realloc(paclNew, paclNew->AclSize);
+		AddAce(paclNew, ACL_REVISION, 0, pEntry, pEntry->Header.AceSize);
 	}
-	if (!SetSecurityDescriptorDacl(&Result->Security, bPresent, aclNew, bDefaulted)){
+	if (!SetSecurityDescriptorDacl(Result, bPresent, paclNew, bDefaulted)){
 		WIN_ERR("SetSecurityDescriptorDacl(): %s\n", win_strerror(GetLastError()));
 	}else{
 		bResult = TRUE;
 	}
-	Result->Acl = aclNew;
+	Control->Acl = paclNew;
 	return(bResult);
 }
 BOOL 
-vfs_acl_stat(WIN_PSD Security, WIN_VATTR *Stat)
+vfs_acl_stat(PSECURITY_DESCRIPTOR Source, WIN_VATTR *Result)
 {
 	BOOL bResult = TRUE;
 	ACE_PEEK *Info;
@@ -342,39 +331,39 @@ vfs_acl_stat(WIN_PSD Security, WIN_VATTR *Stat)
 	BOOL bPresent, bDefaulted;
 	DWORD dwType, dwTypeMask = 0;
 
-	if (GetSecurityDescriptorOwner(Security, &pOwner, &bDefaulted)){
-		CopySid(GetLengthSid(pOwner), &Stat->UserSid, pOwner);
+	if (GetSecurityDescriptorOwner(Source, &pOwner, &bDefaulted)){
+		CopySid(GetLengthSid(pOwner), &Result->UserSid, pOwner);
 	}
-	if (GetSecurityDescriptorGroup(Security, &pGroup, &bDefaulted)){
-		CopySid(GetLengthSid(pGroup), &Stat->GroupSid, pGroup);
+	if (GetSecurityDescriptorGroup(Source, &pGroup, &bDefaulted)){
+		CopySid(GetLengthSid(pGroup), &Result->GroupSid, pGroup);
 	}
-	if (!GetSecurityDescriptorDacl(Security, &bPresent, &acl, &bDefaulted)){
+	if (!GetSecurityDescriptorDacl(Source, &bPresent, &acl, &bDefaulted)){
 		WIN_ERR("GetSecurityDescriptorDacl(): %s\n", win_strerror(GetLastError()));
 	}else if (bPresent && acl){
 		wIndex = acl->AceCount;
 	}else{		/* VFAT */
-		Stat->Mode.User = WIN_S_IRWX;
-		Stat->Mode.Group = WIN_S_IRWX;
-		Stat->Mode.Other = WIN_S_IRWX;
+		Result->Mode.User = WIN_S_IRWX;
+		Result->Mode.Group = WIN_S_IRWX;
+		Result->Mode.Other = WIN_S_IRWX;
 	}
 	while (wIndex--){
 		GetAce(acl, wIndex, (PVOID)&Info);
 		dwType = AclOwnerType(Info, &dwTypeMask);
 		if (dwType == WIN_ACL_USER){
-			CopySid(GetLengthSid(&Info->Sid), &Stat->UserSid, &Info->Sid);
-			Stat->Mode.User = Info->Mask;
+			CopySid(GetLengthSid(&Info->Sid), &Result->UserSid, &Info->Sid);
+			Result->Mode.User = Info->Mask;
 		}else if (dwType == WIN_ACL_GROUP){
-			CopySid(GetLengthSid(&Info->Sid), &Stat->GroupSid, &Info->Sid);
-			Stat->Mode.Group = Info->Mask;
+			CopySid(GetLengthSid(&Info->Sid), &Result->GroupSid, &Info->Sid);
+			Result->Mode.Group = Info->Mask;
 		}else if (dwType == WIN_ACL_OTHER){
-			Stat->Mode.Other = Info->Mask;
+			Result->Mode.Other = Info->Mask;
 		}
 	}
 	if (EqualSid(pOwner, &SidAdmins)){
-		Stat->Mode.Special |= WIN_S_ISUID;
+		Result->Mode.Special |= WIN_S_ISUID;
 	}
 	if (EqualSid(pGroup, &SidSystem)){
-		Stat->Mode.Special |= WIN_S_ISGID;
+		Result->Mode.Special |= WIN_S_ISGID;
 	}
 	return(bResult);
 }

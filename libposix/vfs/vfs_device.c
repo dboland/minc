@@ -328,7 +328,6 @@ storage_attach(WIN_DEVICE *Device)
 		default:
 			bResult = FALSE;
 	}
-//VfsDebugDevice(Device, "storage_found");
 	return(bResult);
 }
 BOOL 

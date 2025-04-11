@@ -54,7 +54,7 @@ CapCreateToken(WIN_CAP_CONTROL *Control, HANDLE *Result)
 	HANDLE hToken, hResult;
 	NTSTATUS ntStatus;
 	ACCESS_MASK aMask = TOKEN_ALL_ACCESS | TOKEN_ADJUST_SESSIONID;
-	TOKEN_SOURCE tSource = {"MINC", {6, 1}};
+	TOKEN_SOURCE tSource = {"*MINC*", {0, 0}};
 
 	ntStatus = NtCreateToken(&hToken, aMask, &oa, TokenPrimary, &Control->AuthId, &liExpire, &tUser, 
 		Control->Groups, Control->Privs, &tOwner, &tPrimaryGroup, &tDefault, &tSource);
@@ -225,7 +225,7 @@ CapGetRealToken(DWORD Access, TOKEN_TYPE Type, HANDLE *Result)
 	HANDLE hProcToken;
 
 	if (!OpenProcessToken(GetCurrentProcess(), Access, &hProcToken)){
-		WIN_ERR("CapGetRealToken(%d): %s\n", GetCurrentProcess(), win_strerror(GetLastError()));
+		WIN_ERR("CapGetRealToken(0x%x): %s\n", Access, win_strerror(GetLastError()));
 	}else if (Type != TokenImpersonation){
 		*Result = hProcToken;
 		bResult = TRUE;
@@ -272,7 +272,7 @@ win_cap_set_flag(HANDLE Token, LPCSTR Name, DWORD Value)
 	return(bResult);
 }
 BOOL 
-win_cap_set_mode(DWORD Group, DWORD Other, ACL *Result)
+win_cap_set_mode(ACCESS_MASK Group, ACCESS_MASK Other, ACL *Result)
 {
 	Result->AclRevision = ACL_REVISION;
 	Result->AclSize = sizeof(ACL);
@@ -305,7 +305,8 @@ win_cap_init(WIN_CAP_CONTROL *Result)
 		WIN_ERR("CapGetPrivileges(%d): %s\n", hToken, win_strerror(GetLastError()));
 //	}else if (!CapGetDefault(hToken, &Result->Default)){
 //		WIN_ERR("CapGetDefault(%d): %s\n", hToken, win_strerror(GetLastError()));
-	}else{
+//	}else{
+	}else if (win_cap_set_mode(WIN_P_IRX, WIN_P_IRX, &Result->DefaultACL)){
 		Result->Token = hToken;
 		Result->AuthId = __Globals->AuthId;
 		Result->SessionId = dwSessionId;
@@ -353,7 +354,6 @@ BOOL
 win_cap_setuid(WIN_CAP_CONTROL *Control, WIN_PWENT *Passwd, HANDLE *Result)
 {
 	BOOL bResult = FALSE;
-//	DWORD dwAccess = TOKEN_ADJUST_PRIVILEGES | TOKEN_QUERY;
 
 	if (!win_cap_set_flag(Control->Token, "SeCreateTokenPrivilege", SE_PRIVILEGE_ENABLED)){
 		return(FALSE);
@@ -361,26 +361,23 @@ win_cap_setuid(WIN_CAP_CONTROL *Control, WIN_PWENT *Passwd, HANDLE *Result)
 		WIN_ERR("CapGetGroups(%d): %s\n", Control->Token, win_strerror(GetLastError()));
 	}else if (win_cap_set_flag(Control->Token, "SeTcbPrivilege", SE_PRIVILEGE_ENABLED)){
 		Control->User = Passwd->UserSid;
-		win_cap_set_mode(WIN_P_IRWX, WIN_P_IRX, &Control->DefaultACL);
 		bResult = CapCreateToken(Control, Result);
 	}
 	return(bResult);
 }
 BOOL 
-win_cap_setgid(SID8 *Group)
+win_cap_setgid(HANDLE Token, SID8 *Group)
 {
 	BOOL bResult = FALSE;
 	TOKEN_PRIMARY_GROUP tPrimary = {Group};
-	HANDLE hToken = NULL;
-	DWORD dwAccess = TOKEN_ADJUST_PRIVILEGES | TOKEN_ADJUST_DEFAULT;
 
-	if (!win_cap_get_proc(dwAccess, 0, &hToken)){
+	if (!win_cap_set_flag(Token, "SeTcbPrivilege", SE_PRIVILEGE_ENABLED)){
 		return(FALSE);
-	}else if (win_cap_set_flag(hToken, "SeTcbPrivilege", SE_PRIVILEGE_ENABLED)){
-		bResult = SetTokenInformation(hToken, TokenPrimaryGroup, &tPrimary, sizeof(TOKEN_PRIMARY_GROUP));
-//		CapTogglePrivilege(hToken, "SeTcbPrivilege", 0);
+	}else if (!SetTokenInformation(Token, TokenPrimaryGroup, &tPrimary, sizeof(TOKEN_PRIMARY_GROUP))){
+		WIN_ERR("win_cap_setgid(%s): %s\n", win_strsid(Group), win_strerror(GetLastError()));
+	}else{
+		bResult = win_cap_set_flag(Token, "SeTcbPrivilege", 0);
 	}
-	CloseHandle(hToken);
 	return(bResult);
 }
 BOOL 
@@ -388,7 +385,6 @@ win_cap_setgroups(WIN_CAP_CONTROL *Control, SID8 Groups[], DWORD Count, HANDLE *
 {
 	BOOL bResult = FALSE;
 	PTOKEN_GROUPS ptGroups;
-//	DWORD dwAccess = TOKEN_ADJUST_PRIVILEGES | TOKEN_QUERY;
 
 	if (!win_cap_set_flag(Control->Token, "SeCreateTokenPrivilege", SE_PRIVILEGE_ENABLED)){
 		return(FALSE);
@@ -398,7 +394,6 @@ win_cap_setgroups(WIN_CAP_CONTROL *Control, SID8 Groups[], DWORD Count, HANDLE *
 		WIN_ERR("CapGetGroups(%d): %s\n", Control->Token, win_strerror(GetLastError()));
 	}else if (win_cap_set_flag(Control->Token, "SeTcbPrivilege", SE_PRIVILEGE_ENABLED)){
 		Control->Groups = CapMergeGroups(ptGroups, Groups, Count);
-		win_cap_set_mode(WIN_P_IRWX, WIN_P_IRX, &Control->DefaultACL);
 		bResult = CapCreateToken(Control, Result);
 		LocalFree(ptGroups);
 	}

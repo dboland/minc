@@ -36,18 +36,18 @@ BOOL
 DiskCreateFile(WIN_NAMEIDATA *Path, WIN_FLAGS *Flags, WIN_MODE *Mode, WIN_VNODE *Result)
 {
 	BOOL bResult = FALSE;
-	PSECURITY_DESCRIPTOR psd;
+	SECURITY_DESCRIPTOR sd;
 	WCHAR szDirName[WIN_PATH_MAX] = L"";
 	HANDLE hResult;
-	WIN_ACL_CONTROL wControl;
-	SECURITY_ATTRIBUTES sa = {sizeof(sa), &wControl.Security, FALSE};
+	WIN_ACL_CONTROL wControl = {Path->Owner, Path->Group, NULL, NULL};
+	SECURITY_ATTRIBUTES sa = {sizeof(sa), &sd, FALSE};
 
 	Flags->Access |= WRITE_DAC | WRITE_OWNER;		/* disk_fchown() */
-	if (!win_acl_get_file(win_dirname(szDirName, Path->Resolved), &psd)){
+	if (!win_acl_get_file(win_dirname(szDirName, Path->Resolved), &wControl.Source)){
 		return(FALSE);
-	}else if (!win_acl_init(Mode, &wControl)){
-		WIN_ERR("win_acl_init(%s): %s\n", szDirName, win_strerror(GetLastError()));
-	}else if (vfs_acl_create(psd, Mode, 0, &wControl)){
+	}else if (!vfs_acl_init(&wControl, Path->MountId, Mode->Special, &sd)){
+		WIN_ERR("vfs_acl_init(%s): %s\n", szDirName, win_strerror(GetLastError()));
+	}else if (vfs_acl_create(&wControl, Mode, 0, &sd)){
 		hResult = CreateFileW(Path->Resolved, Flags->Access, Flags->Share, 
 			&sa, Flags->Creation, Flags->Attribs, NULL);
 		if (hResult != INVALID_HANDLE_VALUE){
@@ -60,10 +60,11 @@ DiskCreateFile(WIN_NAMEIDATA *Path, WIN_FLAGS *Flags, WIN_MODE *Mode, WIN_VNODE 
 			Result->Access = win_F_GETFL(hResult);
 			Result->Flags = win_F_GETFD(hResult);
 			bResult = TRUE;
+//		}else{
+//			WIN_ERR("CreateFile(%ls): %s\n", Path->Resolved, win_strerror(GetLastError()));
 		}
 	}
-	LocalFree(psd);
-	win_acl_free(&wControl);
+	vfs_acl_free(&wControl);
 	return(bResult);
 }
 BOOL 

@@ -33,26 +33,6 @@
 /****************************************************/
 
 VOID 
-vfs_init(WIN_GLOBALS *Globals)
-{
-	TOKEN_STATISTICS tStats = {0};
-	HANDLE hToken;
-	DWORD dwSize = 0;
-
-	AclInit(&Globals->SidMachine, &Globals->SidNone);
-	if (!QueryPerformanceFrequency(&Globals->Frequency)){
-		WIN_ERR("QueryPerformanceFrequency(): %s\n", win_strerror(GetLastError()));
-	}
-	if (!OpenProcessToken(GetCurrentProcess(), TOKEN_QUERY, &hToken)){
-		WIN_ERR("OpenProcessToken(TOKEN_QUERY): %s\n", win_strerror(GetLastError()));
-	}else if (!GetTokenInformation(hToken, TokenStatistics, &tStats, sizeof(TOKEN_STATISTICS), &dwSize)){
-		WIN_ERR("GetTokenInformation(TokenStatistics): %s\n", win_strerror(GetLastError()));
-	}else{
-		Globals->AuthId = tStats.AuthenticationId;
-		CloseHandle(hToken);
-	}
-}
-VOID 
 vfs_setproctitle(LPCSTR Title)
 {
 	win_mbstowcs(__Strings[CURRENT].Command, Title, WIN_MAX_PROCTITLE);

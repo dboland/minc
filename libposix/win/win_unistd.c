@@ -178,6 +178,20 @@ LinkWriteInfo(HANDLE Handle, LPCWSTR Target)
 /**************************************************************/
 
 BOOL 
+win_chroot(LPCWSTR Path)
+{
+	BOOL bResult = FALSE;
+	WCHAR szPath[MAX_PATH];
+
+	if (!win_realpath(Path, MAX_PATH, szPath)){
+		return(FALSE);
+	}else if (!SetCurrentDirectoryW(szPath)){
+		WIN_ERR("SetCurrentDirectory(%ls): %s\n", szPath, win_strerror(GetLastError()));
+	}else{
+		bResult = TRUE;
+	}
+}
+BOOL 
 win_readlink(LPCWSTR Path, SHELL_LINK_HEADER *Header, LPWSTR Target)
 {
 	BOOL bResult = FALSE;

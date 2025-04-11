@@ -92,18 +92,12 @@ kproc_posix(struct kinfo_proc *proc, WIN_TASK *Task)
 	proc->p_ppid = Task->ParentId;
 	proc->p_sid = Task->SessionId;
 	proc->p__pgid = Task->GroupId;
-	proc->p_uid = rid_posix(&Task->UserSid);
-	proc->p_ruid = Task->RealUid;
+	proc->p_uid = __geteuid(Task);
+	proc->p_ruid = __getuid(Task);
 	proc->p_svuid = Task->SavedUid;
-	if (proc->p_uid == WIN_ROOT_UID){
-		proc->p_uid = 0;
-	}
-	proc->p_gid = rid_posix(&Task->GroupSid);
-	proc->p_rgid = Task->RealGid;
+	proc->p_gid = __getegid(Task);
+	proc->p_rgid = __getgid(Task);
 	proc->p_svgid = Task->SavedGid;
-	if (proc->p_gid == WIN_ROOT_GID){
-		proc->p_gid = 0;
-	}
 	proc->p_tdev = pTerminal->DeviceId;
 	proc->p_tpgid = pTerminal->GroupId;
 	proc->p_vm_rssize = 10;

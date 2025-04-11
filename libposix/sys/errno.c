@@ -47,7 +47,6 @@ errno_posix(DWORD Error)
 		case ERROR_BAD_ARGUMENTS:		/* 160 */
 		case ERROR_NOT_LOCKED:			/* 158: The segment is already unlocked */
 		case ERROR_INVALID_PARAMETER:		/* 87: The parameter is incorrect (mailslot_read()) */
-//		case ERROR_INVALID_DATA:		/* 13: The data is invalid. */
 			result = EINVAL;
 			break;
 		case ERROR_NO_SUCH_ALIAS:		/* 1376: The specified local group does not exist. */
@@ -67,7 +66,6 @@ errno_posix(DWORD Error)
 		case ERROR_LOGON_SESSION_EXISTS:
 		case ERROR_INVALID_OPERATION:
 		case ERROR_ELEVATION_REQUIRED:
-		case ERROR_INVALID_OWNER:		/* trying to force owner on remote disk (vim.exe) */
 			result = EPERM;
 			break;
 		case ERROR_DIRECTORY:			/* 267: The directory name is invalid */

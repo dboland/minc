@@ -350,7 +350,7 @@ sys_fchmod(call_t call, int fd, mode_t mode)
 
 	if (fd < 0 || fd >= OPEN_MAX){
 		result = -EBADF;
-	}else if (!vfs_fchmod(&pwTask->Node[fd], mode_win(&wMode, mode))){
+	}else if (!vfs_fchmod(&pwTask->Node[fd], &pwTask->UserSid, &pwTask->GroupSid, mode_win(&wMode, mode))){
 		result -= errno_posix(GetLastError());
 	}
 	return(result);
@@ -393,7 +393,7 @@ sys_umask(call_t call, mode_t mask)
 /****************************************************/
 
 int 
-__mknodat(WIN_TASK *Task, int fd, const char *path, mode_t mode, dev_t dev)
+__mknodat(int fd, const char *path, mode_t mode, dev_t dev)
 {
 	int result = 0;
 	WIN_NAMEIDATA wPath = {0};
@@ -407,12 +407,12 @@ __mknodat(WIN_TASK *Task, int fd, const char *path, mode_t mode, dev_t dev)
 int 
 sys_mknodat(call_t call, int fd, const char *path, mode_t mode, dev_t dev)
 {
-	return(__mknodat(call.Task, fd, path, mode, dev));
+	return(__mknodat(fd, path, mode, dev));
 }
 int 
 sys_mknod(call_t call, const char *path, mode_t mode, dev_t dev)
 {
-	return(__mknodat(call.Task, AT_FDCWD, path, mode, dev));
+	return(__mknodat(AT_FDCWD, path, mode, dev));
 }
 int 
 __mkdirat(WIN_TASK *Task, int dirfd, const char *pathname, mode_t mode)

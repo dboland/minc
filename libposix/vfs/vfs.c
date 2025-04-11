@@ -62,6 +62,7 @@ extern SID8 SidUsers;
 extern SID8 SidGuests;
 extern SID8 SidBuiltin;
 extern SID8 SidNull;
+extern SID8 SidPowerUsers;
 
 typedef struct _SEQUENCE {
 	CHAR *Args;

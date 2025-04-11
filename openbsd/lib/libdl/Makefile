@@ -4,11 +4,10 @@ RELEASE=6.1.0
 
 LIBEXEC=${PREFIX}/libexec
 
-CFLAGS+=-g -ffreestanding
+CFLAGS+=-g
 OBJECTS=libdl.o
 IMPLIB=libdl.dll.a
 LDFLAGS=-shared -s
-WINDIR=/C/WINDOWS/system32
 LIBROOT=../../..
 POSIXDIR=${LIBROOT}/libposix
 GCCLIB=${LIBROOT}/mingw/gcc
@@ -24,7 +23,7 @@ version.o: version.rc
 ld.so: ${OBJECTS} version.o
 	${LD} ${LDFLAGS} -e _DllMainCRTStartup@12 --out-implib=${IMPLIB} --disable-auto-import --enable-stdcall-fixup \
 	-o $@ --image-base=${IMGBASE_LIBD} ${GCCLIB}/crt1.o ${OBJECTS} version.o \
-	-L${POSIXDIR} -L${WINDIR} -lposix -lkernel32
+	-L${POSIXDIR} -lposix
 
 clean:
 	/bin/rm -f *.o *.a ld.so

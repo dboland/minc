@@ -41,7 +41,7 @@ win_malloc(ULONG Size)
 	while (ulSize <= Size){
 		ulSize += MIN_BUFSIZE;
 	}
-	hLocal = LocalAlloc(LMEM_FIXED + LMEM_ZEROINIT, ulSize + sizeof(ULONG));
+	hLocal = LocalAlloc(LMEM_FIXED | LMEM_ZEROINIT, ulSize + sizeof(ULONG));
 	*(ULONG *)hLocal = ulSize;
 	return(hLocal + sizeof(ULONG));
 }

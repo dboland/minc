@@ -293,7 +293,7 @@ sys_bind(call_t call, int sockfd, const struct sockaddr *addr, socklen_t addrlen
 
 	if (sockfd < 0 || sockfd >= OPEN_MAX){	/* sshd.exe */
 		result = -EBADF;
-	}else if (!vfs_bind(&pwTask->Node[sockfd], saddr_win(pwTask, &sAddress, addr, &addrlen), addrlen)){
+	}else if (!vfs_bind(pwTask, &pwTask->Node[sockfd], saddr_win(pwTask, &sAddress, addr, &addrlen), addrlen)){
 		result -= errno_posix(WSAGetLastError());
 	}
 	return(result);

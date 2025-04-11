@@ -82,7 +82,6 @@ typedef enum _WIN_VTAGTYPE {
 /* sys/syslimits.h */
 
 #define WIN_NAME_MAX		16
-#define WIN_PATH_MAX		1024
 #define WIN_PIPE_BUF		1024
 
 /*
@@ -189,6 +188,8 @@ typedef struct _WIN_NAMEIDATA {
 	HANDLE Object;
 	DWORD Attribs;
 	DWORD Flags;			/* see below */
+	SID8 *Owner;			/* owner at file creation */
+	SID8 *Group;			/* group at file creation */
 	WCHAR *Base;
 	WCHAR *Last;
 	WCHAR *R;			/* current WCHAR in resolved path buffer */
@@ -246,6 +247,17 @@ typedef struct _WIN_DIRENT {
 #define WIN_DT_REG		8
 #define WIN_DT_LNK		10
 #define WIN_DT_SOCK		12
+
+/*
+ * vfs_acl.c
+ */
+
+typedef struct _WIN_ACL_CONTROL {
+	SID8 *Owner;
+	SID8 *Group;
+	PACL Acl;
+	PSECURITY_DESCRIPTOR Source;
+} WIN_ACL_CONTROL;
 
 /*
  * vfs_fcntl.c

@@ -103,14 +103,14 @@ vfs_chmod(WIN_NAMEIDATA *Path, WIN_MODE *Mode)
 	return(bResult);
 }
 BOOL 
-vfs_fchmod(WIN_VNODE *Node, WIN_MODE *Mode)
+vfs_fchmod(WIN_VNODE *Node, SID8 *Owner, SID8 *Group, WIN_MODE *Mode)
 {
 	BOOL bResult = FALSE;
 	WIN_NAMEIDATA wPath = {0};
 
-	if (Node->Access & WRITE_DAC){
-		bResult = disk_fchmod(Node, Mode);
-	}else if (vfs_F_GETPATH(Node, &wPath)){		/* install.exe */
+	if (Node->Access & WRITE_DAC){		/* install.exe */
+		bResult = disk_fchmod(Node, Owner, Group, Mode);
+	}else if (vfs_F_GETPATH(Node, Owner, Group, &wPath)){
 		bResult = vfs_chmod(&wPath, Mode);
 	}
 	return(bResult);
@@ -119,20 +119,19 @@ BOOL
 vfs_mknod(WIN_NAMEIDATA *Path, WIN_MODE *Mode, DWORD DeviceId)
 {
 	BOOL bResult = FALSE;
-	PSECURITY_DESCRIPTOR psd;
-	WIN_ACL_CONTROL wControl;
-	SECURITY_ATTRIBUTES sa = {sizeof(sa), &wControl.Security, FALSE};
+	SECURITY_DESCRIPTOR sd;
+	WIN_ACL_CONTROL wControl = {Path->Owner, Path->Group, NULL, NULL};
+	SECURITY_ATTRIBUTES sa = {sizeof(sa), &sd, FALSE};
 	WCHAR szDirName[WIN_PATH_MAX];
 
-	if (!win_acl_get_file(win_dirname(szDirName, Path->Resolved), &psd)){
+	if (!win_acl_get_file(win_dirname(szDirName, Path->Resolved), &wControl.Source)){
 		return(FALSE);
-	}else if (!win_acl_init(Mode, &wControl)){
-		WIN_ERR("win_acl_init(%s): %s\n", szDirName, win_strerror(GetLastError()));
-	}else if (vfs_acl_create(psd, Mode, 0, &wControl)){
+	}else if (!vfs_acl_init(&wControl, Path->MountId, Mode->Special, &sd)){
+		WIN_ERR("vfs_acl_init(%s): %s\n", szDirName, win_strerror(GetLastError()));
+	}else if (vfs_acl_create(&wControl, Mode, 0, &sd)){
 		bResult = pdo_F_CREATE(Path->Resolved, Mode->FileType, &sa, DeviceId);
 	}
-	LocalFree(psd);
-	win_acl_free(&wControl);
+	vfs_acl_free(&wControl);
 	return(bResult);
 }
 BOOL 
@@ -159,23 +158,22 @@ vfs_mkdir(WIN_NAMEIDATA *Path, WIN_MODE *Mode)
 {
 	BOOL bResult = FALSE;
 	DWORD dwSize = 0;
-	PSECURITY_DESCRIPTOR psd = NULL;
+	SECURITY_DESCRIPTOR sd;
 	WCHAR szParent[WIN_PATH_MAX];
-	WIN_ACL_CONTROL wControl;
-	SECURITY_ATTRIBUTES sa = {sizeof(sa), &wControl.Security, FALSE};
+	WIN_ACL_CONTROL wControl = {Path->Owner, Path->Group, NULL, NULL};
+	SECURITY_ATTRIBUTES sa = {sizeof(sa), &sd, FALSE};
 	BYTE bAceFlags = OBJECT_INHERIT_ACE + CONTAINER_INHERIT_ACE;
 
 	if (*Path->Last == '\\'){	/* git.exe */
 		*Path->Last = 0;
 	}
-	if (!win_acl_get_file(win_dirname(szParent, Path->Resolved), &psd)){
+	if (!win_acl_get_file(win_dirname(szParent, Path->Resolved), &wControl.Source)){
 		return(FALSE);
-	}else if (!win_acl_init(Mode, &wControl)){
-		WIN_ERR("win_acl_init(%s): %s\n", szParent, win_strerror(GetLastError()));
-	}else if (vfs_acl_create(psd, Mode, bAceFlags, &wControl)){
+	}else if (!vfs_acl_init(&wControl, Path->MountId, Mode->Special, &sd)){
+		WIN_ERR("vfs_mkdir(%s): %s\n", szParent, win_strerror(GetLastError()));
+	}else if (vfs_acl_create(&wControl, Mode, bAceFlags, &sd)){
 		bResult = CreateDirectoryW(Path->Resolved, &sa);
 	}
-	LocalFree(psd);
-	win_acl_free(&wControl);
+	vfs_acl_free(&wControl);
 	return(bResult);
 }

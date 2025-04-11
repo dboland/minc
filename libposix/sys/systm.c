@@ -65,24 +65,14 @@ cpu_configure(void)
 	}
 	vfs_endvfs(&cfData);
 }
-char *
+char * 
 diskconf(void)
 {
-	CHAR szString[WIN_PATH_MAX], *psz = szString;
-	DWORD dwSize;
+	WCHAR szRoot[MAX_PATH];
 
 	/* Configure root/swap devices
 	 */
-	if (!SetCurrentDirectoryA(__Globals->Root)){
-		msvc_printf("SetCurrentDirectory(%s): %s\n", __Globals->Root, win_strerror(GetLastError()));
-	}
-	psz = win_stpcpy(win_stpcpy(psz, __Globals->Root), "\\sbin;");
-	psz = win_stpcpy(win_stpcpy(psz, __Globals->Root), "\\usr\\lib;");
-	psz = win_stpcpy(win_stpcpy(psz, __Globals->Root), "\\usr\\libexec;");
-	dwSize = psz - szString;
-	GetEnvironmentVariableA("Path", psz, WIN_PATH_MAX - dwSize);
-	if (!SetEnvironmentVariableA("Path", szString)){
-		msvc_printf("SetEnvironmentVariable(%s): %s\n", szString, win_strerror(GetLastError()));
-	}
+	win_mbstowcs(szRoot, __Globals->Root, MAX_PATH);
+	win_chroot(szRoot);
 	return(__Globals->Root);
 }
