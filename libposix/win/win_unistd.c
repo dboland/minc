@@ -118,7 +118,7 @@ LinkWriteTarget(HANDLE Handle, LPCWSTR Target)
 	UINT uiSize = 0;
 	DWORD dwResult;
 
-	/* Use typecast to get past incorrect declaration by MinGW.
+	/* Use type cast to get past incorrect declaration by MinGW.
 	 */
 	if (S_OK == SHParseDisplayName(Target, NULL, (LPITEMIDLIST)&pidList, sfgaof, &sfgaof)){
 		uiSize = ILGetSize(pidList);

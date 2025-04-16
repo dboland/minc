@@ -45,24 +45,6 @@ TimeProc(PVOID Param, DWORD LowValue, DWORD HighValue)
 		WIN_ERR("PostThreadMessage(%d): %s\n", pwTask->ThreadId, win_strerror(GetLastError()));
 	}
 }
-BOOL 
-TimeWaitSleep(WIN_TASK *Task, HANDLE Handle, DWORDLONG TimeOut, DWORDLONG *Remain)
-{
-	BOOL bResult = FALSE;
-	HANDLE hObjects[2] = {__Interrupt, Handle};
-	DWORDLONG dwlElapsed = 0LL;
-
-	if (WAIT_FAILED == WaitForMultipleObjectsEx(2, hObjects, FALSE, INFINITE, TRUE)){
-		WIN_ERR("WaitForMultipleObjectsEx(%s): %s\n", win_strobj(hObjects, 2), win_strerror(GetLastError()));
-	}else{
-		bResult = TRUE;
-	}
-	if (win_clock_gettime_MONOTONIC(&dwlElapsed)){
-		dwlElapsed -= Task->ClockTime;
-	}
-	*Remain = TimeOut - dwlElapsed;
-	return(bResult);
-}
 
 /****************************************************/
 
@@ -126,25 +108,27 @@ vfs_nanosleep(WIN_TASK *Task, DWORDLONG TimeOut, DWORDLONG *Remain)
 	LONGLONG llRemain = 0LL;
 	HANDLE hTimer = CreateWaitableTimer(NULL, FALSE, NULL);
 	LARGE_INTEGER liTimeOut;
+	DWORD dwStatus;
+	DWORDLONG dwlElapsed = 0LL;
 
 	liTimeOut.QuadPart = (LONGLONG)(TimeOut * -0.01);	/* 100-nanosecond intervals */
 	if (!SetWaitableTimer(hTimer, &liTimeOut, 0, NULL, NULL, FALSE)){
 		WIN_ERR("SetWaitableTimer(%I64d): %s\n", TimeOut, win_strerror(GetLastError()));
-	}else while (!bResult){
-		if (!TimeWaitSleep(Task, hTimer, TimeOut, &llRemain)){
-			break;
-		}else if (proc_poll(Task)){
-			break;
-		}else if (llRemain < 9000000LL){	/* hallo Werner Heisenberg */
+	}else{
+		dwStatus = WaitForSingleObjectEx(hTimer, INFINITE, TRUE);
+		if (dwStatus == WAIT_FAILED){
+			WIN_ERR("WaitForSingleObjectEx(%I64d): %s\n", TimeOut, win_strerror(GetLastError()));
+		}else if (dwStatus != WAIT_IO_COMPLETION){
+			bResult = TRUE;
+		}else if (!proc_poll(Task)){
 			bResult = TRUE;
 		}
 	}
-	if (llRemain > 0){
-		*Remain = llRemain;
-	}else{
-		*Remain = 0LL;
+	NtClose(hTimer);		/* don't clear last error */
+	if (win_clock_gettime_MONOTONIC(&dwlElapsed)){
+		dwlElapsed -= Task->ClockTime;
 	}
-	CloseHandle(hTimer);
+	*Remain = TimeOut - dwlElapsed;
 	return(bResult);
 }
 BOOL 

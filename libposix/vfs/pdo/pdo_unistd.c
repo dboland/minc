@@ -109,13 +109,10 @@ pdo_revoke(WIN_DEVICE *Device)
 {
 	BOOL bResult = FALSE;
 
-//vfs_ktrace("pdo_revoke", STRUCT_DEVICE, Device);
 	switch (Device->DeviceType){
 		case DEV_TYPE_PTY:
-			bResult = char_revoke(Device);
-			break;
 		case DEV_TYPE_CONSOLE:
-			bResult = TRUE;
+			bResult = char_revoke(Device);
 			break;
 		default:
 			SetLastError(ERROR_BAD_DEVICE);

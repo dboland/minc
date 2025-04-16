@@ -75,9 +75,11 @@ char_revoke(WIN_DEVICE *Device)
 {
 	BOOL bResult = FALSE;
 
-	if (!CloseHandle(Device->Input)){
-		WIN_ERR("CloseHandle(%d): %s\n", Device->Input, win_strerror(GetLastError()));
+	if (!Device->Output){
+		bResult = TRUE;
 	}else if (!CloseHandle(Device->Output)){
+		WIN_ERR("CloseHandle(%d): %s\n", Device->Input, win_strerror(GetLastError()));
+	}else if (!CloseHandle(Device->Input)){
 		WIN_ERR("CloseHandle(%d): %s\n", Device->Output, win_strerror(GetLastError()));
 	}else{
 		Device->Input = NULL;

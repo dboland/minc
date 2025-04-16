@@ -318,13 +318,10 @@ win_cap_init(WIN_CAP_CONTROL *Result)
 VOID 
 win_cap_free(WIN_CAP_CONTROL *Control)
 {
-	DWORD dwError = GetLastError();
-
 	LocalFree(Control->Privs);
 	LocalFree(Control->Groups);
 //	LocalFree(Control->Default);
-	CloseHandle(Control->Token);
-	SetLastError(dwError);
+	NtClose(Control->Token);	/* don't clear last error */
 }
 BOOL 
 win_cap_from_name(LPCSTR Name, PTOKEN_PRIVILEGES Token)
