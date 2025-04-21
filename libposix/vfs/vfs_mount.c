@@ -78,7 +78,6 @@ vfs_mount(WIN_VNODE *Node, WIN_NAMEIDATA *Path, DWORD Flags, WIN_MODE *Mode)
 	BOOL bResult = FALSE;
 	WIN_DEVICE *pwDevice = DEVICE(Node->DeviceId);
 
-//vfs_ktrace("vfs_mount", STRUCT_NAMEI, Path);
 	if (Path->Attribs == -1){
 		return(FALSE);
 	}else if (Path->FileType != WIN_VDIR){
@@ -100,7 +99,6 @@ vfs_unmount(WIN_NAMEIDATA *Path)
 {
 	BOOL bResult = FALSE;
 
-//vfs_ktrace("vfs_unmount", STRUCT_NAMEI, Path);
 	if (Path->Attribs == -1){
 		return(FALSE);
 	}else if (Path->FileType != WIN_VDIR){

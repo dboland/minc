@@ -28,23 +28,14 @@
  *
  */
 
-typedef enum _STRUCT_TYPE{
-	STRUCT_UNKNOWN,
-	STRUCT_VNODE,
-	STRUCT_NAMEI,
-	STRUCT_TTY,
-	STRUCT_DEVICE,
-	STRUCT_MOUNT,
-	DWORD_CONIN,
-	STRUCT_CFDATA,
-	STRUCT_STATFS,
-	STRUCT_INODE,
-	STRUCT_ACCESS,
-	STRUCT_NETFLAGS,
-	STRUCT_TASK,
-	STRUCT_THREAD,
-	STRUCT_CAP_CONTROL,
-	STRUCT_SECURITY_DESCRIPTOR
-} STRUCT_TYPE;
+#include "config.h"
 
-VOID vfs_ktrace(LPCWSTR Label, STRUCT_TYPE Type, PVOID Data);
+DWORD 
+vfs_CONIN(DWORD Mode, LPSTR Buffer)
+{
+	LPSTR psz = Buffer;
+
+	psz += sprintf(psz, ":\n");
+	psz = VfsInputMode(psz, "+ mode", Mode);
+	return(psz - Buffer);
+}

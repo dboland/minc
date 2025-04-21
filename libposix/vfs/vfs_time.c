@@ -143,7 +143,6 @@ vfs_utimes(WIN_NAMEIDATA *Path, FILETIME FileTime[2])
 			break;
 		default:
 			SetLastError(ERROR_BAD_FILE_TYPE);
-			break;
 	}
 	return(bResult);
 }

@@ -233,7 +233,6 @@ serial_attach(WIN_DEVICE *Device)
 		default:
 			bResult = FALSE;
 	}
-//vfs_ktrace("serial_attach", STRUCT_DEVICE, Device);
 	return(bResult);
 }
 BOOL 

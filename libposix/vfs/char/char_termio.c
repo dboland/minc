@@ -73,7 +73,6 @@ char_TIOCSETA(WIN_VNODE *Node, WIN_TERMIO *Attribs)
 {
 	BOOL bResult = FALSE;
 
-//vfs_ktrace("char_TIOCSETA", STRUCT_VNODE, Node);
 	switch (Node->DeviceType){
 		case DEV_TYPE_CONSOLE:
 		case DEV_TYPE_PTY:

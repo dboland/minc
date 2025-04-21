@@ -38,7 +38,6 @@ tty_open(WIN_TTY *Terminal, WIN_FLAGS *Flags, WIN_VNODE *Result)
 	Result->DeviceType = Terminal->DeviceType;
 	Result->DeviceId = Terminal->DeviceId;
 	Result->Index = Terminal->Index;
-//vfs_ktrace("tty_open", STRUCT_VNODE, Result);
 	return(TRUE);
 }
 BOOL 

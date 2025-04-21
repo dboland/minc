@@ -109,6 +109,5 @@ drive_statvfs(WIN_CFDATA *Config, DWORD Flags, WIN_CFDRIVER *Result)
 	win_wcscpy(Result->NtClass, L"drive");
 //	win_wcscpy(win_wcpcpy(Result->NtPath, L"\\\\.\\GLOBALROOT"), Config->NtPath);
 	win_volname(Result->NtPath, Config->DosPath);
-//vfs_ktrace("drive_statvfs", STRUCT_CFDATA, Config);
 	return(bResult);
 }

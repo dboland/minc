@@ -76,7 +76,6 @@ disk_F_LOOKUP(HANDLE Handle, DWORD Flags, WIN_NAMEIDATA *Result)
 	}else{
 		bResult = FALSE;
 	}
-//vfs_ktrace("disk_F_LOOKUP", STRUCT_NAMEI, Result);
 	return(bResult);
 }
 BOOL 

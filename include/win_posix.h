@@ -50,7 +50,7 @@ LPSTR win_strcat(LPSTR Destination, LPCSTR Source);
 VOID win_bzero(LPVOID Buffer, DWORD Size);
 LPSTR win_strlcase(LPSTR String);
 DWORD win_strtime(SYSTEMTIME *Time, LPSTR Buffer, DWORD Size);
-LPSTR win_strsid(SID8 *Sid);
+LPSTR win_strsid(PSID Sid);
 LPSTR win_strobj(HANDLE Objects[], DWORD Count);
 BOOL win_isu8cont(UCHAR C);
 

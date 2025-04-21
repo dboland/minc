@@ -223,7 +223,6 @@ vfs_access(WIN_NAMEIDATA *Path, ACCESS_MASK Access)
 	}else if (!AccessCheck(psd, hToken, Access, &map, &priv, &dwSize, &amGranted, &bResult)){
 		WIN_ERR("AccessCheck(%ls): %s\n", Path->Resolved, win_strerror(GetLastError()));
 	}
-//vfs_ktrace("amGranted", STRUCT_ACCESS, &amGranted);
 	CloseHandle(hToken);
 	LocalFree(psd);
 	return(bResult);

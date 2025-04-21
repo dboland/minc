@@ -103,7 +103,6 @@ pipe_F_LOOKUP(HANDLE Handle, DWORD Flags, WIN_NAMEIDATA *Result)
 	}else{
 		WIN_ERR("ReadFile(%ls): %s\n", Result->Resolved, win_strerror(GetLastError()));
 	}
-//vfs_ktrace("pipe_F_LOOKUP", STRUCT_NAMEI, Result);
 	return(bResult);
 }
 BOOL 

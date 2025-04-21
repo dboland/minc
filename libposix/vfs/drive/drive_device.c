@@ -63,6 +63,5 @@ drive_match(LPCWSTR NtName, DWORD DeviceType, WIN_CFDRIVER *Driver)
 	win_strcpy(Driver->Name, pwDevice->Name);
 	Driver->DeviceId = pwDevice->DeviceId;
 	Driver->Flags = pwDevice->Flags;
-//vfs_ktrace("drive_match", STRUCT_DEVICE, pwDevice);
 	return(bResult);
 }

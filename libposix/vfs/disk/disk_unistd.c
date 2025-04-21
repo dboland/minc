@@ -190,7 +190,6 @@ disk_readlink(WIN_NAMEIDATA *Path)
 	BOOL bResult = FALSE;
 	DWORD dwResult;
 
-//vfs_ktrace("disk_readlink", STRUCT_NAMEI, Path);
 	if (Path->FileType != WIN_VLNK){		/* git.exe */
 		SetLastError(ERROR_BAD_ARGUMENTS);
 	}else if (!ReadFile(Path->Object, Path->Resolved, Path->Size, &dwResult, NULL)){

@@ -28,7 +28,7 @@
  *
  */
 
-#include <winbase.h>
+#include <libtrace.h>
 
 /************************************************************/
 
@@ -67,4 +67,23 @@ vfs_ktrace_CLEAR(WIN_TASK *Task)
 		Task->TraceHandle = NULL;
 		bResult = TRUE;
 	}
+}
+
+/************************************************************/
+
+VOID 
+vfs_ktrace(LPCWSTR Label, STRUCT_TYPE Type, PVOID Data)
+{
+	LPSTR pszBuffer = LocalAlloc(LMEM_FIXED, 4096);
+
+	switch (Type){
+		case STRUCT_VNODE:
+			vfs_VNODE((WIN_VNODE *)Data, pszBuffer);
+			break;
+		case STRUCT_NAMEI:
+			vfs_NAMEI((WIN_NAMEIDATA *)Data, pszBuffer);
+			break;
+	}
+	msvc_printf("%ls%s", Label, pszBuffer);
+	LocalFree(pszBuffer);
 }

@@ -35,9 +35,10 @@
 #define NTOSAPI		
 
 #include <winsock2.h>
-#include <ddk/ntapi.h>
-#include <iphlpapi.h>	/* Win32 network api */
 
+#include <ddk/ntapi.h>
+
+#include <iphlpapi.h>	/* Win32 network api */
 #include <stdint.h>
 
 #include "win_posix.h"
@@ -99,13 +100,13 @@ WIN_TASK	*__Process;
 BOOL proc_poll(WIN_TASK *Task);
 
 #include "vfs_acl.c"
-#include "vfs_debug.c"
 #include "vfs_signal.c"
 #include "vfs_statvfs.c"
 #include "vfs_libgen.c"
 #include "vfs_syscall.c"
 #include "vfs_tty.c"
 #include "vfs_device.c"
+#include "vfs_ktrace.c"
 #include "registry/registry.c"
 #include "drive/drive.c"
 #include "char/char.c"
@@ -133,7 +134,6 @@ BOOL proc_poll(WIN_TASK *Task);
 #include "vfs_shm.c"
 #include "vfs_resource.c"
 #include "vfs_wait.c"
-#include "vfs_ktrace.c"
 #include "vfs_event.c"
 #include "vfs_systm.c"
 #include "vfs_reboot.c"

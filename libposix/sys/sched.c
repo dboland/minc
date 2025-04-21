@@ -100,7 +100,6 @@ task_init(char *cmdbuf, char *argv[], void *frame_address)
 void 
 task_copy(WIN_THREAD_STRUCT *Thread)
 {
-//vfs_ktrace("task_copy", STRUCT_THREAD, Thread);
 	/* copy frames */
 	copy_stack(Thread->origin, Thread->source, &Thread->dest);
 	/* add current frame */

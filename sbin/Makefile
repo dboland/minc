@@ -5,7 +5,7 @@ RELEASE=6.1.0
 LDFLAGS= -s -Wl,--disable-auto-import -Wl,--enable-stdcall-fixup
 GCCLIB=/lib/gcc/mingw32/4.8.1
 WINLIB=/C/WINDOWS/system32
-PROGS=wrc mkent
+PROGS=wrc mkent wtrace
 WINDIR=/C/WINDOWS/system32
 
 .SUFFIXES:
@@ -32,9 +32,6 @@ version.o: bsd.rc
 mkent: mkent.o
 	gcc ${LDFLAGS} -o $@ $< ${MINGW}/lib/libiphlpapi.a
 
-libconsole.o: libconsole.c
-	gcc -c ${CFLAGS} -I${MINGW}/include -I../include -o $@ $<
-
 #
 # use  -mwindows -L${WINDIR} for a Windows app
 #
@@ -47,9 +44,19 @@ console.exe: console.o libconsole.o
 
 wrc: wrc.exe
 
+libwtrace.o: libwtrace.c
+	gcc -c ${CFLAGS} -I${MINGW}/include -I../include -I../libtrace -o $@ $<
+
+wtrace: wtrace.c libwtrace.o
+	gcc -s ${CFLAGS} -I../include -L../libtrace -o $@ $^ -ltrace \
+	${MINGW}/lib/libadvapi32.a ${MINGW}/lib/libkernel32.a ${MINGW}/lib/libuser32.a
+
 install-local:
 	./mkent passwd >/etc/passwd
 	./mkent group >/etc/group
+
+install-wtrace:
+	ginstall wtrace ${DESTDIR}${SBINDIR}/
 
 install: ${DESTDIR}
 	@for file in ${PROGS}; do echo $$file; ginstall $$file "${DESTDIR}${SBINDIR}/$$file"; done

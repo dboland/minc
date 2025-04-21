@@ -90,8 +90,6 @@ drive_mount(WIN_DEVICE *Device, WIN_NAMEIDATA *Path, DWORD Flags, WIN_MODE *Mode
 		pwMount->DeviceId = Device->DeviceId;
 		pwMount->DeviceType = Device->DeviceType;
 		GetSystemTimeAsFileTime(&pwMount->Time);
-//vfs_ktrace("drive_mount", STRUCT_DEVICE, Device);
-//vfs_ktrace("drive_mount", STRUCT_MOUNT, pwMount);
 		bResult = TRUE;
 	}
 	return(bResult);

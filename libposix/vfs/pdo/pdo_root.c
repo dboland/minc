@@ -51,7 +51,6 @@ root_mount(WIN_DEVICE *Device, WIN_NAMEIDATA *Path, DWORD Flags, WIN_MODE *Mode)
 		pwMount->DeviceType = Device->DeviceType;
 		pwMount->Flags |= FILE_VOLUME_MNT_ROOTFS;
 		GetSystemTimeAsFileTime(&pwMount->Time);
-//vfs_ktrace("root_mount", STRUCT_MOUNT, pwMount);
 		bResult = TRUE;
 	}
 	return(bResult);

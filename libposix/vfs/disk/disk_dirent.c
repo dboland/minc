@@ -159,7 +159,6 @@ disk_getdents(WIN_NAMEIDATA *Path, PVOID Buffer, DWORD Size, DWORD *Result)
 			Path->Index++;
 		}
 	}
-//vfs_ktrace("disk_getdents", STRUCT_NAMEI, Path);
 	*Result = dwResult;
 	return(bResult);
 }

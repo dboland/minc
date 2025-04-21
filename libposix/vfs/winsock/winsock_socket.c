@@ -180,7 +180,7 @@ ws2_sendto(WIN_VNODE *Node, LPCSTR Buffer, UINT Size, DWORD Flags, CONST LPSOCKA
 {
 	BOOL bResult = TRUE;
 	UINT uiResult = 0;
-	UINT uiFlags = Flags & ~WS_MSG_NOSIGNAL;
+	UINT uiFlags = Flags & ~WS_MSG_NOSIGNAL;	/* git.exe */
 
 	/* On WinXP SP2 we get "A blocking operation was interrupted by
 	 * a call to WSACancelBlockingCall" (traceroute.exe).

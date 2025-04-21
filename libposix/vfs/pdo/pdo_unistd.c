@@ -37,7 +37,6 @@ pdo_close(WIN_VNODE *Node)
 {
 	BOOL bResult = FALSE;
 
-//vfs_ktrace("pdo_close", STRUCT_VNODE, Node);
 	if (Node->Handle == INVALID_HANDLE_VALUE){	/* DEV_TYPE_ROUTE (route.exe) */
 		bResult = TRUE;
 	}else if (!CloseHandle(Node->Handle)){
