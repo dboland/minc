@@ -36,7 +36,7 @@ vfs_DEVICE(WIN_DEVICE *Device, LPSTR Buffer)
 	LPSTR psz = Buffer;
 
 	psz += sprintf(psz, "(%s): Type(%s:%s) Flags(0x%x) Index(%d) I/O([%d][%d]) DevType(0x%x) DevId(0x%x)\n", 
-		Device->Name, __FSType[Device->FSType], __FType[Device->FileType], Device->Flags, Device->Index, Device->Input, Device->Output, Device->DeviceType, Device->DeviceId);
+		Device->Name, __FSTYPE[Device->FSType], __FTYPE[Device->FileType], Device->Flags, Device->Index, Device->Input, Device->Output, Device->DeviceType, Device->DeviceId);
 	psz += sprintf(psz, "+ ClassId: %ls\n", Device->ClassId);
 	psz += sprintf(psz, "+ NtName: %ls\n", Device->NtName);
 	psz += sprintf(psz, "+ NtPath: %ls\n", Device->NtPath);

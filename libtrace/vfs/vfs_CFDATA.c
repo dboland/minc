@@ -36,7 +36,7 @@ vfs_CFDATA(WIN_CFDATA *Config, LPSTR Buffer)
 	LPSTR psz = Buffer;
 
 	psz += sprintf(psz, "(%ls): Bus(%ls) FSType(%s), DosPath(%ls) Depth(%d) Class(%ls)\n", 
-		Config->NtName, Config->BusName, __FSType[Config->FSType], Config->DosPath, Config->Depth, Config->ClassName);
+		Config->NtName, Config->BusName, __FSTYPE[Config->FSType], Config->DosPath, Config->Depth, Config->ClassName);
 	psz += sprintf(psz, "+ NtPath: %ls\n", Config->NtPath);
 	return(psz - Buffer);
 }

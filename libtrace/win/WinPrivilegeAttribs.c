@@ -36,10 +36,10 @@ WinPrivilegeAttribs(LPSTR Buffer, LPCSTR Label, DWORD Attributes)
 	LPSTR psz = Buffer;
 	DWORD dwRemain = Attributes;
 
-	psz += sprintf(psz, "  %s(0x%x): ", Label, Attributes);
+	psz += sprintf(psz, "  %s([0x%x]", Label, Attributes);
 	psz = WinFlagName(psz, SE_PRIVILEGE_ENABLED, "ENABLED", dwRemain, &dwRemain);
 	psz = WinFlagName(psz, SE_PRIVILEGE_ENABLED_BY_DEFAULT, "ENABLED_BY_DEFAULT", dwRemain, &dwRemain);
 	psz = WinFlagName(psz, SE_PRIVILEGE_USED_FOR_ACCESS, "USED_FOR_ACCESS", dwRemain, &dwRemain);
-	psz += sprintf(psz, "[0x%x]\n", dwRemain);
+	psz += sprintf(psz, "[0x%x])\n", dwRemain);
 	return(psz);
 }

@@ -37,7 +37,7 @@ vfs_NAMEI(WIN_NAMEIDATA *Path, LPSTR Buffer)
 
 	psz += sprintf(psz, "(%ls):\n", Path->Resolved);
 	psz += sprintf(psz, "+ MountId(%d) Object(%d) Size(%d) Index(%d) Type(%s:%s) DeviceId(0x%x)\n", 
-		Path->MountId, Path->Object, Path->Size, Path->Index, __FSType[Path->FSType], __FType[Path->FileType], Path->DeviceId);
+		Path->MountId, Path->Object, Path->Size, Path->Index, __FSTYPE[Path->FSType], __FTYPE[Path->FileType], Path->DeviceId);
 	psz = VfsPathFlags(psz, "+ Flags", Path->Flags);
 	psz = VfsFileAttribs(psz, Path->Attribs);
 	psz += sprintf(psz, "+ Base: %ls\n", Path->Base);

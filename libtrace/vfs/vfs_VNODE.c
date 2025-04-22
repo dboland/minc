@@ -30,7 +30,7 @@
 
 #include "config.h"
 
-const CHAR *__FSType[] = {
+const CHAR *__FSTYPE[] = {
 	"UNKNOWN", 
 	"DISK", 
 	"CHAR", 
@@ -48,7 +48,7 @@ const CHAR *__FSType[] = {
 	"SHELL",
 	""
 };
-const CHAR *__FType[] = {
+const CHAR *__FTYPE[] = {
 	"VNON", 
 	"VREG", 
 	"VDIR", 
@@ -67,7 +67,7 @@ vfs_VNODE(WIN_VNODE *Node, LPSTR Buffer)
 	LPSTR psz = Buffer;
 
 	psz += sprintf(psz, "(%s:%s): Handle(%d) Object(%d) Event(%d) Index(%d) Access(0x%x) CloEx(%d)\n", 
-		__FSType[Node->FSType], __FType[Node->FileType], Node->Handle, Node->Object, Node->Event, Node->Index, Node->Access, Node->CloseExec);
+		__FSTYPE[Node->FSType], __FTYPE[Node->FileType], Node->Handle, Node->Object, Node->Event, Node->Index, Node->Access, Node->CloseExec);
 	psz += sprintf(psz, "+ Device: Type(0x%x) Id(0x%x)\n", Node->DeviceType, Node->DeviceId);
 	psz = VfsFileAttribs(psz, Node->Attribs);
 	psz = VfsFileFlags(psz, Node->Flags);

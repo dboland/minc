@@ -188,14 +188,17 @@ win_getgrouplist(WIN_PWENT *Passwd, SID8 *Primary, SID8 *Result[], DWORD *Count)
 		case USER_PRIV_ADMIN:
 			psResult[dwResult++] = SidAuthenticated;
 			psResult[dwResult++] = SidLocalAdmin;	/* Vista */
+			psResult[dwResult++] = SidIntegrityHigh;
 			break;
 		case USER_PRIV_USER:
 			psResult[dwResult++] = SidAuthenticated;
 			psResult[dwResult++] = SidLocalUser;	/* Vista */
+			psResult[dwResult++] = SidIntegrityMedium;
 			break;
 		case USER_PRIV_GUEST:
 			psResult[dwResult++] = SidUsers;	/* WS2_32.DLL/IPHLPAPI.DLL access */
 			psResult[dwResult++] = SidBatch;
+			psResult[dwResult++] = SidIntegrityLow;
 			break;
 	}
 	psResult[dwResult++] = *Primary;

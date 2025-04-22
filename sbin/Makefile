@@ -48,7 +48,7 @@ libwtrace.o: libwtrace.c
 	gcc -c ${CFLAGS} -I${MINGW}/include -I../include -I../libtrace -o $@ $<
 
 wtrace: wtrace.c libwtrace.o
-	gcc -s ${CFLAGS} -I../include -L../libtrace -o $@ $^ -ltrace \
+	gcc -s ${CFLAGS} -I../include -I../libtrace -L../libtrace -o $@ $^ -ltrace \
 	${MINGW}/lib/libadvapi32.a ${MINGW}/lib/libkernel32.a ${MINGW}/lib/libuser32.a
 
 install-local:

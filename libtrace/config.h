@@ -33,6 +33,7 @@
 #include <ddk/ntapi.h>
 #include <ddk/ntifs.h>		/* Object types */
 
+#include <ntsecapi.h>		/* LSA_HANDLE */
 #include <lmcons.h>		/* UNLEN */
 #include <stdio.h>
 
@@ -44,6 +45,7 @@ extern WIN_PSTRING	*__Strings;
 
 LPSTR win_strsid(PSID Sid);
 LPSTR win_strerror(HRESULT Error);
+LPSTR nt_strerror(NTSTATUS Status);
 
 LPSTR WinFlagName(LPSTR Buffer, DWORD Flag, LPCSTR Name, DWORD Mask, DWORD *Remain);
 LPSTR WinAceFlags(LPSTR Buffer, LPCSTR Label, BYTE Flags);
@@ -60,10 +62,5 @@ LPSTR VfsTaskFlags(LPSTR Buffer, LPCSTR Label, DWORD Flags);
 LPSTR VfsInputMode(LPSTR Buffer, LPCSTR Label, DWORD Mode);
 LPSTR VfsScreenMode(LPSTR Buffer, LPCSTR Label, DWORD Mode);
 LPSTR VfsNetEvents(LPSTR Buffer, LONG NetworkEvents);
-
-/* vfs_VNODE.c */
-
-extern const CHAR *__FType[];
-extern const CHAR *__FSType[];
 
 #include "libtrace.h"

@@ -1,6 +1,7 @@
 #define WIN32_LEAN_AND_MEAN
 
 #include <windows.h>
+
 #include <aclapi.h>
 #include <accctrl.h>
 
@@ -8,6 +9,7 @@
 #include <ddk/ntifs.h>	// Object types
 
 #include <stdio.h>
+#include <stdlib.h>
 
 #include "win_types.h"
 #include "dev_types.h"
@@ -15,6 +17,7 @@
 
 #include "libtrace.h"
 
+LPSTR win_strsid(PSID Sid);
 LPSTR win_strerror(HRESULT Error);
 
 #define WIN_ERR		printf
@@ -49,17 +52,16 @@ GetThreadHandle(DWORD ThreadId)
 /************************************************************/
 
 VOID 
-print_acl_desktop(VOID)
+wtrace_ACL_DESKTOP(LPSTR Buffer)
 {
 	PACL Acl = NULL;
 	PSECURITY_DESCRIPTOR Sd;
 	HDESK hObject = OpenInputDesktop(0, FALSE, READ_CONTROL | DESKTOP_READOBJECTS);
-	CHAR szBuffer[4096];
 
 	GetSecurityInfo(hObject, SE_WINDOW_OBJECT, DACL_SECURITY_INFORMATION, NULL, NULL, &Acl, NULL, &Sd);
 	if (Acl){
-		win_ACL(szBuffer, "ACL Desktop", Acl, OB_TYPE_DESKTOP);
-		printf(szBuffer);
+		win_ACL(Buffer, "ACL Desktop", Acl, OB_TYPE_DESKTOP);
+		printf(Buffer);
 		LocalFree(Sd);
 	}else{
 		WIN_ERR("GetSecurityInfo(%d): %s\n", hObject, win_strerror(GetLastError()));
@@ -67,44 +69,42 @@ print_acl_desktop(VOID)
 	CloseDesktop(hObject);
 }
 VOID 
-print_acl_station(VOID)
+wtrace_ACL_STATION(LPSTR Buffer)
 {
 	PACL Acl = NULL;
 	PSECURITY_DESCRIPTOR Sd;
 	HWINSTA hObject = GetProcessWindowStation();
-	CHAR szBuffer[4096];
 
 	GetSecurityInfo(hObject, SE_WINDOW_OBJECT, DACL_SECURITY_INFORMATION, NULL, NULL, &Acl, NULL, &Sd);
 	if (Acl){
-		win_ACL(szBuffer, "ACL WindowStation", Acl, OB_TYPE_WINDOW_STATION);
-		printf(szBuffer);
+		win_ACL(Buffer, "ACL WindowStation", Acl, OB_TYPE_WINDOW_STATION);
+		printf(Buffer);
 		LocalFree(Sd);
 	}else{
 		WIN_ERR("GetSecurityInfo(%d): %s\n", hObject, win_strerror(GetLastError()));
 	}
 }
 VOID 
-print_acl_process(VOID)
+wtrace_ACL_PROCESS(LPSTR Buffer)
 {
 	DWORD dwType = OWNER_SECURITY_INFORMATION + GROUP_SECURITY_INFORMATION + DACL_SECURITY_INFORMATION;
 	PACL Acl = NULL;
 	PSECURITY_DESCRIPTOR psd;
 	DWORD dwSize = 0;
 	HANDLE hProcess = GetCurrentProcess();
-	CHAR szBuffer[4096];
 
 	GetUserObjectSecurity(hProcess, &dwType, NULL, dwSize, &dwSize);
 	psd = LocalAlloc(LMEM_FIXED, dwSize);
 	if (!GetUserObjectSecurity(hProcess, &dwType, psd, dwSize, &dwSize)){
 		WIN_ERR("GetUserObjectSecurity(%d): %s\n", hProcess, win_strerror(GetLastError()));
 	}else{
-		win_SECURITY_DESCRIPTOR(psd, OB_TYPE_PROCESS, szBuffer);
-		printf(szBuffer);
+		win_SECURITY_DESCRIPTOR(psd, OB_TYPE_PROCESS, Buffer);
+		printf(Buffer);
 	}
 	LocalFree(psd);
 }
 VOID 
-print_acl_file(LPWSTR FileName)
+wtrace_ACL_FILE(LPCWSTR FileName, LPSTR Buffer)
 {
 	DWORD dwType = OWNER_SECURITY_INFORMATION + GROUP_SECURITY_INFORMATION + DACL_SECURITY_INFORMATION;
 	PSECURITY_DESCRIPTOR psd;
@@ -112,7 +112,6 @@ print_acl_file(LPWSTR FileName)
 	BOOL bDefaulted;
 	BOOL bPresent;
 	PACL Acl;
-	CHAR szBuffer[4096];
 
 	GetFileSecurityW(FileName, dwType, NULL, dwSize, &dwSize);
 	psd = LocalAlloc(LMEM_FIXED, dwSize);
@@ -120,13 +119,13 @@ print_acl_file(LPWSTR FileName)
 		WIN_ERR("GetFileSecurity(%ls): %s\n", FileName, win_strerror(GetLastError()));
 	}else{
 		printf("FileName: %ls\n", FileName);
-		win_SECURITY_DESCRIPTOR(psd, OB_TYPE_PROCESS, szBuffer);
-		printf(szBuffer);
+		win_SECURITY_DESCRIPTOR(psd, OB_TYPE_PROCESS, Buffer);
+		printf(Buffer);
 	}
 	LocalFree(psd);
 }
 VOID 
-print_acl_object(LPCSTR Name)
+wtrace_ACL_OBJECT(LPCSTR Name, LPSTR Buffer)
 {
 	DWORD dwType = OWNER_SECURITY_INFORMATION + GROUP_SECURITY_INFORMATION + DACL_SECURITY_INFORMATION;
 	PSECURITY_DESCRIPTOR psd;
@@ -134,7 +133,6 @@ print_acl_object(LPCSTR Name)
 	BOOL bDefaulted;
 	BOOL bPresent;
 	PACL Acl;
-	CHAR szBuffer[4096];
 
 	GetFileSecurity(Name, dwType, NULL, dwSize, &dwSize);
 	psd = LocalAlloc(LMEM_FIXED, dwSize);
@@ -142,36 +140,88 @@ print_acl_object(LPCSTR Name)
 		WIN_ERR("GetFileSecurity(%s): %s\n", Name, win_strerror(GetLastError()));
 	}else{
 		printf("Resolved: %s\n", Name);
-		win_SECURITY_DESCRIPTOR(psd, OB_TYPE_PROCESS, szBuffer);
-		printf(szBuffer);
+		win_SECURITY_DESCRIPTOR(psd, OB_TYPE_PROCESS, Buffer);
+		printf(Buffer);
 	}
 	LocalFree(psd);
 }
 VOID 
-print_process_token(DWORD ProcessId)
+wtrace_TOKEN_PROCESS(DWORD ProcessId, LPSTR Buffer)
 {
 	HANDLE hToken;
-	CHAR szBuffer[4096];
 
 	if (!OpenProcessToken(GetProcessHandle(ProcessId), MAXIMUM_ALLOWED, &hToken)){
 		WIN_ERR("GetCurrentProcess(%d): %s\n", ProcessId, win_strerror(GetLastError()));
 	}else{
-		win_TOKEN(hToken, szBuffer);
-		printf(szBuffer);
+		win_TOKEN(hToken, Buffer);
+		printf(Buffer);
 		CloseHandle(hToken);
 	}
 }
 VOID 
-print_thread_token(DWORD ThreadId)
+wtrace_TOKEN_THREAD(DWORD ThreadId, LPSTR Buffer)
 {
 	HANDLE hToken = NULL;
-	CHAR szBuffer[4096];
 
 	if (!OpenThreadToken(GetThreadHandle(ThreadId), MAXIMUM_ALLOWED, TRUE, &hToken)){
 		WIN_ERR("OpenThreadToken(%d): %s\n", ThreadId, win_strerror(GetLastError()));
 	}else{
-		win_TOKEN(hToken, szBuffer);
-		printf(szBuffer);
+		win_TOKEN(hToken, Buffer);
+		printf(Buffer);
 		CloseHandle(hToken);
 	}
+}
+VOID 
+wtrace_SID_RIGHTS(LPCSTR Name, LPSTR Buffer)
+{
+	LPSTR psz = Buffer;
+	SID_NAME_USE snuType = 0;
+	SID8 sid;
+	DWORD sidSize = sizeof(SID8);
+	CHAR szDomain[MAX_NAME];
+	DWORD domSize = MAX_NAME;
+
+	if (!LookupAccountName(NULL, Name, &sid, &sidSize, szDomain, &domSize, &snuType)){
+		WIN_ERR("LookupAccountName(%s): %s\n", Name, win_strerror(GetLastError()));
+	}else{
+		psz += sprintf(psz, "%s (%s: %s\\%s)\n", win_strsid(&sid), __STYPE[snuType], szDomain, Name);
+		win_SID_RIGHTS(psz, "Capabilities", &sid);
+		printf(Buffer);
+	}
+}
+
+/************************************************************/
+
+VOID 
+win_ktrace(STRUCT_TYPE Type, LONG Size, PVOID Data)
+{
+	LPSTR pszBuffer = LocalAlloc(LMEM_FIXED, Size);
+
+	switch (Type){
+		case STRUCT_TOKEN_PROCESS:
+			wtrace_TOKEN_PROCESS(atoi(Data), pszBuffer);
+			break;
+		case STRUCT_TOKEN_THREAD:
+			wtrace_TOKEN_THREAD(atoi(Data), pszBuffer);
+			break;
+		case STRUCT_ACL_DESKTOP:
+			wtrace_ACL_DESKTOP(pszBuffer);
+			break;
+		case STRUCT_ACL_STATION:
+			wtrace_ACL_STATION(pszBuffer);
+			break;
+		case STRUCT_ACL_OBJECT:
+			wtrace_ACL_OBJECT((LPCSTR)Data, pszBuffer);
+			break;
+		case STRUCT_ACL_FILE:
+			wtrace_ACL_FILE((LPCWSTR)Data, pszBuffer);
+			break;
+		case STRUCT_ACL_PROCESS:
+			wtrace_ACL_PROCESS(pszBuffer);
+			break;
+		case STRUCT_SID_RIGHTS:
+			wtrace_SID_RIGHTS((LPCSTR)Data, pszBuffer);
+			break;
+	}
+	LocalFree(pszBuffer);
 }

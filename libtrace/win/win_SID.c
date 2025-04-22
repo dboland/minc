@@ -30,7 +30,7 @@
 
 #include "config.h"
 
-static const CHAR *__STYPE[] = {
+const CHAR *__STYPE[] = {
 	"UNKNOWN",
 	"user",
 	"group",

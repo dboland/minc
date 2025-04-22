@@ -15,7 +15,3 @@ ${LIB}: win.d vfs.d
 clean:
 	${MAKE} -C win clean
 	${MAKE} -C vfs clean
-
-install: ${DESTDIR}
-	cp libdebug.so ${DESTDIR}${LIBDIR}/
-	cp debug.h ${DESTDIR}${INCDIR}/

@@ -36,6 +36,6 @@ vfs_INODE(WIN_INODE *Node, LPSTR Buffer)
 	LPSTR psz = Buffer;
 
 	psz += sprintf(psz, "(%s:%s): DeviceId(0x%x) NameSize(%d) Reserved1(%d) Reserved2(%d)\n",
-		__FSType[Node->FSType], __FType[Node->FileType], Node->DeviceId, Node->NameSize, Node->Reserved1, Node->Reserved2);
+		__FSTYPE[Node->FSType], __FTYPE[Node->FileType], Node->DeviceId, Node->NameSize, Node->Reserved1, Node->Reserved2);
 	return(psz - Buffer);
 }
