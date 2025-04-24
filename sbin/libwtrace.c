@@ -119,7 +119,7 @@ wtrace_ACL_FILE(LPCWSTR FileName, LPSTR Buffer)
 		WIN_ERR("GetFileSecurity(%ls): %s\n", FileName, win_strerror(GetLastError()));
 	}else{
 		printf("FileName: %ls\n", FileName);
-		win_SECURITY_DESCRIPTOR(psd, OB_TYPE_PROCESS, Buffer);
+		win_SECURITY_DESCRIPTOR(psd, OB_TYPE_FILE, Buffer);
 		printf(Buffer);
 	}
 	LocalFree(psd);

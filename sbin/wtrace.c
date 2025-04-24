@@ -15,7 +15,7 @@ VOID win_ktrace(STRUCT_TYPE Type, LONG Size, PVOID Data);
 /************************************************************/
 
 void 
-print_usage(void)
+usage(void)
 {
 	printf("\nPerform ACL trace on various Windows objects.\n\n");
 	printf("Usage: %s [options]\n", __progname);
@@ -41,19 +41,15 @@ main(int argc, char* argv[])
 	char *arg = NULL;
 
 	while (arg = *argv++){
-		if (!strcmp(arg, "-o")){
-			argv++;
-
-		}else if (arg[0] == '-'){
+		if (arg[0] == '-'){
 			cmd = arg;
-
 		}else{
 			token = arg;
-
 		}
 	}
 	if (!cmd)
-		print_usage();
+		usage();
+
 	else switch(cmd[1]){
 		case 'd':
 			win_ktrace(STRUCT_ACL_DESKTOP, 0x1000, token);
@@ -71,7 +67,7 @@ main(int argc, char* argv[])
 			win_ktrace(STRUCT_TOKEN_THREAD, 0x1000, token);
 			break;
 		case 'f':
-			win_ktrace(STRUCT_ACL_FILE, 0x0800, path_win(&wPath, token, O_NOFOLLOW)->Resolved);
+			win_ktrace(STRUCT_ACL_FILE, 0x1000, path_win(&wPath, token, O_NOFOLLOW)->Resolved);
 			break;
 		case 'o':
 			win_ktrace(STRUCT_ACL_OBJECT, 0x1000, token);

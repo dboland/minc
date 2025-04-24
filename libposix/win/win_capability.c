@@ -305,9 +305,6 @@ win_cap_init(WIN_CAP_CONTROL *Result)
 		WIN_ERR("CapGetPrimary(%d): %s\n", hToken, win_strerror(GetLastError()));
 	}else if (!CapGetPrivileges(hToken, &Result->Privs)){
 		WIN_ERR("CapGetPrivileges(%d): %s\n", hToken, win_strerror(GetLastError()));
-//	}else if (!CapGetDefault(hToken, &Result->Default)){
-//		WIN_ERR("CapGetDefault(%d): %s\n", hToken, win_strerror(GetLastError()));
-//	}else{
 	}else if (win_cap_set_mode(WIN_P_IRX, WIN_P_IRX, &Result->DefaultACL)){
 		Result->Token = hToken;
 		Result->AuthId = __Globals->AuthId;
@@ -322,7 +319,6 @@ win_cap_free(WIN_CAP_CONTROL *Control)
 {
 	LocalFree(Control->Privs);
 	LocalFree(Control->Groups);
-//	LocalFree(Control->Default);
 	NtClose(Control->Token);	/* don't clear last error */
 }
 BOOL 

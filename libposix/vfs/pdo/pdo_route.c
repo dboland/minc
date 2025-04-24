@@ -41,7 +41,7 @@ typedef struct _WIN_MSGPEEK {
 	USHORT TableId;
 } WIN_MSGPEEK;
 
-static const char *__Message[] = {
+static const char *__MESSAGE[] = {
 	"RTM_UNKNOWN",
 	"RTM_ADD",
 	"RTM_DELETE",

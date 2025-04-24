@@ -127,6 +127,8 @@ InputKey(KEY_EVENT_RECORD *Event, WIN_TERMIO *Attribs, CHAR *Buffer)
 		win_strcpy(Buffer, ANSI_CURSOR(VK));
 	}else if (VK <= VK_WINDOWS){
 		*Buffer = 0;
+	}else if (VK <= VK_NUMPAD){
+		*Buffer = 0;
 	}else if (VK <= VK_FUNCTION){
 		win_strcpy(Buffer, ANSI_FUNCTION(VK));
 	}
@@ -266,6 +268,8 @@ InputPollAnsi(KEY_EVENT_RECORD *Event)
 	}else if (VK <= VK_CURSOR){
 		bIsAnsi = *ANSI_CURSOR(VK);
 	}else if (VK <= VK_WINDOWS){
+		bIsAnsi = FALSE;
+	}else if (VK <= VK_NUMPAD){
 		bIsAnsi = FALSE;
 	}else if (VK <= VK_FUNCTION){
 		bIsAnsi = *ANSI_FUNCTION(VK);

@@ -31,9 +31,6 @@
 #include <wincon.h>
 
 #define VK_MODIFY		0x1F
-
-/* 0x1F - 0x00 */
-
 #define VK_CURSOR		0x2F
 #define ANSI_CURSOR(vk)		__ANSI_CURSOR[VK_CURSOR - vk]
 
@@ -57,9 +54,7 @@ static LPCSTR __ANSI_CURSOR[] = {
 };
 
 #define VK_WINDOWS		0x5F
-
-/* 0x5F - 0x50 */
-
+#define VK_NUMPAD		0x6F
 #define VK_FUNCTION		0x8F
 #define ANSI_FUNCTION(vk)	__ANSI_FUNCTION[VK_FUNCTION - vk]
 
