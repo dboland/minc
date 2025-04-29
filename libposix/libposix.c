@@ -39,9 +39,10 @@
 #include "win_posix.h"
 #include "msvc_posix.h"
 #include "vfs_posix.h"
-#include "vfs_debug.h"
 #include "ws2_posix.h"
 #include "bsd_posix.h"
+
+#include "../libtrace/libtrace.h"
 
 extern SID8 SidNull;
 extern SID8 SidBuiltinAuth;

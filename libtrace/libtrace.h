@@ -80,3 +80,5 @@ DWORD vfs_TASK(WIN_TASK *Task, LPSTR Buffer);
 DWORD vfs_THREAD(WIN_THREAD_STRUCT *Thread, LPSTR Buffer);
 DWORD vfs_CAP_CONTROL(WIN_CAP_CONTROL *Control, LPSTR Buffer);
 
+VOID win_ktrace(LPCWSTR Label, STRUCT_TYPE Type, PVOID Data);
+VOID vfs_ktrace(LPCWSTR Label, STRUCT_TYPE Type, PVOID Data);

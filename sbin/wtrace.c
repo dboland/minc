@@ -10,8 +10,6 @@
 
 #include "libtrace.h"
 
-VOID win_ktrace(STRUCT_TYPE Type, LONG Size, PVOID Data);
-
 /************************************************************/
 
 void 
@@ -28,9 +26,6 @@ usage(void)
 	printf(" -d\t\t\t%s\n", "print ACL Desktop");
 	printf(" -s\t\t\t%s\n", "print ACL Window Station");
 }
-
-/************************************************************/
-
 int 
 main(int argc, char* argv[])
 {
