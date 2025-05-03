@@ -124,7 +124,7 @@ vfs_mknod(WIN_NAMEIDATA *Path, WIN_MODE *Mode, DWORD DeviceId)
 	SECURITY_ATTRIBUTES sa = {sizeof(sa), &sd, FALSE};
 	WCHAR szDirName[WIN_PATH_MAX];
 
-	if (!win_acl_get_file(win_dirname(szDirName, Path->Resolved), &wControl.Source)){
+	if (!win_acl_get_file(vfs_dirname(szDirName, Path->Resolved), &wControl.Source)){
 		return(FALSE);
 	}else if (!vfs_acl_init(&wControl, Path->MountId, Mode->Special, &sd)){
 		WIN_ERR("vfs_acl_init(%s): %s\n", szDirName, win_strerror(GetLastError()));
@@ -167,7 +167,7 @@ vfs_mkdir(WIN_NAMEIDATA *Path, WIN_MODE *Mode)
 	if (*Path->Last == '\\'){	/* git.exe */
 		*Path->Last = 0;
 	}
-	if (!win_acl_get_file(win_dirname(szParent, Path->Resolved), &wControl.Source)){
+	if (!win_acl_get_file(vfs_dirname(szParent, Path->Resolved), &wControl.Source)){
 		return(FALSE);
 	}else if (!vfs_acl_init(&wControl, Path->MountId, Mode->Special, &sd)){
 		WIN_ERR("vfs_mkdir(%s): %s\n", szParent, win_strerror(GetLastError()));

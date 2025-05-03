@@ -37,3 +37,19 @@ vfs_setproctitle(LPCSTR Title)
 {
 	win_mbstowcs(__Strings[CURRENT].Command, Title, WIN_MAX_PROCTITLE);
 }
+LPWSTR 
+vfs_dirname(LPWSTR Result, LPCWSTR FileName)
+{
+	LPWSTR Base = Result;
+	LPWSTR R = Result;
+	WCHAR C;
+
+	while (C = *FileName++){
+		if (C == '\\'){
+			Base = R;
+		}
+		*R++ = C;
+	}
+	*Base = 0;
+	return(Result);
+}

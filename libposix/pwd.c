@@ -44,9 +44,9 @@ passwd_posix(char *buf, size_t buflen, WIN_PWENT *WinPwd)
 	buf = win_stpcpy(buf, ":");
 	buf = win_stpcpy(buf, WinPwd->Password);
 	buf = win_stpcpy(buf, ":");
-	buf += msvc_sprintf(buf, "%lu", rid_posix(&WinPwd->UserSid));
+	buf += sprintf(buf, "%lu", rid_posix(&WinPwd->UserSid));
 	buf = win_stpcpy(buf, ":");
-	buf += msvc_sprintf(buf, "%lu", rid_posix(&WinPwd->GroupSid));
+	buf += sprintf(buf, "%lu", rid_posix(&WinPwd->GroupSid));
 	/* login class */
 	if (WinPwd->Integrity == SECURITY_MANDATORY_LOW_RID){
 		buf = win_stpcpy(buf, ":daemon");
@@ -54,9 +54,9 @@ passwd_posix(char *buf, size_t buflen, WIN_PWENT *WinPwd)
 		buf = win_stpcpy(buf, ":default");
 	}
 	buf = win_stpcpy(buf, ":");
-	buf += msvc_sprintf(buf, "%lu", WinPwd->Change);
+	buf += sprintf(buf, "%lu", WinPwd->Change);
 	buf = win_stpcpy(buf, ":");
-	buf += msvc_sprintf(buf, "%lu", WinPwd->Expire);
+	buf += sprintf(buf, "%lu", WinPwd->Expire);
 	buf = win_stpcpy(buf, ":");
 	buf = win_stpcpy(buf, WinPwd->Comment);
 	buf = win_stpcpy(buf, ":");

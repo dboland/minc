@@ -28,14 +28,8 @@
  *
  */
 
-#define __PRINTF(...)		msvc_printf(__VA_ARGS__);
-
 /* internal.h */
 
 typedef struct {
 	int newmode;
 } _startupinfo;
-
-/* time.h */
-
-typedef __time_t time_t;

@@ -57,11 +57,11 @@ SigExceptionProc(PEXCEPTION_POINTERS ExceptionInfo)
 			dwCtrlType = CTRL_DIVIDE_BY_ZERO_EVENT;
 			break;
 		case STATUS_STACK_OVERFLOW:
-			msvc_printf("Stack overflow\n");
+			WIN_ERR("Stack overflow\n");
 			dwCtrlType = CTRL_ABORT_EVENT;
 			break;
 		default:
-			msvc_printf("ExceptionProc(0x%x) %s: Not implemented.\n", dwExceptionCode, nt_strerror(GetLastError()));
+			WIN_ERR("ExceptionProc(0x%x) %s: Not implemented.\n", dwExceptionCode, nt_strerror(GetLastError()));
 	}
 	if (win_dladdr(peRecord->ExceptionAddress, &mbInfo, szModule)){
 		WIN_ERR("Exception(0x%X) in %ls at 0x%x\n", dwExceptionCode, szModule, pContext->Eip);

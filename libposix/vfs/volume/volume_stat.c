@@ -40,7 +40,7 @@ vol_fstat(HANDLE Handle, LPSTR Result)
 	DWORD dwSize = sizeof(STORAGE_DEVICE_NUMBER);
 
 	if (DeviceIoControl(Handle, IOCTL_STORAGE_GET_DEVICE_NUMBER, NULL, 0, &Info, dwSize, &dwSize, NULL)){
-		msvc_sprintf(Result, "DeviceType(%d) DeviceNumber(%d) PartitionNumber(%d)", 
+		WIN_ERR(Result, "DeviceType(%d) DeviceNumber(%d) PartitionNumber(%d)", 
 			Info.DeviceType, Info.DeviceNumber, Info.PartitionNumber);
 		bResult = TRUE;
 	}

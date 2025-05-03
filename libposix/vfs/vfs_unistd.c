@@ -445,7 +445,7 @@ vfs_symlink(WIN_NAMEIDATA *Path, WIN_MODE *Mode, WIN_NAMEIDATA *Target)
 	SECURITY_ATTRIBUTES sa = {sizeof(sa), &sd, FALSE};
 	WCHAR szDirName[WIN_PATH_MAX];
 
-	if (!win_acl_get_file(win_dirname(szDirName, Path->Resolved), &wControl.Source)){
+	if (!win_acl_get_file(vfs_dirname(szDirName, Path->Resolved), &wControl.Source)){
 		return(FALSE);
 	}else if (!vfs_acl_init(&wControl, Path->MountId, Mode->Special, &sd)){
 		WIN_ERR("vfs_acl_init(%ls): %s\n", szDirName, win_strerror(GetLastError()));

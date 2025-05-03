@@ -40,10 +40,9 @@
 #include <windows.h>
 #include <ddk/ntapi.h>
 
-#include <stdint.h>
-#include <stdlib.h>
 #include <time.h>
 
+#include "ntdll_posix.h"
 #include "msvc_posix.h"
 #include "win_types.h"
 
@@ -118,21 +117,28 @@ LARGE_INTEGER	*__Frequency;
 VOID 
 win_init(WIN_GLOBALS *Globals, HINSTANCE Instance)
 {
+	SYSTEM_INFO sInfo;
 	TOKEN_STATISTICS tStats = {0};
 	HANDLE hToken;
 	DWORD dwSize = 0;
-	LPSTR pszRoot = Globals->Root;
+	CHAR szRoot[MAX_PATH];
 	LPSTR psz;
 
-	if (!GetModuleFileName(Instance, pszRoot, MAX_PATH)){
+	GetSystemInfo(&sInfo);
+	Globals->PageSize = sInfo.dwPageSize;
+
+	if (!GetModuleFileNameW(Instance, Globals->Root, MAX_PATH)){
 		WIN_ERR("GetModuleFileName(0x%x): %s\n", Instance, win_strerror(GetLastError()));
 	}else{
-		msvc_dirname(msvc_dirname(pszRoot));
+		win_dirname(win_dirname(Globals->Root));
 	}
+
 	AclInit(&Globals->SidMachine, &Globals->SidNone);
+
 	if (!QueryPerformanceFrequency(&Globals->Frequency)){
 		WIN_ERR("QueryPerformanceFrequency(): %s\n", win_strerror(GetLastError()));
 	}
+
 	if (!OpenProcessToken(GetCurrentProcess(), TOKEN_QUERY, &hToken)){
 		WIN_ERR("OpenProcessToken(TOKEN_QUERY): %s\n", win_strerror(GetLastError()));
 	}else if (!GetTokenInformation(hToken, TokenStatistics, &tStats, sizeof(TOKEN_STATISTICS), &dwSize)){
@@ -141,10 +147,12 @@ win_init(WIN_GLOBALS *Globals, HINSTANCE Instance)
 		Globals->AuthId = tStats.AuthenticationId;
 		CloseHandle(hToken);
 	}
+
+	win_wcstombs(szRoot, Globals->Root, MAX_PATH);
 	psz = win_stpcpy(Globals->Path, "Path=");
-	psz = win_stpcpy(win_stpcpy(psz, pszRoot), "\\sbin;");
-	psz = win_stpcpy(win_stpcpy(psz, pszRoot), "\\usr\\lib;");
-	psz = win_stpcpy(win_stpcpy(psz, pszRoot), "\\usr\\libexec;");
+	psz = win_stpcpy(win_stpcpy(psz, szRoot), "\\sbin;");
+	psz = win_stpcpy(win_stpcpy(psz, szRoot), "\\usr\\lib;");
+	psz = win_stpcpy(win_stpcpy(psz, szRoot), "\\usr\\libexec;");
 	dwSize = WIN_PATH_MAX - (psz - Globals->Path);
 	GetEnvironmentVariable("Path", psz, dwSize);
 	psz = win_stpcpy(Globals->SystemRoot, "SystemRoot=");

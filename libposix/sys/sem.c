@@ -35,18 +35,18 @@
 int 
 sys_semget(call_t call, key_t key, int nsems, int semflg)
 {
-	msvc_printf("semget(%d): nsems(%d) semflg(0x%x)\n", key, nsems, semflg);
+	WIN_ERR("semget(%d): nsems(%d) semflg(0x%x)\n", key, nsems, semflg);
 	return(1);
 }
 int 
 sys___semctl(call_t call, int semid, int semnum, int cmd, ...)
 {
-	msvc_printf("semctl(%d): semnum(%d) cmd(%d)\n", semid, semnum, cmd);
+	WIN_ERR("semctl(%d): semnum(%d) cmd(%d)\n", semid, semnum, cmd);
 	return(1);
 }
 int 
 sys_semop(call_t call, int semid, struct sembuf *sops, size_t nsops)
 {
-	msvc_printf("semop(%d): nsops(%d)\n", semid, nsops);
+	WIN_ERR("semop(%d): nsops(%d)\n", semid, nsops);
 	return(0);
 }

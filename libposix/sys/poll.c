@@ -103,6 +103,6 @@ sys_ppoll(call_t call, struct pollfd *fds, nfds_t nfds, const struct timespec *t
 {
 	DWORD dwTimeOut = INFINITE;
 
-__PRINTF("sys_ppoll(%d)\n", nfds)
+WIN_ERR("sys_ppoll(%d)\n", nfds);
 	return(-EOPNOTSUPP);
 }

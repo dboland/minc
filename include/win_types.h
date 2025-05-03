@@ -198,7 +198,7 @@ typedef struct _WIN_CAP_CONTROL {
  * win_stdlib.c
  */
 
-#define MIN_BUFSIZE		1024
+//#define MIN_BUFSIZE		1024
 
 #define WIN_MSGBUFSIZE		(4 * WIN_PAGE_SIZE)
 #define WIN_ATEXIT_MAX		32
@@ -337,7 +337,8 @@ typedef struct _WIN_GLOBALS {
 	SID8 SidNone;
 	LARGE_INTEGER Frequency;	/* result of QueryPerformanceFrequency() */
 	LUID AuthId;
-	CHAR Root[MAX_PATH];
+	ULONG PageSize;
+	WCHAR Root[MAX_PATH];
 	CHAR Path[WIN_PATH_MAX];
 	CHAR SystemRoot[MAX_PATH];
 } WIN_GLOBALS;

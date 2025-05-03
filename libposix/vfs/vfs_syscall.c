@@ -28,7 +28,7 @@
  *
  */
 
-#include <winbase.h>
+#include <rpc.h>
 
 typedef UCHAR *RPC_CSTR;
 

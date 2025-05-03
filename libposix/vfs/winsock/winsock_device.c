@@ -41,7 +41,7 @@ ws2_match(LPCWSTR NtName, DWORD DeviceType, DWORD Index, WIN_CFDRIVER *Driver)
 	USHORT sUnit = DeviceType & 0x00FF;
 
 	while (sUnit < WIN_UNIT_MAX){
-		if (!win_wcscmp(pwDevice->NtName, NtName)){
+		if (!wcscmp(pwDevice->NtName, NtName)){
 			bResult = TRUE;
 			break;
 		}else if (!pwDevice->Flags){

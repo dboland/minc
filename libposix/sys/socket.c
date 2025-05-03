@@ -37,13 +37,13 @@ sflags_debug(int flags, const char *lable)
 {
 	DWORD dwRemain = flags;
 
-	msvc_printf("  %s(0x%x): ", lable, dwRemain);
+	WIN_ERR("  %s(0x%x): ", lable, dwRemain);
 	win_flagname(MSG_OOB, "OOB", dwRemain, &dwRemain);
 	win_flagname(MSG_DONTROUTE, "DONTROUTE", dwRemain, &dwRemain);
 	win_flagname(MSG_NOSIGNAL, "NOSIGNAL", dwRemain, &dwRemain);
 	win_flagname(MSG_DONTWAIT, "DONTWAIT", dwRemain, &dwRemain);
 
-	msvc_printf(" remain(0x%x)\n", dwRemain);
+	WIN_ERR(" remain(0x%x)\n", dwRemain);
 }
 void 
 saddr_debug(const struct sockaddr *addr, socklen_t addrlen, const char *label)
@@ -53,12 +53,12 @@ saddr_debug(const struct sockaddr *addr, socklen_t addrlen, const char *label)
 	if (!addr){
 		return;
 	}
-	msvc_printf("%s(): addrlen(%d) sa_family(%d) sa_len(%d) sa_data(", 
+	WIN_ERR("%s(): addrlen(%d) sa_family(%d) sa_len(%d) sa_data(", 
 		label, addrlen, addr->sa_family, addr->sa_len);
 	while (i < addrlen){
-		msvc_printf("[%d]", addr->sa_data[i++]);
+		WIN_ERR("[%d]", addr->sa_data[i++]);
 	}
-	msvc_printf(")\n");
+	WIN_ERR(")\n");
 }
 
 /****************************************************/
@@ -116,7 +116,7 @@ so_sockopt_posix(WIN_TASK *Task, struct cmsghdr *cmsg)
 			*(int *)data = fd_posix(Task, &vNode, 0);
 			break;
 		case SCM_TIMESTAMP:
-__PRINTF("SCM_TIMESTAMP:\n")
+WIN_ERR("SCM_TIMESTAMP:\n");
 			break;
 	}
 }

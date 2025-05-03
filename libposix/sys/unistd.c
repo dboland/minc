@@ -239,7 +239,7 @@ sys_fsync(call_t call, int fd)
 int 
 sys_setdtablesize(call_t call, int newsize)
 {
-	msvc_printf("  setdtablesize(%d)\n", newsize);
+	WIN_ERR("  setdtablesize(%d)\n", newsize);
 	return(0);
 }
 int 
@@ -249,7 +249,7 @@ sys___getcwd(call_t call, char *buf, size_t size)
 
 	pathn_posix(buf, __Strings[pwTask->TaskId].Path, size);
 	if (pwTask->TracePoints & KTRFAC_NAMEI){
-		ktrace_NAMEI(pwTask, buf, win_strlen(buf));
+		ktrace_NAMEI(pwTask, buf, strlen(buf));
 	}
 	return(0);
 }
@@ -693,7 +693,7 @@ sys_revoke(call_t call, const char *path)
 int 
 sys_acct(call_t call, const char *filename)
 {
-	msvc_printf("acct(%s)\n", filename);
+	WIN_ERR("acct(%s)\n", filename);
 	return(0);
 }
 int 
@@ -709,7 +709,7 @@ sys_profil(call_t call, char *samples, size_t size, u_long offset, u_int scale)
 int 
 sys_obreak(call_t call, char *nsize)
 {
-	msvc_printf("obreak(%d)\n", *nsize);
+	WIN_ERR("obreak(%d)\n", *nsize);
 	return(0);
 }
 pid_t 

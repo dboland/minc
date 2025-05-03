@@ -30,26 +30,8 @@
 
 #include "msvc_types.h"
 
-/* stdio.h */
-
 int msvc_printf(const char *format, ...);
-int msvc_sprintf(char *buf, const char *format, ...);
-int msvc_swprintf(wchar_t *buffer, const wchar_t *format, ...);
-
-/* stdlib.h */
-
 void msvc_init(int *_argc, char ***_argv, char ***_env);
-char *msvc_dirname(char *path);
-int _putenv(const char *envstring);
 
-char *_itoa(int value, char *str, int radix);
+/* internal.h */
 int __getmainargs(int *_Argc, char ***_Argv, char ***_Env, int _DoWildCard, _startupinfo *_StartInfo);
-
-/* msvc_time.c */
-
-int msvc_strtime(time_t time, char *buf, int size);
-
-/* msvc_ctype.c */
-
-int msvc_tolower(int c);
-int msvc_toupper(int c);

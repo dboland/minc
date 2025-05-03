@@ -37,10 +37,10 @@ termio_debug(WIN_TERMIO *Attribs, const char *lable)
 {
 	DWORD dwRemain;
 
-	msvc_printf("%s:\n", lable);
+	WIN_ERR("%s:\n", lable);
 
 	dwRemain = Attribs->LFlags;
-	msvc_printf("+ local([0x%x]", dwRemain);
+	WIN_ERR("+ local([0x%x]", dwRemain);
 	win_flagname(ECHOKE, "ECHOKE", dwRemain, &dwRemain);
 	win_flagname(ECHOE, "ECHOE", dwRemain, &dwRemain);
 	win_flagname(ECHO, "ECHO", dwRemain, &dwRemain);
@@ -49,10 +49,10 @@ termio_debug(WIN_TERMIO *Attribs, const char *lable)
 	win_flagname(ICANON, "ICANON", dwRemain, &dwRemain);
 	win_flagname(IEXTEN, "IEXTEN", dwRemain, &dwRemain);
 	win_flagname(NOKERNINFO, "NOKERNINFO", dwRemain, &dwRemain);
-	msvc_printf("[0x%x])\n", dwRemain);
+	WIN_ERR("[0x%x])\n", dwRemain);
 
 	dwRemain = Attribs->IFlags;
-	msvc_printf("+ input([0x%x]", dwRemain);
+	WIN_ERR("+ input([0x%x]", dwRemain);
 	win_flagname(INLCR, "INLCR", dwRemain, &dwRemain);
 	win_flagname(ICRNL, "ICRNL", dwRemain, &dwRemain);
 	win_flagname(IXANY, "IXANY", dwRemain, &dwRemain);
@@ -61,15 +61,15 @@ termio_debug(WIN_TERMIO *Attribs, const char *lable)
 	win_flagname(BRKINT, "BRKINT", dwRemain, &dwRemain);
 	win_flagname(IGNPAR, "IGNPAR", dwRemain, &dwRemain);
 	win_flagname(IMAXBEL, "IMAXBEL", dwRemain, &dwRemain);
-	msvc_printf("[0x%x])\n", dwRemain);
+	WIN_ERR("[0x%x])\n", dwRemain);
 
 	dwRemain = Attribs->OFlags;
-	msvc_printf("+ output([0x%x]", dwRemain);
+	WIN_ERR("+ output([0x%x]", dwRemain);
 	win_flagname(OPOST, "OPOST", dwRemain, &dwRemain);
 	win_flagname(OXTABS, "OXTABS", dwRemain, &dwRemain);
 	win_flagname(OCRNL, "OCRNL", dwRemain, &dwRemain);
 	win_flagname(ONLCR, "ONLCR", dwRemain, &dwRemain);
-	msvc_printf("[0x%x])\n", dwRemain);
+	WIN_ERR("[0x%x])\n", dwRemain);
 }
 
 /****************************************************/

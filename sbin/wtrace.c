@@ -8,16 +8,17 @@
 #include "vfs_posix.h"
 #include "bsd_posix.h"
 
-#include "libtrace.h"
+#include "../libtrace/libtrace.h"
 
 /************************************************************/
 
 void 
 usage(void)
 {
-	printf("\nPerform ACL trace on various Windows objects.\n\n");
+	printf("\nPerform trace on various Windows objects.\n\n");
 	printf("Usage: %s [options]\n", __progname);
 	printf("\nOptions\n");
+	printf(" -I\t\t\t%s\n", "print processor Information");
 	printf(" -P\t\t\t%s\n", "print Process token");
 	printf(" -T\t\t\t%s\n", "print Thread token (if any)");
 	printf(" -c ACCOUNT\t\t%s\n", "print capabilities of ACCOUNT");
@@ -69,6 +70,9 @@ main(int argc, char* argv[])
 			break;
 		case 'c':
 			win_ktrace(STRUCT_SID_RIGHTS, 0x0800, token);
+			break;
+		case 'I':
+			win_ktrace(STRUCT_SYSTEM_INFO, 0x0800, token);
 			break;
 		default:
 			printf("%s: No such option.\n", cmd);

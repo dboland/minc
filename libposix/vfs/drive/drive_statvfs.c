@@ -40,13 +40,13 @@ DriveLookupStorage(LPCWSTR ClassName)
 {
 	DWORD dwResult = DEV_CLASS_STORAGE;
 
-	if (!win_wcsncmp(ClassName, L"Floppy", 6)){
+	if (!wcsncmp(ClassName, L"Floppy", 6)){
 		dwResult |= DEV_BUS_FDC;
 
-//	}else if (!win_wcsncmp(ClassName, L"Harddisk", 8)){
+//	}else if (!wcsncmp(ClassName, L"Harddisk", 8)){
 //		dwResult |= DEV_BUS_HDC;
 
-	}else if (!win_wcscmp(ClassName, L"Ide")){
+	}else if (!wcscmp(ClassName, L"Ide")){
 		dwResult |= DEV_BUS_IDE;
 
 	}
@@ -57,15 +57,15 @@ DriveLookupDevice(LPCWSTR BusName)
 {
 	DWORD dwResult = DEV_CLASS_DISK;
 
-	if (!win_wcscmp(BusName, L"ROOT")){
+	if (!wcscmp(BusName, L"ROOT")){
 		dwResult = DEV_TYPE_ROOT;
 
-	}else if (!win_wcsncmp(BusName, L"SCSI", 4)){	/* IDE interface for SCSI device */
+	}else if (!wcsncmp(BusName, L"SCSI", 4)){	/* IDE interface for SCSI device */
 		dwResult = DEV_TYPE_IDE;
 
 		/* Vista */
 
-	}else if (!win_wcscmp(BusName, L"LOG")){
+	}else if (!wcscmp(BusName, L"LOG")){
 		dwResult = DEV_TYPE_LOG;
 
 	}

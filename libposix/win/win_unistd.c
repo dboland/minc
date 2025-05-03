@@ -141,7 +141,7 @@ LinkWriteVolumeInfo(LPCWSTR Target)
 	DWORD dwSerial = 0;
 
 	LinkStatVolume(win_drivename(szDrive, Target), szLabel, &dwSerial);
-	dwSize += win_wcslen(szLabel) + 1;
+	dwSize += wcslen(szLabel) + 1;
 	Data = LocalAlloc(LPTR, dwSize);
 	Info = (VOLUME_ID *)Data;
 	Info->VolumeIDSize = dwSize;

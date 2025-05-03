@@ -40,7 +40,7 @@ ws2_nametoindex(LPCSTR Name)
 	UINT uiError = ERROR_BAD_DEVICE;
 
 	while (sUnit < WIN_UNIT_MAX){
-		if (!win_strcmp(pwDevice->Name, Name)){
+		if (!strcmp(pwDevice->Name, Name)){
 			if (!pwDevice->Flags){
 				uiError = ERROR_DEVICE_NOT_AVAILABLE;
 				break;
@@ -66,7 +66,7 @@ ws2_indextoname(DWORD Index, LPSTR Result)
 	}else while (sUnit < WIN_UNIT_MAX){
 		if (pwDevice->Index == Index){
 			win_strcpy(Result, pwDevice->Name);
-			return(win_strlen(Result));
+			return(strlen(Result));
 		}
 		pwDevice++;
 		sUnit++;

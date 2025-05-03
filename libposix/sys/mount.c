@@ -37,7 +37,7 @@ fsflags_debug(u_int32_t flags, const char *lable)
 {
 	DWORD dwFlags = flags;
 
-	msvc_printf("%s([0x%x]", lable, dwFlags);
+	WIN_ERR("%s([0x%x]", lable, dwFlags);
 	win_flagname(MNT_RDONLY, "RDONLY", dwFlags, &dwFlags);
 	win_flagname(MNT_NOATIME, "NOATIME", dwFlags, &dwFlags);
 	win_flagname(MNT_NOEXEC, "NOEXEC", dwFlags, &dwFlags);
@@ -48,18 +48,18 @@ fsflags_debug(u_int32_t flags, const char *lable)
 	win_flagname(MNT_SOFTDEP, "SOFTDEP", dwFlags, &dwFlags);
 	win_flagname(MNT_UPDATE, "UPDATE", dwFlags, &dwFlags);
 	win_flagname(MNT_ROOTFS, "ROOTFS", dwFlags, &dwFlags);
-	msvc_printf("[0x%x])\n", dwFlags);
+	WIN_ERR("[0x%x])\n", dwFlags);
 }
 char *
 fstype_posix(char *type, void *options, LPWSTR TypeName)
 {
-	if (!win_wcsncmp(TypeName, L"FAT", 3)){
+	if (!wcsncmp(TypeName, L"FAT", 3)){
 		struct msdosfs_args *msdos = options;
 		win_strncpy(type, "msdos", MFSNAMELEN);
 		msdos->uid = rid_posix(&SidEveryone);
 		msdos->gid = rid_posix(&SidEveryone);
 		msdos->mask = 00777;
-	}else if (!win_wcscmp(TypeName, L"ISO9660")){
+	}else if (!wcscmp(TypeName, L"ISO9660")){
 		win_strncpy(type, "cd9660", MFSNAMELEN);
 	}else{
 		win_wcstombs(type, win_wcslcase(TypeName), MFSNAMELEN);
@@ -222,16 +222,16 @@ sys_mount(call_t call, const char *type, const char *dir, int flags, void *data)
 
 	/* mount(2)
 	 */
-	if (!win_strcmp(type, MOUNT_NTFS)){
+	if (!strcmp(type, MOUNT_NTFS)){
 		result = mount_NTFS(path_win(&wPath, dir, O_NOCROSS), dwFlags, (struct ntfs_args *)data);
 
-	}else if (!win_strcmp(type, MOUNT_MSDOS)){
+	}else if (!strcmp(type, MOUNT_MSDOS)){
 		result = mount_MSDOS(path_win(&wPath, dir, O_NOCROSS), dwFlags, (struct msdosfs_args *)data);
 
-	}else if (!win_strcmp(type, MOUNT_CD9660)){
+	}else if (!strcmp(type, MOUNT_CD9660)){
 		result = mount_CD9660(path_win(&wPath, dir, O_NOCROSS), dwFlags, (struct iso_args *)data);
 
-	}else if (!win_strcmp(type, MOUNT_UFS)){
+	}else if (!strcmp(type, MOUNT_UFS)){
 		result = mount_UFS(path_win(&wPath, dir, O_NOCROSS), dwFlags, (struct ufs_args *)data);
 
 	}else{

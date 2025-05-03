@@ -135,10 +135,10 @@ ScreenControl(HANDLE Handle, UINT Flags, CONSOLE_SCREEN_BUFFER_INFO *Info)
 		case 2:		/* Start of Text (STX) */
 			break;
 		case 3:		/* End of text (ETX) */
-			msvc_sprintf(__INPUT_BUF, "\006");	/* ACK */
+			sprintf(__INPUT_BUF, "\006");	/* ACK */
 			break;
 		case 5:		/* Enquiry (ENQ) */
-			msvc_sprintf(__INPUT_BUF, "\006");	/* ACK */
+			sprintf(__INPUT_BUF, "\006");	/* ACK */
 			break;
 		case 8:		/* Backspace (BS) */
 			AnsiCursorBack(Handle, Info, 1);
@@ -198,7 +198,7 @@ ScreenAnsi(HANDLE Handle, CHAR C, SEQUENCE *Seq, CONSOLE_SCREEN_BUFFER_INFO *Inf
 	}
 	if (!bResult){
 		Seq->Buf[dwSize] = 0;
-		msvc_printf("\e%s", Seq->Buf);
+		WIN_ERR("\e%s", Seq->Buf);
 	}
 	__Escape = NULL;
 	return(bResult);

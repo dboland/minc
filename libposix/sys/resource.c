@@ -174,7 +174,6 @@ sys_getpriority(call_t call, int which, id_t who)
 	}else if (which == PRIO_PROCESS){
 		result = __Tasks[who].Nice;
 	}else{
-__PRINTF("getpriority(%d): who(%d)\n", which, who)
 		result = -EOPNOTSUPP;
 	}
 	return(result);
@@ -189,7 +188,6 @@ sys_setpriority(call_t call, int which, id_t who, int value)
 	}else if (which == PRIO_PROCESS){
 		__Tasks[who].Nice = value;
 	}else{
-__PRINTF("setpriority(%d): who(%d) value(%d)\n", which, who, value)
 		result = -EOPNOTSUPP;
 	}
 	return(result);

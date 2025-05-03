@@ -35,7 +35,6 @@
 BOOL 
 char_FIONBIO(WIN_VNODE *Node, ULONG NoWait)
 {
-//__PRINTF("char_FIONBIO: %d\n", NoWait)
 	if (NoWait){
 		Node->Attribs |= FILE_FLAG_OVERLAPPED;
 	}else{
@@ -49,10 +48,10 @@ char_FIONREAD(WIN_VNODE *Node, ULONG *Result)
 	ULONG ulResult = 0;
 
 	if (__Clipboard){
-		ulResult += win_wcslen(__Clipboard);
+		ulResult += wcslen(__Clipboard);
 	}
 	if (__Input){
-		ulResult += win_strlen(__Input);
+		ulResult += strlen(__Input);
 	}
 	*Result = ulResult;
 	return(TRUE);

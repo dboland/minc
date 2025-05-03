@@ -77,7 +77,7 @@ kproc_posix(struct kinfo_proc *proc, WIN_TASK *Task)
 {
 	WIN_TTY *pTerminal = &__Terminals[Task->CTTY];
 	wchar_t *command = win_basename(__Strings[Task->TaskId].Command);
-	DWORD dwPageSize = win_HW_PAGESIZE();
+	DWORD dwPageSize = __Globals->PageSize;
 	WIN_KUSAGE wkUsage;
 	struct timeval tv;
 	u_int64_t rtime;

@@ -281,6 +281,8 @@ multi(void)
 void 
 state(int level)
 {
+	setenv("TERM", _term, 0);
+	setenv("LC_CTYPE", _ctype, 0);
 	if (_boot)
 		boot();
 	else if (!level)
@@ -298,15 +300,14 @@ main(int argc, char *argv[], char *envp[])
 	size_t size = sizeof(int);
 	int level = 0;
 	pid_t pid;
-	char *root = diskconf();
 	int status;
+	char root[260];
 
-	args(argc, argv);
-	sysctl(mib, 2, &level, &size, NULL, 0);
+	diskconf(root);
 	setenv("MINCROOT", root, 1);
 	setenv("PATH", _PATH_DEFPATH, 1);
-	setenv("TERM", _term, 0);
-	setenv("LC_CTYPE", _ctype, 0);
+	args(argc, argv);
+	sysctl(mib, 2, &level, &size, NULL, 0);
 	switch (pid = fork()){
 		case -1:
 			die("fork(): %s\n", strerror(errno));

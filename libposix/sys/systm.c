@@ -50,29 +50,26 @@ cpu_configure(void)
 			drive_match(cfData.NtName, cfData.DeviceType, &cfDriver);
 			if (!(cfDriver.Flags & WIN_DVF_CONFIG_READY)){
 				msgbuf_DRIVE(&cfData, &cfDriver, szMessage);
-				msvc_printf(szMessage);
+				WIN_ERR(szMessage);
 			}
 		}else if (cfData.FSType == FS_TYPE_PDO){
 			pdo_statvfs(&cfData, dwFlags, &cfDriver);
 			if (pdo_match(cfData.NtName, cfData.DeviceType, &cfDriver)){
 				msgbuf_PDO(&cfData, &cfDriver, szMessage);
-//				msvc_printf(szMessage);
+//				WIN_ERR(szMessage);
 			}else if (!(cfDriver.Flags & WIN_DVF_CONFIG_READY)){
 				msgbuf_PDO(&cfData, &cfDriver, szMessage);
-				msvc_printf(szMessage);
+				WIN_ERR(szMessage);
 			}
 		}
 	}
 	vfs_endvfs(&cfData);
 }
-char * 
-diskconf(void)
+void 
+diskconf(char *root)
 {
-	WCHAR szRoot[MAX_PATH];
-
 	/* Configure root/swap devices
 	 */
-	win_mbstowcs(szRoot, __Globals->Root, MAX_PATH);
-	win_chroot(szRoot);
-	return(__Globals->Root);
+	win_chroot(__Globals->Root);
+	wcstombs(root, __Globals->Root, MAX_PATH);
 }

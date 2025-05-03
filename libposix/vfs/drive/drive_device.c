@@ -41,8 +41,8 @@ drive_match(LPCWSTR NtName, DWORD DeviceType, WIN_CFDRIVER *Driver)
 	USHORT sUnit = DeviceType & 0x00FF;
 
 	while (sUnit < WIN_UNIT_MAX){
-		if (!win_wcscmp(pwDevice->NtName, NtName)){
-			if (!win_wcscmp(pwDevice->ClassId, Driver->ClassId)){
+		if (!wcscmp(pwDevice->NtName, NtName)){
+			if (!wcscmp(pwDevice->ClassId, Driver->ClassId)){
 				bResult = TRUE;
 			}
 			win_wcscpy(pwDevice->NtPath, Driver->NtPath);

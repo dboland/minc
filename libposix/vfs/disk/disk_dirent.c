@@ -61,7 +61,7 @@ DiskGetEntity(WIN32_FIND_DATAW *Data, WIN_NAMEIDATA *Path, PVOID Buffer, DWORD *
 		bResult = disk_lookup(Path, 0);
 	}else if (dwAttribs & FILE_ATTRIBUTE_DIRECTORY){
 		Path->FileType = WIN_VDIR;
-	}else if (!win_wcscmp(pszType, L".lnk")){
+	}else if (!wcscmp(pszType, L".lnk")){
 		Path->FileType = WIN_VLNK;
 		*pszType = 0;			/* chop off extension */
 	}else{

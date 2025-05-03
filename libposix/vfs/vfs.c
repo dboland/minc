@@ -28,6 +28,9 @@
  *
  */
 
+/* exclude msvcrt.dll headers */
+#define WIN32_LEAN_AND_MEAN
+
 /* iphlpapi.h */
 #define _WIN32_WINNT	_WIN32_WINNT_WINXP
 
@@ -35,14 +38,18 @@
 #define NTOSAPI		
 
 #include <winsock2.h>
-
 #include <ddk/ntapi.h>
 
 #include <iphlpapi.h>	/* Win32 network api */
+
 #include <stdint.h>
+#include <stdlib.h>
+
+#include <ctype.h>
 
 #include "win_posix.h"
 #include "msvc_posix.h"
+#include "ntdll_posix.h"
 #include "ws2_types.h"
 #include "dev_types.h"
 #include "vfs_types.h"

@@ -47,20 +47,20 @@ win_basename(LPCWSTR FileName)
 	return(Base);
 }
 LPWSTR 
-win_dirname(LPWSTR Result, LPCWSTR FileName)
+win_dirname(LPWSTR FileName)
 {
-	LPWSTR Base = Result;
-	LPWSTR R = Result;
+	LPWSTR Base = FileName;
+	LPWSTR F = FileName;
 	WCHAR C;
 
-	while (C = *FileName++){
+	while (C = *F){
 		if (C == '\\'){
-			Base = R;
+			Base = F;
 		}
-		*R++ = C;
+		F++;
 	}
 	*Base = 0;
-	return(Result);
+	return(FileName);
 }
 LPWSTR 
 win_volname(LPWSTR Result, LPCWSTR FileName)
@@ -68,7 +68,7 @@ win_volname(LPWSTR Result, LPCWSTR FileName)
 	LPWSTR R = Result;
 	WCHAR C;
 
-	if (!win_wcscmp(FileName, L"ROOT:")){
+	if (!wcscmp(FileName, L"ROOT:")){
 		*R++ = '.';
 		Result = NULL;
 	}else while (C = *FileName++){
@@ -127,7 +127,7 @@ win_flagname(DWORD Flag, LPCSTR Name, DWORD Mask, DWORD *Remain)
 
 	if (Mask & Flag){
 		if (Name){
-			msvc_printf("[%s]", Name);
+			WIN_ERR("[%s]", Name);
 		}
 		*Remain &= ~Flag;
 		bResult = TRUE;

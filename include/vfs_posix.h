@@ -174,6 +174,7 @@ BOOL vfs_reboot(WIN_TASK *Task, USHORT Type, USHORT DeviceId);
 /* vfs_libgen.c */
 
 VOID vfs_setproctitle(LPCSTR Title);
+LPWSTR vfs_dirname(LPWSTR Result, LPCWSTR FileName);
 
 /* vfs_dirent.c */
 

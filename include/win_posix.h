@@ -40,10 +40,7 @@ LPSTR nt_strerror(NTSTATUS Status);
 LPSTR win_strcpy(LPSTR Destination, LPCSTR Source);
 LPSTR win_stpcpy(LPSTR Destination, LPCSTR Source);
 LPSTR win_strncpy(LPSTR Destination, LPCSTR Source, LONG Length);
-INT win_strlen(LPCSTR String);
 VOID win_memcpy(LPVOID Destination, LPCVOID Source, SIZE_T Size);
-INT win_strcmp(LPCSTR String1, LPCSTR String2);
-INT win_strncmp(LPCSTR String1, LPCSTR String2, LONG Length);
 LPCSTR win_index(LPCSTR String, CHAR Chr);
 VOID win_memset(PVOID Dest, CHAR Fill, SIZE_T Size);
 LPSTR win_strcat(LPSTR Destination, LPCSTR Source);
@@ -63,16 +60,12 @@ LPSTR win_wcstombp(LPSTR Destination, LPCWSTR Source, int Bufsize);
 LPWSTR win_wcscpy(LPWSTR Destination, LPCWSTR Source);
 LPWSTR win_wcpcpy(LPWSTR Destination, LPCWSTR Source);
 LPWSTR win_wcscat(LPWSTR Destination, LPCWSTR Source);
-INT win_wcsncmp(LPCWSTR String1, LPCWSTR String2, LONG Length);
-INT win_wcscmp(LPCWSTR String1, LPCWSTR String2);
 LPWSTR win_wcsncpy(LPWSTR Destination, LPCWSTR Source, LONG Length);
 LPWSTR win_wcslcase(LPWSTR String);
-INT win_wcslen(LPCWSTR String);
 LPWSTR win_wcsucase(LPWSTR String);
 
 /* win_sysctl.c */
 
-UINT win_HW_PAGESIZE(VOID);
 DWORD win_HW_NCPU(VOID);
 UINT win_HW_USERMEM(VOID);
 UINT win_HW_PHYSMEM(VOID);
@@ -86,7 +79,7 @@ BOOL win_KERN_PROC(DWORD ThreadId, WIN_KUSAGE *Result);
 
 /* win_libgen.c */
 
-LPWSTR win_dirname(LPWSTR Result, LPCWSTR FileName);
+LPWSTR win_dirname(LPWSTR FileName);
 LPWSTR win_basename(LPCWSTR FileName);
 LPWSTR win_typename(LPCWSTR FileName);
 LPWSTR win_volname(LPWSTR Result, LPCWSTR FileName);

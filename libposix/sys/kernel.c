@@ -204,9 +204,12 @@ int
 kern_KERN_VERSION(char *buf, size_t bufsize)
 {
 	int size = 0;
+	struct tm *local;
+	time_t time = BUILD;
 
-	size += msvc_sprintf(buf, "OpenBSD %s (MINC): #%s: ", "6.1", VERSION);
-	size += msvc_strtime(BUILD, buf + size, bufsize - size);
+	size += sprintf(buf, "OpenBSD %s (MINC): #%s: ", "6.1", VERSION);
+	local = localtime(&time);
+	size += strftime(buf, size, "%a %b %d %H:%M:%S GMT %Y", local);
 	return(0);
 }
 int 

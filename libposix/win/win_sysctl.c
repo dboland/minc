@@ -32,14 +32,6 @@
 
 /****************************************************/
 
-UINT 
-win_HW_PAGESIZE(VOID)
-{
-	SYSTEM_INFO sInfo;
-
-	GetSystemInfo(&sInfo);
-	return(sInfo.dwPageSize);
-}
 DWORD 
 win_HW_NCPU(VOID)
 {

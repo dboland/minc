@@ -41,7 +41,7 @@ env_win(char *const envp[])
 	int size = 0;
 	int len;
 	char *entry = NULL;
-	PVOID pvResult = win_malloc(WIN_PATH_MAX);
+	PVOID pvResult = win_malloc(0x4000);
 	char *p = pvResult;
 
 	/* Keep Windows "Path" variable on top (login_passwd.exe).
@@ -50,18 +50,18 @@ env_win(char *const envp[])
 	p = win_stpcpy(p, __Globals->Path) + 1;
 	p = win_stpcpy(p, __Globals->SystemRoot) + 1;
 	while (entry = *envp++){
-		if (!win_strncmp(entry, "SystemRoot=", 11)){
+		if (!strncmp(entry, "SystemRoot=", 11)){
 			continue;
-		}else if (!win_strncmp(entry, "Path=", 5)){
+		}else if (!strncmp(entry, "Path=", 5)){
 			continue;
 		}
 		size = p - (char *)pvResult;
-		len = win_strlen(entry) + 1;
+		len = strlen(entry) + 2;	/* assume being last entry */
 		pvResult = win_realloc(pvResult, size + len);
 		p = pvResult + size;
 		p = win_stpcpy(p, entry) + 1;
 	}
-	*p = 0;
+//	*p = 0;
 	return(pvResult);
 }
 LPSTR 
@@ -71,20 +71,20 @@ argv_win(WIN_TASK *Task, const char *command, char *const argv[])
 	char *p;
 	int size = 0;
 	int len;
-	int maxbuf = MAX_ARGBUF - (MAX_ARGBUF % MIN_BUFSIZE);
+	int maxbuf = MAX_ARGBUF - (MAX_ARGBUF % __Globals->PageSize);
 	char *arg = *argv++;		/* skip first argument (unresolved command) */
 
 	p = win_stpcpy(pszResult, command);
 	size = p - pszResult;
 	while (arg = *argv++){
-		len = win_strlen(arg) + 3;
+		len = strlen(arg) + 3;
 		pszResult = win_realloc(pszResult, size + len);
 		p = pszResult + size;
 		p = stpquot(p, arg);
 		size = p - pszResult;
 		/* maximum for CreateProcess(), rounded to nearest block */
 		if (size >= maxbuf){		/* xargs.exe */
-			msvc_printf("+ warning: %s: Too many arguments\n", command);
+			WIN_ERR("+ warning: %s: Too many arguments\n", command);
 			break;
 		}
 	}
@@ -111,7 +111,7 @@ argv_posix(char *buf, int size, char *argv[])
 		}else if (c != ' '){
 			buf++;
 		}else if (count >= MAXDEPTH){
-			msvc_printf("+ warning: #!: Too many arguments\n");
+			WIN_ERR("+ warning: #!: Too many arguments\n");
 			break;
 		}else{
 			*buf++ = 0;

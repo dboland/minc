@@ -73,7 +73,7 @@ sysctl_KERN(const int *name, void *oldp, size_t *oldlenp, void *newp, size_t new
 			win_strncpy(win_stpcpy(oldp, "MINC#"), VERSION, *oldlenp - 5);
 			break;
 		case KERN_ARGMAX:
-			*(int *)oldp = MAX_ARGBUF - (MAX_ARGBUF % MIN_BUFSIZE);
+			*(int *)oldp = MAX_ARGBUF - (MAX_ARGBUF % __Globals->PageSize);
 			break;
 		case KERN_MSGBUFSIZE:	/* dmesg.exe */
 			result = msgbuf_KERN_MSGBUFSIZE((int *)oldp, oldlenp);
@@ -140,7 +140,7 @@ sysctl_HW_DISKNAMES(char *buf, size_t size)
 			if (size < MAX_NAME){
 				break;
 			}else if (disk_HW_DISKNAMES(pwDevice, name)){
-				len = msvc_sprintf(buf, "%s%s", sep, name);
+				len = sprintf(buf, "%s%s", sep, name);
 				buf += len;
 				size -= len;
 				sep = ",";
@@ -160,7 +160,7 @@ sysctl_HW(const int *name, void *oldp, size_t *oldlenp, void *newp, size_t newle
 			win_strncpy(oldp, MACHINE, *oldlenp);
 			break;
 		case HW_PAGESIZE:
-			*(int *)oldp = win_HW_PAGESIZE();
+			*(int *)oldp = __Globals->PageSize;
 			break;
 		case HW_PHYSMEM:	/* gcc (collect2.exe) */
 			*(int *)oldp = win_HW_PHYSMEM();

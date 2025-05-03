@@ -28,12 +28,41 @@
  *
  */
 
-#include <stdarg.h>
-#include <stdint.h>
+#include "config.h"
 
-#include "msvc_posix.h"
+#define PROCESSOR_ARCHITECTURE_ARM64	12
 
-#include "msvc_stdio.c"
-#include "msvc_stdlib.c"
-#include "msvc_time.c"
-#include "msvc_ctype.c"
+#define POCESSOR_MODEL(a)	(a >> 8)
+#define POCESSOR_STEPPING(a)	(a & 0xFF)
+
+LPSTR 
+win_SYSTEM_INFO(LPSTR Buffer, LPCSTR Label, SYSTEM_INFO *Info)
+{
+	LPSTR psz = Buffer;
+	LPSTR pszArch = "UNKNOWN";
+
+	switch (Info->wProcessorArchitecture){
+		case PROCESSOR_ARCHITECTURE_AMD64:
+			pszArch = "AMD64";
+			break;
+		case PROCESSOR_ARCHITECTURE_ARM:
+			pszArch = "ARM";
+			break;
+		case PROCESSOR_ARCHITECTURE_ARM64:
+			pszArch = "ARM64";
+			break;
+		case PROCESSOR_ARCHITECTURE_IA64:
+			pszArch = "IA64";
+			break;
+		case PROCESSOR_ARCHITECTURE_INTEL:
+			pszArch = "x86";
+			break;
+	}
+	psz += sprintf(psz, "%s(%s): CPUType(%d) CPUMask(0x%x) CPUCount(%d) Level(%d) Model(%d) Stepping(%d)\n", 
+		Label, pszArch, Info->dwProcessorType, Info->dwActiveProcessorMask, Info->dwNumberOfProcessors, 
+		Info->wProcessorLevel, POCESSOR_MODEL(Info->wProcessorRevision), POCESSOR_STEPPING(Info->wProcessorRevision));
+	psz += sprintf(psz, "  Addressable: 0x%x - 0x%x\n", Info->lpMinimumApplicationAddress, Info->lpMaximumApplicationAddress);
+	psz += sprintf(psz, "  Ganularity: 0x%x\n", Info->dwAllocationGranularity);
+	psz += sprintf(psz, "  PageSize: 0x%x\n", Info->dwPageSize);
+	return(psz);
+}

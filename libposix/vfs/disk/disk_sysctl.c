@@ -42,7 +42,7 @@ disk_HW_DISKNAMES(WIN_DEVICE *Device, LPSTR Result)
 		case DEV_TYPE_FIXED:
 		case DEV_TYPE_REMOTE:
 			bResult = DriveStatVolume(Device->NtPath, &wMount);
-			msvc_sprintf(Result, "%s:%lu", Device->Name, wMount.Serial);
+			sprintf(Result, "%s:%lu", Device->Name, wMount.Serial);
 			break;
 		default:
 			win_strcpy(Result, Device->Name);

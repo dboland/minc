@@ -45,10 +45,10 @@ ifinit(void)
 		if (ifData.FSType == FS_TYPE_WINSOCK){
 			if (ws2_match(ifData.NtName, ifData.DeviceType, ifData.Index, &cfDriver)){
 				msgbuf_WINSOCK(&ifData, &cfDriver, szMessage);
-//				msvc_printf(szMessage);
+//				WIN_ERR(szMessage);
 			}else if (!(cfDriver.Flags & WIN_DVF_CONFIG_READY)){
 				msgbuf_WINSOCK(&ifData, &cfDriver, szMessage);
-				msvc_printf(szMessage);
+				WIN_ERR(szMessage);
 			}
 		}
 	}

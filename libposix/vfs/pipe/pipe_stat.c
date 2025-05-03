@@ -77,7 +77,7 @@ pipe_mknod(WIN_TASK *Task, LPWSTR FileName, WIN_MODE *Mode, LPWSTR NtName)
 	SECURITY_ATTRIBUTES sa = {sizeof(sa), &sd, FALSE};
 	WCHAR szDirName[WIN_PATH_MAX];
 
-	if (!win_acl_get_file(win_dirname(szDirName, FileName), &wControl.Source)){
+	if (!win_acl_get_file(vfs_dirname(szDirName, FileName), &wControl.Source)){
 		return(FALSE);
 	}else if (!vfs_acl_init(&wControl, 0, Mode->Special, &sd)){
 		WIN_ERR("vfs_acl_init(%ls): %s\n", szDirName, win_strerror(GetLastError()));

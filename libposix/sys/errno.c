@@ -239,7 +239,7 @@ errno_posix(DWORD Error)
 			result = EADDRINUSE;
 			break;
 		default:
-			msvc_printf("errno_posix(%d): %s\n", Error, win_strerror(Error));
+			WIN_ERR("errno_posix(%d): %s\n", Error, win_strerror(Error));
 	}
 	return(result);
 }

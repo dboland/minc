@@ -46,9 +46,9 @@ win_strerrorat(HMODULE Module, LPCSTR Label, DWORD Error)
 	if (Module){
 		dwFlags += FORMAT_MESSAGE_FROM_HMODULE;
 	}
-	pszError += msvc_sprintf(pszError, Label, Error);
+	pszError += sprintf(pszError, Label, Error);
 	if (!FormatMessage(dwFlags, Module, Error, dwLanguageID, pszError, 240, NULL)){
-		msvc_sprintf(pszError, "Unknown error ");
+		sprintf(pszError, "Unknown error ");
 	}
 	return(_ERR255);
 }
@@ -68,9 +68,9 @@ win_strsid(SID8 *Sid)
 	SHORT sIndex;
 	LPSTR psz = _STR255;
 
-	psz += msvc_sprintf(psz, "S-%lu-%lu", Sid->Revision, Sid->IdentifierAuthority.Value[5]);
+	psz += sprintf(psz, "S-%lu-%lu", Sid->Revision, Sid->IdentifierAuthority.Value[5]);
 	for (sIndex = 0; sIndex < Sid->SubAuthorityCount; sIndex++){
-		psz += msvc_sprintf(psz, "-%lu", Sid->SubAuthority[sIndex]);
+		psz += sprintf(psz, "-%lu", Sid->SubAuthority[sIndex]);
 	}
 	return(_STR255);
 }
@@ -81,7 +81,7 @@ win_strobj(HANDLE Objects[], DWORD Count)
 	DWORD dwIndex = 0;
 
 	while (dwIndex < Count){
-		pszBuf += msvc_sprintf(pszBuf, "[%d]", Objects[dwIndex]);
+		pszBuf += sprintf(pszBuf, "[%d]", Objects[dwIndex]);
 		dwIndex++;
 	}
 	return(_STR255);
@@ -148,26 +148,6 @@ win_stpcpy(LPSTR Destination, LPCSTR Source)
 	}
 	*D = 0;
 	return(D);
-}
-LONG 
-win_strlen(LPCSTR String)
-{
-	LONG lResult = 0;
-
-	while (*String++){
-		lResult++;
-	}
-	return(lResult);
-}
-INT 
-win_strcmp(LPCSTR String1, LPCSTR String2)
-{
-	return(CompareString(LOCALE_USER_DEFAULT, NORM_IGNOREWIDTH, String1, -1, String2, -1) - 2);
-}
-INT 
-win_strncmp(LPCSTR String1, LPCSTR String2, LONG Length)
-{
-	return(CompareString(LOCALE_USER_DEFAULT, NORM_IGNOREWIDTH, String1, Length, String2, Length) - 2);
 }
 LPSTR 
 win_strlcase(LPSTR String)

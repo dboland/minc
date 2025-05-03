@@ -7,6 +7,7 @@ GCCLIB=/lib/gcc/mingw32/4.8.1
 WINLIB=/C/WINDOWS/system32
 PROGS=wrc mkent wtrace
 WINDIR=/C/WINDOWS/system32
+TRACELIB=../libtrace/libtrace.a
 
 .SUFFIXES:
 .DEFAULT:
@@ -47,8 +48,8 @@ wrc: wrc.exe
 libwtrace.o: libwtrace.c
 	gcc -c ${CFLAGS} -I${MINGW}/include -I../include -I../libtrace -o $@ $<
 
-wtrace: wtrace.c libwtrace.o
-	gcc -s ${CFLAGS} -I../include -I../libtrace -L../libtrace -o $@ $^ -ltrace \
+wtrace: wtrace.c libwtrace.o ${TRACELIB}
+	gcc -s ${CFLAGS} -I../include -o $@ $^ \
 	${MINGW}/lib/libadvapi32.a ${MINGW}/lib/libkernel32.a ${MINGW}/lib/libuser32.a
 
 install-local:

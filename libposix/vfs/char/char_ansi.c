@@ -521,7 +521,7 @@ AnsiDeviceStatusReport(CONSOLE_SCREEN_BUFFER_INFO *Info, CHAR Parm, CHAR *Result
 	DWORD dwCount;
 
 	if (Parm == '6'){		/* CPR - cursor position (vim.exe) */
-		msvc_sprintf(Result, "\e[%d;%dR", (cPos.Y - Info->srWindow.Top) + 1, cPos.X + 1);
+		sprintf(Result, "\e[%d;%dR", (cPos.Y - Info->srWindow.Top) + 1, cPos.X + 1);
 	}else{
 		bResult = FALSE;
 	}
@@ -564,7 +564,7 @@ AnsiResetMode(HANDLE Handle, WIN_TTY *Terminal, WORD Arg)
 BOOL 
 AnsiDeviceAttributes(HANDLE Handle)
 {
-	msvc_sprintf(__INPUT_BUF, "\e[?64;22c");
+	sprintf(__INPUT_BUF, "\e[?64;22c");
 	__Input = __INPUT_BUF;
 	return(FALSE);
 }

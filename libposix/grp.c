@@ -44,7 +44,7 @@ group_posix(char *buf, size_t buflen, WIN_GRENT *Group)
 	buf = win_stpcpy(buf, ":*:");
 //	buf = win_stpcpy(buf, Group->Comment);
 //	buf = win_stpcpy(buf, ":");
-	buf += msvc_sprintf(buf, "%lu", rid_posix(&Group->Sid));
+	buf += sprintf(buf, "%lu", rid_posix(&Group->Sid));
 	buf = win_stpcpy(buf, ":");
 	buf = win_stpcpy(buf, Group->Members);
 	return(result);

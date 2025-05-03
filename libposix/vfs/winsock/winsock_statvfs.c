@@ -58,19 +58,6 @@ WSALookup(DWORD LinkType)
 	}
 	return(dwResult);
 }
-LPWSTR 
-WSAQueryDosDevice(LPWSTR Buffer, UCHAR Source[], LONG Length)
-{
-	WCHAR *psz = Buffer;
-	WCHAR *pszSep = L"";
-
-	*psz = 0;
-	while (Length--){
-		psz += msvc_swprintf(psz, L"%s%.2X", pszSep, *Source++);
-		pszSep = L"-";
-	}
-	return(Buffer);
-}
 
 /****************************************************/
 

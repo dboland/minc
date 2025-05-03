@@ -176,7 +176,7 @@ typedef struct _WIN_INODE {
 	DWORD Reserved2;
 } WIN_INODE;
 
-#define INAMESIZE(wcs)		((win_wcslen(wcs) + 1) * sizeof(WCHAR))
+#define INAMESIZE(wcs)		((wcslen(wcs) + 1) * sizeof(WCHAR))
 
 typedef struct _WIN_NAMEIDATA {
 	DWORD MountId;
@@ -359,7 +359,7 @@ typedef struct _WIN_STATFS {
 #define WIN_MNT_NOWAIT      2       /* start all I/O, but do not wait for it */
 #define WIN_MNT_LAZY        3       /* push data not written by filesystem syncer */
 
-#define MOUNTID(ch)	(DWORD)(ch ? 1 + msvc_tolower(ch) - 'a' : 0)
+#define MOUNTID(ch)	(DWORD)(ch ? 1 + tolower(ch) - 'a' : 0)
 
 /*
  * vfs_stat.c

@@ -8,7 +8,7 @@ CFLAGS+=-I../include -g
 CFLAGS+=-DRELEASE=\"${RELEASE}\" -DVERSION=\"${VERSION}\" -DBUILD=${BUILD}
 #CFLAGS+=-Wunused
 LDFLAGS=-shared -s
-OBJECTS=crt1.o win_posix.o msvc_posix.o vfs_posix.o libposix.o
+OBJECTS=crt1.o msvc.o win_posix.o vfs_posix.o libposix.o
 WINDIR=/C/WINDOWS/system32
 GCCDIR=../mingw/gcc
 TRACEDIR=../libtrace
@@ -18,10 +18,10 @@ all: ${LIBPOSIX}
 crt1.o: crt1.c
 	gcc -c ${CFLAGS} $<
 
-win_posix.o: win/win.c
+msvc.o: msvc.c
 	gcc -c ${CFLAGS} -I${MINGW}/include -o $@ $<
 
-msvc_posix.o: msvc/msvc.c
+win_posix.o: win/win.c
 	gcc -c ${CFLAGS} -I${MINGW}/include -o $@ $<
 
 vfs_posix.o: vfs/vfs.c

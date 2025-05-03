@@ -35,11 +35,11 @@
 PVOID 
 win_malloc(ULONG Size)
 {
-	ULONG ulSize = MIN_BUFSIZE;
+	ULONG ulSize = __Globals->PageSize;
 	HLOCAL hLocal = NULL;
 
 	while (ulSize <= Size){
-		ulSize += MIN_BUFSIZE;
+		ulSize += __Globals->PageSize;
 	}
 	hLocal = LocalAlloc(LMEM_FIXED | LMEM_ZEROINIT, ulSize + sizeof(ULONG));
 	*(ULONG *)hLocal = ulSize;
@@ -53,7 +53,7 @@ win_realloc(PVOID Buffer, ULONG Size)
 
 	if (Size >= ulSize){
 		while (ulSize <= Size){
-			ulSize += MIN_BUFSIZE;
+			ulSize += __Globals->PageSize;
 		}
 		/* I know this was allocated as LMEM_FIXED, but I would like you 
 		 * to move it anyway. Trust me on this. (Raymond Chen, Stack Overflow, 2013)

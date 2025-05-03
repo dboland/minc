@@ -43,7 +43,7 @@ DiskCreateFile(WIN_NAMEIDATA *Path, WIN_FLAGS *Flags, WIN_MODE *Mode, WIN_VNODE 
 	SECURITY_ATTRIBUTES sa = {sizeof(sa), &sd, FALSE};
 
 	Flags->Access |= WRITE_DAC | WRITE_OWNER;		/* disk_fchown() */
-	if (!win_acl_get_file(win_dirname(szDirName, Path->Resolved), &wControl.Source)){
+	if (!win_acl_get_file(vfs_dirname(szDirName, Path->Resolved), &wControl.Source)){
 		return(FALSE);
 	}else if (!vfs_acl_init(&wControl, Path->MountId, Mode->Special, &sd)){
 		WIN_ERR("vfs_acl_init(%s): %s\n", szDirName, win_strerror(GetLastError()));

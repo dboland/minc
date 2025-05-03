@@ -37,25 +37,25 @@ PDOLookupBus(LPCWSTR BusName, DWORD Class)
 {
 	DWORD dwResult = Class;
 
-	if (!win_wcsncmp(BusName, L"PCI", 3)){
+	if (!wcsncmp(BusName, L"PCI", 3)){
 		dwResult |= DEV_BUS_PCI;
 
-	}else if (!win_wcsncmp(BusName, L"USB", 3)){
+	}else if (!wcsncmp(BusName, L"USB", 3)){
 		dwResult |= DEV_BUS_USB;
 
-	}else if (!win_wcscmp(BusName, L"HID")){
+	}else if (!wcscmp(BusName, L"HID")){
 		dwResult |= DEV_BUS_USB;
 
-	}else if (!win_wcscmp(BusName, L"ACPI")){
+	}else if (!wcscmp(BusName, L"ACPI")){
 		dwResult |= DEV_BUS_ACPI;
 
-	}else if (!win_wcscmp(BusName, L"IDE")){
+	}else if (!wcscmp(BusName, L"IDE")){
 		dwResult |= DEV_BUS_IDE;
 
-	}else if (!win_wcscmp(BusName, L"SCSI")){
+	}else if (!wcscmp(BusName, L"SCSI")){
 		dwResult |= DEV_BUS_SCSI;
 
-	}else if (!win_wcscmp(BusName, L"FDC")){
+	}else if (!wcscmp(BusName, L"FDC")){
 		dwResult |= DEV_BUS_FDC;
 
 	}
@@ -66,10 +66,10 @@ PDOLookupService(LPCWSTR Service, DWORD Bus)
 {
 	DWORD dwResult = Bus;
 
-	if (!win_wcscmp(Service, L"Serial")){
+	if (!wcscmp(Service, L"Serial")){
 		dwResult |= DEV_CLASS_SERIAL;
 
-	}else if (!win_wcscmp(Service, L"Parport")){
+	}else if (!wcscmp(Service, L"Parport")){
 		dwResult |= DEV_CLASS_PRINTER;
 
 	}
@@ -80,63 +80,63 @@ PDOLookup(LPCWSTR Bus, LPCWSTR Class, LPCWSTR Service)
 {
 	DWORD dwResult = DEV_CLASS_DULL;
 
-	if (!win_wcscmp(Class, L"diskdrive")){
+	if (!wcscmp(Class, L"diskdrive")){
 		dwResult = PDOLookupBus(Bus, DEV_CLASS_DISK);
 
-	}else if (!win_wcscmp(Class, L"cdrom")){
+	}else if (!wcscmp(Class, L"cdrom")){
 		dwResult = PDOLookupBus(Bus, DEV_CLASS_DISK);
 
-	}else if (!win_wcscmp(Class, L"floppydisk")){
+	}else if (!wcscmp(Class, L"floppydisk")){
 		dwResult = PDOLookupBus(Bus, DEV_CLASS_DISK);
 
-	}else if (!win_wcscmp(Class, L"net")){
+	}else if (!wcscmp(Class, L"net")){
 		dwResult = PDOLookupBus(Bus, DEV_CLASS_IFNET);
 
-	}else if (!win_wcscmp(Class, L"display")){
+	}else if (!wcscmp(Class, L"display")){
 		dwResult = PDOLookupBus(Bus, DEV_CLASS_DISPLAY);
 
-	}else if (!win_wcscmp(Class, L"keyboard")){
+	}else if (!wcscmp(Class, L"keyboard")){
 		dwResult = PDOLookupBus(Bus, DEV_CLASS_KEYBOARD);
 
-	}else if (!win_wcscmp(Class, L"mouse")){
+	}else if (!wcscmp(Class, L"mouse")){
 		dwResult = PDOLookupBus(Bus, DEV_CLASS_MOUSE);
 
-	}else if (!win_wcscmp(Class, L"media")){
+	}else if (!wcscmp(Class, L"media")){
 		dwResult = PDOLookupBus(Bus, DEV_CLASS_MEDIA);
 
-	}else if (!win_wcscmp(Class, L"image")){
+	}else if (!wcscmp(Class, L"image")){
 		dwResult = PDOLookupBus(Bus, DEV_CLASS_MEDIA);
 
-	}else if (!win_wcscmp(Class, L"volume")){
+	}else if (!wcscmp(Class, L"volume")){
 		dwResult = PDOLookupBus(Bus, DEV_CLASS_STORAGE);
 
-	}else if (!win_wcscmp(Class, L"ports")){
+	}else if (!wcscmp(Class, L"ports")){
 		dwResult = PDOLookupService(Service, DEV_BUS_ISA);
 
-	}else if (!win_wcscmp(Service, L"usbprint")){	/* no "Printer" class for USB */
+	}else if (!wcscmp(Service, L"usbprint")){	/* no "Printer" class for USB */
 		dwResult = DEV_TYPE_USBPRINT;
 
-	}else if (!win_wcscmp(Class, L"usb")){
+	}else if (!wcscmp(Class, L"usb")){
 		dwResult = PDOLookupBus(Bus, DEV_CLASS_USB);
 
 		/* Vista */
 
-	}else if (!win_wcscmp(Class, L"hdc")){
+	}else if (!wcscmp(Class, L"hdc")){
 		dwResult = PDOLookupBus(Bus, DEV_CLASS_DISK);
 
-	}else if (!win_wcscmp(Class, L"printqueue")){
+	}else if (!wcscmp(Class, L"printqueue")){
 		dwResult = PDOLookupBus(Bus, DEV_CLASS_PRINTER);
 
-	}else if (!win_wcscmp(Class, L"monitor")){
+	}else if (!wcscmp(Class, L"monitor")){
 		dwResult = PDOLookupBus(Bus, DEV_CLASS_DISPLAY);
 
-	}else if (!win_wcscmp(Class, L"camera")){
+	}else if (!wcscmp(Class, L"camera")){
 		dwResult = PDOLookupBus(Bus, DEV_CLASS_MEDIA);
 
-	}else if (!win_wcscmp(Class, L"audioendpoint")){
+	}else if (!wcscmp(Class, L"audioendpoint")){
 		dwResult = DEV_TYPE_AUDIO;
 
-	}else if (!win_wcscmp(Class, L"processor")){
+	}else if (!wcscmp(Class, L"processor")){
 		dwResult = DEV_TYPE_PROCESSOR;
 
 	}else{

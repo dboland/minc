@@ -15,7 +15,7 @@
 #include "dev_types.h"
 #include "vfs_types.h"
 
-#include "libtrace.h"
+#include "../libtrace/libtrace.h"
 
 LPSTR win_strsid(PSID Sid);
 LPSTR win_strerror(HRESULT Error);
@@ -189,6 +189,15 @@ wtrace_SID_RIGHTS(LPCSTR Name, LPSTR Buffer)
 		printf(Buffer);
 	}
 }
+VOID 
+wtrace_SYSTEM_INFO(LPSTR Buffer)
+{
+	SYSTEM_INFO sInfo;
+
+	GetSystemInfo(&sInfo);
+	win_SYSTEM_INFO(Buffer, "GetSystemInfo", &sInfo);
+	printf(Buffer);
+}
 
 /************************************************************/
 
@@ -221,6 +230,9 @@ win_ktrace(STRUCT_TYPE Type, LONG Size, PVOID Data)
 			break;
 		case STRUCT_SID_RIGHTS:
 			wtrace_SID_RIGHTS((LPCSTR)Data, pszBuffer);
+			break;
+		case STRUCT_SYSTEM_INFO:
+			wtrace_SYSTEM_INFO(pszBuffer);
 			break;
 	}
 	LocalFree(pszBuffer);

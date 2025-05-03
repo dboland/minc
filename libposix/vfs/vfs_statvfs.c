@@ -64,10 +64,10 @@ VfsLinkType(LPWSTR BusName)
 
 	if (!*BusName){
 		dwType = FS_TYPE_LINK;
-		win_wcscpy(BusName, L"LINK");
-	}else if (!win_wcscmp(BusName, L"Volume")){
+		wcscpy(BusName, L"LINK");
+	}else if (!wcscmp(BusName, L"Volume")){
 		dwType = FS_TYPE_VOLUME;
-	}else if (!win_wcsncmp(BusName, L"NP", 2)){
+	}else if (!wcsncmp(BusName, L"NP", 2)){
 		dwType = FS_TYPE_NPF;
 	}
 	return(dwType);
@@ -134,16 +134,16 @@ VfsQueryDosDevice(LPCWSTR DosPath, LPWSTR Result)
 BOOL 
 vfs_setvfs(WIN_CFDATA *Config, DWORD Flags)
 {
-	DWORD dwCount = MIN_BUFSIZE * 4;
-	LPWSTR pszBuffer = win_malloc(dwCount * sizeof(WCHAR));
+	DWORD dwSize = __Globals->PageSize;
+	LPWSTR pszBuffer = win_malloc(dwSize * sizeof(WCHAR));
 
 	ZeroMemory(Config, sizeof(WIN_CFDATA));
-	while (!QueryDosDeviceW(NULL, pszBuffer, dwCount)){
+	while (!QueryDosDeviceW(NULL, pszBuffer, dwSize)){
 		if (ERROR_INSUFFICIENT_BUFFER == GetLastError()){
-			dwCount += MIN_BUFSIZE;
-			pszBuffer = win_realloc(pszBuffer, dwCount * sizeof(WCHAR));
+			dwSize += __Globals->PageSize;
+			pszBuffer = win_realloc(pszBuffer, dwSize * sizeof(WCHAR));
 		}else{
-			WIN_ERR("QueryDosDevice(%d): %s\n", dwCount, win_strerror(GetLastError()));
+			WIN_ERR("QueryDosDevice(%d): %s\n", dwSize, win_strerror(GetLastError()));
 			win_free(pszBuffer);
 			return(FALSE);
 		}
@@ -171,7 +171,7 @@ vfs_getvfs(WIN_CFDATA *Config, DWORD Flags)
 		win_wcsucase(Config->BusName);
 		Config->NtName = win_basename(Config->NtPath);
 		Config->DosPath = pszNext;
-		Config->Next += win_wcslen(pszNext) + 1;
+		Config->Next += wcslen(pszNext) + 1;
 		bResult = TRUE;
 	}
 	return(bResult);

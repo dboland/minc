@@ -43,7 +43,7 @@ pathnp_posix(char *dest, LPCWSTR Source, LONG Size, BOOL EndPtr)
 	char buf[PATH_MAX], *src = buf;
 	DWORD dwType = 0;
 
-	if (!win_wcsncmp(Source, PROCESS_ROOT, 14)){
+	if (!wcsncmp(Source, PROCESS_ROOT, 14)){
 		Source += 14;
 	}
 	win_wcstombs(src, Source, Size);
@@ -100,7 +100,7 @@ pathp_posix(char *dest, LPCWSTR Source)
 const char *
 root_win(WIN_NAMEIDATA *Result, const char *path)
 {
-	if (!win_strncmp(path, "/proc/", 6)){		/* vim.exe */
+	if (!strncmp(path, "/proc/", 6)){		/* vim.exe */
 		Result->R = win_wcpcpy(Result->Resolved, PROCESS_ROOT);
 		path += 6;
 	}else{
@@ -118,7 +118,7 @@ pathat_win(WIN_NAMEIDATA *Result, int dirfd, const char *path, int atflags)
 	DWORD dwFlags = WIN_FOLLOW;
 
 	if (pwTask->TracePoints & KTRFAC_NAMEI){
-		ktrace_NAMEI(pwTask, path, win_strlen(path));
+		ktrace_NAMEI(pwTask, path, strlen(path));
 	}
 
 	if (atflags & AT_SYMLINK_NOFOLLOW){

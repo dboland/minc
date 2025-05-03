@@ -28,7 +28,7 @@
  *
  */
 
-#include <winnls.h>
+#include <winbase.h>
 
 /************************************************************/
 
@@ -100,26 +100,6 @@ win_wcscat(LPWSTR Destination, LPCWSTR Source)
 	}
 	win_wcscpy(Destination, Source);
 	return(pszResult);
-}
-LONG 
-win_wcslen(LPCWSTR String)
-{
-	LONG lResult = 0;
-
-	while (*String++){
-		lResult++;
-	}
-	return(lResult);
-}
-INT 
-win_wcsncmp(LPCWSTR String1, LPCWSTR String2, LONG Length)
-{
-	return(CompareStringW(LOCALE_USER_DEFAULT, NORM_IGNOREWIDTH, String1, Length, String2, Length) - 2);
-}
-INT 
-win_wcscmp(LPCWSTR String1, LPCWSTR String2)
-{
-	return(CompareStringW(LOCALE_USER_DEFAULT, NORM_IGNOREWIDTH, String1, -1, String2, -1) - 2);
 }
 LPWSTR 
 win_wcsncpy(LPWSTR Destination, LPCWSTR Source, LONG Length)

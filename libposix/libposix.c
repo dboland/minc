@@ -33,6 +33,9 @@
 #include <stdlib.h>
 #include <stddef.h>			/* offsetof() */
 
+#include <wchar.h>
+#include <ctype.h>
+
 #include "win/windows.h"		/* minimal Win32 */
 #include "win/winsock2.h"		/* minimal Windows Sockets v.2 */
 #include "win/iphlpapi.h"		/* minimal Network API */
@@ -71,6 +74,8 @@ u_long	__THREAD_FRAME;
 char 	*__PROGNAME;		/* ktrace.c */
 
 WIN_NAMEIDATA *path_win(WIN_NAMEIDATA *Path, const char *pathname, int flags);
+
+#define WIN_ERR		msvc_printf
 
 /* Hello Terry Davis */
 
