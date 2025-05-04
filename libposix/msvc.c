@@ -28,19 +28,26 @@
  *
  */
 
-#include "msvc_types.h"
+#include <stdio.h>
+#include <stdarg.h>
 
-int msvc_printf(const char *format, ...);
-void msvc_init(int *_argc, char ***_argv, char ***_env);
+#include "msvc_posix.h"
 
-/* internal.h */
+void 
+msvc_init(int *_argc, char ***_argv, char ***_env)
+{
+	_startupinfo info = {0};
 
-int __getmainargs(int *_Argc, char ***_Argv, char ***_Env, int _DoWildCard, _startupinfo *_StartInfo);
+	__getmainargs(_argc, _argv, _env, 0, &info);
+}
+int 
+msvc_printf(const char *format, ...)
+{
+	va_list args;
+	int result;
 
-/* stdlib.h */
-
-int rand(void);
-
-/* ctype.h */
-
-int tolower(int c);
+	va_start(args, format);
+	result = vfprintf(stderr, format, args);
+	va_end(args);
+	return(result);
+}

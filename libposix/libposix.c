@@ -31,7 +31,7 @@
 #include <stdarg.h>
 #include <stdint.h>
 #include <stdlib.h>
-#include <stddef.h>			/* offsetof() */
+#include <stddef.h>
 
 #include <wchar.h>
 #include <ctype.h>
@@ -128,6 +128,7 @@ WIN_NAMEIDATA *path_win(WIN_NAMEIDATA *Path, const char *pathname, int flags);
 #include "sys/sockio.c"
 #include "sys/ioctl.c"
 #include "sys/msg.c"
+#include "compat.c"
 #include "utime.c"
 #include "pwd.c"
 #include "grp.c"
@@ -136,7 +137,6 @@ WIN_NAMEIDATA *path_win(WIN_NAMEIDATA *Path, const char *pathname, int flags);
 #include "sys/file.c"
 #include "sys/kernel.c"
 #include "sys/sysctl.c"
-#include "compat.c"
 #include "kern/init_sysent.c"
 
 /****************************************************/

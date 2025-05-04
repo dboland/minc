@@ -195,9 +195,10 @@ WinFileAccess(LPSTR Buffer, ACCESS_MASK Access, DWORD Type)
 {
 	LPSTR psz = Buffer;
 
-	psz = WinGenericFlags(psz, Access, Type, "  generic");
-	psz = WinReservedFlags(psz, Access, Type, "  reserved");
-	psz = WinStandardFlags(psz, Access, Type, "  standard");
-	psz = WinSpecificFlags(psz, Access, Type, "  specific");
+	psz += sprintf(psz, "  Access(0x%x):\n", Access);
+	psz = WinGenericFlags(psz, Access, Type, "  + generic");
+	psz = WinReservedFlags(psz, Access, Type, "  + reserved");
+	psz = WinStandardFlags(psz, Access, Type, "  + standard");
+	psz = WinSpecificFlags(psz, Access, Type, "  + specific");
 	return(psz);
 }

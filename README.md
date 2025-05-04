@@ -7,6 +7,8 @@ MinC is a tiny kernel emulation (285Kb) which runs on Windows. The rest of the s
 taken from OpenBSD, version 6.1. This means that by installing MinC, you run OpenBSD 
 on your Windows machine at native speed.
 
+![MinC](MinC.png)
+
 To build MinC from scratch you need the MinGW GCC build tools. It is not advisable 
 to attempt this at the moment. The build process is not yet fully automated.
 

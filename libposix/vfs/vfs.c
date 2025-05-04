@@ -42,14 +42,9 @@
 
 #include <iphlpapi.h>	/* Win32 network api */
 
-#include <stdint.h>
-#include <stdlib.h>
-
-#include <ctype.h>
-
 #include "win_posix.h"
-#include "msvc_posix.h"
 #include "ntdll_posix.h"
+#include "msvc_posix.h"
 #include "ws2_types.h"
 #include "dev_types.h"
 #include "vfs_types.h"
@@ -105,6 +100,7 @@ CONST WCHAR	*__Clipboard;		/* Clipboard buffer */
 WIN_TASK	*__Process;
 
 BOOL proc_poll(WIN_TASK *Task);
+BOOL vfs_F_GETFL(HANDLE Handle, ACCESS_MASK *Result);
 
 #include "vfs_acl.c"
 #include "vfs_signal.c"

@@ -28,6 +28,9 @@
  *
  */
 
+/* exclude msvcrt.dll headers */
+#define WIN32_LEAN_AND_MEAN
+
 #include <winsock2.h>
 
 #include <ddk/ntapi.h>
@@ -35,8 +38,8 @@
 
 #include <ntsecapi.h>		/* LSA_HANDLE */
 #include <lmcons.h>		/* UNLEN */
-#include <stdio.h>
 
+#include "ntdll_posix.h"
 #include "win_types.h"
 #include "dev_types.h"
 #include "vfs_types.h"

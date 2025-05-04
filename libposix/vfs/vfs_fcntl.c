@@ -28,7 +28,7 @@
  *
  */
 
-#include <ddk/ntifs.h>
+#include <ddk/ntapi.h>
 
 /****************************************************/
 
@@ -110,6 +110,22 @@ vfs_F_SETFL(WIN_VNODE *Node, WIN_FLAGS *Flags)
 			Node->Attribs = Flags->Attribs;
 			Node->CloseExec = Flags->CloseExec;
 			bResult = TRUE;
+	}
+	return(bResult);
+}
+BOOL 
+vfs_F_GETFL(HANDLE Handle, ACCESS_MASK *Result)
+{
+	BOOL bResult = TRUE;
+	PUBLIC_OBJECT_BASIC_INFORMATION pobInfo;
+	ULONG ulSize = sizeof(PUBLIC_OBJECT_BASIC_INFORMATION);
+	NTSTATUS ntStatus;
+
+	ntStatus = NtQueryObject(Handle, ObjectBasicInformation, &pobInfo, ulSize, &ulSize);
+	if (NT_SUCCESS(ntStatus)){
+		*Result = pobInfo.GrantedAccess;
+	}else{
+		bResult = FALSE;
 	}
 	return(bResult);
 }

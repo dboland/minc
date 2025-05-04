@@ -35,7 +35,7 @@ VfsFileAttribs(LPSTR Buffer, DWORD Attribs)
 {
 	LPSTR psz = Buffer;
 
-	psz += sprintf(psz, "+ Attribs([0x%x]", Attribs);
+	psz += sprintf(psz, "  Attribs([0x%x]", Attribs);
 	if (Attribs != -1){
 		psz = WinFlagName(psz, FILE_FLAG_BACKUP_SEMANTICS, "BACKUP_SEMANTICS", Attribs, &Attribs);
 		psz = WinFlagName(psz, FILE_FLAG_OVERLAPPED, "OVERLAPPED", Attribs, &Attribs);

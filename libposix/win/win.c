@@ -28,11 +28,11 @@
  *
  */
 
-/* shlobj.h */
-#define _WIN32_WINNT	_WIN32_WINNT_WINXP
-
 /* exclude msvcrt.dll headers */
 #define WIN32_LEAN_AND_MEAN
+
+/* shlobj.h */
+#define _WIN32_WINNT	_WIN32_WINNT_WINXP
 
 /* ddk/winddk.h (prevent dllimport decoration) */
 #define NTOSAPI

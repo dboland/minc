@@ -39,7 +39,6 @@
 #include "char_fcntl.c"
 #include "char_unistd.c"
 #include "char_namei.c"
-//#include "char_stat.c"
 #include "char_poll.c"
 #include "char_termio.c"
 #include "char_filio.c"

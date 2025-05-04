@@ -35,7 +35,7 @@ VfsFileFlags(LPSTR Buffer, DWORD Flags)
 {
 	LPSTR psz = Buffer;
 
-	psz += sprintf(psz, "+ Flags([0x%x]", Flags);
+	psz += sprintf(psz, "  Flags([0x%x]", Flags);
 	psz = WinFlagName(psz, HANDLE_FLAG_INHERIT, "INHERIT", Flags, &Flags);
 	psz = WinFlagName(psz, HANDLE_FLAG_PROTECT_FROM_CLOSE, "PROTECT_FROM_CLOSE", Flags, &Flags);
 	psz += sprintf(psz, "[0x%x])\n", Flags);

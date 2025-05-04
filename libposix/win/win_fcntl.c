@@ -30,14 +30,6 @@
 
 #include <ddk/ntapi.h>
 
-typedef struct _PUBLIC_OBJECT_BASIC_INFORMATION {
-	ULONG Attributes;
-	ACCESS_MASK GrantedAccess;
-	ULONG HandleCount;
-	ULONG PointerCount;
-	ULONG Reserved[10];    // reserved for internal use
-} PUBLIC_OBJECT_BASIC_INFORMATION, *PPUBLIC_OBJECT_BASIC_INFORMATION;
-
 /****************************************************/
 
 HANDLE 
@@ -67,7 +59,7 @@ win_F_SETFD(HANDLE Handle, DWORD Info)
 DWORD 
 win_F_GETFD(HANDLE Handle)
 {
-	DWORD dwResult = 0;
+	DWORD dwResult = -1;
 
 	if (!GetHandleInformation(Handle, &dwResult)){
 		WIN_ERR("win_F_GETFD(%d): %s\n", Handle, win_strerror(GetLastError()));
