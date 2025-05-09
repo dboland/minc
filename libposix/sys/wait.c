@@ -97,7 +97,7 @@ taskv_win(WIN_TASK *Parent, pid_t pid, WIN_TASK *Result[])
 void 
 rusage_posix(WIN_TASK *Task, WIN_RUSAGE *Usage, struct rusage *result)
 {
-	DWORDLONG dwlTime;
+//	DWORDLONG dwlTime;
 
 	Usage->KernelTime += Task->KernelTime;
 	Usage->UserTime += Task->UserTime;
@@ -105,10 +105,10 @@ rusage_posix(WIN_TASK *Task, WIN_RUSAGE *Usage, struct rusage *result)
 	vfs_getrusage_CHILDREN(Task->TaskId, Usage);
 
 	win_bzero(result, sizeof(struct rusage));
-	dwlTime = Usage->UserTime;
-	rtime_posix(&result->ru_utime, &dwlTime);
-	dwlTime = Usage->KernelTime;
-	rtime_posix(&result->ru_stime, &dwlTime);
+//	dwlTime = Usage->UserTime;
+	rtime_posix(&result->ru_utime, &Usage->UserTime);
+//	dwlTime = Usage->KernelTime;
+	rtime_posix(&result->ru_stime, &Usage->KernelTime);
 
 	if (Task->TracePoints & KTRFAC_STRUCT){
 		ktrace_STRUCT(Task, "rusage", 6, result, sizeof(struct rusage));

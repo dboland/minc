@@ -62,6 +62,8 @@ WaitNoHang(WIN_TASK *Children[], DWORD Status, WIN_RUSAGE *Result)
 		}else if (pwTask->Status & Status){
 			Result->TaskId = pwTask->TaskId;
 			Result->Status = pwTask->Status;
+			Result->UserTime += pwTask->UserTime;
+			Result->KernelTime += pwTask->KernelTime;
 			return(TRUE);
 		}
 	}

@@ -74,11 +74,12 @@ SID_AND_ATTRIBUTES *
 CapAddGroups(SID_AND_ATTRIBUTES Entry[], ULONG SubAuth, SID8 Groups[], DWORD Count, DWORD Attribs, DWORD *Result)
 {
 	DWORD dwIndex = 0;
+	DWORD dwAttribs = SE_GROUP_ENABLED;
 
 	while (dwIndex < Count){
 		if (Groups->SubAuthority[0] == SubAuth){
 			Entry->Sid = Groups;
-			Entry->Attributes = Attribs;
+			Entry->Attributes = dwAttribs | Attribs;
 			*Result += 1;
 			Entry++;
 		}
@@ -98,19 +99,17 @@ CapMergeGroups(PTOKEN_GROUPS Source, SID8 Groups[], DWORD Count)
 	DWORD dwResult = 0;
 	ULONG ulSubAuth, ulLast = -1;
 	SID8 *pSid;
-	DWORD dwAttribs;
 
 	while (dwIndex < Source->GroupCount){
 		pSid = Source->Groups[dwIndex].Sid;
-		dwAttribs = Source->Groups[dwIndex].Attributes;
 		ulSubAuth = pSid->SubAuthority[0];
 		if (ulSubAuth != ulLast){
 			if (EqualPrefixSid(pSid, __SidMachine)){
-				ptEntry = CapAddGroups(ptEntry, ulSubAuth, Groups, Count, SE_GROUP_ENABLED | SE_GROUP_MANDATORY, &dwResult);
+				ptEntry = CapAddGroups(ptEntry, ulSubAuth, Groups, Count, SE_GROUP_MANDATORY, &dwResult);
 			}else if (EqualPrefixSid(pSid, &SidBuiltinAuth)){
-				ptEntry = CapAddGroups(ptEntry, ulSubAuth, Groups, Count, SE_GROUP_ENABLED | SE_GROUP_OWNER, &dwResult);
+				ptEntry = CapAddGroups(ptEntry, ulSubAuth, Groups, Count, SE_GROUP_OWNER, &dwResult);
 			}else if (EqualPrefixSid(pSid, &SidNTAuth)){
-				ptEntry = CapAddGroups(ptEntry, ulSubAuth, Groups, Count, SE_GROUP_ENABLED | SE_GROUP_ENABLED_BY_DEFAULT, &dwResult);
+				ptEntry = CapAddGroups(ptEntry, ulSubAuth, Groups, Count, SE_GROUP_ENABLED_BY_DEFAULT, &dwResult);
 //			}else if (EqualPrefixSid(pSid, &SidIntegrityAuth)){
 //				ptEntry = CapAddGroups(ptEntry, ulSubAuth, Groups, Count, dwAttribs, &dwResult);
 			}else{

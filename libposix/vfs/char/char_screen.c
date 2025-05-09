@@ -274,7 +274,6 @@ screen_write(HANDLE Handle, LPCSTR Buffer, DWORD Size, DWORD *Result)
 	if (dwMode & ENABLE_VIRTUAL_TERMINAL_PROCESSING){
 		bResult = WriteFile(Handle, Buffer, Size, &dwResult, NULL);
 	}else if (!ScreenRenderWindow(Handle, psbInfo)){
-//	}else if (!GetConsoleScreenBufferInfo(Handle, psbInfo)){
 		return(FALSE);
 	}else while (dwResult < Size){
 		__Char = *Buffer;

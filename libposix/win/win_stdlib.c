@@ -35,13 +35,14 @@
 PVOID 
 win_malloc(ULONG Size)
 {
-	ULONG ulSize = __Globals->PageSize;
+	ULONG ulSize = 0;
 	HLOCAL hLocal = NULL;
 
-	while (ulSize <= Size){
+	Size += sizeof(ULONG);
+	while (ulSize < Size){
 		ulSize += __Globals->PageSize;
 	}
-	hLocal = LocalAlloc(LMEM_FIXED | LMEM_ZEROINIT, ulSize + sizeof(ULONG));
+	hLocal = LocalAlloc(LMEM_FIXED | LMEM_ZEROINIT, ulSize);
 	*(ULONG *)hLocal = ulSize;
 	return(hLocal + sizeof(ULONG));
 }
@@ -51,14 +52,15 @@ win_realloc(PVOID Buffer, ULONG Size)
 	HLOCAL hLocal = Buffer - sizeof(ULONG);
 	ULONG ulSize = *(ULONG *)hLocal;
 
-	if (Size >= ulSize){
-		while (ulSize <= Size){
+	Size += sizeof(ULONG);
+	if (Size > ulSize){
+		while (ulSize < Size){
 			ulSize += __Globals->PageSize;
 		}
 		/* I know this was allocated as LMEM_FIXED, but I would like you 
 		 * to move it anyway. Trust me on this. (Raymond Chen, Stack Overflow, 2013)
 		 */
-		if (hLocal = LocalReAlloc(hLocal, ulSize + sizeof(ULONG), LMEM_MOVEABLE)){
+		if (hLocal = LocalReAlloc(hLocal, ulSize, LMEM_MOVEABLE)){
 			*(ULONG *)hLocal = ulSize;
 		}else{
 			WIN_ERR("LocalReAlloc(%d): %s\n", ulSize, win_strerror(GetLastError()));

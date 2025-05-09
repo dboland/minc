@@ -41,13 +41,13 @@ env_win(char *const envp[])
 	int size = 0;
 	int len;
 	char *entry = NULL;
-	PVOID pvResult = win_malloc(0x4000);
-	char *p = pvResult;
+	PVOID pvResult = win_malloc(PATH_MAX);
+	char *p;
 
 	/* Keep Windows "Path" variable on top (login_passwd.exe).
 	 * Keep Windows "SystemRoot" variable, needed for WSASocket().
 	 */
-	p = win_stpcpy(p, __Globals->Path) + 1;
+	p = win_stpcpy(pvResult, __Globals->Path) + 1;
 	p = win_stpcpy(p, __Globals->SystemRoot) + 1;
 	while (entry = *envp++){
 		if (!strncmp(entry, "SystemRoot=", 11)){
@@ -61,32 +61,32 @@ env_win(char *const envp[])
 		p = pvResult + size;
 		p = win_stpcpy(p, entry) + 1;
 	}
-//	*p = 0;
 	return(pvResult);
 }
 LPSTR 
 argv_win(WIN_TASK *Task, const char *command, char *const argv[])
 {
-	LPSTR pszResult = win_malloc(PATH_MAX);
-	char *p;
 	int size = 0;
 	int len;
 	int maxbuf = MAX_ARGBUF - (MAX_ARGBUF % __Globals->PageSize);
+	LPSTR pszResult = win_malloc(PATH_MAX);
 	char *arg = *argv++;		/* skip first argument (unresolved command) */
+	char *p;
 
 	p = win_stpcpy(pszResult, command);
-	size = p - pszResult;
 	while (arg = *argv++){
-		len = strlen(arg) + 3;
-		pszResult = win_realloc(pszResult, size + len);
-		p = pszResult + size;
-		p = stpquot(p, arg);
 		size = p - pszResult;
-		/* maximum for CreateProcess(), rounded to nearest block */
-		if (size >= maxbuf){		/* xargs.exe */
+		len = strlen(arg) + 3;
+		/* maximum for CreateProcess(), 
+		 * rounded to nearest block (xargs.exe)
+		 */
+		if ((size + len) > maxbuf){
 			WIN_ERR("+ warning: %s: Too many arguments\n", command);
 			break;
 		}
+		pszResult = win_realloc(pszResult, size + len);
+		p = pszResult + size;
+		p = stpquot(p, arg);
 	}
 	if (Task->TracePoints & KTRFAC_NAMEI){
 		ktrace_NAMEI(Task, pszResult, size);
@@ -642,11 +642,11 @@ syscall_enter(call_t call)
 	WIN_TASK *pwTask = &__Tasks[CURRENT];
 	LONGLONG llTime = pwTask->ClockTime;
 
-	if (win_clock_gettime_MONOTONIC(&pwTask->ClockTime)){	/* nanoseconds */
-		pwTask->UserTime += pwTask->ClockTime - llTime;
-	}
 	if (pwTask->TracePoints & KTRFAC_SYSCALL){
 		ktrace_SYSCALL(pwTask, code, ent->sy_argsize, &call.Base + 1);
+	}
+	if (win_clock_gettime_MONOTONIC(&pwTask->ClockTime)){	/* nanoseconds */
+		pwTask->UserTime += (pwTask->ClockTime - llTime);
 	}
 	if (pwTask->Timer){		/* ftp.exe */
 		WaitForSingleObjectEx(__Interrupt, 0, TRUE);
@@ -670,7 +670,7 @@ syscall_leave(call_t call)
 		pwTask->Error = -result;
 	}
 	if (win_clock_gettime_MONOTONIC(&pwTask->ClockTime)){	/* nanoseconds */
-		pwTask->KernelTime += pwTask->ClockTime - llTime;
+		pwTask->KernelTime += (pwTask->ClockTime - llTime);
 	}
 	/* Note: WriteFile() will touch the %edx register.
 	 */

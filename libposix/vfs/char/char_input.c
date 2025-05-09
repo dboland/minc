@@ -117,6 +117,8 @@ InputKey(KEY_EVENT_RECORD *Event, WIN_TERMIO *Attribs, CHAR *Buffer)
 		*Buffer = 0;
 	}else if (VK == VK_RETURN){
 		bResult = InputReturn(Event->dwControlKeyState, Attribs, Buffer);
+	}else if (VK == VK_TAB){
+		bResult = InputTabulator(Event->dwControlKeyState, Buffer);
 	}else if (CH){
 		bResult = InputChar(CH, Event->dwControlKeyState, Buffer);
 	}else if (VK == VK_INSERT){
