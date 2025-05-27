@@ -44,7 +44,7 @@ PDOLookupBus(LPCWSTR BusName, DWORD Class)
 		dwResult |= DEV_BUS_USB;
 
 	}else if (!wcscmp(BusName, L"HID")){
-		dwResult |= DEV_BUS_USB;
+		dwResult |= DEV_BUS_HID;
 
 	}else if (!wcscmp(BusName, L"ACPI")){
 		dwResult |= DEV_BUS_ACPI;
@@ -71,6 +71,11 @@ PDOLookupService(LPCWSTR Service, DWORD Bus)
 
 	}else if (!wcscmp(Service, L"Parport")){
 		dwResult |= DEV_CLASS_PRINTER;
+
+		/* Vista */
+
+	}else if (!wcsncmp(Service, L"BTH", 3)){
+		dwResult |= DEV_CLASS_BLUETOOTH;
 
 	}
 	return(dwResult);
@@ -119,10 +124,16 @@ PDOLookup(LPCWSTR Bus, LPCWSTR Class, LPCWSTR Service)
 	}else if (!wcscmp(Class, L"usb")){
 		dwResult = PDOLookupBus(Bus, DEV_CLASS_USB);
 
+	}else if (!wcscmp(Class, L"hidclass")){
+		dwResult = PDOLookupBus(Bus, DEV_CLASS_HID);
+
 		/* Vista */
 
 	}else if (!wcscmp(Class, L"hdc")){
 		dwResult = PDOLookupBus(Bus, DEV_CLASS_DISK);
+
+	}else if (!wcscmp(Class, L"bluetooth")){
+		dwResult = PDOLookupBus(Bus, DEV_CLASS_BLUETOOTH);
 
 	}else if (!wcscmp(Class, L"printqueue")){
 		dwResult = PDOLookupBus(Bus, DEV_CLASS_PRINTER);

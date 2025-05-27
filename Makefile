@@ -1,17 +1,42 @@
 .DEFAULT:
 .SUFFIXES:
 
+usage:
+	@echo "usage: make TARGET"
+	@echo
+	@echo "Targets:"
+	@echo " all			build all targets"
+	@echo " kernel			build libposix only"
+	@echo " libs			build BSD system libraries only"
+	@echo " includes		install header files locally"
+	@echo " sbin			buid MinC system programs only"
+
+%.d: %
+	@${MAKE} -C $<
+
 all: Makefile.inc mount.sh
 	@${MAKE} -C openbsd includes-local
 	@${MAKE} -C mingw all install-local
+	@${MAKE} -C libtrace all
 	@${MAKE} -C libposix all install-local
 	@${MAKE} -C openbsd all install-local
 
+kernel:
+	@${MAKE} -C libposix all install-local
+
+includes:
+	@${MAKE} -C openbsd includes-local
+
+libs: openbsd.d
+
+sbin: libtrace.d
+	@${MAKE} -C sbin all install
+
 Makefile.inc:
-	cp Makefile.inc.sample Makefile.inc
+	/bin/cp Makefile.inc.sample Makefile.inc
 
 mount.sh:
-	cp mount.sh.sample mount.sh
+	/bin/cp mount.sh.sample mount.sh
 
 clean:
 	@${MAKE} -C libposix clean

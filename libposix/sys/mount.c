@@ -67,24 +67,19 @@ fstype_posix(char *type, void *options, LPWSTR TypeName)
 	return(type);
 }
 u_int32_t 
-fsflags_posix(DWORD Flags)
+fsflags_posix(LARGE_INTEGER *Flags)
 {
-	u_int32_t result = 0;
+	u_int32_t result = Flags->HighPart;
+	DWORD dwFlags = Flags->LowPart;
 
-	if (Flags & FILE_READ_ONLY_VOLUME){
+	if (dwFlags & FILE_READ_ONLY_VOLUME){
 		result |= MNT_RDONLY;
 	}
-	if (!(Flags & FILE_PERSISTENT_ACLS)){
+	if (!(dwFlags & FILE_PERSISTENT_ACLS)){
 		result |= MNT_NOSUID;
 	}
-	if (Flags & FILE_VOLUME_QUOTAS){
+	if (dwFlags & FILE_VOLUME_QUOTAS){
 		result |= MNT_QUOTA;
-	}
-	if (Flags & FILE_VOLUME_MNT_DOOMED){
-		result |= MNT_DOOMED;
-	}
-	if (Flags & FILE_VOLUME_MNT_ROOTFS){
-		result |= MNT_ROOTFS;
 	}
 	return(result);
 }
@@ -103,12 +98,6 @@ fsflags_win(u_int32_t flags)
 	if (flags & MNT_QUOTA){
 		dwResult |= FILE_VOLUME_QUOTAS;
 	}
-	if (flags & MNT_DOOMED){
-		dwResult |= FILE_VOLUME_MNT_DOOMED;
-	}
-	if (flags & MNT_ROOTFS){
-		dwResult |= FILE_VOLUME_MNT_ROOTFS;
-	}
 	return(dwResult);
 }
 struct statfs *
@@ -118,7 +107,7 @@ statfs_posix(struct statfs *buf, WIN_STATFS *Stat)
 
 	win_bzero(buf, sizeof(struct statfs));
 
-	buf->f_flags = fsflags_posix(Stat->Flags);
+	buf->f_flags = fsflags_posix(&Stat->Flags);
 	buf->f_namemax = Stat->MaxPath;
 	buf->f_bsize = Stat->BytesPerSector * Stat->SectorsPerCluster;
 	buf->f_blocks = Stat->ClustersTotal;
@@ -225,6 +214,9 @@ sys_mount(call_t call, const char *type, const char *dir, int flags, void *data)
 	if (!strcmp(type, MOUNT_NTFS)){
 		result = mount_NTFS(path_win(&wPath, dir, O_NOCROSS), dwFlags, (struct ntfs_args *)data);
 
+	}else if (!strcmp(type, "refs")){
+		result = mount_NTFS(path_win(&wPath, dir, O_NOCROSS), dwFlags, (struct ntfs_args *)data);
+
 	}else if (!strcmp(type, MOUNT_MSDOS)){
 		result = mount_MSDOS(path_win(&wPath, dir, O_NOCROSS), dwFlags, (struct msdosfs_args *)data);
 
@@ -291,7 +283,7 @@ sys_getfsstat(call_t call, struct statfs *buf, size_t bufsize, int flags)
 	WIN_MOUNT *pwMount = __Mounts;
 
 	while (dwIndex < WIN_MOUNT_MAX){
-		if (pwMount->Flags){
+		if (pwMount->Flags.QuadPart){
 			if (buf){
 				drive_statfs(pwMount, &fsInfo);
 				buf = statfs_posix(buf, &fsInfo);

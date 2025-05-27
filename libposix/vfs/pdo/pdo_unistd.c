@@ -113,6 +113,9 @@ pdo_revoke(WIN_DEVICE *Device)
 		case DEV_TYPE_CONSOLE:
 			bResult = char_revoke(Device);
 			break;
+		case DEV_TYPE_COM:
+			bResult = TRUE;
+			break;
 		default:
 			SetLastError(ERROR_BAD_DEVICE);
 	}

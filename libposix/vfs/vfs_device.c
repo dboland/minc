@@ -69,28 +69,19 @@ config_found(LPCSTR Name, DWORD FSType, DWORD FileType, WIN_DEVICE *Device)
 /****************************************************/
 
 BOOL 
-system_attach(WIN_DEVICE *Device)
+dull_attach(WIN_DEVICE *Device)
 {
 	BOOL bResult = TRUE;
 
 	switch (Device->DeviceType){
-		case DEV_TYPE_SWD:
-			bResult = config_found("swd", FS_TYPE_PDO, WIN_VCHR, Device);
+		case DEV_TYPE_ACPI:
+			bResult = config_found("acpi", FS_TYPE_PDO, WIN_VCHR, Device);
 			break;
 		case DEV_TYPE_PCI:
 			bResult = config_found("pci", FS_TYPE_PDO, WIN_VCHR, Device);
 			break;
-		case DEV_TYPE_IDE:
-			bResult = config_found("ide", FS_TYPE_PDO, WIN_VCHR, Device);
-			break;
-		case DEV_TYPE_ACPI:
-			bResult = config_found("acpi", FS_TYPE_PDO, WIN_VCHR, Device);
-			break;
-		case DEV_TYPE_EHCI:
-			bResult = config_found("ehci", FS_TYPE_PDO, WIN_VCHR, Device);
-			break;
 		default:
-			bResult = FALSE;
+			bResult = config_found("swd", FS_TYPE_PDO, WIN_VCHR, Device);
 	}
 	return(bResult);
 }
@@ -120,14 +111,14 @@ disk_attach(WIN_DEVICE *Device)
 		case DEV_TYPE_WDC:
 			bResult = config_found("wdc", FS_TYPE_PDO, WIN_VBLK, Device);
 			break;
-		case DEV_TYPE_SCSI:
-			bResult = config_found("scsi", FS_TYPE_PDO, WIN_VBLK, Device);
+		case DEV_TYPE_FDC:
+			bResult = config_found("fdc", FS_TYPE_PDO, WIN_VBLK, Device);
 			break;
 		case DEV_TYPE_USB:
 			bResult = config_found("usb", FS_TYPE_PDO, WIN_VBLK, Device);
 			break;
-		case DEV_TYPE_FDC:
-			bResult = config_found("fdc", FS_TYPE_PDO, WIN_VBLK, Device);
+		case DEV_TYPE_SCSI:
+			bResult = config_found("scsi", FS_TYPE_PDO, WIN_VBLK, Device);
 			break;
 		case DEV_TYPE_AHCI:
 			bResult = config_found("ahci", FS_TYPE_PDO, WIN_VBLK, Device);
@@ -208,7 +199,7 @@ com_attach(WIN_DEVICE *Device)
 	BOOL bResult = FALSE;
 
 	if (tty_attach(Device)){
-		bResult = config_found("serial", FS_TYPE_PDO, WIN_VCHR, Device);
+		bResult = config_found("pccom", FS_TYPE_PDO, WIN_VCHR, Device);
 	}
 	return(bResult);
 }
@@ -278,7 +269,7 @@ keyboard_attach(WIN_DEVICE *Device)
 		case DEV_TYPE_COMKBD:
 			bResult = config_found("comkbd", FS_TYPE_PDO, WIN_VCHR, Device);
 			break;
-		case DEV_TYPE_USBKBD:
+		case DEV_TYPE_HIDKBD:
 			bResult = config_found("ukbd", FS_TYPE_PDO, WIN_VCHR, Device);
 			break;
 		default:
@@ -295,7 +286,7 @@ mouse_attach(WIN_DEVICE *Device)
 		case DEV_TYPE_COMMOUSE:
 			bResult = config_found("comms", FS_TYPE_PDO, WIN_VCHR, Device);
 			break;
-		case DEV_TYPE_USBMOUSE:
+		case DEV_TYPE_HIDMOUSE:
 			bResult = config_found("ums", FS_TYPE_PDO, WIN_VCHR, Device);
 			break;
 		default:
@@ -312,14 +303,14 @@ storage_attach(WIN_DEVICE *Device)
 		case DEV_TYPE_FIXED:
 			bResult = config_found("vol", FS_TYPE_DRIVE, WIN_VBLK, Device);
 			break;
-		case DEV_TYPE_REMOVABLE:
-			bResult = config_found("sd", FS_TYPE_DRIVE, WIN_VBLK, Device);
-			break;
 		case DEV_TYPE_CDROM:
 			bResult = config_found("cd", FS_TYPE_DRIVE, WIN_VBLK, Device);
 			break;
 		case DEV_TYPE_FLOPPY:
 			bResult = config_found("fd", FS_TYPE_DRIVE, WIN_VBLK, Device);
+			break;
+		case DEV_TYPE_SD:
+			bResult = config_found("sd", FS_TYPE_DRIVE, WIN_VBLK, Device);
 			break;
 		case DEV_TYPE_REMOTE:
 			bResult = config_found("smb", FS_TYPE_DRIVE, WIN_VBLK, Device);
@@ -335,17 +326,31 @@ usb_attach(WIN_DEVICE *Device)
 	BOOL bResult = TRUE;
 
 	switch (Device->DeviceType){
-		case DEV_TYPE_HID:
-			bResult = config_found("hid", FS_TYPE_PDO, WIN_VCHR, Device);
-			break;
-		case DEV_TYPE_USBHUB:
-			bResult = config_found("uhub", FS_TYPE_PDO, WIN_VCHR, Device);
-			break;
 		case DEV_TYPE_UHCI:
 			bResult = config_found("uhci", FS_TYPE_PDO, WIN_VCHR, Device);
 			break;
+		case DEV_TYPE_USBT:
+			bResult = config_found("ubt", FS_TYPE_PDO, WIN_VCHR, Device);
+			break;
 		default:
-			bResult = FALSE;
+			bResult = config_found("uhub", FS_TYPE_PDO, WIN_VCHR, Device);
+	}
+	return(bResult);
+}
+BOOL 
+hid_attach(WIN_DEVICE *Device)
+{
+	BOOL bResult = TRUE;
+
+	switch (Device->DeviceType){
+		case DEV_TYPE_EHCI:
+			bResult = config_found("ehci", FS_TYPE_PDO, WIN_VCHR, Device);
+			break;
+		case DEV_TYPE_UHIDEV:
+			bResult = config_found("uhidev", FS_TYPE_PDO, WIN_VCHR, Device);
+			break;
+		default:
+			bResult = config_found("hid", FS_TYPE_PDO, WIN_VCHR, Device);
 	}
 	return(bResult);
 }
@@ -355,8 +360,8 @@ config_attach(WIN_DEVICE *Device, USHORT Class)
 	BOOL bResult = TRUE;
 
 	switch (Class){
-		case DEV_CLASS_SYSTEM:
-			bResult = system_attach(Device);
+		case DEV_CLASS_DULL:
+			bResult = dull_attach(Device);
 			break;
 		case DEV_CLASS_CPU:
 			bResult = cpu_attach(Device);
@@ -370,7 +375,7 @@ config_attach(WIN_DEVICE *Device, USHORT Class)
 		case DEV_CLASS_MEDIA:
 			bResult = media_attach(Device);
 			break;
-		case DEV_CLASS_SERIAL:
+		case DEV_CLASS_TTY:
 			bResult = serial_attach(Device);
 			break;
 		case DEV_CLASS_PRINTER:
@@ -390,6 +395,9 @@ config_attach(WIN_DEVICE *Device, USHORT Class)
 			break;
 		case DEV_CLASS_USB:
 			bResult = usb_attach(Device);
+			break;
+		case DEV_CLASS_HID:
+			bResult = hid_attach(Device);
 			break;
 		default:
 			bResult = FALSE;

@@ -5,7 +5,7 @@ RELEASE=6.1.0
 LDFLAGS= -s -Wl,--disable-auto-import -Wl,--enable-stdcall-fixup
 GCCLIB=/lib/gcc/mingw32/4.8.1
 WINLIB=/C/WINDOWS/system32
-PROGS=wrc mkent wtrace
+PROGS=wrc mkent wtrace mount_refs
 WINDIR=/C/WINDOWS/system32
 TRACELIB=../libtrace/libtrace.a
 
@@ -43,14 +43,18 @@ bsd.exe: bsd.o version.o
 console.exe: console.o libconsole.o
 	gcc ${LDFLAGS} -L${WINDIR} -o $@ console.o libconsole.o -lutil
 
+mount_refs: ${SRCDIR}/sbin/mount_ntfs/mount_ntfs.c
+	gcc -c ${CFLAGS} -I../include -I../openbsd/include -o $@ $<
+
 wrc: wrc.exe
 
 libwtrace.o: libwtrace.c
 	gcc -c ${CFLAGS} -I${MINGW}/include -I../include -I../libtrace -o $@ $<
 
 wtrace: wtrace.c libwtrace.o ${TRACELIB}
-	gcc -s ${CFLAGS} -I../include -o $@ $^ \
-	${MINGW}/lib/libadvapi32.a ${MINGW}/lib/libkernel32.a ${MINGW}/lib/libuser32.a
+	gcc -s ${CFLAGS} ${LDFLAGS} -I../include -o $@ $^ \
+	${MINGW}/lib/libadvapi32.a ${MINGW}/lib/libkernel32.a ${MINGW}/lib/libuser32.a \
+	${MINGW}/lib/libntdll.a
 
 install-local:
 	./mkent passwd >/etc/passwd

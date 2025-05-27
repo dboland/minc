@@ -209,7 +209,7 @@ args(int argc, char *argv[])
 {
 	int ch;
 
-	while ((ch = getopt(argc, argv, "t:kvbh")) > 0){
+	while ((ch = getopt(argc, argv, "tc:kvbh")) > 0){
 		switch (ch){
 		case 'v':
 			_verbose++;
@@ -225,6 +225,9 @@ args(int argc, char *argv[])
 			break;
 		case 't':
 			_term = optarg;
+			break;
+		case 'c':
+			_ctype = optarg;
 			break;
 		}
 	}

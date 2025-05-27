@@ -36,37 +36,26 @@
 /************************************************************/
 
 DWORD 
+DriveLookupDevice(LPCWSTR BusName)
+{
+	DWORD dwResult = DEV_CLASS_SYSTEM;
+
+	if (!wcsncmp(BusName, L"SCSI", 4)){
+		dwResult = DEV_TYPE_SD;
+
+	}else if (!wcscmp(BusName, L"LOG")){
+		dwResult = DEV_TYPE_LOG;
+
+	}
+	return(dwResult);
+}
+DWORD 
 DriveLookupStorage(LPCWSTR ClassName)
 {
 	DWORD dwResult = DEV_CLASS_STORAGE;
 
 	if (!wcsncmp(ClassName, L"Floppy", 6)){
 		dwResult |= DEV_BUS_FDC;
-
-//	}else if (!wcsncmp(ClassName, L"Harddisk", 8)){
-//		dwResult |= DEV_BUS_HDC;
-
-	}else if (!wcscmp(ClassName, L"Ide")){
-		dwResult |= DEV_BUS_IDE;
-
-	}
-	return(dwResult);
-}
-DWORD 
-DriveLookupDevice(LPCWSTR BusName)
-{
-	DWORD dwResult = DEV_CLASS_DISK;
-
-	if (!wcscmp(BusName, L"ROOT")){
-		dwResult = DEV_TYPE_ROOT;
-
-	}else if (!wcsncmp(BusName, L"SCSI", 4)){	/* IDE interface for SCSI device */
-		dwResult = DEV_TYPE_IDE;
-
-		/* Vista */
-
-	}else if (!wcscmp(BusName, L"LOG")){
-		dwResult = DEV_TYPE_LOG;
 
 	}
 	return(dwResult);
@@ -90,7 +79,7 @@ drive_statvfs(WIN_CFDATA *Config, DWORD Flags, WIN_CFDRIVER *Result)
 			Config->DeviceType = DriveLookupDevice(Config->BusName);
 			break;
 		case DRIVE_FIXED:
-			win_wcscpy(Result->ClassId, DEVINTERFACE_PARTITION);
+//			win_wcscpy(Result->ClassId, DEVINTERFACE_PARTITION);
 			Config->DeviceType = DEV_TYPE_FIXED;
 			break;
 		case DRIVE_CDROM:

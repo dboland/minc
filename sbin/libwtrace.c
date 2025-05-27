@@ -14,6 +14,7 @@
 #include "win_types.h"
 #include "dev_types.h"
 #include "vfs_types.h"
+#include "ntdll_posix.h"
 
 #include "../libtrace/libtrace.h"
 
@@ -21,6 +22,8 @@ LPSTR win_strsid(PSID Sid);
 LPSTR win_strerror(HRESULT Error);
 
 #define WIN_ERR		printf
+
+extern __import WIN_MOUNT	*__Mounts;
 
 /************************************************************/
 
@@ -61,7 +64,6 @@ wtrace_ACL_DESKTOP(LPSTR Buffer)
 	GetSecurityInfo(hObject, SE_WINDOW_OBJECT, DACL_SECURITY_INFORMATION, NULL, NULL, &Acl, NULL, &Sd);
 	if (Acl){
 		win_ACL(Buffer, "ACL Desktop", Acl, OB_TYPE_DESKTOP);
-		printf(Buffer);
 		LocalFree(Sd);
 	}else{
 		WIN_ERR("GetSecurityInfo(%d): %s\n", hObject, win_strerror(GetLastError()));
@@ -78,7 +80,6 @@ wtrace_ACL_STATION(LPSTR Buffer)
 	GetSecurityInfo(hObject, SE_WINDOW_OBJECT, DACL_SECURITY_INFORMATION, NULL, NULL, &Acl, NULL, &Sd);
 	if (Acl){
 		win_ACL(Buffer, "ACL WindowStation", Acl, OB_TYPE_WINDOW_STATION);
-		printf(Buffer);
 		LocalFree(Sd);
 	}else{
 		WIN_ERR("GetSecurityInfo(%d): %s\n", hObject, win_strerror(GetLastError()));
@@ -99,7 +100,6 @@ wtrace_ACL_PROCESS(LPSTR Buffer)
 		WIN_ERR("GetUserObjectSecurity(%d): %s\n", hProcess, win_strerror(GetLastError()));
 	}else{
 		win_SECURITY_DESCRIPTOR(psd, OB_TYPE_PROCESS, Buffer);
-		printf(Buffer);
 	}
 	LocalFree(psd);
 }
@@ -120,7 +120,6 @@ wtrace_ACL_FILE(LPCWSTR FileName, LPSTR Buffer)
 	}else{
 		printf("FileName: %ls\n", FileName);
 		win_SECURITY_DESCRIPTOR(psd, OB_TYPE_FILE, Buffer);
-		printf(Buffer);
 	}
 	LocalFree(psd);
 }
@@ -141,7 +140,6 @@ wtrace_ACL_OBJECT(LPCSTR Name, LPSTR Buffer)
 	}else{
 		printf("Resolved: %s\n", Name);
 		win_SECURITY_DESCRIPTOR(psd, OB_TYPE_PROCESS, Buffer);
-		printf(Buffer);
 	}
 	LocalFree(psd);
 }
@@ -154,7 +152,6 @@ wtrace_TOKEN_PROCESS(DWORD ProcessId, LPSTR Buffer)
 		WIN_ERR("GetCurrentProcess(%d): %s\n", ProcessId, win_strerror(GetLastError()));
 	}else{
 		win_TOKEN(hToken, Buffer);
-		printf(Buffer);
 		CloseHandle(hToken);
 	}
 }
@@ -167,7 +164,6 @@ wtrace_TOKEN_THREAD(DWORD ThreadId, LPSTR Buffer)
 		WIN_ERR("OpenThreadToken(%d): %s\n", ThreadId, win_strerror(GetLastError()));
 	}else{
 		win_TOKEN(hToken, Buffer);
-		printf(Buffer);
 		CloseHandle(hToken);
 	}
 }
@@ -186,7 +182,6 @@ wtrace_SID_RIGHTS(LPCSTR Name, LPSTR Buffer)
 	}else{
 		psz += sprintf(psz, "%s (%s: %s\\%s)\n", win_strsid(&sid), __STYPE[snuType], szDomain, Name);
 		win_SID_RIGHTS(psz, "Capabilities", &sid);
-		printf(Buffer);
 	}
 }
 VOID 
@@ -196,7 +191,15 @@ wtrace_SYSTEM_INFO(LPSTR Buffer)
 
 	GetSystemInfo(&sInfo);
 	win_SYSTEM_INFO(Buffer, "GetSystemInfo", &sInfo);
-	printf(Buffer);
+}
+VOID 
+wtrace_MOUNT(CHAR Char, LPSTR Buffer)
+{
+	DWORD dwMountId = MOUNTID(Char);
+	
+	if (!vfs_MOUNT(&__Mounts[dwMountId], Buffer)){
+		WIN_ERR("wtrace_MOUNT(%c): %s\n", Char, win_strerror(GetLastError()));
+	}
 }
 
 /************************************************************/
@@ -204,7 +207,7 @@ wtrace_SYSTEM_INFO(LPSTR Buffer)
 VOID 
 win_ktrace(STRUCT_TYPE Type, LONG Size, PVOID Data)
 {
-	LPSTR pszBuffer = LocalAlloc(LMEM_FIXED, Size);
+	LPSTR pszBuffer = LocalAlloc(LMEM_FIXED | LMEM_ZEROINIT, Size);
 
 	switch (Type){
 		case STRUCT_TOKEN_PROCESS:
@@ -234,6 +237,10 @@ win_ktrace(STRUCT_TYPE Type, LONG Size, PVOID Data)
 		case STRUCT_SYSTEM_INFO:
 			wtrace_SYSTEM_INFO(pszBuffer);
 			break;
+		case STRUCT_MOUNT:
+			wtrace_MOUNT(*(CHAR *)Data, pszBuffer);
+			break;
 	}
+	printf(pszBuffer);
 	LocalFree(pszBuffer);
 }

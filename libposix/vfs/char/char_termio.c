@@ -130,5 +130,6 @@ char_TIOCSCTTY(WIN_DEVICE *Device, WIN_TTY *Terminal)
 	Device->Event = Device->Input;
 	SetConsoleTextAttribute(Device->Output, BACKGROUND_BLACK | FOREGROUND_WHITE);
 	SetConsoleOutputCP(CP_UTF8);
+//	SetConsoleOutputCP(437);
 	return(TRUE);
 }

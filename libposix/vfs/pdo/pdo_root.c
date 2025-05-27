@@ -49,7 +49,7 @@ root_mount(WIN_DEVICE *Device, WIN_NAMEIDATA *Path, DWORD Flags, WIN_MODE *Mode)
 		pwMount->MountId = 0;
 		pwMount->DeviceId = Device->DeviceId;
 		pwMount->DeviceType = Device->DeviceType;
-		pwMount->Flags |= FILE_VOLUME_MNT_ROOTFS;
+		pwMount->Flags.HighPart |= WIN_MNT_ROOTFS;
 		GetSystemTimeAsFileTime(&pwMount->Time);
 		bResult = TRUE;
 	}

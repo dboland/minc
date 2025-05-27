@@ -7,7 +7,7 @@ IMPLIB=libposix.dll.a
 CFLAGS+=-I../include -g
 CFLAGS+=-DRELEASE=\"${RELEASE}\" -DVERSION=\"${VERSION}\" -DBUILD=${BUILD}
 #CFLAGS+=-Wunused
-LDFLAGS=-shared -s
+LDFLAGS+=-shared -s
 OBJECTS=crt1.o msvc.o win_posix.o vfs_posix.o libposix.o
 WINDIR=/C/WINDOWS/system32
 GCCDIR=../mingw/gcc

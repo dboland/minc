@@ -322,33 +322,47 @@ main(int argc, char *argv[])
 	}
 	if (!cmd){
 		print_usage(progname);
+
 	}else if (!strcmp(cmd, "group")){
 		mk_group(stdout);
+
 	}else if (!strcmp(cmd, "passwd")){
 		mk_passwd(stdout);
+
 	}else if (!strcmp(cmd, "fstab")){
 		mk_fstab(stdout);
+
 	}else if (!strcmp(cmd, "resolv")){
 		mk_resolv(stdout);
+
 	}else if (!strcmp(cmd, "pdo")){
 		mk_vfsent(FS_TYPE_PDO);
+
 	}else if (!strcmp(cmd, "vol")){
 		mk_vol(stdout);
+
 	}else if (!strcmp(cmd, "fdo")){
 		mk_vfsent(FS_TYPE_PROCESS);
+
 	}else if (!strcmp(cmd, "link")){
 		mk_vfsent(FS_TYPE_LINK);
+
 	}else if (!strcmp(cmd, "drive")){
 		mk_vfsent(FS_TYPE_DRIVE);
+
 	}else if (!strcmp(cmd, "npf")){
 		mk_vfsent(FS_TYPE_NPF);
+
 	}else if (!strcmp(cmd, "if")){
 		mk_ifent(FS_TYPE_WINSOCK);
+
 	}else if (!strcmp(cmd, "ndis")){
 		mk_ifent(FS_TYPE_NDIS);
+
 	}else{
 		printf("%s: no such entity.\n", cmd);
 		result = -1;
+
 	}
 	return(result);
 }

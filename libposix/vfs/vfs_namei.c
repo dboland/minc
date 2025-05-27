@@ -83,12 +83,12 @@ BOOL
 PathGlob(WIN_NAMEIDATA *Path, DWORD Flags)
 {
 	BOOL bResult = TRUE;
-	Path->Attribs = GetFileAttributesW(Path->Resolved);
+	DWORD dwAttribs = GetFileAttributesW(Path->Resolved);
 
-	switch (Path->Attribs){
-		case -1:
-			bResult = FALSE;
-			break;
+	Path->Attribs = dwAttribs;
+	if (dwAttribs == -1){
+		bResult = FALSE;
+	}else switch (FILE_CLASS(dwAttribs)){
 		case FILE_CLASS_INODE:
 			bResult = disk_lookup(Path, Flags);
 			break;

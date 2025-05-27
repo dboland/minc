@@ -307,6 +307,9 @@ AnsiCursorDown(HANDLE Handle, CONSOLE_SCREEN_BUFFER_INFO *Info, WORD Count)
 	COORD cPos = AnsiRenderCursor(Info);
 
 	cPos.Y += Count;
+	if (cPos.Y > Info->srWindow.Bottom){
+		cPos.Y = Info->srWindow.Bottom;
+	}
 	Info->dwCursorPosition = cPos;
 	return(SetConsoleCursorPosition(Handle, cPos));
 }
@@ -319,8 +322,12 @@ AnsiCursorForward(HANDLE Handle, CONSOLE_SCREEN_BUFFER_INFO *Info, WORD Count)
 	 */
 	cPos.X += Count;
 	if (cPos.X > Info->srWindow.Right){		/* lynx.exe */
-		cPos.X -= Info->srWindow.Right + 1;
-		cPos.Y++;
+		if (__CTTY->VEdit){
+			cPos.X -= Info->srWindow.Right + 1;
+			cPos.Y++;
+		}else{
+			cPos.X = Info->srWindow.Right;
+		}
 	}
 	Info->dwCursorPosition = cPos;
 	return(SetConsoleCursorPosition(Handle, cPos));
@@ -334,8 +341,12 @@ AnsiCursorBack(HANDLE Handle, CONSOLE_SCREEN_BUFFER_INFO *Info, WORD Count)
 	 */
 	cPos.X -= Count;
 	if (cPos.X < 0){				/* lynx.exe */
-		cPos.X += Info->srWindow.Right + 1;
-		cPos.Y--;
+		if (__CTTY->VEdit){
+			cPos.X += Info->srWindow.Right + 1;
+			cPos.Y--;
+		}else{
+			cPos.X = 0;
+		}
 	}
 	Info->dwCursorPosition = cPos;
 	return(SetConsoleCursorPosition(Handle, cPos));
@@ -484,10 +495,8 @@ AnsiCursorHorizontalAbsolute(HANDLE Handle, CONSOLE_SCREEN_BUFFER_INFO *Info, SH
 BOOL 
 AnsiVerticalPositionAbsolute(HANDLE Handle, CONSOLE_SCREEN_BUFFER_INFO *Info, SHORT Y)
 {
-//	COORD cPos = {Info->dwCursorPosition.X, Y - 1};
 	COORD cPos = AnsiRenderCursor(Info);
 
-//	cPos.Y += Info->srWindow.Top;
 	cPos.Y -= Y;
 	Info->dwCursorPosition = cPos;
 	return(SetConsoleCursorPosition(Handle, cPos));
@@ -513,15 +522,15 @@ AnsiRestoreCursor(HANDLE Handle, CONSOLE_SCREEN_BUFFER_INFO *Info)
 	return(bResult);
 }
 BOOL 
-AnsiDeviceStatusReport(CONSOLE_SCREEN_BUFFER_INFO *Info, CHAR Parm, CHAR *Result)
+AnsiDeviceStatusReport(CONSOLE_SCREEN_BUFFER_INFO *Info, CHAR Parm)
 {
 	BOOL bResult = TRUE;
-//	COORD cPos = Info->dwCursorPosition;
 	COORD cPos = AnsiRenderCursor(Info);
 	DWORD dwCount;
 
 	if (Parm == '6'){		/* CPR - cursor position (vim.exe) */
-		sprintf(Result, "\e[%d;%dR", (cPos.Y - Info->srWindow.Top) + 1, cPos.X + 1);
+		sprintf(__INPUT_BUF, "\e[%d;%dR", (cPos.Y - Info->srWindow.Top) + 1, cPos.X + 1);
+		__Input = __INPUT_BUF;
 	}else{
 		bResult = FALSE;
 	}
@@ -607,7 +616,7 @@ AnsiSetTopBottomMargin(HANDLE Handle, CONSOLE_SCREEN_BUFFER_INFO *Info, WORD Top
 BOOL 
 AnsiControl(HANDLE Handle, CHAR C, CONSOLE_SCREEN_BUFFER_INFO *Info, SEQUENCE *Seq, DWORD Size)
 {
-	BOOL bResult = FALSE;
+	BOOL bResult = TRUE;
 
 	switch (C){
 		case '@':		/* ICH */
@@ -680,7 +689,7 @@ AnsiControl(HANDLE Handle, CHAR C, CONSOLE_SCREEN_BUFFER_INFO *Info, SEQUENCE *S
 			bResult = AnsiSelectGraphicRendition(Handle, Info, Seq->Buf, Size);
 			break;
 		case 'n':		/* DSR */
-			bResult = AnsiDeviceStatusReport(Info, Seq->Char1, __INPUT_BUF);
+			bResult = AnsiDeviceStatusReport(Info, Seq->Char1);
 			break;
 		case 'r':		/* DECSTBM (apt) */
 			bResult = AnsiSetTopBottomMargin(Handle, Info, Seq->Arg1, AnsiStrToInt(Seq->Args));

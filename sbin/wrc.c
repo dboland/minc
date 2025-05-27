@@ -48,18 +48,14 @@ usage(char *prog)
 int 
 main(int argc, char *argv[], char *env[])
 {
-	int result = -1;
+	int result = 0;
 	char *prog = *argv++;
 
 	if (isatty(1))
-		write(1, "\e[?7h", 5);		/* set autowrap */
+		write(1, "\e[?7h", 5);		/* set autowrap (DECAWM) */
 	if (argc == 1)
 		usage(prog);
-	else if (runcmd(argv) < 0)
-		fprintf(stderr, "%s: %s: %s\n", prog, *argv, strerror(errno));
-	else
-		result = 0;
-	if (isatty(1))
-		write(1, "\e[?7l", 5);		/* unset autowrap */
+	else if ((result = runcmd(argv)) < 0)
+		fprintf(stderr, "%s: %s: %s\n", prog, *argv, strerror(-result));
 	return(result);
 }

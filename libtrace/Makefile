@@ -1,15 +1,11 @@
 include ../Makefile.inc
 
-RELEASE=1.0.0
-VERSION=20200126
-LIB=libtrace.a
-
-all: ${LIB}
+all: libtrace.a
 
 %.d: %
-	${MAKE} -C $<
+	@${MAKE} -C $<
 
-${LIB}: win.d vfs.d
+libtrace.a: win.d vfs.d
 	ar cru $@ $(shell /bin/ls -f win/*.o vfs/*.o)
 
 clean:

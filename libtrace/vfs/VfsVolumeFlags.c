@@ -30,8 +30,26 @@
 
 #include "config.h"
 
+/* Vista */
+
+#define FILE_RETURNS_CLEANUP_RESULT_INFO	0x00000200
+#define FILE_SUPPORTS_POSIX_UNLINK_RENAME	0x00000400
+
 LPSTR 
-VfsVolumeFlags(LPSTR Buffer, LPCSTR Label, DWORD Flags)
+VfsVolumeFlagsHigh(LPSTR Buffer, LPCSTR Label, DWORD Flags)
+{
+	LPSTR psz = Buffer;
+
+	if (Flags){
+		psz += sprintf(psz, "%s([0x%x]", Label, Flags);
+		psz = WinFlagName(psz, WIN_MNT_DOOMED, "MNT_DOOMED", Flags, &Flags);
+		psz = WinFlagName(psz, WIN_MNT_ROOTFS, "MNT_ROOTFS", Flags, &Flags);
+		psz += sprintf(psz, "[0x%x])\n", Flags);
+	}
+	return(psz);
+}
+LPSTR 
+VfsVolumeFlagsLow(LPSTR Buffer, LPCSTR Label, DWORD Flags)
 {
 	LPSTR psz = Buffer;
 
@@ -57,8 +75,8 @@ VfsVolumeFlags(LPSTR Buffer, LPCSTR Label, DWORD Flags)
 	psz = WinFlagName(psz, FILE_SUPPORTS_EXTENDED_ATTRIBUTES, "EXTENDED_ATTRIBUTES", Flags, &Flags);
 	psz = WinFlagName(psz, FILE_SUPPORTS_OPEN_BY_FILE_ID, "OPEN_BY_FILE_ID", Flags, &Flags);
 	psz = WinFlagName(psz, FILE_SUPPORTS_USN_JOURNAL, "USN_JOURNAL", Flags, &Flags);
-	psz = WinFlagName(psz, FILE_VOLUME_MNT_DOOMED, "VOLUME_MNT_DOOMED", Flags, &Flags);
-	psz = WinFlagName(psz, FILE_VOLUME_MNT_ROOTFS, "VOLUME_MNT_ROOTFS", Flags, &Flags);
+	psz = WinFlagName(psz, FILE_SUPPORTS_POSIX_UNLINK_RENAME, "POSIX_UNLINK_RENAME", Flags, &Flags);
+	psz = WinFlagName(psz, FILE_RETURNS_CLEANUP_RESULT_INFO, "CLEANUP_RESULT_INFO", Flags, &Flags);
 	psz += sprintf(psz, "[0x%x])\n", Flags);
 	return(psz);
 }

@@ -45,7 +45,9 @@
 #define DEV_CLASS_MOUSE		0x0900
 #define DEV_CLASS_STORAGE	0x0A00
 #define DEV_CLASS_USB		0x0B00
-#define DEV_CLASS_MAX		12
+#define DEV_CLASS_BLUETOOTH	DEV_CLASS_USB
+#define DEV_CLASS_HID		0x0C00
+#define DEV_CLASS_MAX		13
 
 /* Hardware buses */
 
@@ -60,16 +62,15 @@
 #define DEV_BUS_UART		24			/* Universal Asynchronous Receiver-Transmitter bus */
 #define DEV_BUS_USB		DEV_BUS_UART		/* Universal Serial Bus */
 #define DEV_BUS_IDE		16			/* Integrated Disk Electronics bus */
-#define DEV_BUS_HDC		DEV_BUS_IDE		/* Hard Disk Controller bus */
+#define DEV_BUS_WDC		DEV_BUS_IDE		/* Hard Disk Controller bus */
 #define DEV_BUS_SCSI		8			/* Small Computer System Interface bus  */
+#define DEV_BUS_HID		DEV_BUS_SCSI		/* Human Interface Device bus */
 
 /* System device types */
 
-#define DEV_TYPE_SWD		(DEV_CLASS_SYSTEM)
-#define DEV_TYPE_ACPI		(DEV_CLASS_SYSTEM + DEV_BUS_ACPI)
-#define DEV_TYPE_EHCI		(DEV_CLASS_SYSTEM + DEV_BUS_USB)	/* USB Enhanced Host Controller Interface (USB 2.0) */
-#define DEV_TYPE_PCI		(DEV_CLASS_SYSTEM + DEV_BUS_PCI)	/* PCI controller device */
-#define DEV_TYPE_IDE		(DEV_CLASS_SYSTEM + DEV_BUS_IDE)	/* IDE controller device */
+#define DEV_TYPE_SWD		(DEV_CLASS_DULL)
+#define DEV_TYPE_ACPI		(DEV_CLASS_DULL + DEV_BUS_ACPI)
+#define DEV_TYPE_PCI		(DEV_CLASS_DULL + DEV_BUS_PCI)	/* PCI controller device */
 
 #define DEV_TYPE_MEM		(DEV_CLASS_CPU + 1)		/* physical memory device */
 #define DEV_TYPE_KMEM		(DEV_CLASS_CPU + 2)		/* kernel memory device (libposix.dll) */
@@ -90,8 +91,9 @@
 #define DEV_TYPE_AHCI		(DEV_CLASS_DISK + DEV_BUS_SATA)	/* Serial ATA Advanced Host Controller Interface */
 #define DEV_TYPE_FDC		(DEV_CLASS_DISK + DEV_BUS_FDC)	/* Floppy Disk Controller */
 #define DEV_TYPE_USB		(DEV_CLASS_DISK + DEV_BUS_USB)	/* USB storage controller */
-#define DEV_TYPE_SCSI		(DEV_CLASS_DISK + DEV_BUS_SCSI)	/* SCSI Disk controller */
-#define DEV_TYPE_WDC		(DEV_CLASS_DISK + DEV_BUS_HDC)	/* WD100x compatible hard disk controller */
+//#define DEV_TYPE_WD		(DEV_CLASS_DISK + DEV_BUS_SCSI)	/* SCSI Disk controller */
+#define DEV_TYPE_SCSI		(DEV_CLASS_DISK + DEV_BUS_SCSI)	/* SCSI device */
+#define DEV_TYPE_WDC		(DEV_CLASS_DISK + DEV_BUS_WDC)	/* WD100x compatible hard disk controller */
 
 #define DEV_TYPE_NDIS		(DEV_CLASS_IFNET)
 #define DEV_TYPE_TUNNEL		(DEV_CLASS_IFNET + 16)		/* Tunnel type encapsulation */
@@ -125,18 +127,23 @@
 #define DEV_TYPE_WSKBD		(DEV_CLASS_KEYBOARD)
 #define DEV_TYPE_COMKBD		(DEV_CLASS_KEYBOARD + DEV_BUS_ISA)
 #define DEV_TYPE_USBKBD		(DEV_CLASS_KEYBOARD + DEV_BUS_USB)
+#define DEV_TYPE_HIDKBD		(DEV_CLASS_KEYBOARD + DEV_BUS_HID)
 
 #define DEV_TYPE_WSMOUSE	(DEV_CLASS_MOUSE)
 #define DEV_TYPE_COMMOUSE	(DEV_CLASS_MOUSE + DEV_BUS_ISA)
 #define DEV_TYPE_USBMOUSE	(DEV_CLASS_MOUSE + DEV_BUS_USB)
+#define DEV_TYPE_HIDMOUSE	(DEV_CLASS_MOUSE + DEV_BUS_HID)
 
 #define DEV_TYPE_FIXED		(DEV_CLASS_STORAGE)
-#define DEV_TYPE_CDROM		(DEV_CLASS_STORAGE + DEV_BUS_HDC)	/* CDROM storage */
+#define DEV_TYPE_CDROM		(DEV_CLASS_STORAGE + DEV_BUS_WDC)	/* CDROM storage */
 #define DEV_TYPE_REMOVABLE	(DEV_CLASS_STORAGE + DEV_BUS_USB)	/* Hard Disk storage */
 #define DEV_TYPE_FLOPPY		(DEV_CLASS_STORAGE + DEV_BUS_FDC)	/* Floppy Disk storage */
 #define DEV_TYPE_REMOTE		(DEV_CLASS_STORAGE + DEV_BUS_BIOS)	/* Server Message Block storage */
+#define DEV_TYPE_SD		(DEV_CLASS_STORAGE + DEV_BUS_SCSI)	/* SCSI Disk storage */
 
-#define DEV_TYPE_HID		(DEV_CLASS_USB)
-#define DEV_TYPE_USBHUB		(DEV_CLASS_USB + DEV_BUS_USB)
+//#define DEV_TYPE_OHCI		(DEV_CLASS_USB)			/* USB Open Host Controller Interface (USB 1.1) */
 #define DEV_TYPE_UHCI		(DEV_CLASS_USB + DEV_BUS_PCI)	/* USB Universal Host Controller Interface (USB 1.0) */
-//#define DEV_TYPE_OHCI		(DEV_CLASS_USB + DEV_BUS_PCI)	/* USB Open Host Controller Interface (USB 1.1) */
+#define DEV_TYPE_USBT		(DEV_CLASS_USB + DEV_BUS_ISA)	/* USB Bluetooth adapter */
+
+#define DEV_TYPE_EHCI		(DEV_CLASS_HID + DEV_BUS_PCI)	/* USB Enhanced Host Controller Interface (USB 2.0) */
+#define DEV_TYPE_UHIDEV		(DEV_CLASS_HID + DEV_BUS_USB)	/* USB Human Interface Device */

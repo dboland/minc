@@ -38,9 +38,8 @@ DriveStatVolume(LPCWSTR Drive, WIN_MOUNT *Result)
 	BOOL bResult = FALSE;
 
 	if (!GetVolumeInformationW(win_volname(Result->Volume, Drive), Result->Label, MAX_LABEL, &Result->Serial, 
-		&Result->MaxPath, &Result->Flags, Result->TypeName, MAX_LABEL)){
-//		WIN_ERR("GetVolumeInformation(%ls): %s\n", Result->Volume, win_strerror(GetLastError()));
-		Result->Flags |= FILE_VOLUME_MNT_DOOMED;
+		&Result->MaxPath, &Result->Flags.LowPart, Result->TypeName, MAX_LABEL)){
+		Result->Flags.HighPart |= WIN_MNT_DOOMED;
 	}else{
 		bResult = TRUE;
 	}
@@ -66,7 +65,7 @@ drive_statfs(WIN_MOUNT *Mount, WIN_STATFS *Result)
 		Result->MaxPath = Mount->MaxPath;
 		bResult = TRUE;
 	}else{
-		Result->Flags |= FILE_VOLUME_MNT_DOOMED;
+		Result->Flags.HighPart |= WIN_MNT_DOOMED;
 	}
 	return(bResult);
 }

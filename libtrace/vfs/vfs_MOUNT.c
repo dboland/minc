@@ -35,11 +35,16 @@ vfs_MOUNT(WIN_MOUNT *Mount, LPSTR Buffer)
 {
 	LPSTR psz = Buffer;
 
-	psz += sprintf(psz, "(%ls): MountId(%d) MaxPath(%d) DevType(0x%x) DevId(0x%x)\n", 
-		Mount->TypeName, Mount->MountId, Mount->MaxPath, Mount->DeviceType, Mount->DeviceId);
-	psz = VfsVolumeFlags(psz, "+ Flags", Mount->Flags);
-	psz += sprintf(psz, "+ Serial: %lu\n", Mount->Serial);
-	psz += sprintf(psz, "+ Label: %ls\n", Mount->Label);
-	psz += sprintf(psz, "+ Volume: %ls\n", Mount->Volume);
+	if (Mount->Serial){
+		psz += sprintf(psz, "%ls(%ls) MountId(%d) MaxPath(%d) DevType(0x%x) DevId(0x%x)\n", 
+			Mount->Label, Mount->TypeName, Mount->MountId, Mount->MaxPath, Mount->DeviceType, Mount->DeviceId);
+		psz = VfsVolumeFlagsHigh(psz, "+ FlagsHigh", Mount->Flags.HighPart);
+		psz = VfsVolumeFlagsLow(psz, "+ FlagsLow", Mount->Flags.LowPart);
+		psz += sprintf(psz, "+ Serial: %lu\n", Mount->Serial);
+		psz += sprintf(psz, "+ Volume: %ls\n", Mount->Volume);
+		psz += sprintf(psz, "+ Path: %ls\n", Mount->Path);
+	}else{
+		SetLastError(ERROR_NOT_READY);
+	}
 	return(psz - Buffer);
 }

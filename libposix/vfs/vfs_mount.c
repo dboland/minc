@@ -43,20 +43,22 @@ vfs_getfsstat(WIN_CFDATA *Config, WIN_CFDRIVER *Driver, WIN_STATFS *Result)
 	switch (Config->DeviceType){
 		case DEV_TYPE_CDROM:
 			win_wcscpy(wMount.TypeName, L"ISO9660");
-			wMount.Flags = FILE_READ_ONLY_VOLUME | FILE_VOLUME_MNT_DOOMED;
+			wMount.Flags.LowPart = FILE_READ_ONLY_VOLUME;
+			wMount.Flags.HighPart = WIN_MNT_DOOMED;
 			break;
 		default:
 			win_wcscpy(wMount.TypeName, L"FAT");
 	}
 	if (Config->DeviceType == DEV_TYPE_FLOPPY){
-		wMount.Flags |= FILE_VOLUME_MNT_DOOMED;
+		wMount.Flags.HighPart |= WIN_MNT_DOOMED;
 	}else if (DriveStatVolume(Config->DosPath, &wMount)){
 		Result->MaxPath = wMount.MaxPath;
 	}else if (ERROR_NOT_READY != GetLastError()){
+//		WIN_ERR("GetVolumeInformation(%ls): %s\n", wMount.Volume, win_strerror(GetLastError()));
 		return(FALSE);
 	}
 	if (Config->DeviceType == DEV_TYPE_REMOTE){
-		wMount.Flags |= FILE_VOLUME_MNT_DOOMED;
+		wMount.Flags.HighPart |= WIN_MNT_DOOMED;
 	}
 	win_wcscpy(Result->Path, Config->DosPath);
 	win_wcscpy(Result->TypeName, wMount.TypeName);

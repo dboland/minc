@@ -44,7 +44,7 @@ runcmd(char *argv[])
 	si.hStdError = win_F_SETFD(Nodes[2].Handle, HANDLE_FLAG_INHERIT);
 	win_wcstombs(szPath, __Strings[pwTask->TaskId].Path, PATH_MAX);
 	if (!win_execve(argv_win(pwTask, *argv, argv), szPath, &si)){
-		result = errno_posix(GetLastError());
+		result -= errno_posix(GetLastError());
 	}
 	return(result);
 }

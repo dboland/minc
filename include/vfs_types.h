@@ -160,9 +160,12 @@ typedef WIN_DEVICE WIN_DEV_CLASS[WIN_UNIT_MAX];
 
 #define FILE_ATTRIBUTE_LABEL	0x00000008
 
-#define FILE_CLASS_INODE	(FILE_ATTRIBUTE_ARCHIVE | FILE_ATTRIBUTE_SYSTEM)
+#define FILE_CLASS_INODE	(FILE_ATTRIBUTE_SYSTEM)
 #define FILE_CLASS_MOUNT	(FILE_ATTRIBUTE_READONLY | FILE_ATTRIBUTE_DIRECTORY | FILE_ATTRIBUTE_SYSTEM)
 #define FILE_CLASS_ROOT		(FILE_ATTRIBUTE_HIDDEN | FILE_ATTRIBUTE_DIRECTORY | FILE_ATTRIBUTE_SYSTEM)
+
+#define FILE_CLASS(attr)	(attr & (FILE_ATTRIBUTE_READONLY | FILE_ATTRIBUTE_HIDDEN \
+				| FILE_ATTRIBUTE_DIRECTORY | FILE_ATTRIBUTE_SYSTEM))
 
 #define WIN_SYMLOOP_MAX		8
 
@@ -329,7 +332,7 @@ typedef struct _WIN_MOUNT {
 	DWORD DeviceId;
 	DWORD Serial;
 	DWORD MaxPath;
-	DWORD Flags;
+	LARGE_INTEGER Flags;
 	FILETIME Time;
 	WCHAR Volume[MAX_LABEL];
 	WCHAR Label[MAX_LABEL];
@@ -339,7 +342,7 @@ typedef struct _WIN_MOUNT {
 
 typedef struct _WIN_STATFS {
 	DWORD MaxPath;
-	DWORD Flags;
+	LARGE_INTEGER Flags;
 	DWORD DeviceId;
 	DWORD SectorsPerCluster;
 	DWORD BytesPerSector;
@@ -350,8 +353,8 @@ typedef struct _WIN_STATFS {
 	WCHAR Path[MAX_PATH];
 } WIN_STATFS;
 
-#define FILE_VOLUME_MNT_DOOMED	0x00000800
-#define FILE_VOLUME_MNT_ROOTFS	0x80000000
+#define WIN_MNT_DOOMED 0x08000000	/* device behind filesystem is gone */
+#define WIN_MNT_ROOTFS 0x00004000	/* identifies the root filesystem */
 
 /* waitfor flags to vfs_sync() and getfsstat() */
 
@@ -613,17 +616,19 @@ typedef struct _WIN_TTY {
 
 /* line In */
 
-#define WIN_IXON		0x00000200
-#define WIN_IXOFF		0x00000400
+#define WIN_BRKINT		0x00000002      /* map BREAK to SIGINT */
+#define WIN_IXON		0x00000200	/* enable output flow control */
+#define WIN_IXOFF		0x00000400	/* enable input flow control */
 #define WIN_INLCR		0x00000040	/* Ye Olde TTY had separate key for CR */
-#define WIN_ICRNL		0x00000100
+#define WIN_ICRNL		0x00000100	/* map CR to NL (ala CRMOD) */
+#define WIN_IEXTEN		0x00000400      /* enable DISCARD and LNEXT */
 
 /* line Out */
 
-#define WIN_OPOST		0x00000001
-#define WIN_ONLCR		0x00000002
-#define WIN_OXTABS		0x00000004
-#define WIN_OCRNL		0x00000010
+#define WIN_OPOST		0x00000001	/* enable following output processing */
+#define WIN_ONLCR		0x00000002	/* map NL to CR-NL (ala CRMOD) */
+#define WIN_OXTABS		0x00000004	/* expand tabs to spaces */
+#define WIN_OCRNL		0x00000010	/* map CR to NL */
 
 /* sys/ttycom.h */
 

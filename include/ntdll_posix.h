@@ -39,3 +39,4 @@ typedef struct _PUBLIC_OBJECT_BASIC_INFORMATION {
 int sprintf(char *buf, const char *format, ...);
 char * _itoa(int value, char *buffer, int radix);
 int atoi(const char *str);
+int tolower(int c);
