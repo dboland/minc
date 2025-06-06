@@ -74,6 +74,9 @@ dull_attach(WIN_DEVICE *Device)
 	BOOL bResult = TRUE;
 
 	switch (Device->DeviceType){
+		case DEV_TYPE_SWD:
+			bResult = config_found("swd", FS_TYPE_PDO, WIN_VCHR, Device);
+			break;
 		case DEV_TYPE_ACPI:
 			bResult = config_found("acpi", FS_TYPE_PDO, WIN_VCHR, Device);
 			break;
@@ -81,7 +84,7 @@ dull_attach(WIN_DEVICE *Device)
 			bResult = config_found("pci", FS_TYPE_PDO, WIN_VCHR, Device);
 			break;
 		default:
-			bResult = config_found("swd", FS_TYPE_PDO, WIN_VCHR, Device);
+			bResult = FALSE;
 	}
 	return(bResult);
 }
@@ -108,17 +111,17 @@ disk_attach(WIN_DEVICE *Device)
 	BOOL bResult = TRUE;
 
 	switch (Device->DeviceType){
+		case DEV_TYPE_SCSI:
+			bResult = config_found("scsi", FS_TYPE_PDO, WIN_VBLK, Device);
+			break;
 		case DEV_TYPE_WDC:
 			bResult = config_found("wdc", FS_TYPE_PDO, WIN_VBLK, Device);
-			break;
-		case DEV_TYPE_FDC:
-			bResult = config_found("fdc", FS_TYPE_PDO, WIN_VBLK, Device);
 			break;
 		case DEV_TYPE_USB:
 			bResult = config_found("usb", FS_TYPE_PDO, WIN_VBLK, Device);
 			break;
-		case DEV_TYPE_SCSI:
-			bResult = config_found("scsi", FS_TYPE_PDO, WIN_VBLK, Device);
+		case DEV_TYPE_FDC:
+			bResult = config_found("fdc", FS_TYPE_PDO, WIN_VBLK, Device);
 			break;
 		case DEV_TYPE_AHCI:
 			bResult = config_found("ahci", FS_TYPE_PDO, WIN_VBLK, Device);
@@ -155,6 +158,9 @@ ifnet_attach(WIN_DEVICE *Device)
 		case DEV_TYPE_PPP:
 			bResult = config_found("ppp", FS_TYPE_PDO, WIN_VSOCK, Device);
 			break;
+		case DEV_TYPE_REMOTE:
+			bResult = config_found("smb", FS_TYPE_DRIVE, WIN_VBLK, Device);
+			break;
 		default:
 			bResult = FALSE;
 	}
@@ -166,6 +172,9 @@ media_attach(WIN_DEVICE *Device)
 	BOOL bResult = TRUE;
 
 	switch (Device->DeviceType){
+		case DEV_TYPE_MAGTAPE:
+			bResult = config_found("mt", FS_TYPE_PDO, WIN_VCHR, Device);
+			break;
 		case DEV_TYPE_MEDIA:
 			bResult = config_found("media", FS_TYPE_PDO, WIN_VCHR, Device);
 			break;
@@ -174,9 +183,6 @@ media_attach(WIN_DEVICE *Device)
 			break;
 		case DEV_TYPE_AUDIO:
 			bResult = config_found("audio", FS_TYPE_PDO, WIN_VCHR, Device);
-			break;
-		case DEV_TYPE_MAGTAPE:
-			bResult = config_found("mt", FS_TYPE_PDO, WIN_VCHR, Device);
 			break;
 		default:
 			bResult = FALSE;
@@ -312,9 +318,6 @@ storage_attach(WIN_DEVICE *Device)
 		case DEV_TYPE_SD:
 			bResult = config_found("sd", FS_TYPE_DRIVE, WIN_VBLK, Device);
 			break;
-		case DEV_TYPE_REMOTE:
-			bResult = config_found("smb", FS_TYPE_DRIVE, WIN_VBLK, Device);
-			break;
 		default:
 			bResult = FALSE;
 	}
@@ -326,14 +329,20 @@ usb_attach(WIN_DEVICE *Device)
 	BOOL bResult = TRUE;
 
 	switch (Device->DeviceType){
+		case DEV_TYPE_OHCI:
+			bResult = config_found("ohci", FS_TYPE_PDO, WIN_VCHR, Device);
+			break;
 		case DEV_TYPE_UHCI:
 			bResult = config_found("uhci", FS_TYPE_PDO, WIN_VCHR, Device);
+			break;
+		case DEV_TYPE_UHUB:
+			bResult = config_found("uhub", FS_TYPE_PDO, WIN_VCHR, Device);
 			break;
 		case DEV_TYPE_USBT:
 			bResult = config_found("ubt", FS_TYPE_PDO, WIN_VCHR, Device);
 			break;
 		default:
-			bResult = config_found("uhub", FS_TYPE_PDO, WIN_VCHR, Device);
+			bResult = FALSE;
 	}
 	return(bResult);
 }

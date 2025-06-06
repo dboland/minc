@@ -39,15 +39,15 @@
 #define FOREGROUND_MAGENTA	(FOREGROUND_BLUE | FOREGROUND_RED)
 #define FOREGROUND_CYAN		(FOREGROUND_BLUE | FOREGROUND_GREEN)
 #define FOREGROUND_BLACK	(0x0)
-#define FOREGROUND_DEFAULT	(FOREGROUND_WHITE)
-#define FOREGROUND_UNDERLINE	(FOREGROUND_CYAN)
+#define FOREGROUND_DEFAULT	FOREGROUND_WHITE
+#define FOREGROUND_UNDERLINE	FOREGROUND_CYAN
 
 #define BACKGROUND_WHITE	(BACKGROUND_RED | BACKGROUND_GREEN | BACKGROUND_BLUE)
 #define BACKGROUND_YELLOW	(BACKGROUND_RED | BACKGROUND_GREEN)
 #define BACKGROUND_MAGENTA	(BACKGROUND_BLUE | BACKGROUND_RED)
 #define BACKGROUND_CYAN		(BACKGROUND_BLUE | BACKGROUND_GREEN)
 #define BACKGROUND_BLACK	(0x0)
-#define BACKGROUND_DEFAULT	(BACKGROUND_BLACK)
+#define BACKGROUND_DEFAULT	BACKGROUND_BLACK
 
 /****************************************************/
 
@@ -118,7 +118,7 @@ AnsiRenderCursor(CONSOLE_SCREEN_BUFFER_INFO *Info)
 {
 	COORD cPos = Info->dwCursorPosition;
 
-	if (cPos.X > Info->srWindow.Right){
+	while (cPos.X > Info->srWindow.Right){
 		cPos.X -= Info->srWindow.Right + 1;
 		cPos.Y++;
 	}
@@ -316,7 +316,8 @@ AnsiCursorDown(HANDLE Handle, CONSOLE_SCREEN_BUFFER_INFO *Info, WORD Count)
 BOOL 
 AnsiCursorForward(HANDLE Handle, CONSOLE_SCREEN_BUFFER_INFO *Info, WORD Count)
 {
-	COORD cPos = Info->dwCursorPosition;
+//	COORD cPos = Info->dwCursorPosition;
+	COORD cPos = AnsiRenderCursor(Info);
 
 	/* terminfo(5) - am: automatic right margin (mutt.exe)
 	 */
@@ -335,7 +336,8 @@ AnsiCursorForward(HANDLE Handle, CONSOLE_SCREEN_BUFFER_INFO *Info, WORD Count)
 BOOL 
 AnsiCursorBack(HANDLE Handle, CONSOLE_SCREEN_BUFFER_INFO *Info, WORD Count)
 {
-	COORD cPos = Info->dwCursorPosition;
+//	COORD cPos = Info->dwCursorPosition;
+	COORD cPos = AnsiRenderCursor(Info);
 
 	/* terminfo(5) - bw: automatic left margin (top.exe)
 	 */
@@ -515,10 +517,11 @@ AnsiRestoreCursor(HANDLE Handle, CONSOLE_SCREEN_BUFFER_INFO *Info)
 
 	/* We don't have an alternate screen buffer (ALTBUF).
 	 */
-	if (__CTTY->VEdit){
-		Info->dwCursorPosition = cPos;
-		bResult = SetConsoleCursorPosition(Handle, cPos);
+	if (!__CTTY->VEdit){
+		cPos.Y = Info->dwCursorPosition.Y;
 	}
+	Info->dwCursorPosition = cPos;
+	bResult = SetConsoleCursorPosition(Handle, cPos);
 	return(bResult);
 }
 BOOL 
@@ -529,12 +532,19 @@ AnsiDeviceStatusReport(CONSOLE_SCREEN_BUFFER_INFO *Info, CHAR Parm)
 	DWORD dwCount;
 
 	if (Parm == '6'){		/* CPR - cursor position (vim.exe) */
-		sprintf(__INPUT_BUF, "\e[%d;%dR", (cPos.Y - Info->srWindow.Top) + 1, cPos.X + 1);
-		__Input = __INPUT_BUF;
+		__Index += sprintf(&__Input[__Index], "\e[%d;%dR", (cPos.Y - Info->srWindow.Top) + 1, cPos.X + 1);
 	}else{
 		bResult = FALSE;
 	}
 	return(bResult);
+}
+BOOL 
+AnsiDeviceAttributes(HANDLE Handle)
+{
+//	__Index += sprintf(&__Input[__Index], "\e[?1;2c");	/* VT100 with AVO */
+//	__Index += sprintf(&__Input[__Index], "\e[?64;22c");	/* Linux */
+	__Index += sprintf(&__Input[__Index], "\e[?64;1;6;15;22c");
+	return(TRUE);
 }
 BOOL 
 AnsiSetMode(HANDLE Handle, WIN_TTY *Terminal, WORD Arg)
@@ -569,13 +579,6 @@ AnsiResetMode(HANDLE Handle, WIN_TTY *Terminal, WORD Arg)
 		bResult = FALSE;
 	}
 	return(bResult);
-}
-BOOL 
-AnsiDeviceAttributes(HANDLE Handle)
-{
-	sprintf(__INPUT_BUF, "\e[?64;22c");
-	__Input = __INPUT_BUF;
-	return(FALSE);
 }
 BOOL 
 AnsiVerticalEditingMode(HANDLE Handle, CONSOLE_SCREEN_BUFFER_INFO *Info, SHORT Parm)

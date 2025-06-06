@@ -31,3 +31,4 @@ SHDIR=${PREFIX}/share
 MANDIR=${SHDIR}/man
 
 CFLAGS= -Wimplicit-function-declaration -Werror -ffixed-bx -ffreestanding
+LDFLAGS= --disable-auto-import

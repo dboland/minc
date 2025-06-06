@@ -93,9 +93,14 @@ grp_GRP_GETGRNAM(const char *name, char *buf, size_t buflen)
 	WCHAR szAccount[MAX_NAME];
 	WIN_GRENT wgResult;
 
-	if (!mbstowcs(szAccount, name, MAX_NAME)){
-		result = -EINVAL;
-	}else if (!win_getgrnam(szAccount, &wgResult)){
+	if (!strcmp(name, "bin")){
+		mbstowcs(szAccount, "Users", MAX_NAME);
+	}else if (!strcmp(name, "wheel")){
+		mbstowcs(szAccount, "Administrators", MAX_NAME);
+	}else if (!mbstowcs(szAccount, name, MAX_NAME)){
+		return(EINVAL);
+	}
+	if (!win_getgrnam(szAccount, &wgResult)){
 		result -= errno_posix(GetLastError());
 	}else{
 		group_posix(buf, buflen, &wgResult);

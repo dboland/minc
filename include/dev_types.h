@@ -51,9 +51,9 @@
 
 /* Hardware buses */
 
-#define DEV_BUS_MAIN		56
+#define DEV_BUS_MAIN		64
 #define DEV_BUS_BIOS		DEV_BUS_MAIN
-#define DEV_BUS_APM		48			/* Advanced Power Management interface bus */
+#define DEV_BUS_APM		56			/* Advanced Power Management interface bus */
 #define DEV_BUS_ACPI		DEV_BUS_APM		/* Advanced Configuration and Power Interface bus */
 #define DEV_BUS_PCI		40			/* Peripheral Component Interconnect bus */
 #define DEV_BUS_SATA		DEV_BUS_PCI		/* Serial Advanced Technology Attachment bus */
@@ -68,9 +68,9 @@
 
 /* System device types */
 
-#define DEV_TYPE_SWD		(DEV_CLASS_DULL)
-#define DEV_TYPE_ACPI		(DEV_CLASS_DULL + DEV_BUS_ACPI)
-#define DEV_TYPE_PCI		(DEV_CLASS_DULL + DEV_BUS_PCI)	/* PCI controller device */
+#define DEV_TYPE_SWD		(DEV_CLASS_SYSTEM)
+#define DEV_TYPE_ACPI		(DEV_CLASS_SYSTEM + DEV_BUS_ACPI)
+#define DEV_TYPE_PCI		(DEV_CLASS_SYSTEM + DEV_BUS_PCI)	/* PCI controller device */
 
 #define DEV_TYPE_MEM		(DEV_CLASS_CPU + 1)		/* physical memory device */
 #define DEV_TYPE_KMEM		(DEV_CLASS_CPU + 2)		/* kernel memory device (libposix.dll) */
@@ -87,13 +87,12 @@
 #define DEV_TYPE_RAMDISK	(DEV_CLASS_CPU + 32)		/* Random Access Memory disk device (rd*) */
 #define DEV_TYPE_PROCESSOR	(DEV_CLASS_CPU + DEV_BUS_BIOS)	/* Central Processing Unit */
 
-#define DEV_TYPE_ROOT		(DEV_CLASS_DISK)		/* Root mount point */
+//#define DEV_TYPE_ROOT		(DEV_CLASS_DISK)		/* Root mount point */
 #define DEV_TYPE_AHCI		(DEV_CLASS_DISK + DEV_BUS_SATA)	/* Serial ATA Advanced Host Controller Interface */
 #define DEV_TYPE_FDC		(DEV_CLASS_DISK + DEV_BUS_FDC)	/* Floppy Disk Controller */
 #define DEV_TYPE_USB		(DEV_CLASS_DISK + DEV_BUS_USB)	/* USB storage controller */
-//#define DEV_TYPE_WD		(DEV_CLASS_DISK + DEV_BUS_SCSI)	/* SCSI Disk controller */
-#define DEV_TYPE_SCSI		(DEV_CLASS_DISK + DEV_BUS_SCSI)	/* SCSI device */
 #define DEV_TYPE_WDC		(DEV_CLASS_DISK + DEV_BUS_WDC)	/* WD100x compatible hard disk controller */
+#define DEV_TYPE_SCSI		(DEV_CLASS_DISK + DEV_BUS_SCSI)	/* Small Computer System Interface controller */
 
 #define DEV_TYPE_NDIS		(DEV_CLASS_IFNET)
 #define DEV_TYPE_TUNNEL		(DEV_CLASS_IFNET + 16)		/* Tunnel type encapsulation */
@@ -101,7 +100,8 @@
 #define DEV_TYPE_PPP		(DEV_CLASS_IFNET + 24)		/* Point-To-Point network device */
 #define DEV_TYPE_ETH		(DEV_CLASS_IFNET + 28)		/* Ethernet network device */
 #define DEV_TYPE_WLAN		(DEV_CLASS_IFNET + 36)		/* IEEE80211 wireless network device */
-#define DEV_TYPE_NIC		(DEV_CLASS_IFNET + DEV_BUS_PCI)	/* Network Interface Card */
+#define DEV_TYPE_NIC		(DEV_CLASS_IFNET + DEV_BUS_PCI)		/* Network Interface Card */
+#define DEV_TYPE_REMOTE		(DEV_CLASS_IFNET + DEV_BUS_MAIN)	/* Server Message Block storage */
 
 #define DEV_TYPE_MEDIA		(DEV_CLASS_MEDIA)
 #define DEV_TYPE_USBVIDEO	(DEV_CLASS_MEDIA + DEV_BUS_USB)
@@ -138,11 +138,12 @@
 #define DEV_TYPE_CDROM		(DEV_CLASS_STORAGE + DEV_BUS_WDC)	/* CDROM storage */
 #define DEV_TYPE_REMOVABLE	(DEV_CLASS_STORAGE + DEV_BUS_USB)	/* Hard Disk storage */
 #define DEV_TYPE_FLOPPY		(DEV_CLASS_STORAGE + DEV_BUS_FDC)	/* Floppy Disk storage */
-#define DEV_TYPE_REMOTE		(DEV_CLASS_STORAGE + DEV_BUS_BIOS)	/* Server Message Block storage */
 #define DEV_TYPE_SD		(DEV_CLASS_STORAGE + DEV_BUS_SCSI)	/* SCSI Disk storage */
+#define DEV_TYPE_ROOT		(DEV_CLASS_STORAGE + DEV_BUS_MAIN)	/* Root mount point */
 
-//#define DEV_TYPE_OHCI		(DEV_CLASS_USB)			/* USB Open Host Controller Interface (USB 1.1) */
+#define DEV_TYPE_OHCI		(DEV_CLASS_USB)			/* USB Open Host Controller Interface (USB 1.1) */
 #define DEV_TYPE_UHCI		(DEV_CLASS_USB + DEV_BUS_PCI)	/* USB Universal Host Controller Interface (USB 1.0) */
+#define DEV_TYPE_UHUB		(DEV_CLASS_USB + DEV_BUS_USB)	/* USB Hub adapter */
 #define DEV_TYPE_USBT		(DEV_CLASS_USB + DEV_BUS_ISA)	/* USB Bluetooth adapter */
 
 #define DEV_TYPE_EHCI		(DEV_CLASS_HID + DEV_BUS_PCI)	/* USB Enhanced Host Controller Interface (USB 2.0) */

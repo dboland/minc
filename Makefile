@@ -39,6 +39,7 @@ mount.sh:
 	/bin/cp mount.sh.sample mount.sh
 
 clean:
+	@${MAKE} -C libtrace clean
 	@${MAKE} -C libposix clean
 	@${MAKE} -C mingw clean
 	@${MAKE} -C sbin clean

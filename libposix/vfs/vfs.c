@@ -87,6 +87,8 @@ HGLOBAL		__Lock;			/* Clipboard lock */
 DWORD		__ThreadCount;
 DWORD 		__TlsIndex;
 
+DWORD		__Index;
+
 WIN_SESSION	*__Session;
 WIN_TASK	*__Tasks;
 WIN_DEV_CLASS	*__Devices;

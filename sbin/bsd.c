@@ -73,9 +73,6 @@ void tty_init(void);
 
 /* sys/arch/i386/stand/boot/crt0.c */
 
-char *_term = "interix";
-char *_ctype = "en_US.UTF-8";
-
 /************************************************************/
 
 void 
@@ -209,7 +206,7 @@ args(int argc, char *argv[])
 {
 	int ch;
 
-	while ((ch = getopt(argc, argv, "tc:kvbh")) > 0){
+	while ((ch = getopt(argc, argv, "kvbh")) > 0){
 		switch (ch){
 		case 'v':
 			_verbose++;
@@ -222,12 +219,6 @@ args(int argc, char *argv[])
 			break;
 		case 'h':
 			_home++;
-			break;
-		case 't':
-			_term = optarg;
-			break;
-		case 'c':
-			_ctype = optarg;
 			break;
 		}
 	}
@@ -284,8 +275,8 @@ multi(void)
 void 
 state(int level)
 {
-	setenv("TERM", _term, 0);
-	setenv("LC_CTYPE", _ctype, 0);
+	setenv("TERM", "interix", 0);
+	setenv("LC_CTYPE", "en_US.UTF-8", 0);
 	if (_boot)
 		boot();
 	else if (!level)

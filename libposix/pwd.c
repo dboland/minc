@@ -118,9 +118,14 @@ pwd_PWD_GETPWNAM(const char *name, char *buf, size_t buflen)
 	WCHAR szAccount[MAX_NAME];
 	WIN_PWENT pwResult;
 
-	if (!mbstowcs(szAccount, name, MAX_NAME)){
-		result = -EINVAL;
-	}else if (!win_getpwnam(szAccount, &pwResult)){
+	if (!strncmp(name, "_", 1)){
+		mbstowcs(szAccount, "SERVICE", MAX_NAME);
+	}else if (!strcmp(name, "root")){
+		mbstowcs(szAccount, "SYSTEM", MAX_NAME);
+	}else if (!mbstowcs(szAccount, name, MAX_NAME)){
+		return(-EINVAL);
+	}
+	if (!win_getpwnam(szAccount, &pwResult)){
 		result -= errno_posix(GetLastError());
 	}else{
 		passwd_posix(buf, buflen, &pwResult);

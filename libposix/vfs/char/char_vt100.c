@@ -78,9 +78,9 @@ DECResetMode(HANDLE Handle, WORD Arg)
 		bResult = SetConsoleCursorInfo(Handle, &ciHide);
 //	}else if (Arg == 1000){		// mouse off (linux)
 //	}else if (Arg == 1049){		// xterm rmcup/exit_ca_mode
-	}else if (Arg == 2004){		// xterm bracketed paste mode (nano.exe)
-	}else{
-		bResult = FALSE;
+//	}else if (Arg == 2004){		// xterm bracketed paste mode (nano.exe)
+//	}else if (Arg == 33){		// unknown from synchronet BBS
+//	}else if (Arg == 35){		// unknown from synchronet BBS
 	}
 	return(bResult);
 }

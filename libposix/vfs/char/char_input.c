@@ -58,7 +58,7 @@ InputChar(CHAR C, DWORD KeyState, CHAR *Buffer)
 	 * for file names on remote systems.
 	 */
 	if (C == 14){		/* Ctrl-N (SO): shift out */
-		SetConsoleOutputCP(GetACP());
+		SetConsoleOutputCP(437);
 	}else if (C == 15){	/* Ctrl-O (SI): shift in */
 		SetConsoleOutputCP(CP_UTF8);
 	}else if (KeyState & LEFT_ALT_PRESSED){		/* nano.exe */
@@ -267,6 +267,7 @@ InputWaitChar(HANDLE Handle, DWORD Mode, LPSTR Buffer)
 	}else{
 		bResult = InputReadEvent(Handle, &__CTTY->Attribs, Buffer);
 	}
+	__Index = 0;
 	return(bResult);
 }
 SHORT 

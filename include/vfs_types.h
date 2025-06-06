@@ -88,7 +88,7 @@ typedef enum _WIN_VTAGTYPE {
  * vfs_device.c
  */
 
-#define WIN_UNIT_MAX		64
+#define WIN_UNIT_MAX		72
 
 typedef struct _WIN_DEVICE {
 	WIN_VTYPE FileType;
