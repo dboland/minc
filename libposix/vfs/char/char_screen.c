@@ -154,7 +154,7 @@ ScreenEscape(HANDLE Handle, CHAR C, SEQUENCE *Seq, CONSOLE_SCREEN_BUFFER_INFO *I
 		__Escape = NULL;
 	}else if (C == '@'){
 		ScreenAnsi(Handle, C, Seq, Info);
-	}else if (C == '_'){		/* invalid (BBS probes) */
+	}else if (C == '_'){		/* invalid (Synchronet BBS probes) */
 		__Escape = NULL;
 	}else if (Seq->CSI == ']'){	/* hyperlinks (systemctl) */
 		return;			/* ignore */

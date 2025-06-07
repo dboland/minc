@@ -119,10 +119,10 @@ pwd_PWD_GETPWNAM(const char *name, char *buf, size_t buflen)
 	WIN_PWENT pwResult;
 
 	if (!strncmp(name, "_", 1)){
-		mbstowcs(szAccount, "SERVICE", MAX_NAME);
+		win_mbstowcs(szAccount, "SERVICE", MAX_NAME);
 	}else if (!strcmp(name, "root")){
-		mbstowcs(szAccount, "SYSTEM", MAX_NAME);
-	}else if (!mbstowcs(szAccount, name, MAX_NAME)){
+		win_mbstowcs(szAccount, "SYSTEM", MAX_NAME);
+	}else if (!win_mbstowcs(szAccount, name, MAX_NAME)){
 		return(-EINVAL);
 	}
 	if (!win_getpwnam(szAccount, &pwResult)){

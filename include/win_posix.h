@@ -54,7 +54,7 @@ BOOL win_isu8cont(UCHAR C);
 /* win_wchar.c */
 
 INT win_mbstowcs(LPWSTR Destination, LPCSTR Source, int Bufsize);
-LPWSTR win_mbstowcp(LPWSTR Destination, LPCSTR Source, INT Bufsize);
+//LPWSTR win_mbstowcp(LPWSTR Destination, LPCSTR Source, INT Bufsize);
 INT win_wcstombs(LPSTR Destination, LPCWSTR Source, int Bufsize);
 LPSTR win_wcstombp(LPSTR Destination, LPCWSTR Source, int Bufsize);
 LPWSTR win_wcscpy(LPWSTR Destination, LPCWSTR Source);

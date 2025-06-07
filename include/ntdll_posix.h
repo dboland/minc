@@ -37,8 +37,6 @@ typedef struct _PUBLIC_OBJECT_BASIC_INFORMATION {
 } PUBLIC_OBJECT_BASIC_INFORMATION, *PPUBLIC_OBJECT_BASIC_INFORMATION;
 
 int sprintf(char *buf, const char *format, ...);
-char * _itoa(int value, char *buffer, int radix);
+char *_itoa(int value, char *buffer, int radix);
 int atoi(const char *str);
 int tolower(int c);
-
-#define ISUCONT(C)	((C & 0xC0) == 0x80)

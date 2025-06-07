@@ -40,7 +40,4 @@ int __getmainargs(int *_Argc, char ***_Argv, char ***_Env, int _DoWildCard, _sta
 /* stdlib.h */
 
 int rand(void);
-
-/* ctype.h */
-
-int tolower(int c);
+void srand(unsigned int seed);

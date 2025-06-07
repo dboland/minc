@@ -71,5 +71,5 @@ diskconf(char *root)
 	/* Configure root/swap devices
 	 */
 	win_chroot(__Globals->Root);
-	wcstombs(root, __Globals->Root, MAX_PATH);
+	win_wcstombs(root, __Globals->Root, MAX_PATH);
 }

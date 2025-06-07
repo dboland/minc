@@ -30,7 +30,6 @@
 
 #include <stdarg.h>
 #include <stdint.h>
-#include <stdlib.h>
 #include <stddef.h>
 
 #include <wchar.h>
@@ -39,6 +38,7 @@
 #include "win/windows.h"		/* minimal Win32 */
 #include "win/winsock2.h"		/* minimal Windows Sockets v.2 */
 #include "win/iphlpapi.h"		/* minimal Network API */
+#include "ntdll_posix.h"
 #include "win_posix.h"
 #include "msvc_posix.h"
 #include "vfs_posix.h"

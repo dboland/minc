@@ -94,10 +94,10 @@ grp_GRP_GETGRNAM(const char *name, char *buf, size_t buflen)
 	WIN_GRENT wgResult;
 
 	if (!strcmp(name, "bin")){
-		mbstowcs(szAccount, "Users", MAX_NAME);
+		win_mbstowcs(szAccount, "Users", MAX_NAME);
 	}else if (!strcmp(name, "wheel")){
-		mbstowcs(szAccount, "Administrators", MAX_NAME);
-	}else if (!mbstowcs(szAccount, name, MAX_NAME)){
+		win_mbstowcs(szAccount, "Administrators", MAX_NAME);
+	}else if (!win_mbstowcs(szAccount, name, MAX_NAME)){
 		return(EINVAL);
 	}
 	if (!win_getgrnam(szAccount, &wgResult)){
@@ -141,7 +141,7 @@ grp_GRP_GETGROUPLIST(const char *user, gid_t group, gid_t *groups, int *ngroups)
 	if (!group){
 		group = WIN_ROOT_GID;
 	}
-	if (!mbstowcs(szAccount, user, MAX_NAME)){
+	if (!win_mbstowcs(szAccount, user, MAX_NAME)){
 		result = -EINVAL;
 	}else if (!win_getpwnam(szAccount, &pwEntry)){
 		result -= errno_posix(GetLastError());
