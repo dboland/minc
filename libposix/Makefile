@@ -28,7 +28,7 @@ vfs_posix.o: vfs/vfs.c
 	gcc -c ${CFLAGS} -I${MINGW}/include -I${TRACEDIR} -o $@ $<
 
 libposix.o: libposix.c
-	gcc -c ${CFLAGS} -I../openbsd/include -I../openbsd/sys \
+	gcc -c ${CFLAGS} -I../openbsd/include -I../openbsd/sys -I${SRCDIR}/sys \
 	-DTTYDEFCHARS -DKTRACE -DSYSVSEM $<
 
 version.o: version.rc

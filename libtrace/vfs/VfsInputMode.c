@@ -28,7 +28,7 @@
  *
  */
 
-#include "config.h"
+#include "../config.h"
 
 LPSTR 
 VfsInputMode(LPSTR Buffer, LPCSTR Label, DWORD Mode)

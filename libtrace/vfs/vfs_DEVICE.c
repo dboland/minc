@@ -28,7 +28,7 @@
  *
  */
 
-#include "config.h"
+#include "../config.h"
 
 DWORD 
 vfs_DEVICE(WIN_DEVICE *Device, LPSTR Buffer)

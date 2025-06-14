@@ -38,7 +38,7 @@
 DWORD 
 DriveLookupDevice(LPCWSTR BusName)
 {
-	DWORD dwResult = DEV_CLASS_SYSTEM;
+	DWORD dwResult = DEV_CLASS_CPU;
 
 	if (!wcsncmp(BusName, L"SCSI", 4)){
 		dwResult = DEV_TYPE_SD;

@@ -28,7 +28,7 @@
  *
  */
 
-#include "config.h"
+#include "../config.h"
 
 DWORD 
 vfs_THREAD(WIN_THREAD_STRUCT *Thread, LPSTR Buffer)

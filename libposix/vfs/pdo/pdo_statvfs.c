@@ -72,10 +72,8 @@ PDOLookupService(LPCWSTR Service, DWORD Bus)
 	}else if (!wcscmp(Service, L"Parport")){
 		dwResult |= DEV_CLASS_PRINTER;
 
-		/* Vista */
-
 	}else if (!wcsncmp(Service, L"BTH", 3)){
-		dwResult |= DEV_CLASS_BLUETOOTH;
+		dwResult |= DEV_CLASS_USB;
 
 	}
 	return(dwResult);
@@ -127,13 +125,13 @@ PDOLookup(LPCWSTR Bus, LPCWSTR Class, LPCWSTR Service)
 	}else if (!wcscmp(Class, L"hidclass")){
 		dwResult = PDOLookupBus(Bus, DEV_CLASS_HID);
 
+	}else if (!wcscmp(Class, L"system")){
+		dwResult = PDOLookupBus(Bus, DEV_CLASS_SYSTEM);
+
 		/* Vista */
 
 	}else if (!wcscmp(Class, L"hdc")){
 		dwResult = PDOLookupBus(Bus, DEV_CLASS_DISK);
-
-	}else if (!wcscmp(Class, L"bluetooth")){
-		dwResult = PDOLookupBus(Bus, DEV_CLASS_BLUETOOTH);
 
 	}else if (!wcscmp(Class, L"printqueue")){
 		dwResult = PDOLookupBus(Bus, DEV_CLASS_PRINTER);
@@ -144,14 +142,11 @@ PDOLookup(LPCWSTR Bus, LPCWSTR Class, LPCWSTR Service)
 	}else if (!wcscmp(Class, L"camera")){
 		dwResult = PDOLookupBus(Bus, DEV_CLASS_MEDIA);
 
-	}else if (!wcscmp(Class, L"audioendpoint")){
-		dwResult = DEV_TYPE_AUDIO;
-
 	}else if (!wcscmp(Class, L"processor")){
 		dwResult = DEV_TYPE_PROCESSOR;
 
 	}else{
-		dwResult = PDOLookupBus(Bus, DEV_CLASS_SYSTEM);
+		dwResult = PDOLookupBus(Bus, DEV_CLASS_DULL);
 
 	}
 	return(dwResult);
@@ -165,7 +160,9 @@ PDOLookupClass(LPCWSTR ClassID, LPWSTR Result)
 	WIN_NAMEIDATA wPath;
 
 	if (reg_open(reg_lookup(&wPath, REG_CLASS, ClassID), &wFlags, &vNode)){
-		reg_read(&vNode, L"Class", Result, MAX_NAME, &dwResult);
+		if (!reg_read(&vNode, L"Class", Result, MAX_NAME, &dwResult)){
+			win_wcscpy(Result, L"UNKNOWN");
+		}
 		reg_close(&vNode);
 		win_wcslcase(Result);
 	}

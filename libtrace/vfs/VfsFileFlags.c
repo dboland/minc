@@ -28,7 +28,7 @@
  *
  */
 
-#include "config.h"
+#include "../config.h"
 
 LPSTR 
 VfsFileFlags(LPSTR Buffer, DWORD Flags)

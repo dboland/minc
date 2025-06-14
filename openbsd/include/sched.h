@@ -28,16 +28,9 @@
  *
  */
 
-#include "../config.h"
+#ifndef _SCHED_H_
+#define	_SCHED_H_
 
-DWORD 
-vfs_STATFS(WIN_STATFS *Info, LPSTR Buffer)
-{
-	LPSTR psz = Buffer;
+#include <sys/sched.h>
 
-	psz += sprintf(psz, "(%ls): DevId(0x%x) MaxPath(%d) ClustersTotal(%d) FreeClusters(%d)\n", 
-		Info->TypeName, Info->DeviceId, Info->MaxPath, Info->ClustersTotal, Info->FreeClusters);
-	psz = VfsVolumeFlagsLow(psz, "+ Flags", Info->Flags.LowPart);
-	psz += sprintf(psz, "+ Path: %ls\n", Info->Path);
-	return(psz - Buffer);
-}
+#endif

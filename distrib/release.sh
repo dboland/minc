@@ -9,6 +9,7 @@ MINIROOT=${DISTROOT}/miniroot
 LATEST=/mnt/d/commandlinerevolution.nl/minc/release
 
 SBIN='libposix-6.1.0.dll bsd.exe mkent wrc setup.sh wtrace iptables color terminal.cmd mount_refs'
+ETC='man.conf login.conf magic profile MAKEDEV console.reg syslog.conf ttys vi.exrc'
 
 copy_file()
 {

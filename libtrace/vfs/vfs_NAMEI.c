@@ -28,7 +28,7 @@
  *
  */
 
-#include "config.h"
+#include "../config.h"
 
 DWORD 
 vfs_NAMEI(WIN_NAMEIDATA *Path, LPSTR Buffer)

@@ -28,7 +28,7 @@
  *
  */
 
-#include "config.h"
+#include "../config.h"
 
 DWORD 
 vfs_CFDATA(WIN_CFDATA *Config, LPSTR Buffer)

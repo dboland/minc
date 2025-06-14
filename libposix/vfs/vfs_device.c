@@ -74,8 +74,28 @@ dull_attach(WIN_DEVICE *Device)
 	BOOL bResult = TRUE;
 
 	switch (Device->DeviceType){
+		case DEV_TYPE_BIOS:
+			bResult = config_found("bios", FS_TYPE_PDO, WIN_VCHR, Device);
+			break;
+		case DEV_TYPE_USBT:
+			bResult = config_found("ubt", FS_TYPE_PDO, WIN_VCHR, Device);
+			break;
 		case DEV_TYPE_SWD:
 			bResult = config_found("swd", FS_TYPE_PDO, WIN_VCHR, Device);
+			break;
+		default:
+			bResult = FALSE;
+	}
+	return(bResult);
+}
+BOOL 
+system_attach(WIN_DEVICE *Device)
+{
+	BOOL bResult = TRUE;
+
+	switch (Device->DeviceType){
+		case DEV_TYPE_ENUM:
+			bResult = config_found("enum", FS_TYPE_PDO, WIN_VCHR, Device);
 			break;
 		case DEV_TYPE_ACPI:
 			bResult = config_found("acpi", FS_TYPE_PDO, WIN_VCHR, Device);
@@ -338,8 +358,11 @@ usb_attach(WIN_DEVICE *Device)
 		case DEV_TYPE_UHUB:
 			bResult = config_found("uhub", FS_TYPE_PDO, WIN_VCHR, Device);
 			break;
-		case DEV_TYPE_USBT:
-			bResult = config_found("ubt", FS_TYPE_PDO, WIN_VCHR, Device);
+		case DEV_TYPE_BTHUB:
+			bResult = config_found("bthub", FS_TYPE_PDO, WIN_VCHR, Device);
+			break;
+		case DEV_TYPE_ITE:
+			bResult = config_found("ite", FS_TYPE_PDO, WIN_VCHR, Device);
 			break;
 		default:
 			bResult = FALSE;
@@ -407,6 +430,9 @@ config_attach(WIN_DEVICE *Device, USHORT Class)
 			break;
 		case DEV_CLASS_HID:
 			bResult = hid_attach(Device);
+			break;
+		case DEV_CLASS_SYSTEM:
+			bResult = system_attach(Device);
 			break;
 		default:
 			bResult = FALSE;

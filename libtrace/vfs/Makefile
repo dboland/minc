@@ -11,7 +11,7 @@ CFLAGS += -DWIN_ERR=printf
 all: ${OBJECTS}
 
 %.o: %.c
-	gcc -c ${CFLAGS} -I${MINGW}/include -I../../include -I.. -o $@ $<
+	gcc -c ${CFLAGS} -I${MINGW}/include -I../../include -o $@ $<
 
 clean:
 	rm -f *.o ${LIB}

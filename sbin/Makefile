@@ -56,10 +56,6 @@ wtrace: wtrace.c libwtrace.o ${TRACELIB}
 	${MINGW}/lib/libadvapi32.a ${MINGW}/lib/libkernel32.a ${MINGW}/lib/libuser32.a \
 	${MINGW}/lib/libntdll.a
 
-install-local:
-	./mkent passwd >/etc/passwd
-	./mkent group >/etc/group
-
 install-wtrace:
 	ginstall wtrace ${DESTDIR}${SBINDIR}/
 

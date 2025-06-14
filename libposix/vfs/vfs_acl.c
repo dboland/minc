@@ -117,11 +117,13 @@ BOOL
 AclAddEntry(PACL Acl, BYTE Flags, ACCESS_MASK Access, PSID Sid)
 {
 	WORD wSidSize = GetLengthSid(Sid);
-	WORD wAceSize = sizeof(ACCESS_ALLOWED_ACE) - sizeof(DWORD) + wSidSize;
+	WORD wAceSize = ACL_ACESIZE + wSidSize;
 	ACCESS_ALLOWED_ACE8 acEntry = {
-		{ACCESS_ALLOWED_ACE_TYPE, Flags, wAceSize}, Access
+		{ACCESS_ALLOWED_ACE_TYPE, INHERITED_ACE | Flags, wAceSize}, Access
 	};
 
+	/* When adding ACE, Flags should include INHERITED_ACE.
+	 */
 	CopySid(wSidSize, &acEntry.Sid, Sid);
 	Acl->AclSize += wAceSize;
 	win_realloc(Acl, Acl->AclSize);
@@ -139,7 +141,6 @@ vfs_acl_init(WIN_ACL_CONTROL *Control, DWORD MountId, DWORD Mode, PSECURITY_DESC
 	BOOL bOwner, bGroup;
 	DWORD dwType = __Mounts[MountId].DeviceType;
 
-//__PRINTF("dwType: 0x%x\n", dwType)
 	if (!GetSecurityDescriptorOwner(Control->Source, &pOwner, &bOwner)){
 		WIN_ERR("GetSecurityDescriptorOwner(): %s\n", win_strerror(GetLastError()));
 	}
@@ -220,7 +221,8 @@ vfs_acl_create(WIN_ACL_CONTROL *Control, WIN_MODE *Mode, BYTE Flags, PSECURITY_D
 	/* When creating files/subfolders in in user's profile tree (git.exe)
 	 */
 	if (!(dwTypeMask & WIN_ACL_OTHER)){
-		aMaskNew = READ_CONTROL | FILE_READ_ATTRIBUTES | SYNCHRONIZE | Mode->Other;
+		aMaskNew = READ_CONTROL | SYNCHRONIZE;
+		aMaskNew |= FILE_READ_ATTRIBUTES | FILE_READ_EA | Mode->Other;
 		AclAddEntry(paclNew, Flags, aMaskNew, &SidAuthenticated);
 	}
 	if (!SetSecurityDescriptorDacl(Result, bPresent, paclNew, FALSE)){

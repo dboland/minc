@@ -28,7 +28,7 @@
  *
  */
 
-#include "config.h"
+#include "../config.h"
 
 DWORD 
 vfs_MOUNT(WIN_MOUNT *Mount, LPSTR Buffer)

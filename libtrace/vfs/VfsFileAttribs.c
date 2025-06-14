@@ -28,7 +28,7 @@
  *
  */
 
-#include "config.h"
+#include "../config.h"
 
 LPSTR 
 VfsFileAttribs(LPSTR Buffer, DWORD Attribs)

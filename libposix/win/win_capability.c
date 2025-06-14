@@ -278,11 +278,11 @@ win_cap_set_mode(ACCESS_MASK Group, ACCESS_MASK Other, ACL *Result)
 	Result->AclRevision = ACL_REVISION;
 	Result->AclSize = sizeof(ACL);
 	Result->AceCount = 0;
-	Result->AclSize += CAP_ACESIZE + GetLengthSid(&SidAdmins);
+	Result->AclSize += ACL_ACESIZE + GetLengthSid(&SidAdmins);
 	AddAccessAllowedAce(Result, ACL_REVISION, GENERIC_ALL, &SidAdmins);
-	Result->AclSize += CAP_ACESIZE + GetLengthSid(&SidUsers);
+	Result->AclSize += ACL_ACESIZE + GetLengthSid(&SidUsers);
 	AddAccessAllowedAce(Result, ACL_REVISION, Group, &SidUsers);
-	Result->AclSize += CAP_ACESIZE + GetLengthSid(&SidAuthenticated);
+	Result->AclSize += ACL_ACESIZE + GetLengthSid(&SidAuthenticated);
 	AddAccessAllowedAce(Result, ACL_REVISION, Other, &SidAuthenticated);
 	return(TRUE);
 }

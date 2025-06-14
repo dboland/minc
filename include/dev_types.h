@@ -31,7 +31,6 @@
 /* Device classes (sys/device.h) */
 
 #define DEV_CLASS_DULL		0x0000			/* generic, no special info */
-#define DEV_CLASS_SYSTEM	DEV_CLASS_DULL
 #define DEV_CLASS_CPU		0x0100
 #define DEV_CLASS_DISK		0x0200
 #define DEV_CLASS_IFNET		0x0300
@@ -45,9 +44,9 @@
 #define DEV_CLASS_MOUSE		0x0900
 #define DEV_CLASS_STORAGE	0x0A00
 #define DEV_CLASS_USB		0x0B00
-#define DEV_CLASS_BLUETOOTH	DEV_CLASS_USB
 #define DEV_CLASS_HID		0x0C00
-#define DEV_CLASS_MAX		13
+#define DEV_CLASS_SYSTEM	0x0D00
+#define DEV_CLASS_MAX		14
 
 /* Hardware buses */
 
@@ -68,24 +67,28 @@
 
 /* System device types */
 
-#define DEV_TYPE_SWD		(DEV_CLASS_SYSTEM)
-#define DEV_TYPE_ACPI		(DEV_CLASS_SYSTEM + DEV_BUS_ACPI)
+#define DEV_TYPE_SWD		(DEV_CLASS_DULL)
+#define DEV_TYPE_BIOS		(DEV_CLASS_DULL + DEV_BUS_ACPI)
+#define DEV_TYPE_USBT		(DEV_CLASS_DULL + DEV_BUS_USB)	/* USB Bluetooth adapter */
+
+#define DEV_TYPE_ENUM		(DEV_CLASS_SYSTEM)
 #define DEV_TYPE_PCI		(DEV_CLASS_SYSTEM + DEV_BUS_PCI)	/* PCI controller device */
+#define DEV_TYPE_ACPI		(DEV_CLASS_SYSTEM + DEV_BUS_ACPI)
 
 #define DEV_TYPE_MEM		(DEV_CLASS_CPU + 1)		/* physical memory device */
 #define DEV_TYPE_KMEM		(DEV_CLASS_CPU + 2)		/* kernel memory device (libposix.dll) */
 #define DEV_TYPE_NULL		(DEV_CLASS_CPU + 3)		/* null byte write device */
 #define DEV_TYPE_PORT		(DEV_CLASS_CPU + 4)		/* I/O port access */
 #define DEV_TYPE_ZERO		(DEV_CLASS_CPU + 5)		/* null byte read device */
-#define DEV_TYPE_URANDOM	(DEV_CLASS_CPU + 8)		/* random generator pseudo device */
-#define DEV_TYPE_RANDOM		(DEV_CLASS_CPU + 9)		/* crypto random generator pseudo device */
-#define DEV_TYPE_ROUTE		(DEV_CLASS_CPU + 10)		/* message routing pseudo device */
-#define DEV_TYPE_STDIN		(DEV_CLASS_CPU + 16)		/* standard stream pseudo device */
-#define DEV_TYPE_STDOUT		(DEV_CLASS_CPU + 17)		/* standard stream pseudo device */
-#define DEV_TYPE_STDERR		(DEV_CLASS_CPU + 18)		/* standard stream pseudo device */
-#define DEV_TYPE_SWAP		(DEV_CLASS_CPU + 24)		/* disk swap pseudo device */
-#define DEV_TYPE_RAMDISK	(DEV_CLASS_CPU + 32)		/* Random Access Memory disk device (rd*) */
-#define DEV_TYPE_PROCESSOR	(DEV_CLASS_CPU + DEV_BUS_BIOS)	/* Central Processing Unit */
+#define DEV_TYPE_URANDOM	(DEV_CLASS_CPU + 6)		/* random generator pseudo device */
+#define DEV_TYPE_RANDOM		(DEV_CLASS_CPU + 7)		/* crypto random generator pseudo device */
+#define DEV_TYPE_ROUTE		(DEV_CLASS_CPU + 8)		/* message routing pseudo device */
+#define DEV_TYPE_STDIN		(DEV_CLASS_CPU + 9)		/* standard stream pseudo device */
+#define DEV_TYPE_STDOUT		(DEV_CLASS_CPU + 10)		/* standard stream pseudo device */
+#define DEV_TYPE_STDERR		(DEV_CLASS_CPU + 11)		/* standard stream pseudo device */
+#define DEV_TYPE_SWAP		(DEV_CLASS_CPU + 12)		/* disk swap pseudo device */
+#define DEV_TYPE_RAMDISK	(DEV_CLASS_CPU + 24)		/* Random Access Memory disk device (rd*) */
+#define DEV_TYPE_PROCESSOR	(DEV_CLASS_CPU + 32)		/* Central Processing Unit */
 
 //#define DEV_TYPE_ROOT		(DEV_CLASS_DISK)		/* Root mount point */
 #define DEV_TYPE_AHCI		(DEV_CLASS_DISK + DEV_BUS_SATA)	/* Serial ATA Advanced Host Controller Interface */
@@ -100,7 +103,7 @@
 #define DEV_TYPE_PPP		(DEV_CLASS_IFNET + 24)		/* Point-To-Point network device */
 #define DEV_TYPE_ETH		(DEV_CLASS_IFNET + 28)		/* Ethernet network device */
 #define DEV_TYPE_WLAN		(DEV_CLASS_IFNET + 36)		/* IEEE80211 wireless network device */
-#define DEV_TYPE_NIC		(DEV_CLASS_IFNET + DEV_BUS_PCI)		/* Network Interface Card */
+#define DEV_TYPE_NIC		(DEV_CLASS_IFNET + DEV_BUS_PCI)	/* Network Interface Card */
 #define DEV_TYPE_REMOTE		(DEV_CLASS_IFNET + DEV_BUS_MAIN)	/* Server Message Block storage */
 
 #define DEV_TYPE_MEDIA		(DEV_CLASS_MEDIA)
@@ -144,7 +147,8 @@
 #define DEV_TYPE_OHCI		(DEV_CLASS_USB)			/* USB Open Host Controller Interface (USB 1.1) */
 #define DEV_TYPE_UHCI		(DEV_CLASS_USB + DEV_BUS_PCI)	/* USB Universal Host Controller Interface (USB 1.0) */
 #define DEV_TYPE_UHUB		(DEV_CLASS_USB + DEV_BUS_USB)	/* USB Hub adapter */
-#define DEV_TYPE_USBT		(DEV_CLASS_USB + DEV_BUS_ISA)	/* USB Bluetooth adapter */
+#define DEV_TYPE_BTHUB		(DEV_CLASS_USB + DEV_BUS_ISA)	/* USB Bluetooth hub */
+#define DEV_TYPE_ITE		(DEV_CLASS_USB + DEV_BUS_ACPI)	/* ITE Chipset */
 
 #define DEV_TYPE_EHCI		(DEV_CLASS_HID + DEV_BUS_PCI)	/* USB Enhanced Host Controller Interface (USB 2.0) */
 #define DEV_TYPE_UHIDEV		(DEV_CLASS_HID + DEV_BUS_USB)	/* USB Human Interface Device */

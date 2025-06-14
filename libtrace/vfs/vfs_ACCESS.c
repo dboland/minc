@@ -28,7 +28,7 @@
  *
  */
 
-#include "config.h"
+#include "../config.h"
 
 DWORD 
 vfs_ACCESS(ACCESS_MASK Access, LPSTR Buffer)

@@ -28,7 +28,7 @@
  *
  */
 
-#include "config.h"
+#include "../config.h"
 
 DWORD 
 vfs_INODE(WIN_INODE *Node, LPSTR Buffer)

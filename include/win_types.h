@@ -163,6 +163,8 @@ typedef struct _WIN_OBJECT_CONTROL {
 	ACCESS_ALLOWED_ACE8 Ace[3];
 } WIN_OBJECT_CONTROL;
 
+#define ACL_ACESIZE			(sizeof(ACCESS_ALLOWED_ACE) - sizeof(DWORD))
+
 /*
  * win_sysctl.c
  */
@@ -179,7 +181,6 @@ typedef struct _WIN_KUSAGE {
  */
 
 #define TOKEN_ADJUST_SESSIONID		0x100
-#define CAP_ACESIZE			(sizeof(ACCESS_ALLOWED_ACE) - sizeof(DWORD))
 
 typedef struct _WIN_CAP_CONTROL {
 	HANDLE Token;
@@ -189,7 +190,6 @@ typedef struct _WIN_CAP_CONTROL {
 	DWORD SessionId;
 	PTOKEN_GROUPS Groups;
 	PTOKEN_PRIVILEGES Privs;
-//	PTOKEN_DEFAULT_DACL Default;
 	ACL DefaultACL;
 	ACCESS_ALLOWED_ACE8 Ace[4];
 } WIN_CAP_CONTROL;

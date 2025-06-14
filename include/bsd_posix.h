@@ -44,7 +44,7 @@ int runcmd(char *argv[]);
 
 /* grp.c */
 
-char *group_posix(char *buf, size_t buflen, WIN_GRENT *Group);
+//char *group_posix(char *buf, size_t buflen, WIN_GRENT *Group);
 
 /* pwd.c */
 

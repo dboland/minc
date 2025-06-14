@@ -28,7 +28,7 @@
  *
  */
 
-#include "config.h"
+#include "../config.h"
 
 DWORD 
 vfs_CAP_CONTROL(WIN_CAP_CONTROL *Control, LPSTR Buffer)

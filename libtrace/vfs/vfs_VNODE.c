@@ -28,7 +28,7 @@
  *
  */
 
-#include "config.h"
+#include "../config.h"
 
 const CHAR *__FSTYPE[] = {
 	"UNKNOWN", 

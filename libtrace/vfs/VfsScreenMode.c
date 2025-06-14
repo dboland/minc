@@ -28,7 +28,7 @@
  *
  */
 
-#include "config.h"
+#include "../config.h"
 
 LPSTR 
 VfsScreenMode(LPSTR Buffer, LPCSTR Label, DWORD Mode)

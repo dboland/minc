@@ -1,21 +1,20 @@
 include ../Makefile.inc
 
+ARCHDIR=sys/arch/i386/include
+
 all:
 	@${MAKE} -C lib
 	@${MAKE} -C usr.bin
 
-includes-local: ${INCDIR}/machine
+includes-local:
+	@/bin/mkdir -p ${INCDIR}/machine
+	@/bin/cp -ru ${SRCDIR}/include/* ${INCDIR}/
 	@/bin/cp -rvu include/* ${INCDIR}/
+	@/bin/cp -ru ${SRCDIR}/sys/sys ${INCDIR}/
 	@/bin/cp -rvu sys/sys ${INCDIR}/
-	@/bin/cp -rvu sys/dev ${INCDIR}/
-	@/bin/cp -rvu sys/net ${INCDIR}/
-	@/bin/cp -rvu sys/nfs ${INCDIR}/
-	@/bin/cp -rvu sys/uvm ${INCDIR}/
-	@/bin/cp -rvu sys/netmpls ${INCDIR}/
-	@/bin/cp -rvu sys/netinet ${INCDIR}/
 	@/bin/cp -rvu sys/netinet6 ${INCDIR}/
-	@/bin/cp -rvu sys/net80211 ${INCDIR}/
-	@/bin/cp -rvu sys/arch/i386/include/* ${INCDIR}/machine/
+	@/bin/cp -ru ${SRCDIR}/${ARCHDIR}/* ${INCDIR}/machine/
+	@/bin/cp -rvu ${ARCHDIR}/* ${INCDIR}/machine/
 	@${MAKE} -C lib includes-local
 
 includes: ${DESTDIR}

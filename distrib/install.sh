@@ -7,7 +7,6 @@ BIN='ksh'
 LIB='libc.so.75.0 libsocket.so.75.0'
 #LIB="${LIB} libcrypto.so.27.0 libutil.so.12.1"
 #LIB="${LIB} libssl.so.24.1 libedit.so.5.1 libkvm.so.16.0 libsqlite3.so.27.0"
-ETC='man.conf login.conf magic profile MAKEDEV console.reg syslog.conf ttys vi.exrc'
 LOCALE='ARMSCII-8 ISO8859-2 KOI8-U CP1251 ISO8859-4 UTF-8 CP866 ISO8859-5 ISO8859-1 ISO8859-7 ISO8859-13
  ISO8859-9 ISO8859-15 KOI8-R'
 LIBEXEC='iptables-list.sh ncurses ld.so'
@@ -52,7 +51,6 @@ copy_bin /usr/libexec "$LIBEXEC"
 #copy_dir /usr/share "terminfo"
 
 mkdir -p ./etc
-copy_bin /etc "$ETC"
 copy_dir /etc "ssl"
 copy_dir /etc "color"
 

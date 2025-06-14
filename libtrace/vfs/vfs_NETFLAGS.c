@@ -28,7 +28,7 @@
  *
  */
 
-#include "config.h"
+#include "../config.h"
 
 DWORD 
 vfs_NETFLAGS(LONG Events, LPSTR Buffer)
