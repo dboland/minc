@@ -6,7 +6,7 @@ LIBEXEC=${PREFIX}/libexec
 LIBS=libadvapi32.a libkernel32.a libshell32.a libuser32.a \
 	libmoldname.a libgmon.a
 
-all: ${LIBS}
+all: ${LIBS} install-gcc install-ld
 	@#${MAKE} -C bin
 	@${MAKE} -C gcc
 
@@ -65,13 +65,11 @@ install-tools: ${MSGBIN}
 
 # note: create dummy ld.so for configure scripts to detect shared libs
 
-install-lib: ${LIBDIR}
-	/bin/cp ${LIBS} ${LIBDIR}/
-
 install-libexec: ${LIBEXEC}
 	/bin/cp -rvu ${MINGW}/libexec/gcc ${LIBEXEC}/
 
-install-local: ${MINGW} install-lib install-gcc install-ld
+install-local: ${MINGW} ${LIBDIR}
+	/bin/cp -vu ${LIBS} ${LIBDIR}/
 	@${MAKE} -C gcc install-local
 
 install:
