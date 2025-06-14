@@ -12,13 +12,13 @@ ${SRCDIR}:
 includes-local: ${SRCDIR}
 	@/bin/mkdir -p ${INCDIR}/machine ${INCDIR}/dev
 	/bin/cp -ru ${SRCDIR}/include/* ${INCDIR}/
-	/bin/cp -rvu include/* ${INCDIR}/
+	/bin/cp -rv include/* ${INCDIR}/
 	/bin/cp -ru ${SRCDIR}/sys/sys ${INCDIR}/
-	/bin/cp -rvu sys/sys ${INCDIR}/
+	/bin/cp -rv sys/sys ${INCDIR}/
 	/bin/cp -ru ${SRCDIR}/sys/netinet6 ${INCDIR}/
-	/bin/cp -rvu sys/netinet6 ${INCDIR}/
+	/bin/cp -rv sys/netinet6 ${INCDIR}/
 	/bin/cp -ru ${SRCDIR}/sys/arch/i386/include/* ${INCDIR}/machine/
-	/bin/cp -rvu sys/arch/i386/include/* ${INCDIR}/machine/
+	/bin/cp -rv sys/arch/i386/include/* ${INCDIR}/machine/
 	/bin/cp -ru ${SRCDIR}/sys/dev/wscons ${INCDIR}/dev/
 	/bin/cp -ru ${SRCDIR}/sys/uvm ${INCDIR}/
 	/bin/cp -ru ${SRCDIR}/sys/net ${INCDIR}/

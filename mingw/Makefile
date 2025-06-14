@@ -1,12 +1,11 @@
 include ../Makefile.inc
 
-UBINDIR=${PREFIX}/bin
 LIBEXEC=${PREFIX}/libexec
 
 LIBS=libadvapi32.a libkernel32.a libshell32.a libuser32.a \
 	libmoldname.a libgmon.a
 
-all: install-gcc install-ld ${LIBS}
+all: install-gcc install-libexec install-ld ${LIBS}
 	@#${MAKE} -C bin
 	@${MAKE} -C gcc
 
@@ -62,12 +61,13 @@ MSGBIN=msgfmt.exe libgettextsrc-0-18-3.dll libgettextlib-0-18-3.dll
 install-gcc: ${BINDIR} ${UBINDIR} ${GCCBIN} ${GCCLIB}
 install-ld: ${UBINDIR} ${BINUTILS}
 install-tools: ${MSGBIN}
+install-libexec: ${LIBEXEC}
+	/bin/cp -rvu ${MINGW}/libexec/gcc ${LIBEXEC}/
 
 # tip: create dummy ld.so for configure scripts to detect shared libs
 
-install-local: ${MINGW} ${LIBDIR} ${LIBEXEC}
+install-local: ${MINGW} ${LIBDIR}
 	/bin/cp -vu ${LIBS} ${LIBDIR}/
-	/bin/cp -rvu ${MINGW}/libexec/gcc ${LIBEXEC}/
 	@${MAKE} -C gcc install-local
 
 install:
