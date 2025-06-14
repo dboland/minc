@@ -44,7 +44,7 @@ console.exe: console.o libconsole.o
 	gcc ${LDFLAGS} -L${WINDIR} -o $@ console.o libconsole.o -lutil
 
 mount_refs: ${SRCDIR}/sbin/mount_ntfs/mount_ntfs.c
-	gcc -c ${CFLAGS} -I../include -I../openbsd/include -o $@ $<
+	gcc -c ${CFLAGS} -I../include -o $@ $<
 
 wrc: wrc.exe
 

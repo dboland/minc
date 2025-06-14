@@ -13,7 +13,7 @@ GCCDIR=/lib/gcc/mingw32/${GCCVER}
 all: ${OBJECTS} ${LIBS}
 
 %.o: %.c
-	gcc -c ${CFLAGS} -I../../openbsd/include -I../../include -o $@ $<
+	gcc -c ${CFLAGS} -I../../include -o $@ $<
 
 #
 # we need alloca(), which belongs in libgcc.a
@@ -21,7 +21,7 @@ all: ${OBJECTS} ${LIBS}
 #
 
 libgcc.a: wintls.o emutls.o mempcpy.o gnu_mntent.o futimesat.o
-	ar xv ${MINGW}${GCCLIB}/libgcc.a ${GCCOBJ}
+	ar xv ${MINGW}${GCCDIR}/libgcc.a ${GCCOBJ}
 	ar cru $@ ${GCCOBJ} $^
 # wintls.o
 
