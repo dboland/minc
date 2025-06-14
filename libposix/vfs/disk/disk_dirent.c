@@ -43,7 +43,7 @@ static const UCHAR __DTYPE_POSIX[] = {
 };
 
 #define DIRENT_RECSIZE(namelen) \
-    ((offsetof(WIN_DIRENT, FileName) + (namelen) + 1 + 7) &~ 7)
+    ((__builtin_offsetof(WIN_DIRENT, FileName) + (namelen) + 1 + 7) &~ 7)
 
 /************************************************************/
 

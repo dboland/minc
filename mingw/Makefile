@@ -30,16 +30,21 @@ includes-local:
 	@/bin/cp -rvu include/* ${INCDIR}/
 
 ${BINDIR}:
-	mkdir -p ${BINDIR}
+	/bin/mkdir -p ${BINDIR}
 
 ${UBINDIR}:
-	mkdir -p ${UBINDIR}
+	/bin/mkdir -p ${UBINDIR}
 
 ${LIBDIR}:
-	mkdir -p ${LIBDIR}
+	/bin/mkdir -p ${LIBDIR}
 
 ${LIBEXEC}:
-	mkdir -p ${LIBEXEC}
+	/bin/mkdir -p ${LIBEXEC}
+
+${MINGW}:
+	@echo " > MinGW source directory ($@) not found. Make sure"
+	@echo " > it is defined correctly in Makefile.inc"
+	@exit 1
 
 GCCBIN=gcc.exe cc.exe cpp.exe
 GCCLIB=libgmp-10.dll libmpc-3.dll libmpfr-4.dll zlib1.dll libgcc_s_dw2-1.dll
@@ -57,7 +62,7 @@ MSGBIN=msgfmt.exe libgettextsrc-0-18-3.dll libgettextlib-0-18-3.dll
 install-gcc: ${BINDIR} ${UBINDIR} ${GCCBIN} ${GCCLIB}
 install-ld: ${UBINDIR} ${BINUTILS}
 
-# create dummy ld.so for configure scripts to detect shared libs
+# note: create dummy ld.so for configure scripts to detect shared libs
 
 install-lib: ${LIBDIR}
 	/bin/cp ${LIBS} ${LIBDIR}/
@@ -67,7 +72,7 @@ install-libexec: ${LIBEXEC}
 
 install-tools: ${MSGBIN}
 
-install-local: install-lib
+install-local: ${MINGW} install-lib
 	@${MAKE} -C gcc install-local
 
 install:

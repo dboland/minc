@@ -7,7 +7,8 @@ GCCOBJ=_mulsc3.o _muldc3.o _mulxc3.o _ctzdi2.o \
 	_ffsdi2.o _popcountdi2.o _popcountsi2.o _popcount_tab.o _udivdi3.o \
 	_divdi3.o _clrsbdi2.o _clrsbsi2.o \
 	_chkstk.o _chkstk_ms.o 
-GCCINC=/lib/gcc/mingw32/${GCCVER}/include
+GCCINC=${GCCDIR}/include
+GCCDIR=/lib/gcc/mingw32/${GCCVER}
 
 all: ${OBJECTS} ${LIBS}
 
@@ -20,7 +21,7 @@ all: ${OBJECTS} ${LIBS}
 #
 
 libgcc.a: wintls.o emutls.o mempcpy.o gnu_mntent.o futimesat.o
-	ar xv ${MINGW}/lib/gcc/mingw32/${GCCVER}/libgcc.a ${GCCOBJ}
+	ar xv ${MINGW}${GCCLIB}/libgcc.a ${GCCOBJ}
 	ar cru $@ ${GCCOBJ} $^
 # wintls.o
 
@@ -42,10 +43,10 @@ includes-local: ${CPPINC}
 	/bin/cp -rvu ${MINGW}${CPPINC}/c++ ${GCCINC}/
 	/bin/cp -rvu ${MINGW}${CPPINC}/ssp ${GCCINC}/
 
-install-local: ${LIBDIR}/gcc/mingw32/${GCCVER}
-	/bin/cp ${MINGW}/lib/gcc/mingw32/${GCCVER}/libstdc++.dll.a ${LIBDIR}/gcc/mingw32/${GCCVER}/libstdc++.a
-	/bin/cp ${LIBS} ${LIBDIR}/gcc/mingw32/${GCCVER}/
-	/bin/cp crtbegin.o crtend.o ${LIBDIR}/gcc/mingw32/${GCCVER}/
+install-local: ${GCCDIR}
+	/bin/cp ${MINGW}${GCCDIR}/libstdc++.dll.a ${GCCDIR}/libstdc++.a
+	/bin/cp ${LIBS} ${GCCDIR}/
+	/bin/cp crtbegin.o crtend.o ${GCCDIR}/
 	/bin/cp ${CRT0} ${LIBDIR}/crt2.o
 	/bin/cp crt1.o ${LIBDIR}/dllcrt2.o
 	/bin/cp gcrt0.o ${LIBDIR}/gcrt2.o

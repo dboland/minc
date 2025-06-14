@@ -6,7 +6,6 @@ LIBPOSIX=libposix-${RELEASE}.dll
 IMPLIB=libposix.dll.a
 CFLAGS+=-I../include -g
 CFLAGS+=-DRELEASE=\"${RELEASE}\" -DVERSION=\"${VERSION}\" -DBUILD=${BUILD}
-#CFLAGS+=-Wunused
 LDFLAGS+=-shared -s
 OBJECTS=crt1.o msvc.o win_posix.o vfs_posix.o libposix.o
 WINDIR=/C/WINDOWS/system32
@@ -16,7 +15,7 @@ TRACEDIR=../libtrace
 all: ${LIBPOSIX}
 
 crt1.o: crt1.c
-	gcc -c ${CFLAGS} $<
+	gcc -c ${CFLAGS} -I${SRCDIR}/sys $<
 
 msvc.o: msvc.c
 	gcc -c ${CFLAGS} -I${MINGW}/include -o $@ $<
@@ -28,8 +27,7 @@ vfs_posix.o: vfs/vfs.c
 	gcc -c ${CFLAGS} -I${MINGW}/include -I${TRACEDIR} -o $@ $<
 
 libposix.o: libposix.c
-	gcc -c ${CFLAGS} -I../openbsd/include -I../openbsd/sys -I${SRCDIR}/sys \
-	-DTTYDEFCHARS -DKTRACE -DSYSVSEM $<
+	gcc -c ${CFLAGS} -DTTYDEFCHARS -DKTRACE -DSYSVSEM $<
 
 version.o: version.rc
 	windres -DVERSION=\\\"${VERSION}\\\" -DRELEASE=\\\"${RELEASE}\\\" $< $@
@@ -38,7 +36,7 @@ libposix.a: win_posix.o msvc_posix.o
 	ar cru $@ $^
 
 arch.d:
-	@${MAKE} -C arch CFLAGS="-I../../openbsd/include -I../../include"
+	@${MAKE} -C arch CFLAGS="-I../../include"
 
 ${LIBPOSIX}: arch.d ${OBJECTS} version.o
 	${LD} ${LDFLAGS} -e _DllMainCRTStartup@12 --out-implib=${IMPLIB} --disable-auto-import --enable-stdcall-fixup \

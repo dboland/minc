@@ -34,10 +34,10 @@ sbin: libtrace.d
 	@${MAKE} -C sbin all install
 
 Makefile.inc:
-	/bin/cp Makefile.inc.sample Makefile.inc
+	@/bin/cp Makefile.inc.sample Makefile.inc
 
 mount.sh:
-	/bin/cp mount.sh.sample mount.sh
+	@/bin/cp mount.sh.sample mount.sh
 
 clean:
 	@${MAKE} -C libtrace clean

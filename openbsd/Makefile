@@ -1,20 +1,28 @@
 include ../Makefile.inc
 
-ARCHDIR=sys/arch/i386/include
-
 all:
 	@${MAKE} -C lib
 	@${MAKE} -C usr.bin
 
-includes-local:
-	@/bin/mkdir -p ${INCDIR}/machine
+${SRCDIR}:
+	@echo " > OpenBSD source directory ($@) not found. Make sure"
+	@echo " > it is defined correctly in Makefile.inc"
+	@exit 1
+
+includes-local: ${SRCDIR}
+	@/bin/mkdir -p ${INCDIR}/machine ${INCDIR}/dev
 	@/bin/cp -ru ${SRCDIR}/include/* ${INCDIR}/
-	@/bin/cp -rvu include/* ${INCDIR}/
+	/bin/cp -rvu include/* ${INCDIR}/
 	@/bin/cp -ru ${SRCDIR}/sys/sys ${INCDIR}/
-	@/bin/cp -rvu sys/sys ${INCDIR}/
-	@/bin/cp -rvu sys/netinet6 ${INCDIR}/
-	@/bin/cp -ru ${SRCDIR}/${ARCHDIR}/* ${INCDIR}/machine/
-	@/bin/cp -rvu ${ARCHDIR}/* ${INCDIR}/machine/
+	/bin/cp -rvu sys/sys ${INCDIR}/
+	@/bin/cp -ru ${SRCDIR}/sys/netinet6 ${INCDIR}/
+	/bin/cp -rvu sys/netinet6 ${INCDIR}/
+	@/bin/cp -ru ${SRCDIR}/sys/arch/i386/include/* ${INCDIR}/machine/
+	/bin/cp -rvu sys/arch/i386/include/* ${INCDIR}/machine/
+	@/bin/cp -ru ${SRCDIR}/sys/dev/wscons ${INCDIR}/dev/
+	@/bin/cp -ru ${SRCDIR}/sys/uvm ${INCDIR}/
+	@/bin/cp -ru ${SRCDIR}/sys/net ${INCDIR}/
+	@/bin/cp -ru ${SRCDIR}/sys/netinet ${INCDIR}/
 	@${MAKE} -C lib includes-local
 
 includes: ${DESTDIR}
