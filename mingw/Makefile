@@ -7,7 +7,7 @@ LIBS=libadvapi32.a libkernel32.a libshell32.a libuser32.a \
 	libmoldname.a libgmon.a
 
 all: ${LIBS}
-	@${MAKE} -C bin
+	@#${MAKE} -C bin
 	@${MAKE} -C gcc
 
 #
@@ -18,10 +18,10 @@ all: ${LIBS}
 	dlltool -d $< -l $@ -k
 
 %.exe: ${MINGW}/bin/%.exe
-	/bin/cp -vu $< ${UBINDIR}/
+	@/bin/cp -vu $< ${UBINDIR}/
 
 %.dll: ${MINGW}/bin/%.dll
-	/bin/cp -vu $< ${BINDIR}/
+	@/bin/cp -vu $< ${BINDIR}/
 
 bin.d:
 	@${MAKE} -C bin
@@ -61,6 +61,7 @@ MSGBIN=msgfmt.exe libgettextsrc-0-18-3.dll libgettextlib-0-18-3.dll
 
 install-gcc: ${BINDIR} ${UBINDIR} ${GCCBIN} ${GCCLIB}
 install-ld: ${UBINDIR} ${BINUTILS}
+install-tools: ${MSGBIN}
 
 # note: create dummy ld.so for configure scripts to detect shared libs
 
@@ -70,9 +71,7 @@ install-lib: ${LIBDIR}
 install-libexec: ${LIBEXEC}
 	/bin/cp -rvu ${MINGW}/libexec/gcc ${LIBEXEC}/
 
-install-tools: ${MSGBIN}
-
-install-local: ${MINGW} install-lib
+install-local: ${MINGW} install-lib install-gcc install-ld
 	@${MAKE} -C gcc install-local
 
 install:
