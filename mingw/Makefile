@@ -6,7 +6,7 @@ LIBEXEC=${PREFIX}/libexec
 LIBS=libadvapi32.a libkernel32.a libshell32.a libuser32.a \
 	libmoldname.a libgmon.a
 
-all: ${LIBS} install-gcc install-ld
+all: install-gcc install-ld ${LIBS}
 	@#${MAKE} -C bin
 	@${MAKE} -C gcc
 
@@ -46,7 +46,7 @@ ${MINGW}:
 	@echo " > it is defined correctly in Makefile.inc"
 	@exit 1
 
-GCCBIN=gcc.exe cc.exe cpp.exe
+GCCBIN=gcc.exe cpp.exe
 GCCLIB=libgmp-10.dll libmpc-3.dll libmpfr-4.dll zlib1.dll libgcc_s_dw2-1.dll
 GCCBIN+=g++.exe c++.exe gdb.exe
 GCCLIB+=libintl-8.dll libiconv-2.dll libstdc++-6.dll
@@ -63,13 +63,11 @@ install-gcc: ${BINDIR} ${UBINDIR} ${GCCBIN} ${GCCLIB}
 install-ld: ${UBINDIR} ${BINUTILS}
 install-tools: ${MSGBIN}
 
-# note: create dummy ld.so for configure scripts to detect shared libs
+# tip: create dummy ld.so for configure scripts to detect shared libs
 
-install-libexec: ${LIBEXEC}
-	/bin/cp -rvu ${MINGW}/libexec/gcc ${LIBEXEC}/
-
-install-local: ${MINGW} ${LIBDIR}
+install-local: ${MINGW} ${LIBDIR} ${LIBEXEC}
 	/bin/cp -vu ${LIBS} ${LIBDIR}/
+	/bin/cp -rvu ${MINGW}/libexec/gcc ${LIBEXEC}/
 	@${MAKE} -C gcc install-local
 
 install:
