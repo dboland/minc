@@ -1,0 +1,588 @@
+--- include/ctype.h	2025-06-15 09:19:36 +0200
++++ include/ctype.h	2025-06-15 09:14:30 +0200
+@@ -53,9 +53,9 @@
+ 
+ __BEGIN_DECLS
+ 
+-extern const char	*_ctype_;
+-extern const short	*_tolower_tab_;
+-extern const short	*_toupper_tab_;
++extern LIBC_IMPORT const char	*_ctype_;
++extern LIBC_IMPORT const short	*_tolower_tab_;
++extern LIBC_IMPORT const short	*_toupper_tab_;
+ 
+ #if defined(__GNUC__) || defined(_ANSI_LIBRARY)
+ int	isalnum(int);
+--- include/fcntl.h	1970-01-01 01:00:00 +0100
++++ include/fcntl.h	2025-06-15 09:29:13 +0200
+@@ -0,0 +1,36 @@
++/*
++ * Copyright (c) 2016 Daniel Boland <dboland@xs4all.nl>.
++ * All rights reserved.
++ *
++ * Redistribution and use in source and binary forms, with or without
++ * modification, are permitted provided that the following conditions
++ * are met:
++ * 1. Redistributions of source code must retain the above copyright
++ *    notice, this list of conditions and the following disclaimer.
++ * 2. Redistributions in binary form must reproduce the above copyright
++ *    notice, this list of conditions and the following disclaimer in the
++ *    documentation and/or other materials provided with the distribution.
++ * 3. Neither the name of the copyright holders nor the names of its 
++ *    contributors may be used to endorse or promote products derived 
++ *    from this software without specific prior written permission.
++ *
++ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" 
++ * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
++ * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
++ * ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDERS OR CONTRIBUTORS 
++ * BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR 
++ * CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF 
++ * SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS 
++ * INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN 
++ * CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) 
++ * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF 
++ * THE POSSIBILITY OF SUCH DAMAGE.
++ *
++ */
++
++#ifndef _FCNTL_H_
++#define	_FCNTL_H_
++
++#include <sys/fcntl.h>
++
++#endif
+--- include/getopt.h	2025-06-15 09:19:36 +0200
++++ include/getopt.h	2025-06-15 09:29:08 +0200
+@@ -65,11 +65,11 @@
+ #define _GETOPT_DEFINED_
+ int	 getopt(int, char * const *, const char *);
+ 
+-extern   char *optarg;                  /* getopt(3) external variables */
+-extern   int opterr;
+-extern   int optind;
+-extern   int optopt;
+-extern   int optreset;
++extern LIBC_IMPORT  char *optarg;                  /* getopt(3) external variables */
++extern LIBC_IMPORT  int opterr;
++extern LIBC_IMPORT  int optind;
++extern LIBC_IMPORT  int optopt;
++extern LIBC_IMPORT  int optreset;
+ #endif
+ __END_DECLS
+  
+--- include/machine/asm.h	2025-06-15 09:19:38 +0200
++++ include/machine/asm.h	2025-06-15 09:29:56 +0200
+@@ -58,7 +58,7 @@
+ #define PIC_GOTOFF(x)	x
+ #endif
+ 
+-#define _C_LABEL(name)	name
++#define _C_LABEL(name)	__CONCAT(_,name)
+ #define	_ASM_LABEL(x)	x
+ 
+ #define CVAROFF(x, y)	_C_LABEL(x) + y
+@@ -94,7 +94,7 @@
+ #endif
+ 
+ #define _ENTRY(x) \
+-	.text; _ALIGN_TEXT; .globl x; .type x,@function; x:
++	.text; _ALIGN_TEXT; .global x; .def x; .scl 2; .type 32; .endef; x:
+ 
+ #if defined(PROF) || defined(GPROF)
+ # define _PROF_PROLOGUE	\
+--- include/machine/cdefs.h	2025-06-15 09:19:38 +0200
++++ include/machine/cdefs.h	2025-06-15 09:29:52 +0200
+@@ -4,18 +4,81 @@
+  * Written by J.T. Conklin <jtc@wimsey.com> 01/17/95.
+  * Public domain.
+  */
++/* Adapted for MinC by D. Boland <dboland@xs4all.nl> 2016
++ */
+ 
+ #ifndef	_MACHINE_CDEFS_H_
+ #define	_MACHINE_CDEFS_H_
+ 
+-#define __strong_alias(alias,sym)			\
+-	__asm__(".global " __STRING(alias) " ; "	\
+-	    __STRING(alias) " = " __STRING(sym))
+-#define __weak_alias(alias,sym)				\
+-	__asm__(".weak " __STRING(alias) " ; "		\
+-	    __STRING(alias) " = " __STRING(sym))
+-#define __warn_references(sym,msg)			\
+-	__asm__(".section .gnu.warning." __STRING(sym)	\
+-	    " ; .ascii \"" msg "\" ; .text")
++#ifndef __bounded__
++#define __bounded__(...)	
++#endif
++#ifndef visibility
++#define visibility(a)	
++#endif
++
++#undef __MINGW32__
++#undef __WIN32__	// <GL/gl.h>
++#undef __MSVCRT__
++#undef __WINNT__
++#undef __WINNT
++#undef _WIN32		// cc.exe
++#undef WIN32		// cc.exe
++#undef WINNT
++
++#define __thread	__thread __attribute__((section(".tls")))
++#define __import	__attribute__((dllimport))
++
++#define __MinC__
++#define __OpenBSD__
++#define restrict	__restrict
++#define environ		__environ
++#define alloca		__builtin_alloca
++
++#define sys_siglist	_sys_siglist	/* legacy */
++
++/* pthread_win32 */
++#define PTW32_CDECL
++#define __struct_timespec_defined
++#define __have_typedef_pid_t
++
++#ifdef USEVFORK
++#define fork		vfork
++#endif
++
++#ifdef NOPIE
++#define LIBC_IMPORT		
++#define GETOPT_IMPORT	
++#define LIBSOCK_IMPORT	
++#define DLL_IMPORT	
++#endif
++
++#ifndef LIBC_IMPORT
++#define LIBC_IMPORT	__import
++#endif
++#ifndef GETOPT_IMPORT
++#define GETOPT_IMPORT	__import
++#endif
++#ifndef LIBSOCK_IMPORT
++#define LIBSOCK_IMPORT	__import
++#endif
++#ifndef DLL_IMPORT
++#define DLL_IMPORT	__import
++#endif
++
++/* weak aliases are kind of broken in MinGW32 ld.exe:
++ * http://mingw.5.n7.nabble.com/weak-functions-td6379.html
++ * https://sourceware.org/bugzilla/show_bug.cgi?id=9687
++ * https://sourceware.org/bugzilla/show_bug.cgi?id=2729
++ */
++
++#define __strong_alias(name,symbol)			\
++	extern __typeof(symbol) name __attribute__((alias(__STRING(symbol))))
++//#define __weak_alias(name,symbol)			\
++//	extern __typeof(symbol) name __attribute__((weak,alias(__STRING(symbol))))
++#define __weak_alias(name,symbol)			\
++	__strong_alias(name,symbol)
++#define __warn_references(symbol,msg)			\
++	extern __typeof(symbol) symbol __attribute__((deprecated(msg)))
+ 
+ #endif /* !_MACHINE_CDEFS_H_ */
+--- include/machine/exec.h	2025-06-15 09:19:38 +0200
++++ include/machine/exec.h	2025-06-15 09:29:46 +0200
+@@ -40,7 +40,6 @@
+ #define ELF_TARG_MACH		EM_386 /* XXX - EM_486 is currently unused
+                                           by all OSs/compilers/linkers */
+ 
+-#define _NLIST_DO_ELF
+ #define _KERN_DO_ELF
+ 
+ #endif  /* _MACHINE_EXEC_H_ */
+--- include/machine/_types.h	2025-06-15 09:19:38 +0200
++++ include/machine/_types.h	2025-06-15 09:30:01 +0200
+@@ -121,7 +121,7 @@
+ typedef long double		__double_t;
+ typedef long double		__float_t;
+ typedef long			__ptrdiff_t;
+-typedef	unsigned long		__size_t;
++typedef	__SIZE_TYPE__		__size_t;
+ typedef	long			__ssize_t;
+ #if defined(__GNUC__) && __GNUC__ >= 3
+ typedef	__builtin_va_list	__va_list;
+@@ -131,9 +131,9 @@
+ 
+ /* Wide character support types */
+ #ifndef __cplusplus
+-typedef	int			__wchar_t;
++typedef	__WCHAR_TYPE__	__wchar_t;		// match WinNT's
+ #endif
+-typedef int			__wint_t;
++typedef	__WINT_TYPE__		__wint_t;		// match WinNT's
+ typedef	int			__rune_t;
+ typedef	void *			__wctrans_t;
+ typedef	void *			__wctype_t;
+--- include/math.h	2025-06-15 09:19:36 +0200
++++ include/math.h	2025-06-15 09:29:02 +0200
+@@ -24,7 +24,7 @@
+ /*
+  * ANSI/POSIX
+  */
+-extern char __infinity[];
++extern LIBC_IMPORT char __infinity[];
+ #if __GNUC_PREREQ__(3, 3) && !defined(__vax__)
+ #define HUGE_VAL	__builtin_huge_val()
+ #else /* __GNUC_PREREQ__(3, 3) && !__vax__ */
+--- include/netdb.h	2025-06-15 09:19:36 +0200
++++ include/netdb.h	2025-06-15 09:28:58 +0200
+@@ -144,7 +144,7 @@
+ };
+ 
+ #if __BSD_VISIBLE || __POSIX_VISIBLE < 200809
+-extern int h_errno;
++extern LIBC_IMPORT int h_errno;
+ 
+ /*
+  * Error return codes from gethostbyname() and gethostbyaddr()
+--- include/netinet6/in6.h	2025-06-15 09:19:37 +0200
++++ include/netinet6/in6.h	2025-06-15 09:30:13 +0200
+@@ -127,7 +127,7 @@
+ #define IN6MASK128	{{{ 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, \
+ 			    0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff }}}
+ 
+-extern const struct sockaddr_in6 sa6_any;
++extern LIBSOCK_IMPORT const struct sockaddr_in6 sa6_any;
+ 
+ extern const struct in6_addr in6mask0;
+ extern const struct in6_addr in6mask32;
+@@ -137,10 +137,10 @@
+ #endif /* _KERNEL */
+ 
+ /* Both kernel and libc define these for use */
+-extern const struct in6_addr in6addr_any;
+-extern const struct in6_addr in6addr_loopback;
+-extern const struct in6_addr in6addr_intfacelocal_allnodes;
+-extern const struct in6_addr in6addr_linklocal_allnodes;
++extern LIBSOCK_IMPORT const struct in6_addr in6addr_any;
++extern LIBSOCK_IMPORT const struct in6_addr in6addr_loopback;
++extern LIBSOCK_IMPORT const struct in6_addr in6addr_intfacelocal_allnodes;
++extern LIBSOCK_IMPORT const struct in6_addr in6addr_linklocal_allnodes;
+ 
+ #if __BSD_VISIBLE
+ /*
+--- include/resolv.h	2025-06-15 09:19:36 +0200
++++ include/resolv.h	2025-06-15 09:28:52 +0200
+@@ -91,6 +91,7 @@
+ #include <sys/types.h>
+ #include <sys/socket.h>
+ #include <stdio.h>
++#include <netinet/in.h>	// FreeBSD patch # 182466
+ 
+ /*
+  * Revision information.  This is the release date in YYYYMMDD format.
+@@ -237,7 +238,7 @@
+ 	char *	humanname;	/* Its fun name, like "mail exchanger" */
+ };
+ 
+-extern struct __res_state _res;
++extern LIBSOCK_IMPORT struct __res_state _res;
+ #if 1 /* INET6 */
+ extern struct __res_state_ext _res_ext;
+ #endif
+--- include/sched.h	1970-01-01 01:00:00 +0100
++++ include/sched.h	2025-06-15 09:28:42 +0200
+@@ -0,0 +1,36 @@
++/*
++ * Copyright (c) 2016 Daniel Boland <dboland@xs4all.nl>.
++ * All rights reserved.
++ *
++ * Redistribution and use in source and binary forms, with or without
++ * modification, are permitted provided that the following conditions
++ * are met:
++ * 1. Redistributions of source code must retain the above copyright
++ *    notice, this list of conditions and the following disclaimer.
++ * 2. Redistributions in binary form must reproduce the above copyright
++ *    notice, this list of conditions and the following disclaimer in the
++ *    documentation and/or other materials provided with the distribution.
++ * 3. Neither the name of the copyright holders nor the names of its 
++ *    contributors may be used to endorse or promote products derived 
++ *    from this software without specific prior written permission.
++ *
++ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" 
++ * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
++ * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
++ * ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDERS OR CONTRIBUTORS 
++ * BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR 
++ * CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF 
++ * SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS 
++ * INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN 
++ * CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) 
++ * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF 
++ * THE POSSIBILITY OF SUCH DAMAGE.
++ *
++ */
++
++#ifndef _SCHED_H_
++#define	_SCHED_H_
++
++#include <sys/sched.h>
++
++#endif
+--- include/signal.h	2025-06-15 09:19:36 +0200
++++ include/signal.h	2025-06-15 09:28:37 +0200
+@@ -43,8 +43,8 @@
+ 
+ __BEGIN_DECLS
+ #if __BSD_VISIBLE
+-extern __const char *__const sys_signame[_NSIG];
+-extern __const char *__const sys_siglist[_NSIG];
++extern LIBC_IMPORT __const char *__const sys_signame[_NSIG];
++extern LIBC_IMPORT __const char *__const sys_siglist[_NSIG];
+ #endif
+ 
+ int	raise(int);
+--- include/stdarg.h	1970-01-01 01:00:00 +0100
++++ include/stdarg.h	2025-06-15 09:28:28 +0200
+@@ -0,0 +1,31 @@
++/*
++ * Copyright (c) 2016 Daniel Boland <dboland@xs4all.nl>.
++ * All rights reserved.
++ *
++ * Redistribution and use in source and binary forms, with or without
++ * modification, are permitted provided that the following conditions
++ * are met:
++ * 1. Redistributions of source code must retain the above copyright
++ *    notice, this list of conditions and the following disclaimer.
++ * 2. Redistributions in binary form must reproduce the above copyright
++ *    notice, this list of conditions and the following disclaimer in the
++ *    documentation and/or other materials provided with the distribution.
++ * 3. Neither the name of the copyright holders nor the names of its 
++ *    contributors may be used to endorse or promote products derived 
++ *    from this software without specific prior written permission.
++ *
++ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" 
++ * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
++ * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
++ * ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDERS OR CONTRIBUTORS 
++ * BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR 
++ * CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF 
++ * SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS 
++ * INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN 
++ * CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) 
++ * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF 
++ * THE POSSIBILITY OF SUCH DAMAGE.
++ *
++ */
++
++#include <sys/stdarg.h>
+--- include/stdint.h	1970-01-01 01:00:00 +0100
++++ include/stdint.h	2025-06-15 09:28:22 +0200
+@@ -0,0 +1,34 @@
++/*
++ * Copyright (c) 2016 Daniel Boland <dboland@xs4all.nl>.
++ * All rights reserved.
++ *
++ * Redistribution and use in source and binary forms, with or without
++ * modification, are permitted provided that the following conditions
++ * are met:
++ * 1. Redistributions of source code must retain the above copyright
++ *    notice, this list of conditions and the following disclaimer.
++ * 2. Redistributions in binary form must reproduce the above copyright
++ *    notice, this list of conditions and the following disclaimer in the
++ *    documentation and/or other materials provided with the distribution.
++ * 3. Neither the name of the copyright holders nor the names of its 
++ *    contributors may be used to endorse or promote products derived 
++ *    from this software without specific prior written permission.
++ *
++ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" 
++ * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
++ * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
++ * ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDERS OR CONTRIBUTORS 
++ * BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR 
++ * CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF 
++ * SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS 
++ * INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN 
++ * CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) 
++ * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF 
++ * THE POSSIBILITY OF SUCH DAMAGE.
++ *
++ */
++
++#ifndef _STDINT_H_
++#define _STDINT_H_
++#include <sys/stdint.h>
++#endif
+--- include/stdio.h	2025-06-15 09:19:36 +0200
++++ include/stdio.h	2025-06-15 09:28:18 +0200
+@@ -140,7 +140,7 @@
+ } FILE;
+ 
+ __BEGIN_DECLS
+-extern FILE __sF[];
++extern LIBC_IMPORT FILE __sF[];
+ __END_DECLS
+ 
+ #define	__SLBF	0x0001		/* line buffered */
+@@ -240,6 +240,7 @@
+ 		__attribute__((__bounded__ (__size__,1,3,2)));
+ int	 getc(FILE *);
+ int	 getchar(void);
++char	*gets(char *);	// glibc legacy
+ #if __POSIX_VISIBLE >= 200809
+ ssize_t	 getdelim(char ** __restrict, size_t * __restrict, int,
+ 	    FILE * __restrict);
+@@ -250,7 +251,7 @@
+ #define __SYS_ERRLIST
+ 
+ extern int sys_nerr;			/* perror(3) external variables */
+-extern char *sys_errlist[];
++extern LIBC_IMPORT char *sys_errlist[];
+ #endif
+ void	 perror(const char *);
+ int	 printf(const char *, ...);
+@@ -416,7 +417,7 @@
+ #define	__sclearerr(p)	((void)((p)->_flags &= ~(__SERR|__SEOF)))
+ #define	__sfileno(p)	((p)->_file)
+ 
+-extern int __isthreaded;
++extern LIBC_IMPORT int __isthreaded;
+ 
+ #define feof(p)		(!__isthreaded ? __sfeof(p) : (feof)(p))
+ #define ferror(p)	(!__isthreaded ? __sferror(p) : (ferror)(p))
+--- include/stdlib.h	2025-06-15 09:19:36 +0200
++++ include/stdlib.h	2025-06-15 09:28:11 +0200
+@@ -34,6 +34,7 @@
+ 
+ #ifndef _STDLIB_H_
+ #define _STDLIB_H_
++#define _STDLIB_H		// GNU legacy: bash-3.2.48: y.tab.c (bison)
+ 
+ #include <sys/cdefs.h>
+ #include <machine/_types.h>
+@@ -46,6 +47,9 @@
+ typedef	__size_t	size_t;
+ #endif
+ 
++extern LIBC_IMPORT char **__environ;
++extern LIBC_IMPORT char *__progname;
++
+ /* in C++, wchar_t is a built-in type */
+ #if !defined(_WCHAR_T_DEFINED_) && !defined(__cplusplus)
+ #define _WCHAR_T_DEFINED_
+@@ -92,7 +96,7 @@
+ 
+ #define	RAND_MAX	0x7fffffff
+ 
+-extern size_t	__mb_cur_max;
++extern LIBC_IMPORT size_t	__mb_cur_max;
+ #define	MB_CUR_MAX	__mb_cur_max
+ 
+ #include <sys/cdefs.h>
+@@ -282,7 +286,7 @@
+ 	getprogname(void);
+ void	setprogname(const char *);
+ 
+-extern	 char *suboptarg;		/* getsubopt(3) external variable */
++extern	 LIBC_IMPORT char *suboptarg;		/* getsubopt(3) external variable */
+ 
+ int	 mkstemps(char *, int);
+ 
+--- include/string.h	2025-06-15 09:19:36 +0200
++++ include/string.h	2025-06-15 09:27:59 +0200
+@@ -139,6 +139,7 @@
+ char	*strsep(char **, const char *);
+ int	 timingsafe_bcmp(const void *, const void *, size_t);
+ #endif 
++void *mempcpy(void *, const void *, size_t);
+ __END_DECLS
+ 
+ #endif /* _STRING_H_ */
+--- include/sys/time.h	2025-06-15 09:19:37 +0200
++++ include/sys/time.h	2025-06-15 09:30:37 +0200
+@@ -345,7 +345,9 @@
+ int	setitimer(int, const struct itimerval *, struct itimerval *);
+ int	settimeofday(const struct timeval *, const struct timezone *);
+ int	utimes(const char *, const struct timeval *);
++int	lutimes(const char *, const struct timeval *);
+ #endif /* __XPG_VISIBLE */
++int	futimesat(int, const char *, const struct timeval [2]);
+ __END_DECLS
+ #endif /* __BSD_VISIBLE || __XPG_VISIBLE */
+ 
+--- include/sys/types.h	2025-06-15 09:19:37 +0200
++++ include/sys/types.h	2025-06-15 09:30:29 +0200
+@@ -127,6 +127,7 @@
+ 
+ /* Standard system types */
+ typedef	char *		caddr_t;	/* core address */
++//typedef	unsigned char *		caddr_t;	/* core address (avoid signedness errors in libcrypto) */
+ typedef	__int32_t	daddr32_t;	/* 32-bit disk address */
+ typedef	__int64_t	daddr_t;	/* 64-bit disk address */
+ typedef	__dev_t		dev_t;		/* device number */
+--- include/termios.h	1970-01-01 01:00:00 +0100
++++ include/termios.h	2025-06-15 09:27:47 +0200
+@@ -0,0 +1,36 @@
++/*
++ * Copyright (c) 2016 Daniel Boland <dboland@xs4all.nl>.
++ * All rights reserved.
++ *
++ * Redistribution and use in source and binary forms, with or without
++ * modification, are permitted provided that the following conditions
++ * are met:
++ * 1. Redistributions of source code must retain the above copyright
++ *    notice, this list of conditions and the following disclaimer.
++ * 2. Redistributions in binary form must reproduce the above copyright
++ *    notice, this list of conditions and the following disclaimer in the
++ *    documentation and/or other materials provided with the distribution.
++ * 3. Neither the name of the copyright holders nor the names of its 
++ *    contributors may be used to endorse or promote products derived 
++ *    from this software without specific prior written permission.
++ *
++ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" 
++ * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
++ * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
++ * ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDERS OR CONTRIBUTORS 
++ * BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR 
++ * CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF 
++ * SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS 
++ * INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN 
++ * CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) 
++ * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF 
++ * THE POSSIBILITY OF SUCH DAMAGE.
++ *
++ */
++
++#ifndef _TERMIOS_H_
++#define	_TERMIOS_H_
++
++#include <sys/termios.h>
++
++#endif /* TERMIOS_H_ */
+--- include/time.h	2025-06-15 09:19:36 +0200
++++ include/time.h	2021-11-28 10:28:56 +0100
+@@ -150,7 +150,7 @@
+ #endif
+ 
+ #if __POSIX_VISIBLE
+-extern char *tzname[2];
++extern LIBC_IMPORT char *tzname[2];
+ void tzset(void);
+ #endif
+ 
+--- include/unistd.h	2025-06-15 09:19:36 +0200
++++ include/unistd.h	2025-06-15 09:27:27 +0200
+@@ -68,7 +68,7 @@
+ #define _POSIX_CLOCK_SELECTION			(-1)
+ #define _POSIX_CPUTIME				200809L
+ #define _POSIX_FSYNC				200112L
+-#define _POSIX_IPV6				0
++#define _POSIX_IPV6				200809L
+ #define _POSIX_JOB_CONTROL			1
+ #define _POSIX_MAPPED_FILES			200112L
+ #define _POSIX_MEMLOCK				200112L
+@@ -394,8 +394,8 @@
+ #ifndef _GETOPT_DEFINED_
+ #define _GETOPT_DEFINED_
+ int	 getopt(int, char * const *, const char *);
+-extern	 char *optarg;			/* getopt(3) external variables */
+-extern	 int opterr, optind, optopt, optreset;
++extern GETOPT_IMPORT	 char *optarg;			/* getopt(3) external variables */
++extern GETOPT_IMPORT	 int opterr, optind, optopt, optreset;
+ #endif /* _GETOPT_DEFINED_ */
+ #endif
+ 
