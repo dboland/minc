@@ -8,10 +8,10 @@
  */
 
 #include <sys/param.h>
-#include <sys/systm.h>
+#include "systm.h"
 #include <sys/signal.h>
 #include <sys/mount.h>
-#include <sys/syscallargs.h>
+#include "syscallargs.h"
 #include <sys/poll.h>
 #include <sys/event.h>
 

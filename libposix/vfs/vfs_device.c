@@ -74,14 +74,14 @@ dull_attach(WIN_DEVICE *Device)
 	BOOL bResult = TRUE;
 
 	switch (Device->DeviceType){
+		case DEV_TYPE_SWD:
+			bResult = config_found("swd", FS_TYPE_PDO, WIN_VCHR, Device);
+			break;
 		case DEV_TYPE_BIOS:
 			bResult = config_found("bios", FS_TYPE_PDO, WIN_VCHR, Device);
 			break;
 		case DEV_TYPE_USBT:
 			bResult = config_found("ubt", FS_TYPE_PDO, WIN_VCHR, Device);
-			break;
-		case DEV_TYPE_SWD:
-			bResult = config_found("swd", FS_TYPE_PDO, WIN_VCHR, Device);
 			break;
 		default:
 			bResult = FALSE;
