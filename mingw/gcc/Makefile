@@ -1,7 +1,7 @@
 include ../../Makefile.inc
 
 CRT0=crt0.o
-OBJECTS=${CRT0} crt1.o crtbegin.o crtend.o gcrt0.o
+OBJECTS=${CRT0} crt1.o crtbegin.o crtend.o
 LIBS=libgcc.a libgcc_s.a libgcc_eh.a
 GCCOBJ=_mulsc3.o _muldc3.o _mulxc3.o _ctzdi2.o \
 	_ffsdi2.o _popcountdi2.o _popcountsi2.o _popcount_tab.o _udivdi3.o \

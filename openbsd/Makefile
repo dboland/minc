@@ -1,5 +1,8 @@
 include ../Makefile.inc
 
+LINKS=include/fcntl.h include/sched.h include/stdarg.h \
+	include/stdint.h include/termios.h
+
 all:
 	@${MAKE} -C lib
 	@${MAKE} -C usr.bin
@@ -19,6 +22,7 @@ includes-local: ${SRCDIR}
 	/bin/cp -ru ${SRCDIR}/sys/uvm ${INCDIR}/
 	/bin/cp -ru ${SRCDIR}/sys/net ${INCDIR}/
 	/bin/cp -ru ${SRCDIR}/sys/netinet ${INCDIR}/
+	/bin/cp -ru ${LINKS} ${INCDIR}/
 	@${MAKE} -C lib includes-local
 
 includes: ${DESTDIR}
