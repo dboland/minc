@@ -225,7 +225,7 @@ sys_clock_gettime(call_t call, clockid_t clockid, struct timespec *tp)
 		case CLOCK_MONOTONIC:			/* git.exe */
 			result = clock_gettime_MONOTONIC(tp);
 			break;
-		case CLOCK_VIRTUAL:
+//		case CLOCK_VIRTUAL:
 		case CLOCK_PROCESS_CPUTIME_ID:
 		case CLOCK_THREAD_CPUTIME_ID:
 		case CLOCK_UPTIME:

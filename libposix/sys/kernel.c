@@ -58,7 +58,7 @@ kern_KERN_CLOCKRATE(struct clockinfo *info)
 {
 	info->hz = win_KERN_CLOCKRATE();
 	info->tick = 1000000000 / info->hz;
-	info->tickadj = 0;
+//	info->tickadj = 0;
 	info->stathz = info->hz;
 	info->profhz = info->hz;
 	return(0);

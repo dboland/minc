@@ -151,7 +151,7 @@ msgbuf_KERN_MSGBUF(char data[], size_t *len)
 
 	msg->msg_magic = MSG_MAGIC;
 	msg->msg_bufr = 0;
-	msg->msg_bufl = bufsize;
+	msg->msg_bufd = bufsize;
 	msg->msg_bufs = bufsize;
 	msg->msg_bufx = bufsize;
 	win_memcpy(&msg->msg_bufc, msgbuf, bufsize);

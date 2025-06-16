@@ -79,6 +79,7 @@ WIN_NAMEIDATA *path_win(WIN_NAMEIDATA *Path, const char *pathname, int flags);
 
 /* Hello Terry Davis */
 
+#include "kern/syscall.h"
 #include "kern/syscalls.c"
 #include "string.c"
 #include "sys/errno.c"

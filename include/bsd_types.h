@@ -35,10 +35,11 @@
 #undef _KERNEL
 
 #include <sys/syslimits.h>
-#include <sys/syscall.h>
+//#include <sys/syscall.h>
 #include <sys/sysctl.h>
 #include <sys/param.h>
 
+#include <net/if_var.h>
 #include <netdb.h>
 
 /* sys/fcntl.c */
