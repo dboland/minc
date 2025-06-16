@@ -33,5 +33,5 @@ MANDIR=${SHDIR}/man
 
 # In GCC 6.3.0, -ffixed-bx crashes compilation
 
-CFLAGS= -Wimplicit-function-declaration -Werror -ffixed-bx -ffreestanding
+CFLAGS= -Wimplicit-function-declaration -Werror -ffreestanding
 LDFLAGS= --disable-auto-import

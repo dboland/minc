@@ -28,7 +28,7 @@
  *
  */
 
-#include "sys/syscall.h"
+#include "../kern/syscall.h"
 
 #define MAXLINE		80
 #define MAXDEPTH	16

@@ -15,16 +15,10 @@ ${SRCDIR}:
 	@exit 1
 
 includes-local: ${SRCDIR}
-	@/bin/mkdir -p ${INCDIR}/machine ${INCDIR}/dev
+	@/bin/mkdir -p ${INCDIR}/machine
 	/bin/cp -ru ${SRCDIR}/include/* ${INCDIR}/
 	/bin/cp -ru ${SRCDIR}/sys/sys ${INCDIR}/
 	/bin/cp -ru ${SRCDIR}/sys/arch/i386/include/* ${INCDIR}/machine/
-	@#/bin/cp -ru ${SRCDIR}/sys/dev/wscons ${INCDIR}/dev/
-	@#/bin/cp -ru ${SRCDIR}/sys/netinet6 ${INCDIR}/
-	@#/bin/cp -ru ${SRCDIR}/sys/uvm ${INCDIR}/
-	@#/bin/cp -ru ${SRCDIR}/sys/net ${INCDIR}/
-	@#/bin/cp -ru ${SRCDIR}/sys/netinet ${INCDIR}/
-	@#/bin/cp -ru ${LINKS} ${INCDIR}/
 	@${MAKE} -C lib includes-local
 
 includes: ${DESTDIR}
