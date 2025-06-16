@@ -36,13 +36,17 @@
 #include <ddk/ntapi.h>
 #include <ddk/ntifs.h>		/* Object types */
 
+#include <winerror.h>
 #include <ntsecapi.h>		/* LSA_HANDLE */
 #include <lmcons.h>		/* UNLEN */
 
 #include "ntdll_posix.h"
+#include "msvc_posix.h"
 #include "win_types.h"
 #include "dev_types.h"
 #include "vfs_types.h"
+
+#define WIN_ERR		msvc_printf
 
 extern WIN_PSTRING	*__Strings;
 

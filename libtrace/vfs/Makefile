@@ -6,12 +6,10 @@ OBJECTS += vfs_CAP_CONTROL.o vfs_VNODE.o vfs_NAMEI.o vfs_DEVICE.o vfs_MOUNT.o \
 	vfs_STATFS.o vfs_INODE.o vfs_TASK.o vfs_THREAD.o vfs_TTY.o vfs_CONIN.o \
 	vfs_ACCESS.o vfs_NETFLAGS.o vfs_CFDATA.o
 
-CFLAGS += -DWIN_ERR=printf
-
 all: ${OBJECTS}
 
 %.o: %.c
-	gcc -c ${CFLAGS} -I${MINGW}/include -I../../include -o $@ $<
+	gcc -c ${CFLAGS} -I../../include -o $@ $<
 
 clean:
 	rm -f *.o ${LIB}

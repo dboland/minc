@@ -58,7 +58,7 @@ install-local: ${GCCDIR}
 	/bin/cp crtbegin.o crtend.o ${GCCDIR}/
 	/bin/cp ${CRT0} ${LIBDIR}/crt2.o
 	/bin/cp crt1.o ${LIBDIR}/dllcrt2.o
-	/bin/cp gcrt0.o ${LIBDIR}/gcrt2.o
+	@#/bin/cp gcrt0.o ${LIBDIR}/gcrt2.o
 
 install: ${DESTDIR}${LIBDIR}
 	cp libgcc.a ${DESTDIR}${LIBDIR}/gcc/i686-pe-openbsd/${GCCVER}/
