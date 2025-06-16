@@ -28,6 +28,8 @@
  *
  */
 
+#include <stddef.h>
+
 #include "win/windows.h"
 #include "win_types.h"
 

@@ -41,6 +41,7 @@
 #include <ddk/ntapi.h>
 
 #include <iphlpapi.h>	/* Win32 network api */
+#include <winerror.h>
 
 #include "win_posix.h"
 #include "ntdll_posix.h"

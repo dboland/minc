@@ -31,7 +31,7 @@
 #include <winbase.h>
 
 /****************************************************/
-
+BOOL 
 link_rename(WIN_NAMEIDATA *Path, WIN_NAMEIDATA *Result)
 {
 	BOOL bResult = FALSE;
