@@ -28,9 +28,9 @@
  *
  */
 
-#include <stdarg.h>
-#include <stdint.h>
-#include <stddef.h>
+#include <sys/stdarg.h>
+#include <sys/stdint.h>
+//#include <stddef.h>
 
 #include <wchar.h>
 #include <ctype.h>

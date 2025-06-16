@@ -2,6 +2,7 @@ VERSION=20240915
 BUILD=$(shell date +%s)
 DESTDIR=/C/MinC
 GCCVER=4.8.1
+GCCLIB=
 MINGW=/C/MinGW
 SRCDIR=/D/openbsd-master
 
@@ -29,6 +30,8 @@ LIBDIR=${PREFIX}/lib
 INCDIR=${PREFIX}/include
 SHDIR=${PREFIX}/share
 MANDIR=${SHDIR}/man
+
+# In GCC 6.3.0, -ffixed-bx crashes compilation
 
 CFLAGS= -Wimplicit-function-declaration -Werror -ffixed-bx -ffreestanding
 LDFLAGS= --disable-auto-import

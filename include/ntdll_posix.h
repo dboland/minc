@@ -40,3 +40,6 @@ int sprintf(char *buf, const char *format, ...);
 char *_itoa(int value, char *buffer, int radix);
 int atoi(const char *str);
 int tolower(int c);
+
+int wcscmp(const wchar_t *string1, const wchar_t *string2);
+size_t wcslen(const wchar_t *str);

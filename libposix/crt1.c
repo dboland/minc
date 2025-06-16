@@ -28,7 +28,8 @@
  *
  */
 
-#include "win/windows.h"
+#include <windows.h>
+
 #include "win_types.h"
 #include "vfs_posix.h"
 

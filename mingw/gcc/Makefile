@@ -7,10 +7,14 @@ GCCOBJ=_mulsc3.o _muldc3.o _mulxc3.o _ctzdi2.o \
 	_ffsdi2.o _popcountdi2.o _popcountsi2.o _popcount_tab.o _udivdi3.o \
 	_divdi3.o _clrsbdi2.o _clrsbsi2.o \
 	_chkstk.o _chkstk_ms.o 
-GCCINC=${GCCDIR}/include
 GCCDIR=/lib/gcc/mingw32/${GCCVER}
 
 all: ${OBJECTS} ${LIBS}
+
+${MINGW}${GCCDIR}:
+	@echo "| GCC libexec directory ($@) not found. Make sure"
+	@echo "| it is defined correctly in Makefile.inc"
+	@exit 1
 
 %.o: %.c
 	gcc -c ${CFLAGS} -I../../include -o $@ $<
@@ -39,9 +43,14 @@ libgcc_eh.a: libgcc_eh.def
 crt0_tls.o: crt0.o win_tls.o
 	ld -r -o $@ crt0.o win_tls.o
 
-includes-local: ${CPPINC}
-	/bin/cp -rvu ${MINGW}${CPPINC}/c++ ${GCCINC}/
-	/bin/cp -rvu ${MINGW}${CPPINC}/ssp ${GCCINC}/
+${GCCDIR}:
+	/bin/mkdir -p ${GCCDIR}
+
+GCCINC=${GCCDIR}/include
+
+includes-local: ${GCCINC}
+	/bin/cp -rvu ${MINGW}${GCCINC}/c++ ${GCCINC}/
+	/bin/cp -rvu ${MINGW}${GCCINC}/ssp ${GCCINC}/
 
 install-local: ${GCCDIR}
 	/bin/cp ${MINGW}${GCCDIR}/libstdc++.dll.a ${GCCDIR}/libstdc++.a
