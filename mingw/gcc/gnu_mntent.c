@@ -22,6 +22,8 @@
 
 #define BUFLEN 1024
 
+#define strtok_r	strtok_s
+
 /*******************************************************/
 
 FILE *setmntent(const char *filename, const char *type)

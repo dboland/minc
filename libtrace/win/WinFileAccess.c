@@ -50,7 +50,7 @@ WinGenericFlags(LPSTR Buffer, ACCESS_MASK Access, DWORD Type, LPCSTR Label)
 
 	if (dwGeneric){
 		if (dwGeneric & GENERIC_ALL){				// 0x10000000
-			strcpy(mask, "rwx");
+			win_strcpy(mask, "rwx");
 		}else{
 			if (Access & GENERIC_READ) mask[0] = 'r';	// 0x80000000
 			if (Access & GENERIC_WRITE) mask[1] = 'w';	// 0x40000000
@@ -105,7 +105,7 @@ WinSpecificFlags(LPSTR Buffer, ACCESS_MASK Perms, DWORD Type, LPCSTR Label)
 
 	if (dwRemain){
 		psz += sprintf(psz, "%s(0x%08lx): ", Label, dwRemain);
-		strcpy(mask, "---");
+		win_strcpy(mask, "---");
 		if (Type == OB_TYPE_FILE){
 			/* 0x0001 */
 			if (TestAccess(dwRemain, FILE_READ_DATA, &dwRemain))
@@ -129,7 +129,7 @@ WinSpecificFlags(LPSTR Buffer, ACCESS_MASK Perms, DWORD Type, LPCSTR Label)
 				mask[2] = 'x';
 			psz += sprintf(psz, "process(%s) ", mask);
 		}
-		strcpy(mask, "---");
+		win_strcpy(mask, "---");
 		if (Type == OB_TYPE_FILE){
 			/* 0x0080 */
 			if (TestAccess(dwRemain, FILE_READ_ATTRIBUTES, &dwRemain))
@@ -146,7 +146,7 @@ WinSpecificFlags(LPSTR Buffer, ACCESS_MASK Perms, DWORD Type, LPCSTR Label)
 				mask[0] = 'r';
 		}
 		psz += sprintf(psz, "attr(%s) ", mask);
-		strcpy(mask, "---");
+		win_strcpy(mask, "---");
 		if (Type == OB_TYPE_FILE){
 			/* 0x0008 */
 			if (TestAccess(dwRemain, FILE_READ_EA, &dwRemain))

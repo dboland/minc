@@ -39,10 +39,11 @@
 #include <winerror.h>
 #include <ntsecapi.h>		/* LSA_HANDLE */
 #include <lmcons.h>		/* UNLEN */
+//#include <time.h>
 
+#include "win_posix.h"
 #include "ntdll_posix.h"
 #include "msvc_posix.h"
-#include "win_types.h"
 #include "dev_types.h"
 #include "vfs_types.h"
 

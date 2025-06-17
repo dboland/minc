@@ -281,17 +281,6 @@ typedef struct _GUID {
         unsigned char  Data4[8];
 } GUID, *REFGUID, *LPGUID;
 
-typedef VOID (NTAPI *PIMAGE_TLS_CALLBACK)(PVOID,DWORD,PVOID);
-
-typedef struct _IMAGE_TLS_DIRECTORY {
-       PVOID StartAddressOfRawData;
-       PVOID EndAddressOfRawData;
-       PVOID AddressOfIndex;
-       PVOID AddressOfCallBacks;
-       DWORD SizeOfZeroFill;
-       DWORD Characteristics;
-} IMAGE_TLS_DIRECTORY, *PIMAGE_TLS_DIRECTORY;
-
 typedef struct _MEMORY_BASIC_INFORMATION {
         PVOID BaseAddress;
         PVOID AllocationBase;

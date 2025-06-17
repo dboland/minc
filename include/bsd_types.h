@@ -28,18 +28,8 @@
  *
  */
 
-#define _KERNEL
-#include <machine/cpu.h>
-#include <machine/biosvar.h>
-#include <machine/param.h>
-#undef _KERNEL
-
-#include <sys/syslimits.h>
-//#include <sys/syscall.h>
 #include <sys/sysctl.h>
-#include <sys/param.h>
 
-#include <net/if_var.h>
 #include <netdb.h>
 
 /* sys/fcntl.c */
@@ -54,6 +44,10 @@
 #define AT_SYMLINK		0x0040
 #define AT_OBJECT		0x0080
 #define AT_LOCKLEAF		0x0100
+
+/* machine/param.h */
+
+#define MSGBUFSIZE		(4 * PAGE_SIZE)
 
 /* sys/signal.c */
 

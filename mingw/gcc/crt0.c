@@ -32,7 +32,7 @@
 #include <stdint.h>
 
 #include <sys/param.h>
-#include <sys/exec.h>		/* use struct exec for next version */
+//#include <sys/exec.h>		/* use struct exec for next version */
 
 extern int main(int argc, char *argv[], char *env[]);
 
@@ -47,7 +47,7 @@ void __fini(void);
 
 /* lib/csu/ia64/crt0.c */
 
-char __progname_storage[NAME_MAX+1];
+//char __progname_storage[NAME_MAX+1];
 
 /************************************************************/
 

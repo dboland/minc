@@ -28,9 +28,8 @@
  *
  */
 
-#include <stddef.h>
+#include <windows.h>
 
-#include "win/windows.h"
 #include "win_types.h"
 
 extern unsigned char __tls_start__;
@@ -40,10 +39,10 @@ DWORD __tls_index__ = -1;
 PIMAGE_TLS_CALLBACK __tls_init__[2] = {&TlsMainCRTStartup, NULL};
 
 const IMAGE_TLS_DIRECTORY _tls_used = {
-	&__tls_start__,		/* start of tls data */
-	&__tls_end__,		/* end of tls data */
-	&__tls_index__,		/* offset into thread-local storage array */
-	&__tls_init__,		/* pointer to call back array */
+	(DWORD)&__tls_start__,	/* start of tls data */
+	(DWORD)&__tls_end__,	/* end of tls data */
+	(DWORD)&__tls_index__,	/* offset into thread-local storage array */
+	(DWORD)&__tls_init__,	/* pointer to call back array */
 	0,			/* size of tls zero fill */
 	0			/* characteristics */
 };

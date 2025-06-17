@@ -2,10 +2,10 @@ include ../Makefile.inc
 
 LIBEXEC=${PREFIX}/libexec
 
-LIBS=libadvapi32.a libkernel32.a libshell32.a libuser32.a \
-	libmoldname.a libgmon.a
+LIBS=libadvapi32.dll.a libkernel32.dll.a libshell32.dll.a libuser32.dll.a \
+	libmoldname.dll.a libgmon.dll.a
 
-all: install-gcc install-libexec install-ld ${LIBS}
+all: install-gcc install-libexec install-ld ${LIBS} libiphlpapi.dll.a
 	@#${MAKE} -C bin
 	@${MAKE} -C gcc
 
@@ -18,7 +18,7 @@ ${MINGW}:
 # below -k option makes ld remove "@" suffix
 #
 
-%.a: %.def
+%.dll.a: %.def
 	dlltool -d $< -l $@ -k
 
 %.exe: ${MINGW}/bin/%.exe
@@ -67,6 +67,7 @@ install-libexec: ${LIBEXEC}
 # tip: create dummy ld.so for configure scripts to detect shared libs
 
 install-local: ${MINGW} ${LIBDIR}
+	/bin/cp -vu libiphlpapi.dll.a ${MINGW}/lib/
 	/bin/cp -vu ${LIBS} ${LIBDIR}/
 	@${MAKE} -C gcc install-local
 

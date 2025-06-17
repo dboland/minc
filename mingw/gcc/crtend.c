@@ -30,7 +30,7 @@
  * SUCH DAMAGE.
  *
  */
-#include <sys/cdefs.h>
+//#include <sys/cdefs.h>
 
 typedef void (*func_ptr) (void);
 

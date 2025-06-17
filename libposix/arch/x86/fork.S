@@ -29,7 +29,6 @@
  */
 
 #include "arch_types.h"
-#include <sys/syscall.h>
 
 .file "fork.S"
 .global _sys_fork, _sys_vfork

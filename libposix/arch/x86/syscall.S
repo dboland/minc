@@ -28,7 +28,7 @@
  *
  */
 
-#include <sys/syscall.h>
+#include "../../kern/syscall.h"
 
 .file "syscall.S"
 .global ___kernel, _sys_syscall

@@ -28,8 +28,7 @@
  *
  */
 
-#include "win/windows.h"			/* minimal Win32 */
-#include "win_types.h"
+#include <windows.h>
 
 /****************************************************/
 

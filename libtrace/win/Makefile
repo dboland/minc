@@ -9,6 +9,3 @@ all: ${OBJECTS}
 
 %.o: %.c
 	gcc -c ${CFLAGS} -I../../include -I.. -o $@ $<
-
-clean:
-	rm -f *.o

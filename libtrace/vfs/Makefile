@@ -10,6 +10,3 @@ all: ${OBJECTS}
 
 %.o: %.c
 	gcc -c ${CFLAGS} -I../../include -o $@ $<
-
-clean:
-	rm -f *.o ${LIB}

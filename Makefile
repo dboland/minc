@@ -19,8 +19,8 @@ all:
 	@${MAKE} -C mingw all install-local
 	@${MAKE} -C libtrace all
 	@${MAKE} -C libposix all install-local
-	@${MAKE} -C openbsd all install-local
-	@${MAKE} -C sbin all
+	@#@${MAKE} -C openbsd all install-local
+	@#@${MAKE} -C sbin all
 
 kernel:
 	@${MAKE} -C libposix all install-local
@@ -44,7 +44,7 @@ clean:
 	@${MAKE} -C libposix clean
 	@${MAKE} -C mingw clean
 	@${MAKE} -C sbin clean
-	@${MAKE} -C openbsd clean
+	@#${MAKE} -C openbsd clean
 
 install:
 	@${MAKE} -C libposix install

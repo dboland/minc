@@ -43,6 +43,3 @@ int tolower(int c);
 
 int wcscmp(const wchar_t *string1, const wchar_t *string2);
 size_t wcslen(const wchar_t *str);
-
-size_t strftime(char *strDest, size_t maxsize, const char *format, const struct tm *timeptr);
-struct tm *localtime( const time_t *sourceTime );

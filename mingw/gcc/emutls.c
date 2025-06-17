@@ -28,13 +28,13 @@
  *
  */
 
-#include <stdio.h>
+//#include <stdio.h>
 
 extern unsigned char __tls_start__;
 
 /* wintls.c */
 
-extern uint32_t __tls_index__;
+extern unsigned int __tls_index__;
 
 typedef unsigned int word __attribute__((mode(word)));
 typedef unsigned int pointer __attribute__((mode(pointer)));

@@ -24,7 +24,10 @@ ${MINGW}${GCCDIR}:
 # btw: there is a chkstk() in ntdll.dll
 #
 
-libgcc.a: wintls.o emutls.o mempcpy.o gnu_mntent.o futimesat.o
+#second stage:
+#gnu_mntent.o  futimesat.o
+
+libgcc.a: wintls.o emutls.o mempcpy.o
 	ar xv ${MINGW}${GCCDIR}/libgcc.a ${GCCOBJ}
 	ar cru $@ ${GCCOBJ} $^
 # wintls.o

@@ -150,10 +150,10 @@ msgbuf_KERN_MSGBUF(char data[], size_t *len)
 	struct msgbuf *msg = (struct msgbuf *)data;
 
 	msg->msg_magic = MSG_MAGIC;
-	msg->msg_bufr = 0;
-	msg->msg_bufd = bufsize;
-	msg->msg_bufs = bufsize;
 	msg->msg_bufx = bufsize;
+	msg->msg_bufr = 0;
+	msg->msg_bufs = bufsize;
+//	msg->msg_bufl = bufsize;
 	win_memcpy(&msg->msg_bufc, msgbuf, bufsize);
 	win_free(msgbuf);
 	return(0);

@@ -378,6 +378,7 @@ sysctl_VFS(const int *name, void *oldp, size_t *oldlenp, void *newp, size_t newl
 
 /****************************************************/
 
+#if 0
 int 
 sysctl_MACHDEP_CPU_BIOS(const int *name, char **buf, size_t *size)
 {
@@ -414,6 +415,7 @@ sysctl_MACHDEP(const int *name, void *oldp, size_t *oldlenp, void *newp, size_t 
 	}
 	return(result);
 }
+#endif
 
 /****************************************************/
 
@@ -464,7 +466,8 @@ sys___sysctl(call_t call, const int *name, u_int namelen, void *oldp, size_t *ol
 			result = sysctl_VFS(name, oldp, oldlenp, newp, newlen);
 			break;
 		case CTL_MACHDEP:
-			result = sysctl_MACHDEP(name, oldp, oldlenp, newp, newlen);
+//			result = sysctl_MACHDEP(name, oldp, oldlenp, newp, newlen);
+			result = -ENXIO;
 			break;
 		case CTL_USER:
 			result = sysctl_USER(name, oldp, oldlenp, newp, newlen);

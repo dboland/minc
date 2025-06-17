@@ -28,7 +28,9 @@
  *
  */
 
+#define _KERNEL
 #include <net/if_var.h>
+#undef _KERNEL
 
 /****************************************************/
 
