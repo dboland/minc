@@ -51,7 +51,7 @@ kfile_posix(struct kinfo_file *buf, WIN_TASK *Task, WIN_VNODE *Node)
 		}
 	}
 	buf->f_flag = FFLAGS(flflags_posix(&vNode));	/* SHORT: flags (see fcntl.h) */
-	buf->f_type = DTYPE_VNODE;			/* INT: descriptor type */
+	buf->f_type = WIN_DTYPE_VNODE;			/* INT: descriptor type */
 	buf->v_type = vNode.FileType;			/* ENUM: vnode type */
 	buf->p_pid = Task->TaskId;			/* PID_T: process id */
 	buf->fd_fd = vNode.FileId;			/* INT: descriptor number */

@@ -29,8 +29,7 @@
  */
 
 #include <sys/sysctl.h>
-
-#include <netdb.h>
+#include <sys/param.h>
 
 /* sys/fcntl.c */
 

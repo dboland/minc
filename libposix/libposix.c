@@ -30,7 +30,6 @@
 
 #include <sys/stdarg.h>
 #include <sys/stdint.h>
-//#include <stddef.h>
 
 #include <wchar.h>
 #include <ctype.h>
@@ -126,15 +125,13 @@ WIN_NAMEIDATA *path_win(WIN_NAMEIDATA *Path, const char *pathname, int flags);
 #include "netinet/in_pcb.c"
 #include "netinet/tcp.c"
 #include "netinet/udp.c"
-#include "sys/sockio.c"
-#include "sys/ioctl.c"
-#include "sys/msg.c"
 #include "compat.c"
 #include "utime.c"
 #include "pwd.c"
 #include "grp.c"
-
-#define _KERNEL
+#include "sys/sockio.c"
+#include "sys/ioctl.c"
+#include "sys/msg.c"
 #include "sys/file.c"
 #include "sys/kernel.c"
 #include "sys/sysctl.c"
