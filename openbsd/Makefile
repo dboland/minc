@@ -1,10 +1,5 @@
 include ../Makefile.inc
 
-#LINKS=include/fcntl.h include/sched.h include/stdarg.h \
-#	include/stdint.h include/termios.h
-
-LINKS=include/stdarg.h include/stdint.h
-
 all:
 	@${MAKE} -C lib
 	@${MAKE} -C usr.bin
