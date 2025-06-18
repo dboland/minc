@@ -14,8 +14,9 @@ LBINDIR=${PREFIX}/local/bin
 all: ${LIBPOSIX}
 
 ${LBINDIR}:
-	@echo "| First stage of the build has finished successfully."
-	@echo "| To finish the build, switch to OpenBSD by running:"
+	@echo "|"
+	@echo "| The first stage of the build was successful. To finish"
+	@echo "| the build, switch to OpenBSD by running:"
 	@echo "|"
 	@echo "| ./mount.sh minc"
 	@echo "|"

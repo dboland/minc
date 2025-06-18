@@ -1,7 +1,7 @@
 .DEFAULT:
 .SUFFIXES:
 
-usage: Makefile.inc mount.sh
+usage:
 	@echo "usage: make TARGET"
 	@echo
 	@echo "Targets:"
@@ -14,7 +14,7 @@ usage: Makefile.inc mount.sh
 %.d: %
 	@${MAKE} -C $<
 
-all:
+all: Makefile.inc mount.sh
 	@${MAKE} -C openbsd includes-local
 	@${MAKE} -C mingw all install-local
 	@${MAKE} -C libtrace all

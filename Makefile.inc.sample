@@ -1,10 +1,11 @@
-VERSION=20240915
+VERSION=20250618
 BUILD=$(shell date +%s)
+RELEASE=7.7.0
 DESTDIR=/C/MinC
-GCCVER=4.8.1
-GCCLIB=
+GCCVER=6.3.0
+GCCLIB=libisl-15.dll libmingwex-0.dll
 MINGW=/C/MinGW
-SRCDIR=/D/openbsd-master
+SRCDIR=/C/minc-devel/src-master
 
 .SUFFIXES:
 .DEFAULT:

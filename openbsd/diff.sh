@@ -1,25 +1,16 @@
 #!/bin/sh
 
-REVERT=
 VERBOSE=
 TARGET=
-SOURCE=/mnt/d/openbsd-master
+SOURCE=/mnt/c/minc-devel/src-master
 PATTERN='*.[chS]'
-NOCHOP=
 
 diff_file()
 {
 	if [ "$VERBOSE" ]; then
 		echo "$1"
 	fi
-	# insert ^M with vi (Ctrl+V, followed by Ctrl+M)
-	if [ "$NOCHOP" ]; then
-		diff -Naur "$SOURCE/$1" "$1" | sed "s:$SOURCE/::"
-	elif [ -n "$REVERT" ]; then
-		sed 's///' "$1" | diff -Naur - "$SOURCE/$1" | sed "s:$SOURCE/::"
-	else
-		sed 's///' "$1" | diff -Naur "$SOURCE/$1" - | sed "s:$SOURCE/::"
-	fi
+	diff -Naur "$SOURCE/$1" "$1" | sed "s:$SOURCE/::"
 }
 diff_dir()
 {
@@ -28,8 +19,6 @@ diff_dir()
 	if [ "$VERBOSE" ]; then
 		echo "find $1 -type f -name $PATTERN"
 	fi
-#	for file in $(find "$1" -type f \! \( -name '*.o' \)); do
-#	for file in $(find "$1" -type f -name "$PATTERN"); do
 	for file in $(find "$1" -type f); do
 		if [[ $file == *.o ]]; then
 			continue
@@ -45,9 +34,7 @@ do_usage()
 	echo "Options"
 	echo " -s,--source\t\t\tspecify source directory"
 	echo " -v,--verbose\t\t\tbe verbose"
-	echo " -r,--revert\t\t\trevert target/source"
 	echo " -p,--pattern PATTERN\t\tuse PATTERN for file extension"
-	echo " -C,--nochop\t\t\tdon't chop carrage returns"
 }
 
 while [ -n "$1" ]; do
@@ -59,15 +46,9 @@ while [ -n "$1" ]; do
 		-v|--verbose)
 			VERBOSE=yes
 			;;
-		-r|--revert)
-			REVERT=yes
-			;;
 		-p|--pattern)
 			PATTERN="$2"
 			shift;
-			;;
-		-C|--nochop)
-			NOCHOP=yes
 			;;
 		*)
 			TARGET="$1"

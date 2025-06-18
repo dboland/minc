@@ -9,11 +9,11 @@ GCCOBJ=_mulsc3.o _muldc3.o _mulxc3.o _ctzdi2.o \
 	_chkstk.o _chkstk_ms.o 
 GCCDIR=/lib/gcc/mingw32/${GCCVER}
 
-all: ${OBJECTS} ${LIBS}
+all: ${MINGW}${GCCDIR} ${OBJECTS} ${LIBS}
 
 ${MINGW}${GCCDIR}:
 	@echo "| GCC libexec directory ($@) not found. Make sure"
-	@echo "| it is defined correctly in Makefile.inc"
+	@echo "| the GCCVER variable is defined correctly in Makefile.inc"
 	@exit 1
 
 %.o: %.c
@@ -30,7 +30,6 @@ ${MINGW}${GCCDIR}:
 libgcc.a: wintls.o emutls.o mempcpy.o
 	ar xv ${MINGW}${GCCDIR}/libgcc.a ${GCCOBJ}
 	ar cru $@ ${GCCOBJ} $^
-# wintls.o
 
 libgcc_s.a: libgcc_s.def
 	dlltool -d $< -l $@ -k
