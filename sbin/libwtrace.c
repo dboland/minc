@@ -23,7 +23,7 @@ LPSTR win_strerror(HRESULT Error);
 
 #define WIN_ERR		printf
 
-extern __import WIN_MOUNT	*__Mounts;
+extern __attribute__((dllimport)) WIN_MOUNT	*__Mounts;
 
 /************************************************************/
 

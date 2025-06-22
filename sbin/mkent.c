@@ -30,7 +30,6 @@
 
 #include <stdio.h>
 #include <string.h>
-#include <stdint.h>
 #include <stdlib.h>
 #include <ctype.h>
 #include <errno.h>
@@ -38,7 +37,6 @@
 
 #include <sys/param.h>
 #include <sys/stat.h>
-#include <sys/systm.h>
 #include <sys/mount.h>
 
 #include "win/windows.h"

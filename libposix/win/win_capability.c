@@ -137,10 +137,11 @@ CapAddPrivilege(PTOKEN_PRIVILEGES Privs, LPCSTR Name)
 		WIN_ERR("LookupPrivilegeValue(%s): %s\n", Name, win_strerror(GetLastError()));
 	}else{
 		dwSize += sizeof(LUID_AND_ATTRIBUTES);
-		ptResult = win_realloc(Privs, dwSize);
-		ptResult->Privileges[dwCount].Attributes = dwAttribs;
-		ptResult->Privileges[dwCount].Luid = luid;
-		ptResult->PrivilegeCount++;
+		if (win_realloc(dwSize, Privs, (PVOID *)&Privs)){
+			ptResult->Privileges[dwCount].Attributes = dwAttribs;
+			ptResult->Privileges[dwCount].Luid = luid;
+			ptResult->PrivilegeCount++;
+		}
 	}
 	return(ptResult);
 }

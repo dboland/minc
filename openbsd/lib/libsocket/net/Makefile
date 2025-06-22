@@ -31,12 +31,14 @@ SHOBJECTS+=ip6opt.so rthdr.so vars6.so
 
 all: ${OBJECTS} ${SHOBJECTS}
 
-%.o: ${SRCDIR}/libc/net/%.c
+%.o: ${SRCDIR}/lib/libc/net/%.c
 	gcc -c ${CFLAGS} -DNOPIE -o $@ $<
+
 %.c.o: %.c
 	gcc -c ${CFLAGS} -DNOPIE -o $@ $<
 
-%.so: ${SRCDIR}/libc/net/%.c
+%.so: ${SRCDIR}/lib/libc/net/%.c
 	gcc -c ${CFLAGS} -o $@ $<
+
 %.c.so: %.c
 	gcc -c ${CFLAGS} -o $@ $<

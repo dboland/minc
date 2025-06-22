@@ -6,6 +6,6 @@ OBJECTS+=_catclose.o _catgets.o _catopen.o
 
 all: ${OBJECTS}
 
-%.o: ${SRCDIR}/nls/%.c
+%.o: ${SRCDIR}/lib/libc/nls/%.c
 	gcc -c ${CFLAGS} -o $@ $<
 

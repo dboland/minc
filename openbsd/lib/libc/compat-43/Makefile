@@ -6,8 +6,8 @@ OBJECTS= creat.o getdtablesize.o getwd.o \
 
 all: ${OBJECTS}
 
-%.o: ${SRCDIR}/compat-43/%.c
-	gcc -c ${CFLAGS} -o $@ $<
+%.o: ${SRCDIR}/lib/libc/compat-43/%.c
+	gcc -c ${CFLAGS} -I${SRCDIR}/sys -o $@ $<
 
 testlib: ${OBJECTS}
 	gcc -shared -e "" -Wl,--disable-auto-import -o testlib.dll ${OBJECTS}

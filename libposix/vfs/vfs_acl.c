@@ -126,7 +126,7 @@ AclAddEntry(PACL Acl, BYTE Flags, ACCESS_MASK Access, PSID Sid)
 	 */
 	CopySid(wSidSize, &acEntry.Sid, Sid);
 	Acl->AclSize += wAceSize;
-	win_realloc(Acl, Acl->AclSize);
+	win_realloc(Acl->AclSize, Acl, (PVOID *)&Acl);
 	return(AddAce(Acl, ACL_REVISION, MAXDWORD, &acEntry, wAceSize));
 }
 
@@ -215,8 +215,9 @@ vfs_acl_create(WIN_ACL_CONTROL *Control, WIN_MODE *Mode, BYTE Flags, PSECURITY_D
 		}
 		pEntry->Header.AceFlags = bFlagsNew + Flags;
 		paclNew->AclSize += pEntry->Header.AceSize;
-		paclNew = win_realloc(paclNew, paclNew->AclSize);
-		AddAce(paclNew, ACL_REVISION, 0, pEntry, pEntry->Header.AceSize);
+		if (win_realloc(paclNew->AclSize, paclNew, (PVOID *)&paclNew)){
+			AddAce(paclNew, ACL_REVISION, 0, pEntry, pEntry->Header.AceSize);
+		}
 	}
 	/* When creating files/subfolders in in user's profile tree (git.exe)
 	 */
@@ -311,8 +312,9 @@ vfs_acl_chown(WIN_ACL_CONTROL *Control, PSID NewUser, PSID NewGroup, PSECURITY_D
 			}
 		}
 		paclNew->AclSize += pEntry->Header.AceSize;
-		paclNew = win_realloc(paclNew, paclNew->AclSize);
-		AddAce(paclNew, ACL_REVISION, 0, pEntry, pEntry->Header.AceSize);
+		if (win_realloc(paclNew->AclSize, paclNew, (PVOID *)&paclNew)){
+			AddAce(paclNew, ACL_REVISION, 0, pEntry, pEntry->Header.AceSize);
+		}
 	}
 	if (!SetSecurityDescriptorDacl(Result, bPresent, paclNew, bDefaulted)){
 		WIN_ERR("SetSecurityDescriptorDacl(): %s\n", win_strerror(GetLastError()));

@@ -43,11 +43,14 @@ win_writev(HANDLE Handle, const WIN_IOVEC Data[], DWORD Count, ULONG *Result)
 
 	while (Count--){
 		dwSize = Data->Length;
-		pvBuffer = win_realloc(pvBuffer, ulSize + dwSize);
-		P = pvBuffer + ulSize;
-		win_memcpy(P, Data->Buffer, dwSize);
-		ulSize += dwSize;
-		Data++;
+		if (!win_realloc(ulSize + dwSize, pvBuffer, &pvBuffer)){
+			break;
+		}else{
+			P = pvBuffer + ulSize;
+			win_memcpy(P, Data->Buffer, dwSize);
+			ulSize += dwSize;
+			Data++;
+		}
 	}
 	if (!WriteFile(Handle, pvBuffer, ulSize, &dwSize, NULL)){
 		WIN_ERR("win_writev(%d): %s\n", Handle, win_strerror(GetLastError()));

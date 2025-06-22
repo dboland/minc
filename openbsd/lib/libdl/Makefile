@@ -1,10 +1,7 @@
 include ../../../Makefile.inc
 
-RELEASE=6.1.0
-
 LIBEXEC=${PREFIX}/libexec
 
-CFLAGS+=-g
 OBJECTS=libdl.o
 IMPLIB=libdl.dll.a
 LDFLAGS=-shared -s
@@ -15,7 +12,7 @@ GCCLIB=${LIBROOT}/mingw/gcc
 all: ld.so
 
 %.o: %.c
-	gcc -c ${CFLAGS} -I${LIBROOT}/include -I../../include $<
+	gcc -c -g ${CFLAGS} -I${LIBROOT}/include -I${SRCDIR}/sys $<
 
 version.o: version.rc
 	windres -DVERSION=\\\"${VERSION}\\\" -DRELEASE=\\\"${RELEASE}\\\" $< $@

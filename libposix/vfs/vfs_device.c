@@ -83,6 +83,9 @@ dull_attach(WIN_DEVICE *Device)
 		case DEV_TYPE_USBT:
 			bResult = config_found("ubt", FS_TYPE_PDO, WIN_VCHR, Device);
 			break;
+		case DEV_TYPE_NVME:
+			bResult = config_found("nvme", FS_TYPE_PDO, WIN_VCHR, Device);
+			break;
 		default:
 			bResult = FALSE;
 	}

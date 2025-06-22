@@ -5,6 +5,6 @@ OBJECTS= send.o recv.o herror.o
 
 all: ${OBJECTS}
 
-%.o: ${SRCDIR}/net/%.c
-	gcc -c ${CFLAGS} -o $@ $<
+%.o: ${SRCDIR}/lib/libc/net/%.c
+	gcc -c ${CFLAGS} -I${SRCDIR}/sys -o $@ $<
 

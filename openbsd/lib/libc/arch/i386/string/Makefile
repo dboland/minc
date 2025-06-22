@@ -10,8 +10,8 @@ OBJECTS+= strncat.c.o strncpy.c.o strcspn.c.o strlcpy.c.o strspn.c.o
 
 all: ${OBJECTS}
 
-%.o: ${SRCDIR}/arch/${ARCH}/string/%.S
+%.o: ${SRCDIR}/lib/libc/arch/${ARCH}/string/%.S
 	gcc -c ${CFLAGS} -o $@ $<
 
-%.c.o: ${SRCDIR}/string/%.c
+%.c.o: ${SRCDIR}/lib/libc/string/%.c
 	gcc -c ${CFLAGS} -o $@ $<

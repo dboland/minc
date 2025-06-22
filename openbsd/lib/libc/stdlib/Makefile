@@ -18,8 +18,8 @@ OBJECTS+= atexit.c.o
 
 all: ${OBJECTS}
 
-%.o: ${SRCDIR}/stdlib/%.c
-	gcc -c ${CFLAGS} -o $@ $<
+%.o: ${SRCDIR}/lib/libc/stdlib/%.c
+	gcc -c ${CFLAGS} -I${SRCDIR}/sys -I${SRCDIR}/lib/libc/include -o $@ $<
 
 %.c.o: %.c
 	gcc -c ${CFLAGS} -I../../../../include -I${SRCDIR}/stdlib -o $@ $<

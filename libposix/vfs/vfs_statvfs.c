@@ -141,7 +141,7 @@ vfs_setvfs(WIN_CFDATA *Config, DWORD Flags)
 	while (!QueryDosDeviceW(NULL, pszBuffer, dwSize)){
 		if (ERROR_INSUFFICIENT_BUFFER == GetLastError()){
 			dwSize += __Globals->PageSize;
-			pszBuffer = win_realloc(pszBuffer, dwSize * sizeof(WCHAR));
+			win_realloc(dwSize * sizeof(WCHAR), pszBuffer, (PVOID *)&pszBuffer);
 		}else{
 			WIN_ERR("QueryDosDevice(%d): %s\n", dwSize, win_strerror(GetLastError()));
 			win_free(pszBuffer);

@@ -12,6 +12,6 @@ KOBJECTS=adddi3.o anddi3.o ashldi3.o ashrdi3.o cmpdi2.o divdi3.o iordi3.o \
 
 all: ${OBJECTS}
 
-%.o: ${SRCDIR}/quad/%.c
+%.o: ${SRCDIR}/lib/libc/quad/%.c
 	gcc -c ${CFLAGS} -o $@ $<
 

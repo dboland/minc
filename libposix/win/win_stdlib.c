@@ -46,9 +46,10 @@ win_malloc(ULONG Size)
 	*(ULONG *)hLocal = ulSize;
 	return(hLocal + sizeof(ULONG));
 }
-PVOID 
-win_realloc(PVOID Buffer, ULONG Size)
+BOOL 
+win_realloc(ULONG Size, PVOID Buffer, PVOID *Result)
 {
+	BOOL bResult = TRUE;
 	HLOCAL hLocal = Buffer - sizeof(ULONG);
 	ULONG ulSize = *(ULONG *)hLocal;
 
@@ -62,11 +63,12 @@ win_realloc(PVOID Buffer, ULONG Size)
 		 */
 		if (hLocal = LocalReAlloc(hLocal, ulSize, LMEM_MOVEABLE)){
 			*(ULONG *)hLocal = ulSize;
+			*Result = hLocal + sizeof(ULONG);
 		}else{
-			WIN_ERR("LocalReAlloc(%d): %s\n", ulSize, win_strerror(GetLastError()));
+			bResult = FALSE;
 		}
 	}
-	return(hLocal + sizeof(ULONG));
+	return(bResult);
 }
 VOID 
 win_free(PVOID Buffer)

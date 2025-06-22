@@ -70,6 +70,7 @@
 #define DEV_TYPE_SWD		(DEV_CLASS_DULL)
 #define DEV_TYPE_BIOS		(DEV_CLASS_DULL + DEV_BUS_ACPI)
 #define DEV_TYPE_USBT		(DEV_CLASS_DULL + DEV_BUS_USB)	/* USB Bluetooth adapter */
+#define DEV_TYPE_NVME		(DEV_CLASS_DULL + DEV_BUS_PCI)
 
 #define DEV_TYPE_ENUM		(DEV_CLASS_SYSTEM)
 #define DEV_TYPE_PCI		(DEV_CLASS_SYSTEM + DEV_BUS_PCI)	/* PCI controller device */

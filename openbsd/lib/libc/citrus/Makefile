@@ -5,6 +5,6 @@ OBJECTS = citrus_ctype.o citrus_none.o citrus_utf8.o
 
 all: ${OBJECTS}
 
-%.o: ${SRCDIR}/citrus/%.c
+%.o: ${SRCDIR}/lib/libc/citrus/%.c
 	gcc -c ${CFLAGS} -o $@ $<
 

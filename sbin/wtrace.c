@@ -1,7 +1,8 @@
+#include <sys/fcntl.h>
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <fcntl.h>
 
 #include "win/windows.h"
 #include "win_posix.h"

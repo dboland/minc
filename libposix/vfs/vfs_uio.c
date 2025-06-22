@@ -44,12 +44,15 @@ vfs_writev(WIN_VNODE *Node, const WIN_IOVEC Data[], DWORD Count, DWORD *Result)
 
 	while (dwIndex < Count){
 		dwLength = Data->Length;
-		pvBuffer = win_realloc(pvBuffer, dwSize + dwLength);
-		P = pvBuffer + dwSize;
-		win_memcpy(P, Data->Buffer, dwLength);
-		dwSize += dwLength;
-		dwIndex++;
-		Data++;
+		if (!win_realloc(dwSize + dwLength, pvBuffer, &pvBuffer)){
+			break;
+		}else{
+			P = pvBuffer + dwSize;
+			win_memcpy(P, Data->Buffer, dwLength);
+			dwSize += dwLength;
+			dwIndex++;
+			Data++;
+		}
 	}
 	bResult = vfs_write(Node, pvBuffer, dwSize, Result);
 	win_free(pvBuffer);

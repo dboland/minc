@@ -28,14 +28,11 @@
  *
  */
 
-#include <stdarg.h>
 #include <stdio.h>
 #include <stdlib.h>
-#include <fcntl.h>
 #include <pwd.h>
 #include <errno.h>
 #include <string.h>
-#include <termios.h>
 #include <signal.h>
 #include <unistd.h>
 #include <paths.h>
@@ -44,6 +41,8 @@
 #include <locale.h>
 #include <dirent.h>
 
+#include <sys/stdarg.h>
+#include <sys/fcntl.h>
 #include <sys/wait.h>
 #include <sys/ioctl.h>
 #include <sys/param.h>
@@ -53,12 +52,13 @@
 #include <sys/uio.h>
 #include <sys/ktrace.h>
 #include <sys/reboot.h>
-#include <sys/systm.h>
 #include <sys/socket.h>
 #include <sys/tty.h>
+#include <sys/termios.h>
+
+#include "../libposix/kern/systm.h"
 
 #define _KERNEL
-
 #include <net/if.h>
 
 #define KTR_DEFAULT (KTRFAC_SYSCALL | KTRFAC_SYSRET | KTRFAC_NAMEI | \

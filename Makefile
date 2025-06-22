@@ -7,31 +7,23 @@ usage:
 	@echo "Targets:"
 	@echo " all			build all targets"
 	@echo " kernel			build libposix only"
-	@echo " libs			build BSD system libraries only"
-	@echo " includes		install header files locally"
-	@echo " sbin			buid MinC system programs only"
+	@echo " patch			patch header files"
+	@echo " system			build OpenBSD system libraries only"
+
+all: kernel system
 
 %.d: %
 	@${MAKE} -C $<
 
-all: Makefile.inc mount.sh
+kernel: Makefile.inc mount.sh
 	@${MAKE} -C openbsd includes-local
 	@${MAKE} -C mingw all install-local
 	@${MAKE} -C libtrace all
 	@${MAKE} -C libposix all install-local
-	@#@${MAKE} -C openbsd all install-local
-	@#@${MAKE} -C sbin all
+	@${MAKE} -C sbin all
 
-kernel:
-	@${MAKE} -C libposix all install-local
-
-includes:
-	@${MAKE} -C openbsd includes-local
-
-libs: openbsd.d
-
-sbin: libtrace.d
-	@${MAKE} -C sbin all install
+system:
+	@${MAKE} -C openbsd all
 
 Makefile.inc:
 	@/bin/cp Makefile.inc.sample Makefile.inc
@@ -39,13 +31,17 @@ Makefile.inc:
 mount.sh:
 	@/bin/cp mount.sh.sample mount.sh
 
+patch:
+	@${MAKE} -C openbsd patch
+
 clean:
 	@${MAKE} -C libtrace clean
 	@${MAKE} -C libposix clean
 	@${MAKE} -C mingw clean
 	@${MAKE} -C sbin clean
-	@#${MAKE} -C openbsd clean
+	@${MAKE} -C openbsd clean
 
 install:
 	@${MAKE} -C libposix install
 	@${MAKE} -C openbsd install
+	@${MAKE} -C sbin install

@@ -1,5 +1,5 @@
 # for LOCALECHARSETS
-include ${SRCDIR}/../../share/locale/ctype/Makefile.inc
+include ${SRCDIR}/share/locale/ctype/Makefile.inc
 
 OBJECTS= btowc.o _def_messages.o _def_monetary.o _def_numeric.o _def_time.o \
 	localeconv.o nl_langinfo.o setlocale.o iswctype.o __mb_cur_max.o \
@@ -16,10 +16,5 @@ OBJECTS+= wcstof.o wcstold.o
 
 all: ${OBJECTS}
 
-%.o: ${SRCDIR}/locale/%.c
-	gcc -c ${CFLAGS} -DLOCALE_CHARSETS="\"${LOCALECHARSETS}\"" -I${SRCDIR}/include -I${SRCDIR}/citrus -o $@ $<
-
-# runetable.c does not match gen/ctype_.c
-# %.c.o: %.c
-#	gcc -c ${CFLAGS} -DLOCALE_CHARSETS="\"${LOCALECHARSETS}\"" -I${SRCDIR}/locale -I${SRCDIR}/citrus -o $@ $<
-
+%.o: ${SRCDIR}/lib/libc/locale/%.c
+	gcc -c ${CFLAGS} -DLOCALE_CHARSETS="\"${LOCALECHARSETS}\"" -I${SRCDIR}/lib/libc/include -I${SRCDIR}/lib/libc/citrus -o $@ $<

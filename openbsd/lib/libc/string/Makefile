@@ -13,6 +13,6 @@ OBJECTS=explicit_bzero.o memccpy.o memmem.o memrchr.o stpcpy.o stpncpy.o \
 
 all: ${OBJECTS}
 
-%.o: ${SRCDIR}/string/%.c
-	gcc -c ${CFLAGS} -I${SRCDIR} -o $@ $<
+%.o: ${SRCDIR}/lib/libc/string/%.c
+	gcc -c ${CFLAGS} -I${SRCDIR}/lib/libc -I${SRCDIR}/lib/libc/include -o $@ $<
 

@@ -5,6 +5,6 @@ OBJECTS=htonl.o htons.o ntohl.o ntohs.o
 
 all: ${OBJECTS}
 
-%.o: ${SRCDIR}/arch/i386/net/%.S
+%.o: ${SRCDIR}/lib/libc/arch/i386/net/%.S
 	gcc -c ${CFLAGS} -o $@ $<
 

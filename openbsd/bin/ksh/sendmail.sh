@@ -1,0 +1,1 @@
+/mnt/d/libminc-0.6.1/test/ksh/sendmail.sh

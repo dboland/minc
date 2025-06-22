@@ -103,7 +103,7 @@ BOOL win_execve(LPSTR Command, LPCSTR Path, STARTUPINFO *Info);
 /* win_stdlib.c */
 
 PVOID win_malloc(UINT Size);
-PVOID win_realloc(PVOID Buffer, UINT Size);
+BOOL win_realloc(ULONG Size, PVOID Buffer, PVOID *Result);
 VOID win_free(PVOID Buffer);
 DWORD win_getenv(LPCSTR Name, LPCSTR Buffer, DWORD Size);
 BOOL win_getcwd(LPWSTR Path);

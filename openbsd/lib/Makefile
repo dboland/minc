@@ -1,19 +1,10 @@
 include ../../Makefile.inc
 
 all:
-	@${MAKE} -C libc
-	@${MAKE} -C libdl
-	@${MAKE} -C libsocket
-	@${MAKE} -C libutil
-
-includes-local:
-	@/bin/cp -rvu include/* ${INCDIR}/
-
-install-local:
-	@${MAKE} -C libc install-local
-	@${MAKE} -C libdl install-local
-	@${MAKE} -C libsocket install-local
-	@${MAKE} -C libutil install-local
+	@${MAKE} -C libc all install-local
+	@${MAKE} -C libdl all install-local
+	@${MAKE} -C libsocket all install-local
+	@${MAKE} -C libutil all install-local
 
 clean:
 	@${MAKE} -C libc clean

@@ -9,14 +9,8 @@ OBJECTS= cfgetispeed.o cfgetospeed.o cfmakeraw.o cfsetispeed.o cfsetospeed.o \
 
 all: ${OBJECTS}
 
-%.o: ${SRCDIR}/termios/%.c
+%.o: ${SRCDIR}/lib/libc/termios/%.c
 	gcc -c ${CFLAGS} -o $@ $<
 
-testlib: ${OBJECTS}
-	gcc -shared -e "" -Wl,--disable-auto-import -o testlib.dll ${OBJECTS}
-
-libtermios.a: ${OBJECTS}
-	ar cru libtermios.a ${OBJECTS}
-
 clean:
-	rm -f *.o *.dll *.a
+	rm -f *.o

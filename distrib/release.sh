@@ -29,7 +29,7 @@ cp /sbin/libposix-6.1.0.dll .
 cp ${ROOT}/mingw/bin/scacls.exe .
 cp /mnt/d/src/gzip-1.13/gzip.exe .
 
-#. $DISTROOT/test.sh
+. $DISTROOT/test.sh
 #. $DISTROOT/comp.sh
 . $DISTROOT/base.sh
 
@@ -58,5 +58,5 @@ cp /mnt/d/src/gzip-1.13/gzip.exe .
 
 wrc makensis "d:/libminc-0.6.1/distrib/minc.nsi"
 #wrc makensis "d:/libminc-0.6.1/distrib/buildtools.nsi"
-#wrc makensis "d:/libminc-0.6.1/distrib/test.nsi"
+wrc makensis "d:/libminc-0.6.1/distrib/test.nsi"
 #git archive --format=zip --prefix=minc-master/ -o release/source/minc-master.zip HEAD

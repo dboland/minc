@@ -21,6 +21,6 @@ CFLAGS+=-DFLOATING_POINT -DPRINTF_WIDE_CHAR -DSCANF_WIDE_CHAR
 
 all: ${OBJECTS}
 
-%.o: ${SRCDIR}/stdio/%.c
-	gcc -c ${CFLAGS} -I${SRCDIR}/gdtoa -I${SRCDIR}/arch/${ARCH}/gdtoa -o $@ $<
+%.o: ${SRCDIR}/lib/libc/stdio/%.c
+	gcc -c ${CFLAGS} -I${SRCDIR}/lib/libc/include -I${SRCDIR}/lib/libc/gdtoa -I${SRCDIR}/lib/libc/arch/${ARCH}/gdtoa -o $@ $<
 

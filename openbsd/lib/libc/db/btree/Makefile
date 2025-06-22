@@ -7,6 +7,6 @@ OBJECTS=bt_close.o bt_conv.o bt_debug.o bt_delete.o bt_get.o bt_open.o \
 
 all: ${OBJECTS}
 
-%.o: ${SRCDIR}/db/btree/%.c
+%.o: ${SRCDIR}/lib/libc/db/btree/%.c
 	gcc -c ${CFLAGS} -o $@ $<
 

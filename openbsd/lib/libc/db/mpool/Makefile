@@ -5,6 +5,6 @@ OBJECTS=mpool.o
 
 all: ${OBJECTS}
 
-%.o: ${SRCDIR}/db/mpool/%.c
+%.o: ${SRCDIR}/lib/libc/db/mpool/%.c
 	gcc -c ${CFLAGS} -o $@ $<
 

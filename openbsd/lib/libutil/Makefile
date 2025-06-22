@@ -21,30 +21,30 @@ OBJECTS+=ohash_create_entry.o ohash_delete.o ohash_do.o ohash_entries.o \
 OBJECTS+= getmaxpartitions.o
 # BSD Auth
 OBJECTS+=passwd.o check_expire.o login_fbtab.o imsg.o imsg-buffer.o login.o
-
 HEADERS=util.h imsg.h
+CFLAGS+= -I${SRCDIR}/sys
 
 all: libutil.a
 
 %.o: ${SRCDIR}/lib/libutil/%.c
 	gcc -c ${CFLAGS} -I../../include -o $@ $<
 
+%.h: ${SRCDIR}/lib/libutil/%.h
+	@/bin/cp -vu $< ${INCDIR}/
+
 pidfile.o: pidfile.c
 	gcc -c ${CFLAGS} -I../../include -o $@ $<
 
-libutil.a: ${OBJECTS}
+libutil.a: ${HEADERS} ${OBJECTS}
 	ar cru $@ ${OBJECTS}
 
 ${LIBUTIL}: ${OBJECTS}
-	${LD} -shared -s -o $@ -e _DllMainCRTStartup@12 --disable-auto-import \
+	${LD} -shared ${LDFLAGS} -s -o $@ -e _DllMainCRTStartup@12 \
 	--out-implib=${IMPLIB} ${GCCLIB}/crt1.o ${OBJECTS} \
 	-L/lib -L${GCCLIB} -lmsvcrt -lmingw32 -lmingwex -lsocket -lgcc
 
 clean:
 	/bin/rm -f *.o *.a ${LIBUTIL}
 
-%.h: ${SRCDIR}/lib/libutil/%.h
-	@cp -vu $< ${DESTDIR}${INCDIR}/$@
-
-install-local: ${HEADERS}
+install-local:
 	/bin/cp libutil.a ${LIBDIR}/

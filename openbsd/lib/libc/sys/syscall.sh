@@ -1,6 +1,6 @@
 #!/bin/sh
 
-MASTER=/usr/include/sys/syscall.h
+MASTER=../../../../libposix/kern/syscall.h
 
 echo -n "creating system call stubs..."
 

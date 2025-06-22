@@ -9,14 +9,8 @@ OBJECTS+= hdtoa.o ldtoa.o strtod.o strtord.o strtodg.o strtof.o gethex.o
 
 all: ${OBJECTS}
 
-%.o: ${SRCDIR}/gdtoa/%.c
-	gcc -c ${CFLAGS} -I${SRCDIR}/arch/${ARCH}/gdtoa -o $@ $<
-
-testlib: ${OBJECTS}
-	gcc -shared -e "" -Wl,--disable-auto-import -o test.dll ${OBJECTS} ../gen/libgen.a
-
-libgdtoa.a: ${OBJECTS}
-	ar cru libgdtoa.a ${OBJECTS}
+%.o: ${SRCDIR}/lib/libc/gdtoa/%.c
+	gcc -c ${CFLAGS} -I${SRCDIR}/lib/libc/arch/${ARCH}/gdtoa -o $@ $<
 
 clean:
 	rm -f *.o *.dll *.a

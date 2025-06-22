@@ -6,6 +6,6 @@ OBJECTS=rec_close.o rec_delete.o rec_get.o rec_open.o rec_put.o rec_search.o \
 
 all: ${OBJECTS}
 
-%.o: ${SRCDIR}/db/recno/%.c
+%.o: ${SRCDIR}/lib/libc/db/recno/%.c
 	gcc -c ${CFLAGS} -o $@ $<
 

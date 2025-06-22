@@ -6,6 +6,6 @@ OBJECTS=hash.o hash_bigkey.o hash_buf.o hash_func.o hash_log2.o \
 
 all: ${OBJECTS}
 
-%.o: ${SRCDIR}/db/hash/%.c
+%.o: ${SRCDIR}/lib/libc/db/hash/%.c
 	gcc -c ${CFLAGS} -o $@ $<
 

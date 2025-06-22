@@ -9,7 +9,6 @@ OBJECTS=crt1.o msvc.o win_posix.o vfs_posix.o libposix.o
 WINDIR=/C/WINDOWS/system32
 GCCDIR=../mingw/gcc
 TRACEDIR=../libtrace
-LBINDIR=${PREFIX}/local/bin
 
 all: ${LIBPOSIX}
 
@@ -34,8 +33,8 @@ win_posix.o: win/win.c
 vfs_posix.o: vfs/vfs.c
 	gcc -c ${CFLAGS} -I${TRACEDIR} -o $@ $<
 
-libposix.o: ${LBINDIR} libposix.c
-	gcc -c ${CFLAGS} -I${SRCDIR}/sys -DTTYDEFCHARS -DKTRACE -DSYSVSEM libposix.c
+libposix.o: libposix.c
+	gcc -c ${CFLAGS} -I${SRCDIR}/sys -DTTYDEFCHARS -DKTRACE -DSYSVSEM $<
 
 version.o: version.rc
 	windres -DVERSION=\\\"${VERSION}\\\" -DRELEASE=\\\"${RELEASE}\\\" $< $@

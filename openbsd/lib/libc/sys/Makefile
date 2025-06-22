@@ -43,7 +43,7 @@ all: source ${OBJECTS}
 %.o: %.S
 	gcc -c ${CFLAGS} -I../arch/${ARCH} -o $@ $<
 
-%.c.o: ${SRCDIR}/sys/%.c
+%.c.o: ${SRCDIR}/lib/libc/sys/%.c
 	gcc -c ${CFLAGS} -I../arch/${ARCH} -o $@ $<
 
 source:

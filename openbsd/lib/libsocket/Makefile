@@ -2,7 +2,6 @@ include ../../../Makefile.inc
 
 RELEASE=75.0
 
-SRCDIR=/D/openbsd-master/lib
 LIBROOT=../../..
 POSIXLIB=${LIBROOT}/libposix
 GCCLIB=${LIBROOT}/mingw/gcc
@@ -34,7 +33,7 @@ ${LIBSOCKET}: crt1.o version.o
 	-L${POSIXLIB} -L${GCCLIB} -L../libc -lposix -lc -lmsvcrt -lgcc
 
 %.d: %
-	@${MAKE} -C $< SRCDIR="${SRCDIR}" CFLAGS="${CFLAGS} -DLIBSOCK_IMPORT= -I../../../../include -I../../libc/include"
+	@${MAKE} -C $< SRCDIR="${SRCDIR}" CFLAGS="${CFLAGS} -DLIBSOCK_IMPORT= -I../../../../include -I${SRCDIR}/sys -I${SRCDIR}/lib/libc/include"
 
 objects: asr.d net.d rpc.d
 

@@ -36,6 +36,17 @@
 #include "msvc_posix.h"
 #include "arch_posix.h"
 
+/* winnt.h */
+
+typedef struct _IMAGE_TLS_DIRECTORY {
+        PVOID StartAddressOfRawData;
+        PVOID EndAddressOfRawData;
+        PVOID AddressOfIndex;
+        PVOID AddressOfCallBacks;
+        PVOID SizeOfZeroFill;
+        PVOID Characteristics;
+} IMAGE_TLS_DIRECTORY,*PIMAGE_TLS_DIRECTORY;
+
 #include <libgen.h>
 #include <nlist.h>
 #include <string.h>

@@ -169,8 +169,9 @@ win_getgrouplist(WIN_PWENT *Passwd, SID8 *Primary, SID8 *Result[], DWORD *Count)
 	naStatus = NetUserGetLocalGroups(NULL, Passwd->Account, 0, LG_INCLUDE_INDIRECT, (LPBYTE *)&plguInfo, MAX_PREFERRED_LENGTH, &dwCount, &dwTotal);
 	if (naStatus == NERR_Success){
 		dwSize += sizeof(SID8) * dwCount;
-		psResult = win_realloc(psResult, dwSize);
-		while (dwIndex < dwCount){
+		if (!win_realloc(dwSize, psResult, (PVOID *)&psResult)){
+			bResult = FALSE;
+		}else while (dwIndex < dwCount){
 			AclLookupW(plguInfo->lgrui0_name, &psResult[dwResult]);
 			if (!EqualSid(&psResult[dwResult], Primary)){
 				dwResult++;

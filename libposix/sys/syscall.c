@@ -55,9 +55,13 @@ env_win(char *const envp[])
 		}
 		size = p - (char *)pvResult;
 		len = strlen(entry) + 2;	/* assume being last entry */
-		pvResult = win_realloc(pvResult, size + len);
-		p = pvResult + size;
-		p = win_stpcpy(p, entry) + 1;
+		if (win_realloc(size + len, pvResult, &pvResult)){
+			p = pvResult + size;
+			p = win_stpcpy(p, entry) + 1;
+		}else{
+			WIN_ERR("+ warning: Environment too large\n");
+			break;
+		}
 	}
 	return(pvResult);
 }
@@ -77,14 +81,19 @@ argv_win(WIN_TASK *Task, const char *command, char *const argv[])
 		len = strlen(arg) + 3;
 		/* maximum for CreateProcess(), 
 		 * rounded to nearest block (xargs.exe)
+		 * find /mnt/d/openbsd-master -name Makefile | xargs grep chown
 		 */
-		if ((size + len) > maxbuf){
+		if ((size + len) > 0x3000){
 			WIN_ERR("+ warning: %s: Too many arguments\n", command);
 			break;
 		}
-		pszResult = win_realloc(pszResult, size + len);
-		p = pszResult + size;
-		p = stpquot(p, arg);
+		if (win_realloc(size + len, pszResult, (PVOID *)&pszResult)){
+			p = pszResult + size;
+			p = stpquot(p, arg);
+		}else{
+			WIN_ERR("+ warning: %s[0x%x]: Too many arguments\n", command, size + len);
+			break;
+		}
 	}
 	if (Task->TracePoints & KTRFAC_NAMEI){
 		ktrace_NAMEI(Task, pszResult, size);

@@ -29,8 +29,6 @@
  */
 
 #ifndef _SCHED_H_
-#define	_SCHED_H_
-
+#define _SCHED_H_
 #include <sys/sched.h>
-
 #endif

@@ -49,7 +49,8 @@ DECSetMode(HANDLE Handle, WORD Arg)
 	}else if (Arg == 25){		// show cursor
 		bResult = SetConsoleCursorInfo(Handle, &ciNorm);
 //	}else if (Arg == 47){		// xterm alternate screen
-//	}else if (Arg == 1000){		// linux mouse on
+	}else if (Arg == 1000){		// linux mouse on
+		bResult = TRUE;
 	/* weird: why would a terminal do autoindent? */
 	}else if (Arg == 2004){		// xterm bracketed paste mode (nano.exe)
 	}else{
@@ -76,11 +77,15 @@ DECResetMode(HANDLE Handle, WORD Arg)
 		bResult = SetConsoleCursorInfo(Handle, &ciNorm);
 	}else if (Arg == 25){		// hide cursor
 		bResult = SetConsoleCursorInfo(Handle, &ciHide);
-//	}else if (Arg == 1000){		// mouse off (linux)
+	}else if (Arg == 1000){		// mouse off (linux)
+		bResult = TRUE;
 //	}else if (Arg == 1049){		// xterm rmcup/exit_ca_mode
-//	}else if (Arg == 2004){		// xterm bracketed paste mode (nano.exe)
+	}else if (Arg == 2004){		// xterm bracketed paste mode (nano.exe)
+		bResult = TRUE;
 //	}else if (Arg == 33){		// unknown from synchronet BBS
 //	}else if (Arg == 35){		// unknown from synchronet BBS
+	}else{
+		bResult = FALSE;
 	}
 	return(bResult);
 }

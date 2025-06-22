@@ -10,8 +10,8 @@ OBJECTS+=divsi3.o fixdfsi.o fixunsdfsi.o udivsi3.o
 
 all: ${OBJECTS}
 
-%.c.o: ${SRCDIR}/arch/i386/gen/%.c
+%.c.o: ${SRCDIR}/lib/libc/arch/i386/gen/%.c
 	gcc -c ${CFLAGS} -o $@ $<
 
-%.o: ${SRCDIR}/arch/i386/gen/%.S
+%.o: ${SRCDIR}/lib/libc/arch/i386/gen/%.S
 	gcc -c ${CFLAGS} -o $@ $<

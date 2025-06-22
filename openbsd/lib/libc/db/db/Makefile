@@ -5,6 +5,6 @@ OBJECTS=db.o
 
 all: ${OBJECTS}
 
-%.o: ${SRCDIR}/db/db/%.c
+%.o: ${SRCDIR}/lib/libc/db/db/%.c
 	gcc -c ${CFLAGS} -o $@ $<
 

@@ -124,15 +124,17 @@ msgbuf_KERN_MSGBUFSIZE(int *data, size_t *len)
 			drive_statvfs(&cfData, dwFlags, &cfDriver);
 			if (drive_match(cfData.NtName, cfData.DeviceType, &cfDriver)){
 				bufsize += msgbuf_DRIVE(&cfData, &cfDriver, buf);
-				msgbuf = win_realloc(msgbuf, bufsize + MSGBUFSIZE);
-				buf = msgbuf + bufsize;
+				if (win_realloc(bufsize + MSGBUFSIZE, msgbuf, (PVOID *)&msgbuf)){
+					buf = msgbuf + bufsize;
+				}
 			}
 		}else if (cfData.FSType == FS_TYPE_PDO){
 			pdo_statvfs(&cfData, dwFlags, &cfDriver);
 			if (pdo_match(cfData.NtName, cfData.DeviceType, &cfDriver)){
 				bufsize += msgbuf_PDO(&cfData, &cfDriver, buf);
-				msgbuf = win_realloc(msgbuf, bufsize + MSGBUFSIZE);
-				buf = msgbuf + bufsize;
+				if (win_realloc(bufsize + MSGBUFSIZE, msgbuf, (PVOID *)&msgbuf)){
+					buf = msgbuf + bufsize;
+				}
 			}
 		}
 	}

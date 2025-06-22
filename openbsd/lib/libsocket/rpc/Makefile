@@ -20,9 +20,9 @@ SHOBJECTS=auth_none.so auth_unix.so  authunix_prot.so bindresvport.so \
 
 all: ${OBJECTS} ${SHOBJECTS}
 
-%.o: ${SRCDIR}/libc/rpc/%.c
+%.o: ${SRCDIR}/lib/libc/rpc/%.c
 	gcc -c ${CFLAGS} -DNOPIE -o $@ $<
 
-%.so: ${SRCDIR}/libc/rpc/%.c
+%.so: ${SRCDIR}/lib/libc/rpc/%.c
 	gcc -c ${CFLAGS} -o $@ $<
 

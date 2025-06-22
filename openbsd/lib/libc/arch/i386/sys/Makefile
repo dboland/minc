@@ -7,7 +7,7 @@ OBJECTS+=_exit.S.o _getlogin.S.o _setlogin.S.o
 
 all: ${OBJECTS}
 
-%.o: ${SRCDIR}/arch/${ARCH}/sys/%.S
+%.o: ${SRCDIR}/lib/libc/arch/${ARCH}/sys/%.S
 	gcc -c ${CFLAGS} -o $@ $<
 
 %.S.o: %.S

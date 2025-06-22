@@ -39,21 +39,11 @@ OBJECTS+= syslog_r.o syslog.o auth_subr.o login_cap.o authenticate.o
 
 all: ${OBJECTS}
 
-%.o: ${SRCDIR}/gen/%.c
-	gcc -c ${CFLAGS} -I${SRCDIR}/time -o $@ $<
+%.o: ${SRCDIR}/lib/libc/gen/%.c
+	gcc -c ${CFLAGS} -I${SRCDIR}/sys -I${SRCDIR}/lib/libc/include -o $@ $<
 
 %.c.o: %.c
-	gcc -c ${CFLAGS} -I../../../../include -o $@ $<
+	gcc -c ${CFLAGS} -I${SRCDIR}/sys -I../../../../include -o $@ $<
 
 %.S.o: %.S
 	gcc -c ${CFLAGS} -I../arch/${ARCH} -o $@ $<
-
-sysconf.o: ${SRCDIR}/gen/sysconf.c
-	gcc -c ${CFLAGS} -I${SRCDIR}/../../sys -I../../../sys -o $@ $<
-
-getloadavg.o: getloadavg.c
-	gcc -c ${CFLAGS} -I${SRCDIR}/../../sys -o $@ $<
-
-disklabel.o: ${SRCDIR}/gen/disklabel.c
-	gcc -c ${CFLAGS} -I${SRCDIR}/../../sys -o $@ $<
-
