@@ -7,7 +7,6 @@ usage:
 	@echo "Targets:"
 	@echo " all			build all targets"
 	@echo " kernel			build libposix only"
-	@echo " patch			patch header files"
 	@echo " system			build OpenBSD system libraries only"
 
 all: kernel system
@@ -32,7 +31,7 @@ mount.sh:
 	@/bin/cp mount.sh.sample mount.sh
 
 patch:
-	@${MAKE} -C openbsd patch
+	@${MAKE} -C openbsd includes-local patch
 
 clean:
 	@${MAKE} -C libtrace clean

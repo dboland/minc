@@ -5,9 +5,8 @@ OBJECTS=chmod.exe ln.exe arch.exe touch.exe \
 	test.exe mknod.exe chown.exe chgrp.exe ls.exe cp.exe
 #OBJECTS+=ginstall.exe
 CFLAGS+=-DNOPIE -I${SRCDIR}/sys
-LBINDIR=${PREFIX}/local/bin
 
-all: ${OBJECTS} install-local
+all: ${OBJECTS}
 
 ${LBINDIR}:
 	/bin/mkdir -p ${LBINDIR}
@@ -58,11 +57,8 @@ ls.exe: ls.d
 
 cp.exe: cp.d
 
-install-local: ${LBINDIR}
-	/bin/cp -rvu ${OBJECTS} ${LBINDIR}/
-
 install:
 	ginstall ginstall.exe ${DESTDIR}/usr/bin/ginstall
 
 clean:
-	/bin/rm ${OBJECTS}
+	/bin/rm -f ${OBJECTS}

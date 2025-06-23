@@ -154,3 +154,14 @@ win_KERN_BOOTTIME(FILETIME *Result)
 	}
 	return(bResult);
 }
+BOOL 
+win_KERN_VERSION(DWORDLONG Build, LPSTR Buffer, LONG Size)
+{
+	BOOL bResult = TRUE;
+	struct tm *local;
+	time_t time = Build;
+
+	local = localtime(&time);
+	strftime(Buffer, Size, "%a %b %d %H:%M:%S GMT %Y", local);
+	return(bResult);
+}

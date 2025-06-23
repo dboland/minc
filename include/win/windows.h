@@ -31,7 +31,6 @@
 #include "basetsd.h"
 #include "wincon.h"
 #include "winbase.h"
-#include "time.h"
 
 typedef HANDLE HWND;
 

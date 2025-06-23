@@ -203,14 +203,16 @@ kern_KERN_CPTIME2(int cpu, u_int64_t states[CPUSTATES])
 int 
 kern_KERN_VERSION(char *buf, size_t bufsize)
 {
+	int result = 0;
 	int size = 0;
 	struct tm *local;
 	time_t time = BUILD;
 
-	size += sprintf(buf, "OpenBSD %s (MINC): #%s: ", "6.1", VERSION);
-	local = localtime(&time);
-	size += strftime(buf, size, "%a %b %d %H:%M:%S GMT %Y", local);
-	return(0);
+	size = sprintf(buf, "OpenBSD %s (MINC): #%s: ", RELEASE, VERSION);
+	if (!win_KERN_VERSION((DWORDLONG)BUILD, buf + size, bufsize - size)){
+		result -= errno_posix(GetLastError());
+	}
+	return(result);
 }
 int 
 kern_KERN_SECURELVL(int *oldvalue, int *newvalue)

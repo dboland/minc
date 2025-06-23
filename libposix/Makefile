@@ -9,16 +9,15 @@ OBJECTS=crt1.o msvc.o win_posix.o vfs_posix.o libposix.o
 WINDIR=/C/WINDOWS/system32
 GCCDIR=../mingw/gcc
 TRACEDIR=../libtrace
+LBINDIR=${PREFIX}/local/bin
 
 all: ${LIBPOSIX}
 
 ${LBINDIR}:
-	@echo "|"
 	@echo "| The first stage of the build was successful. To finish"
 	@echo "| the build, switch to OpenBSD by running:"
 	@echo "|"
 	@echo "| ./mount.sh minc"
-	@echo "|"
 	@exit 1
 
 crt1.o: crt1.c
@@ -33,8 +32,8 @@ win_posix.o: win/win.c
 vfs_posix.o: vfs/vfs.c
 	gcc -c ${CFLAGS} -I${TRACEDIR} -o $@ $<
 
-libposix.o: libposix.c
-	gcc -c ${CFLAGS} -I${SRCDIR}/sys -DTTYDEFCHARS -DKTRACE -DSYSVSEM $<
+libposix.o: ${LBINDIR}
+	gcc -c ${CFLAGS} -I${SRCDIR}/sys -DTTYDEFCHARS -DKTRACE -DSYSVSEM libposix.c
 
 version.o: version.rc
 	windres -DVERSION=\\\"${VERSION}\\\" -DRELEASE=\\\"${RELEASE}\\\" $< $@

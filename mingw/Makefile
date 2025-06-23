@@ -6,7 +6,7 @@ LIBS=libadvapi32.a libkernel32.a libshell32.a libuser32.a \
 	libmoldname.a libgmon.a
 
 all: install-gcc install-libexec install-ld ${LIBS} libiphlpapi.a
-	@${MAKE} -C bin
+	@#${MAKE} -C bin
 	@${MAKE} -C gcc
 
 ${MINGW}:

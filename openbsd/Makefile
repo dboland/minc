@@ -1,5 +1,7 @@
 include ../Makefile.inc
 
+MACHINEDIR=${INCDIR}/machine
+
 all:
 	@${MAKE} -C lib
 	@${MAKE} -C bin
@@ -9,14 +11,14 @@ ${SRCDIR}:
 	@echo "| it is defined correctly in Makefile.inc"
 	@exit 1
 
-includes-local: ${SRCDIR}
-	@/bin/mkdir -p ${INCDIR}/machine
+${MACHINEDIR}: ${SRCDIR}
+	/bin/mkdir -p ${MACHINEDIR}
 	/bin/cp -ru ${SRCDIR}/include/* ${INCDIR}/
 	/bin/cp -ru ${SRCDIR}/sys/sys ${INCDIR}/
-	/bin/cp -ru ${SRCDIR}/sys/arch/i386/include/* ${INCDIR}/machine/
+	/bin/cp -ru ${SRCDIR}/sys/arch/i386/include/* ${MACHINEDIR}/
+	/bin/patch -p 0 -d ${PREFIX} <include.patch
 
-patch:
-	/bin/patch -p 0 -d ${PREFIX} <includes.patch
+includes-local: ${MACHINEDIR}
 
 includes: ${DESTDIR}
 	@cp -rvu include/* ${DESTDIR}${INCDIR}/
