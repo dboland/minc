@@ -45,13 +45,14 @@ lib-clean:
 objects-clean:
 	rm -f */*.o */*.so
 
-install: ${DESTDIR}
-	ginstall ${LIBSOCKET} ${DESTDIR}${LIBDIR}/
-	ginstall libsocket.a ${DESTDIR}${LIBDIR}/
-	@#${LN} -s ${LIBSOCKET} ${DESTDIR}${LIBDIR}/libsocket.so
-
 # Perl needs libsocket.so
 install-local:
 	/bin/cp ${IMPLIB} ${LIBDIR}/
 	/bin/cp ${IMPLIB} ${LIBDIR}/libsocket.so
 	/bin/cp libsocket.a ${LIBDIR}/
+
+install: ${DESTDIR}
+	install ${LIBSOCKET} ${DESTDIR}${LIBDIR}/
+	install libsocket.a ${DESTDIR}${LIBDIR}/
+	@#${LN} -s ${LIBSOCKET} ${DESTDIR}${LIBDIR}/libsocket.so
+

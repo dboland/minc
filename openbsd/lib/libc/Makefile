@@ -14,7 +14,6 @@ TOOLDIR=${LIBROOT}/mingw/bin
 POSIXLIB=${LIBROOT}/libposix
 WINLIB=/C/WINDOWS/system32
 LIBC=libc.so.${RELEASE}
-HEADERS= pthread.h
 
 NLS=    C.msg Pig.msg da.ISO8859-1.msg da.UTF-8.msg de.ISO8859-1.msg \
         de.UTF-8.msg es.ISO8859-1.msg es.UTF-8.msg fi.ISO8859-1.msg \
@@ -22,7 +21,7 @@ NLS=    C.msg Pig.msg da.ISO8859-1.msg da.UTF-8.msg de.ISO8859-1.msg \
         nl.ISO8859-1.msg nl.UTF-8.msg no.ISO8859-1.msg no.UTF-8.msg \
         ru.KOI8-R.msg ru.UTF-8.msg sv.ISO8859-1.msg sv.UTF-8.msg
 
-all: ${HEADERS} objects lib
+all: objects lib
 
 %.d: %
 	@CFLAGS="${CFLAGS}" ${MAKE} -C $< SRCDIR=${SRCDIR} ARCH=${ARCH}
@@ -35,9 +34,6 @@ libc.a:
 
 libmsvcrt.a: libmsvcrt.def
 	dlltool -d $< -l $@ -k
-
-pthread.h: ${SRCDIR}/lib/libpthread/include/pthread.h
-	@/bin/cp -vu $< ${INCDIR}/
 
 version.o: version.rc
 	windres -DVERSION=\\\"${VERSION}\\\" -DRELEASE=\\\"${RELEASE}\\\" $< $@
@@ -71,8 +67,8 @@ install-local:
 	/bin/cp libmsvcrt.a ${LIBDIR}/
 
 install: ${DESTDIR}
-	ginstall ${LIBC} ${DESTDIR}${LIBDIR}/
-	ginstall libc.a ${DESTDIR}${LIBDIR}/
-	ginstall libmsvcrt.a ${DESTDIR}${LIBDIR}/
+	install ${LIBC} ${DESTDIR}${LIBDIR}/
+	install libc.a ${DESTDIR}${LIBDIR}/
+	install libmsvcrt.a ${DESTDIR}${LIBDIR}/
 	@#ln -s ${LIBC} ${DESTDIR}${LIBDIR}/libc.so
 

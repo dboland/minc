@@ -19,10 +19,10 @@ kernel: Makefile.inc mount.sh
 	@${MAKE} -C mingw all install-local
 	@${MAKE} -C libtrace all
 	@${MAKE} -C libposix all install-local
-	@${MAKE} -C sbin all
 
 system:
 	@${MAKE} -C openbsd all
+	@${MAKE} -C sbin all
 
 Makefile.inc:
 	@/bin/cp Makefile.inc.sample Makefile.inc

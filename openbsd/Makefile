@@ -1,8 +1,9 @@
 include ../Makefile.inc
 
 MACHINEDIR=${INCDIR}/machine
+SCHED_H=${INCDIR}/sched.h
 
-all:
+all: ${SCHED_H}
 	@${MAKE} -C lib
 	@${MAKE} -C bin
 
@@ -10,6 +11,9 @@ ${SRCDIR}:
 	@echo "| OpenBSD source directory ($@) not found. Make sure"
 	@echo "| it is defined correctly in Makefile.inc"
 	@exit 1
+
+${SCHED_H}: sched.h
+	@/bin/cp -vu $< $@
 
 ${MACHINEDIR}: ${SRCDIR}
 	/bin/mkdir -p ${MACHINEDIR}

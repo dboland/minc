@@ -64,5 +64,5 @@ install-local: ${LIBDIR} ${BINDIR}
 	/bin/cp ${IMPLIB} ${LIBDIR}/libmingw32.a
 
 install: ${DESTDIR}
-	ginstall -m 06555 ${LIBPOSIX} ${DESTDIR}${SBINDIR}/
+	install -m 06555 ${LIBPOSIX} ${DESTDIR}${SBINDIR}/
 

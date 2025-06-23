@@ -1,11 +1,11 @@
-VERSION=20250618
+VERSION=20240915
 BUILD=$(shell date +%s)
-RELEASE=7.7.0
+RELEASE=6.1.0
 DESTDIR=/C/MinC
-GCCVER=6.3.0
-GCCLIB=libisl-15.dll libmingwex-0.dll
+GCCVER=4.8.1
+GCCLIB=
 MINGW=/C/MinGW
-SRCDIR=/C/minc-devel/src-master
+SRCDIR=/D/openbsd-master
 
 .SUFFIXES:
 .DEFAULT:
@@ -32,7 +32,7 @@ INCDIR=${PREFIX}/include
 SHDIR=${PREFIX}/share
 MANDIR=${SHDIR}/man
 
-# In GCC 6.3.0, -ffixed-bx crashes compilation
+# In GCC 6.3.0, -ffixed-ebx crashes compilation
 
-CFLAGS= -Wimplicit-function-declaration -Werror -ffreestanding
+CFLAGS= -Wimplicit-function-declaration -Werror -ffreestanding -Wl,--disable-auto-import
 LDFLAGS= --disable-auto-import

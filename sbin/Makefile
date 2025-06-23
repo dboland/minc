@@ -50,12 +50,9 @@ wtrace: wtrace.o libwtrace.o
 	gcc -s ${CFLAGS} -o $@ -L${TRACEDIR} $^ -ltrace \
 	${MINGW}/lib/libkernel32.a ${MINGW}/lib/libuser32.a ${MINGW}/lib/libadvapi32.a
 
-install-wtrace:
-	ginstall wtrace ${DESTDIR}${SBINDIR}/
-
 install: ${DESTDIR}
-	@for file in ${PROGS}; do echo $$file; ginstall $$file "${DESTDIR}${SBINDIR}/$$file"; done
-	ginstall -m 02555 -o 0 -g 0 bsd.exe ${DESTDIR}${SBINDIR}/
+	@for file in ${PROGS}; do echo $$file; install $$file "${DESTDIR}${SBINDIR}/$$file"; done
+	install -m 02555 -o 0 -g 0 bsd.exe ${DESTDIR}${SBINDIR}/
 
 clean:
 	/bin/rm -f *.exe *.o

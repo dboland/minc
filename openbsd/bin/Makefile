@@ -2,8 +2,7 @@ include ../../Makefile.inc
 
 OBJECTS=chmod.exe ln.exe arch.exe touch.exe \
 	mkdir.exe mv.exe rm.exe rmdir.exe uname.exe \
-	test.exe mknod.exe chown.exe chgrp.exe ls.exe cp.exe
-#OBJECTS+=ginstall.exe
+	test.exe mknod.exe chown.exe chgrp.exe ls.exe cp.exe install.exe
 CFLAGS+=-DNOPIE -I${SRCDIR}/sys
 
 all: ${OBJECTS}
@@ -53,12 +52,12 @@ rmdir.exe: ${SRCDIR}/bin/rmdir/rmdir.c
 test.exe: ${SRCDIR}/bin/test/test.c
 	gcc -s -static ${CFLAGS} -o $@ $<
 
+install.exe: ${SRCDIR}/usr.bin/xinstall/xinstall.c
+	gcc -s -static ${CFLAGS} -o $@ $<
+
 ls.exe: ls.d
 
 cp.exe: cp.d
-
-install:
-	ginstall ginstall.exe ${DESTDIR}/usr/bin/ginstall
 
 clean:
 	/bin/rm -f ${OBJECTS}
