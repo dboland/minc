@@ -4,7 +4,7 @@ RELEASE=75.0
 
 ARCH=i386
 CFLAGS+= -g -DNOPIE
-LDFLAGS= -shared -s
+LDFLAGS+= -shared -s
 IMPLIB= libc.dll.a
 OBJECTS= libc.o
 SHOBJECTS= $(shell /bin/ls arch/${ARCH}/*/*.o */*.o db/*/*.o)
@@ -38,9 +38,9 @@ version.o: version.rc
 	windres -DVERSION=\\\"${VERSION}\\\" -DRELEASE=\\\"${RELEASE}\\\" $< $@
 
 ${LIBC}: ${OBJECTS} version.o
-	${LD} ${LDFLAGS} -e _DllMainCRTStartup@12 --out-implib=${IMPLIB} --disable-auto-import \
+	${LD} ${LDFLAGS} -e _DllMainCRTStartup@12 --out-implib=${IMPLIB} \
 	-o $@ --image-base=${IMGBASE_LIBC} ${GCCLIB}/crt1.o ${OBJECTS} ${SHOBJECTS} version.o \
-	-L${GCCLIB} -L${POSIXLIB} -L${WINLIB} -lgcc -lposix -lmsvcrt
+	-L${GCCLIB} -L${POSIXLIB} -lgcc -lposix -lmsvcrt
 
 objects: arch.d quad.d stdlib.d citrus.d compat-43.d crypt.d db.d gdtoa.d gen.d \
 	hash.d locale.d regex.d stdio.d string.d termios.d time.d thread.d \

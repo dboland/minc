@@ -29,10 +29,10 @@ chmod.exe: ${SRCDIR}/bin/chmod/chmod.c
 	gcc -s -static ${CFLAGS} -o $@ $<
 
 chown.exe: chmod.exe
-	/bin/cp -rvu $< $@
+	/bin/cp -vu $< $@
 
 chgrp.exe: chmod.exe
-	/bin/cp -rvu $< $@
+	/bin/cp -vu $< $@
 
 ln.exe: ${SRCDIR}/bin/ln/ln.c
 	gcc -s -static ${CFLAGS} -o $@ $<

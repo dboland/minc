@@ -39,7 +39,7 @@ console.exe: console.o libconsole.o
 	gcc ${LDFLAGS} -L${MINGW}/lib -o $@ console.o libconsole.o -lutil
 
 mount_refs: ${SRCDIR}/sbin/mount_ntfs/mount_ntfs.c
-	gcc -c ${CFLAGS} -I../include -o $@ $<
+	gcc -c ${CFLAGS} -I${SRCDIR}/sbin/mount -o $@ $<
 
 wrc: wrc.exe
 

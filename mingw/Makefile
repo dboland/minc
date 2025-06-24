@@ -67,7 +67,6 @@ install:
 	@${MAKE} -C bin install
 
 clean:
-	@${MAKE} -C bin clean
 	@${MAKE} -C gcc clean
 	/bin/rm -f *.a
 
