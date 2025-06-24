@@ -2,7 +2,7 @@
 .SUFFIXES:
 
 usage:
-	@echo "usage: make TARGET"
+	@echo "usage: ${MAKE} TARGET"
 	@echo
 	@echo "Targets:"
 	@echo " all			build all targets"

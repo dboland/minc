@@ -4,12 +4,14 @@ LIBEXEC=${PREFIX}/libexec
 LIBS=libadvapi32.a libkernel32.a libshell32.a libuser32.a \
 	libmoldname.a libgmon.a
 
-all: ${LIBS} libiphlpapi.a
+all: ${MINGW} ${LIBS} libiphlpapi.a
 	@${MAKE} -C gcc
 
 ${MINGW}:
+	@echo " -----------------------------------------------"
 	@echo "| MinGW root directory ($@) not found. Make sure"
-	@echo "| it is defined correctly in Makefile.inc"
+	@echo "| the 'MINGW' variable is defined correctly in Makefile.inc"
+	@echo " -----------------------------------------------"
 	@exit 1
 
 #
@@ -55,7 +57,7 @@ install-tools: ${MSGBIN}
 
 # tip: create dummy ld.so for configure scripts to detect shared libs
 
-install-local: install-gcc install-ld ${MINGW} ${LIBEXEC} ${LIBDIR}
+install-local: ${MINGW} install-gcc install-ld ${LIBEXEC} ${LIBDIR}
 	/bin/cp -vu ${LIBS} ${LIBDIR}/
 	/bin/cp -vu libiphlpapi.a ${MINGW}/lib/libiphlpapi.dll.a
 	@${MAKE} -C gcc install-local

@@ -12,8 +12,10 @@ GCCDIR=/lib/gcc/mingw32/${GCCVER}
 all: ${MINGW}${GCCDIR} ${OBJECTS} ${LIBS}
 
 ${MINGW}${GCCDIR}:
+	@echo " -----------------------------------------------"
 	@echo "| GCC libexec directory ($@) not found. Make sure"
-	@echo "| the GCCVER variable is defined correctly in Makefile.inc"
+	@echo "| the 'GCCVER' variable is defined correctly in Makefile.inc"
+	@echo " -----------------------------------------------"
 	@exit 1
 
 %.o: %.c
@@ -40,13 +42,14 @@ libgcc_eh.a: libgcc_eh.def
 #libgcc_eh.a: emutls.o wintls.o mempcpy.o gnu_mntent.o futimesat.o
 #	ar cru $@ $^
 
-# combine objects:
+# use -r switch to combine objects:
 
 crt0_tls.o: crt0.o win_tls.o
 	ld -r -o $@ crt0.o win_tls.o
 
-${GCCDIR}:
+${GCCDIR}: ${MINGW}${GCCDIR}
 	/bin/mkdir -p ${GCCDIR}
+	/bin/cp -vu ${MINGW}${GCCDIR}/libstdc++.dll.a ${GCCDIR}/libstdc++.a
 
 GCCINC=${GCCDIR}/include
 
@@ -55,7 +58,6 @@ includes-local: ${GCCINC}
 	/bin/cp -rvu ${MINGW}${GCCINC}/ssp ${GCCINC}/
 
 install-local: ${GCCDIR}
-	/bin/cp -vu ${MINGW}${GCCDIR}/libstdc++.dll.a ${GCCDIR}/libstdc++.a
 	/bin/cp -vu ${LIBS} ${GCCDIR}/
 	/bin/cp -vu crtbegin.o crtend.o ${GCCDIR}/
 	/bin/cp -vu ${CRT0} ${LIBDIR}/crt2.o

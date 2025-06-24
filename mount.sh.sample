@@ -3,12 +3,9 @@
 FSTAB=/etc/fstab
 
 if [[ "$1" == minc ]]; then
-	echo "D:/libminc-0.6.1/openbsd/bin /usr/local/bin" >$FSTAB
-	echo "C:/MinC/usr/lib /mingw/bin" >>$FSTAB
+	echo "C:/MinC/usr/lib /mingw/bin" >$FSTAB
 elif [[ "$1" == mingw ]]; then
 	echo "C:/MinGW /mingw" >$FSTAB
 else
 	/bin/cat $FSTAB
 fi
-
-uname -a

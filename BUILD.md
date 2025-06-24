@@ -15,8 +15,9 @@ https://www.openbsd.org/anoncvs.html
 
 ## Stage 1: build the kernel
 
-For this we need the OpenBSD 6.1.0 source code. You can get it yourself 
-using cvs, but you can also use my copy:
+For this you need the OpenBSD 6.1.0 source code. You can get it yourself 
+using cvs, but you can also use my copy (186Mb). Move this file to 
+your 'minc-devel' directory and extract it there:
 
 https://minc.commandlinerevolution.nl/source/openbsd-master-6.1.0.zip
 
@@ -29,11 +30,10 @@ kernel first:
 When the first stage was succesful, you will get the following output:
 
 	fatal error: machine/cdefs.h: No such file or directory
-	#include <machine/cdefs.h>
 
 This means we are ready for Stage 2.
 
-## Stage 2: build a minimal system
+## Stage 2: build a minimal build system
 
 Next, you will need to unmount the /mingw directory and mount the directory 
 for your new system. This is be done by running the mount.sh script:

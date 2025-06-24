@@ -29,8 +29,8 @@ SBINDIR=/sbin
 UBINDIR=${PREFIX}/bin
 LIBDIR=${PREFIX}/lib
 INCDIR=${PREFIX}/include
-SHDIR=${PREFIX}/share
-MANDIR=${SHDIR}/man
+SHAREDIR=${PREFIX}/share
+MANDIR=${SHAREDIR}/man
 
 # In GCC 6.3.0, -ffixed-ebx crashes compilation
 

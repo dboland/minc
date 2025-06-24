@@ -9,8 +9,10 @@ all:
 	@${MAKE} -C bin
 
 ${SRCDIR}:
+	@echo " ---------------------------------------------------"
 	@echo "| OpenBSD source directory ($@) not found. Make sure"
-	@echo "| it is defined correctly in Makefile.inc"
+	@echo "| the 'SRCDIR' variable is defined correctly in Makefile.inc"
+	@echo " ---------------------------------------------------"
 	@exit 1
 
 ${MACHINEDIR}: ${SRCDIR}
