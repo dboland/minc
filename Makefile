@@ -32,7 +32,7 @@ mount.sh:
 	@/bin/cp mount.sh.sample mount.sh
 
 help:
-	@/bin/fmt BUILD.md
+	@/bin/cat BUILD.md
 
 clean:
 	@${MAKE} -C libtrace clean

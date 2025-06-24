@@ -4,7 +4,7 @@ MACHINEDIR= ${INCDIR}/machine
 HEADERS= ${INCDIR}/fcntl.h ${INCDIR}/stdarg.h ${INCDIR}/stdint.h \
 	${INCDIR}/sched.h ${INCDIR}/syslog.h ${INCDIR}/termios.h
 
-all:
+all: ${SRCDIR}
 	@${MAKE} -C lib
 	@${MAKE} -C bin
 
@@ -15,7 +15,7 @@ ${SRCDIR}:
 	@echo " ---------------------------------------------------"
 	@exit 1
 
-${MACHINEDIR}: ${SRCDIR}
+${MACHINEDIR}:
 	/bin/mkdir -p ${MACHINEDIR}
 	/bin/cp -ru ${SRCDIR}/include/* ${INCDIR}/
 	/bin/cp -ru ${SRCDIR}/sys/sys ${INCDIR}/

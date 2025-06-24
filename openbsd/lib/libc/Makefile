@@ -12,8 +12,7 @@ LIBROOT=../../..
 GCCLIB=${LIBROOT}/mingw/gcc
 TOOLDIR=${LIBROOT}/mingw/bin
 POSIXLIB=${LIBROOT}/libposix
-WINLIB=/C/WINDOWS/system32
-LIBC=libc.so.${RELEASE}
+LIBC= libc.so.${RELEASE}
 
 NLS=    C.msg Pig.msg da.ISO8859-1.msg da.UTF-8.msg de.ISO8859-1.msg \
         de.UTF-8.msg es.ISO8859-1.msg es.UTF-8.msg fi.ISO8859-1.msg \
