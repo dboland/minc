@@ -8,6 +8,7 @@ usage:
 	@echo " all			build all targets"
 	@echo " kernel			build libposix only"
 	@echo " system			build OpenBSD system libraries only"
+	@echo " help			show build instructions"
 
 all: kernel system
 
@@ -21,7 +22,7 @@ kernel: Makefile.inc mount.sh
 	@${MAKE} -C libposix all install-local
 
 system:
-	@${MAKE} -C openbsd all
+	@${MAKE} -C openbsd all install-local
 	@${MAKE} -C sbin all
 
 Makefile.inc:
@@ -30,8 +31,8 @@ Makefile.inc:
 mount.sh:
 	@/bin/cp mount.sh.sample mount.sh
 
-patch:
-	@${MAKE} -C openbsd includes-local patch
+help:
+	@/bin/fmt BUILD.md
 
 clean:
 	@${MAKE} -C libtrace clean

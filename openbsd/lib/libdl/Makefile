@@ -29,8 +29,8 @@ ${LIBEXEC}:
 	/bin/mkdir ${LIBEXEC}
 
 install-local: ${LIBEXEC}
-	/bin/cp ld.so ${LIBEXEC}/
-	/bin/cp ${IMPLIB} ${LIBDIR}/
+	/bin/cp -vu ld.so ${LIBEXEC}/
+	/bin/cp -vu ${IMPLIB} ${LIBDIR}/
 
 install: ${DESTDIR}
 	install ld.so ${DESTDIR}${LIBEXEC}/

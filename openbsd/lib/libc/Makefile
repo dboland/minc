@@ -59,12 +59,12 @@ objects-clean:
 
 # Perl needs libc.so
 install-local:
-	/bin/cp ${IMPLIB} ${LIBDIR}/libc.so
-	/bin/cp ${IMPLIB} ${LIBDIR}/libmingwex.dll.a
-	/bin/cp ${IMPLIB} ${LIBDIR}/
-	/bin/cp libc.a ${LIBDIR}/libmingwex.a
-	/bin/cp libc.a ${LIBDIR}/
-	/bin/cp libmsvcrt.a ${LIBDIR}/
+	/bin/cp -vu ${IMPLIB} ${LIBDIR}/libc.so
+	/bin/cp -vu ${IMPLIB} ${LIBDIR}/libmingwex.dll.a
+	/bin/cp -vu ${IMPLIB} ${LIBDIR}/
+	/bin/cp -vu libc.a ${LIBDIR}/libmingwex.a
+	/bin/cp -vu libc.a ${LIBDIR}/
+	/bin/cp -vu libmsvcrt.a ${LIBDIR}/
 
 install: ${DESTDIR}
 	install ${LIBC} ${DESTDIR}${LIBDIR}/

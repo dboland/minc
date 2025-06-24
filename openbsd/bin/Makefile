@@ -2,16 +2,16 @@ include ../../Makefile.inc
 
 OBJECTS=chmod.exe ln.exe arch.exe touch.exe \
 	mkdir.exe mv.exe rm.exe rmdir.exe uname.exe \
-	test.exe mknod.exe chown.exe chgrp.exe ls.exe cp.exe install.exe
+	test.exe mknod.exe chown.exe chgrp.exe \
+	install.exe ls.exe cp.exe
 CFLAGS+=-DNOPIE -I${SRCDIR}/sys
+LBINDIR= ${PREFIX}/local/bin
 
 all: ${OBJECTS}
 
-${LBINDIR}:
-	/bin/mkdir -p ${LBINDIR}
-
-%.d: %
-	@${MAKE} -C $< CFLAGS="${CFLAGS}" SRCDIR="${SRCDIR}"
+${LBINDIR}: ${OBJECTS}
+	@/bin/mkdir -p ${LBINDIR}
+	/bin/cp -vu ${OBJECTS} ${LBINDIR}/
 
 uname.exe: ${SRCDIR}/usr.bin/uname/uname.c
 	gcc -s -static ${CFLAGS} -o $@ $<
@@ -55,9 +55,13 @@ test.exe: ${SRCDIR}/bin/test/test.c
 install.exe: ${SRCDIR}/usr.bin/xinstall/xinstall.c
 	gcc -s -static ${CFLAGS} -o $@ $<
 
-ls.exe: ls.d
+ls.exe:
+	@${MAKE} -C ls CFLAGS="${CFLAGS}" SRCDIR="${SRCDIR}"
 
-cp.exe: cp.d
+cp.exe:
+	@${MAKE} -C cp CFLAGS="${CFLAGS}" SRCDIR="${SRCDIR}"
+
+install-local: ${LBINDIR}
 
 clean:
 	/bin/rm -f ${OBJECTS}

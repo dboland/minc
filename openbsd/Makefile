@@ -1,9 +1,10 @@
 include ../Makefile.inc
 
-MACHINEDIR=${INCDIR}/machine
-SCHED_H=${INCDIR}/sched.h
+MACHINEDIR= ${INCDIR}/machine
+HEADERS= ${INCDIR}/fcntl.h ${INCDIR}/stdarg.h ${INCDIR}/stdint.h \
+	${INCDIR}/sched.h ${INCDIR}/syslog.h ${INCDIR}/termios.h
 
-all: ${SCHED_H}
+all:
 	@${MAKE} -C lib
 	@${MAKE} -C bin
 
@@ -12,9 +13,6 @@ ${SRCDIR}:
 	@echo "| it is defined correctly in Makefile.inc"
 	@exit 1
 
-${SCHED_H}: sched.h
-	@/bin/cp -vu $< $@
-
 ${MACHINEDIR}: ${SRCDIR}
 	/bin/mkdir -p ${MACHINEDIR}
 	/bin/cp -ru ${SRCDIR}/include/* ${INCDIR}/
@@ -22,15 +20,36 @@ ${MACHINEDIR}: ${SRCDIR}
 	/bin/cp -ru ${SRCDIR}/sys/arch/i386/include/* ${MACHINEDIR}/
 	/bin/patch -p 0 -d ${PREFIX} <include.patch
 
-includes-local: ${MACHINEDIR}
+${INCDIR}/fcntl.h:
+	@/bin/cp -vu fcntl.h ${INCDIR}/
+
+${INCDIR}/sched.h:
+	@/bin/cp -vu sched.h ${INCDIR}/
+
+${INCDIR}/stdarg.h:
+	@/bin/cp -vu stdarg.h ${INCDIR}/
+
+${INCDIR}/stdint.h:
+	@/bin/cp -vu stdint.h ${INCDIR}/
+
+${INCDIR}/syslog.h:
+	@/bin/cp -vu syslog.h ${INCDIR}/
+
+${INCDIR}/termios.h:
+	@/bin/cp -vu termios.h ${INCDIR}/
+
+includes-local: ${MACHINEDIR} ${HEADERS}
 
 includes: ${DESTDIR}
 	@cp -rvu include/* ${DESTDIR}${INCDIR}/
 	@cp -rvu sys/sys ${DESTDIR}${INCDIR}/
 	@cp -rvu sys/arch/i386/include/* ${DESTDIR}${INCDIR}/machine/
 
+install-local:
+	@${MAKE} -C bin install-local
+
 install: ${DESTDIR}
-	@/bin/cp -rvu share/mk ${DESTDIR}${SHDIR}/
+	@/bin/cp -rvu share/mk ${DESTDIR}${SHAREDIR}/
 	@${MAKE} -C lib install
 
 clean:

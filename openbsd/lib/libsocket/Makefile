@@ -47,9 +47,9 @@ objects-clean:
 
 # Perl needs libsocket.so
 install-local:
-	/bin/cp ${IMPLIB} ${LIBDIR}/
-	/bin/cp ${IMPLIB} ${LIBDIR}/libsocket.so
-	/bin/cp libsocket.a ${LIBDIR}/
+	/bin/cp -vu ${IMPLIB} ${LIBDIR}/
+	/bin/cp -vu ${IMPLIB} ${LIBDIR}/libsocket.so
+	/bin/cp -vu libsocket.a ${LIBDIR}/
 
 install: ${DESTDIR}
 	install ${LIBSOCKET} ${DESTDIR}${LIBDIR}/

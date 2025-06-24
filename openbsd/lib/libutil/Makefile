@@ -4,7 +4,6 @@ RELEASE=12.1
 
 LIBUTIL=libutil.so.${RELEASE}
 IMPLIB=libutil.dll.a
-
 LIBROOT=../../..
 GCCLIB=${LIBROOT}/mingw/gcc
 POSIXLIB=${LIBROOT}/libposix
@@ -24,7 +23,7 @@ OBJECTS+=passwd.o check_expire.o login_fbtab.o imsg.o imsg-buffer.o login.o
 HEADERS=util.h imsg.h
 CFLAGS+= -I${SRCDIR}/sys
 
-all: libutil.a
+all: ${HEADERS} libutil.a
 
 %.o: ${SRCDIR}/lib/libutil/%.c
 	gcc -c ${CFLAGS} -I../../include -o $@ $<
@@ -35,7 +34,7 @@ all: libutil.a
 pidfile.o: pidfile.c
 	gcc -c ${CFLAGS} -I../../include -o $@ $<
 
-libutil.a: ${HEADERS} ${OBJECTS}
+libutil.a: ${OBJECTS}
 	ar cru $@ ${OBJECTS}
 
 ${LIBUTIL}: ${OBJECTS}
@@ -47,4 +46,4 @@ clean:
 	/bin/rm -f *.o *.a ${LIBUTIL}
 
 install-local:
-	/bin/cp libutil.a ${LIBDIR}/
+	/bin/cp -vu libutil.a ${LIBDIR}/

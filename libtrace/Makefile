@@ -1,11 +1,11 @@
 include ../Makefile.inc
 
-all: libtrace.a
+all: win.d vfs.d libtrace.a
 
 %.d: %
 	@${MAKE} -C $<
 
-libtrace.a: win.d vfs.d
+libtrace.a:
 	ar cru $@ $(shell /bin/ls -f win/*.o vfs/*.o)
 
 clean:

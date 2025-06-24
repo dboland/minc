@@ -55,19 +55,19 @@ includes-local: ${GCCINC}
 	/bin/cp -rvu ${MINGW}${GCCINC}/ssp ${GCCINC}/
 
 install-local: ${GCCDIR}
-	/bin/cp ${MINGW}${GCCDIR}/libstdc++.dll.a ${GCCDIR}/libstdc++.a
-	/bin/cp ${LIBS} ${GCCDIR}/
-	/bin/cp crtbegin.o crtend.o ${GCCDIR}/
-	/bin/cp ${CRT0} ${LIBDIR}/crt2.o
-	/bin/cp crt1.o ${LIBDIR}/dllcrt2.o
-	@#/bin/cp gcrt0.o ${LIBDIR}/gcrt2.o
+	/bin/cp -vu ${MINGW}${GCCDIR}/libstdc++.dll.a ${GCCDIR}/libstdc++.a
+	/bin/cp -vu ${LIBS} ${GCCDIR}/
+	/bin/cp -vu crtbegin.o crtend.o ${GCCDIR}/
+	/bin/cp -vu ${CRT0} ${LIBDIR}/crt2.o
+	/bin/cp -vu crt1.o ${LIBDIR}/dllcrt2.o
+	@#/bin/cp -vu gcrt0.o ${LIBDIR}/gcrt2.o
 
 install: ${DESTDIR}${LIBDIR}
-	cp libgcc.a ${DESTDIR}${LIBDIR}/gcc/i686-pe-openbsd/${GCCVER}/
-	cp crtbegin.o crtend.o ${DESTDIR}${LIBDIR}/
-	cp ${CRT0} ${DESTDIR}${LIBDIR}/
-	cp crt1.o ${DESTDIR}${LIBDIR}/
-	cp gcrt0.o ${DESTDIR}${LIBDIR}/
+	install libgcc.a ${DESTDIR}${LIBDIR}/gcc/i686-pe-openbsd/${GCCVER}/
+	install crtbegin.o crtend.o ${DESTDIR}${LIBDIR}/
+	install ${CRT0} ${DESTDIR}${LIBDIR}/
+	install crt1.o ${DESTDIR}${LIBDIR}/
+	install gcrt0.o ${DESTDIR}${LIBDIR}/
 
 clean:
 	/bin/rm -f *.o *.a
