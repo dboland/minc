@@ -17,7 +17,7 @@ https://www.openbsd.org/anoncvs.html
 
 For this you need the OpenBSD 6.1.0 source code. You can get it yourself 
 using cvs, but you can also use my copy (186Mb). Move this file to 
-your 'minc-devel' directory and extract it there:
+preferably the root of a disk drive and extract it there:
 
 https://minc.commandlinerevolution.nl/source/openbsd-master-6.1.0.zip
 
@@ -27,19 +27,31 @@ kernel first:
 
 	make kernel
 
-When the first stage was succesful, you will get the following output:
+When the first stage was succesful, you will get the following output. 
+This means we are ready for Stage 2:
 
 	fatal error: machine/cdefs.h: No such file or directory
 
-This means we are ready for Stage 2.
+## Stage 2: build a minimal system
 
-## Stage 2: build a minimal build system
+A minimal system consists of the kernel, the BSD libc library , the 
+boot program, the shell and some utilities. These will be made by 
+the new system itself.
 
-Next, you will need to unmount the /mingw directory and mount the directory 
-for your new system. This is be done by running the mount.sh script:
+To achieve this, you will need to unmount the /mingw directory. This is 
+done by running the mount.sh script:
 
 	./mount.sh minc
 
-To finish the build:
+Now you can finish the build:
 
 	make all
+
+You now have a working OpenBSD system. To test this, you can run 
+the **uname** command:
+
+	uname -a
+
+It should be similar to the following output:
+
+	OpenBSD dimension.sassenheim.dmz 6.1.0 MINC#20240915 i386

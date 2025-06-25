@@ -6,7 +6,8 @@ usage:
 	@echo "Targets:"
 	@echo " all			build all targets"
 	@echo " kernel			build libposix only"
-	@echo " system			build OpenBSD system libraries only"
+	@echo " system			build OpenBSD system binaries only"
+	@echo " install		install OpenBSD into ${DESTDIR}"
 	@echo " help			show build instructions"
 
 ${DESTDIR}:

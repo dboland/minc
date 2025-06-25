@@ -1,11 +1,12 @@
 include ../../Makefile.inc
 
-OBJECTS=chmod ln mkdir mv rm rmdir test mknod chown chgrp ls cp
-CFLAGS+=-DNOPIE -I${SRCDIR}/sys
+OBJECTS= chmod ln mkdir mv rm rmdir test mknod chown chgrp ls cp
+CFLAGS+= -DNOPIE -I${SRCDIR}/sys
 LBINDIR= ${PREFIX}/local/bin
 BINPATH= ${SRCDIR}/bin
 
 all: ${BINPATH} ${OBJECTS}
+	@${MAKE} -C ksh
 
 ${BINPATH}:
 	@echo " ---------------------------------------------------"
@@ -49,19 +50,22 @@ test: ${SRCDIR}/bin/test/test.c
 	gcc -s -static ${CFLAGS} -o $@ $<
 
 ls:
-	gcc -c ${CFLAGS} -o main.o ${SRCDIR}/bin/ls/main.c
-	gcc -c ${CFLAGS} -o print.o ${SRCDIR}/bin/ls/print.c
-	gcc -c ${CFLAGS} -o cmp.o ${SRCDIR}/bin/ls/cmp.c
-	gcc -c ${CFLAGS} -o util.o ${SRCDIR}/bin/ls/util.c
-	gcc -c ${CFLAGS} -o ls.o ${SRCDIR}/bin/ls/ls.c
+	@gcc -c ${CFLAGS} -o main.o ${SRCDIR}/bin/ls/main.c
+	@gcc -c ${CFLAGS} -o print.o ${SRCDIR}/bin/ls/print.c
+	@gcc -c ${CFLAGS} -o cmp.o ${SRCDIR}/bin/ls/cmp.c
+	@gcc -c ${CFLAGS} -o util.o ${SRCDIR}/bin/ls/util.c
+	@gcc -c ${CFLAGS} -o ls.o ${SRCDIR}/bin/ls/ls.c
 	gcc -s -static ${CFLAGS} -o $@ main.o print.o cmp.o util.o ls.o -lutil
 
 cp:
-	gcc -c ${CFLAGS} -o utils.o ${SRCDIR}/bin/cp/utils.c
-	gcc -c ${CFLAGS} -o cp.o ${SRCDIR}/bin/cp/cp.c
+	@gcc -c ${CFLAGS} -o utils.o ${SRCDIR}/bin/cp/utils.c
+	@gcc -c ${CFLAGS} -o cp.o ${SRCDIR}/bin/cp/cp.c
 	gcc -s -static ${CFLAGS} -o $@ utils.o cp.o
 
 install-local: ${LBINDIR}
+
+install:
+	@${MAKE} -C ksh install
 
 clean:
 	/bin/rm -f *.exe *.o

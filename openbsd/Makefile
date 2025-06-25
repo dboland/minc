@@ -45,13 +45,12 @@ ${INCDIR}/termios.h:
 includes-local: ${MACHINEDIR} ${HEADERS}
 
 includes: ${DESTDIR}
-	@cp -rvu include/* ${DESTDIR}${INCDIR}/
-	@cp -rvu sys/sys ${DESTDIR}${INCDIR}/
-	@cp -rvu sys/arch/i386/include/* ${DESTDIR}${INCDIR}/machine/
+	@/bin/mkdir -p ${DESTDIR}${INCDIR}
+	cp -ru ${INCDIR}/* ${DESTDIR}${INCDIR}/
 
-install: ${DESTDIR}
-	@/bin/cp -rvu share/mk ${DESTDIR}${SHAREDIR}/
+install:
 	@${MAKE} -C lib install
+	@${MAKE} -C bin install
 	@${MAKE} -C sbin install
 
 clean:

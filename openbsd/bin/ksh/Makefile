@@ -1,6 +1,5 @@
 include ../../../Makefile.inc
 
-CFLAGS+=-g -DNOPIE
 # wait for signals from child executable
 #CFLAGS+=-DUSEVFORK
 #CFLAGS+=-DDEBUG
@@ -8,11 +7,10 @@ CFLAGS+=-g -DNOPIE
 #CFLAGS+=-DDEBUG_SUBST
 #CFLAGS+=-DDEBUG_EXIT
 #CFLAGS+=-DKSH_DEBUG
-LDFLAGS=-static -s -Wl,--disable-auto-import
 CFLAGS+=-DSMALL
 #CFLAGS+=-DJOBS
 
-OBJECTS = alloc.o c_ksh.o c_sh.o c_test.o c_ulimit.o edit.o 2021_emacs.o eval.o \
+OBJECTS= alloc.o c_ksh.o c_sh.o c_test.o c_ulimit.o edit.o 2021_emacs.o eval.o \
 	exec.o expr.o history.o io.o jobs.o lex.o mail.o main.o mknod.o \
 	misc.o path.o shf.o syn.o table.o trap.o tree.o tty.o var.o \
 	version.o 2021_vi.o debug.o
@@ -32,16 +30,23 @@ OBJECTS = alloc.o c_ksh.o c_sh.o c_test.o c_ulimit.o edit.o 2021_emacs.o eval.o 
 all: ksh.exe
 
 %.o: %.c
-	gcc -c ${CFLAGS} -I${SRCDIR}/lib/libc/gen -o $@ $<
+	@echo -n " $@"
+	@gcc -c ${CFLAGS} -g -DNOPIE -o $@ $<
+
+misc.o: misc.c
+	@echo -n " $@"
+	@gcc -c ${CFLAGS} -g -DNOPIE -I${SRCDIR}/lib/libc/gen -o $@ $<
 
 ksh.exe: ${OBJECTS}
-	gcc ${LDFLAGS} -o $@ ${OBJECTS}
+	@echo done.
+	gcc -static -s ${CFLAGS} -o $@ ${OBJECTS}
 
 clean:
 	rm -f *.o *.exe
 
 install: ${DESTDIR}
-	ginstall ksh.exe ${DESTDIR}${BINDIR}/ksh
-	@cp -vu ksh.1 ${DESTDIR}${MANDIR}/man1/
-	@cp -vu sh.1 ${DESTDIR}${MANDIR}/man1/
+	@/bin/mkdir -p ${DESTDIR}${BINDIR}
+	${INSTALL} ksh ${DESTDIR}${BINDIR}/
+	@/bin/cp -vu ksh.1 ${DESTDIR}${MANDIR}/man1/
+	@/bin/cp -vu sh.1 ${DESTDIR}${MANDIR}/man1/
 	ln -f ${DESTDIR}${BINDIR}/ksh ${DESTDIR}${BINDIR}/sh
