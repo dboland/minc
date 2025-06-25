@@ -9,4 +9,5 @@ mount.sh
 *.out
 *.tgz
 *.so.*
+*.pdf
 openbsd/lib/libc/sys/*.S

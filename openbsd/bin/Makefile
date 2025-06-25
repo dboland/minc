@@ -1,67 +1,67 @@
 include ../../Makefile.inc
 
-OBJECTS=chmod.exe ln.exe arch.exe touch.exe \
-	mkdir.exe mv.exe rm.exe rmdir.exe uname.exe \
-	test.exe mknod.exe chown.exe chgrp.exe \
-	install.exe ls.exe cp.exe
+OBJECTS=chmod ln mkdir mv rm rmdir test mknod chown chgrp ls cp
 CFLAGS+=-DNOPIE -I${SRCDIR}/sys
 LBINDIR= ${PREFIX}/local/bin
+BINPATH= ${SRCDIR}/bin
 
-all: ${OBJECTS}
+all: ${BINPATH} ${OBJECTS}
+
+${BINPATH}:
+	@echo " ---------------------------------------------------"
+	@echo "| OpenBSD 'bin' directory ($@) not found. Make sure"
+	@echo "| you extracted this directory from the source archive."
+	@echo " ---------------------------------------------------"
+	@exit 1
 
 ${LBINDIR}: ${OBJECTS}
 	@/bin/mkdir -p ${LBINDIR}
 	/bin/cp -vu ${OBJECTS} ${LBINDIR}/
 
-uname.exe: ${SRCDIR}/usr.bin/uname/uname.c
+mknod: ${SRCDIR}/sbin/mknod/mknod.c
 	gcc -s -static ${CFLAGS} -o $@ $<
 
-arch.exe: ${SRCDIR}/usr.bin/arch/arch.c
+chmod: ${SRCDIR}/bin/chmod/chmod.c
 	gcc -s -static ${CFLAGS} -o $@ $<
 
-touch.exe: ${SRCDIR}/usr.bin/touch/touch.c
+chown: chmod.exe
+	/bin/cp -vu $< $@.exe
+
+chgrp: chmod.exe
+	/bin/cp -vu $< $@.exe
+
+ln: ${SRCDIR}/bin/ln/ln.c
 	gcc -s -static ${CFLAGS} -o $@ $<
 
-mknod.exe: ${SRCDIR}/sbin/mknod/mknod.c
+mkdir: ${SRCDIR}/bin/mkdir/mkdir.c
 	gcc -s -static ${CFLAGS} -o $@ $<
 
-chmod.exe: ${SRCDIR}/bin/chmod/chmod.c
+mv: ${SRCDIR}/bin/mv/mv.c
 	gcc -s -static ${CFLAGS} -o $@ $<
 
-chown.exe: chmod.exe
-	/bin/cp -vu $< $@
-
-chgrp.exe: chmod.exe
-	/bin/cp -vu $< $@
-
-ln.exe: ${SRCDIR}/bin/ln/ln.c
+rm: ${SRCDIR}/bin/rm/rm.c
 	gcc -s -static ${CFLAGS} -o $@ $<
 
-mkdir.exe: ${SRCDIR}/bin/mkdir/mkdir.c
+rmdir: ${SRCDIR}/bin/rmdir/rmdir.c
 	gcc -s -static ${CFLAGS} -o $@ $<
 
-mv.exe: ${SRCDIR}/bin/mv/mv.c
+test: ${SRCDIR}/bin/test/test.c
 	gcc -s -static ${CFLAGS} -o $@ $<
 
-rm.exe: ${SRCDIR}/bin/rm/rm.c
-	gcc -s -static ${CFLAGS} -o $@ $<
+ls:
+	gcc -c ${CFLAGS} -o main.o ${SRCDIR}/bin/ls/main.c
+	gcc -c ${CFLAGS} -o print.o ${SRCDIR}/bin/ls/print.c
+	gcc -c ${CFLAGS} -o cmp.o ${SRCDIR}/bin/ls/cmp.c
+	gcc -c ${CFLAGS} -o util.o ${SRCDIR}/bin/ls/util.c
+	gcc -c ${CFLAGS} -o ls.o ${SRCDIR}/bin/ls/ls.c
+	gcc -s -static ${CFLAGS} -o $@ main.o print.o cmp.o util.o ls.o -lutil
 
-rmdir.exe: ${SRCDIR}/bin/rmdir/rmdir.c
-	gcc -s -static ${CFLAGS} -o $@ $<
-
-test.exe: ${SRCDIR}/bin/test/test.c
-	gcc -s -static ${CFLAGS} -o $@ $<
-
-install.exe: ${SRCDIR}/usr.bin/xinstall/xinstall.c
-	gcc -s -static ${CFLAGS} -o $@ $<
-
-ls.exe:
-	@${MAKE} -C ls CFLAGS="${CFLAGS}" SRCDIR="${SRCDIR}"
-
-cp.exe:
-	@${MAKE} -C cp CFLAGS="${CFLAGS}" SRCDIR="${SRCDIR}"
+cp:
+	gcc -c ${CFLAGS} -o utils.o ${SRCDIR}/bin/cp/utils.c
+	gcc -c ${CFLAGS} -o cp.o ${SRCDIR}/bin/cp/cp.c
+	gcc -s -static ${CFLAGS} -o $@ utils.o cp.o
 
 install-local: ${LBINDIR}
 
 clean:
-	/bin/rm -f ${OBJECTS}
+	/bin/rm -f *.exe *.o

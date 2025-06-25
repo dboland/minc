@@ -6,7 +6,9 @@ HEADERS= ${INCDIR}/fcntl.h ${INCDIR}/stdarg.h ${INCDIR}/stdint.h \
 
 all: ${SRCDIR}
 	@${MAKE} -C lib
-	@${MAKE} -C bin
+	@${MAKE} -C bin all install-local
+	@${MAKE} -C usr.bin all install-local
+	@${MAKE} -C sbin
 
 ${SRCDIR}:
 	@echo " ---------------------------------------------------"
@@ -47,13 +49,12 @@ includes: ${DESTDIR}
 	@cp -rvu sys/sys ${DESTDIR}${INCDIR}/
 	@cp -rvu sys/arch/i386/include/* ${DESTDIR}${INCDIR}/machine/
 
-install-local:
-	@${MAKE} -C bin install-local
-
 install: ${DESTDIR}
 	@/bin/cp -rvu share/mk ${DESTDIR}${SHAREDIR}/
 	@${MAKE} -C lib install
+	@${MAKE} -C sbin install
 
 clean:
 	@${MAKE} -C lib clean
 	@${MAKE} -C bin clean
+	@${MAKE} -C sbin clean

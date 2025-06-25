@@ -56,7 +56,7 @@
 #include <sys/tty.h>
 #include <sys/termios.h>
 
-#include "../libposix/kern/systm.h"
+#include "../../libposix/kern/systm.h"
 
 #define _KERNEL
 #include <net/if.h>

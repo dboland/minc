@@ -1,8 +1,8 @@
 include ../../../Makefile.inc
 
-HEADERS= pthread.h
+HEADERS= ${INCDIR}/pthread.h
 
-%.h: ${SRCDIR}/lib/libpthread/include/%.h
-	/bin/cp -vu $< ${INCDIR}/
+${INCDIR}/pthread.h:
+	@/bin/cp -vu ${SRCDIR}/lib/libpthread/include/pthread.h $@
 
 install-local: ${HEADERS}
