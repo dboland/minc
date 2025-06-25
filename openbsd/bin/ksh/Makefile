@@ -30,15 +30,15 @@ OBJECTS= alloc.o c_ksh.o c_sh.o c_test.o c_ulimit.o edit.o 2021_emacs.o eval.o \
 all: ksh.exe
 
 %.o: %.c
-	@echo -n " $@"
+	@/bin/echo -n " $@"
 	@gcc -c ${CFLAGS} -g -DNOPIE -o $@ $<
 
 misc.o: misc.c
-	@echo -n " $@"
+	@/bin/echo -n " $@"
 	@gcc -c ${CFLAGS} -g -DNOPIE -I${SRCDIR}/lib/libc/gen -o $@ $<
 
 ksh.exe: ${OBJECTS}
-	@echo done.
+	@/bin/echo " done."
 	gcc -static -s ${CFLAGS} -o $@ ${OBJECTS}
 
 clean:

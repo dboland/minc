@@ -69,3 +69,4 @@ install:
 
 clean:
 	/bin/rm -f *.exe *.o
+	@${MAKE} -C ksh clean
