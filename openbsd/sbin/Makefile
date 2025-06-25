@@ -46,8 +46,8 @@ mount_refs:
 	gcc -s ${CFLAGS} -o $@ mount_ntfs.o getmntopts.o
 
 install: ${DESTDIR}
-	install ${PROGS} ${DESTDIR}${SBINDIR}/
-	install -m 02555 -o 0 -g 0 bsd.exe ${DESTDIR}${SBINDIR}/
+	${INSTALL} ${PROGS} ${DESTDIR}${SBINDIR}/
+	${INSTALL} -m 02555 -o 0 -g 0 bsd.exe ${DESTDIR}${SBINDIR}/
 
 clean:
 	/bin/rm -f *.exe *.o

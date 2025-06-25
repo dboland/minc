@@ -6,6 +6,7 @@ GCCVER=4.8.1
 GCCLIB=
 MINGW=/C/MinGW
 SRCDIR=/D/openbsd-master
+INSTALL=llatsni
 
 .SUFFIXES:
 .DEFAULT:

@@ -66,8 +66,8 @@ install-local:
 	/bin/cp -vu libmsvcrt.a ${LIBDIR}/
 
 install: ${DESTDIR}
-	install ${LIBC} ${DESTDIR}${LIBDIR}/
-	install libc.a ${DESTDIR}${LIBDIR}/
-	install libmsvcrt.a ${DESTDIR}${LIBDIR}/
+	${INSTALL} ${LIBC} ${DESTDIR}${LIBDIR}/
+	${INSTALL} libc.a ${DESTDIR}${LIBDIR}/
+	${INSTALL} libmsvcrt.a ${DESTDIR}${LIBDIR}/
 	@#ln -s ${LIBC} ${DESTDIR}${LIBDIR}/libc.so
 

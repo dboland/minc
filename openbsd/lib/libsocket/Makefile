@@ -52,7 +52,7 @@ install-local:
 	/bin/cp -vu libsocket.a ${LIBDIR}/
 
 install: ${DESTDIR}
-	install ${LIBSOCKET} ${DESTDIR}${LIBDIR}/
-	install libsocket.a ${DESTDIR}${LIBDIR}/
+	${INSTALL} ${LIBSOCKET} ${DESTDIR}${LIBDIR}/
+	${INSTALL} libsocket.a ${DESTDIR}${LIBDIR}/
 	@#${LN} -s ${LIBSOCKET} ${DESTDIR}${LIBDIR}/libsocket.so
 
