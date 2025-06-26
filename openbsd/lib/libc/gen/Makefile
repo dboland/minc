@@ -38,12 +38,16 @@ OBJECTS+= syslog_r.o syslog.o auth_subr.o login_cap.o authenticate.o
 .DEFAULT:
 
 all: ${OBJECTS}
+	@/bin/echo " done."
 
 %.o: ${SRCDIR}/lib/libc/gen/%.c
-	gcc -c ${CFLAGS} -I${SRCDIR}/sys -I${SRCDIR}/lib/libc/include -o $@ $<
+	@/bin/echo -n " $@"
+	@gcc -c ${CFLAGS} -I${SRCDIR}/sys -I${SRCDIR}/lib/libc/include -o $@ $<
 
 %.c.o: %.c
-	gcc -c ${CFLAGS} -I${SRCDIR}/sys -I../../../../include -o $@ $<
+	@/bin/echo -n " $@"
+	@gcc -c ${CFLAGS} -I${SRCDIR}/sys -I../../../../include -o $@ $<
 
 %.S.o: %.S
-	gcc -c ${CFLAGS} -I../arch/${ARCH} -o $@ $<
+	@/bin/echo -n " $@"
+	@gcc -c ${CFLAGS} -I../arch/${ARCH} -o $@ $<

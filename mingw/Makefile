@@ -2,7 +2,7 @@ include ../Makefile.inc
 
 LIBEXEC=${PREFIX}/libexec
 LIBS=libadvapi32.a libkernel32.a libshell32.a libuser32.a \
-	libmoldname.a libgmon.a
+	libmoldname.a libgmon.a libmsvcrt.a
 
 all: ${MINGW} ${LIBS} libiphlpapi.a
 	@${MAKE} -C gcc
@@ -63,6 +63,7 @@ install-local: ${MINGW} install-gcc install-ld ${LIBEXEC} ${LIBDIR}
 	@${MAKE} -C gcc install-local
 
 install:
+	${INSTALL} libmsvcrt.a ${DESTDIR}${LIBDIR}/
 	@${MAKE} -C gcc install
 	@${MAKE} -C bin install
 

@@ -9,10 +9,8 @@ IMPLIB= libc.dll.a
 OBJECTS= libc.o
 SHOBJECTS= $(shell /bin/ls arch/${ARCH}/*/*.o */*.o db/*/*.o)
 LIBROOT=../../..
-GCCLIB=${LIBROOT}/mingw/gcc
-TOOLDIR=${LIBROOT}/mingw/bin
-POSIXLIB=${LIBROOT}/libposix
 LIBC= libc.so.${RELEASE}
+GCCLIB= ${LIBDIR}/gcc/mingw32/${GCCVER}
 
 NLS=    C.msg Pig.msg da.ISO8859-1.msg da.UTF-8.msg de.ISO8859-1.msg \
         de.UTF-8.msg es.ISO8859-1.msg es.UTF-8.msg fi.ISO8859-1.msg \
@@ -31,22 +29,19 @@ all: objects lib
 libc.a:
 	ar cru $@ ${OBJECTS} ${SHOBJECTS}
 
-libmsvcrt.a: libmsvcrt.def
-	dlltool -d $< -l $@ -k
-
 version.o: version.rc
 	windres -DVERSION=\\\"${VERSION}\\\" -DRELEASE=\\\"${RELEASE}\\\" $< $@
 
 ${LIBC}: ${OBJECTS} version.o
 	${LD} ${LDFLAGS} -e _DllMainCRTStartup@12 --out-implib=${IMPLIB} \
-	-o $@ --image-base=${IMGBASE_LIBC} ${GCCLIB}/crt1.o ${OBJECTS} ${SHOBJECTS} version.o \
-	-L${GCCLIB} -L${POSIXLIB} -lgcc -lposix -lmsvcrt
+	-o $@ --image-base=${IMGBASE_LIBC} /usr/lib/dllcrt2.o ${OBJECTS} ${SHOBJECTS} version.o \
+	-L/usr/lib -L${GCCLIB} -lmingw32 -lmsvcrt -lgcc
 
 objects: arch.d quad.d stdlib.d citrus.d compat-43.d crypt.d db.d gdtoa.d gen.d \
 	hash.d locale.d regex.d stdio.d string.d termios.d time.d thread.d \
 	sys.d nls.d dlfcn.d gmon.d net.d
 
-lib: ${LIBC} libc.a libmsvcrt.a
+lib: ${LIBC} libc.a
 
 clean: objects-clean lib-clean
 
@@ -68,6 +63,5 @@ install-local:
 install: ${DESTDIR}
 	${INSTALL} ${LIBC} ${DESTDIR}${LIBDIR}/
 	${INSTALL} libc.a ${DESTDIR}${LIBDIR}/
-	${INSTALL} libmsvcrt.a ${DESTDIR}${LIBDIR}/
 	@#ln -s ${LIBC} ${DESTDIR}${LIBDIR}/libc.so
 

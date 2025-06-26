@@ -15,6 +15,8 @@ OBJECTS+= wcstof.o wcstold.o
 .DEFAULT:
 
 all: ${OBJECTS}
+	@/bin/echo " done."
 
 %.o: ${SRCDIR}/lib/libc/locale/%.c
-	gcc -c ${CFLAGS} -DLOCALE_CHARSETS="\"${LOCALECHARSETS}\"" -I${SRCDIR}/lib/libc/include -I${SRCDIR}/lib/libc/citrus -o $@ $<
+	@/bin/echo -n " $@"
+	@gcc -c ${CFLAGS} -DLOCALE_CHARSETS="\"${LOCALECHARSETS}\"" -I${SRCDIR}/lib/libc/include -I${SRCDIR}/lib/libc/citrus -o $@ $<
