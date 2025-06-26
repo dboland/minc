@@ -17,14 +17,14 @@ OBJECTS+= atexit.c.o
 .DEFAULT:
 
 all: ${OBJECTS}
-	@/bin/echo " done."
+	@/bin/echo "done."
 
 %.o: ${SRCDIR}/lib/libc/stdlib/%.c
-	@/bin/echo -n " $@"
+	@/bin/echo -n "$@ "
 	@gcc -c ${CFLAGS} -I${SRCDIR}/sys -I${SRCDIR}/lib/libc/include -o $@ $<
 
 %.c.o: %.c
-	@/bin/echo -n " $@"
+	@/bin/echo -n "$@ "
 	@gcc -c ${CFLAGS} -I../../../../include -I${SRCDIR}/stdlib -o $@ $<
 
 

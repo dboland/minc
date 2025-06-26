@@ -1,22 +1,18 @@
-include ../../../Makefile.inc
+ROOTDIR=../../..
+
+include ${ROOTDIR}/Makefile.inc
 
 RELEASE=75.0
-
-LIBROOT=../../..
-POSIXLIB=${LIBROOT}/libposix
-GCCLIB=${LIBROOT}/mingw/gcc
-TOOLDIR=${LIBROOT}/mingw/bin
-
-LDFLAGS= -shared -s
 LIBSOCKET= libsocket.so.${RELEASE}
 IMPLIB= libsocket.dll.a
+GCCDIR= ${LIBDIR}/gcc/mingw32/${GCCVER}
 
 all: objects lib
 
 lib: ${LIBSOCKET} libsocket.a
 
 crt1.o: crt1.c
-	gcc -c -g ${CFLAGS} -I../../include -I${LIBROOT}/include $<
+	gcc -c -g ${CFLAGS} -I${ROOTDIR}/include $<
 
 libsocket.a:
 	ar cru $@ $(shell ls */*.o)
@@ -28,12 +24,12 @@ ${IMPLIB}: libsocket.def
 	dlltool -d $< -D ${LIBSOCKET} -l $@
 
 ${LIBSOCKET}: crt1.o version.o
-	${LD} ${LDFLAGS} -e _DllMainCRTStartup@12 --out-implib=${IMPLIB} --disable-auto-import \
+	${LD} -s -shared ${LDFLAGS} -e _DllMainCRTStartup@12 --out-implib=${IMPLIB} \
 	-o $@ crt1.o --image-base=${IMGBASE_LIBSOCKET} $(shell /bin/ls */*.so) version.o \
-	-L${POSIXLIB} -L${GCCLIB} -L../libc -lposix -lc -lmsvcrt -lgcc
+	-L${LIBDIR} -L${GCCDIR} -lmingw32 -lmingwex -lmsvcrt -lgcc
 
 %.d: %
-	@${MAKE} -C $< SRCDIR="${SRCDIR}" CFLAGS="${CFLAGS} -DLIBSOCK_IMPORT= -I../../../../include -I${SRCDIR}/sys -I${SRCDIR}/lib/libc/include"
+	@${MAKE} -C $< ROOTDIR=${ROOTDIR}/.. SRCDIR=${SRCDIR} CFLAGS="${CFLAGS} -DLIBSOCK_IMPORT= -I${SRCDIR}/sys -I../../libc/include"
 
 objects: asr.d net.d rpc.d
 

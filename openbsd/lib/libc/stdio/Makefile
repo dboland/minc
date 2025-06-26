@@ -20,9 +20,9 @@ CFLAGS+=-DFLOATING_POINT -DPRINTF_WIDE_CHAR -DSCANF_WIDE_CHAR
 .DEFAULT:
 
 all: ${OBJECTS}
-	@/bin/echo " done."
+	@/bin/echo "done."
 
 %.o: ${SRCDIR}/lib/libc/stdio/%.c
-	@/bin/echo -n " $@"
+	@/bin/echo -n "$@ "
 	@gcc -c ${CFLAGS} -I${SRCDIR}/lib/libc/include -I${SRCDIR}/lib/libc/gdtoa -I${SRCDIR}/lib/libc/arch/${ARCH}/gdtoa -o $@ $<
 

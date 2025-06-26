@@ -4,9 +4,7 @@ RELEASE=12.1
 
 LIBUTIL=libutil.so.${RELEASE}
 IMPLIB=libutil.dll.a
-LIBROOT=../../..
-GCCLIB=${LIBROOT}/mingw/gcc
-POSIXLIB=${LIBROOT}/libposix
+GCCLIB= ${LIBDIR}/gcc/mingw32/${GCCVER}
 
 OBJECTS=bcrypt_pbkdf.o duid.o \
 	login_tty.o logout.o logwtmp.o pty.o \
@@ -26,21 +24,23 @@ CFLAGS+= -I${SRCDIR}/sys
 all: ${HEADERS} libutil.a
 
 %.o: ${SRCDIR}/lib/libutil/%.c
-	gcc -c ${CFLAGS} -I../../include -o $@ $<
+	@/bin/echo -n " $@"
+	@gcc -c ${CFLAGS} -o $@ $<
 
 %.h: ${SRCDIR}/lib/libutil/%.h
 	@/bin/cp -vu $< ${INCDIR}/
 
 pidfile.o: pidfile.c
-	gcc -c ${CFLAGS} -I../../include -o $@ $<
+	gcc -c ${CFLAGS} -o $@ $<
 
 libutil.a: ${OBJECTS}
+	@/bin/echo " done."
 	ar cru $@ ${OBJECTS}
 
 ${LIBUTIL}: ${OBJECTS}
-	${LD} -shared ${LDFLAGS} -s -o $@ -e _DllMainCRTStartup@12 \
-	--out-implib=${IMPLIB} ${GCCLIB}/crt1.o ${OBJECTS} \
-	-L/lib -L${GCCLIB} -lmsvcrt -lmingw32 -lmingwex -lsocket -lgcc
+	${LD} -s -shared ${LDFLAGS} -o $@ -e _DllMainCRTStartup@12 \
+	--out-implib=${IMPLIB} ${LIBDIR}/dllcrt2.o ${OBJECTS} \
+	-L${LIBDIR} -L${GCCLIB} -lmsvcrt -lmingw32 -lmingwex -lsocket -lgcc
 
 clean:
 	/bin/rm -f *.o *.a ${LIBUTIL}

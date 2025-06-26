@@ -19,10 +19,13 @@ SHOBJECTS=auth_none.so auth_unix.so  authunix_prot.so bindresvport.so \
 #SHOBJECTS+= pmap_rmt.so
 
 all: ${OBJECTS} ${SHOBJECTS}
+	@/bin/echo "done."
 
 %.o: ${SRCDIR}/lib/libc/rpc/%.c
+	@/bin/echo -n "$@ "
 	gcc -c ${CFLAGS} -DNOPIE -o $@ $<
 
 %.so: ${SRCDIR}/lib/libc/rpc/%.c
+	@/bin/echo -n "$@ "
 	gcc -c ${CFLAGS} -o $@ $<
 

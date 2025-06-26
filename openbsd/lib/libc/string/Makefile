@@ -12,9 +12,9 @@ OBJECTS=explicit_bzero.o memccpy.o memmem.o memrchr.o stpcpy.o stpncpy.o \
 .DEFAULT:
 
 all: ${OBJECTS}
-	@/bin/echo " done."
+	@/bin/echo "done."
 
 %.o: ${SRCDIR}/lib/libc/string/%.c
-	@/bin/echo -n " $@"
+	@/bin/echo -n "$@ "
 	@gcc -c ${CFLAGS} -I${SRCDIR}/lib/libc -I${SRCDIR}/lib/libc/include -o $@ $<
 

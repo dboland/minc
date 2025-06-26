@@ -51,6 +51,9 @@ while [ -n "$1" ]; do
 		-v|--verbose)
 			VERBOSE=yes
 			;;
+		-p|--prefix)
+			SOURCE="/mnt${SOURCE}"
+			;;
 		*)
 			TARGET="$1"
 			;;

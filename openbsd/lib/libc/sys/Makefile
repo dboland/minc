@@ -39,14 +39,14 @@ OBJECTS+= socket.o connect.o accept.o recvfrom.o sendto.o sendmsg.o recvmsg.o \
 .DEFAULT:
 
 all: source ${OBJECTS}
-	@/bin/echo " done."
+	@/bin/echo "done."
 
 %.o: %.S
-	@/bin/echo -n " $@"
+	@/bin/echo -n "$@ "
 	@gcc -c ${CFLAGS} -I../arch/${ARCH} -o $@ $<
 
 %.c.o: ${SRCDIR}/lib/libc/sys/%.c
-	@/bin/echo -n " $@"
+	@/bin/echo -n "$@ "
 	@gcc -c ${CFLAGS} -I../arch/${ARCH} -o $@ $<
 
 source:

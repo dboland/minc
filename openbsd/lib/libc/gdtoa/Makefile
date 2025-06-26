@@ -8,9 +8,11 @@ OBJECTS+= hdtoa.o ldtoa.o strtod.o strtord.o strtodg.o strtof.o gethex.o
 .DEFAULT:
 
 all: ${OBJECTS}
+	@/bin/echo "done."
 
 %.o: ${SRCDIR}/lib/libc/gdtoa/%.c
-	gcc -c ${CFLAGS} -I${SRCDIR}/lib/libc/arch/${ARCH}/gdtoa -o $@ $<
+	@/bin/echo -n "$@ "
+	@gcc -c ${CFLAGS} -I${SRCDIR}/lib/libc/arch/${ARCH}/gdtoa -o $@ $<
 
 clean:
 	rm -f *.o *.dll *.a

@@ -17,15 +17,20 @@ SHOBJECTS+= getaddrinfo.so gethostnamadr.so getnameinfo.so getnetnamadr.so \
 	sethostent.so
 
 all: ${OBJECTS} ${SHOBJECTS}
+	@/bin/echo "done."
 
 %.o: ${SRCDIR}/lib/libc/asr/%.c
-	gcc -c ${CFLAGS} -DNOPIE -DASR_OPT_HOSTALIASES -o $@ $<
+	@/bin/echo -n "$@ "
+	@gcc -c ${CFLAGS} -DNOPIE -DASR_OPT_HOSTALIASES -o $@ $<
 
 %.c.o: %.c
-	gcc -c ${CFLAGS} -DNOPIE -DASR_OPT_HOSTALIASES -I${SRCDIR}/lib/libc/asr -o $@ $<
+	@/bin/echo -n "$@ "
+	@gcc -c ${CFLAGS} -DNOPIE -DASR_OPT_HOSTALIASES -I${SRCDIR}/lib/libc/asr -o $@ $<
 
 %.so: ${SRCDIR}/lib/libc/asr/%.c
-	gcc -c ${CFLAGS} -DASR_OPT_HOSTALIASES -o $@ $<
+	@/bin/echo -n "$@ "
+	@gcc -c ${CFLAGS} -DASR_OPT_HOSTALIASES -o $@ $<
 
 %.c.so: %.c
-	gcc -c ${CFLAGS} -DASR_OPT_HOSTALIASES -I${SRCDIR}/lib/libc/asr -o $@ $<
+	@/bin/echo -n "$@ "
+	@gcc -c ${CFLAGS} -DASR_OPT_HOSTALIASES -I${SRCDIR}/lib/libc/asr -o $@ $<
