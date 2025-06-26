@@ -68,4 +68,3 @@ bsd_signal(int s, sig_t a)
 }
 
 __weak_alias(signal, _signal);
-//__weak_alias(bsd_signal, _signal);

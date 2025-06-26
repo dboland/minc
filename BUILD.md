@@ -21,7 +21,7 @@ above, you can get it yourself using cvs, but you can also use
 my copy (186Mb). Move this file to preferably the root of a disk 
 drive and extract it there:
 
-https://minc.commandlinerevolution.nl/source/openbsd-master-6.1.0.zip
+https://minc.commandlinerevolution.nl/openbsd-master-6.1.0.zip
 
 Most of the kernel can be built using a vanilla MinGW installation. 
 Open the Msys terminal, cd to the 'minc-devel' directory and make 
@@ -37,11 +37,9 @@ output. This means we are ready for Stage 2:
 ## Stage 2: build a minimal system
 
 A minimal system consists of the kernel, the BSD libc library, the 
-boot program, the shell and some utilities. These will be made by 
-the new system itself.
-
-To achieve this, you will need to unmount the /mingw directory. This is 
-done by running the mount.sh script:
+boot program, the shell and some utilities. These will be built by 
+the new system itself. To achieve this, you will need to unmount 
+the /mingw directory. This is done by running the mount.sh script:
 
 	./mount.sh minc
 

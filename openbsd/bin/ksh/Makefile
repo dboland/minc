@@ -38,7 +38,7 @@ misc.o: misc.c
 	@gcc -c ${CFLAGS} -g -DNOPIE -I${SRCDIR}/lib/libc/gen -o $@ $<
 
 ksh.exe: ${OBJECTS}
-	@/bin/echo " done."
+	@/bin/echo " - done."
 	gcc -static -s ${CFLAGS} -o $@ ${OBJECTS}
 
 clean:

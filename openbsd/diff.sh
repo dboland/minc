@@ -2,8 +2,7 @@
 
 VERBOSE=
 TARGET=
-SOURCE=/mnt/c/minc-devel/src-master
-PATTERN='*.[chS]'
+SOURCE=/d/openbsd-master
 
 diff_file()
 {
@@ -12,13 +11,20 @@ diff_file()
 	fi
 	diff -Naur "$SOURCE/$1" "$1" | sed "s:$SOURCE/::"
 }
+diff_list()
+{
+	while read -r file; do
+		if [[ $file == \#* ]]; then
+			continue
+		elif ! diff_file "$file"; then
+			exit 2
+		fi
+	done < $TARGET;
+}
 diff_dir()
 {
 	IFS="
 "
-	if [ "$VERBOSE" ]; then
-		echo "find $1 -type f -name $PATTERN"
-	fi
 	for file in $(find "$1" -type f); do
 		if [[ $file == *.o ]]; then
 			continue
@@ -34,7 +40,6 @@ do_usage()
 	echo "Options"
 	echo " -s,--source\t\t\tspecify source directory"
 	echo " -v,--verbose\t\t\tbe verbose"
-	echo " -p,--pattern PATTERN\t\tuse PATTERN for file extension"
 }
 
 while [ -n "$1" ]; do
@@ -46,10 +51,6 @@ while [ -n "$1" ]; do
 		-v|--verbose)
 			VERBOSE=yes
 			;;
-		-p|--pattern)
-			PATTERN="$2"
-			shift;
-			;;
 		*)
 			TARGET="$1"
 			;;
@@ -59,8 +60,12 @@ done
 
 if [ -z "$TARGET" ]; then
 	do_usage
+elif ! [ -d "$SOURCE" ]; then
+	echo "$SOURCE: No such directory"
 elif [ -d "$TARGET" ]; then
 	diff_dir "$TARGET"
+elif [[ $TARGET == *.master ]]; then
+	diff_list
 elif [ -f "$TARGET" ]; then
 	diff_file "$TARGET"
 fi
