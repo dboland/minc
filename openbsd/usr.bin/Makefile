@@ -1,6 +1,6 @@
 include ../../Makefile.inc
 
-OBJECTS= arch uname llatsni touch
+OBJECTS= arch uname touch install install.exe.manifest
 CFLAGS+=-DNOPIE -I${SRCDIR}/sys
 LBINDIR= ${PREFIX}/local/bin
 UBINPATH= ${SRCDIR}/usr.bin
@@ -27,11 +27,11 @@ arch: ${SRCDIR}/usr.bin/arch/arch.c
 touch: ${SRCDIR}/usr.bin/touch/touch.c
 	gcc -s -static ${CFLAGS} -o $@ $<
 
-# "install" seems to be a reserved word in Windows. When executed
-# with such name, Windows (XP and Vista) checks if user is elevated, 
+# In Windows, "install" seems to be a reserved word. When 
+# executed with such name, Vista checks if user is elevated, 
 # emits ERROR_ELEVATION_REQUIRED if not.
 
-llatsni: ${SRCDIR}/usr.bin/xinstall/xinstall.c
+install: ${SRCDIR}/usr.bin/xinstall/xinstall.c
 	gcc -s -static ${CFLAGS} -o $@ $<
 
 install-local: ${LBINDIR}
