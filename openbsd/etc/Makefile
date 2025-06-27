@@ -2,8 +2,16 @@ include ../../Makefile.inc
 
 FILES= fstab man.conf rc.conf rc.local syslog.conf inetd.conf rc netstart motd gettytab \
 	login.conf sysctl.conf ftpchroot ftpusers
+ETCPATH= ${SRCDIR}/etc
 
-all: ${FILES} ttys
+all: ${ETCPATH} ${FILES} ttys
+
+${ETCPATH}:
+	@echo " ---------------------------------------------------"
+	@echo "| OpenBSD 'etc' directory ($@) not found. Make sure"
+	@echo "| you extracted this directory from the source archive."
+	@echo " ---------------------------------------------------"
+	@exit 1
 
 ${DESTDIR}${ETCDIR}:
 	@mkdir -p ${DESTDIR}${ETCDIR}
@@ -13,9 +21,6 @@ ${DESTDIR}${ETCDIR}:
 
 %: ${SRCDIR}/etc/%
 	@/bin/cp -uv $< $@
-
-%.dir: ${SRCDIR}/etc/%
-	@/bin/cp -uvr $< ${DESTDIR}${ETCDIR}/
 
 fstab:
 	mkent fstab >fstab
