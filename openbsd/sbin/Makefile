@@ -22,7 +22,7 @@ ${SBINPATH}:
 
 ${LBINDIR}: ${PROGS}
 	@/bin/mkdir -p ${LBINDIR}
-	/bin/cp -vu mknod ${LBINDIR}/
+	/bin/cp -vu mknod mkent ${LBINDIR}/
 
 wrc: wrc.exe
 

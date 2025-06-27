@@ -9,6 +9,7 @@ all: ${SRCDIR}
 	@${MAKE} -C bin all install-local
 	@${MAKE} -C usr.bin all install-local
 	@${MAKE} -C sbin all install-local
+	@${MAKE} -C etc
 
 ${SRCDIR}:
 	@echo " ---------------------------------------------------"
@@ -53,6 +54,7 @@ install:
 	@${MAKE} -C bin install
 	@${MAKE} -C usr.bin install
 	@${MAKE} -C sbin install
+	@${MAKE} -C etc install
 
 clean:
 	@${MAKE} -C lib clean

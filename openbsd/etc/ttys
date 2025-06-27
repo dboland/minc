@@ -1,0 +1,8 @@
+#
+#	$OpenBSD: src/etc/etc.i386/ttys,v 1.18 2008/01/09 17:39:42 miod Exp $
+#
+# name	getty				type	status	comments
+#
+console	"/usr/libexec/getty std.9600"	interix	on	secure
+pccom0	"/usr/libexec/getty std.9600"	vt100	off	secure
+pccom1	"/usr/libexec/getty std.9600"	vt100	off	secure
