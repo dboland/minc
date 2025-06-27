@@ -45,8 +45,9 @@ clean:
 	rm -f *.o *.exe
 
 install: ${DESTDIR}
-	@/bin/mkdir -p ${DESTDIR}${BINDIR}
+	@mkdir -p ${DESTDIR}${BINDIR}
 	${INSTALL} ksh ${DESTDIR}${BINDIR}/
+	ln -f ${DESTDIR}${BINDIR}/ksh ${DESTDIR}${BINDIR}/sh
+	@mkdir -p ${DESTDIR}${MANDIR}/man1
 	/bin/cp -vu ksh.1 ${DESTDIR}${MANDIR}/man1/
 	/bin/cp -vu sh.1 ${DESTDIR}${MANDIR}/man1/
-	ln -f ${DESTDIR}${BINDIR}/ksh ${DESTDIR}${BINDIR}/sh

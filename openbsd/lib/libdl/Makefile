@@ -31,6 +31,7 @@ install-local: ${LIBEXEC}
 	/bin/cp -vu ${IMPLIB} ${LIBDIR}/
 
 install: ${DESTDIR}
+	@mkdir -p ${DESTDIR}${LIBEXEC}
 	${INSTALL} ld.so ${DESTDIR}${LIBEXEC}/
 	${INSTALL} ${IMPLIB} ${DESTDIR}${LIBDIR}/libdl.a
 

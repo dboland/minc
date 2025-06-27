@@ -63,6 +63,7 @@ install-local:
 	/bin/cp -vu libc.a ${LIBDIR}/
 
 install: ${DESTDIR}
+	@mkdir -p ${DESTDIR}${LIBDIR}
 	${INSTALL} ${LIBC} ${DESTDIR}${LIBDIR}/
 	${INSTALL} libc.a ${DESTDIR}${LIBDIR}/
 	@#ln -s ${LIBC} ${DESTDIR}${LIBDIR}/libc.so
