@@ -4,7 +4,9 @@ OBJECTS=htonl.o htons.o ntohl.o ntohs.o
 .DEFAULT:
 
 all: ${OBJECTS}
+	@/bin/echo "done."
 
-%.o: ${SRCDIR}/lib/libc/arch/i386/net/%.S
-	gcc -c ${CFLAGS} -o $@ $<
+%.o: ${SRCDIR}/lib/libc/arch/${ARCH}/net/%.S
+	@/bin/echo -n "$@ "
+	@gcc -c ${CFLAGS} -o $@ $<
 

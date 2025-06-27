@@ -6,5 +6,5 @@ OBJECTS=asctime.o difftime.o localtime.o strftime.o strptime.o wcsftime.o
 all: ${OBJECTS}
 
 %.o: ${SRCDIR}/lib/libc/time/%.c
-	gcc -c ${CFLAGS} -I${SRCDIR}/lib/libc/include -o $@ $<
+	gcc -c ${CFLAGS} -I../include -o $@ $<
 

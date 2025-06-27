@@ -4,7 +4,6 @@ include ${ROOTDIR}/Makefile.inc
 
 RELEASE=75.0
 CFLAGS+= -g -DNOPIE
-LDFLAGS+= -shared -s
 IMPLIB= libc.dll.a
 OBJECTS= libc.o
 SHOBJECTS= $(shell /bin/ls arch/${ARCH}/*/*.o */*.o db/*/*.o)
@@ -26,19 +25,20 @@ all: include objects lib
 	gcc -c ${CFLAGS} -I${ROOTDIR}/include -o $@ $<
 
 libc.a:
-	ar cru $@ ${OBJECTS} ${SHOBJECTS}
+	@/bin/echo "Making static library $@"
+	@ar cru $@ ${OBJECTS} ${SHOBJECTS}
 
 version.o: version.rc
 	windres -DVERSION=\\\"${VERSION}\\\" -DRELEASE=\\\"${RELEASE}\\\" $< $@
 
 ${LIBC}: ${OBJECTS} version.o
-	${LD} ${LDFLAGS} -e _DllMainCRTStartup@12 --out-implib=${IMPLIB} \
+	${LD} -shared -s ${LDFLAGS} -e _DllMainCRTStartup@12 --out-implib=${IMPLIB} \
 	-o $@ --image-base=${IMGBASE_LIBC} /usr/lib/dllcrt2.o ${OBJECTS} ${SHOBJECTS} version.o \
 	-L${LIBDIR} -L${GCCDIR} -lmingw32 -lmsvcrt -lgcc
 
 include:
 	/bin/cp -ru ${SRCDIR}/lib/libc/include .
-	/bin/patch -p 0 -d . <include.patch
+	/bin/patch -p 2 -d . <libc.patch
 
 objects: arch.d quad.d stdlib.d citrus.d compat-43.d crypt.d db.d gdtoa.d gen.d \
 	hash.d locale.d regex.d stdio.d string.d termios.d time.d thread.d \

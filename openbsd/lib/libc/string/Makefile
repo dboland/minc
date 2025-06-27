@@ -16,5 +16,5 @@ all: ${OBJECTS}
 
 %.o: ${SRCDIR}/lib/libc/string/%.c
 	@/bin/echo -n "$@ "
-	@gcc -c ${CFLAGS} -I${SRCDIR}/lib/libc -I${SRCDIR}/lib/libc/include -o $@ $<
+	@gcc -c ${CFLAGS} -I../include -I${SRCDIR}/lib/libc -o $@ $<
 

@@ -15,7 +15,8 @@ crt1.o: crt1.c
 	gcc -c -g ${CFLAGS} -I${ROOTDIR}/include $<
 
 libsocket.a:
-	ar cru $@ $(shell ls */*.o)
+	@/bin/echo "Making static library $@"
+	@ar cru $@ $(shell ls */*.o)
 
 version.o: version.rc
 	windres -DVERSION=\\\"${VERSION}\\\" -DRELEASE=\\\"${RELEASE}\\\" $< $@

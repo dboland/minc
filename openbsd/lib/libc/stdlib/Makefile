@@ -21,10 +21,10 @@ all: ${OBJECTS}
 
 %.o: ${SRCDIR}/lib/libc/stdlib/%.c
 	@/bin/echo -n "$@ "
-	@gcc -c ${CFLAGS} -I${SRCDIR}/sys -I${SRCDIR}/lib/libc/include -o $@ $<
+	@gcc -c ${CFLAGS} -I${SRCDIR}/sys -I../include -o $@ $<
 
 %.c.o: %.c
 	@/bin/echo -n "$@ "
-	@gcc -c ${CFLAGS} -I../../../../include -I${SRCDIR}/stdlib -o $@ $<
+	@gcc -c ${CFLAGS} -I${ROOTDIR}/include -I${SRCDIR}/stdlib -o $@ $<
 
 

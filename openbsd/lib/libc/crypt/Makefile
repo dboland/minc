@@ -6,5 +6,5 @@ OBJECTS=crypt.o crypt2.o cryptutil.o blowfish.o bcrypt.o arc4random.o
 all: ${OBJECTS}
 
 %.o: ${SRCDIR}/lib/libc/crypt/%.c
-	gcc -c ${CFLAGS} -I${SRCDIR}/sys -I${SRCDIR}/lib/libc/include -o $@ $<
+	gcc -c ${CFLAGS} -I${SRCDIR}/sys -I../include -o $@ $<
 

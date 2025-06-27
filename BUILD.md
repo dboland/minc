@@ -43,7 +43,7 @@ the /mingw directory. This is done by running the mount.sh script:
 
 	./mount.sh minc
 
-Now you can finish the build:
+To finish the build:
 
 	make all
 

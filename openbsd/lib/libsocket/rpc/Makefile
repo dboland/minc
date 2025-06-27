@@ -23,9 +23,9 @@ all: ${OBJECTS} ${SHOBJECTS}
 
 %.o: ${SRCDIR}/lib/libc/rpc/%.c
 	@/bin/echo -n "$@ "
-	gcc -c ${CFLAGS} -DNOPIE -o $@ $<
+	@gcc -c ${CFLAGS} -DNOPIE -o $@ $<
 
 %.so: ${SRCDIR}/lib/libc/rpc/%.c
 	@/bin/echo -n "$@ "
-	gcc -c ${CFLAGS} -o $@ $<
+	@gcc -c ${CFLAGS} -o $@ $<
 

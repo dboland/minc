@@ -19,4 +19,4 @@ all: ${OBJECTS}
 
 %.o: ${SRCDIR}/lib/libc/locale/%.c
 	@/bin/echo -n "$@ "
-	@gcc -c ${CFLAGS} -DLOCALE_CHARSETS="\"${LOCALECHARSETS}\"" -I${SRCDIR}/lib/libc/include -I${SRCDIR}/lib/libc/citrus -o $@ $<
+	@gcc -c ${CFLAGS} -DLOCALE_CHARSETS="\"${LOCALECHARSETS}\"" -I../include -I${SRCDIR}/lib/libc/citrus -o $@ $<

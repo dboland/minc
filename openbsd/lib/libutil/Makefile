@@ -24,7 +24,7 @@ CFLAGS+= -I${SRCDIR}/sys
 all: ${HEADERS} libutil.a
 
 %.o: ${SRCDIR}/lib/libutil/%.c
-	@/bin/echo -n " $@"
+	@/bin/echo -n "$@ "
 	@gcc -c ${CFLAGS} -o $@ $<
 
 %.h: ${SRCDIR}/lib/libutil/%.h
@@ -34,7 +34,7 @@ pidfile.o: pidfile.c
 	gcc -c ${CFLAGS} -o $@ $<
 
 libutil.a: ${OBJECTS}
-	@/bin/echo " done."
+	@/bin/echo "done."
 	ar cru $@ ${OBJECTS}
 
 ${LIBUTIL}: ${OBJECTS}

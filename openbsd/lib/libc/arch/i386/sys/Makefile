@@ -6,9 +6,12 @@ OBJECTS+=_exit.S.o _getlogin.S.o _setlogin.S.o
 .DEFAULT:
 
 all: ${OBJECTS}
+	@/bin/echo "done."
 
 %.o: ${SRCDIR}/lib/libc/arch/${ARCH}/sys/%.S
-	gcc -c ${CFLAGS} -o $@ $<
+	@/bin/echo -n "$@ "
+	@gcc -c ${CFLAGS} -o $@ $<
 
 %.S.o: %.S
-	gcc -c ${CFLAGS} -I.. -o $@ $<
+	@/bin/echo -n "$@ "
+	@gcc -c ${CFLAGS} -I.. -o $@ $<
