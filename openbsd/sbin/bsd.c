@@ -251,9 +251,9 @@ single(void)
 	fs_unmount();
 	fs_mount();
 	sysctl(mib, 2, NULL, NULL, &level, sizeof(int));
-	close(0);
-	close(1);
-	close(2);
+//	close(0);
+//	close(1);
+//	close(2);
 	(void) revoke(_PATH_CONSOLE);
 	setsid();
 	if (getty(_PATH_CONSOLE) < 0){

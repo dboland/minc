@@ -30,6 +30,7 @@ BINDIR=/bin
 ETCDIR=/etc
 SBINDIR=/sbin
 UBINDIR=${PREFIX}/bin
+USBINDIR=${PREFIX}/sbin
 LIBDIR=${PREFIX}/lib
 INCDIR=${PREFIX}/include
 SHAREDIR=${PREFIX}/share

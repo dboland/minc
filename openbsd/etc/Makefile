@@ -1,10 +1,10 @@
 include ../../Makefile.inc
 
-FILES= fstab man.conf rc.conf rc.local syslog.conf inetd.conf rc netstart motd gettytab \
+FILES= man.conf rc.conf rc.local syslog.conf inetd.conf rc netstart motd gettytab \
 	login.conf sysctl.conf ftpchroot ftpusers
 ETCPATH= ${SRCDIR}/etc
 
-all: ${ETCPATH} ${FILES} ttys
+all: ${ETCPATH} ${FILES} ttys MAKEDEV
 
 ${ETCPATH}:
 	@echo " ---------------------------------------------------"
@@ -15,15 +15,11 @@ ${ETCPATH}:
 
 ${DESTDIR}${ETCDIR}:
 	@mkdir -p ${DESTDIR}${ETCDIR}
-	${INSTALL} ${FILES} ${DESTDIR}${ETCDIR}/
-	${INSTALL} ttys ${DESTDIR}${ETCDIR}/
+	${INSTALL} ${FILES} ttys MAKEDEV ${DESTDIR}${ETCDIR}/
 	cp -R ${SRCDIR}/etc/rc.d ${DESTDIR}${ETCDIR}/
 
 %: ${SRCDIR}/etc/%
 	@/bin/cp -uv $< $@
-
-fstab:
-	mkent fstab >fstab
 
 login.conf: ${SRCDIR}/etc/etc.${ARCH}/login.conf
 	@/bin/cp -uv $< $@

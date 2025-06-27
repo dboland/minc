@@ -9,6 +9,7 @@ all: ${SRCDIR}
 	@${MAKE} -C bin all install-local
 	@${MAKE} -C usr.bin all install-local
 	@${MAKE} -C sbin all install-local
+	@${MAKE} -C usr.sbin
 	@${MAKE} -C etc
 
 ${SRCDIR}:
@@ -54,6 +55,7 @@ install:
 	@${MAKE} -C bin install
 	@${MAKE} -C usr.bin install
 	@${MAKE} -C sbin install
+	@${MAKE} -C usr.sbin install
 	@${MAKE} -C etc install
 
 clean:
@@ -61,3 +63,5 @@ clean:
 	@${MAKE} -C bin clean
 	@${MAKE} -C usr.bin clean
 	@${MAKE} -C sbin clean
+	@${MAKE} -C usr.sbin clean
+	@${MAKE} -C etc clean

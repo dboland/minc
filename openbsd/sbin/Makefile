@@ -22,7 +22,7 @@ ${SBINPATH}:
 
 ${LBINDIR}: ${PROGS}
 	@/bin/mkdir -p ${LBINDIR}
-	/bin/cp -vu mknod mkent ${LBINDIR}/
+	/bin/cp -vu mknod ${LBINDIR}/
 
 wrc: wrc.exe
 
@@ -59,6 +59,7 @@ install: ${DESTDIR}
 	@mkdir -p ${DESTDIR}${SBINDIR}
 	${INSTALL} ${PROGS} ${DESTDIR}${SBINDIR}/
 	${INSTALL} -m 02555 -o 0 -g 0 bsd.exe ${DESTDIR}${SBINDIR}/
+	${INSTALL} -m 00750 -o 0 -g 0 setup.sh ${DESTDIR}${SBINDIR}/
 
 clean:
 	/bin/rm -f *.exe *.o

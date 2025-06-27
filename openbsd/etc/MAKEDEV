@@ -1,0 +1,256 @@
+# Main bus #
+
+mknod /dev/pci0 b 0 40
+mknod /dev/pci1 b 0 41
+mknod /dev/pci2 b 0 42
+mknod /dev/pci3 b 0 43
+
+# CPU device #
+
+mknod /dev/mem c 1 1
+mknod /dev/kmem c 1 2
+mknod /dev/null c 1 3
+
+mknod /dev/urandom c 1 6
+mknod /dev/random c 1 7
+
+mknod /dev/stdin c 1 9
+mknod /dev/stdout c 1 10
+mknod /dev/stderr c 1 11
+mknod /dev/swap b 1 12
+
+mknod /dev/rd0 b 1 24
+mknod /dev/rd1 b 1 25
+mknod /dev/rd2 b 1 26
+mknod /dev/rd3 b 1 27
+
+mknod /dev/cpu0 c 1 32
+mknod /dev/cpu1 c 1 33
+mknod /dev/cpu2 c 1 34
+mknod /dev/cpu3 c 1 35
+mknod /dev/cpu4 c 1 36
+mknod /dev/cpu5 c 1 37
+mknod /dev/cpu6 c 1 38
+mknod /dev/cpu7 c 1 39
+
+# Disk device #
+
+mknod /dev/scsi0 b 2 8
+mknod /dev/scsi1 b 2 9
+mknod /dev/scsi2 b 2 10
+mknod /dev/scsi3 b 2 11
+
+mknod /dev/wdc0 b 2 16
+mknod /dev/wdc1 b 2 17
+mknod /dev/wdc2 b 2 18
+mknod /dev/wdc3 b 2 19
+
+mknod /dev/usb0 b 2 24
+mknod /dev/usb1 b 2 25
+mknod /dev/usb2 b 2 26
+mknod /dev/usb3 b 2 27
+
+mknod /dev/fdc0 b 2 32
+mknod /dev/fdc1 b 2 33
+mknod /dev/fdc2 b 2 34
+mknod /dev/fdc3 b 2 35
+
+mknod /dev/ahci0 b 2 40
+mknod /dev/ahci1 b 2 41
+mknod /dev/ahci2 b 2 42
+mknod /dev/ahci3 b 2 43
+
+# Network device #
+
+mknod /dev/eth0 c 3 28
+mknod /dev/eth1 c 3 29
+mknod /dev/eth2 c 3 30
+mknod /dev/eth3 c 3 31
+mknod /dev/eth4 c 3 32
+mknod /dev/eth5 c 3 33
+mknod /dev/eth6 c 3 34
+mknod /dev/eth7 c 3 35
+
+mknod /dev/wlan0 c 3 36
+mknod /dev/wlan1 c 3 37
+mknod /dev/wlan2 c 3 38
+mknod /dev/wlan3 c 3 39
+mknod /dev/wlan4 c 3 40
+mknod /dev/wlan5 c 3 41
+mknod /dev/wlan6 c 3 42
+mknod /dev/wlan7 c 3 43
+
+mknod /dev/smb0 b 3 64
+mknod /dev/smb1 b 3 65
+mknod /dev/smb2 b 3 66
+mknod /dev/smb3 b 3 67
+
+# Media device #
+
+mknod /dev/mt0 c 4 8
+mknod /dev/mt1 c 4 9
+mknod /dev/mt2 c 4 10
+mknod /dev/mt3 c 4 11
+
+mknod /dev/uvideo0 c 4 24
+mknod /dev/uvideo1 c 4 25
+mknod /dev/uvideo2 c 4 26
+mknod /dev/uvideo3 c 4 27
+
+mknod /dev/audio0 c 4 40
+mknod /dev/audio1 c 4 41
+mknod /dev/audio2 c 4 42
+mknod /dev/audio3 c 4 43
+
+# Serial device #
+
+mknod /dev/tty c 5 0
+mknod /dev/console c 5 1
+mknod /dev/ptm c 5 2
+mknod /dev/printk c 5 3
+mknod /dev/input c 5 4
+mknod /dev/screen c 5 5
+
+mknod /dev/pty0 c 5 8
+mknod /dev/pty1 c 5 9
+mknod /dev/pty2 c 5 10
+mknod /dev/pty3 c 5 11
+mknod /dev/pty4 c 5 12
+mknod /dev/pty5 c 5 13
+mknod /dev/pty6 c 5 14
+mknod /dev/pty7 c 5 15
+mknod /dev/pty8 c 5 16
+mknod /dev/pty9 c 5 17
+mknod /dev/pty10 c 5 18
+mknod /dev/pty11 c 5 19
+mknod /dev/pty12 c 5 20
+mknod /dev/pty13 c 5 21
+mknod /dev/pty14 c 5 22
+mknod /dev/pty15 c 5 23
+
+mknod /dev/pccom0 c 5 32
+mknod /dev/pccom1 c 5 33
+mknod /dev/pccom2 c 5 34
+mknod /dev/pccom3 c 5 35
+
+# Printer device #
+
+mknod /dev/ulpt0 c 6 24
+mknod /dev/ulpt1 c 6 25
+mknod /dev/ulpt2 c 6 26
+mknod /dev/ulpt3 c 6 27
+
+mknod /dev/parallel0 c 6 32
+mknod /dev/parallel1 c 6 33
+mknod /dev/parallel2 c 6 34
+mknod /dev/parallel3 c 6 35
+
+# Display device #
+
+mknod /dev/wsdisplay0 c 7 0
+mknod /dev/wsdisplay1 c 7 1
+mknod /dev/wsdisplay2 c 7 2
+mknod /dev/wsdisplay3 c 7 3
+
+mknod /dev/vga0 c 7 40
+mknod /dev/vga1 c 7 41
+mknod /dev/vga2 c 7 42
+mknod /dev/vga3 c 7 43
+
+# Keyboard device #
+
+mknod /dev/wskbd0 c 8 0
+mknod /dev/wskbd1 c 8 1
+mknod /dev/wskbd2 c 8 2
+mknod /dev/wskbd3 c 8 3
+
+mknod /dev/ukbd0 c 8 24
+mknod /dev/ukbd1 c 8 25
+mknod /dev/ukbd2 c 8 26
+mknod /dev/ukbd3 c 8 27
+
+mknod /dev/comkbd0 c 8 32
+mknod /dev/comkbd1 c 8 33
+mknod /dev/comkbd2 c 8 34
+mknod /dev/comkbd3 c 8 35
+
+# Mouse device #
+
+mknod /dev/wsmouse0 c 9 0
+mknod /dev/wsmouse1 c 9 1
+mknod /dev/wsmouse2 c 9 2
+mknod /dev/wsmouse3 c 9 3
+
+mknod /dev/ums0 c 9 24
+mknod /dev/ums1 c 9 25
+mknod /dev/ums2 c 9 26
+mknod /dev/ums3 c 9 27
+
+mknod /dev/comms0 c 9 32
+mknod /dev/comms1 c 9 33
+mknod /dev/comms2 c 9 34
+mknod /dev/comms3 c 9 35
+
+# Storage device #
+
+mknod /dev/vol0 b 10 0
+mknod /dev/vol1 b 10 1
+mknod /dev/vol2 b 10 2
+mknod /dev/vol3 b 10 3
+mknod /dev/vol4 b 10 4
+mknod /dev/vol5 b 10 5
+mknod /dev/vol6 b 10 6
+mknod /dev/vol7 b 10 7
+mknod /dev/vol8 b 10 8
+mknod /dev/vol9 b 10 9
+mknod /dev/vol10 b 10 10
+mknod /dev/vol11 b 10 11
+mknod /dev/vol12 b 10 12
+mknod /dev/vol13 b 10 13
+mknod /dev/vol14 b 10 14
+mknod /dev/vol15 b 10 15
+
+mknod /dev/cd0 b 10 16
+mknod /dev/cd1 b 10 17
+mknod /dev/cd2 b 10 18
+mknod /dev/cd3 b 10 19
+
+mknod /dev/fd0 b 10 32
+mknod /dev/fd1 b 10 33
+mknod /dev/fd2 b 10 34
+mknod /dev/fd3 b 10 35
+
+mknod /dev/root b 10 64
+
+# USB device #
+
+mknod /dev/uhub0 c 11 24
+mknod /dev/uhub1 c 11 25
+mknod /dev/uhub2 c 11 26
+mknod /dev/uhub3 c 11 27
+mknod /dev/uhub4 c 11 28
+mknod /dev/uhub5 c 11 29
+mknod /dev/uhub6 c 11 30
+mknod /dev/uhub7 c 11 31
+mknod /dev/uhub8 c 11 32
+mknod /dev/uhub9 c 11 33
+mknod /dev/uhub10 c 11 34
+mknod /dev/uhub11 c 11 35
+mknod /dev/uhub12 c 11 36
+mknod /dev/uhub13 c 11 37
+mknod /dev/uhub14 c 11 38
+mknod /dev/uhub15 c 11 39
+
+mknod /dev/uhci0 c 11 40
+mknod /dev/uhci1 c 11 41
+mknod /dev/uhci2 c 11 42
+mknod /dev/uhci3 c 11 43
+
+# HID device #
+
+mknod /dev/ehci0 c 12 40
+mknod /dev/ehci1 c 12 41
+mknod /dev/ehci2 c 12 42
+mknod /dev/ehci3 c 12 43
+
+dev_mkdb
