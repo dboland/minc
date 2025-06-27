@@ -37,7 +37,7 @@ ${LIBC}: ${OBJECTS} version.o
 	-L${LIBDIR} -L${GCCDIR} -lmingw32 -lmsvcrt -lgcc
 
 include:
-	/bin/cp -ru ${SRCDIR}/lib/libc/include .
+	/bin/cp -rvu ${SRCDIR}/lib/libc/include .
 	/bin/patch -p 2 -d . <libc.patch
 
 objects: arch.d quad.d stdlib.d citrus.d compat-43.d crypt.d db.d gdtoa.d gen.d \

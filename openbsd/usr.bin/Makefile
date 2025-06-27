@@ -38,5 +38,10 @@ install.exe: ${SRCDIR}/usr.bin/xinstall/xinstall.c
 
 install-local: ${LBINDIR}
 
+install: ${DESTDIR}
+	@mkdir -p ${DESTDIR}${UBINDIR}
+	${INSTALL} ${OBJECTS} ${DESTDIR}${UBINDIR}/
+	${INSTALL} install ${DESTDIR}${UBINDIR}/
+
 clean:
 	/bin/rm -f *.exe *.o

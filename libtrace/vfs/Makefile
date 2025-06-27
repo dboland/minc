@@ -7,6 +7,8 @@ OBJECTS += vfs_CAP_CONTROL.o vfs_VNODE.o vfs_NAMEI.o vfs_DEVICE.o vfs_MOUNT.o \
 	vfs_ACCESS.o vfs_NETFLAGS.o vfs_CFDATA.o
 
 all: ${OBJECTS}
+	@/bin/echo "done."
 
 %.o: %.c
-	gcc -c ${CFLAGS} -I../../include -o $@ $<
+	@/bin/echo "$@ "
+	@gcc -c ${CFLAGS} -I../../include -o $@ $<

@@ -8,7 +8,7 @@ all: ${SRCDIR}
 	@${MAKE} -C lib
 	@${MAKE} -C bin all install-local
 	@${MAKE} -C usr.bin all install-local
-	@${MAKE} -C sbin
+	@${MAKE} -C sbin all install-local
 
 ${SRCDIR}:
 	@echo " ---------------------------------------------------"
@@ -21,7 +21,7 @@ ${MACHINEDIR}:
 	/bin/mkdir -p ${MACHINEDIR}
 	/bin/cp -ru ${SRCDIR}/include/* ${INCDIR}/
 	/bin/cp -ru ${SRCDIR}/sys/sys ${INCDIR}/
-	/bin/cp -ru ${SRCDIR}/sys/arch/i386/include/* ${MACHINEDIR}/
+	/bin/cp -ru ${SRCDIR}/sys/arch/${ARCH}/include/* ${MACHINEDIR}/
 	/bin/patch -p 0 -d ${PREFIX} <include.patch
 
 ${INCDIR}/fcntl.h:
@@ -42,18 +42,20 @@ ${INCDIR}/syslog.h:
 ${INCDIR}/termios.h:
 	@/bin/cp -vu termios.h ${INCDIR}/
 
-includes-local: ${MACHINEDIR} ${HEADERS}
+includes-local: ${SRCDIR} ${MACHINEDIR} ${HEADERS}
 
 includes: ${DESTDIR}
-	@/bin/mkdir -p ${DESTDIR}${INCDIR}
+	@mkdir -p ${DESTDIR}${INCDIR}
 	cp -ru ${INCDIR}/* ${DESTDIR}${INCDIR}/
 
 install:
 	@${MAKE} -C lib install
 	@${MAKE} -C bin install
+	@${MAKE} -C usr.bin install
 	@${MAKE} -C sbin install
 
 clean:
 	@${MAKE} -C lib clean
 	@${MAKE} -C bin clean
+	@${MAKE} -C usr.bin clean
 	@${MAKE} -C sbin clean

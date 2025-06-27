@@ -8,7 +8,7 @@ OBJECTS=md5hl.o rmd160hl.o sha1hl.o sha224hl.o sha256hl.o sha384hl.o sha512hl.o 
 all: ${HELPER} ${OBJECTS}
 
 %.c: ${SRCDIR}/lib/libc/hash/%.c
-	/bin/cp $< $@
+	/bin/cp -u $< $@
 
 %.o: %.c
 	gcc -c ${CFLAGS} -I${SRCDIR}/sys -o $@ $<

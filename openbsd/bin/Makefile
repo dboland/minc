@@ -1,6 +1,6 @@
 include ../../Makefile.inc
 
-OBJECTS= chmod ln mkdir mv rm rmdir test mknod chown chgrp ls cp
+OBJECTS= chmod ln mkdir mv rm rmdir test chown chgrp ls cp
 CFLAGS+= -DNOPIE -I${SRCDIR}/sys
 LBINDIR= ${PREFIX}/local/bin
 BINPATH= ${SRCDIR}/bin
@@ -18,9 +18,6 @@ ${BINPATH}:
 ${LBINDIR}: ${OBJECTS}
 	@/bin/mkdir -p ${LBINDIR}
 	/bin/cp -vu ${OBJECTS} ${LBINDIR}/
-
-mknod: ${SRCDIR}/sbin/mknod/mknod.c
-	gcc -s -static ${CFLAGS} -o $@ $<
 
 chmod: ${SRCDIR}/bin/chmod/chmod.c
 	gcc -s -static ${CFLAGS} -o $@ $<
@@ -65,6 +62,8 @@ cp:
 install-local: ${LBINDIR}
 
 install:
+	@mkdir -p ${DESTDIR}${BINDIR}
+	${INSTALL} ${OBJECTS} ${DESTDIR}${BINDIR}/
 	@${MAKE} -C ksh install
 
 clean:
