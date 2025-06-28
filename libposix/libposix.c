@@ -28,11 +28,9 @@
  *
  */
 
-#include <sys/stdarg.h>
-#include <sys/stdint.h>
-
+#include <stdarg.h>
+#include <stdint.h>
 #include <wchar.h>
-#include <ctype.h>
 
 #include "win/windows.h"		/* minimal Win32 */
 #include "win/winsock2.h"		/* minimal Windows Sockets v.2 */

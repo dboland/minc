@@ -157,15 +157,15 @@ mk_passwd(FILE *stream)
 	char buf[WIN_PATH_MAX];
 	size_t size = WIN_PATH_MAX;
 
-	mib[3] = WIN_ROOT_UID;
+	mib[3] = ROOT_UID;
 	if (!sysctl(mib, 4, buf, &size, NULL, 0)){
 		fprintf(stream, "%s\n", buf);
 	}
-	mib[3] = WIN_DAEMON_UID;
+	mib[3] = DAEMON_UID;
 	if (!sysctl(mib, 4, buf, &size, NULL, 0)){
 		fprintf(stream, "%s\n", buf);
 	}
-	mib[3] = WIN_ROOT_GID;
+	mib[3] = ROOT_GID;
 	if (!sysctl(mib, 4, buf, &size, NULL, 0)){
 		fprintf(stream, "%s\n", buf);
 	}

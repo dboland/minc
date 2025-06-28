@@ -9,5 +9,5 @@ all: ${OBJECTS}
 	@/bin/echo "done."
 
 %.o: %.c
-	@/bin/echo "$@ "
+	@/bin/echo -n "$@ "
 	@gcc -c ${CFLAGS} -I../../include -I.. -o $@ $<

@@ -26,6 +26,9 @@ ${MACHINEDIR}:
 	/bin/cp -ru ${SRCDIR}/sys/arch/${ARCH}/include/* ${MACHINEDIR}/
 	/bin/patch -p 0 -d ${PREFIX} <include.patch
 
+${DESTDIR}${INCDIR}:
+	cp -R ${INCDIR} ${DESTDIR}/
+
 ${INCDIR}/fcntl.h:
 	@/bin/cp -vu fcntl.h ${INCDIR}/
 
@@ -44,13 +47,9 @@ ${INCDIR}/syslog.h:
 ${INCDIR}/termios.h:
 	@/bin/cp -vu termios.h ${INCDIR}/
 
-includes-local: ${SRCDIR} ${MACHINEDIR} ${HEADERS}
+install-local: ${SRCDIR} ${MACHINEDIR} ${HEADERS}
 
-includes: ${DESTDIR}
-	@mkdir -p ${DESTDIR}${INCDIR}
-	cp -ru ${INCDIR}/* ${DESTDIR}${INCDIR}/
-
-install:
+install: ${DESTDIR}${INCDIR}
 	@${MAKE} -C lib install
 	@${MAKE} -C bin install
 	@${MAKE} -C usr.bin install

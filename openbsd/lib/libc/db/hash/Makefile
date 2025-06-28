@@ -5,7 +5,9 @@ OBJECTS=hash.o hash_bigkey.o hash_buf.o hash_func.o hash_log2.o \
 .DEFAULT:
 
 all: ${OBJECTS}
+	@/bin/echo "done."
 
 %.o: ${SRCDIR}/lib/libc/db/hash/%.c
-	gcc -c ${CFLAGS} -o $@ $<
+	@/bin/echo -n "$@ "
+	@gcc -c ${CFLAGS} -o $@ $<
 

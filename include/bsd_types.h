@@ -44,12 +44,6 @@
 #define AT_OBJECT		0x0080
 #define AT_LOCKLEAF		0x0100
 
-#define ROOT_UID	500000018
-#define ROOT_GID	532000544
-#define BIN_GID		532000545
-#define DAEMON_UID	500000006
-#define DAEMON_GID	500000019
-
 /* machine/param.h */
 
 #define MSGBUFSIZE		(4 * PAGE_SIZE)

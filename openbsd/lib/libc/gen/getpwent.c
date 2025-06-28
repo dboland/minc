@@ -62,12 +62,12 @@ pwent_posix(struct passwd *pwd, char *buf)
 	pwd->pw_passwd = buf;
 	buf = pwd_skip(buf);
 	pwd->pw_uid = strtoul(buf, &buf, 10);
-	if (pwd->pw_uid == WIN_ROOT_UID){
+	if (pwd->pw_uid == ROOT_UID){
 		pwd->pw_uid = 0;
 	}
 	*buf++ = 0;
 	pwd->pw_gid = strtoul(buf, &buf, 10);
-	if (pwd->pw_gid == WIN_ROOT_GID){
+	if (pwd->pw_gid == ROOT_GID){
 		pwd->pw_gid = 0;
 	}
 	*buf++ = 0;

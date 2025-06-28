@@ -1,15 +1,22 @@
 include ../Makefile.inc
 
-LIBPOSIX=libposix-${RELEASE}.dll
-IMPLIB=libposix.dll.a
+LIBPOSIX= libposix-${RELEASE}.dll
+IMPLIB= libposix.dll.a
 CFLAGS+= -I../include -g
-CFLAGS+=-DRELEASE=\"${RELEASE}\" -DVERSION=\"${VERSION}\" -DBUILD=${BUILD}
-OBJECTS=crt1.o msvc.o win_posix.o vfs_posix.o libposix.o \
+CFLAGS+= -DRELEASE=\"${RELEASE}\" -DVERSION=\"${VERSION}\" -DBUILD=${BUILD}
+OBJECTS= crt1.o msvc.o win_posix.o vfs_posix.o libposix.o \
 	arch/fork.o arch/syscall.o version.o
 GCCDIR=../mingw/gcc
 TRACEDIR=../libtrace
 
 all: ${LIBPOSIX}
+
+${DESTDIR}:
+	@echo " ---------------------------------------------------"
+	@echo "| MinC install directory ($@) not found. Make sure"
+	@echo "| it exists and the 'DESTDIR' variable is defined correctly in Makefile.inc"
+	@echo " ---------------------------------------------------"
+	@exit 1
 
 crt1.o: crt1.c
 	gcc -c ${CFLAGS} $<

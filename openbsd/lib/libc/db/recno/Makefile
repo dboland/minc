@@ -5,7 +5,9 @@ OBJECTS=rec_close.o rec_delete.o rec_get.o rec_open.o rec_put.o rec_search.o \
 .DEFAULT:
 
 all: ${OBJECTS}
+	@/bin/echo "done."
 
 %.o: ${SRCDIR}/lib/libc/db/recno/%.c
-	gcc -c ${CFLAGS} -o $@ $<
+	@/bin/echo -n "$@ "
+	@gcc -c ${CFLAGS} -o $@ $<
 

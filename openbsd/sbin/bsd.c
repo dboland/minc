@@ -98,7 +98,7 @@ sig(int signum)
 		fprintf(stderr, "%s: %s\n", __progname, strsignal(signum));
 	}
 }
-int 
+void 
 fs_mount(void)
 {
 	int result = 0;
@@ -117,9 +117,8 @@ fs_mount(void)
 	}
 	endfsent();
 	regfree(&rebuf);
-	return(result);
 }
-int 
+void 
 fs_unmount(void)
 {
 	int result = 0;
@@ -129,7 +128,6 @@ fs_unmount(void)
 		unmount(tab->fs_file, MNT_FORCE);
 	}
 	endfsent();
-	return(result);
 }
 int
 getty(const char *path)
@@ -189,19 +187,6 @@ trpoints(const char *opts)
 	return(result);
 }
 void 
-notty(void)
-{
-	char *root = getenv("MINCROOT");
-	char *msg = "MinC is installed and working but could not configure itself.\n"
-		"Please exclude %s from your anti-virus software,\n"
-		"open the console as Administrator and run /sbin/setup.sh.\n\n"
-		"Press ENTER to continue . . .";
-	char buf;
-
-	fprintf(stderr, msg, root);
-	read(0, &buf, 1);
-}
-void 
 args(int argc, char *argv[])
 {
 	int ch;
@@ -257,7 +242,6 @@ single(void)
 	(void) revoke(_PATH_CONSOLE);
 	setsid();
 	if (getty(_PATH_CONSOLE) < 0){
-		notty();
 		args[0] = "/bin/sh";
 		args[1] = NULL;
 	}

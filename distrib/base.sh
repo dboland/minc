@@ -5,7 +5,7 @@ elif ! cd "$PKGROOT/../minc-base"; then
         exit 1
 fi
 
-copy_file /sbin "$ETC"
+copy_file /etc "$ETC"
 copy_file /sbin "$SBIN"
 
 echo -n "Inpakken base61.tgz... "

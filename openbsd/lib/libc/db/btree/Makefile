@@ -6,7 +6,9 @@ OBJECTS=bt_close.o bt_conv.o bt_debug.o bt_delete.o bt_get.o bt_open.o \
 .DEFAULT:
 
 all: ${OBJECTS}
+	@/bin/echo "done."
 
 %.o: ${SRCDIR}/lib/libc/db/btree/%.c
-	gcc -c ${CFLAGS} -o $@ $<
+	@/bin/echo -n "$@ "
+	@gcc -c ${CFLAGS} -o $@ $<
 
