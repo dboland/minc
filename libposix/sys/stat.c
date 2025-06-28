@@ -245,10 +245,10 @@ stat_posix(WIN_TASK *Task, struct stat *buf, WIN_VATTR *Stat)
 	buf->st_mtime = time_posix(&Stat->LastWriteTime);
 	/* status change (chown, chgrp, chmod, futimes) */
 	buf->st_ctime = time_posix(&Stat->CreationTime);
-	if (buf->st_uid == WIN_ROOT_UID){
+	if (buf->st_uid == ROOT_UID){
 		buf->st_uid = 0;
 	}
-	if (buf->st_gid == WIN_ROOT_GID){
+	if (buf->st_gid == ROOT_GID){
 		buf->st_gid = 0;
 	}
 	buf->st_flags = attr_posix(Stat->Attributes);

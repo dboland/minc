@@ -1,7 +1,7 @@
 include ../../Makefile.inc
 
-OBJECTS= arch uname touch install.exe.manifest
-CFLAGS+=-DNOPIE -I${SRCDIR}/sys
+OBJECTS= arch uname touch
+CFLAGS+= -DNOPIE -I${SRCDIR}/sys
 LBINDIR= ${PREFIX}/local/bin
 UBINPATH= ${SRCDIR}/usr.bin
 
@@ -16,7 +16,7 @@ ${UBINPATH}:
 
 ${LBINDIR}: ${OBJECTS}
 	@/bin/mkdir -p ${LBINDIR}
-	/bin/cp -vu ${OBJECTS} ${LBINDIR}/
+	/bin/cp -vu ${OBJECTS} install.exe.manifest ${LBINDIR}/
 	/bin/cp -vu install.exe ${LBINDIR}/
 
 uname: ${SRCDIR}/usr.bin/uname/uname.c
@@ -40,8 +40,7 @@ install-local: ${LBINDIR}
 
 install: ${DESTDIR}
 	@mkdir -p ${DESTDIR}${UBINDIR}
-	${INSTALL} ${OBJECTS} ${DESTDIR}${UBINDIR}/
-	${INSTALL} install ${DESTDIR}${UBINDIR}/
+	${INSTALL} ${OBJECTS} install install.manifest ${DESTDIR}${UBINDIR}/
 
 clean:
 	/bin/rm -f *.exe *.o

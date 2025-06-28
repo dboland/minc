@@ -17,7 +17,7 @@ function admins_only
 }
 
 echo "Creating system directories..."
-mkdir -p /mnt /dev /root /home /tmp
+mkdir -p /mnt /dev /root /home /tmp /var/run /var/mail
 chown "${USERNAME}" /mnt /tmp /home
 chmod 0775 /root /tmp
 chgrp 0 /root

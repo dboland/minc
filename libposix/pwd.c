@@ -112,27 +112,6 @@ pwd_PWD_GETPWENT(char *buf, size_t buflen)
 	return(result);
 }
 int 
-pwd_PWD_GETPWNAM(const char *name, char *buf, size_t buflen)
-{
-	int result = 0;
-	WCHAR szAccount[MAX_NAME];
-	WIN_PWENT pwResult;
-
-	if (!strncmp(name, "_", 1)){
-		win_mbstowcs(szAccount, "SERVICE", MAX_NAME);
-	}else if (!strcmp(name, "root")){
-		win_mbstowcs(szAccount, "SYSTEM", MAX_NAME);
-	}else if (!win_mbstowcs(szAccount, name, MAX_NAME)){
-		return(-EINVAL);
-	}
-	if (!win_getpwnam(szAccount, &pwResult)){
-		result -= errno_posix(GetLastError());
-	}else{
-		passwd_posix(buf, buflen, &pwResult);
-	}
-	return(result);
-}
-int 
 pwd_PWD_GETPWUID(uid_t uid, char *buf, size_t buflen)
 {
 	int result = 0;
@@ -140,11 +119,31 @@ pwd_PWD_GETPWUID(uid_t uid, char *buf, size_t buflen)
 	SID8 sid;
 
 	if (!uid){
-		uid = WIN_ROOT_UID;
+		uid = ROOT_UID;
 	}
 	if (uid < 0){
 		result = -EINVAL;
 	}else if (!win_getpwuid(rid_win(&sid, uid), &pwResult)){
+		result -= errno_posix(GetLastError());
+	}else{
+		passwd_posix(buf, buflen, &pwResult);
+	}
+	return(result);
+}
+int 
+pwd_PWD_GETPWNAM(const char *name, char *buf, size_t buflen)
+{
+	int result = 0;
+	WCHAR szAccount[MAX_NAME];
+	WIN_PWENT pwResult;
+
+	if (!strncmp(name, "_", 1)){
+		result = pwd_PWD_GETPWUID(DAEMON_UID, buf, buflen);
+	}else if (!strcmp(name, "root")){
+		result = pwd_PWD_GETPWUID(ROOT_UID, buf, buflen);
+	}else if (!win_mbstowcs(szAccount, name, MAX_NAME)){
+		return(-EINVAL);
+	}else if (!win_getpwnam(szAccount, &pwResult)){
 		result -= errno_posix(GetLastError());
 	}else{
 		passwd_posix(buf, buflen, &pwResult);

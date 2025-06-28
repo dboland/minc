@@ -257,11 +257,12 @@ InputWaitChar(HANDLE Handle, DWORD Mode, LPSTR Buffer)
 	HANDLE hObjects[2] = {__Interrupt, Handle};
 	DWORD dwStatus;
 
-	dwStatus = WaitForMultipleObjectsEx(2, hObjects, FALSE, INFINITE, TRUE);
+//	dwStatus = WaitForMultipleObjectsEx(2, hObjects, FALSE, INFINITE, TRUE);
+	dwStatus = WaitForSingleObjectEx(Handle, INFINITE, TRUE);
 	if (dwStatus == WAIT_FAILED){
 		WIN_ERR("WaitForMultipleObjectsEx(%s): %s\n", win_strobj(hObjects, 2), win_strerror(GetLastError()));
-	}else if (!dwStatus){
-		bResult = TRUE;
+//	}else if (!dwStatus){
+//		bResult = TRUE;
 	}else if (Mode & ENABLE_LINE_INPUT){
 		bResult = InputReadLine(Handle, &__CTTY->Attribs, Buffer);
 	}else{

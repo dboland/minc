@@ -179,7 +179,7 @@ __getuid(WIN_TASK *Task)
 	if (!uid){
 		uid = rid_posix(&Task->UserSid);
 	}
-	if (uid == WIN_ROOT_UID){
+	if (uid == ROOT_UID){
 		uid = 0;
 	}
 	return(uid);
@@ -194,7 +194,7 @@ __geteuid(WIN_TASK *Task)
 {
 	uid_t uid = rid_posix(&Task->UserSid);
 
-	if (uid == WIN_ROOT_UID){
+	if (uid == ROOT_UID){
 		uid = 0;
 	}
 	return(uid);
@@ -223,7 +223,7 @@ __getgid(WIN_TASK *Task)
 	if (!gid){
 		gid = rid_posix(&Task->GroupSid);
 	}
-	if (gid == WIN_ROOT_GID){
+	if (gid == ROOT_GID){
 		gid = 0;
 	}
 	return(gid);
@@ -238,7 +238,7 @@ __getegid(WIN_TASK *Task)
 {
 	gid_t gid = rid_posix(&Task->GroupSid);
 
-	if (gid == WIN_ROOT_GID){
+	if (gid == ROOT_GID){
 		gid = 0;
 	}
 	return(gid);
@@ -268,7 +268,7 @@ __seteuid(WIN_TASK *Task, uid_t uid)
 	SID8 sidUser;
 
 	if (!uid){
-		uid = WIN_ROOT_UID;
+		uid = ROOT_UID;
 	}
 	if (uid == rid_posix(&Task->UserSid)){		/* PRIV_START check (ssh.exe) */
 		return(0);
@@ -307,7 +307,7 @@ __setreuid(WIN_TASK *Task, uid_t ruid, uid_t euid)
 	int result = 0;
 
 	if (!ruid){
-		ruid = WIN_ROOT_UID;
+		ruid = ROOT_UID;
 	}
 	if (ruid == __getuid(Task)){
 		result = __seteuid(Task, euid);
@@ -327,7 +327,7 @@ sys_setresuid(call_t call, uid_t ruid, uid_t euid, uid_t suid)
 	int result = 0;
 
 	if (!suid){
-		suid = WIN_ROOT_UID;
+		suid = ROOT_UID;
 	}
 	if (!__setreuid(call.Task, ruid, euid)){
 		call.Task->SavedUid = suid;
@@ -346,7 +346,7 @@ __setegid(WIN_TASK *Task, gid_t gid)
 	SID8 sidGroup;
 
 	if (!gid){
-		gid = WIN_ROOT_GID;
+		gid = ROOT_GID;
 	}
 	if (gid == rid_posix(&Task->GroupSid)){		/* PRIV_START check (ssh.exe) */
 		return(0);
@@ -400,7 +400,7 @@ int
 sys_setresgid(call_t call, gid_t rgid, gid_t egid, gid_t sgid)
 {
 	if (!sgid){
-		sgid = WIN_ROOT_GID;
+		sgid = ROOT_GID;
 	}
 	if (!__setregid(call.Task, rgid, egid)){
 		call.Task->SavedGid = sgid;
@@ -483,10 +483,10 @@ sys_chown(call_t call, const char *path, uid_t owner, gid_t group)
 	WIN_NAMEIDATA wpePath = {0};
 
 	if (!owner){
-		owner = WIN_ROOT_UID;
+		owner = ROOT_UID;
 	}
 	if (!group){
-		group = WIN_ROOT_GID;
+		group = ROOT_GID;
 	}
 	if (!vfs_chown(path_win(&wpePath, path, 0), rid_win(&sidUser, owner), rid_win(&sidGroup, group))){
 		result -= errno_posix(GetLastError());
@@ -502,10 +502,10 @@ sys_fchown(call_t call, int fd, uid_t owner, gid_t group)
 	WIN_TASK *pwTask = call.Task;
 
 	if (!owner){
-		owner = WIN_ROOT_UID;
+		owner = ROOT_UID;
 	}
 	if (!group){
-		group = WIN_ROOT_GID;
+		group = ROOT_GID;
 	}
 	if (fd < 0 || fd >= OPEN_MAX){
 		result = -EBADF;
@@ -523,10 +523,10 @@ sys_lchown(call_t call, const char *path, uid_t owner, gid_t group)
 	WIN_NAMEIDATA wpePath = {0};
 
 	if (!owner){
-		owner = WIN_ROOT_UID;
+		owner = ROOT_UID;
 	}
 	if (!group){
-		group = WIN_ROOT_GID;
+		group = ROOT_GID;
 	}
 	if (!vfs_chown(path_win(&wpePath, path, O_NOFOLLOW), rid_win(&sidUser, owner), rid_win(&sidGroup, group))){
 		result -= errno_posix(GetLastError());
@@ -544,10 +544,10 @@ sys_fchownat(call_t call, int dirfd, const char *path, uid_t owner, gid_t group,
 	WIN_NAMEIDATA wPath = {0};
 
 	if (!owner){
-		owner = WIN_ROOT_UID;
+		owner = ROOT_UID;
 	}
 	if (!group){
-		group = WIN_ROOT_GID;
+		group = ROOT_GID;
 	}
 	if (!path || !path[0]){
 		result = -EINVAL;

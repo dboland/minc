@@ -87,27 +87,6 @@ grp_GRP_GETGRENT(char *buf, size_t buflen)
 	return(result);
 }
 int 
-grp_GRP_GETGRNAM(const char *name, char *buf, size_t buflen)
-{
-	int result = 0;
-	WCHAR szAccount[MAX_NAME];
-	WIN_GRENT wgResult;
-
-	if (!strcmp(name, "bin")){
-		win_mbstowcs(szAccount, "Users", MAX_NAME);
-	}else if (!strcmp(name, "wheel")){
-		win_mbstowcs(szAccount, "Administrators", MAX_NAME);
-	}else if (!win_mbstowcs(szAccount, name, MAX_NAME)){
-		return(EINVAL);
-	}
-	if (!win_getgrnam(szAccount, &wgResult)){
-		result -= errno_posix(GetLastError());
-	}else{
-		group_posix(buf, buflen, &wgResult);
-	}
-	return(result);
-}
-int 
 grp_GRP_GETGRGID(gid_t gid, char *buf, size_t buflen)
 {
 	int result = 0;
@@ -115,11 +94,33 @@ grp_GRP_GETGRGID(gid_t gid, char *buf, size_t buflen)
 	SID8 sid;
 
 	if (!gid){
-		gid = WIN_ROOT_GID;
+		gid = ROOT_GID;
 	}
 	if (gid < 0){
 		result = -EINVAL;
 	}else if (!win_getgrgid(rid_win(&sid, gid), &wgResult)){
+		result -= errno_posix(GetLastError());
+	}else{
+		group_posix(buf, buflen, &wgResult);
+	}
+	return(result);
+}
+int 
+grp_GRP_GETGRNAM(const char *name, char *buf, size_t buflen)
+{
+	int result = 0;
+	WCHAR szAccount[MAX_NAME];
+	WIN_GRENT wgResult;
+
+	if (!strncmp(name, "_", 1)){
+		result = grp_GRP_GETGRGID(DAEMON_GID, buf, buflen);
+	}else if (!strcmp(name, "bin")){
+		result = grp_GRP_GETGRGID(BIN_GID, buf, buflen);
+	}else if (!strcmp(name, "wheel")){
+		result = grp_GRP_GETGRGID(ROOT_GID, buf, buflen);
+	}else if (!win_mbstowcs(szAccount, name, MAX_NAME)){
+		return(EINVAL);
+	}else if (!win_getgrnam(szAccount, &wgResult)){
 		result -= errno_posix(GetLastError());
 	}else{
 		group_posix(buf, buflen, &wgResult);
@@ -139,7 +140,7 @@ grp_GRP_GETGROUPLIST(const char *user, gid_t group, gid_t *groups, int *ngroups)
 	gid_t next;
 
 	if (!group){
-		group = WIN_ROOT_GID;
+		group = ROOT_GID;
 	}
 	if (!win_mbstowcs(szAccount, user, MAX_NAME)){
 		result = -EINVAL;
@@ -151,7 +152,7 @@ grp_GRP_GETGROUPLIST(const char *user, gid_t group, gid_t *groups, int *ngroups)
 		result = -EINVAL;
 	}else while (index < dwCount){
 		next = rid_posix(psGroups);
-		if (next == WIN_ROOT_GID){
+		if (next == ROOT_GID){
 			groups[index] = 0;
 		}else{
 			groups[index] = next;
