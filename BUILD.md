@@ -31,12 +31,12 @@ drive and extract it there:
 https://minc.commandlinerevolution.nl/openbsd-master-6.1.0.zip
 
 Most of the kernel can be built using a vanilla MinGW installation. 
-Open the MSYS terminal, cd to the 'minc-devel' directory and make 
+Open the MSYS terminal, **cd** to the *minc-devel* directory and make 
 the kernel first:
 
 	make kernel
 
-When the first stage was succesful, you will get the following 
+When the first stage was successful, you will get the following 
 output. This means we are ready for step 2:
 
 	fatal error: machine/_types.h: No such file or directory
@@ -46,7 +46,7 @@ output. This means we are ready for step 2:
 A minimal system consists of the kernel, the BSD libc library, the 
 boot program, the shell and some utilities. These will be built by 
 the new system itself. To achieve this, you will need to unmount 
-the /mingw directory. This is done by running the mount.sh script:
+the /mingw directory. This is done by running the **mount** script:
 
 	./mount.sh minc
 
@@ -67,24 +67,24 @@ It should be similar to the following output:
 
 To install the new system you have to manually create the root 
 directory, run the **install** target and the **setup** program, 
-thereby mimicking what is automatically done by the MinC installer.
+thereby mimicking what is done automatically by the MinC installer.
 This is also to avoid accidentally writing into an existing 
 MinC system. 
 
 For this step, you need to be Administrator. Close the MSYS 
-terminal and open it again as Administrator. Change to the 
-'minc-devel' directory and create the MinC root folder. I 
-name it 'minc-release' so it won't conflict with an existing 
+terminal and open it again as Administrator. Change to your 
+*minc-devel* directory and create the MinC root folder. I 
+name it *minc-release* so it won't conflict with an existing 
 MinC system:
 
 	mkdir /c/minc-release
 
-Now you can run the 'install' target:
+Now you can run the **install** target:
 
 	make install
 
 To finalize step 3, go to the new folder in Windows Exporer and 
-open the 'sbin' folder. There should be a program named 'bsd.exe'.
+open the *sbin* folder. There should be a program named *bsd.exe*.
 Right-click it and run it as Administrator. You will see the 
 following message:
 
@@ -92,7 +92,7 @@ following message:
 	/bin/ksh: No controlling tty (open /dev/tty: No such file or directory)
 	/bin/ksh: warning: won't have full job control
 
-This is because there is no 'dev' file system yet. To create it,
+This is because there is no */dev* file system yet. To create it,
 along with some of the other system directories like 'home' and 
 'tmp', run the **setup** script:
 
@@ -114,14 +114,14 @@ The *START* command tells the console to read console settings from
 the Registry. The *-h* switch tells MinC to change to your *home* 
 directory.
 
-A final note: the root folder you created seems to be disappeared.
+A final note: the root folder you created seems to have disappeared.
 This is because when MinC mounts its root directory, it hides the 
 directory from view in Windows Explorer. This is super important 
-for preventing recursive directory listings. It is also a standard 
+for preventing recursive directory listings. It is also standard 
 practice in Windows for mounted drives.
 
 If you want to access the MinC root folder in Windows Explorer, just
-type its location in the address bar, like "C:\minc-release" and 
+type its location in the address bar, like *C:\minc-release* and 
 you're back.
 
 ## Step 4: building the GCC compiler
