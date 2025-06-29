@@ -5,7 +5,7 @@ CFLAGS+= -I${SRCDIR}/sys
 LBINDIR= ${PREFIX}/local/bin
 UBINPATH= ${SRCDIR}/usr.bin
 
-all: ${UBINPATH} ${OBJECTS} install.exe grep
+all: ${UBINPATH} ${OBJECTS} install.exe grep du
 
 ${UBINPATH}:
 	@echo " ---------------------------------------------------"
@@ -28,6 +28,9 @@ arch: ${SRCDIR}/usr.bin/arch/arch.c
 touch: ${SRCDIR}/usr.bin/touch/touch.c
 	gcc -s -static ${CFLAGS} -DNOPIE -o $@ $<
 
+du: ${SRCDIR}/usr.bin/du/du.c
+	gcc -s ${CFLAGS} -o $@ $< -lutil
+
 grep: grep.c
 	@gcc -c ${CFLAGS} -o binary.o ${SRCDIR}/usr.bin/grep/binary.c
 	@gcc -c ${CFLAGS} -o file.o ${SRCDIR}/usr.bin/grep/file.c
@@ -48,7 +51,7 @@ install-local: ${LBINDIR}
 
 install: ${DESTDIR}
 	@mkdir -p ${DESTDIR}${UBINDIR}
-	${INSTALL} ${OBJECTS} install install.manifest grep ${DESTDIR}${UBINDIR}/
+	${INSTALL} ${OBJECTS} install install.manifest grep du ${DESTDIR}${UBINDIR}/
 
 clean:
 	/bin/rm -f *.exe *.o

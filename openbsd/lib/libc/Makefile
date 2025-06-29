@@ -33,7 +33,7 @@ version.o: version.rc
 
 ${LIBC}: ${OBJECTS} version.o
 	${LD} -shared -s ${LDFLAGS} -e _DllMainCRTStartup@12 --out-implib=${IMPLIB} \
-	-o $@ --image-base=${IMGBASE_LIBC} /usr/lib/dllcrt2.o ${OBJECTS} ${SHOBJECTS} version.o \
+	-o $@ --image-base=${IMGBASE_LIBC} ${LIBDIR}/dllcrt2.o ${OBJECTS} ${SHOBJECTS} version.o \
 	-L${LIBDIR} -L${GCCDIR} -lmingw32 -lmsvcrt -lgcc
 
 include:
