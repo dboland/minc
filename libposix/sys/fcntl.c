@@ -307,6 +307,9 @@ sys_open(call_t call, const char *path, int flags, ...)
 	va_list args;
 	WIN_NAMEIDATA wPath = {0};
 
+	if (!path[0]){
+		return(-ENOENT);
+	}
 	va_start(args, flags);
 	result = __openat(call.Task, path_win(&wPath, path, flags | O_OBJECT), flags, args);
 	va_end(args);

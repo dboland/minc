@@ -5,7 +5,7 @@ CFLAGS+= -DNOPIE -I${SRCDIR}/sys
 LBINDIR= ${PREFIX}/local/bin
 BINPATH= ${SRCDIR}/bin
 
-all: ${BINPATH} ${OBJECTS}
+all: ${BINPATH} ${OBJECTS} cat
 	@${MAKE} -C ksh
 
 ${BINPATH}:
@@ -46,6 +46,9 @@ rmdir: ${SRCDIR}/bin/rmdir/rmdir.c
 test: ${SRCDIR}/bin/test/test.c
 	gcc -s -static ${CFLAGS} -o $@ $<
 
+cat: ${SRCDIR}/bin/cat/cat.c
+	gcc -s -static ${CFLAGS} -o $@ $<
+
 ls:
 	@gcc -c ${CFLAGS} -o main.o ${SRCDIR}/bin/ls/main.c
 	@gcc -c ${CFLAGS} -o print.o ${SRCDIR}/bin/ls/print.c
@@ -63,7 +66,7 @@ install-local: ${LBINDIR}
 
 install:
 	@mkdir -p ${DESTDIR}${BINDIR}
-	${INSTALL} ${OBJECTS} ${DESTDIR}${BINDIR}/
+	${INSTALL} ${OBJECTS} cat ${DESTDIR}${BINDIR}/
 	@${MAKE} -C ksh install
 
 clean:

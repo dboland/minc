@@ -27,7 +27,7 @@ ${MACHINEDIR}:
 	/bin/patch -p 0 -d ${PREFIX} <include.patch
 
 ${DESTDIR}${INCDIR}:
-	cp -R ${INCDIR} ${DESTDIR}/
+	cp -R ${INCDIR} ${DESTDIR}/${PREFIX}/
 
 ${INCDIR}/fcntl.h:
 	@/bin/cp -vu fcntl.h ${INCDIR}/

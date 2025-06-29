@@ -142,7 +142,7 @@ pwd_PWD_GETPWNAM(const char *name, char *buf, size_t buflen)
 	}else if (!strcmp(name, "root")){
 		result = pwd_PWD_GETPWUID(ROOT_UID, buf, buflen);
 	}else if (!win_mbstowcs(szAccount, name, MAX_NAME)){
-		return(-EINVAL);
+		result = -EINVAL;
 	}else if (!win_getpwnam(szAccount, &pwResult)){
 		result -= errno_posix(GetLastError());
 	}else{

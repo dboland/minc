@@ -2,6 +2,7 @@ include ../../Makefile.inc
 
 all:
 	@${MAKE} -C libpthread install-local
+	@${MAKE} -C libz all install-local
 	@${MAKE} -C libc all install-local
 	@${MAKE} -C libdl all install-local
 	@${MAKE} -C libsocket all install-local

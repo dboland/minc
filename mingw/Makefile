@@ -28,16 +28,16 @@ ${MINGW}:
 	@/bin/cp -vu $< ${BINDIR}/
 
 ${BINDIR}:
-	/bin/mkdir -p ${BINDIR}
+	@/bin/mkdir -p ${BINDIR}
 
 ${UBINDIR}:
-	/bin/mkdir -p ${UBINDIR}
+	@/bin/mkdir -p ${UBINDIR}
 
 ${LIBDIR}:
-	/bin/mkdir -p ${LIBDIR}
+	@/bin/mkdir -p ${LIBDIR}
 
 ${LIBEXEC}:
-	/bin/mkdir -p ${LIBEXEC}
+	@/bin/mkdir -p ${LIBEXEC}
 	/bin/cp -rvu ${MINGW}/libexec/gcc ${LIBEXEC}/
 
 GCCBIN+=gcc.exe cpp.exe

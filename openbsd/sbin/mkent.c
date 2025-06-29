@@ -272,7 +272,7 @@ mk_vol(FILE *stream)
 		fprintf(stderr, "vfs_setfsstat(): %s\n", strerror(errno));
 	}else while (vfs_getvfs(&cfData, 0)){
 		if (cfData.FSType == FS_TYPE_VOLUME){
-			printf("%ls: %s\n", cfData.DosPath, path_posix(buf, cfData.NtPath));
+			printf("%ls: %ls\n", cfData.DosPath, cfData.NtPath);
 			if (!vol_stat(cfData.DosPath, szMessage)){
 				printf("   %s\n", win_strerror(errno_win()));
 			}else{

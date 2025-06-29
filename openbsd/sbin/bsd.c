@@ -241,10 +241,7 @@ single(void)
 //	close(2);
 	(void) revoke(_PATH_CONSOLE);
 	setsid();
-	if (getty(_PATH_CONSOLE) < 0){
-		args[0] = "/bin/sh";
-		args[1] = NULL;
-	}
+	getty(_PATH_CONSOLE);
 	shell(args);
 }
 void 

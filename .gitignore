@@ -11,3 +11,4 @@ mount.sh
 *.so.*
 *.pdf
 openbsd/lib/libc/sys/*.S
+openbsd/lib/libc/include

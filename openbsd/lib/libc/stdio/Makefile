@@ -14,7 +14,7 @@ OBJECTS= asprintf.o clrerr.o fclose.o fdopen.o feof.o ferror.o fflush.o fgetc.o 
 	fwscanf.o swscanf.o vfwscanf.o vswscanf.o vwscanf.o wscanf.o \
 	getdelim.o getline.o dprintf.o vdprintf.o
 
-CFLAGS+=-DFLOATING_POINT -DPRINTF_WIDE_CHAR -DSCANF_WIDE_CHAR
+CFLAGS+= -DFLOATING_POINT -DPRINTF_WIDE_CHAR -DSCANF_WIDE_CHAR
 
 .SUFFIXES:
 .DEFAULT:
@@ -25,4 +25,3 @@ all: ${OBJECTS}
 %.o: ${SRCDIR}/lib/libc/stdio/%.c
 	@/bin/echo -n "$@ "
 	@gcc -c ${CFLAGS} -I../include -I${SRCDIR}/lib/libc/gdtoa -I${SRCDIR}/lib/libc/arch/${ARCH}/gdtoa -o $@ $<
-

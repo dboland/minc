@@ -32,7 +32,7 @@ the kernel first:
 When the first stage was succesful, you will get the following 
 output. This means we are ready for Stage 2:
 
-	fatal error: machine/cdefs.h: No such file or directory
+	fatal error: machine/_types.h: No such file or directory
 
 ## Stage 2: build a minimal system
 

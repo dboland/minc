@@ -19,7 +19,7 @@ NLS=    C.msg Pig.msg da.ISO8859-1.msg da.UTF-8.msg de.ISO8859-1.msg \
 all: include objects lib
 
 %.d: %
-	@${MAKE} -C $< ROOTDIR=${ROOTDIR}/.. SRCDIR=${SRCDIR} CFLAGS="${CFLAGS}" ARCH=${ARCH}
+	@CFLAGS="${CFLAGS}" ${MAKE} -C $< ROOTDIR=${ROOTDIR}/.. SRCDIR=${SRCDIR} ARCH=${ARCH}
 
 %.o: %.c
 	gcc -c ${CFLAGS} -I${ROOTDIR}/include -o $@ $<

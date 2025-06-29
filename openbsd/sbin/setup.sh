@@ -25,7 +25,7 @@ mkent group >/etc/group
 mkent passwd >/tmp/passwd
 pwd_mkdb -p /tmp/passwd
 
-echo "Detecting devices..."
+echo "Creating devices..."
 sh /etc/MAKEDEV
 mkent -p fstab >/etc/fstab
 admins_only "/etc/fstab"

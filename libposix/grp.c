@@ -119,7 +119,7 @@ grp_GRP_GETGRNAM(const char *name, char *buf, size_t buflen)
 	}else if (!strcmp(name, "wheel")){
 		result = grp_GRP_GETGRGID(ROOT_GID, buf, buflen);
 	}else if (!win_mbstowcs(szAccount, name, MAX_NAME)){
-		return(EINVAL);
+		result = -EINVAL;
 	}else if (!win_getgrnam(szAccount, &wgResult)){
 		result -= errno_posix(GetLastError());
 	}else{
