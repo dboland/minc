@@ -102,7 +102,7 @@ When it is finished, you can close the window and open it again
 by double-clicking. The above message should be gone.
 
 Double-clicking the *bsd.exe* program is not the right way to start
-the MinC terminal. To make it start properly and in you home directory,
+the MinC terminal. To make it start properly and in your home directory,
 put following lines in a file named *minc-release.cmd* on your Desktop:
 
 	@ECHO OFF
@@ -121,7 +121,8 @@ for preventing recursive directory listings. It is also a standard
 practice in Windows for mounted drives.
 
 If you want to access the MinC root folder in Windows Explorer, just
-type its location in the 
+type its location in the address bar, like "C:\minc-release" and 
+you're back.
 
 ## Step 4: building the GCC compiler
 
