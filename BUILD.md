@@ -31,12 +31,12 @@ drive and extract it there:
 https://minc.commandlinerevolution.nl/openbsd-master-6.1.0.zip
 
 Most of the kernel can be built using a vanilla MinGW installation. 
-Open the MSYS terminal, **cd** to the *minc-devel* directory and make 
-the kernel first:
+Open the MSYS terminal, **cd** to your *minc-devel* directory 
+and make the kernel first:
 
 	make kernel
 
-When the first stage was successful, you will get the following 
+When the first step was successful, you will get the following 
 output. This means we are ready for step 2:
 
 	fatal error: machine/_types.h: No such file or directory
@@ -46,7 +46,7 @@ output. This means we are ready for step 2:
 A minimal system consists of the kernel, the BSD libc library, the 
 boot program, the shell and some utilities. These will be built by 
 the new system itself. To achieve this, you will need to unmount 
-the /mingw directory. This is done by running the **mount** script:
+the */mingw* directory. This is done by running the **mount** script:
 
 	./mount.sh minc
 

@@ -34,7 +34,7 @@ grep: grep.c
 	@gcc -c ${CFLAGS} -o mmfile.o ${SRCDIR}/usr.bin/grep/mmfile.c
 	@gcc -c ${CFLAGS} -o queue.o ${SRCDIR}/usr.bin/grep/queue.c
 	@gcc -c ${CFLAGS} -o util.o ${SRCDIR}/usr.bin/grep/util.c
-	gcc -s ${CFLAGS} -o $@ $< binary.o file.o mmfile.o queue.o util.o -lz
+	gcc -s ${CFLAGS} -I${SRCDIR}/usr.bin/grep -o $@ $< binary.o file.o mmfile.o queue.o util.o -lz
 
 # In Windows, "install" seems to be a reserved word. When 
 # executed with such name, Vista checks if user is elevated, 
