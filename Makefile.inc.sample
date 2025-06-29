@@ -1,7 +1,7 @@
 VERSION=20240915
 BUILD=$(shell date +%s)
 RELEASE=6.1.0
-DESTDIR=/DRIVE/MinC
+DESTDIR=/DRIVE/minc-release
 GCCVER=4.8.1
 GCCLIB=libisl-15.dll libmingwex-0.dll
 MINGW=/C/MinGW

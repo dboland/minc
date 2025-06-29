@@ -7,7 +7,7 @@ Below their download locations:
 * MinGW32: https://sourceforge.net/projects/mingw/
 * NSIS: https://nsis.sourceforge.io/Download
 
-I pulled the **OpenBSD** source code from the read-only GitHub 
+I pulled the *OpenBSD* source code from the read-only GitHub 
 repository. There is an article which explains how to pull the 
 source for a specific stable version, but you need 
 the CVS software:
@@ -17,10 +17,9 @@ https://www.openbsd.org/anoncvs.html
 **Warning**: if you go forward, be advised that the MSYS system 
 running MinGW will be modified to function as an OpenBSD system.
 Your MinGW installation will be left completely untouched, but 
-the MSYS system running it, will not.
-
-If you already use MinGW and expect it to continue creating Windows 
-programs, you should **not** go ahead and build the MinC Unix emulator.
+the MSYS system running it, will not. If you already use MinGW 
+and expect it to continue creating Windows programs, you 
+should **not** go ahead and build the MinC Unix emulator.
 
 ## Step 1: build the kernel
 
@@ -102,15 +101,30 @@ along with some of the other system directories like 'home' and
 When it is finished, you can close the window and open it again 
 by double-clicking. The above message should be gone.
 
+Double-clicking the *bsd.exe* program is not the right way to start
+the MinC terminal. To make it start properly and in you home directory,
+put following lines in a file named *minc-release.cmd* on your Desktop:
+
+	@ECHO OFF
+	
+	CD C:\minc-release\sbin
+	START "MinC" bsd.exe -h
+
+The *START* command tells the console to read console settings from
+the Registry. The *-h* switch tells MinC to change to your *home* 
+directory.
+
 A final note: the root folder you created seems to be disappeared.
 This is because when MinC mounts its root directory, it hides the 
 directory from view in Windows Explorer. This is super important 
 for preventing recursive directory listings. It is also a standard 
 practice in Windows for mounted drives.
 
+If you want to access the MinC root folder in Windows Explorer, just
+type its location in the 
+
 ## Step 4: building the GCC compiler
 
 This is currently not within the scope of this document.
 
-June, 2025
-Daniel Boland
+Daniel Boland, June, 2025
