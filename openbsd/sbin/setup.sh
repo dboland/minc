@@ -37,8 +37,8 @@ ln -sf "$SystemRoot\System32\drivers\etc\services" /etc/services
 ln -sf "$SystemRoot\System32\drivers\etc\protocol" /etc/protocols
 ln -sf "$SystemRoot\System32\drivers\etc\networks" /etc/networks
 if ! grep '^127\.0\.0\.1' /etc/hosts >/dev/null; then
-	echo "127.0.0.1\tlocalhost\r\n" >>/etc/hosts
-	echo "::1\tlocalhost\r\n" >>/etc/hosts
+	echo "127.0.0.1\tlocalhost\r" >>/etc/hosts
+	echo "::1\tlocalhost\r" >>/etc/hosts
 fi
 mkent resolv >/etc/resolv.conf
 admins_only "/etc/resolv.conf"

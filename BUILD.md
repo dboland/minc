@@ -16,9 +16,9 @@ https://www.openbsd.org/anoncvs.html
 
 ## Stage 1: build the kernel
 
-For this you need the OpenBSD 6.1.0 source code. As mentined 
-above, you can get it yourself using cvs, but you can also use 
-my copy (186Mb). Move this file to preferably the root of a disk 
+For this you need the OpenBSD 6.1.0 source code. As mentioned, 
+you can get it yourself using cvs, but you can also use my 
+copy (186Mb). Move this file to preferably the root of a disk 
 drive and extract it there:
 
 https://minc.commandlinerevolution.nl/openbsd-master-6.1.0.zip

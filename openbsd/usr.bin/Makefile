@@ -28,7 +28,7 @@ arch: ${SRCDIR}/usr.bin/arch/arch.c
 touch: ${SRCDIR}/usr.bin/touch/touch.c
 	gcc -s -static ${CFLAGS} -DNOPIE -o $@ $<
 
-grep: ${SRCDIR}/usr.bin/grep/grep.c
+grep: grep.c
 	@gcc -c ${CFLAGS} -o binary.o ${SRCDIR}/usr.bin/grep/binary.c
 	@gcc -c ${CFLAGS} -o file.o ${SRCDIR}/usr.bin/grep/file.c
 	@gcc -c ${CFLAGS} -o mmfile.o ${SRCDIR}/usr.bin/grep/mmfile.c

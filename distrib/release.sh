@@ -26,7 +26,6 @@ cp /bin/tar tar.exe
 cp /bin/chmod chmod.exe
 cp /bin/sh sh.exe
 cp /sbin/libposix-6.1.0.dll .
-cp ${ROOT}/mingw/bin/scacls.exe .
 cp /mnt/d/src/gzip-1.13/gzip.exe .
 
 #. $DISTROOT/test.sh
