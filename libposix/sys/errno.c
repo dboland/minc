@@ -90,6 +90,7 @@ errno_posix(DWORD Error)
 		case WSAEACCES:
 		case ERROR_SQL_ACCESS_DENIED:
 		case ERROR_ACCESS_DENIED:
+		case ERROR_LOCK_VIOLATION:		/* 33: Another process has locked a portion of the file. */
 			result = EACCES;
 			break;
 		case ERROR_FILE_EXISTS:
@@ -175,7 +176,6 @@ errno_posix(DWORD Error)
 			break;
 		case ERROR_PIPE_BUSY:			/* 231: All pipe instances are busy */
 			SetEvent(__PipeEvent);		/* logger.exe */
-		case ERROR_LOCK_VIOLATION:		/* 33: Another process has locked a portion of the file. */
 		case ERROR_MORE_DATA:
 		case ERROR_IO_PENDING:
 			result = EAGAIN;

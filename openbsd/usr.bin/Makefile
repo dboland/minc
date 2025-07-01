@@ -1,7 +1,7 @@
 include ../../Makefile.inc
 
 PROGS= arch uname touch
-OBJECTS= ${PROGS} grep du
+OBJECTS= ${PROGS} grep du env
 CFLAGS+= -I${SRCDIR}/sys
 LBINDIR= ${PREFIX}/local/bin
 UBINPATH= ${SRCDIR}/usr.bin
@@ -46,6 +46,9 @@ grep: grep.c
 
 du: ${SRCDIR}/usr.bin/du/du.c
 	gcc -s ${CFLAGS} -o $@ $< -lutil
+
+env: ${SRCDIR}/usr.bin/env/env.c
+	gcc -s ${CFLAGS} -o $@ $<
 
 install-local: ${LBINDIR}
 
