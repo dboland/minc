@@ -47,7 +47,7 @@ grep: grep.c
 du: ${SRCDIR}/usr.bin/du/du.c
 	gcc -s ${CFLAGS} -o $@ $< -lutil
 
-env: ${SRCDIR}/usr.bin/env/env.c
+env: env.c
 	gcc -s ${CFLAGS} -o $@ $<
 
 install-local: ${LBINDIR}
