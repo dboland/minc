@@ -4,7 +4,7 @@ LIBEXEC=${PREFIX}/libexec
 LIBS=libadvapi32.a libkernel32.a libshell32.a libuser32.a \
 	libmoldname.a libgmon.a libmsvcrt.a
 
-all: ${MINGW} ${LIBS} libiphlpapi.a
+all: ${MINGW} ${LIBS} libiphlpapi.dll.a
 	@${MAKE} -C gcc
 
 ${MINGW}:
@@ -21,10 +21,10 @@ ${MINGW}:
 %.a: %.def
 	dlltool -d $< -l $@ -k
 
-%.exe: ${MINGW}/bin/%.exe
+${UBINDIR}/%.exe: ${MINGW}/bin/%.exe
 	@/bin/cp -vu $< ${UBINDIR}/
 
-%.dll: ${MINGW}/bin/%.dll
+${BINDIR}/%.dll: ${MINGW}/bin/%.dll
 	@/bin/cp -vu $< ${BINDIR}/
 
 ${BINDIR}:
@@ -40,16 +40,21 @@ ${LIBEXEC}:
 	@/bin/mkdir -p ${LIBEXEC}
 	/bin/cp -rvu ${MINGW}/libexec/gcc ${LIBEXEC}/
 
-GCCBIN+=gcc.exe cpp.exe
-GCCLIB+=libgmp-10.dll libmpc-3.dll libmpfr-4.dll zlib1.dll libgcc_s_dw2-1.dll
-GCCBIN+=g++.exe c++.exe gdb.exe
-GCCLIB+=libintl-8.dll libiconv-2.dll libstdc++-6.dll
+GCCBIN+= ${UBINDIR}/gcc.exe ${UBINDIR}/cpp.exe ${UBINDIR}/gdb.exe
+GCCLIB+= ${BINDIR}/libgmp-10.dll ${BINDIR}/libmpc-3.dll ${BINDIR}/libmpfr-4.dll \
+	${BINDIR}/zlib1.dll ${BINDIR}/libgcc_s_dw2-1.dll
+GCCBIN+= ${UBINDIR}/g++.exe ${UBINDIR}/c++.exe
+GCCLIB+= ${BINDIR}/libintl-8.dll ${BINDIR}/libiconv-2.dll ${BINDIR}/libstdc++-6.dll
 
-BINUTILS=ld.exe ar.exe as.exe nm.exe objdump.exe ranlib.exe size.exe strip.exe \
-	dlltool.exe gprof.exe addr2line.exe dllwrap.exe elfedit.exe objcopy.exe \
-	strings.exe windmc.exe windres.exe c++filt.exe
+BINUTILS= ${UBINDIR}/ld.exe ${UBINDIR}/ar.exe ${UBINDIR}/as.exe ${UBINDIR}/nm.exe \
+	${UBINDIR}/objdump.exe ${UBINDIR}/ranlib.exe ${UBINDIR}/size.exe \
+	${UBINDIR}/strip.exe ${UBINDIR}/dlltool.exe ${UBINDIR}/gprof.exe \
+	${UBINDIR}/addr2line.exe ${UBINDIR}/dllwrap.exe ${UBINDIR}/elfedit.exe \
+	${UBINDIR}/objcopy.exe ${UBINDIR}/strings.exe ${UBINDIR}/windmc.exe \
+	${UBINDIR}/windres.exe ${UBINDIR}/c++filt.exe
 
-MSGBIN=msgfmt.exe libgettextsrc-0-18-3.dll libgettextlib-0-18-3.dll
+MSGBIN= ${UBINDIR}/msgfmt.exe ${BINDIR}/libgettextsrc-0-18-3.dll \
+	${BINDIR}/libgettextlib-0-18-3.dll
 
 install-gcc: ${BINDIR} ${UBINDIR} ${GCCBIN} ${GCCLIB}
 install-ld: ${UBINDIR} ${BINUTILS}
@@ -59,15 +64,14 @@ install-tools: ${MSGBIN}
 
 install-local: ${MINGW} install-gcc install-ld ${LIBEXEC} ${LIBDIR}
 	/bin/cp -vu ${LIBS} ${LIBDIR}/
-	/bin/cp -vu libiphlpapi.a ${MINGW}/lib/libiphlpapi.dll.a
+	/bin/cp -vu libiphlpapi.dll.a ${MINGW}/lib/
 	@${MAKE} -C gcc install-local
 
 install:
 	${INSTALL} libmsvcrt.a ${DESTDIR}${LIBDIR}/
 	@${MAKE} -C gcc install
-	@${MAKE} -C bin install
 
 clean:
-	@${MAKE} -C gcc clean
 	/bin/rm -f *.a
+	@${MAKE} -C gcc clean
 

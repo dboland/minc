@@ -86,6 +86,8 @@ DiskOpenFile(WIN_NAMEIDATA *Path, WIN_FLAGS *Flags, WIN_VNODE *Result)
 		Result->Access = win_F_GETFL(hResult);
 		Result->Flags = win_F_GETFD(hResult);
 		bResult = TRUE;
+//	}else{
+//		WIN_ERR("CreateFile(%ls): %s\n", Path->Resolved, win_strerror(GetLastError()));
 	}
 	return(bResult);
 }

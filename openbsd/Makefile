@@ -63,4 +63,3 @@ clean:
 	@${MAKE} -C usr.bin clean
 	@${MAKE} -C sbin clean
 	@${MAKE} -C usr.sbin clean
-	@${MAKE} -C etc clean

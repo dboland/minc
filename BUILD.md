@@ -93,8 +93,8 @@ following message:
 	/bin/ksh: warning: won't have full job control
 
 This is because there is no */dev* file system yet. To create it,
-along with some of the other system directories like 'home' and 
-'tmp', run the **setup** script:
+along with some of the other system directories like */home* and 
+*/tmp*, run the **setup** script:
 
 	/sbin/setup.sh
 
@@ -111,7 +111,7 @@ put following lines in a file named *minc-release.cmd* on your Desktop:
 	START "MinC" bsd.exe -h
 
 The *START* command tells the console to read console settings from
-the Registry. The *-h* switch tells MinC to change to your *home* 
+the Registry. The *-h* switch tells MinC to change to your */home* 
 directory.
 
 A final note: the root folder you created seems to have disappeared.

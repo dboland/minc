@@ -4,8 +4,8 @@ LIBPOSIX= libposix-${RELEASE}.dll
 IMPLIB= libposix.dll.a
 CFLAGS+= -I../include -g
 CFLAGS+= -DRELEASE=\"${RELEASE}\" -DVERSION=\"${VERSION}\" -DBUILD=${BUILD}
-OBJECTS= crt1.o msvc.o win_posix.o vfs_posix.o libposix.o \
-	arch/fork.o arch/syscall.o version.o
+OBJECTS= crt1.o version.o msvc.o win_posix.o vfs_posix.o libposix.o \
+	arch/fork.o arch/syscall.o
 GCCDIR=../mingw/gcc
 TRACEDIR=../libtrace
 

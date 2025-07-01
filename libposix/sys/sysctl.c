@@ -111,9 +111,9 @@ sysctl_KERN(const int *name, void *oldp, size_t *oldlenp, void *newp, size_t new
 		case KERN_FILE:		/* fstat.exe */
 			result = file_KERN_FILE(name, oldp, oldlenp);
 			break;
-//		case KERN_ARND:		/* makewhatis.exe */
-//			result = kern_KERN_ARND((char *)oldp, *(size_t *)oldlenp);
-//			break;
+		case KERN_ARND:		/* makewhatis.exe */
+			result = kern_KERN_ARND((char *)oldp, *(size_t *)oldlenp);
+			break;
 		case KERN_BOOTTIME:	/* w.exe */
 			result = kern_KERN_BOOTTIME((struct timeval *)oldp);
 			break;

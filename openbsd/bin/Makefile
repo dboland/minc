@@ -1,11 +1,12 @@
 include ../../Makefile.inc
 
-OBJECTS= chmod ln mkdir mv rm rmdir test chown chgrp ls cp
+PROGS= chmod ln mkdir mv rm rmdir test chown chgrp ls cp
+OBJECTS= ${OBJECTS} cat
 CFLAGS+= -DNOPIE -I${SRCDIR}/sys
 LBINDIR= ${PREFIX}/local/bin
 BINPATH= ${SRCDIR}/bin
 
-all: ${BINPATH} ${OBJECTS} cat
+all: ${BINPATH} ${OBJECTS}
 	@${MAKE} -C ksh
 
 ${BINPATH}:
@@ -15,9 +16,9 @@ ${BINPATH}:
 	@echo " ---------------------------------------------------"
 	@exit 1
 
-${LBINDIR}: ${OBJECTS}
+${LBINDIR}: ${PROGS}
 	@/bin/mkdir -p ${LBINDIR}
-	/bin/cp -vu ${OBJECTS} ${LBINDIR}/
+	/bin/cp -vu ${PROGS} ${LBINDIR}/
 
 chmod: ${SRCDIR}/bin/chmod/chmod.c
 	gcc -s -static ${CFLAGS} -o $@ $<
@@ -64,9 +65,9 @@ cp:
 
 install-local: ${LBINDIR}
 
-install:
+install: ${DESTDIR} ${OBJECTS}
 	@mkdir -p ${DESTDIR}${BINDIR}
-	${INSTALL} ${OBJECTS} cat ${DESTDIR}${BINDIR}/
+	${INSTALL} ${OBJECTS} ${DESTDIR}${BINDIR}/
 	@${MAKE} -C ksh install
 
 clean:

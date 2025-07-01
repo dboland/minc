@@ -341,7 +341,7 @@ sys_flock(call_t call, int fd, int operation)
 	WIN_TASK *pwTask = call.Task;
 	DWORD dwFlags = 0;
 	LARGE_INTEGER liOffset = {0, 0};
-	LARGE_INTEGER liSize = {0xFFFFFFFF, INT32_MAX};
+	LARGE_INTEGER liSize = {0xFFFFFFFF, 0xFFFFFFFF};
 
 	if (operation & LOCK_EX){
 		dwFlags |= LOCKFILE_EXCLUSIVE_LOCK;

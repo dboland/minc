@@ -1,0 +1,4 @@
+#	$OpenBSD: src/etc/ftpchroot,v 1.3 1996/07/18 12:12:47 deraadt Exp $
+#
+# list of users (one per line) given ftp access to a chrooted area.
+# read by ftpd(8).

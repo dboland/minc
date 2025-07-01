@@ -3,7 +3,6 @@ BUILD=$(shell date +%s)
 RELEASE=6.1.0
 DESTDIR=/DRIVE/minc-release
 GCCVER=4.8.1
-GCCLIB=libisl-15.dll libmingwex-0.dll
 MINGW=/C/MinGW
 SRCDIR=/D/openbsd-master
 INSTALL=install
@@ -40,3 +39,4 @@ MANDIR=${SHAREDIR}/man
 
 CFLAGS= -Wimplicit-function-declaration -Werror -ffreestanding -Wl,--disable-auto-import
 LDFLAGS= --disable-auto-import
+GCCLIB= ${BINDIR}/libisl-15.dll ${BINDIR}/libmingwex-0.dll

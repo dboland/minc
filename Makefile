@@ -29,7 +29,7 @@ mount.sh:
 	@/bin/cp mount.sh.sample mount.sh
 
 help:
-	@/bin/less BUILD.md
+	@less BUILD.md
 
 clean:
 	@${MAKE} -C mingw clean
