@@ -10,5 +10,6 @@ mount.sh
 *.tgz
 *.so.*
 *.pdf
+openbsd/include
 openbsd/lib/libc/sys/*.S
 openbsd/lib/libc/include

@@ -58,4 +58,4 @@ cp /mnt/d/src/gzip-1.13/gzip.exe .
 wrc makensis "d:/libminc-0.6.1/distrib/minc.nsi"
 #wrc makensis "d:/libminc-0.6.1/distrib/buildtools.nsi"
 #wrc makensis "d:/libminc-0.6.1/distrib/test.nsi"
-#git archive --format=zip --prefix=minc-master/ -o release/source/minc-master.zip HEAD
+#git archive --format=zip --prefix=minc-devel/ -o release/source/minc-devel.zip HEAD

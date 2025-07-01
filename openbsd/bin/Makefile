@@ -1,7 +1,7 @@
 include ../../Makefile.inc
 
 PROGS= chmod ln mkdir mv rm rmdir test chown chgrp ls cp
-OBJECTS= ${OBJECTS} cat
+OBJECTS= ${PROGS} cat
 CFLAGS+= -DNOPIE -I${SRCDIR}/sys
 LBINDIR= ${PREFIX}/local/bin
 BINPATH= ${SRCDIR}/bin
