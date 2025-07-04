@@ -21,11 +21,11 @@ ${MINGW}:
 %.a: %.def
 	dlltool -d $< -l $@ -k
 
-${UBINDIR}/%.exe: ${MINGW}/bin/%.exe
-	@/bin/cp -vu $< ${UBINDIR}/
+${UBINDIR}/%.exe:
+	@/bin/cp -vu ${MINGW}$@ ${UBINDIR}/
 
-${BINDIR}/%.dll: ${MINGW}/bin/%.dll
-	@/bin/cp -vu $< ${BINDIR}/
+${BINDIR}/%.dll:
+	@/bin/cp -vu ${MINGW}$@ ${BINDIR}/
 
 ${BINDIR}:
 	@/bin/mkdir -p ${BINDIR}

@@ -17,9 +17,10 @@ https://www.openbsd.org/anoncvs.html
 **Warning**: if you go forward, be advised that the MSYS system 
 running MinGW will be modified to function as an OpenBSD system.
 Your MinGW installation will be left completely untouched, but 
-the MSYS system running it, will not. If you already use MinGW 
-and expect it to continue creating Windows programs, you 
-should **not** go ahead and build the MinC Unix emulator.
+the MSYS system running it, will not. This means that you will 
+still be able to compile Windows programs (.exe), but not 
+libraries (.dll and .a), because your */include*, */local/bin* 
+and */lib* directories will be used for OpenBSD.
 
 ## Step 1: build the kernel
 
