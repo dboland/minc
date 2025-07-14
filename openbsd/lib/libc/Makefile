@@ -55,6 +55,7 @@ objects-clean:
 	/bin/rm -f */*.o arch/${ARCH}/*/*.o db/*/*.o
 
 # Perl needs libc.so
+
 install-local:
 	/bin/cp -vu ${IMPLIB} ${LIBDIR}/libc.so
 	/bin/cp -vu ${IMPLIB} ${LIBDIR}/libmingwex.dll.a
@@ -63,8 +64,7 @@ install-local:
 	/bin/cp -vu libc.a ${LIBDIR}/
 
 install: ${DESTDIR}
-	@mkdir -p ${DESTDIR}${LIBDIR}
-	${INSTALL} ${LIBC} ${DESTDIR}${LIBDIR}/
-	${INSTALL} libc.a ${DESTDIR}${LIBDIR}/
-	@#ln -s ${LIBC} ${DESTDIR}${LIBDIR}/libc.so
+	@mkdir -p ${DESTDIR}/usr/lib
+	${INSTALL} ${LIBC} libc.a ${DESTDIR}/usr/lib/
+	@#ln -s ${LIBC} ${DESTDIR}/usr/lib/libc.so
 

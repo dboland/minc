@@ -35,7 +35,7 @@ ${LIBDIR}:
 
 ${LIBEXEC}:
 	@/bin/mkdir -p ${LIBEXEC}
-	/bin/cp -rvu ${MINGW}/libexec/gcc ${LIBEXEC}/
+	/bin/cp -ru ${MINGW}/libexec/gcc ${LIBEXEC}/
 
 GCCBIN+= ${UBINDIR}/gcc.exe ${UBINDIR}/cpp.exe ${UBINDIR}/gdb.exe
 GCCLIB+= ${BINDIR}/libgmp-10.dll ${BINDIR}/libmpc-3.dll ${BINDIR}/libmpfr-4.dll \

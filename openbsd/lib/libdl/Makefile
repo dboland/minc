@@ -2,7 +2,7 @@ ROOTDIR=../../..
 
 include ${ROOTDIR}/Makefile.inc
 
-LIBEXEC=${PREFIX}/libexec
+LIBEXEC= /usr/libexec
 OBJECTS=libdl.o
 IMPLIB=libdl.dll.a
 LDFLAGS=-shared -s
@@ -33,5 +33,5 @@ install-local: ${LIBEXEC}
 install: ${DESTDIR}
 	@mkdir -p ${DESTDIR}${LIBEXEC}
 	${INSTALL} ld.so ${DESTDIR}${LIBEXEC}/
-	${INSTALL} ${IMPLIB} ${DESTDIR}${LIBDIR}/libdl.a
+	${INSTALL} ${IMPLIB} ${DESTDIR}/usr/lib/libdl.a
 

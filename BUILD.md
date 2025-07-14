@@ -21,8 +21,8 @@ To build the new kernel and compile the operating system code,
 we would have to install the OpenBSD header files into the 
 */include* directory, build some libraries and put them in 
 the */lib* directory. This would make MinGW unusable for normal 
-operation, so we create an isolated instance of the compiler. 
-Let's call it a *poor man's cross-compiler*. 
+operation, so instead we will create an isolated instance 
+of the compiler. Let's call it a *poor man's cross-compiler*. 
 
 Open the MSYS terminal, **cd** to your *minc-devel* directory 
 and make the *opt* target. All files will be installed in a 
