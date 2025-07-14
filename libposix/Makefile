@@ -51,16 +51,13 @@ ${LIBPOSIX}: ${OBJECTS}
 ${LIBDIR}:
 	/bin/mkdir -p ${LIBDIR}
 
-${BINDIR}:
-	/bin/mkdir -p ${BINDIR}
-
 install-local: ${LIBDIR} ${BINDIR}
 	/bin/cp -vu ${LIBPOSIX} ${BINDIR}/
 	/bin/cp -vu ${IMPLIB} ${LIBDIR}/libmingw32.a
 
 install: ${DESTDIR}
-	@mkdir -p ${DESTDIR}${SBINDIR}
-	${INSTALL} -m 06555 ${LIBPOSIX} ${DESTDIR}${SBINDIR}/
+	@mkdir -p ${DESTDIR}/usr/sbin/
+	${INSTALL} -m 06555 ${LIBPOSIX} ${DESTDIR}/usr/sbin/
 
 clean:
 	/bin/rm -f arch/*.o *.o *.a *.dll

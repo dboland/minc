@@ -1,13 +1,14 @@
-include ../../Makefile.inc
+ROOTDIR=../..
 
-PROGS=wrc mkent wtrace mount_refs mknod
-TRACEDIR=../../libtrace
-SBINPATH= ${SRCDIR}/sbin
-LBINDIR= ${PREFIX}/local/bin
+include ${ROOTDIR}/Makefile.inc
 
-all: ${SBINPATH} ${PROGS} bsd.exe
+PROGS= wrc mkent wtrace mount_refs mknod
+TRACEDIR= ${ROOTDIR}/libtrace
+SBINSRC= ${SRCDIR}/sbin
 
-${SBINPATH}:
+all: ${SBINSRC} ${PROGS} bsd.exe
+
+${SBINSRC}:
 	@echo " ---------------------------------------------------"
 	@echo "| OpenBSD 'sbin' directory ($@) not found. Make sure"
 	@echo "| you extracted this directory from the source archive."
@@ -15,14 +16,14 @@ ${SBINPATH}:
 	@exit 1
 
 %.o: %.c
-	gcc -c ${CFLAGS} -I../../include -I${SRCDIR}/sys -o $@ $<
+	gcc -c ${CFLAGS} -I${ROOTDIR}/include -I${SRCDIR}/sys -o $@ $<
 
 %.exe: %.o
 	gcc -s ${CFLAGS} -o $@ $<
 
-${LBINDIR}: ${PROGS}
-	@/bin/mkdir -p ${LBINDIR}
-	/bin/cp -vu mknod ${LBINDIR}/
+${UBINDIR}: ${PROGS}
+	@/bin/mkdir -p ${UBINDIR}
+	/bin/cp -vu mknod ${UBINDIR}/
 
 wrc: wrc.exe
 
@@ -42,7 +43,7 @@ bsd.exe: bsd.o version.o
 	gcc -s -static ${CFLAGS} -o $@ $^
 
 libwtrace.o: libwtrace.c
-	gcc -c ${CFLAGS} -I${MINGW}/include -I../../include -o $@ $<
+	gcc -c ${CFLAGS} -I${MINGW}/include -I${ROOTDIR}/include -o $@ $<
 
 wtrace: libwtrace.o wtrace.o
 	gcc -s ${CFLAGS} -o $@ -L${TRACEDIR} $^ -ltrace \
@@ -53,13 +54,13 @@ mount_refs:
 	@gcc -c ${CFLAGS} -o getmntopts.o ${SRCDIR}/sbin/mount/getmntopts.c
 	gcc -s ${CFLAGS} -o $@ mount_ntfs.o getmntopts.o
 
-install-local: ${LBINDIR}
+install-local: ${UBINDIR}
 
 install: ${DESTDIR}
-	@mkdir -p ${DESTDIR}${SBINDIR}
-	${INSTALL} ${PROGS} ${DESTDIR}${SBINDIR}/
-	${INSTALL} -m 02555 -o 0 -g 0 bsd.exe ${DESTDIR}${SBINDIR}/
-	${INSTALL} -m 00754 -o 0 -g 0 setup.sh ${DESTDIR}${SBINDIR}/
+	@mkdir -p ${DESTDIR}/sbin
+	${INSTALL} ${PROGS} ${DESTDIR}/sbin/
+	${INSTALL} -m 02555 -o 0 -g 0 bsd.exe ${DESTDIR}/sbin/
+	${INSTALL} -m 00754 -o 0 -g 0 setup.sh ${DESTDIR}/sbin/
 
 clean:
 	/bin/rm -f *.exe *.o

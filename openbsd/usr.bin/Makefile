@@ -3,21 +3,20 @@ include ../../Makefile.inc
 PROGS= arch uname touch
 OBJECTS= ${PROGS} grep du env
 CFLAGS+= -I${SRCDIR}/sys
-LBINDIR= ${PREFIX}/local/bin
-UBINPATH= ${SRCDIR}/usr.bin
+UBINSRC= ${SRCDIR}/usr.bin
 
-all: ${UBINPATH} ${OBJECTS} install.exe
+all: ${UBINSRC} ${OBJECTS} install.exe
 
-${UBINPATH}:
+${UBINSRC}:
 	@echo " ---------------------------------------------------"
 	@echo "| OpenBSD 'usr.bin' directory ($@) not found. Make sure"
 	@echo "| you extracted this directory from the source archive."
 	@echo " ---------------------------------------------------"
 	@exit 1
 
-${LBINDIR}: ${PROGS} install.exe
-	@/bin/mkdir -p ${LBINDIR}
-	/bin/cp -vu ${PROGS} install.exe install.exe.manifest ${LBINDIR}/
+${UBINDIR}: ${PROGS} install.exe
+	@/bin/mkdir -p ${UBINDIR}
+	/bin/cp -vu ${PROGS} install.exe install.exe.manifest ${UBINDIR}/
 
 uname: ${SRCDIR}/usr.bin/uname/uname.c
 	gcc -s -static ${CFLAGS} -DNOPIE -o $@ $<
@@ -50,11 +49,11 @@ du: ${SRCDIR}/usr.bin/du/du.c
 env: env.c
 	gcc -s ${CFLAGS} -o $@ $<
 
-install-local: ${LBINDIR}
+install-local: ${UBINDIR}
 
 install: ${DESTDIR} ${OBJECTS} install.exe
-	@mkdir -p ${DESTDIR}${UBINDIR}
-	${INSTALL} ${OBJECTS} install install.manifest ${DESTDIR}${UBINDIR}/
+	@mkdir -p ${DESTDIR}/usr/bin
+	${INSTALL} ${OBJECTS} install install.manifest ${DESTDIR}/usr/bin/
 
 clean:
 	/bin/rm -f *.exe *.o

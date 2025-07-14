@@ -21,14 +21,11 @@ ${MINGW}:
 %.a: %.def
 	dlltool -d $< -l $@ -k
 
-${UBINDIR}/%.exe:
-	@/bin/cp -vu ${MINGW}$@ ${UBINDIR}/
+${UBINDIR}/%.exe: ${MINGW}/bin/%.exe
+	@/bin/cp -vu $^ $@
 
-${BINDIR}/%.dll:
-	@/bin/cp -vu ${MINGW}$@ ${BINDIR}/
-
-${BINDIR}:
-	@/bin/mkdir -p ${BINDIR}
+${BINDIR}/%.dll: ${MINGW}/bin/%.dll
+	@/bin/cp -vu $^ $@
 
 ${UBINDIR}:
 	@/bin/mkdir -p ${UBINDIR}
@@ -60,18 +57,18 @@ install-gcc: ${BINDIR} ${UBINDIR} ${GCCBIN} ${GCCLIB}
 install-ld: ${UBINDIR} ${BINUTILS}
 install-tools: ${MSGBIN}
 
-# tip: create dummy ld.so for configure scripts to detect shared libs
+# GetIpStatisticsEx() is missing in vanilla MinGW (libiphlpapi.dll.a)
+# tip: create dummy /libexec/ld.so for configure scripts to detect shared libs
 
 install-local: ${MINGW} install-gcc install-ld ${LIBEXEC} ${LIBDIR}
 	/bin/cp -vu ${LIBS} ${LIBDIR}/
 	/bin/cp -vu libiphlpapi.dll.a ${MINGW}/lib/
 	@${MAKE} -C gcc install-local
 
-install:
+install: ${DESTDIR}
 	${INSTALL} libmsvcrt.a ${DESTDIR}${LIBDIR}/
 	@${MAKE} -C gcc install
 
 clean:
 	/bin/rm -f *.a
 	@${MAKE} -C gcc clean
-

@@ -2,9 +2,10 @@ usage:
 	@echo "usage: ${MAKE} TARGET"
 	@echo
 	@echo "Targets:"
+	@echo " opt			set up a simple cross-compiler"
+	@echo " kernel			build libtrace and libposix"
+	@echo " system			build OpenBSD system binaries"
 	@echo " all			build all targets"
-	@echo " kernel			build libposix only"
-	@echo " system			build OpenBSD system binaries only"
 	@echo " install		install OpenBSD into 'DESTDIR'"
 	@echo " help			show build instructions"
 
@@ -13,9 +14,11 @@ all: kernel system
 %.d: %
 	@${MAKE} -C $<
 
-kernel: Makefile.inc mount.sh
+opt: Makefile.inc mount.sh
 	@${MAKE} -C openbsd install-local
 	@${MAKE} -C mingw all install-local
+
+kernel:
 	@${MAKE} -C libtrace all
 	@${MAKE} -C libposix all install-local
 

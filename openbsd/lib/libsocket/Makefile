@@ -21,9 +21,6 @@ libsocket.a:
 version.o: version.rc
 	windres -DVERSION=\\\"${VERSION}\\\" -DRELEASE=\\\"${RELEASE}\\\" $< $@
 
-${IMPLIB}: libsocket.def
-	dlltool -d $< -D ${LIBSOCKET} -l $@
-
 ${LIBSOCKET}: crt1.o version.o
 	${LD} -s -shared ${LDFLAGS} -e _DllMainCRTStartup@12 --out-implib=${IMPLIB} \
 	-o $@ crt1.o --image-base=${IMGBASE_LIBSOCKET} $(shell /bin/ls */*.so) version.o \
@@ -34,15 +31,14 @@ ${LIBSOCKET}: crt1.o version.o
 
 objects: asr.d net.d rpc.d
 
-clean: objects-clean lib-clean
-
 lib-clean:
-	rm -f *.o *.a ${LIBSOCKET}
+	/bin/rm -f *.o *.a ${LIBSOCKET}
 
 objects-clean:
-	rm -f */*.o */*.so
+	/bin/rm -f */*.o */*.so
 
 # Perl needs libsocket.so
+
 install-local:
 	/bin/cp -vu ${IMPLIB} ${LIBDIR}/
 	/bin/cp -vu ${IMPLIB} ${LIBDIR}/libsocket.so
@@ -52,4 +48,6 @@ install: ${DESTDIR}
 	${INSTALL} ${LIBSOCKET} ${DESTDIR}${LIBDIR}/
 	${INSTALL} libsocket.a ${DESTDIR}${LIBDIR}/
 	@#${LN} -s ${LIBSOCKET} ${DESTDIR}${LIBDIR}/libsocket.so
+
+clean: objects-clean lib-clean
 

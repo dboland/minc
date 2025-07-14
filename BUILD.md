@@ -1,39 +1,39 @@
 # Building the system
 
-To build the MinC Unix emulator for Windows you need MinGW, 
-the latest OpenBSD source code and NSIS to create the installer. 
-Below their download locations:
+To build the MinC Unix emulator for Windows you need the 
+OpenBSD 6.1.0 source code and MinGW:
 
-* MinGW32: https://sourceforge.net/projects/mingw/
-* NSIS: https://nsis.sourceforge.io/Download
+* https://sourceforge.net/projects/mingw/
 
-I pulled the *OpenBSD* source code from the read-only GitHub 
-repository. There is an article which explains how to pull the 
-source for a specific stable version, but you need 
-the CVS software:
+I pulled the OpenBSD source code from the read-only GitHub 
+repository. There is an article which explains how to pull 
+the source for a specific version, but you will need the 
+CVS software:
 
-https://www.openbsd.org/anoncvs.html
+* https://www.openbsd.org/anoncvs.html
 
-**Warning**: if you go forward, be advised that the MSYS system 
-running MinGW will be modified to function as an OpenBSD system.
-Your MinGW installation will be left completely untouched, but 
-the MSYS system running it, will not. This means that you will 
-still be able to compile Windows programs (.exe), but not 
-libraries (.dll and .a), because your */include*, */local/bin* 
-and */lib* directories will be used for OpenBSD.
+However, you can also use my copy (186Mb). Move this file to 
+preferably the root of a disk drive and extract it there:
+
+* https://minc.commandlinerevolution.nl/openbsd-master-6.1.0.zip
+
+To build the new kernel and compile the operating system code, 
+we would have to install the OpenBSD header files into the 
+*/include* directory, build some libraries and put them in 
+the */lib* directory. This would make MinGW unusable for normal 
+operation, so we create an isolated instance of the compiler. 
+Let's call it a *poor man's cross-compiler*. 
+
+Open the MSYS terminal, **cd** to your *minc-devel* directory 
+and make the *opt* target. All files will be installed in a 
+newly created directory, called */opt*:
+
+	make opt
 
 ## Step 1: build the kernel
 
-For this you need the OpenBSD 6.1.0 source code. As mentioned, 
-you can get it yourself using cvs, but you can also use my 
-copy (186Mb). Move this file to preferably the root of a disk 
-drive and extract it there:
-
-https://minc.commandlinerevolution.nl/openbsd-master-6.1.0.zip
-
-Most of the kernel can be built using a vanilla MinGW installation. 
-Open the MSYS terminal, **cd** to your *minc-devel* directory 
-and make the kernel first:
+Most of the kernel will be built using the vanilla MinGW 
+installation. Make this part of the kernel first:
 
 	make kernel
 
@@ -44,7 +44,7 @@ output. This means we are ready for step 2:
 
 ## Step 2: build a minimal system
 
-A minimal system consists of the kernel, the BSD libc library, the 
+A minimal system consists of the kernel, the BSD C library, the 
 boot program, the shell and some utilities. These will be built by 
 the new system itself. To achieve this, you will need to unmount 
 the */mingw* directory. This is done by running the **mount** script:
@@ -60,22 +60,26 @@ the **uname** command:
 
 	uname -a
 
-It should be similar to the following output:
+The result should be similar to the following output:
 
 	OpenBSD dimension.sassenheim.dmz 6.1.0 MINC#20240915 i386
 
+**Note**: if you want back to building Windows programs, simply 
+re-mount the */mingw* directory:
+
+	./mount.sh mingw
+
 ## Step 3: install the system
 
-To install the new system you have to manually create the root 
+To install your new system you have to manually create the root 
 directory, run the **install** target and the **setup** program, 
 thereby mimicking what is done automatically by the MinC installer.
-This is also to avoid accidentally writing into an existing 
-MinC system. 
+This is to avoid accidentally writing into an existing MinC system. 
 
 For this step, you need to be Administrator. Close the MSYS 
 terminal and open it again as Administrator. Change to your 
 *minc-devel* directory and create the MinC root folder. I 
-name it *minc-release* so it won't conflict with an existing 
+named it *minc-release* so it won't conflict with an existing 
 MinC system:
 
 	mkdir /c/minc-release
@@ -112,21 +116,19 @@ put following lines in a file named *minc-release.cmd* on your Desktop:
 	START "MinC" bsd.exe -h
 
 The *START* command tells the console to read console settings from
-the Registry. The *-h* switch tells MinC to change to your */home* 
-directory.
+the Windows Registry. The *-h* switch tells MinC to change to 
+your */home* directory.
 
-A final note: the root folder you created seems to have disappeared.
+**Note**: the root folder you created seems to have disappeared.
 This is because when MinC mounts its root directory, it hides the 
 directory from view in Windows Explorer. This is super important 
 for preventing recursive directory listings. It is also standard 
-practice in Windows for mounted drives.
-
-If you want to access the MinC root folder in Windows Explorer, just
-type its location in the address bar, like *C:\minc-release* and 
-you're back.
+practice in Windows for mounted drives. If you want to access 
+the MinC root folder in Windows Explorer, just type its location 
+in the address bar, like *C:\minc-release* and you're back.
 
 ## Step 4: building the GCC compiler
 
 This is currently not within the scope of this document.
 
-Daniel Boland, June, 2025
+Daniel Boland, July, 2025

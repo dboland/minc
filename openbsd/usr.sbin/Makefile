@@ -20,8 +20,8 @@ pwd_mkdb: ${SRCDIR}/usr.sbin/pwd_mkdb/pwd_mkdb.c
 	gcc -s ${CFLAGS} -o $@ $< -lutil
 
 install: ${DESTDIR}
-	@mkdir -p ${DESTDIR}${USBINDIR}
-	${INSTALL} ${OBJECTS} ${DESTDIR}${USBINDIR}/
+	@mkdir -p ${DESTDIR}/usr/sbin
+	${INSTALL} ${OBJECTS} ${DESTDIR}/usr/sbin/
 
 clean:
 	/bin/rm -f *.exe *.o

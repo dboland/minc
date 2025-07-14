@@ -3,22 +3,21 @@ include ../../Makefile.inc
 PROGS= chmod ln mkdir mv rm rmdir test chown chgrp ls cp
 OBJECTS= ${PROGS} cat
 CFLAGS+= -DNOPIE -I${SRCDIR}/sys
-LBINDIR= ${PREFIX}/local/bin
-BINPATH= ${SRCDIR}/bin
+BINSRC= ${SRCDIR}/bin
 
-all: ${BINPATH} ${OBJECTS}
+all: ${BINSRC} ${OBJECTS}
 	@${MAKE} -C ksh
 
-${BINPATH}:
+${BINSRC}:
 	@echo " ---------------------------------------------------"
 	@echo "| OpenBSD 'bin' directory ($@) not found. Make sure"
 	@echo "| you extracted this directory from the source archive."
 	@echo " ---------------------------------------------------"
 	@exit 1
 
-${LBINDIR}: ${PROGS}
-	@/bin/mkdir -p ${LBINDIR}
-	/bin/cp -vu ${PROGS} ${LBINDIR}/
+${UBINDIR}: ${PROGS}
+	@/bin/mkdir -p ${UBINDIR}
+	/bin/cp -vu ${PROGS} ${UBINDIR}/
 
 chmod: ${SRCDIR}/bin/chmod/chmod.c
 	gcc -s -static ${CFLAGS} -o $@ $<
@@ -63,7 +62,7 @@ cp:
 	@gcc -c ${CFLAGS} -o cp.o ${SRCDIR}/bin/cp/cp.c
 	gcc -s -static ${CFLAGS} -o $@ utils.o cp.o
 
-install-local: ${LBINDIR}
+install-local: ${UBINDIR}
 
 install: ${DESTDIR} ${OBJECTS}
 	@mkdir -p ${DESTDIR}${BINDIR}

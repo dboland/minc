@@ -41,12 +41,13 @@ ksh.exe: ${OBJECTS}
 	@/bin/echo "done."
 	gcc -static -s ${CFLAGS} -o $@ ${OBJECTS}
 
-clean:
-	rm -f *.o *.exe
-
 install: ${DESTDIR}
 	@mkdir -p ${DESTDIR}${BINDIR}
 	${INSTALL} ksh ${DESTDIR}${BINDIR}/
 	ln -f ${DESTDIR}${BINDIR}/ksh ${DESTDIR}${BINDIR}/sh
-	@mkdir -p ${DESTDIR}${MANDIR}/man1
-	${INSTALL} sh.1 ksh.1 ${DESTDIR}${MANDIR}/man1/
+	@mkdir -p ${DESTDIR}/usr/share/man/man1
+	${INSTALL} sh.1 ksh.1 ${DESTDIR}/usr/share/man/man1/
+
+clean:
+	rm -f *.o *.exe
+

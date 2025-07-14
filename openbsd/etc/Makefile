@@ -20,6 +20,6 @@ ${DESTDIR}${ETCDIR}: ${FILES}
 	@/bin/cp -uv $< $@
 
 login.conf:
-	@/bin/cp -uv ${SRCDIR}/etc/etc.${ARCH}/login.conf $@
+	@/bin/cp -uv ${ETCSRC}/etc.${ARCH}/login.conf $@
 
 install: ${DESTDIR}${ETCDIR}

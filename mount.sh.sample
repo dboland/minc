@@ -1,17 +1,17 @@
 #!/bin/sh
 
-FSTAB=/etc/fstab
 MINGW=C:/MinGW
-DESTDIR=C:/MinC
+OPTDIR=${MINGW}/msys/1.0/opt
+FSTAB=/etc/fstab
 
 if ! [ -d ${MINGW} ]; then
 	echo "${MINGW}: No such directory"
 elif [ "$1" == "mingw" ]; then
 	echo "${MINGW} /mingw" >$FSTAB
-elif ! [ -d ${DESTDIR} ]; then
-	echo "${DESTDIR}: No such directory"
+elif ! [ -d ${OPTDIR} ]; then
+	echo "${OPTDIR}: No such directory"
 elif [ "$1" == "minc" ]; then
-	echo "${DESTDIR}/usr/lib /mingw/bin" >$FSTAB
+	echo "${OPTDIR} /mingw" >$FSTAB
 else
 	/bin/cat $FSTAB
 fi
