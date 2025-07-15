@@ -30,21 +30,21 @@ OBJECTS= alloc.o c_ksh.o c_sh.o c_test.o c_ulimit.o edit.o 2021_emacs.o eval.o \
 all: ksh.exe
 
 %.o: %.c
-	@/bin/echo -n "$@ "
+	@echo -n "$@ "
 	@gcc -c ${CFLAGS} -g -DNOPIE -o $@ $<
 
 misc.o: misc.c
-	@/bin/echo -n "$@ "
+	@echo -n "$@ "
 	@gcc -c ${CFLAGS} -g -DNOPIE -I${SRCDIR}/lib/libc/gen -o $@ $<
 
 ksh.exe: ${OBJECTS}
-	@/bin/echo "done."
+	@echo "done."
 	gcc -static -s ${CFLAGS} -o $@ ${OBJECTS}
 
 install: ${DESTDIR}
-	@mkdir -p ${DESTDIR}${BINDIR}
-	${INSTALL} ksh ${DESTDIR}${BINDIR}/
-	ln -f ${DESTDIR}${BINDIR}/ksh ${DESTDIR}${BINDIR}/sh
+	@mkdir -p ${DESTDIR}/bin
+	${INSTALL} ksh ${DESTDIR}/bin/
+	ln -f ${DESTDIR}/bin/ksh ${DESTDIR}/bin/sh
 	@mkdir -p ${DESTDIR}/usr/share/man/man1
 	${INSTALL} sh.1 ksh.1 ${DESTDIR}/usr/share/man/man1/
 

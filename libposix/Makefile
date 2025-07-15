@@ -19,6 +19,12 @@ ${DESTDIR}:
 	@echo " ---------------------------------------------------"
 	@exit 1
 
+../Makefile.inc:
+	@echo " ---------------------------------------------------"
+	@echo "| Cross-compiler not set up. Please run 'make opt' first.
+	@echo " ---------------------------------------------------"
+	@exit 1
+
 crt1.o: crt1.c
 	gcc -c ${CFLAGS} $<
 
