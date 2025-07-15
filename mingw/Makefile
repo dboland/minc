@@ -3,6 +3,7 @@ include ../Makefile.inc
 LIBEXEC=${PREFIX}/libexec
 LIBS=libadvapi32.a libkernel32.a libshell32.a libuser32.a \
 	libmoldname.a libgmon.a libmsvcrt.a
+ULIBDIR= /usr/lib
 
 all: ${MINGW} ${LIBS} libiphlpapi.dll.a
 	@${MAKE} -C gcc
@@ -21,14 +22,14 @@ ${MINGW}:
 %.a: %.def
 	dlltool -d $< -l $@ -k
 
-${UBINDIR}/%.exe: ${MINGW}/bin/%.exe
+${BINDIR}/%.exe: ${MINGW}/bin/%.exe
 	@/bin/cp -vu $^ $@
 
 ${BINDIR}/%.dll: ${MINGW}/bin/%.dll
 	@/bin/cp -vu $^ $@
 
-${UBINDIR}:
-	@/bin/mkdir -p ${UBINDIR}
+${BINDIR}:
+	@/bin/mkdir -p ${BINDIR}
 
 ${LIBDIR}:
 	@/bin/mkdir -p ${LIBDIR}
@@ -37,24 +38,24 @@ ${LIBEXEC}:
 	@/bin/mkdir -p ${LIBEXEC}
 	/bin/cp -ru ${MINGW}/libexec/gcc ${LIBEXEC}/
 
-GCCBIN+= ${UBINDIR}/gcc.exe ${UBINDIR}/cpp.exe ${UBINDIR}/gdb.exe
+GCCBIN+= ${BINDIR}/gcc.exe ${BINDIR}/cpp.exe ${BINDIR}/gdb.exe
 GCCLIB+= ${BINDIR}/libgmp-10.dll ${BINDIR}/libmpc-3.dll ${BINDIR}/libmpfr-4.dll \
 	${BINDIR}/zlib1.dll ${BINDIR}/libgcc_s_dw2-1.dll
-GCCBIN+= ${UBINDIR}/g++.exe ${UBINDIR}/c++.exe
+GCCBIN+= ${BINDIR}/g++.exe ${BINDIR}/c++.exe
 GCCLIB+= ${BINDIR}/libintl-8.dll ${BINDIR}/libiconv-2.dll ${BINDIR}/libstdc++-6.dll
 
-BINUTILS= ${UBINDIR}/ld.exe ${UBINDIR}/ar.exe ${UBINDIR}/as.exe ${UBINDIR}/nm.exe \
-	${UBINDIR}/objdump.exe ${UBINDIR}/ranlib.exe ${UBINDIR}/size.exe \
-	${UBINDIR}/strip.exe ${UBINDIR}/dlltool.exe ${UBINDIR}/gprof.exe \
-	${UBINDIR}/addr2line.exe ${UBINDIR}/dllwrap.exe ${UBINDIR}/elfedit.exe \
-	${UBINDIR}/objcopy.exe ${UBINDIR}/strings.exe ${UBINDIR}/windmc.exe \
-	${UBINDIR}/windres.exe ${UBINDIR}/c++filt.exe
+BINUTILS= ${BINDIR}/ld.exe ${BINDIR}/ar.exe ${BINDIR}/as.exe ${BINDIR}/nm.exe \
+	${BINDIR}/objdump.exe ${BINDIR}/ranlib.exe ${BINDIR}/size.exe \
+	${BINDIR}/strip.exe ${BINDIR}/dlltool.exe ${BINDIR}/gprof.exe \
+	${BINDIR}/addr2line.exe ${BINDIR}/dllwrap.exe ${BINDIR}/elfedit.exe \
+	${BINDIR}/objcopy.exe ${BINDIR}/strings.exe ${BINDIR}/windmc.exe \
+	${BINDIR}/windres.exe ${BINDIR}/c++filt.exe
 
-MSGBIN= ${UBINDIR}/msgfmt.exe ${BINDIR}/libgettextsrc-0-18-3.dll \
+MSGBIN= ${BINDIR}/msgfmt.exe ${BINDIR}/libgettextsrc-0-18-3.dll \
 	${BINDIR}/libgettextlib-0-18-3.dll
 
-install-gcc: ${BINDIR} ${UBINDIR} ${GCCBIN} ${GCCLIB}
-install-ld: ${UBINDIR} ${BINUTILS}
+install-gcc: ${BINDIR} ${GCCBIN} ${GCCLIB}
+install-ld: ${BINDIR} ${BINUTILS}
 install-tools: ${MSGBIN}
 
 # GetIpStatisticsEx() is missing in vanilla MinGW (libiphlpapi.dll.a)
@@ -66,7 +67,7 @@ install-local: ${MINGW} install-gcc install-ld ${LIBEXEC} ${LIBDIR}
 	@${MAKE} -C gcc install-local
 
 install: ${DESTDIR}
-	${INSTALL} libmsvcrt.a ${DESTDIR}${LIBDIR}/
+	${INSTALL} libmsvcrt.a ${DESTDIR}${ULIBDIR}/
 	@${MAKE} -C gcc install
 
 clean:

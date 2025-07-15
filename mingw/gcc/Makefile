@@ -1,17 +1,18 @@
 include ../../Makefile.inc
 
-CRT0=crt0.o
-OBJECTS=${CRT0} crt1.o crtbegin.o crtend.o
-LIBS=libgcc.a libgcc_s.a libgcc_eh.a
-GCCOBJ=_mulsc3.o _muldc3.o _mulxc3.o _ctzdi2.o \
+CRT0= crt0.o
+OBJECTS= ${CRT0} crt1.o crtbegin.o crtend.o
+LIBS= libgcc.a libgcc_s.a libgcc_eh.a
+GCCOBJ= _mulsc3.o _muldc3.o _mulxc3.o _ctzdi2.o \
 	_ffsdi2.o _popcountdi2.o _popcountsi2.o _popcount_tab.o _udivdi3.o \
 	_divdi3.o _clrsbdi2.o _clrsbsi2.o \
 	_chkstk.o _chkstk_ms.o 
-GCCPATH=lib/gcc/mingw32/${GCCVER}
+GCCDIR= /lib/gcc/mingw32/${GCCVER}
+ULIBDIR= /usr/lib
 
-all: ${MINGW}/${GCCPATH} ${OBJECTS} ${LIBS}
+all: ${MINGW}${GCCDIR} ${OBJECTS} ${LIBS}
 
-${MINGW}/${GCCPATH}:
+${MINGW}${GCCDIR}:
 	@echo " -----------------------------------------------"
 	@echo "| GCC libexec directory ($@) not found. Make sure"
 	@echo "| the 'GCCVER' variable is defined correctly in Makefile.inc"
@@ -30,7 +31,7 @@ ${MINGW}/${GCCPATH}:
 #gnu_mntent.o  futimesat.o
 
 libgcc.a: wintls.o emutls.o mempcpy.o
-	ar xv ${MINGW}/${GCCPATH}/libgcc.a ${GCCOBJ}
+	ar xv ${MINGW}${GCCDIR}/libgcc.a ${GCCOBJ}
 	ar cru $@ ${GCCOBJ} $^
 
 libgcc_s.a: libgcc_s.def
@@ -47,29 +48,29 @@ libgcc_eh.a: libgcc_eh.def
 crt0_tls.o: crt0.o win_tls.o
 	ld -r -o $@ crt0.o win_tls.o
 
-${PREFIX}/${GCCPATH}: ${MINGW}/${GCCPATH}
-	/bin/mkdir -p ${PREFIX}/${GCCPATH}
-	/bin/cp -vu ${MINGW}/${GCCPATH}/libstdc++.dll.a ${PREFIX}/${GCCPATH}/libstdc++.a
+${PREFIX}${GCCDIR}: ${MINGW}${GCCDIR}
+	/bin/mkdir -p ${PREFIX}${GCCDIR}
+	/bin/cp -vu ${MINGW}${GCCDIR}/libstdc++.dll.a ${PREFIX}${GCCDIR}/libstdc++.a
 
-GCCINC=${PREFIX}/${GCCPATH}/include
+GCCINC=${PREFIX}${GCCDIR}/include
 
 includes-local: ${GCCINC}
 	/bin/cp -rvu ${MINGW}${GCCINC}/c++ ${GCCINC}/
 	/bin/cp -rvu ${MINGW}${GCCINC}/ssp ${GCCINC}/
 
-install-local: ${PREFIX}/${GCCPATH}
-	/bin/cp -vu ${LIBS} ${PREFIX}/${GCCPATH}/
-	/bin/cp -vu crtbegin.o crtend.o ${PREFIX}/${GCCPATH}/
+install-local: ${PREFIX}${GCCDIR}
+	/bin/cp -vu ${LIBS} ${PREFIX}${GCCDIR}/
+	/bin/cp -vu crtbegin.o crtend.o ${PREFIX}${GCCDIR}/
 	/bin/cp -vu ${CRT0} ${LIBDIR}/crt2.o
 	/bin/cp -vu crt1.o ${LIBDIR}/dllcrt2.o
 	@#/bin/cp -vu gcrt0.o ${LIBDIR}/gcrt2.o
 
-install: ${DESTDIR}${LIBDIR}
-	${INSTALL} libgcc.a ${DESTDIR}${LIBDIR}/gcc/i686-pe-openbsd/${GCCVER}/
-	${INSTALL} crtbegin.o crtend.o ${DESTDIR}${LIBDIR}/
-	${INSTALL} ${CRT0} ${DESTDIR}${LIBDIR}/
-	${INSTALL} crt1.o ${DESTDIR}${LIBDIR}/
-	${INSTALL} gcrt0.o ${DESTDIR}${LIBDIR}/
+install: ${DESTDIR}${ULIBDIR}
+	${INSTALL} libgcc.a ${DESTDIR}${ULIBDIR}/gcc/i686-pe-openbsd/${GCCVER}/
+	${INSTALL} crtbegin.o crtend.o ${DESTDIR}${ULIBDIR}/
+	${INSTALL} ${CRT0} ${DESTDIR}${ULIBDIR}/
+	${INSTALL} crt1.o ${DESTDIR}${ULIBDIR}/
+	${INSTALL} gcrt0.o ${DESTDIR}${ULIBDIR}/
 
 clean:
 	/bin/rm -f *.o *.a

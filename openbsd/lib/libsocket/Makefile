@@ -45,8 +45,7 @@ install-local:
 	/bin/cp -vu libsocket.a ${LIBDIR}/
 
 install: ${DESTDIR}
-	${INSTALL} ${LIBSOCKET} ${DESTDIR}/usr/lib/
-	${INSTALL} libsocket.a ${DESTDIR}/usr/lib/
+	${INSTALL} ${LIBSOCKET} libsocket.a ${DESTDIR}/usr/lib/
 	@#${LN} -s ${LIBSOCKET} ${DESTDIR}/usr/lib/libsocket.so
 
 clean: objects-clean lib-clean

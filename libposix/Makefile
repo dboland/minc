@@ -8,6 +8,7 @@ OBJECTS= crt1.o version.o msvc.o win_posix.o vfs_posix.o libposix.o \
 	arch/fork.o arch/syscall.o
 GCCDIR=../mingw/gcc
 TRACEDIR=../libtrace
+SBINDIR= /sbin
 
 all: ${LIBPOSIX}
 
@@ -56,8 +57,8 @@ install-local: ${LIBDIR} ${BINDIR}
 	/bin/cp -vu ${IMPLIB} ${LIBDIR}/libmingw32.a
 
 install: ${DESTDIR}
-	@mkdir -p ${DESTDIR}/usr/sbin/
-	${INSTALL} -m 06555 ${LIBPOSIX} ${DESTDIR}/usr/sbin/
+	@mkdir -p ${DESTDIR}${SBINDIR}/
+	${INSTALL} -m 06555 ${LIBPOSIX} ${DESTDIR}${SBINDIR}/
 
 clean:
 	/bin/rm -f arch/*.o *.o *.a *.dll

@@ -15,11 +15,11 @@ ${BINSRC}:
 	@echo " ---------------------------------------------------"
 	@exit 1
 
-${UBINDIR}: ${PROGS}
-	@/bin/mkdir -p ${UBINDIR}
-	/bin/cp -vu ${PROGS} ${UBINDIR}/
+${BINDIR}: ${PROGS}
+	@/bin/mkdir -p ${BINDIR}
+	/bin/cp -vu ${PROGS} ${BINDIR}/
 
-chmod: ${SRCDIR}/bin/chmod/chmod.c
+chmod: ${BINSRC}/chmod/chmod.c
 	gcc -s -static ${CFLAGS} -o $@ $<
 
 chown: chmod.exe
@@ -28,45 +28,45 @@ chown: chmod.exe
 chgrp: chmod.exe
 	/bin/cp -vu $< $@.exe
 
-ln: ${SRCDIR}/bin/ln/ln.c
+ln: ${BINSRC}/ln/ln.c
 	gcc -s -static ${CFLAGS} -o $@ $<
 
-mkdir: ${SRCDIR}/bin/mkdir/mkdir.c
+mkdir: ${BINSRC}/mkdir/mkdir.c
 	gcc -s -static ${CFLAGS} -o $@ $<
 
-mv: ${SRCDIR}/bin/mv/mv.c
+mv: ${BINSRC}/mv/mv.c
 	gcc -s -static ${CFLAGS} -o $@ $<
 
-rm: ${SRCDIR}/bin/rm/rm.c
+rm: ${BINSRC}/rm/rm.c
 	gcc -s -static ${CFLAGS} -o $@ $<
 
-rmdir: ${SRCDIR}/bin/rmdir/rmdir.c
+rmdir: ${BINSRC}/rmdir/rmdir.c
 	gcc -s -static ${CFLAGS} -o $@ $<
 
-test: ${SRCDIR}/bin/test/test.c
+test: ${BINSRC}/test/test.c
 	gcc -s -static ${CFLAGS} -o $@ $<
 
-cat: ${SRCDIR}/bin/cat/cat.c
+cat: ${BINSRC}/cat/cat.c
 	gcc -s -static ${CFLAGS} -o $@ $<
 
 ls:
-	@gcc -c ${CFLAGS} -o main.o ${SRCDIR}/bin/ls/main.c
-	@gcc -c ${CFLAGS} -o print.o ${SRCDIR}/bin/ls/print.c
-	@gcc -c ${CFLAGS} -o cmp.o ${SRCDIR}/bin/ls/cmp.c
-	@gcc -c ${CFLAGS} -o util.o ${SRCDIR}/bin/ls/util.c
-	@gcc -c ${CFLAGS} -o ls.o ${SRCDIR}/bin/ls/ls.c
-	gcc -s -static ${CFLAGS} -o $@ main.o print.o cmp.o util.o ls.o -lutil
+	@gcc -c ${CFLAGS} -o ls-main.o ls-main.c
+	@gcc -c ${CFLAGS} -o print.o ${BINSRC}/ls/print.c
+	@gcc -c ${CFLAGS} -o cmp.o ${BINSRC}/ls/cmp.c
+	@gcc -c ${CFLAGS} -o util.o ${BINSRC}/ls/util.c
+	@gcc -c ${CFLAGS} -o ls.o ${BINSRC}/ls/ls.c
+	gcc -s -static ${CFLAGS} -o $@ ls-main.o print.o cmp.o util.o ls.o -lutil
 
 cp:
-	@gcc -c ${CFLAGS} -o utils.o ${SRCDIR}/bin/cp/utils.c
-	@gcc -c ${CFLAGS} -o cp.o ${SRCDIR}/bin/cp/cp.c
+	@gcc -c ${CFLAGS} -o utils.o ${BINSRC}/cp/utils.c
+	@gcc -c ${CFLAGS} -o cp.o ${BINSRC}/cp/cp.c
 	gcc -s -static ${CFLAGS} -o $@ utils.o cp.o
 
-install-local: ${UBINDIR}
+install-local: ${BINDIR}
 
 install: ${DESTDIR} ${OBJECTS}
-	@mkdir -p ${DESTDIR}${BINDIR}
-	${INSTALL} ${OBJECTS} ${DESTDIR}${BINDIR}/
+	@mkdir -p ${DESTDIR}/bin
+	${INSTALL} ${OBJECTS} ${DESTDIR}/bin/
 	@${MAKE} -C ksh install
 
 clean:

@@ -5,6 +5,7 @@ include ${ROOTDIR}/Makefile.inc
 PROGS= wrc mkent wtrace mount_refs mknod
 TRACEDIR= ${ROOTDIR}/libtrace
 SBINSRC= ${SRCDIR}/sbin
+SBINDIR= /sbin
 
 all: ${SBINSRC} ${PROGS} bsd.exe
 
@@ -21,13 +22,13 @@ ${SBINSRC}:
 %.exe: %.o
 	gcc -s ${CFLAGS} -o $@ $<
 
-${UBINDIR}: ${PROGS}
-	@/bin/mkdir -p ${UBINDIR}
-	/bin/cp -vu mknod ${UBINDIR}/
+${BINDIR}: ${PROGS}
+	@/bin/mkdir -p ${BINDIR}
+	/bin/cp -vu mknod ${BINDIR}/
 
 wrc: wrc.exe
 
-mknod: ${SRCDIR}/sbin/mknod/mknod.c
+mknod: ${SBINSRC}/mknod/mknod.c
 	gcc -s -static ${CFLAGS} -DNOPIE -o $@ $<
 
 mkent: mkent.o
@@ -50,17 +51,17 @@ wtrace: libwtrace.o wtrace.o
 	${MINGW}/lib/libkernel32.a ${MINGW}/lib/libuser32.a ${MINGW}/lib/libadvapi32.a
 
 mount_refs:
-	@gcc -c ${CFLAGS} -I${SRCDIR}/sbin/mount -o mount_ntfs.o ${SRCDIR}/sbin/mount_ntfs/mount_ntfs.c
-	@gcc -c ${CFLAGS} -o getmntopts.o ${SRCDIR}/sbin/mount/getmntopts.c
+	@gcc -c ${CFLAGS} -I${SBINSRC}/mount -o mount_ntfs.o ${SBINSRC}/mount_ntfs/mount_ntfs.c
+	@gcc -c ${CFLAGS} -o getmntopts.o ${SBINSRC}/mount/getmntopts.c
 	gcc -s ${CFLAGS} -o $@ mount_ntfs.o getmntopts.o
 
-install-local: ${UBINDIR}
+install-local: ${BINDIR}
 
-install: ${DESTDIR}
-	@mkdir -p ${DESTDIR}/sbin
-	${INSTALL} ${PROGS} ${DESTDIR}/sbin/
-	${INSTALL} -m 02555 -o 0 -g 0 bsd.exe ${DESTDIR}/sbin/
-	${INSTALL} -m 00754 -o 0 -g 0 setup.sh ${DESTDIR}/sbin/
+install: ${DESTDIR}${SBINDIR}
+	@mkdir -p ${DESTDIR}${SBINDIR}
+	${INSTALL} ${PROGS} ${DESTDIR}${SBINDIR}/
+	${INSTALL} -m 02555 -o 0 -g 0 bsd.exe ${DESTDIR}${SBINDIR}/
+	${INSTALL} -m 00754 -o 0 -g 0 setup.sh ${DESTDIR}${SBINDIR}/
 
 clean:
 	/bin/rm -f *.exe *.o
