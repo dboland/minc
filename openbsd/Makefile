@@ -26,7 +26,7 @@ ${SRCDIR}:
 	@exit 1
 
 ${MACHINEDIR}:
-	/bin/mkdir -p ${MACHINEDIR}
+	@/bin/mkdir -p ${MACHINEDIR}
 	/bin/cp -ru ${SRCDIR}/include/* ${INCDIR}/
 	/bin/cp -ru ${SRCDIR}/sys/sys ${INCDIR}/
 	/bin/cp -ru ${SRCDIR}/sys/arch/${ARCH}/include/* ${MACHINEDIR}/

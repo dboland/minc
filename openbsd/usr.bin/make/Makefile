@@ -54,8 +54,6 @@ make.out: ${OBJECTS}
 
 install: ${DESTDIR}
 	${INSTALL} make.out ${DESTDIR}${UBINDIR}/make
-	@cp -ruv ../../share/mk ${DESTDIR}${SHAREDIR}/
-	@cp -uv ${UBINSRC}/make/make.1 ${DESTDIR}${MANDIR}/man1/
 
 clean:
 	rm -f *.h *.o *.exe *.tmp

@@ -13,9 +13,8 @@ ${SHARESRC}:
 # BSD patch needs /tmp
 
 ${SHAREDIR}/mk:
-	@export TMPDIR=/tmp
 	@mkdir -p $@
 	cp -R ${SHARESRC}/mk ${SHAREDIR}/
-	/bin/patch -p 1 -d ${SHAREDIR} <../share.patch
+	TMPDIR=/tmp patch --posix --silent -p 1 -d ${SHAREDIR} <../share.patch
 
 install: ${SHARESRC} ${SHAREDIR}/mk

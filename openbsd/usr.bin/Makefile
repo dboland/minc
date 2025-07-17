@@ -60,8 +60,8 @@ install-local: ${BINDIR}
 install: ${DESTDIR} ${OBJECTS} install.exe patch.exe
 	@mkdir -p ${DESTDIR}${UBINDIR}
 	${INSTALL} ${OBJECTS} install patch ${DESTDIR}${UBINDIR}/
-	cp manifest ${DESTDIR}${UBINDIR}/install.manifest
-	cp manifest ${DESTDIR}${UBINDIR}/patch.manifest
+	${INSTALL} manifest ${DESTDIR}${UBINDIR}/install.manifest
+	${INSTALL} manifest ${DESTDIR}${UBINDIR}/patch.manifest
 	@${MAKE} -C make install UBINDIR="${UBINDIR}"
 
 clean:
