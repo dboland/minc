@@ -21,9 +21,9 @@ ${DESTDIR}:
 	@echo " ---------------------------------------------------"
 	@exit 1
 
-${ROOTDIR}/Makefile.inc:
+${ROOTDIR}/config.inc:
 	@echo " ---------------------------------------------------"
-	@echo "| Cross-compiler not set up. Please run 'make opt' first.
+	@echo "| Cross-compiler not set up. Please run 'make opt' first."
 	@echo " ---------------------------------------------------"
 	@exit 1
 
