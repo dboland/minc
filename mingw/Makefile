@@ -1,4 +1,6 @@
-include ../Makefile.inc
+ROOTDIR= ..
+
+include ${ROOTDIR}/Makefile.inc
 
 LIBEXEC=${PREFIX}/libexec
 LIBS=libadvapi32.a libkernel32.a libshell32.a libuser32.a \

@@ -1,4 +1,6 @@
-include ../../Makefile.inc
+ROOTDIR= ../..
+
+include ${ROOTDIR}/Makefile.inc
 
 CRT0= crt0.o
 OBJECTS= ${CRT0} crt1.o crtbegin.o crtend.o
@@ -16,12 +18,12 @@ ${MINGW}${GCCDIR}:
 	@echo " -----------------------------------------------"
 	@echo "| GCC libexec directory ($@) not found. Make sure"
 	@echo "| the 'GCCVER' variable is defined correctly in config.inc"
-	@echo "| Run 'gcc -v' to find out the right version number.
+	@echo "| Run 'gcc -v' to find out the right version number."
 	@echo " -----------------------------------------------"
 	@exit 1
 
 %.o: %.c
-	gcc -c ${CFLAGS} -I../../include -o $@ $<
+	gcc -c ${CFLAGS} -I${ROOTDIR}/include -o $@ $<
 
 #
 # we need alloca(), which belongs in libgcc.a
