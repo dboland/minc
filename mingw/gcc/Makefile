@@ -15,7 +15,7 @@ all: ${MINGW}${GCCDIR} ${OBJECTS} ${LIBS}
 ${MINGW}${GCCDIR}:
 	@echo " -----------------------------------------------"
 	@echo "| GCC libexec directory ($@) not found. Make sure"
-	@echo "| the 'GCCVER' variable is defined correctly in Makefile.inc"
+	@echo "| the 'GCCVER' variable is defined correctly in config.inc"
 	@echo "| Run 'gcc -v' to find out the right version number.
 	@echo " -----------------------------------------------"
 	@exit 1

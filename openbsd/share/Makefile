@@ -1,4 +1,6 @@
-include ../../Makefile.inc
+ROOTDIR= ../..
+
+include ${ROOTDIR}/Makefile.inc
 
 SHARESRC= ${SRCDIR}/share
 SHAREDIR= ${DESTDIR}/usr/share
@@ -17,4 +19,4 @@ ${SHAREDIR}/mk:
 	cp -R ${SHARESRC}/mk ${SHAREDIR}/
 	TMPDIR=/tmp patch --posix --silent -p 1 -d ${SHAREDIR} <../share.patch
 
-install: ${SHARESRC} ${SHAREDIR}/mk
+install-comp: ${SHARESRC} ${SHAREDIR}/mk

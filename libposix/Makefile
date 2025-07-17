@@ -1,8 +1,10 @@
-include ../Makefile.inc
+ROOTDIR= ..
+
+include ${ROOTDIR}/Makefile.inc
 
 LIBPOSIX= libposix-${RELEASE}.dll
 IMPLIB= libposix.dll.a
-CFLAGS+= -I../include -g
+CFLAGS+= -I${ROOTDIR}/include -g
 CFLAGS+= -DRELEASE=\"${RELEASE}\" -DVERSION=\"${VERSION}\" -DBUILD=${BUILD}
 OBJECTS= crt1.o version.o msvc.o win_posix.o vfs_posix.o libposix.o \
 	arch/fork.o arch/syscall.o
@@ -15,11 +17,11 @@ all: ${LIBPOSIX}
 ${DESTDIR}:
 	@echo " ---------------------------------------------------"
 	@echo "| MinC install directory ($@) not found. Make sure"
-	@echo "| it exists and the 'DESTDIR' variable is defined correctly in Makefile.inc"
+	@echo "| it exists and the 'DESTDIR' variable is defined correctly in config.inc"
 	@echo " ---------------------------------------------------"
 	@exit 1
 
-../Makefile.inc:
+${ROOTDIR}/Makefile.inc:
 	@echo " ---------------------------------------------------"
 	@echo "| Cross-compiler not set up. Please run 'make opt' first.
 	@echo " ---------------------------------------------------"

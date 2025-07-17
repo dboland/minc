@@ -28,7 +28,7 @@
  *
  */
 
-#include "config.h"
+#include "../config.h"
 
 LPSTR 
 WinCapabilities(LPSTR Buffer, LPCSTR Label, LSA_HANDLE Handle, PSID Sid)

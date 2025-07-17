@@ -1,4 +1,6 @@
-include ../Makefile.inc
+ROOTDIR= ..
+
+include ${ROOTDIR}/Makefile.inc
 
 MACHINEDIR= ${INCDIR}/machine
 HEADERS= ${INCDIR}/fcntl.h ${INCDIR}/stdarg.h ${INCDIR}/stdint.h \
@@ -15,11 +17,11 @@ all: ${SRCDIR}
 ${SRCDIR}:
 	@echo " ---------------------------------------------------"
 	@echo "| OpenBSD source directory ($@) not found. Make sure"
-	@echo "| the 'SRCDIR' variable is defined correctly in Makefile.inc"
+	@echo "| the 'SRCDIR' variable is defined correctly in config.inc"
 	@echo " ---------------------------------------------------"
 	@exit 1
 
-../Makefile.inc:
+${ROOTDIR}/Makefile.inc:
 	@echo " ---------------------------------------------------"
 	@echo "| Cross-compiler not set up. Please run 'make opt' first.
 	@echo " ---------------------------------------------------"
@@ -59,6 +61,8 @@ install: ${DESTDIR}
 	@${MAKE} -C sbin install
 	@${MAKE} -C usr.sbin install
 	@${MAKE} -C etc install
+
+install-comp:
 	@${MAKE} -C share install
 
 clean:

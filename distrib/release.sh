@@ -1,8 +1,8 @@
 #!/bin/sh
 
 ROOT=/mnt/d/libminc-0.6.1
-#RELEASE=/mnt/d/minc-base
 PKGROOT=/mnt/d/src
+VERSION=20250717
 
 DISTROOT=${ROOT}/distrib
 MINIROOT=${DISTROOT}/miniroot
@@ -55,7 +55,7 @@ cp /mnt/d/src/gzip-1.13/gzip.exe .
 #. $DISTROOT/bind.sh
 #. $DISTROOT/sasl.sh
 
-wrc makensis "d:/libminc-0.6.1/distrib/minc.nsi"
+wrc makensis /DVERSION=$VERSION "d:/libminc-0.6.1/distrib/minc.nsi"
 #wrc makensis "d:/libminc-0.6.1/distrib/buildtools.nsi"
 #wrc makensis "d:/libminc-0.6.1/distrib/test.nsi"
 #git archive --format=zip --prefix=minc-devel/ -o release/source/minc-devel.zip HEAD

@@ -1,8 +1,10 @@
 #!/bin/sh
 
+. ../config.inc
+
 VERBOSE=
 TARGET=
-SOURCE=/mnt/d/openbsd-master
+SOURCE=${SRCDIR}
 
 diff_file()
 {

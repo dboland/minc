@@ -1,4 +1,6 @@
-include ../../Makefile.inc
+ROOTDIR= ../..
+
+include ${ROOTDIR}/Makefile.inc
 
 OBJECTS= dev_mkdb pwd_mkdb
 CFLAGS+= -I${SRCDIR}/sys

@@ -14,7 +14,7 @@ all: kernel system
 %.d: %
 	@${MAKE} -C $<
 
-opt: Makefile.inc mount.sh
+opt: config.inc
 	@${MAKE} -C openbsd install-local
 	@${MAKE} -C mingw all install-local
 
@@ -25,11 +25,8 @@ kernel:
 system:
 	@${MAKE} -C openbsd
 
-Makefile.inc:
-	@/bin/cp Makefile.inc.sample Makefile.inc
-
-mount.sh:
-	@/bin/cp mount.sh.sample mount.sh
+config.inc:
+	@/bin/cp $@.sample $@
 
 help:
 	@less BUILD.md

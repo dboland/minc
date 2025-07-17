@@ -1,4 +1,6 @@
-include ../../Makefile.inc
+ROOTDIR= ../..
+
+include ${ROOTDIR}/Makefile.inc
 
 OBJECTS = VfsFileAttribs.o VfsFileFlags.o VfsPathFlags.o VfsVolumeFlags.o \
 	VfsTaskFlags.o VfsInputMode.o VfsNetEvents.o VfsScreenMode.o
@@ -11,4 +13,4 @@ all: ${OBJECTS}
 
 %.o: %.c
 	@/bin/echo -n "$@ "
-	@gcc -c ${CFLAGS} -I../../include -o $@ $<
+	@gcc -c ${CFLAGS} -I${ROOTDIR}/include -o $@ $<

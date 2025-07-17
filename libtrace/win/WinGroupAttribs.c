@@ -28,7 +28,7 @@
  *
  */
 
-#include "config.h"
+#include "../config.h"
 
 LPSTR 
 WinGroupAttribs(LPSTR Buffer, LPCSTR Label, DWORD Attribs)

@@ -28,7 +28,7 @@
  *
  */
 
-#include "config.h"
+#include "../config.h"
 
 #define PROCESSOR_ARCHITECTURE_ARM64	12
 

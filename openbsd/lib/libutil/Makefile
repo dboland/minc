@@ -1,4 +1,6 @@
-include ../../../Makefile.inc
+ROOTDIR= ../../..
+
+include ${ROOTDIR}/Makefile.inc
 
 OBJECTS= bcrypt_pbkdf.o duid.o \
 	login_tty.o logout.o logwtmp.o pty.o \

@@ -28,7 +28,7 @@
  *
  */
 
-#include "config.h"
+#include "../config.h"
 
 LPSTR 
 WinPrivilegeAttribs(LPSTR Buffer, LPCSTR Label, DWORD Attributes)

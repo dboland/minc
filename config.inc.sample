@@ -1,0 +1,14 @@
+VERSION=20250720
+RELEASE=6.1.0
+DESTDIR=/DRIVE/minc-release
+GCCVER=4.8.1
+MINGW=/C/MinGW
+SRCDIR=/D/openbsd-master
+INSTALL=install
+ARCH=i386
+
+PREFIX=/opt
+BINDIR=${PREFIX}/bin
+LIBDIR=${PREFIX}/lib
+INCDIR=${PREFIX}/include
+GCCLIB=${BINDIR}/libisl-15.dll ${BINDIR}/libmingwex-0.dll

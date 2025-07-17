@@ -28,7 +28,7 @@
  *
  */
 
-#include "config.h"
+#include "../config.h"
 
 static const CHAR *__ATYPE[] = {
 	"ACCESS_ALLOWED_ACE_TYPE",

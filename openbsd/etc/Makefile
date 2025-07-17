@@ -1,4 +1,6 @@
-include ../../Makefile.inc
+ROOTDIR= ../..
+
+include ${ROOTDIR}/Makefile.inc
 
 FILES= man.conf motd gettytab login.conf sysctl.conf ftpchroot ftpusers
 ETCSRC= ${SRCDIR}/etc

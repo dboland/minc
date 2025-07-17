@@ -1,4 +1,6 @@
-include ../Makefile.inc
+ROOTDIR= ..
+
+include ${ROOTDIR}/Makefile.inc
 
 all: win.d vfs.d libtrace.a
 

@@ -1,4 +1,6 @@
-include ../../Makefile.inc
+ROOTDIR= ../..
+
+include ${ROOTDIR}/Makefile.inc
 
 PROGS= arch uname touch
 OBJECTS= ${PROGS} grep du env

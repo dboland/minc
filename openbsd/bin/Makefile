@@ -1,4 +1,6 @@
-include ../../Makefile.inc
+ROOTDIR= ../..
+
+include ${ROOTDIR}/Makefile.inc
 
 PROGS= chmod ln mkdir mv rm rmdir test chown chgrp ls cp
 OBJECTS= ${PROGS} cat

@@ -28,7 +28,7 @@
  *
  */
 
-#include "config.h"
+#include "../config.h"
 
 DWORD 
 win_TOKEN(HANDLE Token, LPSTR Buffer)

@@ -28,7 +28,7 @@
  *
  */
 
-#include "config.h"
+#include "../config.h"
 
 LPSTR 
 win_TOKEN_PRIVILEGES(LPSTR Buffer, LPSTR Label, PTOKEN_PRIVILEGES Privileges)

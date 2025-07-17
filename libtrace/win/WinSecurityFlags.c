@@ -28,7 +28,7 @@
  *
  */
 
-#include "config.h"
+#include "../config.h"
 
 LPSTR 
 WinSecurityFlags(LPSTR Buffer, LPCSTR Label, WORD Flags)

@@ -1,4 +1,6 @@
-include ../../../Makefile.inc
+ROOTDIR= ../../..
+
+include ${ROOTDIR}/Makefile.inc
 
 HEADERS= ${INCDIR}/pthread.h
 

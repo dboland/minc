@@ -1,4 +1,6 @@
-include ../../../Makefile.inc
+ROOTDIR= ../../..
+
+include ${ROOTDIR}/Makefile.inc
 
 # wait for signals from child executable
 #CFLAGS+=-DUSEVFORK

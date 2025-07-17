@@ -11,7 +11,7 @@ all: ${MINGW} ${LIBS} libiphlpapi.dll.a
 ${MINGW}:
 	@echo " -----------------------------------------------"
 	@echo "| MinGW root directory ($@) not found. Make sure"
-	@echo "| the 'MINGW' variable is defined correctly in Makefile.inc"
+	@echo "| the 'MINGW' variable is defined correctly in config.inc"
 	@echo " -----------------------------------------------"
 	@exit 1
 

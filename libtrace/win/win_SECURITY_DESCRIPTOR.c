@@ -28,7 +28,7 @@
  *
  */
 
-#include "config.h"
+#include "../config.h"
 
 DWORD 
 win_SECURITY_DESCRIPTOR(PSECURITY_DESCRIPTOR Security, DWORD Type, LPSTR Buffer)

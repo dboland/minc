@@ -1,4 +1,6 @@
-include ../../../Makefile.inc
+ROOTDIR= ../../..
+
+include ${ROOTDIR}/Makefile.inc
 
 OBJECTS = arch.o buf.o cmd_exec.o compat.o cond.o dir.o direxpand.o dump.o \
 	engine.o \

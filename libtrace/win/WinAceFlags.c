@@ -28,7 +28,7 @@
  *
  */
 
-#include "config.h"
+#include "../config.h"
 
 LPSTR 
 WinAceFlags(LPSTR Buffer, LPCSTR Label, BYTE Flags)

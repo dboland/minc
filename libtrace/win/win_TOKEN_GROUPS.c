@@ -28,7 +28,7 @@
  *
  */
 
-#include "config.h"
+#include "../config.h"
 
 LPSTR 
 win_TOKEN_GROUPS(LPSTR Buffer, LPCSTR Label, PTOKEN_GROUPS Token)

@@ -1,4 +1,6 @@
-include ../../Makefile.inc
+ROOTDIR= ../..
+
+include ${ROOTDIR}/Makefile.inc
 
 OBJECTS = WinFlagName.o WinAceFlags.o WinFileAccess.o WinSecurityFlags.o \
 	WinGroupAttribs.o WinPrivilegeAttribs.o
@@ -10,4 +12,4 @@ all: ${OBJECTS}
 
 %.o: %.c
 	@/bin/echo -n "$@ "
-	@gcc -c ${CFLAGS} -I../../include -I.. -o $@ $<
+	@gcc -c ${CFLAGS} -I${ROOTDIR}/include -o $@ $<

@@ -1,4 +1,6 @@
-include ../../../Makefile.inc
+ROOTDIR= ../../..
+
+include ${ROOTDIR}/Makefile.inc
 
 OBJECTS= adler32.o compress.o crc32.o deflate.o gzio.o infback.o \
 	inffast.o inflate.o inftrees.o trees.o uncompr.o zutil.o

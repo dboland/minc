@@ -1,4 +1,4 @@
-ROOTDIR=../../..
+ROOTDIR= ../../..
 
 include ${ROOTDIR}/Makefile.inc
 

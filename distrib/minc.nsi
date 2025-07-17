@@ -4,8 +4,10 @@
 !include WinMessages.nsh
 !include WinVer.nsh
 
+!define OUTFILE "minc-6.1.0.${VERSION}.exe"
+
 Name "MinC"
-OutFile minc-6.1.exe
+OutFile ${OUTFILE}
 RequestExecutionLevel admin
 Unicode True
 

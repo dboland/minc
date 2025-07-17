@@ -1,12 +1,4 @@
-VERSION=20240915
-BUILD=$(shell date +%s)
-RELEASE=6.1.0
-DESTDIR=/DRIVE/minc-release
-GCCVER=4.8.1
-MINGW=/C/MinGW
-SRCDIR=/D/openbsd-master
-INSTALL=install
-ARCH=i386
+include ${ROOTDIR}/config.inc
 
 .SUFFIXES:
 .DEFAULT:
@@ -24,13 +16,9 @@ IMGBASE_LIBEDIT=	0x0FC00000
 IMGBASE_LIBCURL=	0x0F900000
 LIBPERL_IMGBASE=	0x0F600000 # (3MB)
 
-PREFIX=/opt
-BINDIR=${PREFIX}/bin
-LIBDIR=${PREFIX}/lib
-INCDIR=${PREFIX}/include
+BUILD=$(shell date +%s)
 
 # In GCC 6.3.0, -ffixed-ebx crashes compilation
 
 CFLAGS= -Wimplicit-function-declaration -Werror -ffreestanding -Wl,--disable-auto-import
 LDFLAGS= --disable-auto-import
-GCCLIB= ${BINDIR}/libisl-15.dll ${BINDIR}/libmingwex-0.dll
