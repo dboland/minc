@@ -1,0 +1,62 @@
+--- share/mk/bsd.lib.mk	Mon May 19 17:05:13 2014
++++ share/mk/bsd.lib.mk	Tue Feb 23 13:55:36 2021
+@@ -36,8 +36,8 @@
+ DIST_CFLAGS+=	-Os
+ 
+ .c.o:
+-	@echo "${COMPILE.c} ${.IMPSRC} -o ${.TARGET}"
+-	@${COMPILE.c} ${.IMPSRC}  -o ${.TARGET}.o
++	@echo "${COMPILE.c} ${AFLAGS} ${.IMPSRC} -o ${.TARGET}"
++	@${COMPILE.c} ${AFLAGS} ${.IMPSRC} -o ${.TARGET}.o
+ 	@${LD} -X -r ${.TARGET}.o -o ${.TARGET}
+ 	@rm -f ${.TARGET}.o
+ 
+@@ -171,6 +171,7 @@
+ .if defined(SHLIB_MAJOR) && defined(SHLIB_MINOR)
+ _LIBS+=lib${LIB}.so.${SHLIB_MAJOR}.${SHLIB_MINOR}
+ .endif
++AFLAGS=	${NOPIE_FLAGS}
+ .endif
+ 
+ all: ${_LIBS} _SUBDIRUSE
+@@ -202,7 +203,7 @@
+ 	@echo building shared ${LIB} library \(version ${SHLIB_MAJOR}.${SHLIB_MINOR}\)
+ 	@rm -f lib${LIB}.so.${SHLIB_MAJOR}.${SHLIB_MINOR}
+ 	${CC} -shared ${PICFLAG} \
+-	    -o lib${LIB}.so.${SHLIB_MAJOR}.${SHLIB_MINOR} \
++	    -o lib${LIB}.so.${SHLIB_MAJOR}.${SHLIB_MINOR} -Wl,--out-implib=lib${LIB}.dll.a \
+ 	    `${LORDER} ${SOBJS}|tsort -q` ${LDADD}
+ 
+ # all .do files...
+--- share/mk/bsd.man.mk	Mon May 19 17:05:13 2014
++++ share/mk/bsd.man.mk	Mon Feb  1 10:04:33 2021
+@@ -54,7 +54,7 @@
+ .for page in ${MAN}
+ .  for sub in ${MANSUBDIR}
+ _MAN_INST=${DESTDIR}${MANDIR}${page:E}${sub}${page:T}
+-${_MAN_INST}: ${page}
++${_MAN_INST}: ${SRCDIR}${page}
+ 	${INSTALL} ${INSTALL_COPY} -o ${MANOWN} -g ${MANGRP} -m ${MANMODE} \
+ 		${.ALLSRC} ${.TARGET}
+ 
+@@ -72,7 +72,7 @@
+ 	@l=${DESTDIR}${MANDIR}${lnk:E}${sub}${lnk}; \
+ 	t=${DESTDIR}${MANDIR}${file:E}${sub}${file}; \
+ 	echo $$t -\> $$l; \
+-	rm -f $$t; ln $$l $$t;
++	rm -f $$t; ln -s $$l $$t;
+ .     endfor
+ .  endfor
+ .endif
+--- share/mk/bsd.own.mk	Mon May 19 17:05:13 2014
++++ share/mk/bsd.own.mk	Thu Jun  5 09:00:32 2025
+@@ -40,8 +40,7 @@
+ .endif
+ 
+ .if !empty(PIE_ARCH:M${_arch})
+-NOPIE_FLAGS?=-fno-pie
+-NOPIE_LDFLAGS?=-nopie
++NOPIE_FLAGS?=-DNOPIE
+ PIE_DEFAULT?=${DEFAULT_PIE_DEF}
+ .else
+ NOPIE_FLAGS?=

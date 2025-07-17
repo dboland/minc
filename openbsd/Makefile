@@ -59,6 +59,7 @@ install: ${DESTDIR}
 	@${MAKE} -C sbin install
 	@${MAKE} -C usr.sbin install
 	@${MAKE} -C etc install
+	@${MAKE} -C share install
 
 clean:
 	@${MAKE} -C lib clean

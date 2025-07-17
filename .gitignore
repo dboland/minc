@@ -13,3 +13,4 @@ mount.sh
 openbsd/include
 openbsd/lib/libc/sys/*.S
 openbsd/lib/libc/include
+openbsd/usr.bin/make/*.h

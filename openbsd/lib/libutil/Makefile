@@ -13,7 +13,7 @@ OBJECTS+= getmaxpartitions.o
 # BSD Auth
 OBJECTS+=passwd.o check_expire.o login_fbtab.o imsg.o imsg-buffer.o login.o
 
-HEADERS=util.h imsg.h
+HEADERS=util.h imsg.h ohash.h
 CFLAGS+= -I${SRCDIR}/sys
 
 all: ${HEADERS} libutil.a

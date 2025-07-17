@@ -2,7 +2,7 @@
 
 VERBOSE=
 TARGET=
-SOURCE=/d/openbsd-master
+SOURCE=/mnt/d/openbsd-master
 
 diff_file()
 {
@@ -27,6 +27,8 @@ diff_dir()
 "
 	for file in $(find "$1" -type f); do
 		if [[ $file == *.o ]]; then
+			continue
+		elif [[ $file == */Makefile ]]; then
 			continue
 		elif ! diff_file "$file"; then
 			exit 2

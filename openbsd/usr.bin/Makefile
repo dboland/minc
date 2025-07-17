@@ -6,7 +6,10 @@ CFLAGS+= -I${SRCDIR}/sys
 UBINSRC= ${SRCDIR}/usr.bin
 UBINDIR= /usr/bin
 
-all: ${UBINSRC} ${OBJECTS} install.exe
+# GNU make can't cd into make if make/make.exe exists?!?!
+
+all: ${UBINSRC} ${OBJECTS} install.exe patch.exe
+	@${MAKE} -C make UBINSRC="${UBINSRC}"
 
 ${UBINSRC}:
 	@echo " ---------------------------------------------------"
@@ -15,9 +18,11 @@ ${UBINSRC}:
 	@echo " ---------------------------------------------------"
 	@exit 1
 
-${BINDIR}: ${PROGS} install.exe
+${BINDIR}: ${PROGS} install.exe patch.exe
 	@/bin/mkdir -p ${BINDIR}
-	/bin/cp -vu ${PROGS} install.exe install.exe.manifest ${BINDIR}/
+	/bin/cp -vu $^ ${BINDIR}/
+	/bin/cp -vu manifest ${BINDIR}/install.exe.manifest
+	/bin/cp -vu manifest ${BINDIR}/patch.exe.manifest
 
 uname: ${UBINSRC}/uname/uname.c
 	gcc -s -static ${CFLAGS} -DNOPIE -o $@ $<
@@ -28,21 +33,21 @@ arch: ${UBINSRC}/arch/arch.c
 touch: ${UBINSRC}/touch/touch.c
 	gcc -s -static ${CFLAGS} -DNOPIE -o $@ $<
 
-# In Windows, "install" seems to be a reserved word. When 
-# executed with such name, Vista checks if user is elevated, 
-# emits ERROR_ELEVATION_REQUIRED if not.
+# In Windows, "install" and "patch" seem to be reserved 
+# words. When executed with such name, Vista checks if 
+# user is elevated, yields ERROR_ELEVATION_REQUIRED if not.
 # see: https://irq5.io/2011/06/26/gnu-patch-and-windows-uac/
 
 install.exe: ${UBINSRC}/xinstall/xinstall.c
 	gcc -s -static ${CFLAGS} -DNOPIE -o $@ $<
 
-grep: grep.c
-	@gcc -c ${CFLAGS} -o binary.o ${UBINSRC}/grep/binary.c
-	@gcc -c ${CFLAGS} -o file.o ${UBINSRC}/grep/file.c
-	@gcc -c ${CFLAGS} -o mmfile.o ${UBINSRC}/grep/mmfile.c
-	@gcc -c ${CFLAGS} -o queue.o ${UBINSRC}/grep/queue.c
-	@gcc -c ${CFLAGS} -o util.o ${UBINSRC}/grep/util.c
-	gcc -s ${CFLAGS} -I${UBINSRC}/grep -o $@ $< binary.o file.o mmfile.o queue.o util.o -lz
+patch.exe: ${UBINSRC}/patch/patch.c ${UBINSRC}/patch/pch.c ${UBINSRC}/patch/inp.c \
+	${UBINSRC}/patch/util.c ${UBINSRC}/patch/backupfile.c ${UBINSRC}/patch/mkpath.c
+	gcc -s -static ${CFLAGS} -DNOPIE -o $@ $^
+
+grep: grep.c ${UBINSRC}/grep/binary.c ${UBINSRC}/grep/file.c ${UBINSRC}/grep/mmfile.c \
+	${UBINSRC}/grep/queue.c ${UBINSRC}/grep/util.c
+	gcc -s ${CFLAGS} -I${UBINSRC}/grep -o $@ $^ -lz
 
 du: ${UBINSRC}/du/du.c
 	gcc -s ${CFLAGS} -o $@ $< -lutil
@@ -52,9 +57,13 @@ env: env.c
 
 install-local: ${BINDIR}
 
-install: ${DESTDIR} ${OBJECTS} install.exe
+install: ${DESTDIR} ${OBJECTS} install.exe patch.exe
 	@mkdir -p ${DESTDIR}${UBINDIR}
-	${INSTALL} ${OBJECTS} install install.manifest ${DESTDIR}${UBINDIR}/
+	${INSTALL} ${OBJECTS} install patch ${DESTDIR}${UBINDIR}/
+	cp manifest ${DESTDIR}${UBINDIR}/install.manifest
+	cp manifest ${DESTDIR}${UBINDIR}/patch.manifest
+	@${MAKE} -C make install UBINDIR="${UBINDIR}"
 
 clean:
 	/bin/rm -f *.exe *.o
+	@${MAKE} -C make clean

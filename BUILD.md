@@ -68,7 +68,7 @@ The result should be similar to the following output:
 
 	OpenBSD dimension.sassenheim.dmz 6.1.0 MINC#20240915 i386
 
-**Note**: if you want back to building Windows programs, simply 
+**Note**: if you want back to compiling Windows programs, simply 
 re-mount the */mingw* directory:
 
 	./mount.sh mingw
@@ -82,7 +82,7 @@ This is to avoid accidentally writing into an existing MinC system.
 
 For this step, you need to be Administrator. Close the MSYS 
 terminal and open it again as Administrator. Change to your 
-*minc-devel* directory and create the MinC root folder. I 
+*minc-devel* directory and create the MinC root directory. I 
 named it *minc-release* so it won't conflict with an existing 
 MinC system:
 
@@ -128,8 +128,8 @@ This is because when MinC mounts its root directory, it hides the
 directory from view in Windows Explorer. This is super important 
 for preventing recursive directory listings. It is also standard 
 practice in Windows for mounted drives. If you want to access 
-the MinC root folder in Windows Explorer, just type its location 
-in the address bar, like *C:\minc-release* and you're back.
+the MinC root folder in Windows Explorer, just exit the console 
+or type its location in the address bar, like *C:\minc-release*.
 
 ## Step 4: building the GCC compiler
 
