@@ -31,8 +31,8 @@ newly created directory, called */opt*:
 	make opt
 
 **Note**: you will probably get some error messages here. These 
-are all about your 'Makefile.inc' file. Use vim to edit it and 
-define the indicated variable.
+will guide you to set up the 'config.inc' file. Use vim to 
+edit it and define the indicated variable.
 
 ## Step 1: build the kernel
 
