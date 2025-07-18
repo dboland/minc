@@ -51,11 +51,6 @@ Section
 	File /r 'miniroot'
 
 	ExecDos::exec /DETAILED 'cacls . /E /R "$USERNAME"'
-
-	${If} ${AtMostWin2003}
-		ExecDos::exec /DETAILED '.\miniroot\scacls . /E /G S-1-5-11:R'
-	${EndIf}
-
 	ExecDos::exec /DETAILED '.\miniroot\chmod -R 00755 miniroot'
 
 SectionEnd

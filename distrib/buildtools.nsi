@@ -4,8 +4,10 @@
 !include WinMessages.nsh
 !include WinVer.nsh
 
+!define OUTFILE "buildtools-6.1.0.${VERSION}.exe"
+
 Name "MinC - Build Tools"
-OutFile buildtools-6.1.exe
+OutFile ${OUTFILE}
 RequestExecutionLevel admin
 Unicode True
 InstallDir "%SystemDrive%\MinC"

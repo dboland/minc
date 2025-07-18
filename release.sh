@@ -1,12 +1,14 @@
 #!/bin/sh
 
-ROOT=/mnt/d/libminc-0.6.1
-PKGROOT=/mnt/d/src
-VERSION=20250717
+DEVROOT=$(pwd)
+DISTROOT=${DEVROOT}/distrib
 
-DISTROOT=${ROOT}/distrib
-MINIROOT=${DISTROOT}/miniroot
-LATEST=/mnt/d/commandlinerevolution.nl/minc/release
+if ! [ -d "${DISTROOT}" ]; then
+	echo "${DISTROOT}: No such directory"
+	exit 1
+fi
+
+. ${DEVROOT}/config.inc
 
 SBIN='libposix-6.1.0.dll bsd.exe mkent wrc setup.sh wtrace iptables color terminal.cmd mount_refs'
 ETC='man.conf login.conf magic profile MAKEDEV console.reg syslog.conf ttys vi.exrc'
@@ -18,16 +20,13 @@ copy_file()
 	done
 }
 
-if ! cd "$MINIROOT"; then
+if ! [ -d "${PKGROOT}" ]; then
+	echo "Package root (${PKGROOT}) not found. Make sure "
+	echo "the 'PKGROOT' variable is defined correctly in config.inc"
 	exit 1
 fi
 
-cp /bin/tar tar.exe
-cp /bin/chmod chmod.exe
-cp /bin/sh sh.exe
-cp /sbin/libposix-6.1.0.dll .
-cp /mnt/d/src/gzip-1.13/gzip.exe .
-
+. $DISTROOT/miniroot.sh
 #. $DISTROOT/test.sh
 #. $DISTROOT/comp.sh
 . $DISTROOT/base.sh
@@ -55,7 +54,11 @@ cp /mnt/d/src/gzip-1.13/gzip.exe .
 #. $DISTROOT/bind.sh
 #. $DISTROOT/sasl.sh
 
-wrc makensis /DVERSION=$VERSION "d:/libminc-0.6.1/distrib/minc.nsi"
-#wrc makensis "d:/libminc-0.6.1/distrib/buildtools.nsi"
-#wrc makensis "d:/libminc-0.6.1/distrib/test.nsi"
+if ! cd ${DISTROOT}; then
+	exit 1
+fi
+
+wrc makensis /DVERSION=$VERSION minc.nsi
+wrc makensis /DVERSION=$VERSION buildtools.nsi
+#wrc makensis /DVERSION=$VERSION test.nsi
 #git archive --format=zip --prefix=minc-devel/ -o release/source/minc-devel.zip HEAD

@@ -42,6 +42,7 @@ bsd.o: bsd.c
 
 bsd.exe: bsd.o version.o
 	gcc -s -static ${CFLAGS} -o $@ $^
+	rm version.o
 
 libwtrace.o: libwtrace.c
 	gcc -c ${CFLAGS} -I${MINGW}/include -I${ROOTDIR}/include -o $@ $<

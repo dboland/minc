@@ -10,7 +10,7 @@ UBINDIR= /usr/bin
 
 # GNU make can't cd into make if make/make.exe exists?!?!
 
-all: ${UBINSRC} ${OBJECTS} install.exe patch.exe
+all: ${UBINSRC} ${OBJECTS} install.exe patch.exe gzip.exe
 	@${MAKE} -C make UBINSRC="${UBINSRC}"
 
 ${UBINSRC}:
@@ -20,7 +20,7 @@ ${UBINSRC}:
 	@echo " ---------------------------------------------------"
 	@exit 1
 
-${BINDIR}: ${PROGS} install.exe patch.exe
+${BINDIR}: ${PROGS} install.exe patch.exe gzip.exe
 	@/bin/mkdir -p ${BINDIR}
 	/bin/cp -vu $^ ${BINDIR}/
 	/bin/cp -vu manifest ${BINDIR}/install.exe.manifest
@@ -47,6 +47,10 @@ patch.exe: ${UBINSRC}/patch/patch.c ${UBINSRC}/patch/pch.c ${UBINSRC}/patch/inp.
 	${UBINSRC}/patch/util.c ${UBINSRC}/patch/backupfile.c ${UBINSRC}/patch/mkpath.c
 	gcc -s -static ${CFLAGS} -DNOPIE -o $@ $^
 
+gzip.exe: ${UBINSRC}/compress/main.c ${UBINSRC}/compress/zopen.c \
+	${UBINSRC}/compress/gzopen.c ${UBINSRC}/compress/nullopen.c
+	gcc -s -static ${CFLAGS} -DNOPIE -o $@ $^ -lz
+
 grep: grep.c ${UBINSRC}/grep/binary.c ${UBINSRC}/grep/file.c ${UBINSRC}/grep/mmfile.c \
 	${UBINSRC}/grep/queue.c ${UBINSRC}/grep/util.c
 	gcc -s ${CFLAGS} -I${UBINSRC}/grep -o $@ $^ -lz
@@ -59,9 +63,9 @@ env: env.c
 
 install-local: ${BINDIR}
 
-install: ${DESTDIR} ${OBJECTS} install.exe patch.exe
+install: ${DESTDIR} ${OBJECTS}
 	@mkdir -p ${DESTDIR}${UBINDIR}
-	${INSTALL} ${OBJECTS} install patch ${DESTDIR}${UBINDIR}/
+	${INSTALL} ${OBJECTS} ${DESTDIR}${UBINDIR}/
 	${INSTALL} manifest ${DESTDIR}${UBINDIR}/install.manifest
 	${INSTALL} manifest ${DESTDIR}${UBINDIR}/patch.manifest
 	@${MAKE} -C make install UBINDIR="${UBINDIR}"

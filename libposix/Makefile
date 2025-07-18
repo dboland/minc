@@ -56,6 +56,7 @@ ${LIBPOSIX}: ${OBJECTS}
 	-o $@ --image-base=${IMGBASE_LIBPOSIX} ${OBJECTS} \
 	-L${MINGW}/lib -L${GCCDIR} -L${TRACEDIR} -lmsvcrt -ladvapi32 -lshell32 -luser32 -lntdll -lkernel32 \
 	-lnetapi32 -lws2_32 -liphlpapi -lrpcrt4 -lmpr -lgcc -ltrace
+	rm version.o
 
 ${LIBDIR}:
 	/bin/mkdir -p ${LIBDIR}

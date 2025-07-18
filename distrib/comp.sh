@@ -1,7 +1,4 @@
-if ! [ -d "$DISTROOT" ]; then
-        echo "$DISTROOT: No such directory"
-        exit 1
-elif ! cd "$PKGROOT/../minc-comp"; then
+if ! cd "$PKGROOT/../minc-comp"; then
         exit 1
 fi
 

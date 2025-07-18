@@ -1,7 +1,4 @@
-if ! [ -d "$DISTROOT" ]; then
-        echo "$DISTROOT: No such directory"
-        exit 1
-elif ! cd "$PKGROOT/mutt-release"; then
+if ! cd "$PKGROOT/mutt-release"; then
         exit 1
 fi
 
