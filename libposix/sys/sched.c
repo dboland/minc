@@ -51,8 +51,11 @@ copy_stack(u_long origin, u_long src, u_long *dest)
 	int size;
 	u_long next;
 
-//__PRINTF("+ origin(0x%lx) src(0x%lx) dest(0x%lx) __THREAD_FRAME(0x%lx)\n", 
-//	origin, src, dest[0], __THREAD_FRAME)
+	/* Rewind the stack to replace the base pointers. This
+	 * segfaults if any optimization is done (install.exe).
+	 */
+//msvc_printf("+ origin(0x%x) src(0x%x) dest(0x%x) __THREAD_FRAME(0x%x)\n", 
+// origin, src, dest[0], __THREAD_FRAME);
 	if (!src){				/* at process frame (_start()) */
 		depth = 0;
 	}else if (src == __THREAD_FRAME){	/* at thread frame (main()) */
@@ -101,6 +104,7 @@ void
 task_copy(WIN_THREAD_STRUCT *Thread)
 {
 	/* copy frames */
+//msvc_printf("task_copy(0x%x): source(0x%x) dest(0x%x)\n", Thread->origin, Thread->source, Thread->dest);
 	copy_stack(Thread->origin, Thread->source, &Thread->dest);
 	/* add current frame */
 	Thread->source -= Thread->offset;

@@ -51,18 +51,12 @@ test: ${BINSRC}/test/test.c
 cat: ${BINSRC}/cat/cat.c
 	gcc -s -static ${CFLAGS} -o $@ $<
 
-ls:
-	@gcc -c ${CFLAGS} -o ls-main.o ls-main.c
-	@gcc -c ${CFLAGS} -o print.o ${BINSRC}/ls/print.c
-	@gcc -c ${CFLAGS} -o cmp.o ${BINSRC}/ls/cmp.c
-	@gcc -c ${CFLAGS} -o util.o ${BINSRC}/ls/util.c
-	@gcc -c ${CFLAGS} -o ls.o ${BINSRC}/ls/ls.c
-	gcc -s -static ${CFLAGS} -o $@ ls-main.o print.o cmp.o util.o ls.o -lutil
+ls: ls-main.c ${BINSRC}/ls/print.c ${BINSRC}/ls/cmp.c ${BINSRC}/ls/util.c \
+	${BINSRC}/ls/ls.c
+	gcc -s -static ${CFLAGS} -o $@ $^ -lutil
 
-cp:
-	@gcc -c ${CFLAGS} -o utils.o ${BINSRC}/cp/utils.c
-	@gcc -c ${CFLAGS} -o cp.o ${BINSRC}/cp/cp.c
-	gcc -s -static ${CFLAGS} -o $@ utils.o cp.o
+cp: ${BINSRC}/cp/utils.c ${BINSRC}/cp/cp.c
+	gcc -s -static ${CFLAGS} -o $@ $^
 
 install-local: ${BINDIR}
 

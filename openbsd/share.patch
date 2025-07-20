@@ -1,5 +1,5 @@
---- share/mk/bsd.lib.mk	Mon May 19 17:05:13 2014
-+++ share/mk/bsd.lib.mk	Tue Feb 23 13:55:36 2021
+--- share/mk/bsd.lib.mk	2014-05-19 17:05:13 +0200
++++ share/mk/bsd.lib.mk	2021-02-23 13:55:36 +0100
 @@ -36,8 +36,8 @@
  DIST_CFLAGS+=	-Os
  
@@ -28,8 +28,8 @@
  	    `${LORDER} ${SOBJS}|tsort -q` ${LDADD}
  
  # all .do files...
---- share/mk/bsd.man.mk	Mon May 19 17:05:13 2014
-+++ share/mk/bsd.man.mk	Mon Feb  1 10:04:33 2021
+--- share/mk/bsd.man.mk	2014-05-19 17:05:13 +0200
++++ share/mk/bsd.man.mk	2021-02-01 10:04:33 +0100
 @@ -54,7 +54,7 @@
  .for page in ${MAN}
  .  for sub in ${MANSUBDIR}
@@ -48,8 +48,8 @@
  .     endfor
  .  endfor
  .endif
---- share/mk/bsd.own.mk	Mon May 19 17:05:13 2014
-+++ share/mk/bsd.own.mk	Thu Jun  5 09:00:32 2025
+--- share/mk/bsd.own.mk	2014-05-19 17:05:13 +0200
++++ share/mk/bsd.own.mk	2025-06-05 09:00:32 +0200
 @@ -40,8 +40,7 @@
  .endif
  
@@ -60,3 +60,23 @@
  PIE_DEFAULT?=${DEFAULT_PIE_DEF}
  .else
  NOPIE_FLAGS?=
+--- share/mk/sys.mk	2014-05-19 17:05:13 +0200
++++ share/mk/sys.mk	2025-07-20 06:42:35 +0200
+@@ -32,7 +32,7 @@
+ 
+ PIPE?=		-pipe
+ 
+-CFLAGS?=	-O2 ${PIPE} ${DEBUG}
++CFLAGS?=	${PIPE} ${DEBUG}
+ COMPILE.c?=	${CC} ${CFLAGS} ${CPPFLAGS} -c
+ LINK.c?=	${CC} ${CFLAGS} ${CPPFLAGS} ${LDFLAGS}
+ 
+@@ -47,7 +47,7 @@
+ CPPFLAGS?=	
+ 
+ FC?=		f77
+-FFLAGS?=	-O2
++FFLAGS?=	
+ RFLAGS?=
+ COMPILE.f?=	${FC} ${FFLAGS} -c
+ LINK.f?=	${FC} ${FFLAGS} ${LDFLAGS}

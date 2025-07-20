@@ -40,7 +40,7 @@ touch: ${UBINSRC}/touch/touch.c
 # user is elevated, yields ERROR_ELEVATION_REQUIRED if not.
 # see: https://irq5.io/2011/06/26/gnu-patch-and-windows-uac/
 
-install.exe: ${UBINSRC}/xinstall/xinstall.c
+install.exe: xinstall.c
 	gcc -s -static ${CFLAGS} -DNOPIE -o $@ $<
 
 patch.exe: ${UBINSRC}/patch/patch.c ${UBINSRC}/patch/pch.c ${UBINSRC}/patch/inp.c \

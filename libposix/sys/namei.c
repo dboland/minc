@@ -120,7 +120,6 @@ pathat_win(WIN_NAMEIDATA *Result, int dirfd, const char *path, int atflags)
 	if (pwTask->TracePoints & KTRFAC_NAMEI){
 		ktrace_NAMEI(pwTask, path, strlen(path));
 	}
-
 	if (atflags & AT_SYMLINK_NOFOLLOW){
 		dwFlags = WIN_NOFOLLOW;
 	}
