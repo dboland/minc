@@ -1,6 +1,8 @@
 #!/bin/sh
 
-. config.inc
+ROOTDIR=$(dirname $0)
+
+. ${ROOTDIR}/config.inc
 
 MINGW=$(echo -n ${MINGW} | sed -E 's/^\/(.)/\1\:/')
 MINC=${MINGW}/msys/1.0${PREFIX}

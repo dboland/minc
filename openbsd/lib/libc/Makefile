@@ -35,11 +35,10 @@ ${LIBC}: ${OBJECTS} version.o
 	${LD} -shared -s ${LDFLAGS} -e _DllMainCRTStartup@12 --out-implib=${IMPLIB} \
 	-o $@ --image-base=${IMGBASE_LIBC} ${LIBDIR}/dllcrt2.o ${OBJECTS} ${SHOBJECTS} version.o \
 	-L${LIBDIR} -L${GCCDIR} -lmingw32 -lmsvcrt -lgcc
-	rm version.o
 
 include:
 	/bin/cp -rvu ${SRCDIR}/lib/libc/include .
-	/bin/patch -p 2 -d . <libc.patch
+	/bin/patch -p 2 -d . <../../libc.patch
 
 objects: arch.d quad.d stdlib.d citrus.d compat-43.d crypt.d db.d gdtoa.d gen.d \
 	hash.d locale.d regex.d stdio.d string.d termios.d time.d thread.d \
@@ -47,13 +46,14 @@ objects: arch.d quad.d stdlib.d citrus.d compat-43.d crypt.d db.d gdtoa.d gen.d 
 
 lib: ${LIBC} libc.a
 
-clean: objects-clean lib-clean
-
 lib-clean:
 	/bin/rm -f *.o *.a ${LIBC}
 
 objects-clean:
 	/bin/rm -f */*.o arch/${ARCH}/*/*.o db/*/*.o
+
+release-clean:
+	/bin/rm -f version.o
 
 # Perl needs libc.so
 
@@ -68,4 +68,6 @@ install: ${DESTDIR}
 	@mkdir -p ${DESTDIR}/usr/lib
 	${INSTALL} ${LIBC} libc.a ${DESTDIR}/usr/lib/
 	@#ln -s ${LIBC} ${DESTDIR}/usr/lib/libc.so
+
+clean: objects-clean lib-clean
 

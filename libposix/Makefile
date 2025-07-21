@@ -45,9 +45,6 @@ libposix.o: libposix.c
 version.o: version.rc
 	windres -DVERSION=\\\"${VERSION}\\\" -DRELEASE=\\\"${RELEASE}\\\" $< $@
 
-libposix.a: win_posix.o msvc_posix.o
-	ar cru $@ $^
-
 arch/%.o: arch/${PROCESSOR_ARCHITECTURE}/%.S
 	gcc -c ${CFLAGS} -o $@ $<
 
@@ -67,6 +64,11 @@ install-local: ${LIBDIR} ${BINDIR}
 install: ${DESTDIR}
 	@mkdir -p ${DESTDIR}${SBINDIR}/
 	${INSTALL} -m 06555 ${LIBPOSIX} ${DESTDIR}${SBINDIR}/
+
+release-clean:
+	/bin/rm version.o
+
+release: release-clean all
 
 clean:
 	/bin/rm -f arch/*.o *.o *.a *.dll

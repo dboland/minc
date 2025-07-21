@@ -12,4 +12,5 @@ config.inc
 openbsd/include
 openbsd/lib/libc/sys/*.S
 openbsd/lib/libc/include
+openbsd/share/mk
 openbsd/usr.bin/make/*.h

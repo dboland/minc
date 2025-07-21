@@ -9,8 +9,6 @@ GCCDIR= ${LIBDIR}/gcc/mingw32/${GCCVER}
 
 all: objects lib
 
-lib: ${LIBSOCKET} libsocket.a
-
 crt1.o: crt1.c
 	gcc -c -g ${CFLAGS} -I${ROOTDIR}/include $<
 
@@ -31,11 +29,16 @@ ${LIBSOCKET}: crt1.o version.o
 
 objects: asr.d net.d rpc.d
 
+lib: ${LIBSOCKET} libsocket.a
+
 lib-clean:
 	/bin/rm -f *.o *.a ${LIBSOCKET}
 
 objects-clean:
 	/bin/rm -f */*.o */*.so
+
+release-clean:
+	/bin/rm version.o
 
 # Perl needs libsocket.so
 

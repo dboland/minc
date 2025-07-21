@@ -7,7 +7,7 @@ SRCDIR=/D/openbsd-master
 INSTALL=install
 ARCH=i386
 
-# locations for cross-compiler
+# locations of cross-compiler
 
 PREFIX=/opt
 BINDIR=${PREFIX}/bin

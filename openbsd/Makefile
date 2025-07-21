@@ -65,6 +65,9 @@ install: ${DESTDIR}
 install-comp:
 	@${MAKE} -C share install
 
+release:
+	@${MAKE} -C lib release
+	
 clean:
 	@${MAKE} -C lib clean
 	@${MAKE} -C bin clean
