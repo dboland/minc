@@ -13,7 +13,8 @@ PREFIX=/opt
 BINDIR=${PREFIX}/bin
 LIBDIR=${PREFIX}/lib
 INCDIR=${PREFIX}/include
-GCCLIB=${BINDIR}/libisl-15.dll ${BINDIR}/libmingwex-0.dll
+GCCLIB=${BINDIR}/libisl-15.dll
+GCCLIB+=${BINDIR}/libmingwex-0.dll
 
 # location of packages for release.sh
 
