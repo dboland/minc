@@ -4,10 +4,10 @@ include ${ROOTDIR}/Makefile.inc
 
 PROGS= chmod ln mkdir mv rm rmdir test chown chgrp ls cp
 OBJECTS= ${PROGS} cat
-CFLAGS+= -DNOPIE -I${SRCDIR}/sys
+CFLAGS+= -DNOPIE
 BINSRC= ${SRCDIR}/bin
 
-all: ${BINSRC} ${OBJECTS}
+all: ${BINSRC} ${PROGS}
 	@${MAKE} -C ksh
 
 ${BINSRC}:

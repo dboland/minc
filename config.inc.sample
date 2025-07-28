@@ -7,7 +7,7 @@ SRCDIR=/D/openbsd-master
 INSTALL=install
 ARCH=i386
 
-# locations of cross-compiler
+# locations for native compiler
 
 PREFIX=/opt
 BINDIR=${PREFIX}/bin
@@ -16,6 +16,12 @@ INCDIR=${PREFIX}/include
 GCCLIB=${BINDIR}/libisl-15.dll
 GCCLIB+=${BINDIR}/libmingwex-0.dll
 
-# location of packages for release.sh
+# locations for cross-compiler
+
+XPREFIX=/usr/i686-openbsd-pe
+XLIBDIR=${XPREFIX}/lib
+XINCDIR=${XPREFIX}/include
+
+# location of packages (release.sh)
 
 PKGROOT=/mnt/d/src

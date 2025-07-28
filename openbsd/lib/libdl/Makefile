@@ -30,6 +30,9 @@ install-local: ${LIBEXEC}
 	/bin/cp -vu ld.so ${LIBEXEC}/
 	/bin/cp -vu ${IMPLIB} ${LIBDIR}/
 
+install-cross:
+	/bin/cp -vu ${IMPLIB} ${XLIBDIR}/libdl.a
+
 install: ${DESTDIR}
 	@mkdir -p ${DESTDIR}${LIBEXEC}
 	${INSTALL} ld.so ${DESTDIR}${LIBEXEC}/

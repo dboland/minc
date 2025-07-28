@@ -10,7 +10,7 @@ UBINDIR= /usr/bin
 
 # GNU make can't cd into make if make/make.exe exists?!?!
 
-all: ${UBINSRC} ${OBJECTS} install.exe patch.exe gzip.exe
+all: ${UBINSRC} ${PROGS} install.exe patch.exe gzip.exe
 	@${MAKE} -C make UBINSRC="${UBINSRC}"
 
 ${UBINSRC}:
@@ -41,7 +41,7 @@ touch: ${UBINSRC}/touch/touch.c
 # see: https://irq5.io/2011/06/26/gnu-patch-and-windows-uac/
 
 install.exe: xinstall.c
-	gcc -s -static ${CFLAGS} -DNOPIE -o $@ $<
+	gcc -s -static ${CFLAGS} -DNOPIE -I${UBINSRC}/xinstall -o $@ $<
 
 patch.exe: ${UBINSRC}/patch/patch.c ${UBINSRC}/patch/pch.c ${UBINSRC}/patch/inp.c \
 	${UBINSRC}/patch/util.c ${UBINSRC}/patch/backupfile.c ${UBINSRC}/patch/mkpath.c

@@ -61,6 +61,9 @@ install-local: ${LIBDIR} ${BINDIR}
 	/bin/cp -vu ${LIBPOSIX} ${BINDIR}/
 	/bin/cp -vu ${IMPLIB} ${LIBDIR}/libmingw32.a
 
+install-cross:
+	/bin/cp -vu ${IMPLIB} ${XLIBDIR}/libposix.so
+
 install: ${DESTDIR}
 	@mkdir -p ${DESTDIR}${SBINDIR}/
 	${INSTALL} -m 06555 ${LIBPOSIX} ${DESTDIR}${SBINDIR}/

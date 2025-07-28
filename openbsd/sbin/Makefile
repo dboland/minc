@@ -42,7 +42,6 @@ bsd.o: bsd.c
 
 bsd.exe: bsd.o version.o
 	gcc -s -static ${CFLAGS} -o $@ $^
-	rm version.o
 
 libwtrace.o: libwtrace.c
 	gcc -c ${CFLAGS} -I${MINGW}/include -I${ROOTDIR}/include -o $@ $<
@@ -51,10 +50,8 @@ wtrace: libwtrace.o wtrace.o
 	gcc -s ${CFLAGS} -o $@ -L${TRACEDIR} $^ -ltrace \
 	${MINGW}/lib/libkernel32.a ${MINGW}/lib/libuser32.a ${MINGW}/lib/libadvapi32.a
 
-mount_refs:
-	@gcc -c ${CFLAGS} -I${SBINSRC}/mount -o mount_ntfs.o ${SBINSRC}/mount_ntfs/mount_ntfs.c
-	@gcc -c ${CFLAGS} -o getmntopts.o ${SBINSRC}/mount/getmntopts.c
-	gcc -s ${CFLAGS} -o $@ mount_ntfs.o getmntopts.o
+mount_refs: ${SBINSRC}/mount_ntfs/mount_ntfs.c ${SBINSRC}/mount/getmntopts.c
+	gcc -s ${CFLAGS} -o $@ $^
 
 install-local: ${BINDIR}
 
@@ -63,6 +60,11 @@ install: ${DESTDIR}${SBINDIR}
 	${INSTALL} ${PROGS} ${DESTDIR}${SBINDIR}/
 	${INSTALL} -m 02555 -o 0 -g 0 bsd.exe ${DESTDIR}${SBINDIR}/
 	${INSTALL} -m 00754 -o 0 -g 0 setup.sh ${DESTDIR}${SBINDIR}/
+
+release-clean:
+	rm version.o
+
+release: release-clean all
 
 clean:
 	/bin/rm -f *.exe *.o

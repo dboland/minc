@@ -3,7 +3,7 @@ ROOTDIR= ../../..
 include ${ROOTDIR}/Makefile.inc
 
 # wait for signals from child executable
-#CFLAGS+=-DUSEVFORK
+#CFLAGS+=-Dfork=vfork
 #CFLAGS+=-DDEBUG
 #CFLAGS+=-DDEBUG_JOBS
 #CFLAGS+=-DDEBUG_SUBST
@@ -29,7 +29,7 @@ OBJECTS= alloc.o c_ksh.o c_sh.o c_test.o c_ulimit.o edit.o 2021_emacs.o eval.o \
 #CFLAGS+=-pg
 #OBJECTS+=/usr/lib/gcrt0.o
 
-all: ksh.exe
+all: ksh
 
 %.o: %.c
 	@echo -n "$@ "
@@ -39,9 +39,12 @@ misc.o: misc.c
 	@echo -n "$@ "
 	@gcc -c ${CFLAGS} -g -DNOPIE -I${SRCDIR}/lib/libc/gen -o $@ $<
 
-ksh.exe: ${OBJECTS}
+ksh: ${OBJECTS}
 	@echo "done."
 	gcc -static -s ${CFLAGS} -o $@ ${OBJECTS}
+
+install-local:
+	/bin/cp -vu ksh ${BINDIR}/sh
 
 install: ${DESTDIR}
 	@mkdir -p ${DESTDIR}/bin

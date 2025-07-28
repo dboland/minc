@@ -47,6 +47,10 @@ install-local:
 	/bin/cp -vu ${IMPLIB} ${LIBDIR}/libsocket.so
 	/bin/cp -vu libsocket.a ${LIBDIR}/
 
+install-cross:
+	/bin/cp -vu libsocket.a ${XLIBDIR}/
+	/bin/cp -vu ${IMPLIB} ${XLIBDIR}/libsocket.so
+
 install: ${DESTDIR}
 	${INSTALL} ${LIBSOCKET} libsocket.a ${DESTDIR}/usr/lib/
 	@#${LN} -s ${LIBSOCKET} ${DESTDIR}/usr/lib/libsocket.so

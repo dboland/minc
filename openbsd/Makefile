@@ -52,6 +52,10 @@ ${INCDIR}/syslog.h:
 ${INCDIR}/termios.h:
 	@/bin/cp -vu termios.h ${INCDIR}/
 
+${XINCDIR}:
+	@/bin/mkdir -p ${XINCDIR}
+	/bin/cp -ru /opt/include/* ${XINCDIR}/
+
 install-local: ${SRCDIR} ${MACHINEDIR} ${HEADERS}
 
 install: ${DESTDIR}
@@ -62,11 +66,13 @@ install: ${DESTDIR}
 	@${MAKE} -C usr.sbin install
 	@${MAKE} -C etc install
 
-install-comp:
-	@${MAKE} -C share install
+install-cross: ${XINCDIR}
+	@#${MAKE} -C share install
+	@${MAKE} -C lib install-cross
 
 release:
 	@${MAKE} -C lib release
+	@${MAKE} -C sbin release
 	
 clean:
 	@${MAKE} -C lib clean

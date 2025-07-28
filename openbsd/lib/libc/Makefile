@@ -64,6 +64,10 @@ install-local:
 	/bin/cp -vu libc.a ${LIBDIR}/libmingwex.a
 	/bin/cp -vu libc.a ${LIBDIR}/
 
+install-cross:
+	/bin/cp -vu libc.a ${XLIBDIR}/
+	/bin/cp -vu ${IMPLIB} ${XLIBDIR}/libc.so
+
 install: ${DESTDIR}
 	@mkdir -p ${DESTDIR}/usr/lib
 	${INSTALL} ${LIBC} libc.a ${DESTDIR}/usr/lib/

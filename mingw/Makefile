@@ -2,9 +2,9 @@ ROOTDIR= ..
 
 include ${ROOTDIR}/Makefile.inc
 
-LIBEXEC=${PREFIX}/libexec
-LIBS=libadvapi32.a libkernel32.a libshell32.a libuser32.a \
+LIBS= libadvapi32.a libkernel32.a libshell32.a libuser32.a \
 	libmoldname.a libgmon.a libmsvcrt.a
+LIBEXEC= ${PREFIX}/libexec
 ULIBDIR= /usr/lib
 
 all: ${MINGW} ${LIBS} libiphlpapi.dll.a
@@ -67,6 +67,10 @@ install-local: ${MINGW} install-gcc install-ld ${LIBEXEC} ${LIBDIR}
 	/bin/cp -vu ${LIBS} ${LIBDIR}/
 	/bin/cp -vu libiphlpapi.dll.a ${MINGW}/lib/
 	@${MAKE} -C gcc install-local
+
+install-cross:
+	/bin/cp -vu libmsvcrt.a ${XLIBDIR}/
+	@${MAKE} -C gcc install-cross
 
 install: ${DESTDIR}
 	${INSTALL} libmsvcrt.a ${DESTDIR}${ULIBDIR}/

@@ -40,6 +40,11 @@ release:
 	@${MAKE} -C libposix release
 	@${MAKE} -C openbsd release
 
+install-cross:
+	@${MAKE} -C mingw install-cross
+	@${MAKE} -C libposix install-cross
+	@${MAKE} -C openbsd install-cross
+
 clean:
 	@${MAKE} -C mingw clean
 	@${MAKE} -C libtrace clean

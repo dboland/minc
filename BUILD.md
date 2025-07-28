@@ -12,10 +12,14 @@ CVS software:
 
 * https://www.openbsd.org/anoncvs.html
 
-However, you can also use my copy (186Mb). Move this file to 
-preferably the root of a disk drive and extract it there:
+However, you can also use my copy (186Mb):
 
 * https://minc.commandlinerevolution.nl/openbsd-master-6.1.0.zip
+
+**Note**: create a folder in the root of a diskdrive, named 
+'source'. Move the .ZIP file there and extract it.
+
+## Step 0: set up a simple cross-compiler
 
 To build the new kernel and compile the operating system code, 
 we would have to install the OpenBSD header files into the 
@@ -31,8 +35,8 @@ newly created directory, called */opt*:
 	make opt
 
 **Note**: you will probably get some error messages here. These 
-will guide you to set up the 'config.inc' file. Use vim to 
-edit it and define the indicated variable.
+will guide you to properly set up the 'config.inc' file. Use 
+vim to edit it and define the indicated variable.
 
 ## Step 1: build the kernel
 
@@ -66,7 +70,7 @@ the **uname** command:
 
 The result should be similar to the following output:
 
-	OpenBSD dimension.sassenheim.dmz 6.1.0 MINC#20240915 i386
+	OpenBSD dimension.sassenheim.dmz 6.1.0 MINC#20250720 i386
 
 **Note**: if you want back to compiling Windows programs, simply 
 re-mount the */mingw* directory:
@@ -87,6 +91,11 @@ named it *minc-release* so it won't conflict with an existing
 MinC system:
 
 	mkdir /c/minc-release
+
+**Note**: it is not advisable to create the MinC root directory 
+in a location like *Program Files*. Remember, we are building an 
+entire operating system. File permissions in this kind of locations 
+are unsuitable for an operating system to run properly.
 
 Now you can run the **install** target:
 
