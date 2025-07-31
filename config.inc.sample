@@ -8,7 +8,7 @@ ARCH=i386
 
 # locations for BSD native binaries
 
-PREFIX=/opt
+PREFIX=/opt/minc
 BINDIR=${PREFIX}/bin
 LIBDIR=${PREFIX}/lib
 INCDIR=${PREFIX}/include
@@ -24,4 +24,4 @@ XINCDIR=${XPREFIX}/include
 
 # native location of packages (release.sh)
 
-PKGROOT=/mnt/d/src
+PKGROOT=/mnt/d/source

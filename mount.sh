@@ -4,18 +4,20 @@ ROOTDIR=$(dirname $0)
 
 . ${ROOTDIR}/config.inc
 
-MINGW=$(echo -n ${MINGW} | sed -E 's/^\/(.)/\1\:/')
-MINC=${MINGW}/msys/1.0${PREFIX}
+# Hello Earnie Boyd #
+
+MINGW=$(cmd //c echo ${MINGW})
+MINCROOT=$(cmd //c echo ${PREFIX})
 FSTAB=/etc/fstab
 
 if ! [ -d ${MINGW} ]; then
 	echo "${MINGW}: No such directory"
 elif [ "$1" == "mingw" ]; then
 	echo "${MINGW} /mingw" >$FSTAB
-elif ! [ -d ${MINC} ]; then
-	echo "${MINC}: No such directory"
+elif ! [ -d ${MINCROOT} ]; then
+	echo "${MINCROOT}: No such directory"
 elif [ "$1" == "minc" ]; then
-	echo "${MINC} /mingw" >$FSTAB
+	echo "${MINCROOT} /mingw" >$FSTAB
 else
 	echo "Usage $0 COMPILER"
 	echo

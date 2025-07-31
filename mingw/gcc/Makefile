@@ -54,10 +54,10 @@ crt0_tls.o: crt0.o win_tls.o
 
 install-local:
 	@/bin/mkdir -p ${GPREFIX}${GCCDIR}
-	/bin/cp -vu ${LIBS} ${GPREFIX}${GCCDIR}/
-	/bin/cp -vu crtbegin.o crtend.o ${GPREFIX}${GCCDIR}/
-	/bin/cp -vu crt0.o ${GLIBDIR}/crt2.o
-	/bin/cp -vu crt1.o ${GLIBDIR}/dllcrt2.o
+	@/bin/cp -vu ${LIBS} ${GPREFIX}${GCCDIR}/
+	@/bin/cp -vu crtbegin.o crtend.o ${GPREFIX}${GCCDIR}/
+	@/bin/cp -vu crt0.o ${GLIBDIR}/crt2.o
+	@/bin/cp -vu crt1.o ${GLIBDIR}/dllcrt2.o
 	@#/bin/cp -vu gcrt0.o ${GLIBDIR}/gcrt2.o
 
 install-cross:

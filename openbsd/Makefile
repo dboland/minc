@@ -27,6 +27,24 @@ ${ROOTDIR}/config.inc:
 	@echo " ---------------------------------------------------"
 	@exit 1
 
+${INSTALL}:
+	@echo " ---------------------------------------------------"
+	@echo "| The system must be installed using the system itself."
+	@echo "| Switch to the OpenBSD system by running the 'mount' script:"
+	@echo "|"
+	@echo "|     ./mount.sh minc"
+	@echo " ---------------------------------------------------"
+	@exit 1
+
+${DESTDIR}:
+	@echo " ---------------------------------------------------"
+	@echo "| MinC release directory ($@) not found. Make sure"
+	@echo "| you create it with the right command (with '/bin' prefix):"
+	@echo "|"
+	@echo "|     /bin/mkdir $@"
+	@echo " ---------------------------------------------------"
+	@exit 1
+
 ${MACHINEDIR}:
 	@/bin/mkdir -p ${MACHINEDIR}
 	/bin/cp -ru ${SRCDIR}/include/* ${GINCDIR}/
@@ -58,7 +76,7 @@ ${XINCDIR}:
 
 install-local: ${SRCDIR} ${MACHINEDIR} ${HEADERS}
 
-install: ${DESTDIR}
+install: ${INSTALL} ${DESTDIR}
 	@${MAKE} -C bin install
 	@${MAKE} -C lib install
 	@${MAKE} -C usr.bin install

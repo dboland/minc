@@ -36,9 +36,9 @@ untouched.
 
 Open the MSYS terminal, **cd** to your *minc-devel* directory 
 and make the *opt* target. All files will be installed in a 
-newly created directory, called */opt*:
+newly created directory, called */opt/minc*:
 
-	make opt
+	**make opt**
 
 **Note**: you will probably get some error messages here. These 
 will guide you to properly set up the 'config.inc' file. Use 
@@ -50,7 +50,7 @@ The kernel will be built using a combination of vanilla MinGW
 and our *poor man's cross-compiler*, residing in */opt/cross*. 
 To test if this all works, make the kernel first:
 
-	make kernel
+	**make kernel**
 
 ## Step 2: build a minimal system
 
@@ -58,18 +58,18 @@ A minimal system consists of the kernel, the BSD C library, the
 boot program, the Korn shell and some utilities. These will be 
 built by the new system itself. To finish the build:
 
-	make system
+	**make system**
 
 You now have a working OpenBSD system, but we are still using 
-the MSYS commands. To make sure we are executing OpenBSD commands, 
-you will need to unmount the */mingw* directory. This is done by 
-running the **mount** script:
+the MSYS commands. To make sure we are using our brand new 
+OpenBSD binaries, you will need to mount the */opt/minc* 
+directory. This is done by running the **mount** script:
 
-	./mount.sh minc
+	**./mount.sh minc**
 
 To test if the new system works, you can run the **uname** command:
 
-	uname -a
+	**uname -a**
 
 The result should be similar to the following output:
 
@@ -78,7 +78,7 @@ The result should be similar to the following output:
 **Note**: if you want back to compiling Windows programs, simply 
 re-mount the */mingw* directory:
 
-	./mount.sh mingw
+	**./mount.sh mingw**
 
 ## Step 3: install the system
 
@@ -91,9 +91,17 @@ For this step, you need to be Administrator. Close the MSYS
 terminal and open it again as Administrator. Change to your 
 *minc-devel* directory and create the MinC root directory. Name 
 it *minc-release* so it won't conflict with an existing MinC 
-system:
+system. Make sure you use the **/bin** prefix in the **mkdir** 
+command:
 
-	mkdir /c/minc-release
+	**/bin/mkdir /c/minc-release**
+
+**Attention**: Each time you install a fresh system, its root 
+directory must be created only by the *Windows Explorer*, the 
+*MinC installer* or *MSYS*. This is because MinC uses the 
+Access Control List (ACL) of its root folder as a template for 
+all permissions in the system. By using the **/bin** prefix, 
+we make sure MSYS creates the directory.
 
 **Note**: it is not advisable to create the MinC root directory 
 in a location like *Program Files*. Remember, we will be building 
@@ -102,7 +110,7 @@ location are unsuitable for OpenBSD to run properly.
 
 Now you can run the **install** target:
 
-	make install
+	**make install**
 
 To finalize step 3, go to the new folder in Windows Exporer and 
 open the *sbin* folder. There should be a program named *bsd.exe*.
@@ -117,7 +125,7 @@ This is because there is no */dev* file system yet. To create it,
 along with some of the other system directories like */home* and 
 */tmp*, run the **setup** script:
 
-	/sbin/setup.sh
+	**/sbin/setup.sh**
 
 When it is finished, you can close the window and open it again 
 by double-clicking. The above message should be gone.

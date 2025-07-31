@@ -16,7 +16,12 @@ IMGBASE_LIBEDIT=	0x0FC00000
 IMGBASE_LIBCURL=	0x0F900000
 LIBPERL_IMGBASE=	0x0F600000 # (3MB)
 
-BUILD=$(shell date +%s)
+# The location of the BSD install program. Don't try to 
+# install it yourself. It will be created automatically. 
+# It is used to check if your build was successful.
+
+INSTALL= /mingw/bin/install
+BUILD= $(shell date +%s)
 
 GPREFIX= ${PREFIX}/cross
 GBINDIR= ${GPREFIX}/bin
@@ -26,12 +31,6 @@ GLIBXDIR= ${GPREFIX}/libexec
 
 XGCC= ${GBINDIR}/gcc
 XWINDRES= ${GBINDIR}/windres
-
-# The location of the BSD install program. It will be created
-# automatically. Don't try to install it yourself. It is used
-# to check if your build was successful.
-
-INSTALL= /mingw/bin/install
 
 # In GCC 6.3.0, -ffixed-ebx crashes compilation
 

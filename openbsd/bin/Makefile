@@ -2,8 +2,8 @@ ROOTDIR= ../..
 
 include ${ROOTDIR}/Makefile.inc
 
-PROGS= chmod mv rm rmdir test chown chgrp ls cp
-OBJECTS= ${PROGS} cat ln mkdir
+PROGS= chmod mv rm mkdir rmdir test chown chgrp ls cp
+OBJECTS= ${PROGS} cat ln
 CFLAGS+= -DNOPIE
 BINSRC= ${SRCDIR}/bin
 
@@ -18,7 +18,6 @@ ${BINSRC}:
 	@exit 1
 
 ${BINDIR}: ${PROGS}
-	@/bin/mkdir -p ${BINDIR}
 	/bin/cp -vu ${PROGS} ${BINDIR}/
 
 chmod: ${BINSRC}/chmod/chmod.c
