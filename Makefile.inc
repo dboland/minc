@@ -35,5 +35,6 @@ INSTALL= /mingw/bin/install
 
 # In GCC 6.3.0, -ffixed-ebx crashes compilation
 
+CC= gcc
 CFLAGS= -Wimplicit-function-declaration -Werror -ffreestanding -Wl,--disable-auto-import
 LDFLAGS= --disable-auto-import

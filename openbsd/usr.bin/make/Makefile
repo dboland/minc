@@ -7,6 +7,7 @@ OBJECTS = arch.o buf.o cmd_exec.o compat.o cond.o dir.o direxpand.o dump.o \
 	error.o for.o init.o job.o lowparse.o main.o make.o memory.o parse.o \
 	parsevar.o str.o stats.o suff.o targ.o targequiv.o timestamp.o \
 	var.o varmodifiers.o varname.o
+UBINSRC= ${SRCDIR}/usr.bin
 
 HOSTCC=${XGCC}
 .OBJDIR=.
@@ -58,6 +59,6 @@ install: ${DESTDIR}
 	${INSTALL} make.out ${DESTDIR}${UBINDIR}/make
 
 clean:
-	rm -f *.h *.o *.exe *.tmp
+	rm -f *.h *.o *.out *.tmp
 	@${MAKE} -C lst.lib clean
 

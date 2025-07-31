@@ -12,6 +12,7 @@ GCCDIR= ${ROOTDIR}/mingw/gcc
 TRACEDIR= ${ROOTDIR}/libtrace
 SBINDIR= /sbin
 ULIBDIR= /usr/lib
+UBINDIR= /usr/bin
 
 all: ${LIBPOSIX}
 
@@ -67,8 +68,10 @@ ${LIBPOSIX}: ${OBJECTS}
 ${GLIBDIR}:
 	/bin/mkdir -p ${GLIBDIR}
 
-install-local: ${GLIBDIR} ${BINDIR}
-	/bin/cp -vu ${LIBPOSIX} ${BINDIR}/
+# LIBPOSIX must always be accessible, so UBINDIR
+
+install-local: ${GLIBDIR} ${UBINDIR}
+	/bin/cp -vu ${LIBPOSIX} ${UBINDIR}/
 	/bin/cp -vu ${IMPLIB} ${GLIBDIR}/libmingw32.a
 
 install-cross:

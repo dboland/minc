@@ -21,18 +21,13 @@ ${MINGW}${GCCDIR}:
 	@exit 1
 
 %.o: %.c
-	gcc -c ${CFLAGS} -I${ROOTDIR}/include -o $@ $<
+	${CC} -c ${CFLAGS} -I${ROOTDIR}/include -o $@ $<
 
 %.a: %.def
 	dlltool -d $< -l $@ -k
 
-#
 # we need alloca(), which belongs in libgcc.a
 # btw: there is a chkstk() in ntdll.dll
-#
-
-#second stage:
-#gnu_mntent.o  futimesat.o mempcpy.o
 
 libgcc.a: wintls.o emutls.o
 	ar xv ${MINGW}${GCCDIR}/libgcc.a ${GCCOBJ}
