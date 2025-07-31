@@ -11,7 +11,6 @@ CFLAGS+= -DRELEASE=\"${RELEASE}\" -DVERSION=\"${VERSION}\" -DBUILD=${BUILD}
 GCCDIR= ${ROOTDIR}/mingw/gcc
 TRACEDIR= ${ROOTDIR}/libtrace
 SBINDIR= /sbin
-ULIBDIR= /usr/lib
 UBINDIR= /usr/bin
 
 all: ${LIBPOSIX}
@@ -80,7 +79,6 @@ install-cross:
 install: ${INSTALL} ${DESTDIR}
 	@mkdir -p ${DESTDIR}${SBINDIR}/
 	${INSTALL} -m 06555 ${LIBPOSIX} ${DESTDIR}${SBINDIR}/
-	${INSTALL} ${IMPLIB} ${DESTDIR}${ULIBDIR}/libposix.so
 
 release-clean:
 	/bin/rm version.o

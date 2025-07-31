@@ -2,8 +2,8 @@ ROOTDIR= ../..
 
 include ${ROOTDIR}/Makefile.inc
 
-PROGS= chmod mkdir mv rm rmdir test chown chgrp ls cp
-OBJECTS= ${PROGS} cat ln
+PROGS= chmod mv rm rmdir test chown chgrp ls cp
+OBJECTS= ${PROGS} cat ln mkdir
 CFLAGS+= -DNOPIE
 BINSRC= ${SRCDIR}/bin
 

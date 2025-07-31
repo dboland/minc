@@ -93,12 +93,7 @@ terminal and open it again as Administrator. Change to your
 it *minc-release* so it won't conflict with an existing MinC 
 system:
 
-	install -o root -g wheel -d /c/minc-release
-
-This command will create the MinC root directory (**-d**) with 
-*root* as the owner (**-o**) and *wheel* as group (**-g**). 
-MinC automatically translates these names to their Windows 
-equivalents (*SYSTEM* and *Administrators*).
+	mkdir /c/minc-release
 
 **Note**: it is not advisable to create the MinC root directory 
 in a location like *Program Files*. Remember, we will be building 
