@@ -33,8 +33,8 @@ help:
 	@less BUILD.md
 
 install:
-	@${MAKE} -C libposix install
 	@${MAKE} -C openbsd install
+	@${MAKE} -C libposix install
 
 release:
 	@${MAKE} -C libposix release

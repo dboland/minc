@@ -59,8 +59,8 @@ ${XINCDIR}:
 install-local: ${SRCDIR} ${MACHINEDIR} ${HEADERS}
 
 install: ${DESTDIR}
-	@${MAKE} -C lib install
 	@${MAKE} -C bin install
+	@${MAKE} -C lib install
 	@${MAKE} -C usr.bin install
 	@${MAKE} -C sbin install
 	@${MAKE} -C usr.sbin install
