@@ -9,5 +9,5 @@ all: ${OBJECTS}
 
 %.o: ${SRCDIR}/lib/libc/compat-43/%.c
 	@/bin/echo -n "$@ "
-	@gcc -c ${CFLAGS} -I${SRCDIR}/sys -o $@ $<
+	@${XGCC} -c ${CFLAGS} -I${SRCDIR}/sys -o $@ $<
 

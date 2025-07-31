@@ -2,9 +2,9 @@ ROOTDIR= ..
 
 include ${ROOTDIR}/Makefile.inc
 
-MACHINEDIR= ${INCDIR}/machine
-HEADERS= ${INCDIR}/fcntl.h ${INCDIR}/stdarg.h ${INCDIR}/stdint.h \
-	${INCDIR}/sched.h ${INCDIR}/syslog.h ${INCDIR}/termios.h
+HEADERS= ${GINCDIR}/fcntl.h ${GINCDIR}/stdarg.h ${GINCDIR}/stdint.h \
+	${GINCDIR}/sched.h ${GINCDIR}/syslog.h ${GINCDIR}/termios.h
+MACHINEDIR= ${GINCDIR}/machine
 
 all: ${SRCDIR}
 	@${MAKE} -C lib
@@ -29,32 +29,32 @@ ${ROOTDIR}/config.inc:
 
 ${MACHINEDIR}:
 	@/bin/mkdir -p ${MACHINEDIR}
-	/bin/cp -ru ${SRCDIR}/include/* ${INCDIR}/
-	/bin/cp -ru ${SRCDIR}/sys/sys ${INCDIR}/
+	/bin/cp -ru ${SRCDIR}/include/* ${GINCDIR}/
+	/bin/cp -ru ${SRCDIR}/sys/sys ${GINCDIR}/
 	/bin/cp -ru ${SRCDIR}/sys/arch/${ARCH}/include/* ${MACHINEDIR}/
-	/bin/patch -p 0 -d ${PREFIX} <include.patch
+	/bin/patch -p 0 -d ${GPREFIX} <include.patch
 
-${INCDIR}/fcntl.h:
-	@/bin/cp -vu fcntl.h ${INCDIR}/
+${GINCDIR}/fcntl.h:
+	@/bin/cp -vu fcntl.h ${GINCDIR}/
 
-${INCDIR}/sched.h:
-	@/bin/cp -vu sched.h ${INCDIR}/
+${GINCDIR}/sched.h:
+	@/bin/cp -vu sched.h ${GINCDIR}/
 
-${INCDIR}/stdarg.h:
-	@/bin/cp -vu stdarg.h ${INCDIR}/
+${GINCDIR}/stdarg.h:
+	@/bin/cp -vu stdarg.h ${GINCDIR}/
 
-${INCDIR}/stdint.h:
-	@/bin/cp -vu stdint.h ${INCDIR}/
+${GINCDIR}/stdint.h:
+	@/bin/cp -vu stdint.h ${GINCDIR}/
 
-${INCDIR}/syslog.h:
-	@/bin/cp -vu syslog.h ${INCDIR}/
+${GINCDIR}/syslog.h:
+	@/bin/cp -vu syslog.h ${GINCDIR}/
 
-${INCDIR}/termios.h:
-	@/bin/cp -vu termios.h ${INCDIR}/
+${GINCDIR}/termios.h:
+	@/bin/cp -vu termios.h ${GINCDIR}/
 
 ${XINCDIR}:
 	@/bin/mkdir -p ${XINCDIR}
-	/bin/cp -ru /opt/include/* ${XINCDIR}/
+	/bin/cp -ru ${GINCDIR}/* ${XINCDIR}/
 
 install-local: ${SRCDIR} ${MACHINEDIR} ${HEADERS}
 

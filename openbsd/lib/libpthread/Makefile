@@ -2,9 +2,9 @@ ROOTDIR= ../../..
 
 include ${ROOTDIR}/Makefile.inc
 
-HEADERS= ${INCDIR}/pthread.h
+HEADERS= ${GINCDIR}/pthread.h
 
-${INCDIR}/pthread.h:
+${GINCDIR}/pthread.h:
 	@/bin/cp -vu ${SRCDIR}/lib/libpthread/include/pthread.h $@
 
 install-local: ${HEADERS}

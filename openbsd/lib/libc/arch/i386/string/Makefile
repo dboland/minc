@@ -12,9 +12,9 @@ all: ${OBJECTS}
 	@/bin/echo "done."
 
 %.o: ${SRCDIR}/lib/libc/arch/${ARCH}/string/%.S
-	@/bin/echo -n "$@ "
-	@gcc -c ${CFLAGS} -o $@ $<
+	@echo -n "$@ "
+	@${XGCC} -c ${CFLAGS} -o $@ $<
 
 %.c.o: ${SRCDIR}/lib/libc/string/%.c
-	@/bin/echo -n "$@ "
-	@gcc -c ${CFLAGS} -o $@ $<
+	@echo -n "$@ "
+	@${XGCC} -c ${CFLAGS} -o $@ $<

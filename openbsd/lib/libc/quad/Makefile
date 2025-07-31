@@ -11,9 +11,9 @@ KOBJECTS=adddi3.o anddi3.o ashldi3.o ashrdi3.o cmpdi2.o divdi3.o iordi3.o \
 .DEFAULT:
 
 all: ${OBJECTS}
-	@/bin/echo "done."
+	@echo "done."
 
 %.o: ${SRCDIR}/lib/libc/quad/%.c
-	@/bin/echo -n "$@ "
-	@gcc -c ${CFLAGS} -o $@ $<
+	@echo -n "$@ "
+	@${XGCC} -c ${CFLAGS} -o $@ $<
 

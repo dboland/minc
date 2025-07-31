@@ -12,7 +12,7 @@ all: ${OBJECTS}
 
 %.o: ${SRCDIR}/lib/libc/gdtoa/%.c
 	@/bin/echo -n "$@ "
-	@gcc -c ${CFLAGS} -I${SRCDIR}/lib/libc/arch/${ARCH}/gdtoa -o $@ $<
+	@${XGCC} -c ${CFLAGS} -I${SRCDIR}/lib/libc/arch/${ARCH}/gdtoa -o $@ $<
 
 clean:
 	rm -f *.o *.dll *.a

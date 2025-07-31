@@ -2,8 +2,8 @@ ROOTDIR= ../..
 
 include ${ROOTDIR}/Makefile.inc
 
-PROGS= chmod ln mkdir mv rm rmdir test chown chgrp ls cp
-OBJECTS= ${PROGS} cat
+PROGS= chmod mkdir mv rm rmdir test chown chgrp ls cp
+OBJECTS= ${PROGS} cat ln
 CFLAGS+= -DNOPIE
 BINSRC= ${SRCDIR}/bin
 
@@ -22,7 +22,7 @@ ${BINDIR}: ${PROGS}
 	/bin/cp -vu ${PROGS} ${BINDIR}/
 
 chmod: ${BINSRC}/chmod/chmod.c
-	gcc -s -static ${CFLAGS} -o $@ $<
+	${XGCC} -s -static ${CFLAGS} -o $@ $<
 
 chown: chmod.exe
 	/bin/cp -vu $< $@.exe
@@ -31,32 +31,32 @@ chgrp: chmod.exe
 	/bin/cp -vu $< $@.exe
 
 ln: ${BINSRC}/ln/ln.c
-	gcc -s -static ${CFLAGS} -o $@ $<
+	${XGCC} -s -static ${CFLAGS} -o $@ $<
 
 mkdir: ${BINSRC}/mkdir/mkdir.c
-	gcc -s -static ${CFLAGS} -o $@ $<
+	${XGCC} -s -static ${CFLAGS} -o $@ $<
 
 mv: ${BINSRC}/mv/mv.c
-	gcc -s -static ${CFLAGS} -o $@ $<
+	${XGCC} -s -static ${CFLAGS} -o $@ $<
 
 rm: ${BINSRC}/rm/rm.c
-	gcc -s -static ${CFLAGS} -o $@ $<
+	${XGCC} -s -static ${CFLAGS} -o $@ $<
 
 rmdir: ${BINSRC}/rmdir/rmdir.c
-	gcc -s -static ${CFLAGS} -o $@ $<
+	${XGCC} -s -static ${CFLAGS} -o $@ $<
 
 test: ${BINSRC}/test/test.c
-	gcc -s -static ${CFLAGS} -o $@ $<
+	${XGCC} -s -static ${CFLAGS} -o $@ $<
 
 cat: ${BINSRC}/cat/cat.c
-	gcc -s -static ${CFLAGS} -o $@ $<
+	${XGCC} -s -static ${CFLAGS} -o $@ $<
 
 ls: ls-main.c ${BINSRC}/ls/print.c ${BINSRC}/ls/cmp.c ${BINSRC}/ls/util.c \
 	${BINSRC}/ls/ls.c
-	gcc -s -static ${CFLAGS} -o $@ $^ -lutil
+	${XGCC} -s -static ${CFLAGS} -o $@ $^ -lutil
 
 cp: ${BINSRC}/cp/utils.c ${BINSRC}/cp/cp.c
-	gcc -s -static ${CFLAGS} -o $@ $^
+	${XGCC} -s -static ${CFLAGS} -o $@ $^
 
 install-local: ${BINDIR}
 

@@ -9,5 +9,5 @@ all: ${OBJECTS}
 
 %.o: ${SRCDIR}/lib/libc/db/recno/%.c
 	@/bin/echo -n "$@ "
-	@gcc -c ${CFLAGS} -o $@ $<
+	@${XGCC} -c ${CFLAGS} -o $@ $<
 

@@ -2,40 +2,43 @@ ROOTDIR= ../../..
 
 include ${ROOTDIR}/Makefile.inc
 
-LIBEXEC= /usr/libexec
 OBJECTS= libdl.o
 IMPLIB= libdl.dll.a
 LDFLAGS= -shared -s
 LIBDL= ld.so
+ULIBXDIR= /usr/libexec
 
-all: lib
+all: ${LIBDL} libdl.a
 
 %.o: %.c
-	gcc -c -g ${CFLAGS} -I${ROOTDIR}/include -I${SRCDIR}/sys $<
+	${XGCC} -c -g ${CFLAGS} -I${ROOTDIR}/include -I${SRCDIR}/sys $<
 
 version.o: version.rc
-	windres -DVERSION=\\\"${VERSION}\\\" -DRELEASE=\\\"${RELEASE}\\\" $< $@
+	${XWINDRES} -DVERSION=\\\"${VERSION}\\\" -DRELEASE=\\\"${RELEASE}\\\" $< $@
+
+libdl.a: ${OBJECTS}
+	@/bin/echo "Making static library $@"
+	@ar cru $@ $^
 
 ${LIBDL}: ${OBJECTS} version.o
 	${LD} ${LDFLAGS} -e _DllMainCRTStartup@12 --out-implib=${IMPLIB} \
-	-o $@ --image-base=${IMGBASE_LIBD} ${LIBDIR}/dllcrt2.o ${OBJECTS} version.o \
-	-L${LIBDIR} -lmingw32
+	-o $@ --image-base=${IMGBASE_LIBD} ${GLIBDIR}/dllcrt2.o ${OBJECTS} version.o \
+	-L${GLIBDIR} -lmingw32
 
-lib: ${LIBDL}
+${LIBXDIR}:
+	/bin/mkdir -p ${LIBXDIR}
 
-${LIBEXEC}:
-	/bin/mkdir ${LIBEXEC}
-
-install-local: ${LIBEXEC}
-	/bin/cp -vu ld.so ${LIBEXEC}/
-	/bin/cp -vu ${IMPLIB} ${LIBDIR}/
+install-local: ${LIBXDIR}
+	/bin/cp -vu ld.so ${LIBXDIR}/
+	/bin/cp -vu ${IMPLIB} ${GLIBDIR}/
 
 install-cross:
-	/bin/cp -vu ${IMPLIB} ${XLIBDIR}/libdl.a
+	/bin/cp -vu libdl.a ${XLIBDIR}/
+	/bin/cp -vu ${IMPLIB} ${XLIBDIR}/libdl.so
 
 install: ${DESTDIR}
-	@mkdir -p ${DESTDIR}${LIBEXEC}
-	${INSTALL} ld.so ${DESTDIR}${LIBEXEC}/
+	@mkdir -p ${DESTDIR}${ULIBXDIR}
+	${INSTALL} ld.so ${DESTDIR}${ULIBXDIR}/
 	${INSTALL} ${IMPLIB} ${DESTDIR}/usr/lib/libdl.a
 
 release-clean:

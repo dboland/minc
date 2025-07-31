@@ -33,15 +33,15 @@ all: ksh
 
 %.o: %.c
 	@echo -n "$@ "
-	@gcc -c ${CFLAGS} -g -DNOPIE -o $@ $<
+	@${XGCC} -c ${CFLAGS} -g -DNOPIE -o $@ $<
 
 misc.o: misc.c
 	@echo -n "$@ "
-	@gcc -c ${CFLAGS} -g -DNOPIE -I${SRCDIR}/lib/libc/gen -o $@ $<
+	@${XGCC} -c ${CFLAGS} -g -DNOPIE -I${SRCDIR}/lib/libc/gen -o $@ $<
 
 ksh: ${OBJECTS}
 	@echo "done."
-	gcc -static -s ${CFLAGS} -o $@ ${OBJECTS}
+	${XGCC} -static -s ${CFLAGS} -o $@ ${OBJECTS}
 
 install-local:
 	/bin/cp -vu ksh ${BINDIR}/sh

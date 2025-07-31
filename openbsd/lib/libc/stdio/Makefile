@@ -24,4 +24,4 @@ all: ${OBJECTS}
 
 %.o: ${SRCDIR}/lib/libc/stdio/%.c
 	@/bin/echo -n "$@ "
-	@gcc -c ${CFLAGS} -I../include -I${SRCDIR}/lib/libc/gdtoa -I${SRCDIR}/lib/libc/arch/${ARCH}/gdtoa -o $@ $<
+	@${XGCC} -c ${CFLAGS} -I../include -I${SRCDIR}/lib/libc/gdtoa -I${SRCDIR}/lib/libc/arch/${ARCH}/gdtoa -o $@ $<

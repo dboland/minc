@@ -5,27 +5,28 @@ include ${ROOTDIR}/Makefile.inc
 RELEASE=75.0
 LIBSOCKET= libsocket.so.${RELEASE}
 IMPLIB= libsocket.dll.a
-GCCDIR= ${LIBDIR}/gcc/mingw32/${GCCVER}
+GCCDIR= ${GLIBDIR}/gcc/mingw32/${GCCVER}
 
 all: objects lib
 
 crt1.o: crt1.c
-	gcc -c -g ${CFLAGS} -I${ROOTDIR}/include $<
+	${CC} -c ${CFLAGS} -I${ROOTDIR}/include $<
 
 libsocket.a:
-	@/bin/echo "Making static library $@"
+	@echo "Making static library $@"
 	@ar cru $@ $(shell ls */*.o)
 
 version.o: version.rc
-	windres -DVERSION=\\\"${VERSION}\\\" -DRELEASE=\\\"${RELEASE}\\\" $< $@
+	${XWINDRES} -DVERSION=\\\"${VERSION}\\\" -DRELEASE=\\\"${RELEASE}\\\" $< $@
 
 ${LIBSOCKET}: crt1.o version.o
 	${LD} -s -shared ${LDFLAGS} -e _DllMainCRTStartup@12 --out-implib=${IMPLIB} \
 	-o $@ crt1.o --image-base=${IMGBASE_LIBSOCKET} $(shell /bin/ls */*.so) version.o \
-	-L${LIBDIR} -L${GCCDIR} -lmingw32 -lmingwex -lmsvcrt -lgcc
+	-L${GLIBDIR} -L${GCCDIR} -lmingw32 -lmingwex -lmsvcrt -lgcc
 
 %.d: %
-	@${MAKE} -C $< ROOTDIR=${ROOTDIR}/.. SRCDIR=${SRCDIR} CFLAGS="${CFLAGS} -DLIBSOCK_IMPORT= -I${SRCDIR}/sys -I../../libc/include"
+	@${MAKE} -C $< XGCC="${XGCC}" ROOTDIR="${ROOTDIR}/.." SRCDIR="${SRCDIR}" \
+	CFLAGS="${CFLAGS} -DLIBSOCK_IMPORT= -I${SRCDIR}/sys -I../../libc/include"
 
 objects: asr.d net.d rpc.d
 
@@ -43,9 +44,9 @@ release-clean:
 # Perl needs libsocket.so
 
 install-local:
-	/bin/cp -vu ${IMPLIB} ${LIBDIR}/
-	/bin/cp -vu ${IMPLIB} ${LIBDIR}/libsocket.so
-	/bin/cp -vu libsocket.a ${LIBDIR}/
+	/bin/cp -vu ${IMPLIB} ${GLIBDIR}/
+	/bin/cp -vu ${IMPLIB} ${GLIBDIR}/libsocket.so
+	/bin/cp -vu libsocket.a ${GLIBDIR}/
 
 install-cross:
 	/bin/cp -vu libsocket.a ${XLIBDIR}/

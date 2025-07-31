@@ -6,5 +6,5 @@ OBJECTS=mpool.o
 all: ${OBJECTS}
 
 %.o: ${SRCDIR}/lib/libc/db/mpool/%.c
-	gcc -c ${CFLAGS} -o $@ $<
+	${XGCC} -c ${CFLAGS} -o $@ $<
 

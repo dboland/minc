@@ -42,12 +42,12 @@ all: ${OBJECTS}
 
 %.o: ${SRCDIR}/lib/libc/gen/%.c
 	@/bin/echo -n "$@ "
-	@gcc -c ${CFLAGS} -I${SRCDIR}/sys -I../include -o $@ $<
+	@${XGCC} -c ${CFLAGS} -I${SRCDIR}/sys -I../include -o $@ $<
 
 %.c.o: %.c
 	@/bin/echo -n "$@ "
-	@gcc -c ${CFLAGS} -I${SRCDIR}/sys -I${ROOTDIR}/include -o $@ $<
+	@${XGCC} -c ${CFLAGS} -I${SRCDIR}/sys -I${ROOTDIR}/include -o $@ $<
 
 %.S.o: %.S
 	@/bin/echo -n "$@ "
-	@gcc -c ${CFLAGS} -I../arch/${ARCH} -o $@ $<
+	@${XGCC} -c ${CFLAGS} -I../arch/${ARCH} -o $@ $<

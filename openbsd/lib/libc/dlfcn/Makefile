@@ -6,5 +6,5 @@ OBJECTS=dlfcn_stubs.o
 all: ${OBJECTS}
 
 %.o: ${SRCDIR}/lib/libc/dlfcn/%.c
-	gcc -c ${CFLAGS} -o $@ $<
+	${XGCC} -c ${CFLAGS} -o $@ $<
 

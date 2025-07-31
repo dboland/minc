@@ -16,10 +16,10 @@ ${USBINPATH}:
 	@exit 1
 
 dev_mkdb: ${SRCDIR}/usr.sbin/dev_mkdb/dev_mkdb.c
-	gcc -s ${CFLAGS} -o $@ $<
+	${XGCC} -s ${CFLAGS} -o $@ $<
 
 pwd_mkdb: ${SRCDIR}/usr.sbin/pwd_mkdb/pwd_mkdb.c
-	gcc -s ${CFLAGS} -o $@ $< -lutil
+	${XGCC} -s ${CFLAGS} -o $@ $< -lutil
 
 install: ${DESTDIR}
 	@mkdir -p ${DESTDIR}/usr/sbin

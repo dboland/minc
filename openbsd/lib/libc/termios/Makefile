@@ -10,4 +10,4 @@ all: ${OBJECTS}
 
 %.o: ${SRCDIR}/lib/libc/termios/%.c
 	@/bin/echo -n "$@ "
-	@gcc -c ${CFLAGS} -o $@ $<
+	@${XGCC} -c ${CFLAGS} -o $@ $<

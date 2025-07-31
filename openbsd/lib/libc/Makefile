@@ -2,13 +2,13 @@ ROOTDIR= ../../..
 
 include ${ROOTDIR}/Makefile.inc
 
-RELEASE=75.0
-CFLAGS+= -g -DNOPIE
-IMPLIB= libc.dll.a
+RELEASE= 75.0
 OBJECTS= libc.o
 SHOBJECTS= $(shell /bin/ls arch/${ARCH}/*/*.o */*.o db/*/*.o)
 LIBC= libc.so.${RELEASE}
-GCCDIR= ${LIBDIR}/gcc/mingw32/${GCCVER}
+GCCDIR= ${GLIBDIR}/gcc/mingw32/${GCCVER}
+CFLAGS+= -g -DNOPIE
+IMPLIB= libc.dll.a
 
 NLS=    C.msg Pig.msg da.ISO8859-1.msg da.UTF-8.msg de.ISO8859-1.msg \
         de.UTF-8.msg es.ISO8859-1.msg es.UTF-8.msg fi.ISO8859-1.msg \
@@ -16,25 +16,26 @@ NLS=    C.msg Pig.msg da.ISO8859-1.msg da.UTF-8.msg de.ISO8859-1.msg \
         nl.ISO8859-1.msg nl.UTF-8.msg no.ISO8859-1.msg no.UTF-8.msg \
         ru.KOI8-R.msg ru.UTF-8.msg sv.ISO8859-1.msg sv.UTF-8.msg
 
-all: include objects lib
+all: include lib
 
 %.d: %
-	@CFLAGS="${CFLAGS}" ${MAKE} -C $< ROOTDIR=${ROOTDIR}/.. SRCDIR=${SRCDIR} ARCH=${ARCH}
+	@CFLAGS="${CFLAGS}" ${MAKE} -C $< XGCC="${XGCC}" ROOTDIR="${ROOTDIR}/.." \
+	SRCDIR=${SRCDIR} ARCH=${ARCH}
 
 %.o: %.c
-	gcc -c ${CFLAGS} -I${ROOTDIR}/include -o $@ $<
+	${XGCC} -c ${CFLAGS} -I${ROOTDIR}/include -o $@ $<
 
 libc.a:
 	@/bin/echo "Making static library $@"
 	@ar cru $@ ${OBJECTS} ${SHOBJECTS}
 
 version.o: version.rc
-	windres -DVERSION=\\\"${VERSION}\\\" -DRELEASE=\\\"${RELEASE}\\\" $< $@
+	${XWINDRES} -DVERSION=\\\"${VERSION}\\\" -DRELEASE=\\\"${RELEASE}\\\" $< $@
 
-${LIBC}: ${OBJECTS} version.o
-	${LD} -shared -s ${LDFLAGS} -e _DllMainCRTStartup@12 --out-implib=${IMPLIB} \
-	-o $@ --image-base=${IMGBASE_LIBC} ${LIBDIR}/dllcrt2.o ${OBJECTS} ${SHOBJECTS} version.o \
-	-L${LIBDIR} -L${GCCDIR} -lmingw32 -lmsvcrt -lgcc
+${LIBC}: objects ${OBJECTS} version.o
+	${LD} -shared ${LDFLAGS} -e _DllMainCRTStartup@12 --out-implib=${IMPLIB} \
+	-o $@ --image-base=${IMGBASE_LIBC} ${GLIBDIR}/dllcrt2.o ${OBJECTS} ${SHOBJECTS} version.o \
+	-L${GLIBDIR} -L${GCCDIR} -lmingw32 -lmsvcrt -lgcc
 
 include:
 	/bin/cp -rvu ${SRCDIR}/lib/libc/include .
@@ -58,11 +59,11 @@ release-clean:
 # Perl needs libc.so
 
 install-local:
-	/bin/cp -vu ${IMPLIB} ${LIBDIR}/libc.so
-	/bin/cp -vu ${IMPLIB} ${LIBDIR}/libmingwex.dll.a
-	/bin/cp -vu ${IMPLIB} ${LIBDIR}/
-	/bin/cp -vu libc.a ${LIBDIR}/libmingwex.a
-	/bin/cp -vu libc.a ${LIBDIR}/
+	/bin/cp -vu ${IMPLIB} ${GLIBDIR}/libc.so
+	/bin/cp -vu ${IMPLIB} ${GLIBDIR}/libmingwex.dll.a
+	/bin/cp -vu ${IMPLIB} ${GLIBDIR}/
+	/bin/cp -vu libc.a ${GLIBDIR}/libmingwex.a
+	/bin/cp -vu libc.a ${GLIBDIR}/
 
 install-cross:
 	/bin/cp -vu libc.a ${XLIBDIR}/

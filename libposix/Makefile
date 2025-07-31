@@ -2,15 +2,16 @@ ROOTDIR= ..
 
 include ${ROOTDIR}/Makefile.inc
 
+OBJECTS= crt1.o version.o msvc.o win_posix.o vfs_posix.o libposix.o \
+	arch/fork.o arch/syscall.o
 LIBPOSIX= libposix-${RELEASE}.dll
 IMPLIB= libposix.dll.a
 CFLAGS+= -I${ROOTDIR}/include -g
 CFLAGS+= -DRELEASE=\"${RELEASE}\" -DVERSION=\"${VERSION}\" -DBUILD=${BUILD}
-OBJECTS= crt1.o version.o msvc.o win_posix.o vfs_posix.o libposix.o \
-	arch/fork.o arch/syscall.o
-GCCDIR=../mingw/gcc
-TRACEDIR=../libtrace
+GCCDIR= ${ROOTDIR}/mingw/gcc
+TRACEDIR= ${ROOTDIR}/libtrace
 SBINDIR= /sbin
+ULIBDIR= /usr/lib
 
 all: ${LIBPOSIX}
 
@@ -27,26 +28,35 @@ ${ROOTDIR}/config.inc:
 	@echo " ---------------------------------------------------"
 	@exit 1
 
+${INSTALL}:
+	@echo " ---------------------------------------------------"
+	@echo "| The system must be installed using the system itself."
+	@echo "| Switch to the OpenBSD system by running the 'mount' script:"
+	@echo "|"
+	@echo "| ./mount.sh minc"
+	@echo " ---------------------------------------------------"
+	@exit 1
+
 crt1.o: crt1.c
-	gcc -c ${CFLAGS} $<
+	${CC} -c ${CFLAGS} $<
 
 msvc.o: msvc.c
-	gcc -c ${CFLAGS} -o $@ $<
+	${CC} -c ${CFLAGS} -o $@ $<
 
 win_posix.o: win/win.c
-	gcc -c ${CFLAGS} -o $@ $<
+	${CC} -c ${CFLAGS} -o $@ $<
 
 vfs_posix.o: vfs/vfs.c
-	gcc -c ${CFLAGS} -I${TRACEDIR} -o $@ $<
+	${CC} -c ${CFLAGS} -I${TRACEDIR} -o $@ $<
 
 libposix.o: libposix.c
-	gcc -c ${CFLAGS} -I${SRCDIR}/sys -DTTYDEFCHARS -DKTRACE -DSYSVSEM $<
+	${XGCC} -c ${CFLAGS} -I${SRCDIR}/sys -DTTYDEFCHARS -DKTRACE -DSYSVSEM $<
 
 version.o: version.rc
-	windres -DVERSION=\\\"${VERSION}\\\" -DRELEASE=\\\"${RELEASE}\\\" $< $@
+	${XWINDRES} -DVERSION=\\\"${VERSION}\\\" -DRELEASE=\\\"${RELEASE}\\\" $< $@
 
 arch/%.o: arch/${PROCESSOR_ARCHITECTURE}/%.S
-	gcc -c ${CFLAGS} -o $@ $<
+	${XGCC} -c ${CFLAGS} -o $@ $<
 
 ${LIBPOSIX}: ${OBJECTS}
 	${LD} -shared -s ${LDFLAGS} -e _DllMainCRTStartup@12 --out-implib=${IMPLIB} \
@@ -54,19 +64,20 @@ ${LIBPOSIX}: ${OBJECTS}
 	-L${MINGW}/lib -L${GCCDIR} -L${TRACEDIR} -lmsvcrt -ladvapi32 -lshell32 -luser32 -lntdll -lkernel32 \
 	-lnetapi32 -lws2_32 -liphlpapi -lrpcrt4 -lmpr -lgcc -ltrace
 
-${LIBDIR}:
-	/bin/mkdir -p ${LIBDIR}
+${GLIBDIR}:
+	/bin/mkdir -p ${GLIBDIR}
 
-install-local: ${LIBDIR} ${BINDIR}
+install-local: ${GLIBDIR} ${BINDIR}
 	/bin/cp -vu ${LIBPOSIX} ${BINDIR}/
-	/bin/cp -vu ${IMPLIB} ${LIBDIR}/libmingw32.a
+	/bin/cp -vu ${IMPLIB} ${GLIBDIR}/libmingw32.a
 
 install-cross:
 	/bin/cp -vu ${IMPLIB} ${XLIBDIR}/libposix.so
 
-install: ${DESTDIR}
+install: ${INSTALL} ${DESTDIR}
 	@mkdir -p ${DESTDIR}${SBINDIR}/
 	${INSTALL} -m 06555 ${LIBPOSIX} ${DESTDIR}${SBINDIR}/
+	${INSTALL} ${IMPLIB} ${DESTDIR}${ULIBDIR}/libposix.so
 
 release-clean:
 	/bin/rm version.o

@@ -43,11 +43,11 @@ all: source ${OBJECTS}
 
 %.o: %.S
 	@/bin/echo -n "$@ "
-	@gcc -c ${CFLAGS} -I../arch/${ARCH} -o $@ $<
+	@${XGCC} -c ${CFLAGS} -I../arch/${ARCH} -o $@ $<
 
 %.c.o: ${SRCDIR}/lib/libc/sys/%.c
 	@/bin/echo -n "$@ "
-	@gcc -c ${CFLAGS} -I../arch/${ARCH} -o $@ $<
+	@${XGCC} -c ${CFLAGS} -I../arch/${ARCH} -o $@ $<
 
 source:
 	@syscall.sh

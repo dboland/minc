@@ -14,9 +14,9 @@ all: ${OBJECTS}
 
 %.c.o: ${SRCDIR}/lib/libc/arch/${ARCH}/gen/%.c
 	@/bin/echo -n "$@ "
-	@gcc -c ${CFLAGS} -o $@ $<
+	@${XGCC} -c ${CFLAGS} -o $@ $<
 
 %.o: ${SRCDIR}/lib/libc/arch/${ARCH}/gen/%.S
 	@/bin/echo -n "$@ "
-	@gcc -c ${CFLAGS} -o $@ $<
+	@${XGCC} -c ${CFLAGS} -o $@ $<
 

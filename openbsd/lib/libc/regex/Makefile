@@ -6,7 +6,7 @@ OBJECTS = regcomp.o regerror.o regexec.o regfree.o
 all: ${OBJECTS}
 
 %.o: ${SRCDIR}/lib/libc/regex/%.c
-	gcc -c ${CFLAGS} -o $@ $<
+	${XGCC} -c ${CFLAGS} -o $@ $<
 
 clean:
 	rm -f *.o

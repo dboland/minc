@@ -27,13 +27,13 @@ ${BINDIR}: ${PROGS} install.exe patch.exe gzip.exe
 	/bin/cp -vu manifest ${BINDIR}/patch.exe.manifest
 
 uname: ${UBINSRC}/uname/uname.c
-	gcc -s -static ${CFLAGS} -DNOPIE -o $@ $<
+	${XGCC} -s -static ${CFLAGS} -DNOPIE -o $@ $<
 
 arch: ${UBINSRC}/arch/arch.c
-	gcc -s -static ${CFLAGS} -DNOPIE -o $@ $<
+	${XGCC} -s -static ${CFLAGS} -DNOPIE -o $@ $<
 
 touch: ${UBINSRC}/touch/touch.c
-	gcc -s -static ${CFLAGS} -DNOPIE -o $@ $<
+	${XGCC} -s -static ${CFLAGS} -DNOPIE -o $@ $<
 
 # In Windows, "install" and "patch" seem to be reserved 
 # words. When executed with such name, Vista checks if 
@@ -41,25 +41,25 @@ touch: ${UBINSRC}/touch/touch.c
 # see: https://irq5.io/2011/06/26/gnu-patch-and-windows-uac/
 
 install.exe: xinstall.c
-	gcc -s -static ${CFLAGS} -DNOPIE -I${UBINSRC}/xinstall -o $@ $<
+	${XGCC} -s -static ${CFLAGS} -DNOPIE -I${UBINSRC}/xinstall -o $@ $<
 
 patch.exe: ${UBINSRC}/patch/patch.c ${UBINSRC}/patch/pch.c ${UBINSRC}/patch/inp.c \
 	${UBINSRC}/patch/util.c ${UBINSRC}/patch/backupfile.c ${UBINSRC}/patch/mkpath.c
-	gcc -s -static ${CFLAGS} -DNOPIE -o $@ $^
+	${XGCC} -s -static ${CFLAGS} -DNOPIE -o $@ $^
 
 gzip.exe: ${UBINSRC}/compress/main.c ${UBINSRC}/compress/zopen.c \
 	${UBINSRC}/compress/gzopen.c ${UBINSRC}/compress/nullopen.c
-	gcc -s -static ${CFLAGS} -DNOPIE -o $@ $^ -lz
+	${XGCC} -s -static ${CFLAGS} -DNOPIE -o $@ $^ -lz
 
 grep: grep.c ${UBINSRC}/grep/binary.c ${UBINSRC}/grep/file.c ${UBINSRC}/grep/mmfile.c \
 	${UBINSRC}/grep/queue.c ${UBINSRC}/grep/util.c
-	gcc -s ${CFLAGS} -I${UBINSRC}/grep -o $@ $^ -lz
+	${XGCC} -s ${CFLAGS} -I${UBINSRC}/grep -o $@ $^ -lz
 
 du: ${UBINSRC}/du/du.c
-	gcc -s ${CFLAGS} -o $@ $< -lutil
+	${XGCC} -s ${CFLAGS} -o $@ $< -lutil
 
 env: env.c
-	gcc -s ${CFLAGS} -o $@ $<
+	${XGCC} -s ${CFLAGS} -o $@ $<
 
 install-local: ${BINDIR}
 

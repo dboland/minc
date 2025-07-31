@@ -17,10 +17,10 @@ ${SBINSRC}:
 	@exit 1
 
 %.o: %.c
-	gcc -c ${CFLAGS} -I${ROOTDIR}/include -I${SRCDIR}/sys -o $@ $<
+	${XGCC} -c ${CFLAGS} -I${ROOTDIR}/include -I${SRCDIR}/sys -o $@ $<
 
 %.exe: %.o
-	gcc -s ${CFLAGS} -o $@ $<
+	${XGCC} -s ${CFLAGS} -o $@ $<
 
 ${BINDIR}: ${PROGS}
 	@/bin/mkdir -p ${BINDIR}
@@ -29,29 +29,29 @@ ${BINDIR}: ${PROGS}
 wrc: wrc.exe
 
 mknod: ${SBINSRC}/mknod/mknod.c
-	gcc -s -static ${CFLAGS} -DNOPIE -o $@ $<
+	${XGCC} -s -static ${CFLAGS} -DNOPIE -o $@ $<
 
 mkent: mkent.o
-	gcc -s ${CFLAGS} -I${SRCDIR}/sys -o $@ $< ${MINGW}/lib/libiphlpapi.a
+	${XGCC} -s ${CFLAGS} -I${SRCDIR}/sys -o $@ $< ${MINGW}/lib/libiphlpapi.a
 
 version.o: bsd.rc
-	windres -DVERSION=\\\"${VERSION}\\\" -DRELEASE=\\\"${RELEASE}\\\" $< $@
+	${XWINDRES} -DVERSION=\\\"${VERSION}\\\" -DRELEASE=\\\"${RELEASE}\\\" $< $@
 
 bsd.o: bsd.c
-	gcc -c ${CFLAGS} -DNOPIE -I${SRCDIR}/sys -o $@ $<
+	${XGCC} -c ${CFLAGS} -DNOPIE -I${SRCDIR}/sys -o $@ $<
 
 bsd.exe: bsd.o version.o
-	gcc -s -static ${CFLAGS} -o $@ $^
+	${XGCC} -s -static ${CFLAGS} -o $@ $^
 
 libwtrace.o: libwtrace.c
-	gcc -c ${CFLAGS} -I${MINGW}/include -I${ROOTDIR}/include -o $@ $<
+	${XGCC} -c ${CFLAGS} -I${MINGW}/include -I${ROOTDIR}/include -o $@ $<
 
 wtrace: libwtrace.o wtrace.o
-	gcc -s ${CFLAGS} -o $@ -L${TRACEDIR} $^ -ltrace \
+	${XGCC} -s ${CFLAGS} -o $@ -L${TRACEDIR} $^ -ltrace \
 	${MINGW}/lib/libkernel32.a ${MINGW}/lib/libuser32.a ${MINGW}/lib/libadvapi32.a
 
 mount_refs: ${SBINSRC}/mount_ntfs/mount_ntfs.c ${SBINSRC}/mount/getmntopts.c
-	gcc -s ${CFLAGS} -o $@ $^
+	${XGCC} -s ${CFLAGS} -I${SBINSRC}/mount -o $@ $^
 
 install-local: ${BINDIR}
 

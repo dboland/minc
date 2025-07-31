@@ -9,8 +9,8 @@ OBJECTS += vfs_CAP_CONTROL.o vfs_VNODE.o vfs_NAMEI.o vfs_DEVICE.o vfs_MOUNT.o \
 	vfs_ACCESS.o vfs_NETFLAGS.o vfs_CFDATA.o
 
 all: ${OBJECTS}
-	@/bin/echo "done."
+	@echo "done."
 
 %.o: %.c
-	@/bin/echo -n "$@ "
-	@gcc -c ${CFLAGS} -I${ROOTDIR}/include -o $@ $<
+	@echo -n "$@ "
+	@${CC} -c ${CFLAGS} -I${ROOTDIR}/include -o $@ $<

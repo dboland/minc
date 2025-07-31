@@ -30,20 +30,20 @@ LIBC= send.so recv.so herror.so
 SHOBJECTS+=ip6opt.so rthdr.so vars6.so
 
 all: ${OBJECTS} ${SHOBJECTS}
-	@/bin/echo "done."
+	@echo "done."
 
 %.o: ${SRCDIR}/lib/libc/net/%.c
-	@/bin/echo -n "$@ "
-	@gcc -c ${CFLAGS} -DNOPIE -o $@ $<
+	@echo -n "$@ "
+	@${XGCC} -c ${CFLAGS} -DNOPIE -o $@ $<
 
 %.c.o: %.c
-	@/bin/echo -n "$@ "
-	@gcc -c ${CFLAGS} -DNOPIE -I${ROOTDIR}/include -o $@ $<
+	@echo -n "$@ "
+	@${XGCC} -c ${CFLAGS} -DNOPIE -I${ROOTDIR}/include -o $@ $<
 
 %.so: ${SRCDIR}/lib/libc/net/%.c
-	@/bin/echo -n "$@ "
-	@gcc -c ${CFLAGS} -o $@ $<
+	@echo -n "$@ "
+	@${XGCC} -c ${CFLAGS} -o $@ $<
 
 %.c.so: %.c
-	@/bin/echo -n "$@ "
-	@gcc -c ${CFLAGS} -I${ROOTDIR}/include -o $@ $<
+	@echo -n "$@ "
+	@${XGCC} -c ${CFLAGS} -I${ROOTDIR}/include -o $@ $<

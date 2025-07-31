@@ -104,7 +104,7 @@ __tls_copy(void *data[])
 
 	/* When TLS is enabled, WinNT automatically copies the .data (.tls)
 	 * sections for each new thread! Let's put the GOT data there first
-	 * to make Windows copy parent data when forking.
+	 * to make Windows copy parent data when forking (./arch/i386/fork.S).
 	 */
 	while (index < GOT_MAX){
 		if (entry->size){

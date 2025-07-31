@@ -28,8 +28,6 @@
  *
  */
 
-//#include <stdio.h>
-
 extern unsigned char __tls_start__;
 
 /* wintls.c */

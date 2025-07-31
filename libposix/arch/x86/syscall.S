@@ -63,7 +63,7 @@ ___kernel:
 	add $4,%esp		# code
 	cmp $0,%eax
 	jge 1f
-	mov $-1,%edx
+	mov $-1,%edx		# lseek()
 	mov $-1,%eax
 1:
 	ret

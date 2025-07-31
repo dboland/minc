@@ -5,8 +5,7 @@ include ${ROOTDIR}/Makefile.inc
 OBJECTS= crt0.o crt1.o crtbegin.o crtend.o
 LIBS= libgcc.a libgcc_s.a libgcc_eh.a
 GCCOBJ= _mulsc3.o _muldc3.o _mulxc3.o _ctzdi2.o \
-	_ffsdi2.o _popcountdi2.o _popcountsi2.o _popcount_tab.o _udivdi3.o \
-	_divdi3.o _clrsbdi2.o _clrsbsi2.o \
+	_divdi3.o _udivdi3.o _clrsbdi2.o _clrsbsi2.o \
 	_chkstk.o _chkstk_ms.o
 GCCDIR= /lib/gcc/mingw32/${GCCVER}
 ULIBDIR= /usr/lib
@@ -47,23 +46,24 @@ libgcc.a: wintls.o emutls.o
 crt0_tls.o: crt0.o win_tls.o
 	ld -r -o $@ crt0.o win_tls.o
 
-${PREFIX}${GCCDIR}/include:
-	@/bin/mkdir -p $@
-	/bin/cp -ru ${MINGW}${GCCDIR}/include/c++ $@/
-	/bin/cp -ru ${MINGW}${GCCDIR}/include/ssp $@/
+#${GPREFIX}${GCCDIR}/include:
+#	@/bin/mkdir -p $@
+#	/bin/cp -ru ${MINGW}${GCCDIR}/include/c++ $@/
+#	/bin/cp -ru ${MINGW}${GCCDIR}/include/ssp $@/
 
-${PREFIX}${GCCDIR}: ${MINGW}${GCCDIR}
-	@/bin/mkdir -p $@
-	/bin/cp -vu ${MINGW}${GCCDIR}/libgcc.a ${PREFIX}${GCCDIR}/
-	/bin/cp -vu ${MINGW}${GCCDIR}/libssp.a ${PREFIX}${GCCDIR}/
-	/bin/cp -vu ${MINGW}${GCCDIR}/libstdc++.a ${PREFIX}${GCCDIR}/
+#${GPREFIX}${GCCDIR}: ${MINGW}${GCCDIR}
+#	@/bin/mkdir -p $@
+#	/bin/cp -vu ${MINGW}${GCCDIR}/libgcc.a ${GPREFIX}${GCCDIR}/
+#	/bin/cp -vu ${MINGW}${GCCDIR}/libssp.a ${GPREFIX}${GCCDIR}/
+#	/bin/cp -vu ${MINGW}${GCCDIR}/libstdc++.a ${GPREFIX}${GCCDIR}/
 
-install-local: ${PREFIX}${GCCDIR}
-	/bin/cp -vu ${LIBS} ${PREFIX}${GCCDIR}/
-	/bin/cp -vu crtbegin.o crtend.o ${PREFIX}${GCCDIR}/
-	/bin/cp -vu crt0.o ${LIBDIR}/crt2.o
-	/bin/cp -vu crt1.o ${LIBDIR}/dllcrt2.o
-	@#/bin/cp -vu gcrt0.o ${LIBDIR}/gcrt2.o
+install-local:
+	@/bin/mkdir -p ${GPREFIX}${GCCDIR}
+	/bin/cp -vu ${LIBS} ${GPREFIX}${GCCDIR}/
+	/bin/cp -vu crtbegin.o crtend.o ${GPREFIX}${GCCDIR}/
+	/bin/cp -vu crt0.o ${GLIBDIR}/crt2.o
+	/bin/cp -vu crt1.o ${GLIBDIR}/dllcrt2.o
+	@#/bin/cp -vu gcrt0.o ${GLIBDIR}/gcrt2.o
 
 install-cross:
 	/bin/cp -vu crtbegin.o crtend.o ${XLIBDIR}/

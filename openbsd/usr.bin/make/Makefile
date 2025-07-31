@@ -8,7 +8,7 @@ OBJECTS = arch.o buf.o cmd_exec.o compat.o cond.o dir.o direxpand.o dump.o \
 	parsevar.o str.o stats.o suff.o targ.o targequiv.o timestamp.o \
 	var.o varmodifiers.o varname.o
 
-HOSTCC=gcc
+HOSTCC=${XGCC}
 .OBJDIR=.
 LDFLAGS= -Wl,--disable-auto-import -s
 LDSTATIC= -static -DNOPIE
@@ -28,10 +28,10 @@ HOSTCFLAGS+=${CDEFS} -I${.OBJDIR}
 
 %.o: ${UBINSRC}/make/%.c
 	@echo -n "$@ "
-	@gcc -c ${CFLAGS} -o $@ $<
+	@${XGCC} -c ${CFLAGS} -o $@ $<
 
 %.d: %
-	@${MAKE} -C $< CFLAGS="${CFLAGS}" UBINSRC="${UBINSRC}"
+	@${MAKE} -C $< XGCC="${XGCC}" CFLAGS="${CFLAGS}" UBINSRC="${UBINSRC}"
 
 beforedepend: varhashconsts.h condhashconsts.h nodehashconsts.h
 # may need tweaking if you add variable synonyms or change the hash function

@@ -22,11 +22,17 @@ However, you can also use my copy (186Mb):
 ## Step 0: set up a simple cross-compiler
 
 To build the new kernel and compile the operating system code, 
-we would have to install the OpenBSD header files into the 
-*/include* directory, build some libraries and put them in 
-the */lib* directory. This would make MinGW unusable for normal 
-operation, so instead we will create an isolated instance 
-of the compiler. Let's call it a *poor man's cross-compiler*. 
+you would have to build an OpenBSD cross compiler first. This 
+can be very laborious and frustrating. If you want to know more 
+about cross-compiling, watch Rob Landley's excellent presentation 
+on the topic:
+
+* https://youtu.be/Sk9TatW9ino
+
+Instead we will create an isolated, slightly modified instance 
+of the MinGW compiler. Let's call it a *poor man's cross-compiler*. 
+Your current MinGW installation will be left completely 
+untouched.
 
 Open the MSYS terminal, **cd** to your *minc-devel* directory 
 and make the *opt* target. All files will be installed in a 
@@ -36,35 +42,32 @@ newly created directory, called */opt*:
 
 **Note**: you will probably get some error messages here. These 
 will guide you to properly set up the 'config.inc' file. Use 
-vim to edit it and define the indicated variable.
+vim to edit it and define the indicated variables.
 
 ## Step 1: build the kernel
 
-Most of the kernel will be built using the vanilla MinGW 
-installation. Make this part of the kernel first:
+The kernel will be built using a combination of vanilla MinGW 
+and our *poor man's cross-compiler*, residing in */opt/cross*. 
+To test if this all works, make the kernel first:
 
 	make kernel
-
-When the first step was successful, you will get the following 
-output. This means we are ready for step 2:
-
-	fatal error: machine/_types.h: No such file or directory
 
 ## Step 2: build a minimal system
 
 A minimal system consists of the kernel, the BSD C library, the 
-boot program, the shell and some utilities. These will be built by 
-the new system itself. To achieve this, you will need to unmount 
-the */mingw* directory. This is done by running the **mount** script:
+boot program, the Korn shell and some utilities. These will be 
+built by the new system itself. To finish the build:
+
+	make system
+
+You now have a working OpenBSD system, but we are still using 
+the MSYS commands. To make sure we are executing OpenBSD commands, 
+you will need to unmount the */mingw* directory. This is done by 
+running the **mount** script:
 
 	./mount.sh minc
 
-To finish the build:
-
-	make all
-
-You now have a working OpenBSD system. To test this, you can run 
-the **uname** command:
+To test if the new system works, you can run the **uname** command:
 
 	uname -a
 
@@ -86,16 +89,21 @@ This is to avoid accidentally writing into an existing MinC system.
 
 For this step, you need to be Administrator. Close the MSYS 
 terminal and open it again as Administrator. Change to your 
-*minc-devel* directory and create the MinC root directory. I 
-named it *minc-release* so it won't conflict with an existing 
-MinC system:
+*minc-devel* directory and create the MinC root directory. Name 
+it *minc-release* so it won't conflict with an existing MinC 
+system:
 
-	mkdir /c/minc-release
+	install -o root -g wheel -d /c/minc-release
+
+This command will create the MinC root directory (**-d**) with 
+*root* as the owner (**-o**) and *wheel* as group (**-g**). 
+MinC automatically translates these names to their Windows 
+equivalents (*SYSTEM* and *Administrators*).
 
 **Note**: it is not advisable to create the MinC root directory 
-in a location like *Program Files*. Remember, we are building an 
-entire operating system. File permissions in this kind of locations 
-are unsuitable for an operating system to run properly.
+in a location like *Program Files*. Remember, we will be building 
+an entire operating system. File permissions in this kind of 
+location are unsuitable for OpenBSD to run properly.
 
 Now you can run the **install** target:
 
@@ -119,9 +127,10 @@ along with some of the other system directories like */home* and
 When it is finished, you can close the window and open it again 
 by double-clicking. The above message should be gone.
 
-Double-clicking the *bsd.exe* program is not the right way to start
-the MinC terminal. To make it start properly and in your home directory,
-put following lines in a file named *minc-release.cmd* on your Desktop:
+Double-clicking the *bsd.exe* program is not the right way to 
+start the MinC terminal. To make it start properly and in your 
+home directory, put following lines in a file named 
+*minc-release.cmd* on your Desktop:
 
 	@ECHO OFF
 	

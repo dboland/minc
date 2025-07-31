@@ -7,7 +7,7 @@ OBJECTS+=mcount.c.o
 all: ${OBJECTS}
 
 %.o: ${SRCDIR}/lib/libc/gmon/%.c
-	gcc -c ${CFLAGS} -I${SRCDIR}/sys -o $@ $<
+	${XGCC} -c ${CFLAGS} -I${SRCDIR}/sys -o $@ $<
 
 %.c.o: %.c
-	gcc -c ${CFLAGS} -I${SRCDIR}/sys -o $@ $<
+	${XGCC} -c ${CFLAGS} -I${SRCDIR}/sys -o $@ $<

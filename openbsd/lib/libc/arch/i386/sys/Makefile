@@ -10,8 +10,8 @@ all: ${OBJECTS}
 
 %.o: ${SRCDIR}/lib/libc/arch/${ARCH}/sys/%.S
 	@/bin/echo -n "$@ "
-	@gcc -c ${CFLAGS} -o $@ $<
+	@${XGCC} -c ${CFLAGS} -o $@ $<
 
 %.S.o: %.S
 	@/bin/echo -n "$@ "
-	@gcc -c ${CFLAGS} -I.. -o $@ $<
+	@${XGCC} -c ${CFLAGS} -I.. -o $@ $<

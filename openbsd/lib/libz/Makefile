@@ -10,10 +10,10 @@ all: ${HEADERS} libz.a
 
 %.o: ${SRCDIR}/lib/libz/%.c
 	@/bin/echo -n "$@ "
-	@gcc -c ${CFLAGS} -o $@ $<
+	@${XGCC} -c ${CFLAGS} -o $@ $<
 
 %.h: ${SRCDIR}/lib/libz/%.h
-	@/bin/cp -vu $< ${INCDIR}/
+	@/bin/cp -vu $< ${GINCDIR}/
 
 libz.a: ${OBJECTS}
 	@/bin/echo "done."
@@ -21,4 +21,4 @@ libz.a: ${OBJECTS}
 	@ar cru $@ ${OBJECTS}
 
 install-local:
-	/bin/cp -vu libz.a ${LIBDIR}/
+	/bin/cp -vu libz.a ${GLIBDIR}/

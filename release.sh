@@ -41,14 +41,14 @@ fi
 #. $DISTROOT/bzip2.sh
 #. $DISTROOT/email.sh
 #. $DISTROOT/hexedit.sh
-#. $DISTROOT/xz.sh
+. $DISTROOT/xz.sh
 #. $DISTROOT/mutt.sh
 #. $DISTROOT/bitchx.sh
 #. $DISTROOT/git.sh
 #. $DISTROOT/magick.sh
 #. $DISTROOT/rsync.sh
-#. $DISTROOT/binutils.sh
-#. $DISTROOT/gcc.sh
+. $DISTROOT/binutils.sh
+. $DISTROOT/gcc.sh
 #. $DISTROOT/gmake.sh
 #. $DISTROOT/perl.sh
 #. $DISTROOT/bind.sh

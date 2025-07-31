@@ -14,6 +14,6 @@ rm -f ./usr/lib/libcrypto.so.27.0
 rm -f ./usr/lib/libssl.so.24.1
 rm -f ./usr/lib/libutil.so.12.1
 
-echo -n "Inpakken comp61.tgz... "
+echo -n "Compressing comp61.tgz... "
 tar -zcf $DISTROOT/comp61.tgz *
-echo gereed.
+echo done.
