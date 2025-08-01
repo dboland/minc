@@ -2,9 +2,9 @@ ROOTDIR= ..
 
 include ${ROOTDIR}/Makefile.inc
 
-HEADERS= ${GINCDIR}/fcntl.h ${GINCDIR}/stdarg.h ${GINCDIR}/stdint.h \
-	${GINCDIR}/sched.h ${GINCDIR}/syslog.h ${GINCDIR}/termios.h
-MACHINEDIR= ${GINCDIR}/machine
+HEADERS= ${XINCDIR}/fcntl.h ${XINCDIR}/stdarg.h ${XINCDIR}/stdint.h \
+	${XINCDIR}/sched.h ${XINCDIR}/syslog.h ${XINCDIR}/termios.h
+MACHINEDIR= ${XINCDIR}/machine
 
 all: ${SRCDIR}
 	@${MAKE} -C lib
@@ -14,69 +14,41 @@ all: ${SRCDIR}
 	@${MAKE} -C usr.sbin
 	@${MAKE} -C etc
 
-${SRCDIR}:
-	@echo " ---------------------------------------------------"
-	@echo "| OpenBSD source directory ($@) not found. Make sure"
-	@echo "| the 'SRCDIR' variable is defined correctly in config.inc"
-	@echo " ---------------------------------------------------"
-	@exit 1
-
-${ROOTDIR}/config.inc:
-	@echo " ---------------------------------------------------"
-	@echo "| Cross-compiler not set up. Please run 'make opt' first."
-	@echo " ---------------------------------------------------"
-	@exit 1
-
-${INSTALL}:
-	@echo " ---------------------------------------------------"
-	@echo "| The system must be installed using the system itself."
-	@echo "| Switch to the OpenBSD system by running the 'mount' script:"
-	@echo "|"
-	@echo "|     ./mount.sh minc"
-	@echo " ---------------------------------------------------"
-	@exit 1
-
-${DESTDIR}:
-	@echo " ---------------------------------------------------"
-	@echo "| MinC release directory ($@) not found. Make sure"
-	@echo "| you create it with the right command (with '/bin' prefix):"
-	@echo "|"
-	@echo "|     /bin/mkdir $@"
-	@echo " ---------------------------------------------------"
-	@exit 1
+include ${ROOTDIR}/Errorfile.inc
 
 ${MACHINEDIR}:
 	@/bin/mkdir -p ${MACHINEDIR}
-	/bin/cp -ru ${SRCDIR}/include/* ${GINCDIR}/
-	/bin/cp -ru ${SRCDIR}/sys/sys ${GINCDIR}/
+	/bin/cp -ru ${SRCDIR}/include/* ${XINCDIR}/
+	/bin/cp -ru ${SRCDIR}/sys/sys ${XINCDIR}/
 	/bin/cp -ru ${SRCDIR}/sys/arch/${ARCH}/include/* ${MACHINEDIR}/
 	/bin/patch -p 0 -d ${GPREFIX} <include.patch
 
-${GINCDIR}/fcntl.h:
-	@/bin/cp -vu fcntl.h ${GINCDIR}/
+${XINCDIR}/fcntl.h:
+	@/bin/cp -vu fcntl.h ${XINCDIR}/
 
-${GINCDIR}/sched.h:
-	@/bin/cp -vu sched.h ${GINCDIR}/
+${XINCDIR}/sched.h:
+	@/bin/cp -vu sched.h ${XINCDIR}/
 
-${GINCDIR}/stdarg.h:
-	@/bin/cp -vu stdarg.h ${GINCDIR}/
+${XINCDIR}/stdarg.h:
+	@/bin/cp -vu stdarg.h ${XINCDIR}/
 
-${GINCDIR}/stdint.h:
-	@/bin/cp -vu stdint.h ${GINCDIR}/
+${XINCDIR}/stdint.h:
+	@/bin/cp -vu stdint.h ${XINCDIR}/
 
-${GINCDIR}/syslog.h:
-	@/bin/cp -vu syslog.h ${GINCDIR}/
+${XINCDIR}/syslog.h:
+	@/bin/cp -vu syslog.h ${XINCDIR}/
 
-${GINCDIR}/termios.h:
-	@/bin/cp -vu termios.h ${GINCDIR}/
+${XINCDIR}/termios.h:
+	@/bin/cp -vu termios.h ${XINCDIR}/
 
-${XINCDIR}:
-	@/bin/mkdir -p ${XINCDIR}
-	/bin/cp -ru ${GINCDIR}/* ${XINCDIR}/
+${_INCDIR}:
+	@/bin/mkdir -p ${_INCDIR}
+	/bin/cp -ru ${XINCDIR}/* ${_INCDIR}/
 
 install-local: ${SRCDIR} ${MACHINEDIR} ${HEADERS}
 
-install: ${INSTALL} ${DESTDIR}
+install: ${INSTALL}
+	@sh ${ROOTDIR}/mkroot.sh ${DESTDIR}
 	@${MAKE} -C bin install
 	@${MAKE} -C lib install
 	@${MAKE} -C usr.bin install
@@ -84,7 +56,7 @@ install: ${INSTALL} ${DESTDIR}
 	@${MAKE} -C usr.sbin install
 	@${MAKE} -C etc install
 
-install-cross: ${XINCDIR}
+install-cross: ${_INCDIR}
 	@#${MAKE} -C share install
 	@${MAKE} -C lib install-cross
 

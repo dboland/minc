@@ -9,12 +9,7 @@ ULIBDIR= /usr/lib
 all: ${MINGW} ${LIBS} libiphlpapi.dll.a
 	@${MAKE} -C gcc
 
-${MINGW}:
-	@echo " -----------------------------------------------"
-	@echo "| MinGW root directory ($@) not found. Make sure"
-	@echo "| the 'MINGW' variable is defined correctly in config.inc"
-	@echo " -----------------------------------------------"
-	@exit 1
+include ${ROOTDIR}/Errorfile.inc
 
 # below -k option makes ld remove "@" suffix (--enable-stdcall-fixup)
 
@@ -30,28 +25,28 @@ ${BINDIR}/%.exe: ${MINGW}/bin/%.exe
 ${BINDIR}:
 	@/bin/mkdir -p $@
 
-${GBINDIR}/%.exe: ${MINGW}/bin/%.exe
+${XBINDIR}/%.exe: ${MINGW}/bin/%.exe
 	@/bin/cp -vu $^ $@
 
-${GBINDIR}:
+${XBINDIR}:
 	@/bin/mkdir -p $@
 
-${GLIBDIR}:
+${XLIBDIR}:
 	@/bin/mkdir -p $@
 
-${GLIBXDIR}:
+${XLIBXDIR}:
 	@/bin/mkdir -p $@
 	/bin/cp -ru ${MINGW}/libexec/gcc $@/
 
-GCCBIN+= ${GBINDIR}/gcc.exe ${GBINDIR}/cpp.exe
-GCCBIN+= ${GBINDIR}/g++.exe ${GBINDIR}/c++.exe
-#GCCBIN+=  ${GBINDIR}/gdb.exe
+GCCBIN+= ${XBINDIR}/gcc.exe ${XBINDIR}/cpp.exe
+GCCBIN+= ${XBINDIR}/g++.exe ${XBINDIR}/c++.exe
+#GCCBIN+=  ${XBINDIR}/gdb.exe
 
 GCCLIB+= ${BINDIR}/libgmp-10.dll ${BINDIR}/libmpc-3.dll ${BINDIR}/libmpfr-4.dll \
 	${BINDIR}/zlib1.dll ${BINDIR}/libgcc_s_dw2-1.dll
 GCCLIB+= ${BINDIR}/libintl-8.dll ${BINDIR}/libiconv-2.dll ${BINDIR}/libstdc++-6.dll
 
-BINUTILS= ${GBINDIR}/windres.exe
+BINUTILS= ${XBINDIR}/windres.exe
 BINUTILS+= ${BINDIR}/ld.exe ${BINDIR}/ar.exe ${BINDIR}/as.exe ${BINDIR}/nm.exe \
 	${BINDIR}/dlltool.exe
 #BINUTILS+= ${BINDIR}/objdump.exe ${BINDIR}/ranlib.exe ${BINDIR}/size.exe \
@@ -63,23 +58,24 @@ BINUTILS+= ${BINDIR}/ld.exe ${BINDIR}/ar.exe ${BINDIR}/as.exe ${BINDIR}/nm.exe \
 #MSGBIN= ${BINDIR}/msgfmt.exe ${BINDIR}/libgettextsrc-0-18-3.dll \
 	${BINDIR}/libgettextlib-0-18-3.dll
 
-install-gcc: ${GBINDIR} ${GCCBIN} ${BINDIR} ${GCCLIB}
-install-ld: ${GBINDIR} ${BINUTILS}
+install-gcc: ${XBINDIR} ${GCCBIN} ${BINDIR} ${GCCLIB}
+install-ld: ${XBINDIR} ${BINUTILS}
 install-tools: ${MSGBIN}
 
 # tip: create dummy /libexec/ld.so for configure scripts to detect shared libs
 # GetIpStatisticsEx() is missing in vanilla MinGW (libiphlpapi.dll.a)
 
-install-local: ${MINGW} install-gcc install-ld ${GLIBXDIR} ${GLIBDIR}
-	/bin/cp -vu ${LIBS} ${GLIBDIR}/
+install-local: ${MINGW} install-gcc install-ld ${XLIBXDIR} ${XLIBDIR}
+	/bin/cp -vu ${LIBS} ${XLIBDIR}/
 	/bin/cp -vu libiphlpapi.dll.a ${MINGW}/lib/
 	@${MAKE} -C gcc install-local
 
 install-cross:
-	/bin/cp -vu libmsvcrt.a ${XLIBDIR}/
+	/bin/cp -vu libmsvcrt.a ${_LIBDIR}/
 	@${MAKE} -C gcc install-cross
 
-install: ${DESTDIR}
+install: ${INSTALL}
+	@sh ${ROOTDIR}/mkroot.sh ${DESTDIR}
 	${INSTALL} libmsvcrt.a ${DESTDIR}${ULIBDIR}/
 	@${MAKE} -C gcc install
 

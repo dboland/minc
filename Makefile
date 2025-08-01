@@ -33,8 +33,8 @@ help:
 	@less BUILD.md
 
 install:
-	@${MAKE} -C openbsd install
 	@${MAKE} -C libposix install
+	@${MAKE} -C openbsd install
 
 release:
 	@${MAKE} -C libposix release
@@ -46,7 +46,5 @@ install-cross:
 	@${MAKE} -C openbsd install-cross
 
 clean:
-	@${MAKE} -C mingw clean
-	@${MAKE} -C libtrace clean
 	@${MAKE} -C libposix clean
 	@${MAKE} -C openbsd clean

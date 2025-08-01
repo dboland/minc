@@ -1,5 +1,9 @@
 include ${ROOTDIR}/config.inc
 
+ifndef DESTDIR
+	DESTDIR= ${SYSTEMDRIVE}/minc-release
+endif
+
 .SUFFIXES:
 .DEFAULT:
 
@@ -23,14 +27,13 @@ LIBPERL_IMGBASE=	0x0F600000 # (3MB)
 INSTALL= /mingw/bin/install
 BUILD= $(shell date +%s)
 
-GPREFIX= ${PREFIX}/cross
-GBINDIR= ${GPREFIX}/bin
-GLIBDIR= ${GPREFIX}/lib
-GINCDIR= ${GPREFIX}/include
-GLIBXDIR= ${GPREFIX}/libexec
-
-XGCC= ${GBINDIR}/gcc
-XWINDRES= ${GBINDIR}/windres
+XPREFIX= ${PREFIX}/cross
+XBINDIR= ${XPREFIX}/bin
+XLIBDIR= ${XPREFIX}/lib
+XINCDIR= ${XPREFIX}/include
+XLIBXDIR= ${XPREFIX}/libexec
+XGCC= ${XBINDIR}/gcc
+XWINDRES= ${XBINDIR}/windres
 
 # In GCC 6.3.0, -ffixed-ebx crashes compilation
 

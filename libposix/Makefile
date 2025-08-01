@@ -12,30 +12,11 @@ GCCDIR= ${ROOTDIR}/mingw/gcc
 TRACEDIR= ${ROOTDIR}/libtrace
 SBINDIR= /sbin
 UBINDIR= /usr/bin
+ULIBDIR= /usr/lib
 
 all: ${LIBPOSIX}
 
-${DESTDIR}:
-	@echo " ---------------------------------------------------"
-	@echo "| MinC install directory ($@) not found. Make sure"
-	@echo "| it exists and the 'DESTDIR' variable is defined correctly in config.inc"
-	@echo " ---------------------------------------------------"
-	@exit 1
-
-${ROOTDIR}/config.inc:
-	@echo " ---------------------------------------------------"
-	@echo "| Cross-compiler not set up. Please run 'make opt' first."
-	@echo " ---------------------------------------------------"
-	@exit 1
-
-${INSTALL}:
-	@echo " ---------------------------------------------------"
-	@echo "| The system must be installed using the system itself."
-	@echo "| Switch to the OpenBSD system by running the 'mount' script:"
-	@echo "|"
-	@echo "| ./mount.sh minc"
-	@echo " ---------------------------------------------------"
-	@exit 1
+include ${ROOTDIR}/Errorfile.inc
 
 crt1.o: crt1.c
 	${CC} -c ${CFLAGS} $<
@@ -64,21 +45,22 @@ ${LIBPOSIX}: ${OBJECTS}
 	-L${MINGW}/lib -L${GCCDIR} -L${TRACEDIR} -lmsvcrt -ladvapi32 -lshell32 -luser32 -lntdll -lkernel32 \
 	-lnetapi32 -lws2_32 -liphlpapi -lrpcrt4 -lmpr -lgcc -ltrace
 
-${GLIBDIR}:
-	/bin/mkdir -p ${GLIBDIR}
+${XLIBDIR}:
+	/bin/mkdir -p ${XLIBDIR}
 
-# LIBPOSIX must always be accessible, so UBINDIR
+# LIBPOSIX must be accessible within both MinC and MinGW, so UBINDIR
 
-install-local: ${GLIBDIR} ${UBINDIR}
+install-local: ${XLIBDIR} ${UBINDIR}
 	/bin/cp -vu ${LIBPOSIX} ${UBINDIR}/
-	/bin/cp -vu ${IMPLIB} ${GLIBDIR}/libmingw32.a
+	/bin/cp -vu ${IMPLIB} ${XLIBDIR}/libmingw32.a
 
 install-cross:
-	/bin/cp -vu ${IMPLIB} ${XLIBDIR}/libposix.so
+	/bin/cp -vu ${IMPLIB} ${_LIBDIR}/libposix.so
 
-install: ${INSTALL} ${DESTDIR}
-	@mkdir -p ${DESTDIR}${SBINDIR}/
+install: ${INSTALL}
+	@sh ${ROOTDIR}/mkroot.sh ${DESTDIR}
 	${INSTALL} -m 06555 ${LIBPOSIX} ${DESTDIR}${SBINDIR}/
+	${INSTALL} ${IMPLIB} ${DESTDIR}${ULIBDIR}/libposix.so
 
 release-clean:
 	/bin/rm version.o

@@ -56,13 +56,13 @@ install-local:
 	@/bin/mkdir -p ${GPREFIX}${GCCDIR}
 	@/bin/cp -vu ${LIBS} ${GPREFIX}${GCCDIR}/
 	@/bin/cp -vu crtbegin.o crtend.o ${GPREFIX}${GCCDIR}/
-	@/bin/cp -vu crt0.o ${GLIBDIR}/crt2.o
-	@/bin/cp -vu crt1.o ${GLIBDIR}/dllcrt2.o
-	@#/bin/cp -vu gcrt0.o ${GLIBDIR}/gcrt2.o
+	@/bin/cp -vu crt0.o ${XLIBDIR}/crt2.o
+	@/bin/cp -vu crt1.o ${XLIBDIR}/dllcrt2.o
+	@#/bin/cp -vu gcrt0.o ${XLIBDIR}/gcrt2.o
 
 install-cross:
-	/bin/cp -vu crtbegin.o crtend.o ${XLIBDIR}/
-	/bin/cp -vu crt0.o crt1.o ${XLIBDIR}/
+	/bin/cp -vu crtbegin.o crtend.o ${_LIBDIR}/
+	/bin/cp -vu crt0.o crt1.o ${_LIBDIR}/
 
 install: ${DESTDIR}${ULIBDIR}
 	@#${INSTALL} libgcc.a ${DESTDIR}${ULIBDIR}/gcc/i686-pe-openbsd/${GCCVER}/

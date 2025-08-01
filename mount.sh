@@ -6,14 +6,14 @@ ROOTDIR=$(dirname $0)
 
 # Hello Earnie Boyd #
 
-MINGW=$(cmd //c echo ${MINGW})
+MINGWROOT=$(cmd //c echo ${MINGW})
 MINCROOT=$(cmd //c echo ${PREFIX})
 FSTAB=/etc/fstab
 
-if ! [ -d ${MINGW} ]; then
-	echo "${MINGW}: No such directory"
+if ! [ -d ${MINGWROOT} ]; then
+	echo "${MINGWROOT}: No such directory"
 elif [ "$1" == "mingw" ]; then
-	echo "${MINGW} /mingw" >$FSTAB
+	echo "${MINGWROOT} /mingw" >$FSTAB
 elif ! [ -d ${MINCROOT} ]; then
 	echo "${MINCROOT}: No such directory"
 elif [ "$1" == "minc" ]; then

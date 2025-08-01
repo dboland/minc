@@ -80,11 +80,11 @@ libm.a: ${OBJECTS}
 	@echo "Creating static library $@"
 	@ar cru $@ ${OBJECTS}
 
-install:
+install: ${DESTDIR}
 	${INSTALL} libm.a ${DESTDIR}${ULIBDIR}/
 
 install-local:
-	/bin/cp -uv libm.a ${GLIBDIR}/
+	/bin/cp -uv libm.a ${XLIBDIR}/
 
 clean:
 	/bin/rm -f *.o *.a

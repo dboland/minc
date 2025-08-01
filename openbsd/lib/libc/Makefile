@@ -6,7 +6,7 @@ RELEASE= 75.0
 OBJECTS= libc.o
 SHOBJECTS= $(shell /bin/ls arch/${ARCH}/*/*.o */*.o db/*/*.o)
 LIBC= libc.so.${RELEASE}
-GCCDIR= ${GLIBDIR}/gcc/mingw32/${GCCVER}
+GCCDIR= ${XLIBDIR}/gcc/mingw32/${GCCVER}
 CFLAGS+= -g -DNOPIE
 IMPLIB= libc.dll.a
 
@@ -34,8 +34,8 @@ version.o: version.rc
 
 ${LIBC}: objects ${OBJECTS} version.o
 	${LD} -shared ${LDFLAGS} -e _DllMainCRTStartup@12 --out-implib=${IMPLIB} \
-	-o $@ --image-base=${IMGBASE_LIBC} ${GLIBDIR}/dllcrt2.o ${OBJECTS} ${SHOBJECTS} version.o \
-	-L${GLIBDIR} -L${GCCDIR} -lmingw32 -lmsvcrt -lgcc
+	-o $@ --image-base=${IMGBASE_LIBC} ${XLIBDIR}/dllcrt2.o ${OBJECTS} ${SHOBJECTS} version.o \
+	-L${XLIBDIR} -L${GCCDIR} -lmingw32 -lmsvcrt -lgcc
 
 include:
 	/bin/cp -rvu ${SRCDIR}/lib/libc/include .
@@ -59,18 +59,17 @@ release-clean:
 # Perl needs libc.so
 
 install-local:
-	/bin/cp -vu ${IMPLIB} ${GLIBDIR}/libc.so
-	/bin/cp -vu ${IMPLIB} ${GLIBDIR}/libmingwex.dll.a
-	/bin/cp -vu ${IMPLIB} ${GLIBDIR}/
-	/bin/cp -vu libc.a ${GLIBDIR}/libmingwex.a
-	/bin/cp -vu libc.a ${GLIBDIR}/
+	/bin/cp -vu ${IMPLIB} ${XLIBDIR}/libc.so
+	/bin/cp -vu ${IMPLIB} ${XLIBDIR}/libmingwex.dll.a
+	/bin/cp -vu ${IMPLIB} ${XLIBDIR}/
+	/bin/cp -vu libc.a ${XLIBDIR}/libmingwex.a
+	/bin/cp -vu libc.a ${XLIBDIR}/
 
 install-cross:
-	/bin/cp -vu libc.a ${XLIBDIR}/
-	/bin/cp -vu ${IMPLIB} ${XLIBDIR}/libc.so
+	/bin/cp -vu libc.a ${_LIBDIR}/
+	/bin/cp -vu ${IMPLIB} ${_LIBDIR}/libc.so
 
 install: ${DESTDIR}
-	@mkdir -p ${DESTDIR}/usr/lib
 	${INSTALL} ${LIBC} libc.a ${DESTDIR}/usr/lib/
 	@#ln -s ${LIBC} ${DESTDIR}/usr/lib/libc.so
 

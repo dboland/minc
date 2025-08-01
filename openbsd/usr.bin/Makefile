@@ -2,7 +2,7 @@ ROOTDIR= ../..
 
 include ${ROOTDIR}/Makefile.inc
 
-PROGS= arch uname touch
+PROGS= arch uname touch id
 OBJECTS= ${PROGS} grep du env
 CFLAGS+= -I${SRCDIR}/sys
 UBINSRC= ${SRCDIR}/usr.bin
@@ -35,6 +35,9 @@ arch: ${UBINSRC}/arch/arch.c
 touch: ${UBINSRC}/touch/touch.c
 	${XGCC} -s -static ${CFLAGS} -DNOPIE -o $@ $<
 
+id: ${UBINSRC}/id/id.c
+	${XGCC} -s -static ${CFLAGS} -DNOPIE -o $@ $<
+
 # In Windows, "install" and "patch" seem to be reserved 
 # words. When executed with such name, Vista checks if 
 # user is elevated, yields ERROR_ELEVATION_REQUIRED if not.
@@ -64,7 +67,6 @@ env: env.c
 install-local: ${BINDIR}
 
 install: ${DESTDIR} ${OBJECTS}
-	@mkdir -p ${DESTDIR}${UBINDIR}
 	${INSTALL} ${OBJECTS} ${DESTDIR}${UBINDIR}/
 	${INSTALL} manifest ${DESTDIR}${UBINDIR}/install.manifest
 	${INSTALL} manifest ${DESTDIR}${UBINDIR}/patch.manifest

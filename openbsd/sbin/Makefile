@@ -56,7 +56,6 @@ mount_refs: ${SBINSRC}/mount_ntfs/mount_ntfs.c ${SBINSRC}/mount/getmntopts.c
 install-local: ${BINDIR}
 
 install: ${DESTDIR}
-	@mkdir -p ${DESTDIR}${SBINDIR}
 	${INSTALL} ${PROGS} ${DESTDIR}${SBINDIR}/
 	${INSTALL} -m 02555 -o 0 -g 0 bsd.exe ${DESTDIR}${SBINDIR}/
 	${INSTALL} -m 00754 -o 0 -g 0 setup.sh ${DESTDIR}${SBINDIR}/

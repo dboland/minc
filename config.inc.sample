@@ -1,6 +1,6 @@
 VERSION=20250720
 RELEASE=6.1.0
-DESTDIR=/DRIVE/minc-release
+#DESTDIR=/C/minc-release
 GCCVER=4.8.1
 MINGW=/C/MinGW
 SRCDIR=/D/openbsd-master
@@ -18,9 +18,9 @@ GCCLIB+=${BINDIR}/libmingwex-0.dll
 
 # locations for GNU cross-compiler
 
-XPREFIX=/usr/i686-openbsd-pe
-XLIBDIR=${XPREFIX}/lib
-XINCDIR=${XPREFIX}/include
+_PREFIX=/usr/i686-openbsd-pe
+_LIBDIR=${_PREFIX}/lib
+_INCDIR=${_PREFIX}/include
 
 # native location of packages (release.sh)
 

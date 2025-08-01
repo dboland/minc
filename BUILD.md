@@ -19,7 +19,7 @@ However, you can also use my copy (186Mb):
 **Note**: create a folder in the root of a diskdrive, named 
 'source'. Move the .ZIP file there and extract it.
 
-## Step 0: set up a simple cross-compiler
+## Step 1: set up a simple cross-compiler
 
 To build the new kernel and compile the operating system code, 
 you would have to build an OpenBSD cross compiler first. This 
@@ -38,38 +38,36 @@ Open the MSYS terminal, **cd** to your *minc-devel* directory
 and make the *opt* target. All files will be installed in a 
 newly created directory, called */opt/minc*:
 
-	**make opt**
+	make opt
 
 **Note**: you will probably get some error messages here. These 
 will guide you to properly set up the 'config.inc' file. Use 
 vim to edit it and define the indicated variables.
 
-## Step 1: build the kernel
+## Step 2: build a minimal OpenBSD system
 
 The kernel will be built using a combination of vanilla MinGW 
 and our *poor man's cross-compiler*, residing in */opt/cross*. 
 To test if this all works, make the kernel first:
 
-	**make kernel**
-
-## Step 2: build a minimal system
+	make kernel
 
 A minimal system consists of the kernel, the BSD C library, the 
 boot program, the Korn shell and some utilities. These will be 
 built by the new system itself. To finish the build:
 
-	**make system**
+	make system
 
 You now have a working OpenBSD system, but we are still using 
 the MSYS commands. To make sure we are using our brand new 
 OpenBSD binaries, you will need to mount the */opt/minc* 
 directory. This is done by running the **mount** script:
 
-	**./mount.sh minc**
+	./mount.sh minc
 
 To test if the new system works, you can run the **uname** command:
 
-	**uname -a**
+	uname -a
 
 The result should be similar to the following output:
 
@@ -78,39 +76,22 @@ The result should be similar to the following output:
 **Note**: if you want back to compiling Windows programs, simply 
 re-mount the */mingw* directory:
 
-	**./mount.sh mingw**
+	./mount.sh mingw
 
 ## Step 3: install the system
 
-To install your new system you have to manually create the root 
-directory, run the **install** target and the **setup** program, 
-thereby mimicking what is done automatically by the MinC installer.
-This is to avoid accidentally writing into an existing MinC system. 
-
 For this step, you need to be Administrator. Close the MSYS 
 terminal and open it again as Administrator. Change to your 
-*minc-devel* directory and create the MinC root directory. Name 
-it *minc-release* so it won't conflict with an existing MinC 
-system. Make sure you use the **/bin** prefix in the **mkdir** 
-command:
+*minc-devel* directory and and run the **install** target:
 
-	**/bin/mkdir /c/minc-release**
+	make install
 
-**Attention**: Each time you install a fresh system, its root 
-directory must be created only by the *Windows Explorer*, the 
-*MinC installer* or *MSYS*. This is because MinC uses the 
-Access Control List (ACL) of its root folder as a template for 
-all permissions in the system. By using the **/bin** prefix, 
-we make sure MSYS creates the directory.
-
-**Note**: it is not advisable to create the MinC root directory 
-in a location like *Program Files*. Remember, we will be building 
-an entire operating system. File permissions in this kind of 
-location are unsuitable for OpenBSD to run properly.
-
-Now you can run the **install** target:
-
-	**make install**
+**Note**: By default, MinC will be installed in the 
+**C:\minc-release** directory. If you want another location, 
+uncomment and change the 'DESTDIR' variable in config.inc. 
+It is not advisable to create the MinC root directory in 
+a location like *Program Files*. File permissions in this 
+kind of location are unsuitable for OpenBSD to run properly.
 
 To finalize step 3, go to the new folder in Windows Exporer and 
 open the *sbin* folder. There should be a program named *bsd.exe*.
@@ -125,7 +106,7 @@ This is because there is no */dev* file system yet. To create it,
 along with some of the other system directories like */home* and 
 */tmp*, run the **setup** script:
 
-	**/sbin/setup.sh**
+	/sbin/setup.sh
 
 When it is finished, you can close the window and open it again 
 by double-clicking. The above message should be gone.

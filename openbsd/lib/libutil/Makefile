@@ -15,7 +15,7 @@ OBJECTS+= getmaxpartitions.o
 # BSD Auth
 OBJECTS+=passwd.o check_expire.o login_fbtab.o imsg.o imsg-buffer.o login.o
 
-HEADERS= ${GINCDIR}/util.h ${GINCDIR}/imsg.h ${GINCDIR}/ohash.h
+HEADERS= ${XINCDIR}/util.h ${XINCDIR}/imsg.h ${XINCDIR}/ohash.h
 CFLAGS+= -I${SRCDIR}/sys
 
 all: ${HEADERS} libutil.a
@@ -24,7 +24,7 @@ all: ${HEADERS} libutil.a
 	@/bin/echo -n "$@ "
 	@${XGCC} -c ${CFLAGS} -o $@ $<
 
-${GINCDIR}/%.h: ${SRCDIR}/lib/libutil/%.h
+${XINCDIR}/%.h: ${SRCDIR}/lib/libutil/%.h
 	@/bin/cp -vu $< $@
 
 pidfile.o: pidfile.c
@@ -39,4 +39,4 @@ clean:
 	/bin/rm -f *.o *.a ${LIBUTIL}
 
 install-local:
-	/bin/cp -vu libutil.a ${GLIBDIR}/
+	/bin/cp -vu libutil.a ${XLIBDIR}/

@@ -13,7 +13,7 @@ all: ${HEADERS} libz.a
 	@${XGCC} -c ${CFLAGS} -o $@ $<
 
 %.h: ${SRCDIR}/lib/libz/%.h
-	@/bin/cp -vu $< ${GINCDIR}/
+	@/bin/cp -vu $< ${XINCDIR}/
 
 libz.a: ${OBJECTS}
 	@/bin/echo "done."
@@ -21,4 +21,4 @@ libz.a: ${OBJECTS}
 	@ar cru $@ ${OBJECTS}
 
 install-local:
-	/bin/cp -vu libz.a ${GLIBDIR}/
+	/bin/cp -vu libz.a ${XLIBDIR}/
