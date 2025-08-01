@@ -4,26 +4,27 @@ include ${ROOTDIR}/Makefile.inc
 
 OBJECTS= dev_mkdb pwd_mkdb
 CFLAGS+= -I${SRCDIR}/sys
-USBINPATH= ${SRCDIR}/usr.sbin
+USBINSRC= ${SRCDIR}/usr.sbin
+USBINDIR= /usr/bin
 
-all: ${USBINPATH} ${OBJECTS}
+all: ${USBINSRC} ${OBJECTS}
 
-${USBINPATH}:
+${USBINSRC}:
 	@echo " ---------------------------------------------------"
 	@echo "| OpenBSD 'usr.sbin' directory ($@) not found. Make sure"
 	@echo "| you extracted this directory from the source archive."
 	@echo " ---------------------------------------------------"
 	@exit 1
 
-dev_mkdb: ${SRCDIR}/usr.sbin/dev_mkdb/dev_mkdb.c
+dev_mkdb: ${USBINSRC}/dev_mkdb/dev_mkdb.c
 	${XGCC} -s ${CFLAGS} -o $@ $<
 
-pwd_mkdb: ${SRCDIR}/usr.sbin/pwd_mkdb/pwd_mkdb.c
+pwd_mkdb: ${USBINSRC}/pwd_mkdb/pwd_mkdb.c
 	${XGCC} -s ${CFLAGS} -o $@ $< -lutil
 
 install: ${DESTDIR}
-	@mkdir -p ${DESTDIR}/usr/sbin
-	${INSTALL} ${OBJECTS} ${DESTDIR}/usr/sbin/
+	@mkdir -p ${DESTDIR}${USBINDIR}
+	${INSTALL} ${OBJECTS} ${DESTDIR}${USBINDIR}/
 
 clean:
 	/bin/rm -f *.exe *.o

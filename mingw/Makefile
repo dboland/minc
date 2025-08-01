@@ -6,7 +6,7 @@ LIBS= libadvapi32.a libkernel32.a libshell32.a libuser32.a \
 	libmoldname.a libgmon.a libmsvcrt.a
 ULIBDIR= /usr/lib
 
-all: ${MINGW} ${LIBS} libiphlpapi.dll.a
+all: ${LIBS} libiphlpapi.dll.a
 	@${MAKE} -C gcc
 
 include ${ROOTDIR}/Errorfile.inc

@@ -21,7 +21,7 @@ ${MACHINEDIR}:
 	/bin/cp -ru ${SRCDIR}/include/* ${XINCDIR}/
 	/bin/cp -ru ${SRCDIR}/sys/sys ${XINCDIR}/
 	/bin/cp -ru ${SRCDIR}/sys/arch/${ARCH}/include/* ${MACHINEDIR}/
-	/bin/patch -p 0 -d ${GPREFIX} <include.patch
+	/bin/patch -p 0 -d ${XPREFIX} <include.patch
 
 ${XINCDIR}/fcntl.h:
 	@/bin/cp -vu fcntl.h ${XINCDIR}/

@@ -59,7 +59,9 @@ install-cross:
 
 install: ${INSTALL}
 	@sh ${ROOTDIR}/mkroot.sh ${DESTDIR}
+	@mkdir -p ${DESTDIR}${SBINDIR}
 	${INSTALL} -m 06555 ${LIBPOSIX} ${DESTDIR}${SBINDIR}/
+	@mkdir -p ${DESTDIR}${ULIBDIR}
 	${INSTALL} ${IMPLIB} ${DESTDIR}${ULIBDIR}/libposix.so
 
 release-clean:

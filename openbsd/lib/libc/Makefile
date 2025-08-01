@@ -9,6 +9,7 @@ LIBC= libc.so.${RELEASE}
 GCCDIR= ${XLIBDIR}/gcc/mingw32/${GCCVER}
 CFLAGS+= -g -DNOPIE
 IMPLIB= libc.dll.a
+ULIBDIR= /usr/lib
 
 NLS=    C.msg Pig.msg da.ISO8859-1.msg da.UTF-8.msg de.ISO8859-1.msg \
         de.UTF-8.msg es.ISO8859-1.msg es.UTF-8.msg fi.ISO8859-1.msg \
@@ -70,8 +71,8 @@ install-cross:
 	/bin/cp -vu ${IMPLIB} ${_LIBDIR}/libc.so
 
 install: ${DESTDIR}
-	${INSTALL} ${LIBC} libc.a ${DESTDIR}/usr/lib/
-	@#ln -s ${LIBC} ${DESTDIR}/usr/lib/libc.so
+	@mkdir -p ${DESTDIR}${ULIBDIR}
+	${INSTALL} ${LIBC} libc.a ${DESTDIR}${ULIBDIR}/
 
 clean: objects-clean lib-clean
 

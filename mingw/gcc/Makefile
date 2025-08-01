@@ -53,9 +53,9 @@ crt0_tls.o: crt0.o win_tls.o
 #	/bin/cp -vu ${MINGW}${GCCDIR}/libstdc++.a ${GPREFIX}${GCCDIR}/
 
 install-local:
-	@/bin/mkdir -p ${GPREFIX}${GCCDIR}
-	@/bin/cp -vu ${LIBS} ${GPREFIX}${GCCDIR}/
-	@/bin/cp -vu crtbegin.o crtend.o ${GPREFIX}${GCCDIR}/
+	@/bin/mkdir -p ${XPREFIX}${GCCDIR}
+	@/bin/cp -vu ${LIBS} ${XPREFIX}${GCCDIR}/
+	@/bin/cp -vu crtbegin.o crtend.o ${XPREFIX}${GCCDIR}/
 	@/bin/cp -vu crt0.o ${XLIBDIR}/crt2.o
 	@/bin/cp -vu crt1.o ${XLIBDIR}/dllcrt2.o
 	@#/bin/cp -vu gcrt0.o ${XLIBDIR}/gcrt2.o

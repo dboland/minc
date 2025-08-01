@@ -37,6 +37,7 @@ install-cross:
 	/bin/cp -vu ${IMPLIB} ${_LIBDIR}/libdl.so
 
 install: ${DESTDIR}
+	@mkdir -p ${DESTDIR}${ULIBXDIR}
 	${INSTALL} ld.so ${DESTDIR}${ULIBXDIR}/
 	${INSTALL} ${IMPLIB} ${DESTDIR}/usr/lib/libdl.a
 

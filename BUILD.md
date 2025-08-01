@@ -46,8 +46,8 @@ vim to edit it and define the indicated variables.
 
 ## Step 2: build a minimal OpenBSD system
 
-The kernel will be built using a combination of vanilla MinGW 
-and our *poor man's cross-compiler*, residing in */opt/cross*. 
+The kernel will be built using a combination of vanilla MinGW and 
+our *poor man's cross-compiler*, residing in */opt/minc/cross*. 
 To test if this all works, make the kernel first:
 
 	make kernel
@@ -87,11 +87,12 @@ terminal and open it again as Administrator. Change to your
 	make install
 
 **Note**: By default, MinC will be installed in the 
-**C:\minc-release** directory. If you want another location, 
-uncomment and change the 'DESTDIR' variable in config.inc. 
-It is not advisable to create the MinC root directory in 
-a location like *Program Files*. File permissions in this 
-kind of location are unsuitable for OpenBSD to run properly.
+**C:\minc-release** directory. If you want another install 
+location, uncomment and change the 'DESTDIR' variable 
+in config.inc. It is not advisable to create the MinC root 
+directory in a location like *Program Files*. File permissions 
+in this kind of location are unsuitable for OpenBSD to run 
+properly.
 
 To finalize step 3, go to the new folder in Windows Exporer and 
 open the *sbin* folder. There should be a program named *bsd.exe*.

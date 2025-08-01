@@ -67,6 +67,7 @@ env: env.c
 install-local: ${BINDIR}
 
 install: ${DESTDIR} ${OBJECTS}
+	@mkdir -p ${DESTDIR}${UBINDIR}
 	${INSTALL} ${OBJECTS} ${DESTDIR}${UBINDIR}/
 	${INSTALL} manifest ${DESTDIR}${UBINDIR}/install.manifest
 	${INSTALL} manifest ${DESTDIR}${UBINDIR}/patch.manifest
