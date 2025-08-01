@@ -10,7 +10,7 @@ fi
 echo " ---------------------------------------------------"
 echo -n "| Installing in ${DESTROOT} for "
 
-if id 'NT SERVICE\TrustedInstaller' 2>&1 >/dev/null; then
+if id 'NT SERVICE\TrustedInstaller' >/dev/null 2>&1; then
 	echo "Windows Vista"
 	/bin/mkdir ${DESTROOT}
 else

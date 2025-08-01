@@ -44,11 +44,15 @@ vfs_dirname(LPWSTR Result, LPCWSTR FileName)
 	LPWSTR R = Result;
 	WCHAR C;
 
+	/* Always Include the back-slash in the name, so we never
+	 * stat the drive part (c:), which yields the ACL of the
+	 * current directory.
+	 */
 	while (C = *FileName++){
+		*R++ = C;
 		if (C == '\\'){
 			Base = R;
 		}
-		*R++ = C;
 	}
 	*Base = 0;
 	return(Result);

@@ -19,6 +19,7 @@ However, you can also use my copy (186Mb):
 **Note**: create a folder in the root of a diskdrive, named 
 'source'. Move the .ZIP file there and extract it.
 
+
 ## Step 1: set up a simple cross-compiler
 
 To build the new kernel and compile the operating system code, 
@@ -44,17 +45,19 @@ newly created directory, called */opt/minc*:
 will guide you to properly set up the 'config.inc' file. Use 
 vim to edit it and define the indicated variables.
 
+
 ## Step 2: build a minimal OpenBSD system
 
-The kernel will be built using a combination of vanilla MinGW and 
-our *poor man's cross-compiler*, residing in */opt/minc/cross*. 
+The kernel will be built using a combination of vanilla MinGW 
+and our *poor man's cross-compiler*, residing in */opt/minc/cross*. 
 To test if this all works, make the kernel first:
 
 	make kernel
 
-A minimal system consists of the kernel, the BSD C library, the 
-boot program, the Korn shell and some utilities. These will be 
-built by the new system itself. To finish the build:
+A minimal OpenBSD system consists of the kernel, the BSD C 
+library, the boot program, the Korn shell and some utilities. 
+These will be built by the new system itself. To finish 
+the build:
 
 	make system
 
@@ -65,7 +68,8 @@ directory. This is done by running the **mount** script:
 
 	./mount.sh minc
 
-To test if the new system works, you can run the **uname** command:
+To test if the new system works, you can run the **uname** 
+command:
 
 	uname -a
 
@@ -77,6 +81,7 @@ The result should be similar to the following output:
 re-mount the */mingw* directory:
 
 	./mount.sh mingw
+
 
 ## Step 3: install the system
 
