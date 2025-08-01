@@ -12,10 +12,10 @@ echo -n "| Installing in ${DESTROOT} for "
 
 if id 'NT SERVICE\TrustedInstaller' >/dev/null 2>&1; then
 	echo "Windows Vista"
-	/bin/mkdir ${DESTROOT}
+	/bin/mkdir -p ${DESTROOT}
 else
 	echo "Windows NT"
-	mkdir ${DESTROOT}
+	mkdir -p ${DESTROOT}
 fi
 
 echo " ---------------------------------------------------"
